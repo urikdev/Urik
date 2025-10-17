@@ -1,0 +1,62 @@
+[versions]
+androidDatabaseSqlcipher = "4.11.0"
+appcompat = "1.7.1"
+coreTesting = "2.2.0"
+datastorePreferences = "1.1.7"
+emoji2Emojipicker = "1.6.0"
+hiltAndroid = "2.57.2"
+icu4j = "77.1"
+coreKtx = "1.17.0"
+junit = "4.13.2"
+junitVersion = "1.3.0"
+espressoCore = "3.7.0"
+kotlinxCoroutinesAndroid = "1.10.2"
+kotlinxCoroutinesTest = "1.10.2"
+lifecycleRuntimeKtx = "2.9.4"
+material = "1.13.0"
+mockitoCore = "5.20.0"
+mockitoKotlin = "6.1.0"
+preferenceKtx = "1.2.1"
+robolectric = "4.16"
+room = "2.8.2"
+roomRuntime = "2.8.2"
+runner = "1.7.0"
+sqliteKtx = "2.6.1"
+symspellkt = "3.4.0"
+coreKtxVersion = "1.7.0"
+
+[libraries]
+android-database-sqlcipher = { module = "net.zetetic:sqlcipher-android", version.ref = "androidDatabaseSqlcipher" }
+androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-core-testing = { module = "androidx.arch.core:core-testing", version.ref = "coreTesting" }
+androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
+androidx-emoji2 = { module = "androidx.emoji2:emoji2", version.ref = "emoji2Emojipicker" }
+androidx-emoji2-emojipicker = { module = "androidx.emoji2:emoji2-emojipicker", version.ref = "emoji2Emojipicker" }
+androidx-lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycleRuntimeKtx" }
+androidx-lifecycle-viewmodel-savedstate = { module = "androidx.lifecycle:lifecycle-viewmodel-savedstate", version.ref = "lifecycleRuntimeKtx" }
+androidx-preference-ktx = { module = "androidx.preference:preference-ktx", version.ref = "preferenceKtx" }
+androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomRuntime" }
+androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomRuntime" }
+androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
+androidx-runner = { module = "androidx.test:runner", version.ref = "runner" }
+androidx-sqlite-ktx = { module = "androidx.sqlite:sqlite-ktx", version.ref = "sqliteKtx" }
+hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroid" }
+hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hiltAndroid" }
+icu4j = { module = "com.ibm.icu:icu4j", version.ref = "icu4j" }
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
+androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
+androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
+kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinxCoroutinesAndroid" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
+material = { module = "com.google.android.material:material", version.ref = "material" }
+mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockitoCore" }
+mockito-kotlin = { module = "org.mockito.kotlin:mockito-kotlin", version.ref = "mockitoKotlin" }
+robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
+symspellkt = { module = "com.darkrockstudios:symspellkt", version.ref = "symspellkt" }
+androidx-room-testing = { module = "androidx.room:room-testing", version.ref = "room" }
+core-ktx = { group = "androidx.test", name = "core-ktx", version.ref = "coreKtxVersion" }
+
+[plugins]
+

@@ -1,0 +1,199 @@
+<resources>
+    <string name="app_name" translatable="false">Urik</string>
+    <string name="ime_name" translatable="false">Urik Keyboard</string>
+    <string name="ime_label">Urik Keyboard</string>
+    <string name="ime_description">The privacy first, accessible keyboard for you.</string>
+
+    <!-- Settings -->
+    <string name="enable_keyboard_title">Enable</string>
+    <string name="open_settings">Open Settings</string>
+    <string name="error_opening_settings">Unable to open settings</string>
+
+    <!-- Settings Activity -->
+    <string name="settings_title">Keyboard Settings</string>
+    <string name="autocorrect_settings_title">Auto-Correct Settings</string>
+    <string name="autocorrect_settings_description">Spelling and suggestions</string>
+    <string name="language_settings_title">Language Settings</string>
+    <string name="language_settings_description">Choose your keyboard languages</string>
+    <string name="feedback_settings_title">Sound &amp; Feedback Settings</string>
+    <string name="feedback_settings_description">Key sounds and vibration</string>
+    <string name="typing_settings_title">Typing Behavior Settings</string>
+    <string name="typing_settings_description">Punctuation etc.</string>
+    <string name="layout_settings_title">Layout &amp; Input</string>
+    <string name="layout_settings_description">Number row, space bar size</string>
+    <string name="appearance_settings_title">Appearance</string>
+    <string name="appearance_settings_description">Theme, size</string>
+    <string name="privacy_settings_title">Privacy &amp; Data</string>
+    <string name="privacy_settings_description">Clear data, reset settings</string>
+
+    <!-- Settings Enums -->
+    <!-- Theme -->
+    <string name="theme_system">Follow System</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+
+    <!-- Key Size -->
+    <string name="key_size_small">Small</string>
+    <string name="key_size_medium">Medium</string>
+    <string name="key_size_large">Large</string>
+
+    <!-- Sound Volume -->
+    <string name="sound_volume_low">Low</string>
+    <string name="sound_volume_medium">Medium</string>
+    <string name="sound_volume_high">High</string>
+
+    <!-- Vibration Strength -->
+    <string name="vibration_strength_light">Light</string>
+    <string name="vibration_strength_medium">Medium</string>
+    <string name="vibration_strength_strong">Strong</string>
+
+    <!-- Long Press Duration -->
+    <string name="long_press_duration_short">Short</string>
+    <string name="long_press_duration_medium">Medium</string>
+    <string name="long_press_duration_long">Long</string>
+
+    <!-- Space Bar Size -->
+    <string name="space_bar_size_compact">Compact</string>
+    <string name="space_bar_size_standard">Standard</string>
+    <string name="space_bar_size_wide">Wide</string>
+
+    <!-- Key Label Size -->
+    <string name="key_label_size_small">Small</string>
+    <string name="key_label_size_medium">Medium</string>
+    <string name="key_label_size_large">Large</string>
+
+    <!-- Repeat Key Delay -->
+    <string name="repeat_key_delay_short">Short</string>
+    <string name="repeat_key_delay_medium">Medium</string>
+    <string name="repeat_key_delay_long">Long</string>
+
+    <!-- Appearance Settings -->
+    <string name="appearance_settings_theme">Theme</string>
+    <string name="appearance_settings_key_size">Key Size</string>
+    <string name="appearance_settings_key_label_size">Key Label Size</string>
+    <string name="appearance_settings_repeat_key_delay">Repeat Key Delay</string>
+
+    <!-- Auto-Correct Settings -->
+    <string name="autocorrect_settings_show_suggestions">Show Suggestions</string>
+    <string name="autocorrect_settings_suggestions_on">Suggestions shown</string>
+    <string name="autocorrect_settings_suggestions_off">Suggestions hidden</string>
+    <string name="autocorrect_settings_suggestion_count">Suggestion Count</string>
+    <string name="autocorrect_settings_learn_new_words">Learn New Words</string>
+    <string name="autocorrect_settings_learn_new_words_on">Learning enabled</string>
+    <string name="autocorrect_settings_learn_new_words_off">Learning disabled</string>
+
+    <!-- Language Settings -->
+    <string name="language_settings_active_languages">Active Languages</string>
+    <string name="language_settings_primary_language">Primary Language</string>
+
+    <!-- Sound & Feedback Settings -->
+    <string name="feedback_settings_key_click_sound">Key Click Sound</string>
+    <string name="feedback_settings_key_click_on">Key click enabled</string>
+    <string name="feedback_settings_key_click_off">Key click disabled</string>
+    <string name="feedback_settings_sound_volume">Sound Volume</string>
+    <string name="feedback_settings_haptic_feedback">Haptic Feedback</string>
+    <string name="feedback_settings_haptic_on">Haptic enabled</string>
+    <string name="feedback_settings_haptic_off">Haptic disabled</string>
+    <string name="feedback_settings_vibration_strength">Vibration Strength</string>
+
+    <!-- Typing Behavior Settings -->
+    <string name="typing_settings_double_space_period">Double-Space Period</string>
+    <string name="typing_settings_double_space_on">Double-space inserts period</string>
+    <string name="typing_settings_double_space_off">Double-space inserts space</string>
+    <string name="typing_settings_long_press_duration">Long Press Duration</string>
+
+    <!-- Layout & Input Settings -->
+    <string name="layout_settings_show_number_row">Show Number Row</string>
+    <string name="layout_settings_number_row_on">Number row shown</string>
+    <string name="layout_settings_number_row_off">Number row hidden</string>
+    <string name="layout_settings_space_bar_size">Space Bar Size</string>
+
+    <!-- Privacy & Data Settings -->
+    <string name="privacy_settings_clear_learned_words">Clear Learned Words</string>
+    <string name="privacy_settings_clear_learned_words_summary">Remove all learned vocabulary</string>
+    <string name="privacy_settings_clear_learned_words_confirm">Clear all learned words? This cannot be undone.</string>
+    <string name="privacy_settings_reset_to_defaults">Reset to Defaults</string>
+    <string name="privacy_settings_reset_to_defaults_summary">Restore default settings</string>
+    <string name="privacy_settings_reset_to_defaults_confirm">Reset all settings to defaults?</string>
+    <string name="privacy_settings_export_error_log">Export Error Log</string>
+    <string name="privacy_settings_export_error_log_summary">Share diagnostic logs for debugging</string>
+    <string name="privacy_settings_export_error_log_failed">Failed to export error log</string>
+
+    <!-- Error Messages -->
+    <string name="error_title">Error</string>
+    <string name="error_update_theme">Failed to update theme</string>
+    <string name="error_update_key_size">Failed to update key size</string>
+    <string name="error_update_key_label_size">Failed to update label size</string>
+    <string name="error_update_repeat_key_delay">Failed to update repeat key delay</string>
+    <string name="error_update_suggestions">Failed to update suggestion settings</string>
+    <string name="error_update_suggestion_count">Failed to update suggestion count</string>
+    <string name="error_update_word_learning">Failed to update word learning</string>
+    <string name="error_update_language">Failed to update language settings</string>
+    <string name="error_update_key_click_sound">Failed to update key click sound</string>
+    <string name="error_update_sound_volume">Failed to update sound volume</string>
+    <string name="error_update_haptic_feedback">Failed to update haptic feedback</string>
+    <string name="error_update_vibration_strength">Failed to update vibration strength</string>
+    <string name="error_update_double_space_period">Failed to update double-space period</string>
+    <string name="error_update_long_press_duration">Failed to update long press duration</string>
+    <string name="error_update_number_row">Failed to update number row</string>
+    <string name="error_update_space_bar_size">Failed to update space bar size</string>
+    <string name="error_clear_learned_words">Failed to clear learned words</string>
+    <string name="error_reset_to_defaults">Failed to reset settings</string>
+
+    <!-- Success Messages -->
+    <string name="success_learned_words_cleared">Learned words cleared</string>
+    <string name="success_settings_reset">Settings reset to defaults</string>
+
+    <!-- Keyboard descriptions -->
+    <string name="keyboard_description">Virtual keyboard</string>
+
+    <!-- Default key labels -->
+    <string name="space_key_label">Space</string>
+    <string name="letters_mode_label">ABC</string>
+    <string name="numbers_mode_label">123</string>
+    <string name="symbols_mode_label">+=&lt;</string>
+
+    <!-- Accessibility descriptions -->
+    <string name="key_character_description">Type %1$s</string>
+    <string name="key_ideograph_description">Type ideograph %1$s</string>
+    <string name="key_syllable_description">Type syllable %1$s</string>
+
+    <string name="shift_key_description">Shift key, tap to capitalize next letter</string>
+    <string name="shift_active_description">Shift is active, tap to deactivate</string>
+    <string name="shift_deactivate_description">Tap to turn off shift</string>
+    <string name="caps_lock_description">Caps lock</string>
+    <string name="caps_lock_on_description">Caps lock is on, tap to turn off</string>
+    <string name="backspace_key_description">Delete previous character</string>
+    <string name="space_key_description">Space bar</string>
+    <string name="letters_mode_description">Switch to letter keyboard</string>
+    <string name="numbers_mode_description">Switch to number keyboard</string>
+    <string name="symbols_mode_description">Switch to symbol keyboard</string>
+    <string name="ime_prediction_description">Prediction: %1$s</string>
+
+    <!-- Action button labels -->
+    <string name="action_enter">Enter</string>
+    <string name="action_search">Search</string>
+    <string name="action_send">Send</string>
+    <string name="action_done">Done</string>
+    <string name="action_go">Go</string>
+    <string name="action_next">Next</string>
+    <string name="action_previous">Previous</string>
+
+    <!-- Action button accessibility descriptions -->
+    <string name="action_enter_description">Press enter</string>
+    <string name="action_search_description">Search</string>
+    <string name="action_send_description">Send message</string>
+    <string name="action_done_description">Done editing</string>
+    <string name="action_go_description">Go to destination</string>
+    <string name="action_next_description">Move to next field</string>
+    <string name="action_previous_description">Move to previous field</string>
+
+    <!-- Action button descriptions -->
+    <string name="action_paste">Paste</string>
+    <string name="action_emoji">Emoji</string>
+
+    <!-- Blacklisting Words -->
+    <string name="remove_suggestion">Remove %1$s from suggestions?</string>
+    <string name="remove_cancel">Cancel</string>
+    <string name="remove_confirm">Remove</string>
+</resources>

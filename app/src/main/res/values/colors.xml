@@ -1,0 +1,101 @@
+<resources>
+    <!-- ============================================ -->
+    <!-- CORE PALETTE -->
+    <!-- ============================================ -->
+    <color name="light_orange">#fcdebe</color>     <!-- Lightest - highlights, pressed states -->
+    <color name="sage">#d4d2a5</color>             <!-- Light accent - focused states, secondary -->
+    <color name="battleship_gray">#928779</color>  <!-- Medium neutral - primary surfaces -->
+    <color name="wenge">#5e5768</color>            <!-- Dark - primary text, borders -->
+    <color name="delft_blue">#3a445d</color>       <!-- Darkest - emphasis text, headers -->
+
+    <!-- ============================================ -->
+    <!-- SURFACE COLORS -->
+    <!-- ============================================ -->
+    <color name="surface_primary">#FFFFFF</color>          <!-- Pure white for main surfaces -->
+    <color name="surface_secondary">@color/light_orange</color>    <!-- Light orange for secondary surfaces -->
+    <color name="surface_accent">@color/sage</color>               <!-- Sage for accent surfaces -->
+    <color name="surface_background">@color/battleship_gray</color> <!-- Gray for app background -->
+
+    <!-- ============================================ -->
+    <!-- CONTENT COLORS -->
+    <!-- ============================================ -->
+    <color name="content_primary">@color/wenge</color>      <!-- Primary text -->
+    <color name="content_secondary">@color/delft_blue</color>    <!-- Secondary/emphasis text -->
+    <color name="content_on_accent">#FFFFFF</color>         <!-- White text on colored backgrounds -->
+
+    <!-- ============================================ -->
+    <!-- INTERACTIVE STATES -->
+    <!-- ============================================ -->
+    <color name="state_pressed">@color/light_orange</color>     <!-- Pressed state -->
+    <color name="state_focused">@color/sage</color>             <!-- Focused state -->
+    <color name="state_activated">@color/sage</color>           <!-- Activated state (shift) -->
+    <color name="state_caps_lock">@color/light_orange</color>   <!-- Caps lock state -->
+    <!-- Add these to your colors.xml -->
+    <color name="key_background_disabled">@color/battleship_gray</color>
+    <color name="key_shadow_disabled">#0D000000</color>         <!-- 5% black -->
+    <color name="key_background_character_pressed">@color/state_pressed</color>
+    <color name="key_focus_indicator">@color/focus_indicator</color>
+
+    <color name="key_shadow_activated">@color/sage</color>
+    <color name="key_background_action_activated">@color/state_activated</color>
+    <color name="key_border_activated">@color/wenge</color>
+    <color name="key_background_action_pressed">@color/state_pressed</color>
+
+    <!-- ============================================ -->
+    <!-- KEYBOARD COLORS -->
+    <!-- ============================================ -->
+
+    <!-- Backgrounds -->
+    <color name="keyboard_background">@color/surface_background</color>
+    <color name="key_background_character">@color/surface_primary</color>
+    <color name="key_background_action">@color/surface_secondary</color>
+    <color name="key_background_space">@color/surface_primary</color>
+
+    <!-- Key States -->
+    <color name="key_background_pressed">@color/state_pressed</color>
+    <color name="key_background_focused">@color/state_focused</color>
+    <color name="key_background_shift_active">@color/state_activated</color>
+    <color name="key_background_caps_lock">@color/state_caps_lock</color>
+
+    <!-- Text Colors -->
+    <color name="key_text_character">@color/content_primary</color>
+    <color name="key_text_action">@color/content_secondary</color>
+    <color name="key_text_on_colored">@color/content_on_accent</color>
+
+    <!-- Borders -->
+    <color name="key_border">@color/battleship_gray</color>
+    <color name="key_border_focused">@color/wenge</color>
+    <color name="key_border_pressed">@color/delft_blue</color>
+
+    <!-- Missing colors for drawables -->
+    <color name="outline_accent">@color/wenge</color>
+    <color name="key_background_space_pressed">@color/state_pressed</color>
+
+    <!-- ============================================ -->
+    <!-- SUGGESTION BAR -->
+    <!-- ============================================ -->
+    <color name="suggestion_bar_background">@color/surface_accent</color>
+    <color name="suggestion_text">@color/content_primary</color>
+    <color name="suggestion_text_highlighted">@color/content_secondary</color>
+    <color name="suggestion_background_selected">@color/state_pressed</color>
+
+    <!-- ============================================ -->
+    <!-- ACCESSIBILITY & SHADOWS -->
+    <!-- ============================================ -->
+    <color name="focus_indicator">@color/delft_blue</color>
+    <color name="key_shadow">#1A000000</color>              <!-- 10% black shadow -->
+    <color name="key_shadow_elevated">#33000000</color>     <!-- 20% black shadow -->
+
+    <!-- ============================================ -->
+    <!-- LEGACY COMPATIBILITY -->
+    <!-- ============================================ -->
+    <color name="primary">@color/sage</color>
+    <color name="primary_variant">@color/battleship_gray</color>
+    <color name="secondary">@color/light_orange</color>
+    <color name="background">@color/surface_primary</color>
+    <color name="surface">@color/surface_secondary</color>
+    <color name="on_primary">@color/content_on_accent</color>
+    <color name="on_secondary">@color/content_primary</color>
+    <color name="on_background">@color/content_primary</color>
+    <color name="on_surface">@color/content_primary</color>
+</resources>
