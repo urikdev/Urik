@@ -1,5 +1,9 @@
 # Urik
 
+[![CI](https://github.com/urikdev/Urik/actions/workflows/ci.yml/badge.svg)](https://github.com/urikdev/Urik/actions)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![Release](https://img.shields.io/github/v/release/urikdev/Urik?include_prereleases)](https://github.com/urikdev/Urik/releases)
+
 Privacy-first keyboard for Android with on-device processing and encrypted storage.
 
 ## Status
