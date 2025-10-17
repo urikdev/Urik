@@ -13,12 +13,12 @@ plugins {
 
 android {
     namespace = "com.urik.keyboard"
-    compileSdk = 36
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.urik.keyboard"
         minSdk = 31
-        targetSdk = 36
+        targetSdk = 35
         versionCode = 1
         versionName = "0.0.11-alpha"
 
@@ -90,6 +90,9 @@ room {
 
 dependencyCheck {
     failBuildOnCVSS = 7.0f
+    nvd {
+        apiKey = System.getenv("NVD_API_KEY") ?: ""
+    }
 }
 
 kover {
