@@ -141,4 +141,11 @@
     <string name="privacy_settings_export_error_log">Exportera fellogg</string>
     <string name="privacy_settings_export_error_log_summary">Dela diagnostikloggar för felsökning</string>
     <string name="privacy_settings_export_error_log_failed">Misslyckades med att exportera felloggen</string>
+    <string name="animation_sentence">Urik. Det flerspråkiga tangentbordet som först och främst använder integritet, är lättillgängligt och för dig. Ta tillbaka dina data.</string>
+    <string name="animation_typo_1_wrong">flrspråkiga</string>
+    <string name="animation_typo_1_correct">flerspråkiga</string>
+    <string name="animation_typo_2_wrong">tangenbordet</string>
+    <string name="animation_typo_3_correct">lättillgängligt</string>
+    <string name="animation_typo_3_wrong">lättillgngligt</string>
+    <string name="animation_typo_2_correct">tangentbordet</string>
 </resources>
