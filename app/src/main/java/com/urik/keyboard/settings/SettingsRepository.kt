@@ -102,7 +102,7 @@ class SettingsRepository
                                     LongPressDuration.MEDIUM
                                 }
                             } ?: LongPressDuration.MEDIUM,
-                        showNumberRow = preferences[PreferenceKeys.SHOW_NUMBER_ROW] ?: false,
+                        showNumberRow = preferences[PreferenceKeys.SHOW_NUMBER_ROW] ?: true,
                         spaceBarSize =
                             preferences[PreferenceKeys.SPACE_BAR_SIZE]?.let {
                                 try {
