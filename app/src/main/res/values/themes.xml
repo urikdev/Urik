@@ -5,4 +5,8 @@
         <item name="colorSecondary">@color/secondary</item>
         <item name="android:windowBackground">@color/keyboard_background</item>
     </style>
+
+    <style name="Theme.Urik.OssLicenses" parent="Theme.Material3.DayNight">
+        <item name="android:fitsSystemWindows">true</item>
+    </style>
 </resources>

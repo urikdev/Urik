@@ -7,6 +7,7 @@ import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
+import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import com.urik.keyboard.R
 import com.urik.keyboard.settings.appearance.AppearanceFragment
 import com.urik.keyboard.settings.autocorrection.AutoCorrectionFragment
@@ -143,6 +144,30 @@ class MainSettingsFragment : PreferenceFragmentCompat() {
                 summary = resources.getString(R.string.privacy_settings_description)
                 setOnPreferenceClickListener {
                     navigateToFragment(PrivacyDataFragment())
+                    true
+                }
+            },
+        )
+
+        screen.addPreference(
+            Preference(context).apply {
+                key = "open_source_licenses"
+                title = resources.getString(R.string.licenses_title)
+                summary = resources.getString(R.string.licenses_description)
+                setOnPreferenceClickListener {
+                    startActivity(Intent(context, OssLicensesMenuActivity::class.java))
+                    true
+                }
+            },
+        )
+
+        screen.addPreference(
+            Preference(context).apply {
+                key = "dictionary_attribution"
+                title = resources.getString(R.string.dictionary_attribution_title)
+                summary = resources.getString(R.string.dictionary_attribution_summary)
+                setOnPreferenceClickListener {
+                    startActivity(Intent(context, DictionaryAttributionActivity::class.java))
                     true
                 }
             },

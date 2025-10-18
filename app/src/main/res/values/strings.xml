@@ -25,6 +25,10 @@
     <string name="appearance_settings_description">Theme, size</string>
     <string name="privacy_settings_title">Privacy &amp; Data</string>
     <string name="privacy_settings_description">Clear data, reset settings</string>
+    <string name="licenses_title">Open Source Licenses</string>
+    <string name="licenses_description">View third-party library licenses</string>
+    <string name="dictionary_attribution_title">Dictionary Data</string>
+    <string name="dictionary_attribution_summary">FrequencyWords license and attribution</string>
 
     <!-- Settings Enums -->
     <!-- Theme -->

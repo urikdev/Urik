@@ -16,6 +16,9 @@ lifecycleRuntimeKtx = "2.9.4"
 material = "1.13.0"
 mockitoCore = "5.20.0"
 mockitoKotlin = "6.1.0"
+ossLicensesPlugin = "0.10.9"
+ossLicensesPluginVersion = "0.10.7"
+playServicesOssLicenses = "17.1.0"
 preferenceKtx = "1.2.1"
 robolectric = "4.16"
 room = "2.8.2"
@@ -53,10 +56,12 @@ kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-t
 material = { module = "com.google.android.material:material", version.ref = "material" }
 mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockitoCore" }
 mockito-kotlin = { module = "org.mockito.kotlin:mockito-kotlin", version.ref = "mockitoKotlin" }
+oss-licenses-plugin = { module = "com.google.android.gms:oss-licenses-plugin", version.ref = "ossLicensesPluginVersion" }
+play-services-oss-licenses = { module = "com.google.android.gms:play-services-oss-licenses", version.ref = "playServicesOssLicenses" }
 robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
 symspellkt = { module = "com.darkrockstudios:symspellkt", version.ref = "symspellkt" }
 androidx-room-testing = { module = "androidx.room:room-testing", version.ref = "room" }
 core-ktx = { group = "androidx.test", name = "core-ktx", version.ref = "coreKtxVersion" }
 
 [plugins]
-
+oss-licenses = { id = "com.google.android.gms.oss-licenses-plugin", version.ref = "ossLicensesPlugin" }
