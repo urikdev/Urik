@@ -26,7 +26,14 @@ All processing happens on-device. No data leaves your phone. User dictionary and
 
 ## Requirements
 
-- Android 12 or higher (API level 31+)
+- Android 8.0 or higher (API level 26+)
+
+## Dictionary Data
+
+Spell checking uses word frequency lists from [FrequencyWords](https://github.com/hermitdave/FrequencyWords) by hermitdave, derived from the OpenSubtitles corpus.
+
+- License: CC-BY-SA-4.0
+- Modifications: Sorted by frequency, filtered for keyboard use
 
 ## Dictionary Data
 

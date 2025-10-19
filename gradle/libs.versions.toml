@@ -17,6 +17,7 @@ material = "1.13.0"
 mockitoCore = "5.20.0"
 mockitoKotlin = "6.1.0"
 ossLicensesPlugin = "0.10.9"
+#Keep OSS licenses pinned for now - bugs with newer versions
 ossLicensesPluginVersion = "0.10.7"
 playServicesOssLicenses = "17.1.0"
 preferenceKtx = "1.2.1"
