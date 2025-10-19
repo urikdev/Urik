@@ -55,48 +55,19 @@ class TypewriterAnimationView
             val editTextMargin = (16f * resources.displayMetrics.density).toInt()
             val editTextTopMargin = suggestionBarHeight + (16f * resources.displayMetrics.density).toInt()
 
-            val editTextHeight = calculateRequiredHeight()
-
             val editTextParams =
                 LayoutParams(
                     LayoutParams.MATCH_PARENT,
-                    editTextHeight,
+                    LayoutParams.WRAP_CONTENT,
                 ).apply {
                     gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL
                     setMargins(editTextMargin, editTextTopMargin, editTextMargin, 0)
                 }
 
+            editTextSimulator.setFullSentenceForMeasurement(fullSentence)
+
             addView(suggestionBar, suggestionBarParams)
             addView(editTextSimulator, editTextParams)
-        }
-
-        private fun calculateRequiredHeight(): Int {
-            val padding = (16f * resources.displayMetrics.density).toInt()
-            val textSize =
-                android.util.TypedValue.applyDimension(
-                    android.util.TypedValue.COMPLEX_UNIT_SP,
-                    18f,
-                    resources.displayMetrics,
-                )
-            val editTextMargin = (16f * resources.displayMetrics.density).toInt()
-
-            val paint =
-                android.text.TextPaint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
-                    this.textSize = textSize
-                }
-
-            val viewWidth = resources.displayMetrics.widthPixels - (editTextMargin * 2)
-            val availableWidth = viewWidth - (padding * 2)
-
-            val layout =
-                android.text.StaticLayout.Builder
-                    .obtain(fullSentence, 0, fullSentence.length, paint, availableWidth)
-                    .setAlignment(android.text.Layout.Alignment.ALIGN_NORMAL)
-                    .setLineSpacing(4f, 1.2f)
-                    .setIncludePad(true)
-                    .build()
-
-            return layout.height + padding * 2
         }
 
         private fun buildTypoConfigs(): List<TypoConfig> {
