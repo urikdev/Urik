@@ -211,7 +211,13 @@ class KeyboardLayoutManager(
         private const val ERROR_TRACKING_RETENTION_SECONDS = 60
     }
 
-    private val vibrator = context.getSystemService(android.os.VibratorManager::class.java)?.defaultVibrator
+    private val vibrator =
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+            context.getSystemService(android.os.VibratorManager::class.java)?.defaultVibrator
+        } else {
+            @Suppress("DEPRECATION")
+            context.getSystemService(Context.VIBRATOR_SERVICE) as? android.os.Vibrator
+        }
     private var hapticEnabled = true
     private var hapticDurationMs = 20L
 
@@ -591,7 +597,7 @@ class KeyboardLayoutManager(
                 performCustomHaptic()
 
                 if (accessibilityManager.isEnabled) {
-                    val event = AccessibilityEvent(AccessibilityEvent.TYPE_VIEW_CLICKED)
+                    val event = AccessibilityEvent.obtain(AccessibilityEvent.TYPE_VIEW_CLICKED)
                     event.contentDescription = contentDescription
                     accessibilityManager.sendAccessibilityEvent(event)
                 }

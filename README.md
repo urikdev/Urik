@@ -26,7 +26,7 @@ All processing happens on-device. No data leaves your phone. User dictionary and
 
 ## Requirements
 
-- Android 12 or higher (API level 31+)
+- Android 8.0 or higher (API level 26+)
 
 ## Dictionary Data
 

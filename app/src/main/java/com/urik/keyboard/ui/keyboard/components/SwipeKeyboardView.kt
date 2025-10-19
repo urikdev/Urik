@@ -239,8 +239,14 @@ class SwipeKeyboardView
 
                 val windowInsets = rootWindowInsets
                 if (windowInsets != null) {
-                    val systemBars = windowInsets.getInsets(WindowInsets.Type.systemBars())
-                    keyboardHeight += systemBars.bottom
+                    val bottomInset =
+                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+                            windowInsets.getInsets(WindowInsets.Type.systemBars()).bottom
+                        } else {
+                            @Suppress("DEPRECATION")
+                            windowInsets.systemWindowInsetBottom
+                        }
+                    keyboardHeight += bottomInset
                 }
 
                 val constrainedHeight = MeasureSpec.makeMeasureSpec(keyboardHeight, MeasureSpec.EXACTLY)
