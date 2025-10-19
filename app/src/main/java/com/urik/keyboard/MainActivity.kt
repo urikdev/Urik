@@ -29,12 +29,11 @@ class MainActivity : AppCompatActivity() {
             setPadding(padding, padding, padding, padding)
 
             val animationView = TypewriterAnimationView(context)
-            val animationHeight = dpToPx(240)
             val animationParams =
                 LinearLayout
                     .LayoutParams(
                         LinearLayout.LayoutParams.MATCH_PARENT,
-                        animationHeight,
+                        LinearLayout.LayoutParams.WRAP_CONTENT,
                     ).apply {
                         val margin = dpToPx(48)
                         setMargins(0, margin, 0, margin)
