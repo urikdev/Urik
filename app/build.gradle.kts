@@ -6,10 +6,11 @@ plugins {
     id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
     id("org.jlleitschuh.gradle.ktlint")
-    id("org.owasp.dependencycheck")
     id("androidx.room")
     id("org.jetbrains.kotlinx.kover")
 }
+
+apply(plugin = "com.google.android.gms.oss-licenses-plugin")
 
 android {
     namespace = "com.urik.keyboard"
@@ -20,7 +21,7 @@ android {
         minSdk = 31
         targetSdk = 35
         versionCode = 1
-        versionName = "0.0.11-alpha"
+        versionName = "0.0.12-alpha"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -88,13 +89,6 @@ room {
     schemaDirectory("$projectDir/schemas")
 }
 
-dependencyCheck {
-    failBuildOnCVSS = 7.0f
-    nvd {
-        apiKey = System.getenv("NVD_API_KEY") ?: ""
-    }
-}
-
 kover {
     reports {
         filters {
@@ -156,6 +150,7 @@ dependencies {
 
     implementation(libs.android.database.sqlcipher)
     implementation(libs.androidx.sqlite.ktx)
+    implementation(libs.play.services.oss.licenses)
 
     testImplementation(libs.junit)
     testImplementation(libs.mockito.core)
