@@ -8,3 +8,8 @@
 
 -keepattributes SourceFile,LineNumberTable
 -renamesourcefileattribute SourceFile
+
+-keep class **.R$raw {
+    public static int third_party_licenses;
+    public static int third_party_license_metadata;
+}
