@@ -1470,10 +1470,6 @@ class UrikInputMethodService :
     /**
      * Handles backspace on committed text by re-composing the word.
      */
-
-    /**
-     * Handles backspace on committed text by re-composing the word.
-     */
     private fun handleCommittedTextBackspace() {
         try {
             val textBeforeCursor = currentInputConnection?.getTextBeforeCursor(50, 0)?.toString()
