@@ -35,6 +35,13 @@ Spell checking uses word frequency lists from [FrequencyWords](https://github.co
 - License: CC-BY-SA-4.0
 - Modifications: Sorted by frequency, filtered for keyboard use
 
+## Dictionary Data
+
+Spell checking uses word frequency lists from [FrequencyWords](https://github.com/hermitdave/FrequencyWords) by hermitdave, derived from the OpenSubtitles corpus.
+
+- License: CC-BY-SA-4.0
+- Modifications: Sorted by frequency, filtered for keyboard use
+
 ## License
 
 GNU General Public License v3.0
