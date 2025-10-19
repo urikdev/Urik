@@ -47,6 +47,8 @@ class EditTextSimulatorView
         private val backgroundRect = RectF()
 
         private val text = SpannableStringBuilder()
+
+        private var fullSentenceForMeasurement: String = ""
         private var textLayout: StaticLayout? = null
         private var lastTextForLayout: String = ""
         private var lastWidthForLayout: Int = 0
@@ -67,6 +69,11 @@ class EditTextSimulatorView
             textPaint.color = ContextCompat.getColor(context, R.color.content_primary)
             cursorPaint.color = ContextCompat.getColor(context, R.color.content_primary)
             backgroundPaint.color = ContextCompat.getColor(context, R.color.surface_primary)
+        }
+
+        fun setFullSentenceForMeasurement(sentence: String) {
+            fullSentenceForMeasurement = sentence
+            requestLayout()
         }
 
         fun setState(state: TypewriterState) {
@@ -230,22 +237,24 @@ class EditTextSimulatorView
             heightMeasureSpec: Int,
         ) {
             val width = MeasureSpec.getSize(widthMeasureSpec)
-
             val availableWidth = width - padding * 2
-            if (availableWidth > 0 && text.isNotEmpty() && (width != lastWidthForLayout || text.toString() != lastTextForLayout)) {
-                textLayout =
-                    StaticLayout
-                        .Builder
-                        .obtain(text, 0, text.length, textPaint, availableWidth)
-                        .setAlignment(Layout.Alignment.ALIGN_NORMAL)
-                        .setLineSpacing(4f, 1.2f)
-                        .setIncludePad(true)
-                        .build()
-                lastTextForLayout = text.toString()
-                lastWidthForLayout = width
-            }
 
-            val textHeight = textLayout?.height ?: (textPaint.textSize * 4).toInt()
+            val textHeight =
+                if (fullSentenceForMeasurement.isNotEmpty() && availableWidth > 0) {
+                    val measureText = fullSentenceForMeasurement
+                    val measureLayout =
+                        StaticLayout
+                            .Builder
+                            .obtain(measureText, 0, measureText.length, textPaint, availableWidth)
+                            .setAlignment(Layout.Alignment.ALIGN_NORMAL)
+                            .setLineSpacing(4f, 1.2f)
+                            .setIncludePad(true)
+                            .build()
+                    measureLayout.height
+                } else {
+                    (textPaint.textSize * 4).toInt()
+                }
+
             val desiredHeight = textHeight + padding * 2
 
             val height =
