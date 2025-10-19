@@ -18,7 +18,7 @@ android {
 
     defaultConfig {
         applicationId = "com.urik.keyboard"
-        minSdk = 31
+        minSdk = 26
         targetSdk = 35
         versionCode = 1
         versionName = "0.0.12-alpha"
