@@ -163,6 +163,22 @@ private data class PendingCallbacks(
 )
 
 /**
+ * Backspace acceleration state machine.
+ *
+ * State transitions:
+ * IDLE → long press → CHAR_ACCELERATING (0-1500ms)
+ * CHAR_ACCELERATING → 1500ms elapsed → CHAR_MAX_SPEED (1500-2000ms)
+ * CHAR_MAX_SPEED → 2000ms elapsed → WORD_MODE (2000ms+)
+ * Any state → release → IDLE
+ */
+private enum class BackspaceMode {
+    IDLE,
+    CHAR_ACCELERATING,
+    CHAR_MAX_SPEED,
+    WORD_MODE,
+}
+
+/**
  * Manages keyboard layout rendering with script-aware adaptations.
  *
  * Architecture:
@@ -197,6 +213,7 @@ private data class PendingCallbacks(
 class KeyboardLayoutManager(
     private val context: Context,
     private val onKeyClick: (KeyboardKey) -> Unit,
+    private val onWordDelete: () -> Unit,
     private val characterVariationService: CharacterVariationService,
     private val languageManager: LanguageManager,
     cacheMemoryManager: CacheMemoryManager,
@@ -252,6 +269,10 @@ class KeyboardLayoutManager(
 
     private var backspaceHandler: Handler? = null
     private var backspaceRunnable: Runnable? = null
+
+    private var backspaceMode = BackspaceMode.IDLE
+    private var backspaceStartTime = 0L
+    private var backspaceCharsSinceLastHaptic = 0
 
     private var variationPopup: CharacterVariationPopup? = null
 
@@ -365,13 +386,13 @@ class KeyboardLayoutManager(
         hapticDurationMs = durationMs
     }
 
-    private fun performCustomHaptic() {
+    private fun performCustomHaptic(durationMs: Long = hapticDurationMs) {
         if (!hapticEnabled) return
 
         try {
             vibrator?.vibrate(
                 android.os.VibrationEffect.createOneShot(
-                    hapticDurationMs,
+                    durationMs,
                     android.os.VibrationEffect.DEFAULT_AMPLITUDE,
                 ),
             )
@@ -689,14 +710,14 @@ class KeyboardLayoutManager(
             if (key is KeyboardKey.Action && key.action == KeyboardKey.ActionType.BACKSPACE) {
                 setOnLongClickListener { view ->
                     performCustomHaptic()
-                    startContinuousBackspace()
+                    startAcceleratedBackspace()
                     true
                 }
 
                 setOnTouchListener { _, event ->
                     when (event.action) {
                         MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                            stopContinuousBackspace()
+                            stopAcceleratedBackspace()
                             false
                         }
                         else -> false
@@ -1065,25 +1086,102 @@ class KeyboardLayoutManager(
             }
     }
 
-    private fun startContinuousBackspace() {
-        stopContinuousBackspace()
+    private fun startAcceleratedBackspace() {
+        stopAcceleratedBackspace()
+
+        backspaceMode = BackspaceMode.CHAR_ACCELERATING
+        backspaceStartTime = System.currentTimeMillis()
+        backspaceCharsSinceLastHaptic = 0
+
         backspaceHandler = Handler(Looper.getMainLooper())
         backspaceRunnable =
             object : Runnable {
                 override fun run() {
-                    onKeyClick(KeyboardKey.Action(KeyboardKey.ActionType.BACKSPACE))
-                    backspaceHandler?.postDelayed(this, currentRepeatKeyDelay.repeatIntervalMs)
+                    val elapsed = System.currentTimeMillis() - backspaceStartTime
+
+                    val newMode =
+                        when {
+                            elapsed >= 2000 -> BackspaceMode.WORD_MODE
+                            elapsed >= 1500 -> BackspaceMode.CHAR_MAX_SPEED
+                            else -> BackspaceMode.CHAR_ACCELERATING
+                        }
+
+                    if (newMode == BackspaceMode.WORD_MODE && backspaceMode != BackspaceMode.WORD_MODE) {
+                        performTransitionToWordMode()
+                    }
+
+                    backspaceMode = newMode
+
+                    if (backspaceMode == BackspaceMode.WORD_MODE) {
+                        onWordDelete()
+                        performHapticForBackspace(backspaceMode)
+                    } else {
+                        onKeyClick(KeyboardKey.Action(KeyboardKey.ActionType.BACKSPACE))
+                        backspaceCharsSinceLastHaptic++
+                        performHapticForBackspace(backspaceMode)
+                    }
+
+                    val nextInterval = calculateBackspaceInterval(elapsed)
+                    backspaceHandler?.postDelayed(this, nextInterval)
                 }
             }
+
         backspaceHandler?.postDelayed(backspaceRunnable!!, currentLongPressDuration.durationMs)
     }
 
-    private fun stopContinuousBackspace() {
+    private fun stopAcceleratedBackspace() {
         backspaceRunnable?.let { runnable ->
             backspaceHandler?.removeCallbacks(runnable)
         }
         backspaceHandler = null
         backspaceRunnable = null
+        backspaceMode = BackspaceMode.IDLE
+        backspaceStartTime = 0L
+        backspaceCharsSinceLastHaptic = 0
+    }
+
+    private fun calculateBackspaceInterval(elapsed: Long): Long =
+        when {
+            elapsed >= 2000 -> 150L
+            elapsed >= 1500 -> 25L
+            else -> {
+                val startSpeed = currentRepeatKeyDelay.repeatIntervalMs
+                val endSpeed = 25L
+                val progress = elapsed / 1500f
+                (startSpeed - (startSpeed - endSpeed) * progress).toLong()
+            }
+        }
+
+    private fun performHapticForBackspace(mode: BackspaceMode) {
+        when (mode) {
+            BackspaceMode.WORD_MODE -> {
+                performCustomHaptic(60L)
+            }
+            BackspaceMode.CHAR_MAX_SPEED -> {
+                if (backspaceCharsSinceLastHaptic >= 5) {
+                    performCustomHaptic()
+                    backspaceCharsSinceLastHaptic = 0
+                }
+            }
+            BackspaceMode.CHAR_ACCELERATING -> {
+                val interval = calculateBackspaceInterval(System.currentTimeMillis() - backspaceStartTime)
+                if (interval > 50) {
+                    performCustomHaptic()
+                    backspaceCharsSinceLastHaptic = 0
+                } else if (backspaceCharsSinceLastHaptic >= 3) {
+                    performCustomHaptic()
+                    backspaceCharsSinceLastHaptic = 0
+                }
+            }
+            BackspaceMode.IDLE -> {}
+        }
+    }
+
+    private fun performTransitionToWordMode() {
+        performCustomHaptic(40L)
+        backspaceHandler?.postDelayed({
+            performCustomHaptic(40L)
+        }, 60L)
     }
 
     private fun getKeyWeight(key: KeyboardKey): Float =
@@ -1155,7 +1253,7 @@ class KeyboardLayoutManager(
         returnActiveButtonsToPool()
         buttonPool.clear()
         buttonPendingCallbacks.clear()
-        stopContinuousBackspace()
+        stopAcceleratedBackspace()
         variationPopup?.dismiss()
         variationPopup = null
         punctuationCache.invalidateAll()

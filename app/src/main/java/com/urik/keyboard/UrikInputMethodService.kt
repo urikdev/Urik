@@ -479,6 +479,7 @@ class UrikInputMethodService :
                 KeyboardLayoutManager(
                     context = this,
                     onKeyClick = { key -> handleKeyPress(key) },
+                    onWordDelete = { handleBackspaceWord() },
                     characterVariationService = characterVariationService,
                     languageManager = languageManager,
                     cacheMemoryManager = cacheMemoryManager,
@@ -504,7 +505,9 @@ class UrikInputMethodService :
                 ErrorLogger.logException(
                     component = "UrikInputMethodService",
                     severity = ErrorLogger.Severity.CRITICAL,
-                    exception = result.exceptionOrNull() ?: Exception("Language manager initialization failed"),
+                    exception =
+                        result.exceptionOrNull()
+                            ?: Exception("Language manager initialization failed"),
                     context = mapOf("phase" to "language_init"),
                 )
                 return
@@ -565,7 +568,8 @@ class UrikInputMethodService :
 
                 val layoutParams = actualWindow.attributes
                 layoutParams.gravity = Gravity.BOTTOM
-                layoutParams.flags = layoutParams.flags or WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
+                layoutParams.flags =
+                    layoutParams.flags or WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
                 actualWindow.attributes = layoutParams
             }
 
@@ -599,7 +603,11 @@ class UrikInputMethodService :
                     setOnSwipeWordListener { validatedWord -> handleSwipeWord(validatedWord) }
                     setOnSuggestionClickListener { suggestion -> handleSuggestionSelected(suggestion) }
                     setOnActionButtonClickListener { action -> handleActionButtonClick(action) }
-                    setOnSuggestionLongPressListener { suggestion -> handleSuggestionRemoval(suggestion) }
+                    setOnSuggestionLongPressListener { suggestion ->
+                        handleSuggestionRemoval(
+                            suggestion,
+                        )
+                    }
                 }
 
             swipeKeyboardView = swipeView
@@ -656,9 +664,11 @@ class UrikInputMethodService :
             SuggestionActionType.PASTE -> {
                 handlePasteAction()
             }
+
             SuggestionActionType.EMOJI -> {
                 handleEmojiAction()
             }
+
             else -> {
             }
         }
@@ -950,6 +960,7 @@ class UrikInputMethodService :
 
                     viewModel.onEvent(KeyboardEvent.KeyPressed(key))
                 }
+
                 is KeyboardKey.Action -> {
                     handleActionKey(key)
                 }
@@ -988,7 +999,12 @@ class UrikInputMethodService :
 
             serviceScope.launch(Dispatchers.Default) {
                 try {
-                    val result = textInputProcessor.processCharacterInput(char, bufferSnapshot, InputMethod.TYPED)
+                    val result =
+                        textInputProcessor.processCharacterInput(
+                            char,
+                            bufferSnapshot,
+                            InputMethod.TYPED,
+                        )
 
                     withContext(Dispatchers.Main) {
                         synchronized(processingLock) {
@@ -998,7 +1014,8 @@ class UrikInputMethodService :
                                         wordState = result.wordState
 
                                         if (result.wordState.suggestions.isNotEmpty() && currentSettings.showSuggestions) {
-                                            val shouldCapitalize = displayBuffer.firstOrNull()?.isUpperCase() == true
+                                            val shouldCapitalize =
+                                                displayBuffer.firstOrNull()?.isUpperCase() == true
                                             val displaySuggestions =
                                                 if (shouldCapitalize) {
                                                     result.wordState.suggestions.map { it.replaceFirstChar { c -> c.uppercase() } }
@@ -1012,6 +1029,7 @@ class UrikInputMethodService :
                                             swipeKeyboardView?.clearSuggestions()
                                         }
                                     }
+
                                     is ProcessingResult.Error -> {
                                     }
                                 }
@@ -1050,12 +1068,18 @@ class UrikInputMethodService :
                         if (!isValid) {
                             currentInputConnection?.beginBatchEdit()
                             try {
-                                learnWordAndInvalidateCache(wordState.normalizedBuffer, InputMethod.TYPED)
+                                learnWordAndInvalidateCache(
+                                    wordState.normalizedBuffer,
+                                    InputMethod.TYPED,
+                                )
                                 coordinateWordCompletion(InputMethod.TYPED)
                                 currentInputConnection?.commitText(char, 1)
 
                                 if (char in setOf(".", "!", "?") && !isSecureField) {
-                                    val textBefore = currentInputConnection?.getTextBeforeCursor(50, 0)?.toString()
+                                    val textBefore =
+                                        currentInputConnection
+                                            ?.getTextBeforeCursor(50, 0)
+                                            ?.toString()
                                     viewModel.checkAndApplyAutoCapitalization(textBefore)
                                 }
                             } finally {
@@ -1072,7 +1096,8 @@ class UrikInputMethodService :
                     currentInputConnection?.commitText(char, 1)
 
                     if (char in setOf(".", "!", "?") && !isSecureField) {
-                        val textBefore = currentInputConnection?.getTextBeforeCursor(50, 0)?.toString()
+                        val textBefore =
+                            currentInputConnection?.getTextBeforeCursor(50, 0)?.toString()
                         viewModel.checkAndApplyAutoCapitalization(textBefore)
                     }
                 } finally {
@@ -1108,7 +1133,8 @@ class UrikInputMethodService :
 
             if (validatedWord.isEmpty()) return
 
-            val shouldCapitalize = viewModel.state.value.isShiftPressed || viewModel.state.value.isCapsLockOn
+            val shouldCapitalize =
+                viewModel.state.value.isShiftPressed || viewModel.state.value.isCapsLockOn
             val displayWord =
                 if (shouldCapitalize) {
                     validatedWord.replaceFirstChar { it.uppercase() }
@@ -1122,7 +1148,8 @@ class UrikInputMethodService :
 
             serviceScope.launch {
                 try {
-                    val result = textInputProcessor.processWordInput(validatedWord, InputMethod.SWIPED)
+                    val result =
+                        textInputProcessor.processWordInput(validatedWord, InputMethod.SWIPED)
 
                     when (result) {
                         is ProcessingResult.Success -> {
@@ -1132,12 +1159,14 @@ class UrikInputMethodService :
                                 coordinateStateTransition(result.wordState)
 
                                 if (result.shouldHighlight) {
-                                    spellConfirmationState = SpellConfirmationState.AWAITING_CONFIRMATION
+                                    spellConfirmationState =
+                                        SpellConfirmationState.AWAITING_CONFIRMATION
                                     pendingWordForLearning = result.wordState.normalizedBuffer
                                     highlightCurrentWord()
                                 }
                             }
                         }
+
                         is ProcessingResult.Error -> {
                             withContext(Dispatchers.Main) {
                                 currentInputConnection?.setComposingText(displayWord, 1)
@@ -1257,12 +1286,15 @@ class UrikInputMethodService :
             KeyboardKey.ActionType.MODE_SWITCH_LETTERS -> {
                 viewModel.onEvent(KeyboardEvent.ModeChanged(KeyboardMode.LETTERS))
             }
+
             KeyboardKey.ActionType.MODE_SWITCH_NUMBERS -> {
                 viewModel.onEvent(KeyboardEvent.ModeChanged(KeyboardMode.NUMBERS))
             }
+
             KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS -> {
                 viewModel.onEvent(KeyboardEvent.ModeChanged(KeyboardMode.SYMBOLS))
             }
+
             KeyboardKey.ActionType.SHIFT -> {
                 val currentTime = System.currentTimeMillis()
                 val timeSinceLastShift = currentTime - lastShiftTime
@@ -1275,6 +1307,7 @@ class UrikInputMethodService :
                                 viewModel.onEvent(KeyboardEvent.CapsLockToggled)
                                 viewModel.onEvent(KeyboardEvent.ShiftStateChanged(false))
                             }
+
                             else -> {
                                 viewModel.onEvent(KeyboardEvent.CapsLockToggled)
                                 viewModel.onEvent(KeyboardEvent.ShiftStateChanged(false))
@@ -1288,9 +1321,11 @@ class UrikInputMethodService :
                             currentState.isCapsLockOn -> {
                                 viewModel.onEvent(KeyboardEvent.CapsLockToggled)
                             }
+
                             !currentState.isShiftPressed -> {
                                 viewModel.onEvent(KeyboardEvent.ShiftStateChanged(true))
                             }
+
                             currentState.isShiftPressed -> {
                                 viewModel.onEvent(KeyboardEvent.ShiftStateChanged(false))
                             }
@@ -1299,6 +1334,7 @@ class UrikInputMethodService :
                     }
                 }
             }
+
             KeyboardKey.ActionType.CAPS_LOCK -> {
                 viewModel.onEvent(KeyboardEvent.CapsLockToggled)
             }
@@ -1326,6 +1362,7 @@ class UrikInputMethodService :
                 -> {
                     currentInputConnection?.performEditorAction(imeAction) ?: false
                 }
+
                 else -> {
                     currentInputConnection?.commitText("\n", 1)
                     true
@@ -1378,7 +1415,12 @@ class UrikInputMethodService :
 
                     serviceScope.launch(Dispatchers.Default) {
                         try {
-                            val result = textInputProcessor.processCharacterInput("", bufferSnapshot, InputMethod.TYPED)
+                            val result =
+                                textInputProcessor.processCharacterInput(
+                                    "",
+                                    bufferSnapshot,
+                                    InputMethod.TYPED,
+                                )
 
                             withContext(Dispatchers.Main) {
                                 synchronized(processingLock) {
@@ -1392,6 +1434,7 @@ class UrikInputMethodService :
                                                     swipeKeyboardView?.clearSuggestions()
                                                 }
                                             }
+
                                             is ProcessingResult.Error -> {}
                                         }
                                     }
@@ -1437,22 +1480,12 @@ class UrikInputMethodService :
                     currentInputConnection?.deleteSurroundingText(1, 0)
 
                     val remainingText = textBeforeCursor.dropLast(1)
+                    val wordInfo = extractWordBeforeCursor(remainingText)
 
-                    val lastWordBoundary =
-                        remainingText.indexOfLast { char ->
-                            char.isWhitespace() || char in ".,!?;:\n"
-                        }
+                    if (wordInfo != null) {
+                        val (wordBeforeCursor, _) = wordInfo
 
-                    val wordBeforeCursor =
-                        if (lastWordBoundary >= 0) {
-                            remainingText.substring(lastWordBoundary + 1)
-                        } else {
-                            remainingText
-                        }
-
-                    if (wordBeforeCursor.isNotEmpty() && isValidTextInput(wordBeforeCursor)) {
                         currentInputConnection?.deleteSurroundingText(wordBeforeCursor.length, 0)
-
                         currentInputConnection?.setComposingText(wordBeforeCursor, 1)
 
                         displayBuffer = wordBeforeCursor
@@ -1468,7 +1501,12 @@ class UrikInputMethodService :
 
                         serviceScope.launch(Dispatchers.Default) {
                             try {
-                                val result = textInputProcessor.processCharacterInput("", bufferSnapshot, InputMethod.TYPED)
+                                val result =
+                                    textInputProcessor.processCharacterInput(
+                                        "",
+                                        bufferSnapshot,
+                                        InputMethod.TYPED,
+                                    )
 
                                 withContext(Dispatchers.Main) {
                                     synchronized(processingLock) {
@@ -1477,7 +1515,10 @@ class UrikInputMethodService :
                                                 is ProcessingResult.Success -> {
                                                     wordState = result.wordState
                                                     if (result.wordState.suggestions.isNotEmpty() && currentSettings.showSuggestions) {
-                                                        val shouldCapitalize = displayBuffer.firstOrNull()?.isUpperCase() == true
+                                                        val shouldCapitalize =
+                                                            displayBuffer
+                                                                .firstOrNull()
+                                                                ?.isUpperCase() == true
                                                         val displaySuggestions =
                                                             if (shouldCapitalize) {
                                                                 result.wordState.suggestions.map {
@@ -1489,12 +1530,15 @@ class UrikInputMethodService :
                                                                 result.wordState.suggestions
                                                             }
                                                         pendingSuggestions = displaySuggestions
-                                                        swipeKeyboardView?.updateSuggestions(displaySuggestions)
+                                                        swipeKeyboardView?.updateSuggestions(
+                                                            displaySuggestions,
+                                                        )
                                                     } else {
                                                         pendingSuggestions = emptyList()
                                                         swipeKeyboardView?.clearSuggestions()
                                                     }
                                                 }
+
                                                 is ProcessingResult.Error -> {
                                                     pendingSuggestions = emptyList()
                                                     swipeKeyboardView?.clearSuggestions()
@@ -1515,6 +1559,111 @@ class UrikInputMethodService :
             }
         } catch (_: Exception) {
             coordinateStateClear()
+        }
+    }
+
+    /**
+     * Extracts word before cursor using boundary detection.
+     *
+     * @param textBeforeCursor Text before cursor position
+     * @return Pair of (word, boundary index) or null if no valid word found
+     */
+    private fun extractWordBeforeCursor(textBeforeCursor: String): Pair<String, Int>? {
+        if (textBeforeCursor.isEmpty()) return null
+
+        val lastWordBoundary =
+            textBeforeCursor.indexOfLast { char ->
+                char.isWhitespace() || char in ".,!?;:\n"
+            }
+
+        val wordBeforeCursor =
+            if (lastWordBoundary >= 0) {
+                textBeforeCursor.substring(lastWordBoundary + 1)
+            } else {
+                textBeforeCursor
+            }
+
+        if (wordBeforeCursor.isEmpty() || !isValidTextInput(wordBeforeCursor)) {
+            return null
+        }
+
+        return Pair(wordBeforeCursor, lastWordBoundary)
+    }
+
+    /**
+     * Handles word-mode backspace deletion.
+     *
+     * Deletes whole words without re-composition.
+     * If composing text exists, deletes char-by-char until empty.
+     */
+    private fun handleBackspaceWord() {
+        try {
+            if (isSecureField) {
+                handleBackspace()
+                return
+            }
+
+            if (spellConfirmationState == SpellConfirmationState.AWAITING_CONFIRMATION) {
+                spellConfirmationState = SpellConfirmationState.NORMAL
+                pendingWordForLearning = null
+            }
+
+            if (displayBuffer.isNotEmpty()) {
+                displayBuffer = displayBuffer.dropLast(1)
+
+                if (displayBuffer.isNotEmpty()) {
+                    currentInputConnection?.setComposingText(displayBuffer, 1)
+                    wordState =
+                        wordState.copy(
+                            buffer = displayBuffer,
+                            normalizedBuffer = displayBuffer.lowercase(),
+                            graphemeCount = displayBuffer.length,
+                        )
+                } else {
+                    currentInputConnection?.beginBatchEdit()
+                    try {
+                        currentInputConnection?.setComposingText("", 1)
+                        coordinateStateClear()
+                    } finally {
+                        currentInputConnection?.endBatchEdit()
+                    }
+                }
+                return
+            }
+
+            val textBeforeCursor = currentInputConnection?.getTextBeforeCursor(50, 0)?.toString()
+
+            if (!textBeforeCursor.isNullOrEmpty()) {
+                val wordInfo = extractWordBeforeCursor(textBeforeCursor)
+
+                if (wordInfo != null) {
+                    val (word, _) = wordInfo
+                    val deleteLength = word.length
+
+                    val charBeforeWord =
+                        if (textBeforeCursor.length > deleteLength) {
+                            textBeforeCursor[textBeforeCursor.length - deleteLength - 1]
+                        } else {
+                            null
+                        }
+
+                    val totalDeleteLength =
+                        if (charBeforeWord?.isWhitespace() == true) {
+                            deleteLength + 1
+                        } else {
+                            deleteLength
+                        }
+
+                    currentInputConnection?.deleteSurroundingText(totalDeleteLength, 0)
+                } else {
+                    currentInputConnection?.deleteSurroundingText(1, 0)
+                }
+            }
+        } catch (_: Exception) {
+            try {
+                currentInputConnection?.deleteSurroundingText(1, 0)
+            } catch (_: Exception) {
+            }
         }
     }
 
@@ -1546,7 +1695,8 @@ class UrikInputMethodService :
                         currentInputConnection?.deleteSurroundingText(1, 0)
                         currentInputConnection?.commitText(". ", 1)
 
-                        val textBefore = currentInputConnection?.getTextBeforeCursor(50, 0)?.toString()
+                        val textBefore =
+                            currentInputConnection?.getTextBeforeCursor(50, 0)?.toString()
                         viewModel.checkAndApplyAutoCapitalization(textBefore)
                     } finally {
                         currentInputConnection?.endBatchEdit()
@@ -1578,7 +1728,8 @@ class UrikInputMethodService :
                                 coordinateWordCompletion(InputMethod.TYPED)
                                 currentInputConnection?.commitText(" ", 1)
 
-                                val textBefore = currentInputConnection?.getTextBeforeCursor(50, 0)?.toString()
+                                val textBefore =
+                                    currentInputConnection?.getTextBeforeCursor(50, 0)?.toString()
                                 viewModel.checkAndApplyAutoCapitalization(textBefore)
                             } finally {
                                 currentInputConnection?.endBatchEdit()
@@ -1587,7 +1738,8 @@ class UrikInputMethodService :
                             return@launch
                         }
 
-                        val suggestions = textInputProcessor.getSuggestions(wordState.normalizedBuffer)
+                        val suggestions =
+                            textInputProcessor.getSuggestions(wordState.normalizedBuffer)
 
                         spellConfirmationState = SpellConfirmationState.AWAITING_CONFIRMATION
                         pendingWordForLearning = wordState.normalizedBuffer
@@ -1697,7 +1849,14 @@ class UrikInputMethodService :
         candidatesStart: Int,
         candidatesEnd: Int,
     ) {
-        super.onUpdateSelection(oldSelStart, oldSelEnd, newSelStart, newSelEnd, candidatesStart, candidatesEnd)
+        super.onUpdateSelection(
+            oldSelStart,
+            oldSelEnd,
+            newSelStart,
+            newSelEnd,
+            candidatesStart,
+            candidatesEnd,
+        )
 
         if (displayBuffer.isNotEmpty()) {
             if (newSelStart < oldSelStart && candidatesStart == -1 && candidatesEnd == -1) {
