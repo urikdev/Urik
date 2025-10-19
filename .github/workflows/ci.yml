@@ -1,10 +1,10 @@
 name: CI
 
 on:
-  push:
-    branches: [ main, develop ]
   pull_request:
     branches: [ main, develop ]
+  push:
+    branches: [ main ]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -15,6 +15,7 @@ jobs:
     name: Unit Tests
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    if: github.event_name == 'pull_request'
 
     steps:
       - uses: actions/checkout@v4
@@ -40,7 +41,7 @@ jobs:
         with:
           name: test-results
           path: '**/build/test-results/**/*.xml'
-          retention-days: 7
+          retention-days: 1
 
       - name: Upload test reports
         if: always()
@@ -48,7 +49,7 @@ jobs:
         with:
           name: test-reports
           path: '**/build/reports/tests/**'
-          retention-days: 7
+          retention-days: 1
 
       - name: Upload coverage report
         if: always()
@@ -56,12 +57,13 @@ jobs:
         with:
           name: coverage-report
           path: '**/build/reports/kover/**'
-          retention-days: 7
+          retention-days: 1
 
   lint:
     name: Code Quality
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    if: github.event_name == 'pull_request'
 
     steps:
       - uses: actions/checkout@v4
@@ -87,13 +89,14 @@ jobs:
         with:
           name: lint-results
           path: '**/build/reports/lint-results-*.html'
-          retention-days: 7
+          retention-days: 1
 
   build-debug:
     name: Build Debug APK
     runs-on: ubuntu-latest
     timeout-minutes: 30
     needs: [test, lint]
+    if: github.event_name == 'pull_request'
 
     steps:
       - uses: actions/checkout@v4
@@ -114,8 +117,7 @@ jobs:
     name: Build Release APK
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    needs: [test, lint]
-    if: github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
     steps:
       - uses: actions/checkout@v4
