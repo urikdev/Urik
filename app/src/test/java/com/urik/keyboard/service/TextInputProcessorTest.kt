@@ -68,6 +68,7 @@ class TextInputProcessorTest {
     fun `processCharacterInput with valid letter returns success`() =
         runTest {
             whenever(spellCheckManager.isWordInDictionary("hello")).thenReturn(true)
+            whenever(spellCheckManager.generateSuggestions("hello", maxSuggestions = 3)).thenReturn(listOf("hello", "hells"))
 
             val result = processor.processCharacterInput("o", "hello", InputMethod.TYPED)
 
@@ -150,11 +151,14 @@ class TextInputProcessorTest {
     fun `second call with same word uses cached processing`() =
         runTest {
             whenever(spellCheckManager.isWordInDictionary("test")).thenReturn(true)
+            whenever(spellCheckManager.generateSuggestions("test", maxSuggestions = 3)).thenReturn(emptyList())
+
             processor.processCharacterInput("t", "test", InputMethod.TYPED)
 
             processor.processCharacterInput("t", "test", InputMethod.TYPED)
 
             verify(spellCheckManager, times(1)).isWordInDictionary("test")
+            verify(spellCheckManager, times(1)).generateSuggestions("test", maxSuggestions = 3)
         }
 
     @Test

@@ -368,7 +368,7 @@ class TextInputProcessor
                         isValid = cachedEntry.isValid
                     } else {
                         isValid = spellCheckManager.isWordInDictionary(normalized)
-                        if (currentConfig.suggestionsEnabled && (!isValid || inputMethod == InputMethod.SWIPED)) {
+                        if (currentConfig.suggestionsEnabled) {
                             suggestions =
                                 spellCheckManager.generateSuggestions(
                                     normalized,
