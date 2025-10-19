@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.VIBRATE" />
 
@@ -31,8 +32,25 @@
         <activity
             android:name=".settings.SettingsActivity"
             android:exported="false"
-            android:theme="@style/Theme.Material3.DayNight.NoActionBar"
+            android:theme="@style/Theme.Material3.DayNight"
             android:label="@string/settings_title" />
+
+        <!-- Licenses Activity -->
+        <activity
+            android:name=".settings.DictionaryAttributionActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Material3.DayNight"
+            android:label="@string/licenses_title" />
+
+        <activity
+            android:name="com.google.android.gms.oss.licenses.OssLicensesMenuActivity"
+            android:theme="@style/Theme.Urik.OssLicenses"
+            tools:replace="android:theme"/>
+
+        <activity
+            android:name="com.google.android.gms.oss.licenses.OssLicensesActivity"
+            android:theme="@style/Theme.Urik.OssLicenses"
+            tools:replace="android:theme"/>
 
         <!-- Input Method Service -->
         <service
