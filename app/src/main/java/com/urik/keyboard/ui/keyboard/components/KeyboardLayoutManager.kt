@@ -597,7 +597,7 @@ class KeyboardLayoutManager(
                 performCustomHaptic()
 
                 if (accessibilityManager.isEnabled) {
-                    val event = AccessibilityEvent(AccessibilityEvent.TYPE_VIEW_CLICKED)
+                    val event = AccessibilityEvent.obtain(AccessibilityEvent.TYPE_VIEW_CLICKED)
                     event.contentDescription = contentDescription
                     accessibilityManager.sendAccessibilityEvent(event)
                 }
