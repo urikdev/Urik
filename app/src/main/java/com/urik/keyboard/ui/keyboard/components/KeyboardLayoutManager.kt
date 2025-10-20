@@ -1243,6 +1243,8 @@ class KeyboardLayoutManager(
 
     private fun getThemeAwareColor(colorRes: Int): Int = ContextCompat.getColor(themedContext, colorRes)
 
+    fun getThemedContext(): Context = themedContext
+
     /**
      * Cleans up all resources.
      *
