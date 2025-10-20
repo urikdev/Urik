@@ -110,7 +110,6 @@
     <string name="action_go_description">Gå till destinationen</string>
     <string name="action_next_description">Gå till nästa fält</string>
     <string name="action_previous_description">Flytta till föregående fält</string>
-    <string name="action_paste">Klistra</string>
     <string name="action_emoji">Emoji</string>
     <string name="remove_suggestion">Ta bort %1$s från förslagen?</string>
     <string name="remove_cancel">Avboka</string>

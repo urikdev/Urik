@@ -84,45 +84,6 @@ sealed class KeyboardKey {
 }
 
 /**
- * Action button configuration for suggestion bar.
- *
- * Lambdas evaluated at render time for dynamic visibility/enablement
- * (e.g., paste button disabled when clipboard empty).
- */
-data class ActionButton(
-    val id: String,
-    val iconRes: Int,
-    val contentDescriptionRes: Int,
-    val action: SuggestionActionType,
-    val isVisible: () -> Boolean = { true },
-    val isEnabled: () -> Boolean = { true },
-    val requiresClipboard: Boolean = false,
-    val requiresSelection: Boolean = false,
-)
-
-/**
- * Operations available via action buttons.
- */
-enum class SuggestionActionType {
-    PASTE,
-    EMOJI,
-    UNDO,
-    REDO,
-    SELECT_ALL,
-    CURSOR_LEFT,
-    CURSOR_RIGHT,
-    SETTINGS,
-}
-
-/**
- * Suggestion bar display mode.
- */
-enum class SuggestionBarMode {
-    SUGGESTIONS,
-    ACTIONS,
-}
-
-/**
  * Keyboard state change events.
  */
 sealed class KeyboardEvent {

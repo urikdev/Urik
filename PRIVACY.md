@@ -79,7 +79,6 @@ For privacy inquiries, contact us at the email above.
 
 **What We Don't Log:**
 - User input or typed text
-- Clipboard content
 - Personal information
 
 **Storage:** Local JSON file on your device (`error_log.json`), maximum 100 entries or 500KB.
@@ -104,16 +103,6 @@ For privacy inquiries, contact us at the email above.
 - The keyboard service stops
 
 **Secure Fields:** When you type in password fields or other secure inputs, all processing is bypassed. No text is cached, spell-checked, or learned.
-
-### 5. Clipboard Access (Read-Only, Temporary)
-
-**When:** Only when you explicitly tap the "Paste" action button.
-
-**What:** The current clipboard content at the moment you tap paste.
-
-**Usage:** Immediately inserted into the text field. Never stored, logged, or transmitted.
-
-**Scope:** We can only read the clipboard when you trigger the paste action. We cannot monitor or access clipboard history.
 
 ## How We Use Your Data
 

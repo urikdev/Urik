@@ -1,6 +1,5 @@
 package com.urik.keyboard
 
-import android.content.ClipboardManager
 import android.graphics.Color
 import android.inputmethodservice.InputMethodService
 import android.text.SpannableString
@@ -18,11 +17,9 @@ import androidx.lifecycle.LifecycleRegistry
 import com.ibm.icu.lang.UScript
 import com.ibm.icu.util.ULocale
 import com.urik.keyboard.data.KeyboardRepository
-import com.urik.keyboard.model.ActionButton
 import com.urik.keyboard.model.KeyboardEvent
 import com.urik.keyboard.model.KeyboardKey
 import com.urik.keyboard.model.KeyboardMode
-import com.urik.keyboard.model.SuggestionActionType
 import com.urik.keyboard.service.CharacterVariationService
 import com.urik.keyboard.service.InputMethod
 import com.urik.keyboard.service.LanguageManager
@@ -602,18 +599,19 @@ class UrikInputMethodService :
                     setOnKeyClickListener { key -> handleKeyPress(key) }
                     setOnSwipeWordListener { validatedWord -> handleSwipeWord(validatedWord) }
                     setOnSuggestionClickListener { suggestion -> handleSuggestionSelected(suggestion) }
-                    setOnActionButtonClickListener { action -> handleActionButtonClick(action) }
                     setOnSuggestionLongPressListener { suggestion ->
                         handleSuggestionRemoval(
                             suggestion,
                         )
+                    }
+                    setOnEmojiSelectedListener { selectedEmoji ->
+                        handleEmojiSelected(selectedEmoji)
                     }
                 }
 
             swipeKeyboardView = swipeView
             updateSwipeKeyboard()
             observeViewModel()
-            configureActionButtons()
 
             swipeView
         } catch (e: Exception) {
@@ -625,107 +623,6 @@ class UrikInputMethodService :
             )
             null
         }
-
-    /**
-     * Configures available action buttons for suggestion bar.
-     */
-    private fun configureActionButtons() {
-        val defaultActions =
-            listOf(
-                ActionButton(
-                    id = "paste",
-                    iconRes = R.drawable.ic_paste,
-                    contentDescriptionRes = R.string.action_paste,
-                    action = SuggestionActionType.PASTE,
-                    isVisible = { true },
-                    isEnabled = { hasClipboardContent() },
-                    requiresClipboard = true,
-                ),
-                ActionButton(
-                    id = "emoji",
-                    iconRes = R.drawable.ic_emoji,
-                    contentDescriptionRes = R.string.action_emoji,
-                    action = SuggestionActionType.EMOJI,
-                    isVisible = { true },
-                    isEnabled = { true },
-                ),
-            )
-
-        swipeKeyboardView?.setAvailableActionButtons(defaultActions)
-    }
-
-    /**
-     * Handles action button clicks.
-     *
-     * @param action Action type clicked
-     */
-    private fun handleActionButtonClick(action: SuggestionActionType) {
-        when (action) {
-            SuggestionActionType.PASTE -> {
-                handlePasteAction()
-            }
-
-            SuggestionActionType.EMOJI -> {
-                handleEmojiAction()
-            }
-
-            else -> {
-            }
-        }
-    }
-
-    /**
-     * Handles paste action from clipboard.
-     */
-    private fun handlePasteAction() {
-        serviceScope.launch {
-            try {
-                val clipboardManager =
-                    getSystemService(CLIPBOARD_SERVICE) as? ClipboardManager
-                        ?: return@launch
-
-                val clipData = clipboardManager.primaryClip
-                if (clipData == null || clipData.itemCount == 0) return@launch
-
-                val clipText = clipData.getItemAt(0)?.text?.toString()
-
-                if (clipText != null && clipText.isNotEmpty()) {
-                    currentInputConnection?.beginBatchEdit()
-                    try {
-                        if (!isSecureField && displayBuffer.isNotEmpty()) {
-                            coordinateWordCompletion(InputMethod.TYPED)
-                        }
-
-                        currentInputConnection?.commitText(clipText, 1)
-
-                        if (!isSecureField && isValidTextInput(clipText)) {
-                            learnWordAndInvalidateCache(clipText, InputMethod.TYPED)
-                        }
-                    } finally {
-                        currentInputConnection?.endBatchEdit()
-                    }
-
-                    swipeKeyboardView?.hideActionButtons()
-                }
-            } catch (_: Exception) {
-            }
-        }
-    }
-
-    /**
-     * Toggles emoji picker visibility.
-     */
-    private fun handleEmojiAction() {
-        swipeKeyboardView?.let { keyboardView ->
-            if (keyboardView.isEmojiPickerShowing()) {
-                keyboardView.hideEmojiPicker()
-            } else {
-                keyboardView.showEmojiPicker { selectedEmoji ->
-                    handleEmojiSelected(selectedEmoji)
-                }
-            }
-        }
-    }
 
     /**
      * Handles emoji selection from picker.
@@ -740,30 +637,8 @@ class UrikInputMethodService :
                 }
 
                 currentInputConnection?.commitText(emoji, 1)
-                swipeKeyboardView?.hideActionButtons()
             } catch (_: Exception) {
             }
-        }
-    }
-
-    /**
-     * Checks if clipboard has content available.
-     *
-     * @return True if clipboard contains text
-     */
-    private fun hasClipboardContent(): Boolean {
-        return try {
-            val clipboardManager =
-                getSystemService(CLIPBOARD_SERVICE) as? ClipboardManager
-                    ?: return false
-
-            val clipData = clipboardManager.primaryClip
-            if (clipData == null || clipData.itemCount == 0) return false
-
-            val text = clipData.getItemAt(0)?.text
-            text != null && text.isNotEmpty()
-        } catch (_: Exception) {
-            false
         }
     }
 
@@ -1784,6 +1659,8 @@ class UrikInputMethodService :
     override fun onFinishInputView(finishingInput: Boolean) {
         super.onFinishInputView(finishingInput)
 
+        swipeKeyboardView?.hideEmojiPicker()
+
         if (displayBuffer.isNotEmpty() && !isSecureField) {
             serviceScope.launch {
                 coordinateWordCompletion(InputMethod.TYPED)
@@ -1823,6 +1700,8 @@ class UrikInputMethodService :
 
     override fun onFinishInput() {
         super.onFinishInput()
+
+        swipeKeyboardView?.hideEmojiPicker()
 
         serviceScope.launch {
             if (displayBuffer.isNotEmpty() && !isSecureField) {
