@@ -1,6 +1,5 @@
 package com.urik.keyboard.ui.keyboard.components
 
-import android.content.ClipboardManager
 import android.content.Context
 import android.graphics.PointF
 import android.graphics.Rect
@@ -20,12 +19,9 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.emoji2.emojipicker.EmojiPickerView
 import com.urik.keyboard.R
-import com.urik.keyboard.model.ActionButton
 import com.urik.keyboard.model.KeyboardKey
 import com.urik.keyboard.model.KeyboardLayout
 import com.urik.keyboard.model.KeyboardState
-import com.urik.keyboard.model.SuggestionActionType
-import com.urik.keyboard.model.SuggestionBarMode
 import com.urik.keyboard.service.SpellCheckManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -35,40 +31,6 @@ import kotlinx.coroutines.launch
 /**
  * Main keyboard view with swipe typing and suggestion bar.
  *
- * Architecture:
- * - Tap input: Direct key press → onKeyClick callback
- * - Swipe input: Path capture → SwipeDetector → word candidates → learned word boost → best selection
- * - Suggestion bar: Dual mode (suggestions when typing, action buttons when idle)
- * - Emoji picker: Full-screen overlay with close button
- * - Touch handling: 60px distance + 200ms duration triggers swipe mode
- *
- * View lifecycle:
- * - initialize() sets up dependencies (strong references)
- * - updateKeyboard() rebuilds layout, auto-hides emoji picker
- * - cleanup() called on detach, nulls all references
- * - Managed CoroutineScope (viewScope) for async operations
- *
- * Swipe typing flow:
- * 1. Touch down → SwipeDetector starts capture
- * 2. Touch move (>60px, >200ms) → intercepts events, shows overlay trail
- * 3. Touch up → SwipeDetector generates candidates
- * 4. Async: Batch check learned words for candidate boost
- * 5. Best candidate selected (learned: 0.95 base, dictionary: spatial*0.85 + freq*0.15)
- * 6. onSwipeWord callback with result
- *
- * Suggestion bar behavior:
- * - Typing: Shows top 3 suggestions with tap-to-insert, long-press-to-remove
- * - Idle: Shows action buttons (clipboard, undo, emoji picker, etc.)
- * - Toggle button: Manual switch between modes
- * - Auto-switches to suggestions when hasActiveWord = true
- *
- * Memory management:
- * - Strong references to critical components (SpellCheckManager, etc.)
- * - Explicit cleanup on detach
- * - Managed CoroutineScope cancelled on cleanup
- * - View collections cleared on layout rebuild
- *
- * Thread safety: All UI operations on main thread, async word checks on viewScope.
  */
 class SwipeKeyboardView
     @JvmOverloads
@@ -86,8 +48,7 @@ class SwipeKeyboardView
         private var onSwipeWordListener: ((String) -> Unit)? = null
         private var onSuggestionClickListener: ((String) -> Unit)? = null
         private var onSuggestionLongPressListener: ((String) -> Unit)? = null
-        private var onActionButtonClickListener: ((SuggestionActionType) -> Unit)? = null
-
+        private var onEmojiSelected: ((String) -> Unit)? = null
         private val keyViews = mutableListOf<Button>()
         private val keyPositions = mutableMapOf<Button, Rect>()
         private val keyMapping = mutableMapOf<Button, KeyboardKey>()
@@ -99,12 +60,8 @@ class SwipeKeyboardView
         private val swipeOverlay = SwipeOverlayView(context)
 
         private var suggestionBar: LinearLayout? = null
-        private var actionToggleButton: TextView? = null
-        private var isActionButtonsToggled = false
 
-        private var currentSuggestionBarMode = SuggestionBarMode.ACTIONS
-        private var availableActionButtons = listOf<ActionButton>()
-        private var hasActiveWord = false
+        private var emojiButton: TextView? = null
 
         private var isSwipeActive = false
         private var touchStartPoint: PointF? = null
@@ -141,40 +98,60 @@ class SwipeKeyboardView
             if (isDestroyed || isShowingEmojiPicker) return
 
             isShowingEmojiPicker = true
-
             findKeyboardView()?.visibility = GONE
 
+            val baseContext = keyboardLayoutManager?.getThemedContext() ?: context
+
+            val themedContext =
+                androidx.appcompat.view.ContextThemeWrapper(
+                    baseContext,
+                    R.style.Theme_Urik,
+                )
+
+            val windowInsets = rootWindowInsets
+            val bottomInset =
+                if (windowInsets != null) {
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+                        windowInsets.getInsets(WindowInsets.Type.systemBars()).bottom
+                    } else {
+                        @Suppress("DEPRECATION")
+                        windowInsets.systemWindowInsetBottom
+                    }
+                } else {
+                    0
+                }
+
             val container =
-                LinearLayout(context).apply {
+                LinearLayout(baseContext).apply {
                     orientation = LinearLayout.VERTICAL
                     layoutParams =
                         LayoutParams(
                             LayoutParams.MATCH_PARENT,
                             LayoutParams.MATCH_PARENT,
                         )
-                    setBackgroundColor(ContextCompat.getColor(context, R.color.surface_background))
+                    setBackgroundColor(ContextCompat.getColor(baseContext, R.color.surface_background))
                 }
 
             val closeButtonBar =
-                LinearLayout(context).apply {
+                LinearLayout(baseContext).apply {
                     orientation = LinearLayout.HORIZONTAL
                     gravity = Gravity.END
-                    setBackgroundColor(ContextCompat.getColor(context, R.color.surface_accent))
+                    setBackgroundColor(ContextCompat.getColor(baseContext, R.color.surface_accent))
 
-                    val padding = context.resources.getDimensionPixelSize(R.dimen.key_margin_horizontal)
+                    val padding = baseContext.resources.getDimensionPixelSize(R.dimen.key_margin_horizontal)
                     setPadding(padding, padding / 2, padding, padding / 2)
                 }
 
             val closeButton =
-                TextView(context).apply {
+                TextView(baseContext).apply {
                     text = "✕"
                     setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
-                    setTextColor(ContextCompat.getColor(context, R.color.content_primary))
+                    setTextColor(ContextCompat.getColor(baseContext, R.color.content_primary))
 
-                    val buttonPadding = (18f * context.resources.displayMetrics.density).toInt()
+                    val buttonPadding = (18f * baseContext.resources.displayMetrics.density).toInt()
                     setPadding(buttonPadding, buttonPadding / 2, buttonPadding, buttonPadding / 2)
 
-                    setBackgroundColor(ContextCompat.getColor(context, R.color.key_background_action))
+                    setBackgroundColor(ContextCompat.getColor(baseContext, R.color.key_background_action))
                     contentDescription = "Close emoji picker"
 
                     setOnClickListener {
@@ -192,16 +169,20 @@ class SwipeKeyboardView
             )
 
             val emojiPickerView =
-                EmojiPickerView(context).apply {
+                EmojiPickerView(themedContext).apply {
                     setOnEmojiPickedListener { emojiViewItem ->
                         onEmojiSelected(emojiViewItem.emoji)
                         hideEmojiPicker()
                     }
                     layoutParams =
-                        LinearLayout.LayoutParams(
-                            LinearLayout.LayoutParams.MATCH_PARENT,
-                            LinearLayout.LayoutParams.MATCH_PARENT,
-                        )
+                        LinearLayout
+                            .LayoutParams(
+                                LinearLayout.LayoutParams.MATCH_PARENT,
+                                0,
+                                1f,
+                            ).apply {
+                                bottomMargin = bottomInset
+                            }
                 }
 
             container.addView(emojiPickerView)
@@ -224,8 +205,6 @@ class SwipeKeyboardView
 
             findKeyboardView()?.visibility = VISIBLE
         }
-
-        fun isEmojiPickerShowing(): Boolean = isShowingEmojiPicker
 
         override fun onMeasure(
             widthMeasureSpec: Int,
@@ -300,19 +279,9 @@ class SwipeKeyboardView
             }
         }
 
-        fun setOnActionButtonClickListener(listener: (SuggestionActionType) -> Unit) {
+        fun setOnEmojiSelectedListener(listener: (String) -> Unit) {
             if (!isDestroyed) {
-                this.onActionButtonClickListener = listener
-            }
-        }
-
-        fun setAvailableActionButtons(actionButtons: List<ActionButton>) {
-            if (!isDestroyed) {
-                this.availableActionButtons = actionButtons
-
-                if (isActionButtonsToggled) {
-                    updateSuggestionBarContent()
-                }
+                this.onEmojiSelected = listener
             }
         }
 
@@ -345,92 +314,31 @@ class SwipeKeyboardView
         /**
          * Updates suggestion bar with new word candidates.
          *
-         * Auto-switches to suggestions mode if hasActiveWord.
-         * Preserves toggle state if manually activated.
          */
         fun updateSuggestions(suggestions: List<String>) {
             if (isDestroyed) return
-
-            hasActiveWord = suggestions.isNotEmpty()
-
-            if (!isActionButtonsToggled) {
-                val newMode =
-                    if (shouldShowActionButtons()) {
-                        SuggestionBarMode.ACTIONS
-                    } else {
-                        SuggestionBarMode.SUGGESTIONS
-                    }
-
-                if (newMode != currentSuggestionBarMode || newMode == SuggestionBarMode.SUGGESTIONS) {
-                    currentSuggestionBarMode = newMode
-                    updateSuggestionBarContent(suggestions)
-                }
-            }
-        }
-
-        private fun shouldShowActionButtons(): Boolean =
-            when {
-                isDestroyed -> false
-                hasActiveWord -> false
-                else -> true
-            }
-
-        private fun toggleActionButtons() {
-            isActionButtonsToggled = !isActionButtonsToggled
-
-            actionToggleButton?.apply {
-                alpha = if (isActionButtonsToggled) 1.0f else 0.7f
-                setBackgroundColor(
-                    ContextCompat.getColor(
-                        context,
-                        if (isActionButtonsToggled) R.color.key_background_character else R.color.key_background_action,
-                    ),
-                )
-            }
-
-            if (isActionButtonsToggled) {
-                updateSuggestionBarContent(emptyList())
-            } else {
-                if (hasActiveWord) {
-                    val newMode =
-                        if (shouldShowActionButtons()) {
-                            SuggestionBarMode.ACTIONS
-                        } else {
-                            SuggestionBarMode.SUGGESTIONS
-                        }
-                    currentSuggestionBarMode = newMode
-                    updateSuggestionBarContent()
-                } else {
-                    updateSuggestionBarContent(emptyList())
-                }
-            }
+            updateSuggestionBarContent(suggestions)
         }
 
         private fun updateSuggestionBarContent(suggestions: List<String> = emptyList()) {
             if (isDestroyed) return
 
             suggestionBar?.let { bar ->
-                val toggleButton = actionToggleButton
+                val emojiBtn = emojiButton
                 bar.removeAllViews()
 
-                when {
-                    isActionButtonsToggled -> {
-                        populateActionButtons(bar)
-                    }
-                    suggestions.isNotEmpty() -> {
-                        populateSuggestions(bar, suggestions)
-                    }
-                    else -> {
-                        val spacer =
-                            View(context).apply {
-                                layoutParams = LinearLayout.LayoutParams(0, 0, 1f)
-                            }
-                        bar.addView(spacer)
-                    }
+                if (suggestions.isNotEmpty()) {
+                    populateSuggestions(bar, suggestions)
+                } else {
+                    val spacer =
+                        View(context).apply {
+                            layoutParams = LinearLayout.LayoutParams(0, 0, 1f)
+                        }
+                    bar.addView(spacer)
                 }
 
-                if (toggleButton != null) {
-                    bar.addView(toggleButton)
+                if (emojiBtn != null) {
+                    bar.addView(emojiBtn)
                 }
             }
         }
@@ -501,56 +409,6 @@ class SwipeKeyboardView
 
                     bar.addView(divider, dividerParams)
                 }
-            }
-        }
-
-        private fun populateActionButtons(bar: LinearLayout) {
-            val filteredButtons =
-                availableActionButtons.filter { actionButton ->
-                    when {
-                        !actionButton.isVisible() -> false
-                        actionButton.requiresClipboard && !hasClipboardContent() -> false
-                        actionButton.requiresSelection && !hasTextSelection() -> false
-                        else -> true
-                    }
-                }
-
-            filteredButtons.take(3).forEachIndexed { index, actionButton ->
-                if (isDestroyed) return@forEachIndexed
-
-                val btn =
-                    TextView(context).apply {
-                        val actionDrawable = ContextCompat.getDrawable(context, actionButton.iconRes)
-                        actionDrawable?.setTint(ContextCompat.getColor(context, R.color.key_text_action))
-
-                        setCompoundDrawablesRelativeWithIntrinsicBounds(actionDrawable, null, null, null)
-
-                        val actionTextSize = calculateResponsiveSuggestionTextSize()
-                        contentDescription = context.getString(actionButton.contentDescriptionRes)
-
-                        val padding = (actionTextSize * context.resources.displayMetrics.density * 0.8f).toInt()
-                        setPadding(padding, padding, padding, padding)
-
-                        setBackgroundColor(ContextCompat.getColor(context, R.color.key_background_character))
-
-                        isEnabled = actionButton.isEnabled()
-                        alpha = if (isEnabled) 1.0f else 0.5f
-
-                        setOnClickListener {
-                            if (!isDestroyed && isEnabled) {
-                                keyboardLayoutManager?.triggerHapticFeedback()
-                                handleActionButtonClick(actionButton.action)
-                            }
-                        }
-                    }
-
-                val layoutParams =
-                    LinearLayout.LayoutParams(0, LayoutParams.WRAP_CONTENT, 1f).apply {
-                        val margin = context.resources.getDimensionPixelSize(R.dimen.key_margin_horizontal) / 2
-                        marginEnd = margin
-                    }
-
-                bar.addView(btn, layoutParams)
             }
         }
 
@@ -656,20 +514,6 @@ class SwipeKeyboardView
             }
         }
 
-        private fun handleActionButtonClick(action: SuggestionActionType) {
-            onActionButtonClickListener?.invoke(action)
-        }
-
-        private fun hasClipboardContent(): Boolean =
-            try {
-                val clipboardManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                clipboardManager.hasPrimaryClip() && clipboardManager.primaryClip?.getItemAt(0)?.text != null
-            } catch (_: Exception) {
-                false
-            }
-
-        private fun hasTextSelection(): Boolean = false
-
         private fun calculateResponsiveSuggestionTextSize(): Float {
             val keyHeight = context.resources.getDimensionPixelSize(R.dimen.key_height)
             val baseTextSize = keyHeight * 0.30f / context.resources.displayMetrics.density
@@ -680,45 +524,14 @@ class SwipeKeyboardView
         }
 
         /**
-         * Clears suggestion bar, switches to action buttons mode.
+         * Clears suggestion bar
          *
          * Call when word buffer empty or committed.
          */
         fun clearSuggestions() {
             if (isDestroyed) return
-
-            hasActiveWord = false
-
-            if (!isActionButtonsToggled) {
-                currentSuggestionBarMode = SuggestionBarMode.ACTIONS
-                updateSuggestionBarContent()
-            }
-
-            safeMappingPost()
-        }
-
-        /**
-         * Hides action buttons and shows empty suggestion bar.
-         *
-         */
-        fun hideActionButtons() {
-            if (isDestroyed) return
-
-            isActionButtonsToggled = false
-            hasActiveWord = false
-            currentSuggestionBarMode = SuggestionBarMode.SUGGESTIONS
-
-            actionToggleButton?.apply {
-                alpha = 0.7f
-                setBackgroundColor(
-                    ContextCompat.getColor(
-                        context,
-                        R.color.key_background_action,
-                    ),
-                )
-            }
-
             updateSuggestionBarContent(emptyList())
+            safeMappingPost()
         }
 
         private fun findKeyboardView(): ViewGroup? {
@@ -770,9 +583,7 @@ class SwipeKeyboardView
                 for (i in 0 until bar.childCount) {
                     val child = bar.getChildAt(i) as? TextView
                     child?.text?.toString()?.let {
-                        if (child != actionToggleButton) {
-                            existingSuggestions.add(it)
-                        }
+                        existingSuggestions.add(it)
                     }
                 }
                 (bar.parent as? ViewGroup)?.removeView(bar)
@@ -812,24 +623,27 @@ class SwipeKeyboardView
                         minimumHeight = (keyHeight * 0.8f).toInt()
                         setBackgroundColor(ContextCompat.getColor(context, R.color.suggestion_bar_background))
 
-                        actionToggleButton =
+                        emojiButton =
                             TextView(context).apply {
-                                val settingsDrawable = ContextCompat.getDrawable(context, R.drawable.ic_appdrawer)
-                                settingsDrawable?.setTint(ContextCompat.getColor(context, R.color.key_text_action))
+                                val emojiDrawable = ContextCompat.getDrawable(context, R.drawable.ic_emoji)
+                                emojiDrawable?.setTint(ContextCompat.getColor(context, R.color.key_text_action))
 
-                                setCompoundDrawablesRelativeWithIntrinsicBounds(settingsDrawable, null, null, null)
+                                setCompoundDrawablesRelativeWithIntrinsicBounds(emojiDrawable, null, null, null)
 
-                                val toggleTextSize = calculateResponsiveSuggestionTextSize()
+                                val emojiTextSize = calculateResponsiveSuggestionTextSize()
 
-                                val padding = (toggleTextSize * context.resources.displayMetrics.density * 0.8f).toInt()
+                                val padding = (emojiTextSize * context.resources.displayMetrics.density * 0.8f).toInt()
                                 setPadding(padding, padding, padding, padding)
                                 setBackgroundColor(ContextCompat.getColor(context, R.color.key_background_action))
 
-                                contentDescription = "Toggle action buttons"
-                                alpha = if (isActionButtonsToggled) 1.0f else 0.7f
+                                contentDescription = context.getString(R.string.action_emoji)
 
                                 setOnClickListener {
-                                    toggleActionButtons()
+                                    if (!isDestroyed) {
+                                        showEmojiPicker { selectedEmoji ->
+                                            onEmojiSelected?.invoke(selectedEmoji)
+                                        }
+                                    }
                                 }
 
                                 layoutParams =
@@ -844,7 +658,7 @@ class SwipeKeyboardView
                                         }
                             }
 
-                        addView(actionToggleButton)
+                        addView(emojiButton)
                     }
 
                 insertSuggestionBar()
@@ -1256,15 +1070,15 @@ class SwipeKeyboardView
                 (bar.parent as? ViewGroup)?.removeView(bar)
             }
             suggestionBar = null
-            actionToggleButton = null
+            emojiButton = null
 
             swipeOverlay.visibility = GONE
 
             onKeyClickListener = null
             onSwipeWordListener = null
             onSuggestionClickListener = null
-            onActionButtonClickListener = null
             onSuggestionLongPressListener = null
+            onEmojiSelected = null
 
             spellCheckManager = null
             keyboardLayoutManager = null
@@ -1275,7 +1089,6 @@ class SwipeKeyboardView
             touchStartPoint = null
             touchStartTime = null
             isSwipeActive = false
-            availableActionButtons = emptyList()
 
             hideRemovalConfirmation()
             hideEmojiPicker()

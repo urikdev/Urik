@@ -192,8 +192,6 @@
     <string name="action_next_description">Move to next field</string>
     <string name="action_previous_description">Move to previous field</string>
 
-    <!-- Action button descriptions -->
-    <string name="action_paste">Paste</string>
     <string name="action_emoji">Emoji</string>
 
     <!-- Blacklisting Words -->
