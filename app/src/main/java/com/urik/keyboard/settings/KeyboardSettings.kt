@@ -199,10 +199,19 @@ data class KeyboardSettings(
         fun getLanguageDisplayNames(): Map<String, String> {
             val displayLocale = ULocale.getDefault()
             return SUPPORTED_LANGUAGES.associateWith { languageCode ->
-                ULocale
-                    .forLanguageTag(languageCode)
-                    .getDisplayName(displayLocale)
-                    .replaceFirstChar { it.uppercase() }
+                val displayName =
+                    ULocale
+                        .forLanguageTag(languageCode)
+                        .getDisplayName(displayLocale)
+
+                if (displayName.isNullOrEmpty() || displayName.length <= 2) {
+                    java.util.Locale
+                        .forLanguageTag(languageCode)
+                        .getDisplayLanguage(java.util.Locale.getDefault())
+                        .replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+                } else {
+                    displayName.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+                }
             }
         }
 

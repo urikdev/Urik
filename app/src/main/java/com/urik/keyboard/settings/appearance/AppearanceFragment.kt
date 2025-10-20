@@ -81,7 +81,11 @@ class AppearanceFragment : PreferenceFragmentCompat() {
                 entryValues = RepeatKeyDelay.entries.map { it.name }.toTypedArray()
                 summaryProvider = ListPreference.SimpleSummaryProvider.getInstance()
             }
+
+        screen.addPreference(themePref)
         screen.addPreference(repeatPref)
+        screen.addPreference(keySizePref)
+        screen.addPreference(labelSizePref)
 
         preferenceScreen = screen
     }
