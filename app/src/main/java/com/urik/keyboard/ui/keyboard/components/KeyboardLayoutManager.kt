@@ -181,39 +181,12 @@ private enum class BackspaceMode {
 /**
  * Manages keyboard layout rendering with script-aware adaptations.
  *
- * Architecture:
- * - Script detection: Determines layout config (RTL, case system, typography)
- * - Button pooling: Recycles up to 40 buttons to reduce GC pressure
- * - Dimension caching: Memoizes expensive calculations per script/settings
- * - Handler tracking: Manages long-press callbacks with proper cleanup
- * - Punctuation loading: Lazy-loads from assets with error handling & fallbacks
- *
- * Rendering pipeline:
- * 1. createKeyboardView() → builds layout hierarchy
- * 2. createRowView() → creates horizontal row with RTL support
- * 3. getOrCreateKeyButton() → fetches from pool or creates new
- * 4. configureButton() → applies styling, listeners, accessibility
- *
- * Button lifecycle:
- * - Active: Attached to layout, configured for specific key
- * - Pooled: Detached, listeners removed, pending callbacks cancelled
- * - Max pool: 40 buttons (typical keyboard ~30-35 keys)
- *
- * Long-press behavior:
- * - Letters: Shows character variations (á, à, â for 'a')
- * - Space: Shows punctuation shortcuts
- * - Backspace: Continuous delete with repeat delay
- *
- * Error resilience:
- * - Punctuation loading: 3 retries, 60s cooldown, falls back to English → defaults
- * - Error tracking: Max 20 languages tracked, periodic cleanup
- *
- * Thread safety: Background coroutines for asset loading, main thread for UI.
  */
 class KeyboardLayoutManager(
     private val context: Context,
     private val onKeyClick: (KeyboardKey) -> Unit,
     private val onWordDelete: () -> Unit,
+    private val onAcceleratedDeletionChanged: (Boolean) -> Unit,
     private val characterVariationService: CharacterVariationService,
     private val languageManager: LanguageManager,
     cacheMemoryManager: CacheMemoryManager,
@@ -446,8 +419,6 @@ class KeyboardLayoutManager(
     /**
      * Creates keyboard view from layout specification.
      *
-     * Applies script-aware rendering: RTL layout, typography, spacing.
-     * Recycles buttons from pool for performance.
      */
     fun createKeyboardView(
         layout: KeyboardLayout,
@@ -729,8 +700,6 @@ class KeyboardLayoutManager(
 
     /**
      * Cleans up button completely and returns to pool.
-     *
-     * Removes all listeners, cancels pending callbacks, detaches from parent.
      */
     @SuppressLint("ClickableViewAccessibility")
     private fun cleanupButton(button: Button) {
@@ -1089,6 +1058,8 @@ class KeyboardLayoutManager(
     private fun startAcceleratedBackspace() {
         stopAcceleratedBackspace()
 
+        onAcceleratedDeletionChanged(true)
+
         backspaceMode = BackspaceMode.CHAR_ACCELERATING
         backspaceStartTime = System.currentTimeMillis()
         backspaceCharsSinceLastHaptic = 0
@@ -1138,6 +1109,8 @@ class KeyboardLayoutManager(
         backspaceMode = BackspaceMode.IDLE
         backspaceStartTime = 0L
         backspaceCharsSinceLastHaptic = 0
+
+        onAcceleratedDeletionChanged(false)
     }
 
     private fun calculateBackspaceInterval(elapsed: Long): Long =
@@ -1248,7 +1221,6 @@ class KeyboardLayoutManager(
     /**
      * Cleans up all resources.
      *
-     * Cancels background jobs, clears button pool, stops handlers, dismisses popups.
      */
     fun cleanup() {
         backgroundJob.cancel()
