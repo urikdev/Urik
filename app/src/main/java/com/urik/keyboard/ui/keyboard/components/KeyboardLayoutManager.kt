@@ -494,7 +494,7 @@ class KeyboardLayoutManager(
             }
 
         keys.forEach { key ->
-            val keyButton = getOrCreateKeyButton(key, state)
+            val keyButton = getOrCreateKeyButton(key, state, keys)
             rowLayout.addView(keyButton)
         }
 
@@ -504,6 +504,7 @@ class KeyboardLayoutManager(
     private fun getOrCreateKeyButton(
         key: KeyboardKey,
         state: KeyboardState,
+        rowKeys: List<KeyboardKey>,
     ): Button {
         val button =
             if (buttonPool.isNotEmpty()) {
@@ -512,7 +513,7 @@ class KeyboardLayoutManager(
                 Button(themedContext)
             }
 
-        configureButton(button, key, state)
+        configureButton(button, key, state, rowKeys)
         activeButtons.add(button)
 
         return button
@@ -523,6 +524,7 @@ class KeyboardLayoutManager(
         button: Button,
         key: KeyboardKey,
         state: KeyboardState,
+        rowKeys: List<KeyboardKey>,
     ) {
         ensureCacheValid()
 
@@ -540,7 +542,7 @@ class KeyboardLayoutManager(
                     .LayoutParams(
                         0,
                         calculatedHeight,
-                        getKeyWeight(key),
+                        getKeyWeight(key, rowKeys),
                     ).apply {
                         val horizontalMargin = cachedDimensions["horizontalMargin"]!!
                         setMargins(horizontalMargin, 0, horizontalMargin, 0)
@@ -1157,8 +1159,17 @@ class KeyboardLayoutManager(
         }, 60L)
     }
 
-    private fun getKeyWeight(key: KeyboardKey): Float =
-        when (key) {
+    private fun getKeyWeight(
+        key: KeyboardKey,
+        rowKeys: List<KeyboardKey>,
+    ): Float {
+        val isNumberModeRow = isNumberModeRow(rowKeys)
+
+        if (isNumberModeRow) {
+            return STANDARD_KEY_WEIGHT
+        }
+
+        return when (key) {
             is KeyboardKey.Character ->
                 when (key.type) {
                     KeyboardKey.KeyType.PUNCTUATION -> 0.7f
@@ -1172,6 +1183,18 @@ class KeyboardLayoutManager(
                     else -> STANDARD_KEY_WEIGHT
                 }
         }
+    }
+
+    private fun isNumberModeRow(rowKeys: List<KeyboardKey>): Boolean {
+        if (rowKeys.size != 3) return false
+
+        return rowKeys.all { key ->
+            when (key) {
+                is KeyboardKey.Character -> key.type == KeyboardKey.KeyType.NUMBER || key.type == KeyboardKey.KeyType.PUNCTUATION
+                is KeyboardKey.Action -> key.action == KeyboardKey.ActionType.BACKSPACE
+            }
+        }
+    }
 
     private fun shouldCapitalize(state: KeyboardState): Boolean = state.isShiftPressed || state.isCapsLockOn
 
