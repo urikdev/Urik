@@ -493,12 +493,38 @@ class KeyboardLayoutManager(
                     }
             }
 
+        val is9LetterRow = is9CharacterLetterRow(keys)
+
+        if (is9LetterRow) {
+            val spacer =
+                View(themedContext).apply {
+                    layoutParams = LinearLayout.LayoutParams(0, 0, 0.5f)
+                }
+            rowLayout.addView(spacer)
+        }
+
         keys.forEach { key ->
             val keyButton = getOrCreateKeyButton(key, state, keys)
             rowLayout.addView(keyButton)
         }
 
+        if (is9LetterRow) {
+            val spacer =
+                View(themedContext).apply {
+                    layoutParams = LinearLayout.LayoutParams(0, 0, 0.5f)
+                }
+            rowLayout.addView(spacer)
+        }
+
         return rowLayout
+    }
+
+    private fun is9CharacterLetterRow(rowKeys: List<KeyboardKey>): Boolean {
+        if (rowKeys.size != 9) return false
+
+        return rowKeys.all { key ->
+            key is KeyboardKey.Character && key.type == KeyboardKey.KeyType.LETTER
+        }
     }
 
     private fun getOrCreateKeyButton(
@@ -535,22 +561,22 @@ class KeyboardLayoutManager(
 
             val scriptAwareMinTarget = cachedDimensions["scriptAwareMinTarget"]!!
             val scriptAwareHeight = cachedDimensions["scriptAwareHeight"]!!
-            val calculatedHeight = maxOf(scriptAwareHeight, scriptAwareMinTarget)
+            val verticalMarginForTarget = maxOf(0, (scriptAwareMinTarget - scriptAwareHeight) / 2)
 
             layoutParams =
                 LinearLayout
                     .LayoutParams(
                         0,
-                        calculatedHeight,
+                        scriptAwareHeight,
                         getKeyWeight(key, rowKeys),
                     ).apply {
                         val horizontalMargin = cachedDimensions["horizontalMargin"]!!
-                        setMargins(horizontalMargin, 0, horizontalMargin, 0)
+                        setMargins(horizontalMargin, verticalMarginForTarget, horizontalMargin, verticalMarginForTarget)
                     }
 
             text = getScriptAwareKeyLabel(key, state)
 
-            val finalTextSize = getCachedTextSize(calculatedHeight)
+            val finalTextSize = getCachedTextSize(scriptAwareHeight)
 
             setTextAppearance(
                 when (key) {
