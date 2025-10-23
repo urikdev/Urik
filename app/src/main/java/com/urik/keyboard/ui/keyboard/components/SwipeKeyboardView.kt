@@ -40,6 +40,10 @@ class SwipeKeyboardView
         defStyleAttr: Int = 0,
     ) : FrameLayout(context, attrs, defStyleAttr),
         SwipeDetector.SwipeListener {
+        private val suggestionViewPool = mutableListOf<TextView>()
+        private val activeSuggestionViews = mutableListOf<TextView>()
+        private val dividerViewPool = mutableListOf<View>()
+        private val activeDividerViews = mutableListOf<View>()
         private var spellCheckManager: SpellCheckManager? = null
         private var keyboardLayoutManager: KeyboardLayoutManager? = null
         private var swipeDetector: SwipeDetector? = null
@@ -325,6 +329,9 @@ class SwipeKeyboardView
 
             suggestionBar?.let { bar ->
                 val emojiBtn = emojiButton
+
+                returnSuggestionViewsToPool()
+
                 bar.removeAllViews()
 
                 if (suggestions.isNotEmpty()) {
@@ -332,7 +339,7 @@ class SwipeKeyboardView
                 } else {
                     val spacer =
                         View(context).apply {
-                            layoutParams = LinearLayout.LayoutParams(0, 0, 1f)
+                            layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1f)
                         }
                     bar.addView(spacer)
                 }
@@ -350,51 +357,50 @@ class SwipeKeyboardView
             suggestions.take(3).forEachIndexed { index, suggestion ->
                 if (isDestroyed) return@forEachIndexed
 
-                val btn =
-                    TextView(context).apply {
-                        text = suggestion
+                val btn = getOrCreateSuggestionView()
 
-                        val suggestionTextSize = calculateResponsiveSuggestionTextSize()
-                        setTextSize(TypedValue.COMPLEX_UNIT_SP, suggestionTextSize)
-                        setTextColor(ContextCompat.getColor(context, R.color.suggestion_text))
+                btn.text = suggestion
 
-                        maxLines = 1
-                        ellipsize = android.text.TextUtils.TruncateAt.MIDDLE
+                val suggestionTextSize = calculateResponsiveSuggestionTextSize()
+                btn.setTextSize(TypedValue.COMPLEX_UNIT_SP, suggestionTextSize)
+                btn.setTextColor(ContextCompat.getColor(context, R.color.suggestion_text))
 
-                        contentDescription = context.getString(R.string.ime_prediction_description, suggestion)
+                btn.maxLines = 1
+                btn.ellipsize = android.text.TextUtils.TruncateAt.MIDDLE
 
-                        val horizontalPadding = (suggestionTextSize * context.resources.displayMetrics.density * 1.2f).toInt()
-                        val verticalPadding = (suggestionTextSize * context.resources.displayMetrics.density * 0.65f).toInt()
-                        setPadding(horizontalPadding, verticalPadding, horizontalPadding, verticalPadding)
+                btn.contentDescription = context.getString(R.string.ime_prediction_description, suggestion)
 
-                        typeface = android.graphics.Typeface.DEFAULT
+                val horizontalPadding = (suggestionTextSize * context.resources.displayMetrics.density * 1.2f).toInt()
+                val verticalPadding = (suggestionTextSize * context.resources.displayMetrics.density * 0.65f).toInt()
+                btn.setPadding(horizontalPadding, verticalPadding, horizontalPadding, verticalPadding)
 
-                        setOnClickListener {
-                            if (!isDestroyed) {
-                                keyboardLayoutManager?.triggerHapticFeedback()
-                                onSuggestionClickListener?.invoke(suggestion)
-                            }
-                        }
+                btn.typeface = android.graphics.Typeface.DEFAULT
 
-                        setOnLongClickListener {
-                            if (!isDestroyed) {
-                                showRemovalConfirmation(suggestion)
-                                true
-                            } else {
-                                false
-                            }
-                        }
+                btn.setOnClickListener {
+                    if (!isDestroyed) {
+                        keyboardLayoutManager?.triggerHapticFeedback()
+                        onSuggestionClickListener?.invoke(suggestion)
                     }
+                }
+
+                btn.setOnLongClickListener {
+                    if (!isDestroyed) {
+                        showRemovalConfirmation(suggestion)
+                        true
+                    } else {
+                        false
+                    }
+                }
+
+                activeSuggestionViews.add(btn)
 
                 val layoutParams = LinearLayout.LayoutParams(0, LayoutParams.WRAP_CONTENT, 1f)
-
                 bar.addView(btn, layoutParams)
 
                 if (index < suggestions.take(3).size - 1) {
-                    val divider =
-                        View(context).apply {
-                            setBackgroundColor(ContextCompat.getColor(context, R.color.suggestion_text))
-                        }
+                    val divider = getOrCreateDividerView()
+
+                    divider.setBackgroundColor(ContextCompat.getColor(context, R.color.suggestion_text))
 
                     val dividerParams =
                         LinearLayout
@@ -407,8 +413,43 @@ class SwipeKeyboardView
                                 marginEnd = margin
                             }
 
+                    activeDividerViews.add(divider)
                     bar.addView(divider, dividerParams)
                 }
+            }
+        }
+
+        private fun getOrCreateSuggestionView(): TextView =
+            if (suggestionViewPool.isNotEmpty()) {
+                suggestionViewPool.removeAt(suggestionViewPool.size - 1)
+            } else {
+                TextView(context)
+            }
+
+        private fun getOrCreateDividerView(): View =
+            if (dividerViewPool.isNotEmpty()) {
+                dividerViewPool.removeAt(dividerViewPool.size - 1)
+            } else {
+                View(context)
+            }
+
+        private fun returnSuggestionViewsToPool() {
+            suggestionBar?.let { bar ->
+                activeSuggestionViews.forEach { view ->
+                    view.setOnClickListener(null)
+                    view.setOnLongClickListener(null)
+                    if (suggestionViewPool.size < 10) {
+                        suggestionViewPool.add(view)
+                    }
+                }
+                activeSuggestionViews.clear()
+
+                activeDividerViews.forEach { view ->
+                    if (dividerViewPool.size < 10) {
+                        dividerViewPool.add(view)
+                    }
+                }
+                activeDividerViews.clear()
             }
         }
 
@@ -582,8 +623,10 @@ class SwipeKeyboardView
             suggestionBar?.let { bar ->
                 for (i in 0 until bar.childCount) {
                     val child = bar.getChildAt(i) as? TextView
-                    child?.text?.toString()?.let {
-                        existingSuggestions.add(it)
+                    child?.text?.toString()?.let { text ->
+                        if (text.isNotBlank()) {
+                            existingSuggestions.add(text)
+                        }
                     }
                 }
                 (bar.parent as? ViewGroup)?.removeView(bar)
@@ -975,14 +1018,6 @@ class SwipeKeyboardView
 
         /**
          * Processes swipe word candidates with learned word boosting.
-         *
-         * Async flow:
-         * 1. Batch check learned status for top 10 candidates
-         * 2. Learned words: base 0.95 + spatial*0.05
-         * 3. Dictionary: spatial*0.85 + frequency*0.15
-         * 4. Select best, invoke onSwipeWord callback
-         *
-         * Exception handling: Falls back to spatial+frequency if batch check fails.
          */
         override fun onSwipeResults(candidates: List<WordCandidate>) {
             if (isDestroyed) return
@@ -1048,6 +1083,11 @@ class SwipeKeyboardView
             keyPositions.clear()
             keyMapping.clear()
             keyCharacterPositions.clear()
+
+            activeSuggestionViews.clear()
+            suggestionViewPool.clear()
+            activeDividerViews.clear()
+            dividerViewPool.clear()
         }
 
         /**
@@ -1064,6 +1104,10 @@ class SwipeKeyboardView
             viewScopeJob.cancel()
 
             clearCollections()
+
+            returnSuggestionViewsToPool()
+            suggestionViewPool.clear()
+            dividerViewPool.clear()
 
             suggestionBar?.let { bar ->
                 bar.removeAllViews()

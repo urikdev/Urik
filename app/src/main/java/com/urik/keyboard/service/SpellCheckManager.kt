@@ -32,18 +32,6 @@ data class SpellingSuggestion(
 
 /**
  * Spell checking and suggestion generation using SymSpell algorithm.
- *
- * Architecture:
- * - Dictionary-based: SymSpell with edit distance ≤2
- * - User learning integration: Learned words marked as valid, boosted in suggestions
- * - Multi-language: Lazy-loads dictionaries per language (en, sv)
- * - Caching: 500 suggestions, 1000 dictionary lookups, LRU eviction
- * - Predictive text: Prefix-based completions for words ≥4 chars
- *
- * Suggestion ranking:
- * 1. Learned words (confidence: 0.85-0.99, frequency-boosted)
- * 2. Completions (confidence: 0.50-0.84, prefix matches)
- * 3. Corrections (confidence: 0.00-0.49, edit distance penalty)
  */
 @Singleton
 class SpellCheckManager
@@ -251,7 +239,7 @@ class SpellCheckManager
          * @return true if word valid, false if typo/unknown
          */
         suspend fun isWordInDictionary(word: String): Boolean =
-            withContext(ioDispatcher) {
+            withContext(Dispatchers.Default) {
                 try {
                     if (isDestroyed || !isValidInput(word)) {
                         return@withContext false
@@ -315,7 +303,7 @@ class SpellCheckManager
          * @return Map of original word → validity
          */
         suspend fun areWordsInDictionary(words: List<String>): Map<String, Boolean> =
-            withContext(ioDispatcher) {
+            withContext(Dispatchers.Default) {
                 if (isDestroyed || words.isEmpty()) {
                     return@withContext emptyMap()
                 }
@@ -426,7 +414,7 @@ class SpellCheckManager
          * @return List of suggestions sorted by confidence (highest first)
          */
         suspend fun getSpellingSuggestionsWithConfidence(word: String): List<SpellingSuggestion> =
-            withContext(ioDispatcher) {
+            withContext(Dispatchers.Default) {
                 try {
                     if (isDestroyed || !isValidInput(word)) {
                         return@withContext emptyList()
