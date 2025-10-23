@@ -27,18 +27,6 @@ enum class KeySize(
 }
 
 /**
- * Sound volume levels as normalized factors (0.0-1.0).
- */
-enum class SoundVolume(
-    val displayNameRes: Int,
-    val volumeLevel: Float,
-) {
-    LOW(R.string.sound_volume_low, 0.3f),
-    MEDIUM(R.string.sound_volume_medium, 0.6f),
-    HIGH(R.string.sound_volume_high, 1.0f),
-}
-
-/**
  * Vibration duration levels in milliseconds.
  */
 enum class VibrationStrength(
@@ -87,18 +75,6 @@ enum class KeyLabelSize(
 }
 
 /**
- * Repeat key timing with initial delay and repeat interval in milliseconds.
- */
-enum class RepeatKeyDelay(
-    val displayNameRes: Int,
-    val repeatIntervalMs: Long,
-) {
-    SHORT(R.string.repeat_key_delay_short, 50L),
-    MEDIUM(R.string.repeat_key_delay_medium, 100L),
-    LONG(R.string.repeat_key_delay_long, 150L),
-}
-
-/**
  * Keyboard configuration and user preferences.
  *
  * Direct construction bypasses validation. SettingsRepository enforces validation
@@ -112,7 +88,6 @@ data class KeyboardSettings(
     val activeLanguages: Set<String> = setOf(DEFAULT_LANGUAGE),
     val primaryLanguage: String = DEFAULT_LANGUAGE,
     val keyClickSound: Boolean = false,
-    val soundVolume: SoundVolume = SoundVolume.MEDIUM,
     val hapticFeedback: Boolean = true,
     val vibrationStrength: VibrationStrength = VibrationStrength.MEDIUM,
     val doubleSpacePeriod: Boolean = true,
@@ -122,7 +97,6 @@ data class KeyboardSettings(
     val theme: Theme = Theme.SYSTEM,
     val keySize: KeySize = KeySize.MEDIUM,
     val keyLabelSize: KeyLabelSize = KeyLabelSize.MEDIUM,
-    val repeatKeyDelay: RepeatKeyDelay = RepeatKeyDelay.MEDIUM,
 ) {
     /**
      * Returns validated copy with constraints enforced.
@@ -169,13 +143,6 @@ data class KeyboardSettings(
      */
     val effectiveVibrationDurationMs: Long
         get() = if (hapticFeedback) vibrationStrength.durationMs else 0L
-
-    /**
-     * Effective sound volume respecting key click sound toggle.
-     * Returns 0.0 if key click sound is disabled.
-     */
-    val effectiveSoundVolume: Float
-        get() = if (keyClickSound) soundVolume.volumeLevel else 0.0f
 
     companion object {
         const val MIN_SUGGESTION_COUNT = 1

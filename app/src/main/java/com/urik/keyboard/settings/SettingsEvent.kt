@@ -14,8 +14,6 @@ sealed interface SettingsEvent {
 
         data object KeyLabelSizeUpdateFailed : Error
 
-        data object RepeatKeyDelayUpdateFailed : Error
-
         data object SuggestionToggleFailed : Error
 
         data object SuggestionCountUpdateFailed : Error
@@ -23,10 +21,6 @@ sealed interface SettingsEvent {
         data object WordLearningToggleFailed : Error
 
         data object LanguageUpdateFailed : Error
-
-        data object KeyClickSoundToggleFailed : Error
-
-        data object SoundVolumeUpdateFailed : Error
 
         data object HapticFeedbackToggleFailed : Error
 

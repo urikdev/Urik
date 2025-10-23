@@ -18,13 +18,10 @@ class SettingsEventHandler(
                 is SettingsEvent.Error.ThemeUpdateFailed -> R.string.error_update_theme
                 is SettingsEvent.Error.KeySizeUpdateFailed -> R.string.error_update_key_size
                 is SettingsEvent.Error.KeyLabelSizeUpdateFailed -> R.string.error_update_key_label_size
-                is SettingsEvent.Error.RepeatKeyDelayUpdateFailed -> R.string.error_update_repeat_key_delay
                 is SettingsEvent.Error.SuggestionToggleFailed -> R.string.error_update_suggestions
                 is SettingsEvent.Error.SuggestionCountUpdateFailed -> R.string.error_update_suggestion_count
                 is SettingsEvent.Error.WordLearningToggleFailed -> R.string.error_update_word_learning
                 is SettingsEvent.Error.LanguageUpdateFailed -> R.string.error_update_language
-                is SettingsEvent.Error.KeyClickSoundToggleFailed -> R.string.error_update_key_click_sound
-                is SettingsEvent.Error.SoundVolumeUpdateFailed -> R.string.error_update_sound_volume
                 is SettingsEvent.Error.HapticFeedbackToggleFailed -> R.string.error_update_haptic_feedback
                 is SettingsEvent.Error.VibrationStrengthUpdateFailed -> R.string.error_update_vibration_strength
                 is SettingsEvent.Error.DoubleSpacePeriodToggleFailed -> R.string.error_update_double_space_period

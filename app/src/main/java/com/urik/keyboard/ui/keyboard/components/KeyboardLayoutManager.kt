@@ -30,7 +30,6 @@ import com.urik.keyboard.service.LanguageManager
 import com.urik.keyboard.settings.KeyLabelSize
 import com.urik.keyboard.settings.KeySize
 import com.urik.keyboard.settings.LongPressDuration
-import com.urik.keyboard.settings.RepeatKeyDelay
 import com.urik.keyboard.settings.SpaceBarSize
 import com.urik.keyboard.settings.Theme
 import com.urik.keyboard.utils.CacheMemoryManager
@@ -213,8 +212,6 @@ class KeyboardLayoutManager(
 
     private var themedContext: Context = context
 
-    private var currentRepeatKeyDelay = RepeatKeyDelay.MEDIUM
-
     private val accessibilityManager = context.getSystemService(Context.ACCESSIBILITY_SERVICE) as AccessibilityManager
     private val typographyManager = ScriptTypographyManager()
 
@@ -346,10 +343,6 @@ class KeyboardLayoutManager(
             }
             Theme.SYSTEM -> context
         }
-
-    fun updateRepeatKeyDelay(delay: RepeatKeyDelay) {
-        currentRepeatKeyDelay = delay
-    }
 
     fun updateHapticSettings(
         enabled: Boolean,
@@ -1146,7 +1139,7 @@ class KeyboardLayoutManager(
             elapsed >= 2000 -> 150L
             elapsed >= 1500 -> 25L
             else -> {
-                val startSpeed = currentRepeatKeyDelay.repeatIntervalMs
+                val startSpeed = 100L
                 val endSpeed = 25L
                 val progress = elapsed / 1500f
                 (startSpeed - (startSpeed - endSpeed) * progress).toLong()
