@@ -170,28 +170,6 @@ class KeyboardSettingsTest {
     }
 
     @Test
-    fun `effectiveSoundVolume returns volume when enabled`() {
-        val settings =
-            KeyboardSettings(
-                keyClickSound = true,
-                soundVolume = SoundVolume.HIGH,
-            )
-
-        assertEquals(1.0f, settings.effectiveSoundVolume, 0.01f)
-    }
-
-    @Test
-    fun `effectiveSoundVolume returns zero when disabled`() {
-        val settings =
-            KeyboardSettings(
-                keyClickSound = false,
-                soundVolume = SoundVolume.HIGH,
-            )
-
-        assertEquals(0.0f, settings.effectiveSoundVolume, 0.01f)
-    }
-
-    @Test
     fun `isWordLearningEnabled reflects learnNewWords`() {
         val enabled = KeyboardSettings(learnNewWords = true)
         val disabled = KeyboardSettings(learnNewWords = false)

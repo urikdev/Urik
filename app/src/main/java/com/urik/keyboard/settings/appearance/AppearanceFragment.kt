@@ -11,7 +11,6 @@ import androidx.preference.PreferenceFragmentCompat
 import com.urik.keyboard.R
 import com.urik.keyboard.settings.KeyLabelSize
 import com.urik.keyboard.settings.KeySize
-import com.urik.keyboard.settings.RepeatKeyDelay
 import com.urik.keyboard.settings.SettingsEventHandler
 import com.urik.keyboard.settings.Theme
 import dagger.hilt.android.AndroidEntryPoint
@@ -30,7 +29,6 @@ class AppearanceFragment : PreferenceFragmentCompat() {
     private lateinit var themePref: ListPreference
     private lateinit var keySizePref: ListPreference
     private lateinit var labelSizePref: ListPreference
-    private lateinit var repeatPref: ListPreference
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -73,17 +71,7 @@ class AppearanceFragment : PreferenceFragmentCompat() {
                 summaryProvider = ListPreference.SimpleSummaryProvider.getInstance()
             }
 
-        repeatPref =
-            ListPreference(context).apply {
-                key = "repeat_key_delay"
-                title = resources.getString(R.string.appearance_settings_repeat_key_delay)
-                entries = RepeatKeyDelay.entries.map { resources.getString(it.displayNameRes) }.toTypedArray()
-                entryValues = RepeatKeyDelay.entries.map { it.name }.toTypedArray()
-                summaryProvider = ListPreference.SimpleSummaryProvider.getInstance()
-            }
-
         screen.addPreference(themePref)
-        screen.addPreference(repeatPref)
         screen.addPreference(keySizePref)
         screen.addPreference(labelSizePref)
 
@@ -111,11 +99,6 @@ class AppearanceFragment : PreferenceFragmentCompat() {
             true
         }
 
-        repeatPref.setOnPreferenceChangeListener { _, newValue ->
-            viewModel.updateRepeatKeyDelay(RepeatKeyDelay.valueOf(newValue as String))
-            true
-        }
-
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
@@ -123,7 +106,6 @@ class AppearanceFragment : PreferenceFragmentCompat() {
                         themePref.value = state.theme.name
                         keySizePref.value = state.keySize.name
                         labelSizePref.value = state.keyLabelSize.name
-                        repeatPref.value = state.repeatKeyDelay.name
                     }
                 }
 

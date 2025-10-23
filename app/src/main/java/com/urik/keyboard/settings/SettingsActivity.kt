@@ -14,7 +14,6 @@ import com.urik.keyboard.settings.autocorrection.AutoCorrectionFragment
 import com.urik.keyboard.settings.languages.LanguagesFragment
 import com.urik.keyboard.settings.layoutinput.LayoutInputFragment
 import com.urik.keyboard.settings.privacydata.PrivacyDataFragment
-import com.urik.keyboard.settings.soundfeedback.SoundFeedbackFragment
 import com.urik.keyboard.settings.typingbehavior.TypingBehaviorFragment
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -84,18 +83,6 @@ class MainSettingsFragment : PreferenceFragmentCompat() {
                 summary = resources.getString(R.string.language_settings_description)
                 setOnPreferenceClickListener {
                     navigateToFragment(LanguagesFragment())
-                    true
-                }
-            },
-        )
-
-        screen.addPreference(
-            Preference(context).apply {
-                key = "sound_feedback_category"
-                title = resources.getString(R.string.feedback_settings_title)
-                summary = resources.getString(R.string.feedback_settings_description)
-                setOnPreferenceClickListener {
-                    navigateToFragment(SoundFeedbackFragment())
                     true
                 }
             },

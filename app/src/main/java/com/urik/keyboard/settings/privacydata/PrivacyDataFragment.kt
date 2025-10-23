@@ -115,8 +115,6 @@ class PrivacyDataFragment : PreferenceFragmentCompat() {
     ) {
         super.onViewCreated(view, savedInstanceState)
 
-        updateErrorLogVisibility()
-
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.events.collect { event ->
@@ -124,15 +122,6 @@ class PrivacyDataFragment : PreferenceFragmentCompat() {
                 }
             }
         }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        updateErrorLogVisibility()
-    }
-
-    private fun updateErrorLogVisibility() {
-        exportErrorLogPref?.isVisible = ErrorLogger.getErrorCount() > 0
     }
 
     private fun exportErrorLog() {
