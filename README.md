@@ -8,7 +8,7 @@ Privacy-first keyboard for Android with on-device processing and encrypted stora
 
 ## Status
 
-**Alpha Software** - Under active development.
+**Beta Software** - In closed beta testing. Under active development.
 
 ## Features
 
