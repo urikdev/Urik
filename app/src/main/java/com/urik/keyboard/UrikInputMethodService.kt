@@ -691,8 +691,6 @@ class UrikInputMethodService :
                     layoutManager.updateKeyLabelSize(newSettings.keyLabelSize)
                     layoutManager.updateTheme(newSettings.theme)
 
-                    layoutManager.updateRepeatKeyDelay(newSettings.repeatKeyDelay)
-
                     layoutManager.updateHapticSettings(
                         newSettings.hapticFeedback,
                         newSettings.vibrationStrength.durationMs,
@@ -773,7 +771,6 @@ class UrikInputMethodService :
         info: EditorInfo?,
         restarting: Boolean,
     ) {
-        layoutManager.updateRepeatKeyDelay(currentSettings.repeatKeyDelay)
         layoutManager.updateLongPressDuration(currentSettings.longPressDuration)
         layoutManager.updateKeySize(currentSettings.keySize)
         layoutManager.updateSpaceBarSize(currentSettings.spaceBarSize)

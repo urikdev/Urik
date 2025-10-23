@@ -46,8 +46,6 @@ class SettingsRepository
             val LEARN_NEW_WORDS = booleanPreferencesKey("learn_new_words")
             val ACTIVE_LANGUAGES = stringSetPreferencesKey("active_languages")
             val PRIMARY_LANGUAGE = stringPreferencesKey("primary_language")
-            val KEY_CLICK_SOUND = booleanPreferencesKey("key_click_sound")
-            val SOUND_VOLUME = stringPreferencesKey("sound_volume")
             val HAPTIC_FEEDBACK = booleanPreferencesKey("haptic_feedback")
             val VIBRATION_STRENGTH = stringPreferencesKey("vibration_strength")
             val DOUBLE_SPACE_PERIOD = booleanPreferencesKey("double_space_period")
@@ -57,7 +55,6 @@ class SettingsRepository
             val THEME = stringPreferencesKey("theme")
             val KEY_SIZE = stringPreferencesKey("key_size")
             val KEY_LABEL_SIZE = stringPreferencesKey("key_label_size")
-            val REPEAT_KEY_DELAY = stringPreferencesKey("repeat_key_delay")
         }
 
         /**
@@ -75,15 +72,6 @@ class SettingsRepository
                         learnNewWords = preferences[PreferenceKeys.LEARN_NEW_WORDS] ?: true,
                         activeLanguages = preferences[PreferenceKeys.ACTIVE_LANGUAGES] ?: setOf(KeyboardSettings.DEFAULT_LANGUAGE),
                         primaryLanguage = preferences[PreferenceKeys.PRIMARY_LANGUAGE] ?: KeyboardSettings.DEFAULT_LANGUAGE,
-                        keyClickSound = preferences[PreferenceKeys.KEY_CLICK_SOUND] ?: false,
-                        soundVolume =
-                            preferences[PreferenceKeys.SOUND_VOLUME]?.let {
-                                try {
-                                    SoundVolume.valueOf(it)
-                                } catch (e: IllegalArgumentException) {
-                                    SoundVolume.MEDIUM
-                                }
-                            } ?: SoundVolume.MEDIUM,
                         hapticFeedback = preferences[PreferenceKeys.HAPTIC_FEEDBACK] ?: true,
                         vibrationStrength =
                             preferences[PreferenceKeys.VIBRATION_STRENGTH]?.let {
@@ -135,14 +123,6 @@ class SettingsRepository
                                     KeyLabelSize.MEDIUM
                                 }
                             } ?: KeyLabelSize.MEDIUM,
-                        repeatKeyDelay =
-                            preferences[PreferenceKeys.REPEAT_KEY_DELAY]?.let {
-                                try {
-                                    RepeatKeyDelay.valueOf(it)
-                                } catch (e: IllegalArgumentException) {
-                                    RepeatKeyDelay.MEDIUM
-                                }
-                            } ?: RepeatKeyDelay.MEDIUM,
                     ).validated()
                 }.catch { exception ->
                     emit(getDefaultSettings())
@@ -215,28 +195,6 @@ class SettingsRepository
                     preferences[PreferenceKeys.ACTIVE_LANGUAGES] = validatedActiveLanguages
                     preferences[PreferenceKeys.PRIMARY_LANGUAGE] = validatedPrimaryLanguage
                 }
-                Result.success(Unit)
-            } catch (e: Exception) {
-                Result.failure(e)
-            }
-
-        /**
-         * Updates key click sound toggle.
-         */
-        suspend fun updateKeyClickSound(enabled: Boolean): Result<Unit> =
-            try {
-                dataStore.edit { it[PreferenceKeys.KEY_CLICK_SOUND] = enabled }
-                Result.success(Unit)
-            } catch (e: Exception) {
-                Result.failure(e)
-            }
-
-        /**
-         * Updates sound volume level.
-         */
-        suspend fun updateSoundVolume(volume: SoundVolume): Result<Unit> =
-            try {
-                dataStore.edit { it[PreferenceKeys.SOUND_VOLUME] = volume.name }
                 Result.success(Unit)
             } catch (e: Exception) {
                 Result.failure(e)
@@ -336,17 +294,6 @@ class SettingsRepository
         suspend fun updateKeyLabelSize(size: KeyLabelSize): Result<Unit> =
             try {
                 dataStore.edit { it[PreferenceKeys.KEY_LABEL_SIZE] = size.name }
-                Result.success(Unit)
-            } catch (e: Exception) {
-                Result.failure(e)
-            }
-
-        /**
-         * Updates repeat key timing delays.
-         */
-        suspend fun updateRepeatKeyDelay(delay: RepeatKeyDelay): Result<Unit> =
-            try {
-                dataStore.edit { it[PreferenceKeys.REPEAT_KEY_DELAY] = delay.name }
                 Result.success(Unit)
             } catch (e: Exception) {
                 Result.failure(e)

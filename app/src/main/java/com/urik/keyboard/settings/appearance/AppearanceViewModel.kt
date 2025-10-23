@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.urik.keyboard.settings.KeyLabelSize
 import com.urik.keyboard.settings.KeySize
-import com.urik.keyboard.settings.RepeatKeyDelay
 import com.urik.keyboard.settings.SettingsEvent
 import com.urik.keyboard.settings.SettingsRepository
 import com.urik.keyboard.settings.Theme
@@ -38,7 +37,6 @@ class AppearanceViewModel
                         theme = settings.theme,
                         keySize = settings.keySize,
                         keyLabelSize = settings.keyLabelSize,
-                        repeatKeyDelay = settings.repeatKeyDelay,
                     )
                 }.stateIn(
                     scope = viewModelScope,
@@ -70,14 +68,6 @@ class AppearanceViewModel
             }
         }
 
-        fun updateRepeatKeyDelay(delay: RepeatKeyDelay) {
-            viewModelScope.launch {
-                settingsRepository
-                    .updateRepeatKeyDelay(delay)
-                    .onFailure { _events.emit(SettingsEvent.Error.RepeatKeyDelayUpdateFailed) }
-            }
-        }
-
         private companion object {
             const val STOP_TIMEOUT_MILLIS = 5000L
         }
@@ -90,5 +80,4 @@ data class AppearanceUiState(
     val theme: Theme = Theme.SYSTEM,
     val keySize: KeySize = KeySize.MEDIUM,
     val keyLabelSize: KeyLabelSize = KeyLabelSize.MEDIUM,
-    val repeatKeyDelay: RepeatKeyDelay = RepeatKeyDelay.MEDIUM,
 )
