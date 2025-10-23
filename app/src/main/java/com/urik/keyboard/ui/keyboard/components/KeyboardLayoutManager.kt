@@ -493,17 +493,44 @@ class KeyboardLayoutManager(
                     }
             }
 
+        val is9LetterRow = is9CharacterLetterRow(keys)
+
+        if (is9LetterRow) {
+            val spacer =
+                View(themedContext).apply {
+                    layoutParams = LinearLayout.LayoutParams(0, 0, 0.5f)
+                }
+            rowLayout.addView(spacer)
+        }
+
         keys.forEach { key ->
-            val keyButton = getOrCreateKeyButton(key, state)
+            val keyButton = getOrCreateKeyButton(key, state, keys)
             rowLayout.addView(keyButton)
+        }
+
+        if (is9LetterRow) {
+            val spacer =
+                View(themedContext).apply {
+                    layoutParams = LinearLayout.LayoutParams(0, 0, 0.5f)
+                }
+            rowLayout.addView(spacer)
         }
 
         return rowLayout
     }
 
+    private fun is9CharacterLetterRow(rowKeys: List<KeyboardKey>): Boolean {
+        if (rowKeys.size != 9) return false
+
+        return rowKeys.all { key ->
+            key is KeyboardKey.Character && key.type == KeyboardKey.KeyType.LETTER
+        }
+    }
+
     private fun getOrCreateKeyButton(
         key: KeyboardKey,
         state: KeyboardState,
+        rowKeys: List<KeyboardKey>,
     ): Button {
         val button =
             if (buttonPool.isNotEmpty()) {
@@ -512,7 +539,7 @@ class KeyboardLayoutManager(
                 Button(themedContext)
             }
 
-        configureButton(button, key, state)
+        configureButton(button, key, state, rowKeys)
         activeButtons.add(button)
 
         return button
@@ -523,6 +550,7 @@ class KeyboardLayoutManager(
         button: Button,
         key: KeyboardKey,
         state: KeyboardState,
+        rowKeys: List<KeyboardKey>,
     ) {
         ensureCacheValid()
 
@@ -533,22 +561,22 @@ class KeyboardLayoutManager(
 
             val scriptAwareMinTarget = cachedDimensions["scriptAwareMinTarget"]!!
             val scriptAwareHeight = cachedDimensions["scriptAwareHeight"]!!
-            val calculatedHeight = maxOf(scriptAwareHeight, scriptAwareMinTarget)
+            val verticalMarginForTarget = maxOf(0, (scriptAwareMinTarget - scriptAwareHeight) / 2)
 
             layoutParams =
                 LinearLayout
                     .LayoutParams(
                         0,
-                        calculatedHeight,
-                        getKeyWeight(key),
+                        scriptAwareHeight,
+                        getKeyWeight(key, rowKeys),
                     ).apply {
                         val horizontalMargin = cachedDimensions["horizontalMargin"]!!
-                        setMargins(horizontalMargin, 0, horizontalMargin, 0)
+                        setMargins(horizontalMargin, verticalMarginForTarget, horizontalMargin, verticalMarginForTarget)
                     }
 
             text = getScriptAwareKeyLabel(key, state)
 
-            val finalTextSize = getCachedTextSize(calculatedHeight)
+            val finalTextSize = getCachedTextSize(scriptAwareHeight)
 
             setTextAppearance(
                 when (key) {
@@ -1157,8 +1185,17 @@ class KeyboardLayoutManager(
         }, 60L)
     }
 
-    private fun getKeyWeight(key: KeyboardKey): Float =
-        when (key) {
+    private fun getKeyWeight(
+        key: KeyboardKey,
+        rowKeys: List<KeyboardKey>,
+    ): Float {
+        val isNumberModeRow = isNumberModeRow(rowKeys)
+
+        if (isNumberModeRow) {
+            return STANDARD_KEY_WEIGHT
+        }
+
+        return when (key) {
             is KeyboardKey.Character ->
                 when (key.type) {
                     KeyboardKey.KeyType.PUNCTUATION -> 0.7f
@@ -1172,6 +1209,18 @@ class KeyboardLayoutManager(
                     else -> STANDARD_KEY_WEIGHT
                 }
         }
+    }
+
+    private fun isNumberModeRow(rowKeys: List<KeyboardKey>): Boolean {
+        if (rowKeys.size != 3) return false
+
+        return rowKeys.all { key ->
+            when (key) {
+                is KeyboardKey.Character -> key.type == KeyboardKey.KeyType.NUMBER || key.type == KeyboardKey.KeyType.PUNCTUATION
+                is KeyboardKey.Action -> key.action == KeyboardKey.ActionType.BACKSPACE
+            }
+        }
+    }
 
     private fun shouldCapitalize(state: KeyboardState): Boolean = state.isShiftPressed || state.isCapsLockOn
 
