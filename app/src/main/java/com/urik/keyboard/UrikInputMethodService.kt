@@ -40,7 +40,6 @@ import com.urik.keyboard.utils.CacheMemoryManager
 import com.urik.keyboard.utils.CursorEditingUtils
 import com.urik.keyboard.utils.ErrorLogger
 import com.urik.keyboard.utils.KeyboardModeUtils
-import com.urik.keyboard.utils.ScriptDetector
 import com.urik.keyboard.utils.SecureFieldDetector
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
