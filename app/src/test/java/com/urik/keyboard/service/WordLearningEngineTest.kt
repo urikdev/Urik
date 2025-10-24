@@ -35,7 +35,7 @@ class WordLearningEngineTest {
 
     private lateinit var cacheMemoryManager: CacheMemoryManager
 
-    private lateinit var languageFlow: MutableStateFlow<LanguageInfo?>
+    private lateinit var languageFlow: MutableStateFlow<String>
     private lateinit var settingsFlow: MutableStateFlow<KeyboardSettings>
 
     private lateinit var wordLearningEngine: WordLearningEngine
@@ -65,20 +65,8 @@ class WordLearningEngineTest {
         val realCache = ManagedCache<String, Boolean>("test", 100, null)
         whenever(cacheMemoryManager.createCache<String, Boolean>(any(), any(), any())).thenReturn(realCache)
 
-        languageFlow =
-            MutableStateFlow(
-                LanguageInfo(
-                    languageTag = "en",
-                    displayName = "English",
-                    nativeName = "English",
-                    isActive = true,
-                    isPrimary = true,
-                ),
-            )
+        languageFlow = MutableStateFlow("en")
         whenever(languageManager.currentLanguage).thenReturn(languageFlow)
-        whenever(languageManager.normalizeText(any())).thenAnswer {
-            (it.arguments[0] as String).lowercase()
-        }
 
         settingsFlow = MutableStateFlow(KeyboardSettings())
         whenever(settingsRepository.settings).thenReturn(settingsFlow)
@@ -248,17 +236,6 @@ class WordLearningEngineTest {
         }
 
     @Test
-    fun `learnWord returns failure when no language set`() =
-        runTest {
-            languageFlow.value = null
-
-            val result = wordLearningEngine.learnWord("word", InputMethod.TYPED)
-
-            assertTrue(result.isFailure)
-            assertEquals("No current language set", result.exceptionOrNull()?.message)
-        }
-
-    @Test
     fun `learnWord returns null when engine destroyed`() =
         runTest {
             wordLearningEngine.cleanup()
@@ -331,16 +308,6 @@ class WordLearningEngineTest {
         runTest {
             whenever(learnedWordDao.findExactWord(any(), any()))
                 .thenThrow(android.database.sqlite.SQLiteException("DB error"))
-
-            val result = wordLearningEngine.isWordLearned("word")
-
-            assertFalse(result)
-        }
-
-    @Test
-    fun `isWordLearned returns false when no language set`() =
-        runTest {
-            languageFlow.value = null
 
             val result = wordLearningEngine.isWordLearned("word")
 
@@ -490,16 +457,6 @@ class WordLearningEngineTest {
         }
 
     @Test
-    fun `getSimilarLearnedWordsWithFrequency returns empty when no language`() =
-        runTest {
-            languageFlow.value = null
-
-            val results = wordLearningEngine.getSimilarLearnedWordsWithFrequency("test", 3)
-
-            assertTrue(results.isEmpty())
-        }
-
-    @Test
     fun `getSimilarLearnedWordsWithFrequency returns empty when destroyed`() =
         runTest {
             wordLearningEngine.cleanup()
@@ -566,16 +523,6 @@ class WordLearningEngineTest {
             assertEquals(2, results.size)
             assertEquals(false, results["word1"])
             assertEquals(false, results["word2"])
-        }
-
-    @Test
-    fun `areWordsLearned returns empty when no language`() =
-        runTest {
-            languageFlow.value = null
-
-            val results = wordLearningEngine.areWordsLearned(listOf("word"))
-
-            assertTrue(results.isEmpty())
         }
 
     @Test
@@ -648,16 +595,6 @@ class WordLearningEngineTest {
         }
 
     @Test
-    fun `removeWord returns failure when no language`() =
-        runTest {
-            languageFlow.value = null
-
-            val result = wordLearningEngine.removeWord("word")
-
-            assertTrue(result.isFailure)
-        }
-
-    @Test
     fun `removeWord returns false when destroyed`() =
         runTest {
             wordLearningEngine.cleanup()
@@ -680,7 +617,7 @@ class WordLearningEngineTest {
             val stats = result.getOrNull()!!
             assertEquals(42, stats.totalWordsLearned)
             assertEquals(5.5, stats.averageWordFrequency, 0.01)
-            assertEquals("English", stats.currentLanguage)
+            assertEquals("en", stats.currentLanguage)
         }
 
     @Test

@@ -8,7 +8,6 @@ import com.urik.keyboard.model.KeyboardEvent
 import com.urik.keyboard.model.KeyboardKey
 import com.urik.keyboard.model.KeyboardLayout
 import com.urik.keyboard.model.KeyboardMode
-import com.urik.keyboard.service.LanguageInfo
 import com.urik.keyboard.service.LanguageManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -33,7 +32,7 @@ class KeyboardViewModelTest {
     private lateinit var languageManager: LanguageManager
     private lateinit var viewModel: KeyboardViewModel
     private val testDispatcher = UnconfinedTestDispatcher()
-    private lateinit var languageFlow: MutableStateFlow<LanguageInfo?>
+    private lateinit var languageFlow: MutableStateFlow<String>
 
     @Before
     fun setup() {
@@ -41,16 +40,7 @@ class KeyboardViewModelTest {
         repository = mock()
         languageManager = mock()
 
-        languageFlow =
-            MutableStateFlow(
-                LanguageInfo(
-                    languageTag = "en",
-                    displayName = "English",
-                    nativeName = "English",
-                    isActive = true,
-                    isPrimary = true,
-                ),
-            )
+        languageFlow = MutableStateFlow("en")
         whenever(languageManager.currentLanguage).thenReturn(languageFlow)
 
         runTest {
@@ -428,14 +418,7 @@ class KeyboardViewModelTest {
     @Test
     fun `layout loading uses current locale`() =
         runTest {
-            languageFlow.value =
-                LanguageInfo(
-                    languageTag = "sv",
-                    displayName = "Swedish",
-                    nativeName = "Svenska",
-                    isActive = true,
-                    isPrimary = true,
-                )
+            languageFlow.value = "sv"
             whenever(repository.getLayoutForMode(any(), any(), any()))
                 .thenReturn(Result.success(createMockLayout(KeyboardMode.LETTERS)))
 
@@ -449,30 +432,9 @@ class KeyboardViewModelTest {
         }
 
     @Test
-    fun `layout loading defaults to en when language null`() =
-        runTest {
-            languageFlow.value = null
-            whenever(repository.getLayoutForMode(any(), any(), any()))
-                .thenReturn(Result.success(createMockLayout(KeyboardMode.LETTERS)))
-
-            verify(repository, atLeastOnce()).getLayoutForMode(
-                any(),
-                eq(ULocale.forLanguageTag("en")),
-                any(),
-            )
-        }
-
-    @Test
     fun `getCurrentLocale extracts language from en-US`() =
         runTest {
-            languageFlow.value =
-                LanguageInfo(
-                    languageTag = "en-US",
-                    displayName = "English (US)",
-                    nativeName = "English",
-                    isActive = true,
-                    isPrimary = true,
-                )
+            languageFlow.value = "en-US"
             whenever(repository.getLayoutForMode(any(), any(), any()))
                 .thenReturn(Result.success(createMockLayout(KeyboardMode.LETTERS)))
 
@@ -486,14 +448,7 @@ class KeyboardViewModelTest {
     @Test
     fun `getCurrentLocale extracts language from sv-SE`() =
         runTest {
-            languageFlow.value =
-                LanguageInfo(
-                    languageTag = "sv-SE",
-                    displayName = "Swedish",
-                    nativeName = "Svenska",
-                    isActive = true,
-                    isPrimary = true,
-                )
+            languageFlow.value = "sv-SE"
             whenever(repository.getLayoutForMode(any(), any(), any()))
                 .thenReturn(Result.success(createMockLayout(KeyboardMode.LETTERS)))
 
@@ -507,14 +462,7 @@ class KeyboardViewModelTest {
     @Test
     fun `getCurrentLocale handles simple language tag`() =
         runTest {
-            languageFlow.value =
-                LanguageInfo(
-                    languageTag = "en",
-                    displayName = "English",
-                    nativeName = "English",
-                    isActive = true,
-                    isPrimary = true,
-                )
+            languageFlow.value = "en"
             whenever(repository.getLayoutForMode(any(), any(), any()))
                 .thenReturn(Result.success(createMockLayout(KeyboardMode.LETTERS)))
 

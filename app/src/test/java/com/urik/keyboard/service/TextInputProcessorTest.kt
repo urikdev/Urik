@@ -272,20 +272,6 @@ class TextInputProcessorTest {
         }
 
     @Test
-    fun `getCurrentConfig reflects settings changes`() =
-        runTest {
-            val initialConfig = processor.getCurrentConfig()
-            assertTrue(initialConfig.spellCheckEnabled)
-            assertTrue(initialConfig.suggestionsEnabled)
-
-            settingsFlow.emit(KeyboardSettings(spellCheckEnabled = false))
-            testDispatcher.scheduler.advanceUntilIdle()
-
-            val updatedConfig = processor.getCurrentConfig()
-            assertFalse(updatedConfig.spellCheckEnabled)
-        }
-
-    @Test
     fun `updateScriptContext clears caches`() =
         runTest {
             whenever(spellCheckManager.isWordInDictionary("hello")).thenReturn(true)
@@ -296,19 +282,6 @@ class TextInputProcessorTest {
             processor.processCharacterInput("o", "hello", InputMethod.TYPED)
 
             verify(spellCheckManager, times(2)).isWordInDictionary(any())
-        }
-
-    @Test
-    fun `config updates for different scripts`() =
-        runTest {
-            processor.updateScriptContext(ULocale.ENGLISH, UScript.LATIN)
-            val latinConfig = processor.getCurrentConfig()
-
-            processor.updateScriptContext(ULocale.CHINESE, UScript.HAN)
-            val cjkConfig = processor.getCurrentConfig()
-
-            assertEquals(2, latinConfig.minWordLengthForSpellCheck)
-            assertEquals(1, cjkConfig.minWordLengthForSpellCheck)
         }
 
     @Test

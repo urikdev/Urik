@@ -140,7 +140,18 @@ class WordLearningEngine
 
         private fun normalizeWord(word: String): NormalizedWord {
             val standardNormalized = normalizer.normalize(word.trim())
-            val userNormalized = languageManager.normalizeText(standardNormalized)
+            val currentLanguage = languageManager.currentLanguage.value
+            val locale =
+                try {
+                    com.ibm.icu.util.ULocale
+                        .forLanguageTag(currentLanguage)
+                } catch (_: Exception) {
+                    com.ibm.icu.util.ULocale.ENGLISH
+                }
+            val userNormalized =
+                com.ibm.icu.lang.UCharacter
+                    .toLowerCase(locale, standardNormalized)
+                    .trim()
             return NormalizedWord(standardNormalized, userNormalized)
         }
 
@@ -204,7 +215,6 @@ class WordLearningEngine
 
                 val currentLanguage =
                     languageManager.currentLanguage.value
-                        ?: return@withContext Result.failure(IllegalStateException("No current language set"))
 
                 return@withContext try {
                     val cleanWord = word.trim()
@@ -225,7 +235,7 @@ class WordLearningEngine
                         LearnedWord.create(
                             word = normalized.userSpecific,
                             wordNormalized = normalized.userSpecific,
-                            languageTag = currentLanguage.languageTag,
+                            languageTag = currentLanguage,
                             frequency = 1,
                             source = wordSource,
                         )
@@ -238,10 +248,10 @@ class WordLearningEngine
                         synchronized(cacheLock) {
                             if (!isDestroyed.get()) {
                                 val cacheSet =
-                                    learnedWordsCache.getIfPresent(currentLanguage.languageTag)
+                                    learnedWordsCache.getIfPresent(currentLanguage)
                                         ?: ConcurrentHashMap.newKeySet()
                                 cacheSet.add(normalized.userSpecific)
-                                learnedWordsCache.put(currentLanguage.languageTag, cacheSet)
+                                learnedWordsCache.put(currentLanguage, cacheSet)
                             }
                         }
                     }
@@ -280,9 +290,7 @@ class WordLearningEngine
             withContext(defaultDispatcher) {
                 if (isDestroyed.get()) return@withContext false
 
-                val currentLanguage =
-                    languageManager.currentLanguage.value
-                        ?: return@withContext false
+                val currentLanguage = languageManager.currentLanguage.value
 
                 return@withContext try {
                     val cleanWord = word.trim()
@@ -294,7 +302,7 @@ class WordLearningEngine
 
                     val cachedWords =
                         synchronized(cacheLock) {
-                            learnedWordsCache.getIfPresent(currentLanguage.languageTag)
+                            learnedWordsCache.getIfPresent(currentLanguage)
                         }
 
                     if (cachedWords != null) {
@@ -304,7 +312,7 @@ class WordLearningEngine
                     val learnedWord =
                         withContext(ioDispatcher) {
                             learnedWordDao.findExactWord(
-                                languageTag = currentLanguage.languageTag,
+                                languageTag = currentLanguage,
                                 normalizedWord = normalized.userSpecific,
                             )
                         }
@@ -338,9 +346,7 @@ class WordLearningEngine
             withContext(ioDispatcher) {
                 if (isDestroyed.get()) return@withContext emptyList()
 
-                val currentLanguage =
-                    languageManager.currentLanguage.value
-                        ?: return@withContext emptyList()
+                val currentLanguage = languageManager.currentLanguage.value
 
                 return@withContext try {
                     val cleanWord = word.trim()
@@ -362,7 +368,7 @@ class WordLearningEngine
                     try {
                         val exactMatch =
                             learnedWordDao.findExactWord(
-                                languageTag = currentLanguage.languageTag,
+                                languageTag = currentLanguage,
                                 normalizedWord = normalized.userSpecific,
                             )
                         if (exactMatch != null) {
@@ -375,7 +381,7 @@ class WordLearningEngine
                         try {
                             val prefixMatches =
                                 learnedWordDao.findWordsWithPrefix(
-                                    languageTag = currentLanguage.languageTag,
+                                    languageTag = currentLanguage,
                                     prefix = normalized.userSpecific,
                                     limit = maxResults - results.size,
                                 )
@@ -392,7 +398,7 @@ class WordLearningEngine
                         try {
                             val candidates =
                                 learnedWordDao.getMostFrequentWords(
-                                    languageTag = currentLanguage.languageTag,
+                                    languageTag = currentLanguage,
                                     limit = 30,
                                 )
 
@@ -443,9 +449,7 @@ class WordLearningEngine
             withContext(ioDispatcher) {
                 if (isDestroyed.get()) return@withContext Result.success(false)
 
-                val currentLanguage =
-                    languageManager.currentLanguage.value
-                        ?: return@withContext Result.failure(IllegalStateException("No current language set"))
+                val currentLanguage = languageManager.currentLanguage.value
 
                 return@withContext try {
                     val cleanWord = word.trim()
@@ -462,14 +466,14 @@ class WordLearningEngine
                     learnWordMutex.withLock {
                         val removed =
                             learnedWordDao.removeWordComplete(
-                                languageTag = currentLanguage.languageTag,
+                                languageTag = currentLanguage,
                                 normalizedWord = normalized.userSpecific,
                             )
 
                         if (removed > 0) {
                             synchronized(cacheLock) {
                                 if (!isDestroyed.get()) {
-                                    learnedWordsCache.getIfPresent(currentLanguage.languageTag)?.remove(normalized.userSpecific)
+                                    learnedWordsCache.getIfPresent(currentLanguage)?.remove(normalized.userSpecific)
                                 }
                             }
 
@@ -565,9 +569,7 @@ class WordLearningEngine
                     return@withContext emptyMap()
                 }
 
-                val currentLanguage =
-                    languageManager.currentLanguage.value
-                        ?: return@withContext emptyMap()
+                val currentLanguage = languageManager.currentLanguage.value
 
                 return@withContext try {
                     val results = mutableMapOf<String, Boolean>()
@@ -591,7 +593,7 @@ class WordLearningEngine
                         if (validWords.isNotEmpty()) {
                             learnedWordDao
                                 .findExistingWords(
-                                    languageTag = currentLanguage.languageTag,
+                                    languageTag = currentLanguage,
                                     normalizedWords = validWords,
                                 ).toSet()
                         } else {
@@ -611,10 +613,10 @@ class WordLearningEngine
                         synchronized(cacheLock) {
                             if (!isDestroyed.get()) {
                                 val cacheSet =
-                                    learnedWordsCache.getIfPresent(currentLanguage.languageTag)
+                                    learnedWordsCache.getIfPresent(currentLanguage)
                                         ?: ConcurrentHashMap.newKeySet()
                                 existingWords.forEach { cacheSet.add(it) }
-                                learnedWordsCache.put(currentLanguage.languageTag, cacheSet)
+                                learnedWordsCache.put(currentLanguage, cacheSet)
                             }
                         }
                     }
@@ -663,7 +665,7 @@ class WordLearningEngine
                                 averageWordFrequency = 0.0,
                                 wordsByLanguage = emptyMap(),
                                 wordsByInputMethod = emptyMap(),
-                                currentLanguage = currentLanguage?.displayName ?: "Unknown",
+                                currentLanguage = currentLanguage,
                             )
                         return@withContext Result.success(defaultStats)
                     }
@@ -682,12 +684,7 @@ class WordLearningEngine
                             0.0
                         }
 
-                    val wordCountByLanguage =
-                        if (currentLanguage != null) {
-                            mapOf(currentLanguage.languageTag to totalWords)
-                        } else {
-                            emptyMap()
-                        }
+                    val wordCountByLanguage = mapOf(currentLanguage to totalWords)
 
                     val sourceCounts =
                         try {
@@ -717,7 +714,7 @@ class WordLearningEngine
                             averageWordFrequency = averageFrequency,
                             wordsByLanguage = wordCountByLanguage,
                             wordsByInputMethod = inputMethodStats,
-                            currentLanguage = currentLanguage?.displayName ?: "None",
+                            currentLanguage = currentLanguage,
                         )
 
                     consecutiveErrors.set(0)
