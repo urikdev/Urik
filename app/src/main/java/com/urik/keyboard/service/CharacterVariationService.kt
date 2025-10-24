@@ -291,13 +291,9 @@ class CharacterVariationService
 
         @Suppress("DEPRECATION")
         private fun clearNonEssentialCaches() {
-            val currentLanguageTag = languageManager.currentLanguage.value?.languageTag
+            val currentLanguageTag = languageManager.currentLanguage.value
             val languagesToKeep =
-                if (currentLanguageTag != null) {
-                    setOf(currentLanguageTag, "en")
-                } else {
-                    setOf("en")
-                }
+                setOf(currentLanguageTag, "en")
 
             val allCached = variationCache.asMap()
             allCached.keys.forEach { languageCode ->

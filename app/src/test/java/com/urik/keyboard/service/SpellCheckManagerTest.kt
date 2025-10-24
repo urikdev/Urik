@@ -37,7 +37,7 @@ class SpellCheckManagerTest {
     private lateinit var suggestionCache: ManagedCache<String, List<SpellingSuggestion>>
     private lateinit var dictionaryCache: ManagedCache<String, Boolean>
 
-    private lateinit var currentLanguageFlow: MutableStateFlow<LanguageInfo?>
+    private lateinit var currentLanguageFlow: MutableStateFlow<String>
 
     private lateinit var spellCheckManager: SpellCheckManager
 
@@ -99,16 +99,7 @@ class SpellCheckManagerTest {
             ),
         ).thenReturn(dictionaryCache)
 
-        currentLanguageFlow =
-            MutableStateFlow(
-                LanguageInfo(
-                    languageTag = "en",
-                    displayName = "English",
-                    nativeName = "English",
-                    isActive = true,
-                    isPrimary = true,
-                ),
-            )
+        currentLanguageFlow = MutableStateFlow("en")
         whenever(languageManager.currentLanguage).thenReturn(currentLanguageFlow)
 
         whenever(context.assets).thenReturn(assetManager)
@@ -145,15 +136,7 @@ class SpellCheckManagerTest {
             whenever(assetManager.open("dictionaries/sv_symspell.txt"))
                 .thenThrow(java.io.FileNotFoundException())
 
-            currentLanguageFlow.emit(
-                LanguageInfo(
-                    "sv",
-                    "Swedish",
-                    "Svenska",
-                    isActive = true,
-                    isPrimary = true,
-                ),
-            )
+            currentLanguageFlow.emit("sv")
 
             val result = spellCheckManager.isWordInDictionary("test")
             assertFalse(result)
@@ -546,15 +529,7 @@ class SpellCheckManagerTest {
             val swedishDictionary = "hej 1000\nvärld 800"
             whenever(assetManager.open("dictionaries/sv_symspell.txt"))
                 .thenReturn(ByteArrayInputStream(swedishDictionary.toByteArray()))
-            currentLanguageFlow.emit(
-                LanguageInfo(
-                    "sv",
-                    "Swedish",
-                    "Svenska",
-                    isActive = true,
-                    isPrimary = true,
-                ),
-            )
+            currentLanguageFlow.emit("sv")
 
             whenever(wordLearningEngine.isWordLearned("hej")).thenReturn(true)
             spellCheckManager.isWordInDictionary("hej")

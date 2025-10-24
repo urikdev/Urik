@@ -250,7 +250,7 @@ class SpellCheckManager
                     }
 
                     val currentLang = getCurrentLanguage()
-                    val locale = getLocaleForLanguage(currentLang)
+                    val locale = getLocaleForLanguage()
                     val normalizedWord = word.lowercase(locale).trim()
 
                     val result = isWordInDictionary(normalizedWord, currentLang)
@@ -314,7 +314,7 @@ class SpellCheckManager
 
                 val results = mutableMapOf<String, Boolean>()
                 val currentLang = getCurrentLanguage()
-                val locale = getLocaleForLanguage(currentLang)
+                val locale = getLocaleForLanguage()
                 val spellChecker = getSpellCheckerForLanguage(currentLang)
 
                 val wordsToProcess = mutableListOf<Pair<String, String>>()
@@ -425,7 +425,7 @@ class SpellCheckManager
                     }
 
                     val currentLang = getCurrentLanguage()
-                    val locale = getLocaleForLanguage(currentLang)
+                    val locale = getLocaleForLanguage()
                     val normalizedWord = word.lowercase(locale).trim()
 
                     return@withContext getSpellingSuggestions(normalizedWord, currentLang)
@@ -594,19 +594,15 @@ class SpellCheckManager
         private fun getCurrentLanguage(): String =
             try {
                 val currentLanguage = languageManager.currentLanguage.value
-                currentLanguage?.languageTag?.split("-")?.first() ?: "en"
+                currentLanguage.split("-").first()
             } catch (_: Exception) {
                 "en"
             }
 
-        private fun getLocaleForLanguage(languageCode: String): Locale =
+        private fun getLocaleForLanguage(): Locale =
             try {
                 val currentLanguage = languageManager.currentLanguage.value
-                if (currentLanguage?.languageTag != null) {
-                    Locale.forLanguageTag(currentLanguage.languageTag)
-                } else {
-                    Locale.forLanguageTag(languageCode)
-                }
+                Locale.forLanguageTag(currentLanguage)
             } catch (_: Exception) {
                 Locale.forLanguageTag("en")
             }
@@ -635,7 +631,7 @@ class SpellCheckManager
         fun invalidateWordCache(word: String) {
             try {
                 val currentLang = getCurrentLanguage()
-                val locale = getLocaleForLanguage(currentLang)
+                val locale = getLocaleForLanguage()
                 val normalizedWord = word.lowercase(locale).trim()
                 val cacheKey = buildCacheKey(normalizedWord, currentLang)
 
@@ -653,7 +649,7 @@ class SpellCheckManager
         fun blacklistSuggestion(word: String) {
             try {
                 val currentLang = getCurrentLanguage()
-                val normalizedWord = word.lowercase(getLocaleForLanguage(currentLang)).trim()
+                val normalizedWord = word.lowercase(getLocaleForLanguage()).trim()
 
                 synchronized(blacklistedWords) {
                     blacklistedWords.add(normalizedWord)
@@ -670,7 +666,7 @@ class SpellCheckManager
         fun removeFromBlacklist(word: String) {
             try {
                 val currentLang = getCurrentLanguage()
-                val normalizedWord = word.lowercase(getLocaleForLanguage(currentLang)).trim()
+                val normalizedWord = word.lowercase(getLocaleForLanguage()).trim()
 
                 var removed = false
                 synchronized(blacklistedWords) {
@@ -687,7 +683,7 @@ class SpellCheckManager
         private fun isWordBlacklisted(word: String): Boolean =
             try {
                 val currentLang = getCurrentLanguage()
-                val normalizedWord = word.lowercase(getLocaleForLanguage(currentLang)).trim()
+                val normalizedWord = word.lowercase(getLocaleForLanguage()).trim()
                 synchronized(blacklistedWords) {
                     normalizedWord in blacklistedWords
                 }

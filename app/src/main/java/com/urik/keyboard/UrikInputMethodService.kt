@@ -129,8 +129,6 @@ class UrikInputMethodService :
     @Volatile
     private var isRecomposing = false
 
-    private var currentScriptCode = UScript.LATIN
-
     @Volatile
     private var pendingSuggestions: List<String> = emptyList()
 
@@ -201,11 +199,9 @@ class UrikInputMethodService :
      * @param locale Locale to derive script from
      */
     private fun updateScriptContext(locale: ULocale) {
-        currentScriptCode = ScriptDetector.getScriptFromLocale(locale)
-
-        layoutManager.updateScriptContext(locale)
+        layoutManager.updateScriptContext()
         swipeDetector.updateScriptContext(locale)
-        textInputProcessor.updateScriptContext(locale, currentScriptCode)
+        textInputProcessor.updateScriptContext(locale, UScript.LATIN)
         spellCheckManager.clearCaches()
     }
 
@@ -538,25 +534,23 @@ class UrikInputMethodService :
             }
 
             val currentLanguage = languageManager.currentLanguage.value
-            if (currentLanguage != null) {
-                try {
-                    wordLearningEngine.initializeLearnedWordsCache(currentLanguage.languageTag)
-                } catch (e: Exception) {
-                    ErrorLogger.logException(
-                        component = "UrikInputMethodService",
-                        severity = ErrorLogger.Severity.HIGH,
-                        exception = e,
-                        context =
-                            mapOf(
-                                "phase" to "word_learning_init",
-                                "language" to currentLanguage.languageTag,
-                            ),
-                    )
-                }
-
-                val locale = ULocale.forLanguageTag(currentLanguage.languageTag)
-                updateScriptContext(locale)
+            try {
+                wordLearningEngine.initializeLearnedWordsCache(currentLanguage)
+            } catch (e: Exception) {
+                ErrorLogger.logException(
+                    component = "UrikInputMethodService",
+                    severity = ErrorLogger.Severity.HIGH,
+                    exception = e,
+                    context =
+                        mapOf(
+                            "phase" to "word_learning_init",
+                            "language" to currentLanguage,
+                        ),
+                )
             }
+
+            val locale = ULocale.forLanguageTag(currentLanguage)
+            updateScriptContext(locale)
 
             try {
                 wordLearningEngine.getLearningStats()
@@ -734,10 +728,8 @@ class UrikInputMethodService :
         observerJobs.add(
             serviceScope.launch {
                 languageManager.currentLanguage.collect { detectedLanguage ->
-                    if (detectedLanguage != null) {
-                        val locale = ULocale.forLanguageTag(detectedLanguage.languageTag)
-                        updateScriptContext(locale)
-                    }
+                    val locale = ULocale.forLanguageTag(detectedLanguage)
+                    updateScriptContext(locale)
                 }
             },
         )
@@ -1014,8 +1006,7 @@ class UrikInputMethodService :
                 }
 
                 if (displayBuffer.isNotEmpty() && wordState.requiresSpellCheck) {
-                    val config = textInputProcessor.getCurrentConfig()
-                    if (wordState.graphemeCount >= config.minWordLengthForSpellCheck) {
+                    if (wordState.graphemeCount >= 2) {
                         val isValid = textInputProcessor.validateWord(wordState.normalizedBuffer)
                         if (!isValid) {
                             spellConfirmationState = SpellConfirmationState.AWAITING_CONFIRMATION
@@ -1130,7 +1121,7 @@ class UrikInputMethodService :
                                         normalizedBuffer = validatedWord.lowercase(),
                                         isFromSwipe = true,
                                         graphemeCount = displayWord.length,
-                                        scriptCode = currentScriptCode,
+                                        scriptCode = UScript.LATIN,
                                     )
                             }
                         }
@@ -1145,7 +1136,7 @@ class UrikInputMethodService :
                                 normalizedBuffer = validatedWord.lowercase(),
                                 isFromSwipe = true,
                                 graphemeCount = displayWord.length,
-                                scriptCode = currentScriptCode,
+                                scriptCode = UScript.LATIN,
                             )
                     }
                 }
@@ -1715,8 +1706,7 @@ class UrikInputMethodService :
                 }
 
                 if (wordState.hasContent && wordState.requiresSpellCheck) {
-                    val config = textInputProcessor.getCurrentConfig()
-                    if (wordState.graphemeCount >= config.minWordLengthForSpellCheck) {
+                    if (wordState.graphemeCount >= 2) {
                         val isValid = textInputProcessor.validateWord(wordState.normalizedBuffer)
                         if (isValid) {
                             currentInputConnection?.beginBatchEdit()

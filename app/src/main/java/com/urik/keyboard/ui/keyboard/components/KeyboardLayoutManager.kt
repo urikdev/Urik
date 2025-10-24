@@ -18,9 +18,6 @@ import android.view.accessibility.AccessibilityManager
 import android.widget.Button
 import android.widget.LinearLayout
 import androidx.core.content.ContextCompat
-import com.ibm.icu.lang.UCharacter
-import com.ibm.icu.lang.UScript
-import com.ibm.icu.util.ULocale
 import com.urik.keyboard.R
 import com.urik.keyboard.model.KeyboardKey
 import com.urik.keyboard.model.KeyboardLayout
@@ -34,142 +31,15 @@ import com.urik.keyboard.settings.SpaceBarSize
 import com.urik.keyboard.settings.Theme
 import com.urik.keyboard.utils.CacheMemoryManager
 import com.urik.keyboard.utils.ManagedCache
-import com.urik.keyboard.utils.ScriptDetector
 import kotlinx.coroutines.*
 import org.json.JSONException
 import java.util.concurrent.ConcurrentHashMap
 
-/**
- * Script-specific layout configuration.
- *
- * Defines rendering parameters per script: dimensions, spacing, typography, cultural adaptations.
- */
-data class ScriptLayoutConfig(
-    val scriptCode: Int,
-    val keyHeightMultiplier: Float,
-    val keyWidthMultiplier: Float,
-    val textSizeMultiplier: Float,
-    val minimumTouchTargetMultiplier: Float,
-    val horizontalSpacingMultiplier: Float,
-    val verticalSpacingMultiplier: Float,
-    val supportsCaseSystem: Boolean,
-    val isRtlScript: Boolean,
-    val requiresSpecialTypography: Boolean,
-    val supportsComposingText: Boolean,
-    val defaultPunctuationSet: List<String>,
-    val culturalKeyLabels: Map<KeyboardKey.ActionType, Int>,
-) {
-    companion object {
-        private const val BASE_HEIGHT_MULTIPLIER = 1.0f
-        private const val BASE_WIDTH_MULTIPLIER = 1.0f
-        private const val BASE_TEXT_SIZE_MULTIPLIER = 1.0f
-        private const val BASE_TOUCH_TARGET_MULTIPLIER = 1.0f
-        private const val BASE_SPACING_MULTIPLIER = 1.0f
-
-        fun forScript(scriptCode: Int): ScriptLayoutConfig =
-            when (scriptCode) {
-                UScript.LATIN ->
-                    ScriptLayoutConfig(
-                        scriptCode = scriptCode,
-                        keyHeightMultiplier = BASE_HEIGHT_MULTIPLIER,
-                        keyWidthMultiplier = BASE_WIDTH_MULTIPLIER,
-                        textSizeMultiplier = BASE_TEXT_SIZE_MULTIPLIER,
-                        minimumTouchTargetMultiplier = BASE_TOUCH_TARGET_MULTIPLIER,
-                        horizontalSpacingMultiplier = BASE_SPACING_MULTIPLIER,
-                        verticalSpacingMultiplier = BASE_SPACING_MULTIPLIER,
-                        supportsCaseSystem = true,
-                        isRtlScript = false,
-                        requiresSpecialTypography = false,
-                        supportsComposingText = false,
-                        defaultPunctuationSet = listOf(".", ",", "?", "!", "'", "\"", ";", ":"),
-                        culturalKeyLabels = getLatinKeyLabels(),
-                    )
-                else ->
-                    ScriptLayoutConfig(
-                        scriptCode = scriptCode,
-                        keyHeightMultiplier = BASE_HEIGHT_MULTIPLIER,
-                        keyWidthMultiplier = BASE_WIDTH_MULTIPLIER,
-                        textSizeMultiplier = BASE_TEXT_SIZE_MULTIPLIER,
-                        minimumTouchTargetMultiplier = BASE_TOUCH_TARGET_MULTIPLIER,
-                        horizontalSpacingMultiplier = BASE_SPACING_MULTIPLIER,
-                        verticalSpacingMultiplier = BASE_SPACING_MULTIPLIER,
-                        supportsCaseSystem = true,
-                        isRtlScript = false,
-                        requiresSpecialTypography = false,
-                        supportsComposingText = false,
-                        defaultPunctuationSet = listOf(".", ",", "?", "!", "'"),
-                        culturalKeyLabels = getLatinKeyLabels(),
-                    )
-            }
-
-        private fun getLatinKeyLabels(): Map<KeyboardKey.ActionType, Int> =
-            mapOf(
-                KeyboardKey.ActionType.SHIFT to R.drawable.shift_48px,
-                KeyboardKey.ActionType.BACKSPACE to 0,
-                KeyboardKey.ActionType.SPACE to 0,
-                KeyboardKey.ActionType.ENTER to 0,
-                KeyboardKey.ActionType.CAPS_LOCK to 0,
-            )
-    }
-}
-
-/**
- * Manages script-specific typography with font fallbacks.
- */
-class ScriptTypographyManager {
-    private val fallbackFonts =
-        mapOf(
-            UScript.ARABIC to listOf("Noto Sans Arabic", "Droid Arabic Naskh", "sans-serif"),
-            UScript.HEBREW to listOf("Noto Sans Hebrew", "Droid Sans Hebrew", "sans-serif"),
-            UScript.HAN to listOf("Noto Sans CJK SC", "Droid Sans Fallback", "sans-serif"),
-            UScript.HANGUL to listOf("Noto Sans CJK KR", "Droid Sans Fallback", "sans-serif"),
-            UScript.HIRAGANA to listOf("Noto Sans CJK JP", "Droid Sans Fallback", "sans-serif"),
-            UScript.KATAKANA to listOf("Noto Sans CJK JP", "Droid Sans Fallback", "sans-serif"),
-            UScript.DEVANAGARI to listOf("Noto Sans Devanagari", "Droid Sans Fallback", "sans-serif"),
-            UScript.BENGALI to listOf("Noto Sans Bengali", "Droid Sans Fallback", "sans-serif"),
-            UScript.TAMIL to listOf("Noto Sans Tamil", "Droid Sans Fallback", "sans-serif"),
-            UScript.GUJARATI to listOf("Noto Sans Gujarati", "Droid Sans Fallback", "sans-serif"),
-            UScript.THAI to listOf("Noto Sans Thai", "Droid Sans Thai", "sans-serif"),
-            UScript.LAO to listOf("Noto Sans Lao", "Droid Sans Fallback", "sans-serif"),
-        )
-
-    fun getTypefaceForScript(scriptCode: Int): Typeface {
-        val fontNames = fallbackFonts[scriptCode] ?: listOf("sans-serif")
-
-        for (fontName in fontNames) {
-            try {
-                val typeface =
-                    if (fontName == "sans-serif") {
-                        Typeface.SANS_SERIF
-                    } else {
-                        Typeface.create(fontName, Typeface.NORMAL)
-                    }
-                if (typeface != null) return typeface
-            } catch (_: Exception) {
-            }
-        }
-
-        return Typeface.DEFAULT_BOLD
-    }
-}
-
-/**
- * Pending callbacks for button long-press handlers.
- */
 private data class PendingCallbacks(
     val handler: Handler,
     val runnable: Runnable,
 )
 
-/**
- * Backspace acceleration state machine.
- *
- * State transitions:
- * IDLE → long press → CHAR_ACCELERATING (0-1500ms)
- * CHAR_ACCELERATING → 1500ms elapsed → CHAR_MAX_SPEED (1500-2000ms)
- * CHAR_MAX_SPEED → 2000ms elapsed → WORD_MODE (2000ms+)
- * Any state → release → IDLE
- */
 private enum class BackspaceMode {
     IDLE,
     CHAR_ACCELERATING,
@@ -177,10 +47,6 @@ private enum class BackspaceMode {
     WORD_MODE,
 }
 
-/**
- * Manages keyboard layout rendering with script-aware adaptations.
- *
- */
 class KeyboardLayoutManager(
     private val context: Context,
     private val onKeyClick: (KeyboardKey) -> Unit,
@@ -198,6 +64,7 @@ class KeyboardLayoutManager(
         private const val MAX_ERROR_TRACKING_SIZE = 20
         private const val ERROR_CLEANUP_INTERVAL_MS = 300000L
         private const val ERROR_TRACKING_RETENTION_SECONDS = 60
+        private val DEFAULT_PUNCTUATION = listOf(".", ",", "?", "!", "'", "\"", ";", ":")
     }
 
     private val vibrator =
@@ -213,10 +80,6 @@ class KeyboardLayoutManager(
     private var themedContext: Context = context
 
     private val accessibilityManager = context.getSystemService(Context.ACCESSIBILITY_SERVICE) as AccessibilityManager
-    private val typographyManager = ScriptTypographyManager()
-
-    private var currentScriptConfig: ScriptLayoutConfig = ScriptLayoutConfig.forScript(UScript.LATIN)
-    private var currentScriptCode: Int = UScript.LATIN
 
     private var currentLongPressDuration = LongPressDuration.MEDIUM
     private var currentKeySize = KeySize.MEDIUM
@@ -231,8 +94,6 @@ class KeyboardLayoutManager(
     private val activeButtons = mutableSetOf<Button>()
     private val buttonPendingCallbacks = ConcurrentHashMap<Button, PendingCallbacks>()
 
-    private var cachedTypeface: Typeface? = null
-    private var cachedScriptCode: Int = -1
     private val cachedTextSizes = mutableMapOf<Int, Float>()
     private val cachedDimensions = mutableMapOf<String, Int>()
     private var cacheValid = false
@@ -259,27 +120,10 @@ class KeyboardLayoutManager(
     private val punctuationErrorCooldownMs = 60000L
     private var lastErrorCleanupTime = 0L
 
-    /**
-     * Updates script context when language changes.
-     *
-     * Reconfigures layout for new script (RTL, typography, spacing).
-     * Invalidates dimension cache on script change.
-     */
-    fun updateScriptContext(locale: ULocale) {
-        val newScriptCode = ScriptDetector.getScriptFromLocale(locale)
-        val newScriptConfig = ScriptLayoutConfig.forScript(newScriptCode)
-
-        if (newScriptCode != currentScriptCode) {
-            invalidateCalculationCache()
-        }
-
-        currentScriptCode = newScriptCode
-        currentScriptConfig = newScriptConfig
+    fun updateScriptContext() {
+        invalidateCalculationCache()
     }
 
-    /**
-     * Triggers haptic feedback if enabled.
-     */
     fun triggerHapticFeedback() {
         performCustomHaptic()
     }
@@ -367,20 +211,13 @@ class KeyboardLayoutManager(
     }
 
     private fun invalidateCalculationCache() {
-        cachedTypeface = null
-        cachedScriptCode = -1
         cachedTextSizes.clear()
         cachedDimensions.clear()
         cacheValid = false
     }
 
     private fun ensureCacheValid() {
-        if (cacheValid && cachedScriptCode == currentScriptCode) {
-            return
-        }
-
-        cachedTypeface = typographyManager.getTypefaceForScript(currentScriptCode)
-        cachedScriptCode = currentScriptCode
+        if (cacheValid) return
 
         val basePadding = context.resources.getDimensionPixelSize(R.dimen.key_margin_horizontal)
         val baseMinTouchTarget = context.resources.getDimensionPixelSize(R.dimen.minimum_touch_target)
@@ -389,13 +226,11 @@ class KeyboardLayoutManager(
 
         val keySizeMultiplier = currentKeySize.scaleFactor
 
-        cachedDimensions["scriptAwareMinTarget"] =
-            (baseMinTouchTarget * currentScriptConfig.minimumTouchTargetMultiplier * keySizeMultiplier).toInt()
-        cachedDimensions["scriptAwareHeight"] = (baseKeyHeight * currentScriptConfig.keyHeightMultiplier * keySizeMultiplier).toInt()
-        cachedDimensions["horizontalPadding"] = (basePadding * currentScriptConfig.keyWidthMultiplier * keySizeMultiplier).toInt()
-        cachedDimensions["verticalPadding"] = (basePadding * 0.5f * currentScriptConfig.keyHeightMultiplier * keySizeMultiplier).toInt()
-        cachedDimensions["horizontalMargin"] =
-            (baseHorizontalMargin * currentScriptConfig.horizontalSpacingMultiplier * keySizeMultiplier).toInt()
+        cachedDimensions["minTarget"] = (baseMinTouchTarget * keySizeMultiplier).toInt()
+        cachedDimensions["keyHeight"] = (baseKeyHeight * keySizeMultiplier).toInt()
+        cachedDimensions["horizontalPadding"] = (basePadding * keySizeMultiplier).toInt()
+        cachedDimensions["verticalPadding"] = (basePadding * 0.5f * keySizeMultiplier).toInt()
+        cachedDimensions["horizontalMargin"] = (baseHorizontalMargin * keySizeMultiplier).toInt()
 
         cacheValid = true
     }
@@ -405,14 +240,10 @@ class KeyboardLayoutManager(
             val baseTextSize = keyHeight * 0.38f / context.resources.displayMetrics.density
             val minSize = 12f
             val maxSize = 24f
-            val scriptAdjusted = baseTextSize.coerceIn(minSize, maxSize) * currentScriptConfig.textSizeMultiplier
-            scriptAdjusted * currentKeyLabelSize.scaleFactor
+            val adjusted = baseTextSize.coerceIn(minSize, maxSize)
+            adjusted * currentKeyLabelSize.scaleFactor
         }
 
-    /**
-     * Creates keyboard view from layout specification.
-     *
-     */
     fun createKeyboardView(
         layout: KeyboardLayout,
         state: KeyboardState,
@@ -429,24 +260,13 @@ class KeyboardLayoutManager(
                     )
 
                 val horizontalPadding = context.resources.getDimensionPixelSize(R.dimen.keyboard_padding)
-                val verticalPadding =
-                    (
-                        context.resources.getDimensionPixelSize(R.dimen.keyboard_padding_vertical) *
-                            currentScriptConfig.verticalSpacingMultiplier
-                    ).toInt()
+                val verticalPadding = context.resources.getDimensionPixelSize(R.dimen.keyboard_padding_vertical)
 
                 setPadding(horizontalPadding, verticalPadding, horizontalPadding, verticalPadding)
                 setBackgroundColor(getThemeAwareColor(R.color.surface_background))
 
                 importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_YES
-                contentDescription = getScriptAwareKeyboardDescription()
-
-                layoutDirection =
-                    if (currentScriptConfig.isRtlScript) {
-                        View.LAYOUT_DIRECTION_RTL
-                    } else {
-                        View.LAYOUT_DIRECTION_LTR
-                    }
+                contentDescription = context.getString(R.string.keyboard_description)
             }
 
         layout.rows.forEach { row ->
@@ -470,20 +290,9 @@ class KeyboardLayoutManager(
                             LinearLayout.LayoutParams.MATCH_PARENT,
                             LinearLayout.LayoutParams.WRAP_CONTENT,
                         ).apply {
-                            val verticalMargin =
-                                (
-                                    context.resources.getDimensionPixelSize(R.dimen.key_margin_vertical) *
-                                        currentScriptConfig.verticalSpacingMultiplier
-                                ).toInt()
+                            val verticalMargin = context.resources.getDimensionPixelSize(R.dimen.key_margin_vertical)
                             setMargins(0, 0, 0, verticalMargin)
                         }
-
-                layoutDirection =
-                    if (currentScriptConfig.isRtlScript) {
-                        View.LAYOUT_DIRECTION_RTL
-                    } else {
-                        View.LAYOUT_DIRECTION_LTR
-                    }
             }
 
         val is9LetterRow = is9CharacterLetterRow(keys)
@@ -552,24 +361,24 @@ class KeyboardLayoutManager(
             setOnLongClickListener(null)
             setOnTouchListener(null)
 
-            val scriptAwareMinTarget = cachedDimensions["scriptAwareMinTarget"]!!
-            val scriptAwareHeight = cachedDimensions["scriptAwareHeight"]!!
-            val verticalMarginForTarget = maxOf(0, (scriptAwareMinTarget - scriptAwareHeight) / 2)
+            val minTarget = cachedDimensions["minTarget"]!!
+            val keyHeight = cachedDimensions["keyHeight"]!!
+            val verticalMarginForTarget = maxOf(0, (minTarget - keyHeight) / 2)
 
             layoutParams =
                 LinearLayout
                     .LayoutParams(
                         0,
-                        scriptAwareHeight,
+                        keyHeight,
                         getKeyWeight(key, rowKeys),
                     ).apply {
                         val horizontalMargin = cachedDimensions["horizontalMargin"]!!
                         setMargins(horizontalMargin, verticalMarginForTarget, horizontalMargin, verticalMarginForTarget)
                     }
 
-            text = getScriptAwareKeyLabel(key, state)
+            text = getKeyLabel(key, state)
 
-            val finalTextSize = getCachedTextSize(scriptAwareHeight)
+            val finalTextSize = getCachedTextSize(keyHeight)
 
             setTextAppearance(
                 when (key) {
@@ -580,7 +389,7 @@ class KeyboardLayoutManager(
 
             setTextSize(TypedValue.COMPLEX_UNIT_SP, finalTextSize)
 
-            typeface = cachedTypeface
+            typeface = Typeface.DEFAULT
 
             minHeight = 0
             minimumHeight = 0
@@ -596,15 +405,8 @@ class KeyboardLayoutManager(
             isClickable = true
             isFocusable = true
 
-            layoutDirection =
-                if (currentScriptConfig.isRtlScript) {
-                    View.LAYOUT_DIRECTION_RTL
-                } else {
-                    View.LAYOUT_DIRECTION_LTR
-                }
-
             importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_YES
-            contentDescription = getScriptAwareKeyContentDescription(key, state)
+            contentDescription = getKeyContentDescription(key, state)
 
             setOnClickListener { view ->
                 performCustomHaptic()
@@ -629,7 +431,7 @@ class KeyboardLayoutManager(
                         KeyboardKey.ActionType.GO -> R.drawable.arrow_forward_48px
                         KeyboardKey.ActionType.NEXT -> R.drawable.arrow_forward_48px
                         KeyboardKey.ActionType.PREVIOUS -> R.drawable.arrow_back_48px
-                        else -> currentScriptConfig.culturalKeyLabels[key.action] ?: 0
+                        else -> 0
                     }
 
                 if (iconRes != 0) {
@@ -719,9 +521,6 @@ class KeyboardLayoutManager(
         }
     }
 
-    /**
-     * Cleans up button completely and returns to pool.
-     */
     @SuppressLint("ClickableViewAccessibility")
     private fun cleanupButton(button: Button) {
         buttonPendingCallbacks.remove(button)?.let { pending ->
@@ -748,55 +547,32 @@ class KeyboardLayoutManager(
         activeButtons.clear()
     }
 
-    private fun getScriptAwareKeyLabel(
+    private fun getKeyLabel(
         key: KeyboardKey,
         state: KeyboardState,
     ): String =
         when (key) {
             is KeyboardKey.Character -> {
                 when {
-                    key.type == KeyboardKey.KeyType.LETTER &&
-                        shouldCapitalize(state) &&
-                        currentScriptConfig.supportsCaseSystem -> {
-                        getScriptAwareUppercase(key.value)
-                    }
+                    key.type == KeyboardKey.KeyType.LETTER && shouldCapitalize(state) -> key.value.uppercase()
                     else -> key.value
                 }
             }
             is KeyboardKey.Action -> {
-                val iconRes = currentScriptConfig.culturalKeyLabels[key.action] ?: 0
-                if (iconRes != 0) {
-                    ""
-                } else {
-                    when (key.action) {
-                        KeyboardKey.ActionType.BACKSPACE -> "⌫"
-                        KeyboardKey.ActionType.SPACE -> context.getString(R.string.space_key_label)
-                        KeyboardKey.ActionType.ENTER -> "↵"
-                        KeyboardKey.ActionType.CAPS_LOCK -> "⇪"
-                        KeyboardKey.ActionType.MODE_SWITCH_LETTERS -> context.getString(R.string.letters_mode_label)
-                        KeyboardKey.ActionType.MODE_SWITCH_NUMBERS -> context.getString(R.string.numbers_mode_label)
-                        KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS -> context.getString(R.string.symbols_mode_label)
-                        else -> "?"
-                    }
+                when (key.action) {
+                    KeyboardKey.ActionType.BACKSPACE -> "⌫"
+                    KeyboardKey.ActionType.SPACE -> context.getString(R.string.space_key_label)
+                    KeyboardKey.ActionType.ENTER -> "↵"
+                    KeyboardKey.ActionType.CAPS_LOCK -> "⇪"
+                    KeyboardKey.ActionType.MODE_SWITCH_LETTERS -> context.getString(R.string.letters_mode_label)
+                    KeyboardKey.ActionType.MODE_SWITCH_NUMBERS -> context.getString(R.string.numbers_mode_label)
+                    KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS -> context.getString(R.string.symbols_mode_label)
+                    else -> "?"
                 }
             }
         }
 
-    private fun getScriptAwareUppercase(text: String): String =
-        if (currentScriptConfig.supportsCaseSystem) {
-            val currentLanguage = languageManager.currentLanguage.value
-            val currentLocale =
-                if (currentLanguage != null) {
-                    ULocale.forLanguageTag(currentLanguage.languageTag).toLocale()
-                } else {
-                    java.util.Locale.getDefault()
-                }
-            UCharacter.toUpperCase(currentLocale, text)
-        } else {
-            text
-        }
-
-    private fun getScriptAwareKeyContentDescription(
+    private fun getKeyContentDescription(
         key: KeyboardKey,
         state: KeyboardState,
     ): String =
@@ -804,28 +580,10 @@ class KeyboardLayoutManager(
             is KeyboardKey.Character -> {
                 val char =
                     when {
-                        key.type == KeyboardKey.KeyType.LETTER &&
-                            shouldCapitalize(state) &&
-                            currentScriptConfig.supportsCaseSystem -> {
-                            getScriptAwareUppercase(key.value)
-                        }
+                        key.type == KeyboardKey.KeyType.LETTER && shouldCapitalize(state) -> key.value.uppercase()
                         else -> key.value
                     }
-
-                when (currentScriptCode) {
-                    UScript.ARABIC, UScript.HEBREW -> {
-                        context.getString(R.string.key_character_description, char)
-                    }
-                    UScript.HAN -> {
-                        context.getString(R.string.key_ideograph_description, char)
-                    }
-                    UScript.HANGUL -> {
-                        context.getString(R.string.key_syllable_description, char)
-                    }
-                    else -> {
-                        context.getString(R.string.key_character_description, char)
-                    }
-                }
+                context.getString(R.string.key_character_description, char)
             }
             is KeyboardKey.Action ->
                 when (key.action) {
@@ -852,12 +610,10 @@ class KeyboardLayoutManager(
                 }
         }
 
-    private fun getScriptAwareKeyboardDescription(): String = context.getString(R.string.keyboard_description)
-
     private fun handleSpaceLongPress(view: View) {
         performCustomHaptic()
 
-        val currentLanguage = languageManager.currentLanguage.value?.languageTag ?: "en"
+        val currentLanguage = languageManager.currentLanguage.value
         val languageCode = currentLanguage.split("-").first()
 
         backgroundScope.launch {
@@ -868,7 +624,7 @@ class KeyboardLayoutManager(
                 }
             } catch (_: Exception) {
                 withContext(Dispatchers.Main) {
-                    showPunctuationPopup(view, currentScriptConfig.defaultPunctuationSet)
+                    showPunctuationPopup(view, DEFAULT_PUNCTUATION)
                 }
             }
         }
@@ -1015,10 +771,10 @@ class KeyboardLayoutManager(
                     }
                 } catch (_: Exception) {
                     failedPunctuationLanguages.add("en")
-                    currentScriptConfig.defaultPunctuationSet
+                    DEFAULT_PUNCTUATION
                 }
             }
-            else -> currentScriptConfig.defaultPunctuationSet
+            else -> DEFAULT_PUNCTUATION
         }
 
     private fun shouldSkipPunctuationLoading(languageCode: String): Boolean {
@@ -1033,7 +789,7 @@ class KeyboardLayoutManager(
         key: KeyboardKey.Character,
         view: View,
     ) {
-        val currentLanguage = languageManager.currentLanguage.value?.languageTag ?: "en"
+        val currentLanguage = languageManager.currentLanguage.value
 
         backgroundScope.launch {
             try {
@@ -1260,10 +1016,6 @@ class KeyboardLayoutManager(
 
     fun getThemedContext(): Context = themedContext
 
-    /**
-     * Cleans up all resources.
-     *
-     */
     fun cleanup() {
         backgroundJob.cancel()
         returnActiveButtonsToPool()

@@ -72,9 +72,7 @@ class KeyboardViewModel
                 languageManager.currentLanguage
                     .drop(1)
                     .collect { language ->
-                        if (language != null) {
-                            startLoadLayout(_state.value.currentMode)
-                        }
+                        startLoadLayout(_state.value.currentMode)
                     }
             }
         }
@@ -289,11 +287,11 @@ class KeyboardViewModel
             }
         }
 
-        private fun getCurrentLocale(): ULocale =
-            languageManager.currentLanguage.value?.let { userLanguage ->
-                val languageOnly = userLanguage.languageTag.split("-").first()
-                ULocale.forLanguageTag(languageOnly)
-            } ?: ULocale.forLanguageTag("en")
+        private fun getCurrentLocale(): ULocale {
+            val currentLanguage = languageManager.currentLanguage.value
+            val languageOnly = currentLanguage.split("-").first()
+            return ULocale.forLanguageTag(languageOnly)
+        }
 
         private fun updateState(update: (KeyboardState) -> KeyboardState) {
             _state.value = update(_state.value)

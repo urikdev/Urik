@@ -8,43 +8,10 @@ import com.ibm.icu.lang.UScript
 import com.ibm.icu.util.ULocale
 import com.urik.keyboard.model.KeyboardKey
 import com.urik.keyboard.service.SpellCheckManager
-import com.urik.keyboard.utils.ScriptDetector
 import kotlinx.coroutines.*
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.math.*
-
-/**
- * Script-specific gesture configuration.
- *
- * Defines swipe typing parameters per script.
- */
-data class ScriptGestureConfig(
-    val minSwipeDistance: Float,
-    val maxTapDuration: Long,
-    val supportsSwipeTyping: Boolean,
-    val spatialSigma: Float,
-) {
-    companion object {
-        fun forScript(scriptCode: Int): ScriptGestureConfig =
-            when (scriptCode) {
-                UScript.LATIN ->
-                    ScriptGestureConfig(
-                        minSwipeDistance = 80f,
-                        maxTapDuration = 350L,
-                        supportsSwipeTyping = true,
-                        spatialSigma = 40f,
-                    )
-                else ->
-                    ScriptGestureConfig(
-                        minSwipeDistance = 80f,
-                        maxTapDuration = 350L,
-                        supportsSwipeTyping = true,
-                        spatialSigma = 40f,
-                    )
-            }
-    }
-}
 
 /**
  * Word candidate with scoring metrics.
@@ -117,17 +84,15 @@ class SwipeDetector
         }
 
         private var swipeListener: SwipeListener? = null
+
+        private var lastUpdateTime = 0L
         private var isSwiping = false
         private var swipePoints = mutableListOf<SwipePoint>()
         private var startTime = 0L
         private var pointCounter = 0
         private var firstPoint: SwipePoint? = null
 
-        private var currentScriptCode = UScript.LATIN
-        private var baseConfig = ScriptGestureConfig.forScript(UScript.LATIN)
-        private var currentConfig = baseConfig
         private var currentLocale: ULocale? = null
-        private var isRtlScript = false
 
         @Volatile
         private var keyCharacterPositions = emptyMap<Char, PointF>()
@@ -166,10 +131,6 @@ class SwipeDetector
          */
         fun updateScriptContext(locale: ULocale) {
             currentLocale = locale
-            currentScriptCode = ScriptDetector.getScriptFromLocale(locale)
-            baseConfig = ScriptGestureConfig.forScript(currentScriptCode)
-            isRtlScript = ScriptDetector.isRtlScript(currentScriptCode)
-
             val languageCode = locale.language
             if (languageCode != dictionaryLanguage) {
                 dictionaryLoadJob?.cancel()
@@ -211,10 +172,6 @@ class SwipeDetector
             event: MotionEvent,
             keyAt: (Float, Float) -> KeyboardKey?,
         ): Boolean {
-            if (!currentConfig.supportsSwipeTyping && event.action == MotionEvent.ACTION_MOVE) {
-                return false
-            }
-
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
                     startSwipeDetection(event)
@@ -261,8 +218,7 @@ class SwipeDetector
         private fun checkForSwipeStart(event: MotionEvent) {
             firstPoint?.let { start ->
                 val distance = calculateDistance(start.x, start.y, event.x, event.y)
-
-                if (distance > currentConfig.minSwipeDistance) {
+                if (distance > 35f) {
                     isSwiping = true
                     swipeListener?.onSwipeStart(PointF(start.x, start.y))
                     updateSwipePath(event)
@@ -279,8 +235,11 @@ class SwipeDetector
 
             val lastPoint = swipePoints.lastOrNull() ?: return true
 
-            val distance = calculateDistance(lastPoint.x, lastPoint.y, newPoint.x, newPoint.y)
-            if (distance < MIN_POINT_DISTANCE) return false
+            val dx = newPoint.x - lastPoint.x
+            val dy = newPoint.y - lastPoint.y
+            val distanceSquared = dx * dx + dy * dy
+
+            if (distanceSquared < MIN_POINT_DISTANCE * MIN_POINT_DISTANCE) return false
 
             val samplingInterval =
                 when {
@@ -296,36 +255,7 @@ class SwipeDetector
                 return counter % MIN_SAMPLING_INTERVAL == 0
             }
 
-            if (swipePoints.size >= 2) {
-                val isDirectionChange = detectDirectionChange(newPoint)
-                if (isDirectionChange) return true
-            }
-
             return true
-        }
-
-        private fun detectDirectionChange(newPoint: SwipePoint): Boolean {
-            if (swipePoints.size < 2) return false
-
-            val current = swipePoints[swipePoints.size - 1]
-            val previous = swipePoints[swipePoints.size - 2]
-
-            val vec1X = current.x - previous.x
-            val vec1Y = current.y - previous.y
-            val vec2X = newPoint.x - current.x
-            val vec2Y = newPoint.y - current.y
-
-            val dot = vec1X * vec2X + vec1Y * vec2Y
-            val mag1 = sqrt(vec1X * vec1X + vec1Y * vec1Y)
-            val mag2 = sqrt(vec2X * vec2X + vec2Y * vec2Y)
-
-            if (mag1 == 0f || mag2 == 0f) return false
-
-            val cosAngle = dot / (mag1 * mag2)
-            val angleRadians = acos(cosAngle.coerceIn(-1f, 1f))
-            val angleDegrees = Math.toDegrees(angleRadians.toDouble()).toFloat()
-
-            return angleDegrees > 45f
         }
 
         private fun updateSwipePath(event: MotionEvent) {
@@ -347,16 +277,21 @@ class SwipeDetector
                 swipePoints.add(newPoint)
             }
 
-            val currentPath =
-                SwipePath(
-                    points = swipePoints.toList(),
-                    keysTraversed = emptyList(),
-                    scriptCode = currentScriptCode,
-                    isRtl = isRtlScript,
-                    topCandidates = emptyList(),
-                )
+            val now = System.currentTimeMillis()
+            if (now - lastUpdateTime >= 16) {
+                lastUpdateTime = now
 
-            swipeListener?.onSwipeUpdate(currentPath, PointF(event.x, event.y))
+                val currentPath =
+                    SwipePath(
+                        points = swipePoints.toList(),
+                        keysTraversed = emptyList(),
+                        scriptCode = UScript.LATIN,
+                        isRtl = false,
+                        topCandidates = emptyList(),
+                    )
+
+                swipeListener?.onSwipeUpdate(currentPath, PointF(event.x, event.y))
+            }
         }
 
         private fun endSwipeDetection(
@@ -378,24 +313,19 @@ class SwipeDetector
                     SwipePath(
                         points = swipePoints.toList(),
                         keysTraversed = emptyList(),
-                        scriptCode = currentScriptCode,
-                        isRtl = isRtlScript,
+                        scriptCode = UScript.LATIN,
+                        isRtl = false,
                         topCandidates = emptyList(),
                     )
 
                 swipeListener?.onSwipeEnd(preliminaryPath)
 
                 val pathSnapshot = swipePoints.toList()
-                val configSnapshot = currentConfig
 
                 scoringJob =
                     scope.launch {
                         try {
-                            val topCandidates =
-                                performSpatialScoringAsync(
-                                    pathSnapshot,
-                                    configSnapshot,
-                                )
+                            val topCandidates = performSpatialScoringAsync(pathSnapshot)
 
                             withContext(Dispatchers.Main) {
                                 swipeListener?.onSwipeResults(topCandidates)
@@ -411,7 +341,7 @@ class SwipeDetector
                 return true
             } else {
                 val duration = System.currentTimeMillis() - startTime
-                if (duration <= currentConfig.maxTapDuration) {
+                if (duration <= 350L) {
                     val tappedKey = keyAt(event.x, event.y)
                     if (tappedKey != null) {
                         swipeListener?.onTap(tappedKey)
@@ -424,10 +354,7 @@ class SwipeDetector
             }
         }
 
-        private suspend fun performSpatialScoringAsync(
-            swipePath: List<SwipePoint>,
-            config: ScriptGestureConfig,
-        ): List<WordCandidate> =
+        private suspend fun performSpatialScoringAsync(swipePath: List<SwipePoint>): List<WordCandidate> =
             withContext(Dispatchers.Default) {
                 if (swipePath.isEmpty()) return@withContext emptyList()
 
@@ -440,7 +367,6 @@ class SwipeDetector
 
                 val candidates = mutableListOf<WordCandidate>()
                 val pathBounds = calculatePathBounds(swipePath)
-                val wordsToCheck = min(500, dictionarySnapshot.size)
 
                 val startingKey =
                     swipePath.firstOrNull()?.let { firstPoint ->
@@ -451,6 +377,8 @@ class SwipeDetector
                                 dx * dx + dy * dy
                             }?.key
                     }
+
+                val wordsToCheck = min(500, dictionarySnapshot.size)
 
                 for (i in 0 until wordsToCheck) {
                     if (i % 50 == 0) {
@@ -489,11 +417,20 @@ class SwipeDetector
                             word,
                             swipePath,
                             keyPositionsSnapshot,
-                            config,
                         )
-                    val combinedScore = spatialScore * 0.7f + preComputedFrequencyScore * 0.3f
 
-                    candidates.add(WordCandidate(word, spatialScore, preComputedFrequencyScore, combinedScore))
+                    val pathLengthRatio = word.length.toFloat() / swipePath.size.toFloat()
+                    val lengthPenalty =
+                        when {
+                            pathLengthRatio < 0.10f -> 0.75f
+                            pathLengthRatio < 0.15f -> 0.90f
+                            else -> 1.0f
+                        }
+
+                    val adjustedSpatialScore = spatialScore * lengthPenalty
+                    val combinedScore = adjustedSpatialScore * 0.7f + preComputedFrequencyScore * 0.3f
+
+                    candidates.add(WordCandidate(word, adjustedSpatialScore, preComputedFrequencyScore, combinedScore))
 
                     if (combinedScore > 0.95f) {
                         val excellentCandidates = candidates.count { it.combinedScore > 0.90f }
@@ -503,19 +440,20 @@ class SwipeDetector
                     }
                 }
 
-                return@withContext candidates.sortedByDescending { it.combinedScore }.take(10)
+                val topCandidates = candidates.sortedByDescending { it.combinedScore }.take(10)
+
+                return@withContext topCandidates
             }
 
         private fun calculateSpatialScore(
             word: String,
             swipePath: List<SwipePoint>,
             keyPositions: Map<Char, PointF>,
-            config: ScriptGestureConfig,
         ): Float {
             if (swipePath.isEmpty()) return 0f
 
             var totalScore = 0f
-            val sigma = config.spatialSigma
+            val sigma = 40f
             val sigmaSquared = sigma * sigma
             val expThreshold = 10f * sigmaSquared
             val twoSigmaSquared = 2 * sigmaSquared
@@ -622,6 +560,7 @@ class SwipeDetector
             startTime = 0L
             pointCounter = 0
             firstPoint = null
+            lastUpdateTime = 0L
         }
 
         /**

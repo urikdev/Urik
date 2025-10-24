@@ -27,12 +27,6 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 import java.io.ByteArrayInputStream
 
-/**
- * Tests text processing pipeline integration across components.
- *
- * Verifies cache invalidation, normalization consistency, transaction boundaries,
- * and error propagation through spell check, word learning, and text processing layers.
- */
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
 class InputProcessingIntegrationTest {
@@ -306,20 +300,6 @@ class InputProcessingIntegrationTest {
             val learningSays = wordLearningEngine.isWordLearned(normalized)
 
             assertEquals("Components must agree on word existence", spellCheckSays, learningSays)
-        }
-
-    @Test
-    fun `LanguageManager normalization matches Room storage expectations`() =
-        runTest(testDispatcher) {
-            val original = "NormalizeMe"
-            val normalized = languageManager.normalizeText(original)
-
-            wordLearningEngine.learnWord(normalized, InputMethod.TYPED)
-
-            assertTrue(
-                "Normalized text should be found in Room",
-                wordLearningEngine.isWordLearned(normalized),
-            )
         }
 
     @Test
