@@ -68,17 +68,6 @@ private class BoundedVariationErrorTracker(
 /**
  * Loads character variations (long-press alternatives) from JSON assets.
  *
- * Architecture:
- * - Primary: Language-specific variations (e.g., sv.json)
- * - Fallback 1: English variations (en.json)
- * - Fallback 2: Hardcoded Latin diacritics (catastrophic failure only)
- *
- * Error handling:
- * - Circuit breaker prevents repeated failed I/O (3 retries, 60s cooldown)
- * - Errors expire after 1 hour (auto-retry)
- * - Missing assets degrade gracefully to fallback
- *
- * Example: Long-press 'a' in Swedish → ["å", "ä", "á", "à", ...]
  */
 @Singleton
 class CharacterVariationService

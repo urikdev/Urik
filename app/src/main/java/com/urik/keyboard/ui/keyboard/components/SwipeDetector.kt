@@ -59,29 +59,6 @@ data class WordCandidate(
 /**
  * Detects swipe gestures and converts to word candidates.
  *
- * Architecture:
- * - Gesture detection: Distinguishes taps from swipes (80px threshold, 350ms max tap)
- * - Path sampling: Adaptive sampling (2-8 point interval) keeps ≤75 points
- * - Spatial scoring: Gaussian distribution matching swipe path to key positions
- * - Dictionary integration: Pre-loads top 1000 words with frequency scores
- * - Async processing: Background thread for scoring, main thread for results
- *
- * Swipe typing algorithm:
- * 1. **Path capture**: Records touch points with adaptive sampling
- *    - Dense sampling for slow precise movements
- *    - Sparse sampling for fast gestures
- *    - Direction change detection preserves accuracy
- *
- * 2. **Candidate filtering** (fast elimination):
- *    - Starting key match: Word must start with tapped key or adjacent
- *    - Bounds check: ≥60% of word's keys within swipe path bounds + margin
- *    - Reduces 1000 words → ~50-100 candidates in <1ms
- *
- * 3. **Spatial scoring** (accurate ranking):
- *    - Gaussian distance: exp(-d²/2σ²) for each letter to nearest path point
- *    - Combined score: 70% spatial + 30% frequency
- *    - Early exit: Stops after finding 3 candidates with >0.90 score
- *
  */
 @Singleton
 class SwipeDetector

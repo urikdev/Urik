@@ -72,15 +72,6 @@ private class BoundedLayoutErrorTracker(
 /**
  * Loads keyboard layouts from JSON assets with caching and fallback.
  *
- * Architecture:
- * - Primary: Locale-specific layout (e.g., en-US.json)
- * - Fallback 1: Language-only layout (e.g., en.json)
- * - Fallback 2: Hardcoded QWERTY layout
- *
- * Error handling:
- * - Circuit breaker prevents repeated failed I/O (3 retries, 60s cooldown)
- * - Errors expire after 1 hour (auto-retry)
- * - Missing assets degrade gracefully to fallback
  */
 @Singleton
 class KeyboardRepository
