@@ -65,24 +65,6 @@ data class LearningStats(
 /**
  * Learns and retrieves user-typed words with frequency tracking.
  *
- * Architecture:
- * - Persistence: Room database with FTS4 index for prefix search
- * - Caching: Per-language Set cache (100 languages, LRU)
- * - Normalization: ICU4J NFC + language-aware (via LanguageManager)
- * - Concurrency: Mutex for learn/remove, synchronized for cache access
- * - Error handling: Circuit breaker with exponential backoff
- *
- * Learning flow:
- * 1. Validate word (length, unicode, settings)
- * 2. Normalize (NFC standard + language-specific)
- * 3. Mutex-locked DB upsert (increments frequency if exists)
- * 4. Update cache
- *
- * Retrieval strategies:
- * - Exact match: O(1) cache or indexed DB query
- * - Prefix search: FTS4 prefix query for autocomplete
- * - Fuzzy search: Edit distance ≤2 for typo correction
- *
  */
 @Singleton
 class WordLearningEngine

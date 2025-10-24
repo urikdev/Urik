@@ -15,20 +15,6 @@ import com.urik.keyboard.R
 /**
  * Character variation popup for long-press key menu.
  *
- * Architecture:
- * - Base character displayed first (highlighted)
- * - Variations shown in horizontal scrollable list
- * - Auto-positioned above/below anchor key based on screen space
- * - Screen bounds checking prevents off-screen clipping
- * - Max width enforced (screen width - 32dp margins)
- *
- * Lifecycle:
- * - setCharacterVariations() configures content and callbacks
- * - showAboveAnchor() displays popup with intelligent positioning
- * - Auto-dismisses on selection
- * - cleanup() for manual dismissal
- *
- * Example: Long-press "a" → shows ["a", "á", "à", "â", "ä", "ã", "å"]
  */
 class CharacterVariationPopup(
     private val context: Context,
