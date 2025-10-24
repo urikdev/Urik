@@ -649,6 +649,15 @@ class UrikInputMethodService :
     private fun handleEmojiSelected(emoji: String) {
         serviceScope.launch {
             try {
+                if (displayBuffer.isNotEmpty()) {
+                    val actualTextBefore = currentInputConnection?.getTextBeforeCursor(1000, 0)?.toString() ?: ""
+                    val actualTextAfter = currentInputConnection?.getTextAfterCursor(1000, 0)?.toString() ?: ""
+
+                    if (actualTextBefore.isEmpty() && actualTextAfter.isEmpty()) {
+                        coordinateStateClear()
+                    }
+                }
+
                 if (!isSecureField && displayBuffer.isNotEmpty()) {
                     coordinateWordCompletion(InputMethod.TYPED)
                 }
@@ -863,6 +872,15 @@ class UrikInputMethodService :
                 return
             }
 
+            if (displayBuffer.isNotEmpty()) {
+                val actualTextBefore = currentInputConnection?.getTextBeforeCursor(1000, 0)?.toString() ?: ""
+                val actualTextAfter = currentInputConnection?.getTextAfterCursor(1000, 0)?.toString() ?: ""
+
+                if (actualTextBefore.isEmpty() && actualTextAfter.isEmpty()) {
+                    coordinateStateClear()
+                }
+            }
+
             if (spellConfirmationState == SpellConfirmationState.AWAITING_CONFIRMATION) {
                 clearSpellConfirmationState(commitWord = false)
             }
@@ -970,6 +988,15 @@ class UrikInputMethodService :
                     return@launch
                 }
 
+                if (displayBuffer.isNotEmpty()) {
+                    val actualTextBefore = currentInputConnection?.getTextBeforeCursor(1000, 0)?.toString() ?: ""
+                    val actualTextAfter = currentInputConnection?.getTextAfterCursor(1000, 0)?.toString() ?: ""
+
+                    if (actualTextBefore.isEmpty() && actualTextAfter.isEmpty()) {
+                        coordinateStateClear()
+                    }
+                }
+
                 if (spellConfirmationState == SpellConfirmationState.AWAITING_CONFIRMATION) {
                     currentInputConnection?.beginBatchEdit()
                     try {
@@ -1042,6 +1069,15 @@ class UrikInputMethodService :
             if (isSecureField) {
                 currentInputConnection?.setComposingText(validatedWord, 1)
                 return
+            }
+
+            if (displayBuffer.isNotEmpty()) {
+                val actualTextBefore = currentInputConnection?.getTextBeforeCursor(1000, 0)?.toString() ?: ""
+                val actualTextAfter = currentInputConnection?.getTextAfterCursor(1000, 0)?.toString() ?: ""
+
+                if (actualTextBefore.isEmpty() && actualTextAfter.isEmpty()) {
+                    coordinateStateClear()
+                }
             }
 
             if (spellConfirmationState == SpellConfirmationState.AWAITING_CONFIRMATION) {
@@ -1266,7 +1302,14 @@ class UrikInputMethodService :
     private suspend fun performInputAction(imeAction: Int) {
         try {
             if (!isSecureField && displayBuffer.isNotEmpty()) {
-                coordinateWordCompletion(InputMethod.TYPED)
+                val actualTextBefore = currentInputConnection?.getTextBeforeCursor(1000, 0)?.toString() ?: ""
+                val actualTextAfter = currentInputConnection?.getTextAfterCursor(1000, 0)?.toString() ?: ""
+
+                if (actualTextBefore.isEmpty() && actualTextAfter.isEmpty()) {
+                    coordinateStateClear()
+                } else {
+                    coordinateWordCompletion(InputMethod.TYPED)
+                }
             }
 
             isActivelyEditing = true
@@ -1311,6 +1354,16 @@ class UrikInputMethodService :
                     currentInputConnection?.deleteSurroundingText(1, 0)
                 }
                 return
+            }
+
+            if (displayBuffer.isNotEmpty()) {
+                val actualTextBefore = currentInputConnection?.getTextBeforeCursor(1000, 0)?.toString() ?: ""
+                val actualTextAfter = currentInputConnection?.getTextAfterCursor(1000, 0)?.toString() ?: ""
+
+                if (actualTextBefore.isEmpty() && actualTextAfter.isEmpty()) {
+                    coordinateStateClear()
+                    return
+                }
             }
 
             if (spellConfirmationState == SpellConfirmationState.AWAITING_CONFIRMATION) {
@@ -1552,6 +1605,16 @@ class UrikInputMethodService :
                 return
             }
 
+            if (displayBuffer.isNotEmpty()) {
+                val actualTextBefore = currentInputConnection?.getTextBeforeCursor(1000, 0)?.toString() ?: ""
+                val actualTextAfter = currentInputConnection?.getTextAfterCursor(1000, 0)?.toString() ?: ""
+
+                if (actualTextBefore.isEmpty() && actualTextAfter.isEmpty()) {
+                    coordinateStateClear()
+                    return
+                }
+            }
+
             if (spellConfirmationState == SpellConfirmationState.AWAITING_CONFIRMATION) {
                 spellConfirmationState = SpellConfirmationState.NORMAL
                 pendingWordForLearning = null
@@ -1597,6 +1660,20 @@ class UrikInputMethodService :
     private fun handleSpace() {
         serviceScope.launch {
             try {
+                if (isSecureField) {
+                    currentInputConnection?.commitText(" ", 1)
+                    return@launch
+                }
+
+                if (displayBuffer.isNotEmpty()) {
+                    val actualTextBefore = currentInputConnection?.getTextBeforeCursor(1000, 0)?.toString() ?: ""
+                    val actualTextAfter = currentInputConnection?.getTextAfterCursor(1000, 0)?.toString() ?: ""
+
+                    if (actualTextBefore.isEmpty() && actualTextAfter.isEmpty()) {
+                        coordinateStateClear()
+                    }
+                }
+
                 val currentTime = System.currentTimeMillis()
                 val timeSinceLastSpace = currentTime - lastSpaceTime
 
@@ -1631,11 +1708,6 @@ class UrikInputMethodService :
                 }
 
                 lastSpaceTime = currentTime
-
-                if (isSecureField) {
-                    currentInputConnection?.commitText(" ", 1)
-                    return@launch
-                }
 
                 if (spellConfirmationState == SpellConfirmationState.AWAITING_CONFIRMATION) {
                     confirmAndLearnWord()
@@ -1712,7 +1784,14 @@ class UrikInputMethodService :
 
         if (displayBuffer.isNotEmpty() && !isSecureField) {
             serviceScope.launch {
-                coordinateWordCompletion(InputMethod.TYPED)
+                val actualTextBefore = currentInputConnection?.getTextBeforeCursor(1000, 0)?.toString() ?: ""
+                val actualTextAfter = currentInputConnection?.getTextAfterCursor(1000, 0)?.toString() ?: ""
+
+                if (actualTextBefore.isEmpty() && actualTextAfter.isEmpty()) {
+                    coordinateStateClear()
+                } else {
+                    coordinateWordCompletion(InputMethod.TYPED)
+                }
             }
         }
 
@@ -1754,7 +1833,14 @@ class UrikInputMethodService :
 
         serviceScope.launch {
             if (displayBuffer.isNotEmpty() && !isSecureField) {
-                coordinateWordCompletion(InputMethod.TYPED)
+                val actualTextBefore = currentInputConnection?.getTextBeforeCursor(1000, 0)?.toString() ?: ""
+                val actualTextAfter = currentInputConnection?.getTextAfterCursor(1000, 0)?.toString() ?: ""
+
+                if (actualTextBefore.isEmpty() && actualTextAfter.isEmpty()) {
+                    coordinateStateClear()
+                } else {
+                    coordinateWordCompletion(InputMethod.TYPED)
+                }
             }
 
             try {
