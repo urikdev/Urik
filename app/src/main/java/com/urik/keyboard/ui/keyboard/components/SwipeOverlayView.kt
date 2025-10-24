@@ -15,12 +15,6 @@ import com.urik.keyboard.R
 /**
  * Visual overlay for swipe typing gesture trail.
  *
- * Architecture:
- * - Path capture: Stores up to 100 points (capped for performance)
- * - Curve rendering: Quadratic Bézier between points for smooth trail
- * - Animations: Pulse on current finger position, fade-out on release
- * - Zero allocations: Reuses FloatArray for path points, PointF instances
- *
  */
 class SwipeOverlayView
     @JvmOverloads

@@ -197,22 +197,6 @@ private data class SuggestionCacheEntry(
 
 /**
  * Processes text input with script-aware normalization and spell checking.
- *
- * Architecture:
- * - Script detection: Unicode script codes (Latin, Arabic, CJK, etc.)
- * - Normalization: Script-specific (NFC for Arabic/Hebrew, lowercase for Latin)
- * - Grapheme counting: ICU BreakIterator for complex scripts (Thai, Arabic), length for simple
- * - Spell checking: Delegates to SpellCheckManager with caching
- * - Settings integration: Observes settings changes, reconfigures on the fly
- *
- * Caching strategy:
- * - Processing cache: Normalized text + grapheme count (200 entries, 5min TTL)
- * - Suggestion cache: Spell check results + suggestions (200 entries, 5min TTL)
- * - Both invalidated on script/settings change
- *
- * Thread safety: All public methods use Dispatchers.Default, caches are ConcurrentHashMap.
- *
- * Example: "café" (Latin) → normalized "café", graphemes 4, spell check if len ≥2
  */
 @Singleton
 class TextInputProcessor
@@ -232,7 +216,7 @@ class TextInputProcessor
                 UScript.LATIN,
                 KeyboardSettings(),
             )
-        private var currentLocale: ULocale? = null
+        private var currentLocale: ULocale = ULocale.ENGLISH
         private var currentSettings = KeyboardSettings()
 
         private val processorJob = SupervisorJob()
@@ -478,13 +462,12 @@ class TextInputProcessor
                         normalizer.normalize(text)
                     }
                     else -> {
-                        val localeToUse = locale?.toLocale() ?: ULocale.getDefault().toLocale()
+                        val localeToUse = locale?.toLocale() ?: currentLocale.toLocale()
                         text.lowercase(localeToUse).trim()
                     }
                 }
             } catch (_: Exception) {
-                val fallbackLocale = currentLocale?.toLocale() ?: ULocale.getDefault().toLocale()
-                text.lowercase(fallbackLocale).trim()
+                text.lowercase(currentLocale.toLocale()).trim()
             }
         }
 

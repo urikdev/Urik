@@ -1933,6 +1933,8 @@ class UrikInputMethodService :
         textBeforeCursor: String,
     ) {
         withContext(Dispatchers.Main) {
+            isActivelyEditing = true
+
             try {
                 val beforeLastBoundary =
                     textBeforeCursor.indexOfLast { char ->

@@ -608,7 +608,7 @@ class SpellCheckManager
                     Locale.forLanguageTag(languageCode)
                 }
             } catch (_: Exception) {
-                Locale.getDefault()
+                Locale.forLanguageTag("en")
             }
 
         private fun buildCacheKey(

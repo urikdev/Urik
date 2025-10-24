@@ -24,12 +24,6 @@ import javax.inject.Inject
 /**
  * Keyboard UI state and layout management.
  *
- * Architecture:
- * - State: Shift/caps lock, current mode (LETTERS/NUMBERS/SYMBOLS), loading status
- * - Layout: Mode-specific key arrangements (3-4 rows, action keys)
- * - Events: User actions serialized through SharedFlow (key presses, mode switches)
- * - Job cancellation: In-flight layout loads cancelled on language/action type change
- *
  */
 @HiltViewModel
 class KeyboardViewModel
