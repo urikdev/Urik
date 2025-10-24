@@ -35,8 +35,11 @@ import com.urik.keyboard.ui.keyboard.components.KeyboardLayoutManager
 import com.urik.keyboard.ui.keyboard.components.SwipeDetector
 import com.urik.keyboard.ui.keyboard.components.SwipeKeyboardView
 import com.urik.keyboard.utils.ActionDetector
+import com.urik.keyboard.utils.BackspaceUtils
 import com.urik.keyboard.utils.CacheMemoryManager
+import com.urik.keyboard.utils.CursorEditingUtils
 import com.urik.keyboard.utils.ErrorLogger
+import com.urik.keyboard.utils.KeyboardModeUtils
 import com.urik.keyboard.utils.ScriptDetector
 import com.urik.keyboard.utils.SecureFieldDetector
 import dagger.hilt.android.AndroidEntryPoint
@@ -123,6 +126,9 @@ class UrikInputMethodService :
     @Volatile
     private var isActivelyEditing = false
 
+    @Volatile
+    private var isRecomposing = false
+
     private var currentScriptCode = UScript.LATIN
 
     @Volatile
@@ -179,18 +185,7 @@ class UrikInputMethodService :
      * @param text Text to validate
      * @return True if text contains letters, ideographs, or valid punctuation
      */
-    private fun isValidTextInput(text: String): Boolean {
-        if (text.isBlank()) return false
-
-        return text.any { char ->
-            Character.isLetter(char.code) ||
-                Character.isIdeographic(char.code) ||
-                Character.getType(char.code) == Character.OTHER_LETTER.toInt() ||
-                char == '\'' ||
-                char == '\u2019' ||
-                char == '-'
-        }
-    }
+    private fun isValidTextInput(text: String): Boolean = CursorEditingUtils.isValidTextInput(text)
 
     /**
      * Checks if character input represents a letter.
@@ -798,16 +793,9 @@ class UrikInputMethodService :
         isSecureField = SecureFieldDetector.isSecure(info)
         currentInputAction = ActionDetector.detectAction(info)
 
-        val isNumberInput =
-            info?.inputType?.let { inputType ->
-                val inputClass = inputType and android.text.InputType.TYPE_MASK_CLASS
-                inputClass == android.text.InputType.TYPE_CLASS_NUMBER
-            } ?: false
-
-        if (isNumberInput) {
-            viewModel.onEvent(KeyboardEvent.ModeChanged(KeyboardMode.NUMBERS))
-        } else if (viewModel.state.value.currentMode == KeyboardMode.NUMBERS) {
-            viewModel.onEvent(KeyboardEvent.ModeChanged(KeyboardMode.LETTERS))
+        val targetMode = KeyboardModeUtils.determineTargetMode(info, viewModel.state.value.currentMode)
+        if (targetMode != viewModel.state.value.currentMode) {
+            viewModel.onEvent(KeyboardEvent.ModeChanged(targetMode))
         }
 
         if (isSecureField) {
@@ -884,7 +872,7 @@ class UrikInputMethodService :
             val cursorPosInWord =
                 if (composingRegionStart != -1 && displayBuffer.isNotEmpty()) {
                     val absoluteCursorPos = currentInputConnection?.getTextBeforeCursor(1000, 0)?.length ?: displayBuffer.length
-                    (absoluteCursorPos - composingRegionStart).coerceIn(0, displayBuffer.length)
+                    CursorEditingUtils.calculateCursorPositionInWord(absoluteCursorPos, composingRegionStart, displayBuffer.length)
                 } else {
                     displayBuffer.length
                 }
@@ -906,9 +894,11 @@ class UrikInputMethodService :
                 currentInputConnection?.setComposingText(displayBuffer, 1)
 
                 if (oldComposingStart != -1) {
-                    val newAbsoluteCursorPos = oldComposingStart + newCursorPos
+                    val currentTextLength = currentInputConnection?.getTextBeforeCursor(1000, 0)?.length ?: displayBuffer.length
+                    composingRegionStart = CursorEditingUtils.recalculateComposingRegionStart(currentTextLength, displayBuffer.length)
+
+                    val newAbsoluteCursorPos = composingRegionStart + newCursorPos
                     currentInputConnection?.setSelection(newAbsoluteCursorPos, newAbsoluteCursorPos)
-                    composingRegionStart = oldComposingStart
                 }
             } finally {
                 currentInputConnection?.endBatchEdit()
@@ -1334,7 +1324,7 @@ class UrikInputMethodService :
                 val cursorPosInWord =
                     if (composingRegionStart != -1) {
                         val absoluteCursorPos = currentInputConnection?.getTextBeforeCursor(1000, 0)?.length ?: displayBuffer.length
-                        (absoluteCursorPos - composingRegionStart).coerceIn(0, displayBuffer.length)
+                        CursorEditingUtils.calculateCursorPositionInWord(absoluteCursorPos, composingRegionStart, displayBuffer.length)
                     } else {
                         displayBuffer.length
                     }
@@ -1353,9 +1343,12 @@ class UrikInputMethodService :
                             currentInputConnection?.setComposingText(displayBuffer, 1)
 
                             if (oldComposingStart != -1) {
-                                val newAbsoluteCursorPos = oldComposingStart + newCursorPos
+                                val currentTextLength = currentInputConnection?.getTextBeforeCursor(1000, 0)?.length ?: displayBuffer.length
+                                composingRegionStart =
+                                    CursorEditingUtils.recalculateComposingRegionStart(currentTextLength, displayBuffer.length)
+
+                                val newAbsoluteCursorPos = composingRegionStart + newCursorPos
                                 currentInputConnection?.setSelection(newAbsoluteCursorPos, newAbsoluteCursorPos)
-                                composingRegionStart = oldComposingStart
                             }
                         } finally {
                             currentInputConnection?.endBatchEdit()
@@ -1543,27 +1536,8 @@ class UrikInputMethodService :
      * @param textBeforeCursor Text before cursor position
      * @return Pair of (word, boundary index) or null if no valid word found
      */
-    private fun extractWordBeforeCursor(textBeforeCursor: String): Pair<String, Int>? {
-        if (textBeforeCursor.isEmpty()) return null
-
-        val lastWordBoundary =
-            textBeforeCursor.indexOfLast { char ->
-                char.isWhitespace() || char in ".,!?;:\n"
-            }
-
-        val wordBeforeCursor =
-            if (lastWordBoundary >= 0) {
-                textBeforeCursor.substring(lastWordBoundary + 1)
-            } else {
-                textBeforeCursor
-            }
-
-        if (wordBeforeCursor.isEmpty() || !isValidTextInput(wordBeforeCursor)) {
-            return null
-        }
-
-        return Pair(wordBeforeCursor, lastWordBoundary)
-    }
+    private fun extractWordBeforeCursor(textBeforeCursor: String): Pair<String, Int>? =
+        BackspaceUtils.extractWordBeforeCursor(textBeforeCursor)
 
     /**
      * Handles word-mode backspace deletion.
@@ -1597,27 +1571,14 @@ class UrikInputMethodService :
             val textBeforeCursor = currentInputConnection?.getTextBeforeCursor(50, 0)?.toString()
 
             if (!textBeforeCursor.isNullOrEmpty()) {
-                val wordInfo = extractWordBeforeCursor(textBeforeCursor)
+                val wordInfo = BackspaceUtils.extractWordBeforeCursor(textBeforeCursor)
 
                 if (wordInfo != null) {
                     val (word, _) = wordInfo
-                    val deleteLength = word.length
+                    val shouldDeleteSpace = BackspaceUtils.shouldDeleteTrailingSpace(textBeforeCursor, word.length)
+                    val deleteLength = BackspaceUtils.calculateDeleteLength(word.length, shouldDeleteSpace)
 
-                    val charBeforeWord =
-                        if (textBeforeCursor.length > deleteLength) {
-                            textBeforeCursor[textBeforeCursor.length - deleteLength - 1]
-                        } else {
-                            null
-                        }
-
-                    val totalDeleteLength =
-                        if (charBeforeWord?.isWhitespace() == true) {
-                            deleteLength + 1
-                        } else {
-                            deleteLength
-                        }
-
-                    currentInputConnection?.deleteSurroundingText(totalDeleteLength, 0)
+                    currentInputConnection?.deleteSurroundingText(deleteLength, 0)
                 } else {
                     currentInputConnection?.deleteSurroundingText(1, 0)
                 }
@@ -1842,6 +1803,9 @@ class UrikInputMethodService :
         val hasSelection = (newSelStart != newSelEnd)
 
         if (hasComposingText && !cursorInComposingRegion && !hasSelection) {
+            if (isRecomposing) return
+
+            isActivelyEditing = true
             coordinateStateClear()
             clearSpellConfirmationState()
 
@@ -1852,8 +1816,13 @@ class UrikInputMethodService :
                 val wordAtCursor = extractWordAtCursor(textBeforeCursor ?: "", textAfterCursor ?: "")
 
                 if (wordAtCursor != null) {
+                    isRecomposing = true
                     serviceScope.launch {
-                        recomposeWordAtCursor(wordAtCursor, textBeforeCursor ?: "")
+                        try {
+                            recomposeWordAtCursor(wordAtCursor, textBeforeCursor ?: "")
+                        } finally {
+                            isRecomposing = false
+                        }
                     }
                 }
             }
@@ -1861,6 +1830,8 @@ class UrikInputMethodService :
         }
 
         if (!hasComposingText && !hasSelection) {
+            if (isRecomposing) return
+
             val textBeforeCursor = currentInputConnection?.getTextBeforeCursor(50, 0)?.toString()
             val textAfterCursor = currentInputConnection?.getTextAfterCursor(50, 0)?.toString()
 
@@ -1868,8 +1839,13 @@ class UrikInputMethodService :
                 val wordAtCursor = extractWordAtCursor(textBeforeCursor ?: "", textAfterCursor ?: "")
 
                 if (wordAtCursor != null) {
+                    isRecomposing = true
                     serviceScope.launch {
-                        recomposeWordAtCursor(wordAtCursor, textBeforeCursor ?: "")
+                        try {
+                            recomposeWordAtCursor(wordAtCursor, textBeforeCursor ?: "")
+                        } finally {
+                            isRecomposing = false
+                        }
                     }
                 }
             }
@@ -1882,8 +1858,23 @@ class UrikInputMethodService :
         }
 
         if (newSelStart == 0 && newSelEnd == 0) {
+            val textBefore = currentInputConnection?.getTextBeforeCursor(50, 0)?.toString()
+            val textAfter = currentInputConnection?.getTextAfterCursor(50, 0)?.toString()
+
+            if (CursorEditingUtils.shouldClearStateOnEmptyField(
+                    newSelStart,
+                    newSelEnd,
+                    textBefore,
+                    textAfter,
+                    displayBuffer,
+                    wordState.hasContent,
+                )
+            ) {
+                coordinateStateClear()
+                clearSpellConfirmationState()
+            }
+
             serviceScope.launch {
-                val textBefore = currentInputConnection?.getTextBeforeCursor(50, 0)?.toString()
                 withContext(Dispatchers.Main) {
                     viewModel.checkAndApplyAutoCapitalization(textBefore)
                 }
@@ -1894,39 +1885,7 @@ class UrikInputMethodService :
     private fun extractWordAtCursor(
         textBefore: String,
         textAfter: String,
-    ): String? {
-        val beforeLastBoundary =
-            textBefore.indexOfLast { char ->
-                char.isWhitespace() || char in ".,!?;:\n"
-            }
-
-        val afterFirstBoundary =
-            textAfter.indexOfFirst { char ->
-                char.isWhitespace() || char in ".,!?;:\n"
-            }
-
-        val wordBefore =
-            if (beforeLastBoundary >= 0) {
-                textBefore.substring(beforeLastBoundary + 1)
-            } else {
-                textBefore
-            }
-
-        val wordAfter =
-            if (afterFirstBoundary >= 0) {
-                textAfter.substring(0, afterFirstBoundary)
-            } else {
-                textAfter
-            }
-
-        val fullWord = wordBefore + wordAfter
-
-        return if (fullWord.isNotEmpty() && isValidTextInput(fullWord)) {
-            fullWord
-        } else {
-            null
-        }
-    }
+    ): String? = CursorEditingUtils.extractWordAtCursor(textBefore, textAfter)
 
     private suspend fun recomposeWordAtCursor(
         word: String,
