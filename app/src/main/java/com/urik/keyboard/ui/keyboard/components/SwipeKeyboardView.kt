@@ -27,6 +27,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * Main keyboard view with swipe typing and suggestion bar.
@@ -711,6 +712,15 @@ class SwipeKeyboardView
                 } else {
                     updateSuggestionBarContent()
                 }
+
+                post {
+                    requestLayout()
+                    post {
+                        if (!isDestroyed) {
+                            mapKeyPositions()
+                        }
+                    }
+                }
             }
         }
 
@@ -889,22 +899,11 @@ class SwipeKeyboardView
                 }
 
                 MotionEvent.ACTION_MOVE -> {
-                    val touchDuration = System.currentTimeMillis() - (touchStartTime ?: System.currentTimeMillis())
+                    val isSwipe = swipeDetector?.handleTouchEvent(ev) { x, y -> findKeyAt(x, y) } ?: false
 
-                    touchStartPoint?.let { start ->
-                        val distance =
-                            kotlin.math.sqrt(
-                                (ev.x - start.x) * (ev.x - start.x) + (ev.y - start.y) * (ev.y - start.y),
-                            )
-
-                        if (distance > 60f && touchDuration > 200L) {
-                            val isSwipe = swipeDetector?.handleTouchEvent(ev) { x, y -> findKeyAt(x, y) } ?: false
-
-                            if (isSwipe && !isSwipeActive) {
-                                isSwipeActive = true
-                                return true
-                            }
-                        }
+                    if (isSwipe && !isSwipeActive) {
+                        isSwipeActive = true
+                        return true
                     }
 
                     return isSwipeActive
@@ -936,24 +935,6 @@ class SwipeKeyboardView
                 }
 
                 return if (handled) true else super.onTouchEvent(event)
-            }
-
-            when (event.action) {
-                MotionEvent.ACTION_DOWN -> {
-                    return true
-                }
-                MotionEvent.ACTION_UP -> {
-                    val duration = System.currentTimeMillis() - (touchStartTime ?: 0)
-                    if (duration <= 350L) {
-                        val key = findKeyAt(event.x, event.y)
-                        if (key != null) {
-                            keyboardLayoutManager?.triggerHapticFeedback()
-                            onKeyClickListener?.invoke(key)
-                            performClick()
-                            return true
-                        }
-                    }
-                }
             }
 
             return super.onTouchEvent(event)
@@ -1013,6 +994,7 @@ class SwipeKeyboardView
 
         override fun onSwipeEnd(finalPath: SwipeDetector.SwipePath) {
             if (isDestroyed) return
+            keyboardLayoutManager?.triggerHapticFeedback()
             swipeOverlay.endSwipe()
         }
 
@@ -1023,12 +1005,14 @@ class SwipeKeyboardView
             if (isDestroyed) return
 
             if (candidates.isNotEmpty()) {
-                viewScope.launch {
+                viewScope.launch(Dispatchers.Default) {
                     try {
                         val bestCandidate = selectBestCandidate(candidates)
 
-                        if (!isDestroyed) {
-                            onSwipeWordListener?.invoke(bestCandidate)
+                        withContext(Dispatchers.Main) {
+                            if (!isDestroyed) {
+                                onSwipeWordListener?.invoke(bestCandidate)
+                            }
                         }
                     } catch (_: Exception) {
                         val fallback =
@@ -1037,8 +1021,10 @@ class SwipeKeyboardView
                                     it.spatialScore * 0.9f + it.frequencyScore * 0.1f
                                 }?.word ?: candidates.first().word
 
-                        if (!isDestroyed) {
-                            onSwipeWordListener?.invoke(fallback)
+                        withContext(Dispatchers.Main) {
+                            if (!isDestroyed) {
+                                onSwipeWordListener?.invoke(fallback)
+                            }
                         }
                     }
                 }
@@ -1061,7 +1047,7 @@ class SwipeKeyboardView
 
                 val adjustedScore =
                     if (isLearned) {
-                        0.95f + (candidate.spatialScore * 0.05f)
+                        candidate.spatialScore * 0.90f + 0.10f
                     } else {
                         candidate.spatialScore * 0.85f + candidate.frequencyScore * 0.15f
                     }
@@ -1070,11 +1056,14 @@ class SwipeKeyboardView
             }
 
             val bestCandidate = candidateScores.maxByOrNull { it.second }
-            return bestCandidate?.first?.word ?: candidates.first().word
+            val selectedWord = bestCandidate?.first?.word ?: candidates.first().word
+
+            return selectedWord
         }
 
         override fun onTap(key: KeyboardKey) {
             if (isDestroyed) return
+            keyboardLayoutManager?.triggerHapticFeedback()
             onKeyClickListener?.invoke(key)
         }
 
