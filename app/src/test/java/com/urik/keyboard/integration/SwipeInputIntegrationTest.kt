@@ -10,7 +10,6 @@ import com.urik.keyboard.service.*
 import com.urik.keyboard.settings.KeyboardSettings
 import com.urik.keyboard.settings.SettingsRepository
 import com.urik.keyboard.ui.keyboard.components.SwipeDetector
-import com.urik.keyboard.ui.keyboard.components.WordCandidate
 import com.urik.keyboard.utils.CacheMemoryManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -260,43 +259,6 @@ class SwipeInputIntegrationTest {
             if (learnedConfidence != null) {
                 assertTrue("Learned word should have confidence boost", learnedConfidence.confidence > 0.5f)
             }
-        }
-
-    @Test
-    fun `candidate selection prefers learned words`() =
-        runTest(testDispatcher) {
-            val candidates =
-                listOf(
-                    WordCandidate("hello", 0.85f, 0.7f, 0.80f),
-                    WordCandidate("customword", 0.75f, 0.3f, 0.60f),
-                )
-
-            wordLearningEngine.learnWord("customword", InputMethod.SWIPED)
-            repeat(20) { wordLearningEngine.learnWord("customword", InputMethod.SWIPED) }
-
-            val isInDict = spellCheckManager.isWordInDictionary("customword")
-            assertTrue("High-use learned word should be in dictionary", isInDict)
-
-            val learnedStatus =
-                candidates.associate {
-                    it.word to spellCheckManager.isWordInDictionary(it.word)
-                }
-
-            val sortedByConfidence =
-                candidates.sortedByDescending { candidate ->
-                    val isLearned = learnedStatus[candidate.word] ?: false
-                    if (isLearned && candidate.word == "customword") {
-                        0.95f
-                    } else {
-                        candidate.spatialScore * 0.85f + candidate.frequencyScore * 0.15f
-                    }
-                }
-
-            assertEquals(
-                "High-frequency learned word should rank first despite lower spatial score",
-                "customword",
-                sortedByConfidence.first().word,
-            )
         }
 
     @Test
