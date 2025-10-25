@@ -591,11 +591,13 @@ class WordLearningEngine
 
                     val existingWords =
                         if (validWords.isNotEmpty()) {
-                            learnedWordDao
-                                .findExistingWords(
-                                    languageTag = currentLanguage,
-                                    normalizedWords = validWords,
-                                ).toSet()
+                            val found =
+                                learnedWordDao
+                                    .findExistingWords(
+                                        languageTag = currentLanguage,
+                                        normalizedWords = validWords,
+                                    ).toSet()
+                            found
                         } else {
                             emptySet()
                         }

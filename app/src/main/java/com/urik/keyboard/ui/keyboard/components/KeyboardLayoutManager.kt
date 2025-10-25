@@ -363,17 +363,18 @@ class KeyboardLayoutManager(
 
             val minTarget = cachedDimensions["minTarget"]!!
             val keyHeight = cachedDimensions["keyHeight"]!!
-            val verticalMarginForTarget = maxOf(0, (minTarget - keyHeight) / 2)
+            val visualHeight = keyHeight + 2
+            val verticalMargin = (minTarget - visualHeight) / 2
 
             layoutParams =
                 LinearLayout
                     .LayoutParams(
                         0,
-                        keyHeight,
+                        visualHeight,
                         getKeyWeight(key, rowKeys),
                     ).apply {
                         val horizontalMargin = cachedDimensions["horizontalMargin"]!!
-                        setMargins(horizontalMargin, verticalMarginForTarget, horizontalMargin, verticalMarginForTarget)
+                        setMargins(horizontalMargin, verticalMargin, horizontalMargin, verticalMargin)
                     }
 
             text = getKeyLabel(key, state)
