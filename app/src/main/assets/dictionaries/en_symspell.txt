@@ -62,7 +62,7 @@ think 1839473
 as 1792220
 see 1781493
 did 1742764
-good 282
+good 1741764
 who 1734491
 why 1722797
 from 1709582
@@ -25496,11 +25496,9 @@ infects 282
 reviving 282
 usurp 282
 mobbed 282
-good 282
 carnivores 282
 shortwave 282
 playboys 282
-iâ 282
 modes 282
 approving 282
 greenhorn 282

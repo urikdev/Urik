@@ -439,12 +439,6 @@ class UrikInputMethodService :
 
                 if (wordToCommit.isNotEmpty()) {
                     currentInputConnection?.finishComposingText()
-
-                    val wordToLearn =
-                        wordState.normalizedBuffer.ifEmpty {
-                            wordToCommit.lowercase()
-                        }
-                    learnWordAndInvalidateCache(wordToLearn, inputMethod)
                 }
 
                 coordinateStateClear()
@@ -605,7 +599,7 @@ class UrikInputMethodService :
 
             val swipeView =
                 SwipeKeyboardView(this).apply {
-                    initialize(layoutManager, swipeDetector, spellCheckManager)
+                    initialize(layoutManager, swipeDetector, spellCheckManager, wordLearningEngine)
                     setOnKeyClickListener { key -> handleKeyPress(key) }
                     setOnSwipeWordListener { validatedWord -> handleSwipeWord(validatedWord) }
                     setOnSuggestionClickListener { suggestion -> handleSuggestionSelected(suggestion) }
@@ -1675,12 +1669,6 @@ class UrikInputMethodService :
                     try {
                         if (wordState.hasContent && !isSecureField) {
                             currentInputConnection?.finishComposingText()
-
-                            val wordToLearn =
-                                wordState.normalizedBuffer.ifEmpty {
-                                    wordState.buffer.lowercase()
-                                }
-                            learnWordAndInvalidateCache(wordToLearn, InputMethod.TYPED)
                             coordinateStateClear()
                         }
                         currentInputConnection?.deleteSurroundingText(1, 0)
@@ -1710,7 +1698,8 @@ class UrikInputMethodService :
                         if (isValid) {
                             currentInputConnection?.beginBatchEdit()
                             try {
-                                coordinateWordCompletion(InputMethod.TYPED)
+                                currentInputConnection?.finishComposingText()
+                                coordinateStateClear()
                                 currentInputConnection?.commitText(" ", 1)
 
                                 val textBefore =

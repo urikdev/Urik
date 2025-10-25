@@ -23,6 +23,7 @@ import com.urik.keyboard.model.KeyboardKey
 import com.urik.keyboard.model.KeyboardLayout
 import com.urik.keyboard.model.KeyboardState
 import com.urik.keyboard.service.SpellCheckManager
+import com.urik.keyboard.service.WordLearningEngine
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -61,6 +62,8 @@ class SwipeKeyboardView
 
         private var currentLayout: KeyboardLayout? = null
         private var currentState: KeyboardState? = null
+
+        private var wordLearningEngine: WordLearningEngine? = null
 
         private val swipeOverlay = SwipeOverlayView(context)
 
@@ -250,12 +253,14 @@ class SwipeKeyboardView
             layoutManager: KeyboardLayoutManager,
             detector: SwipeDetector,
             spellCheckManager: SpellCheckManager,
+            wordLearningEngine: WordLearningEngine,
         ) {
             if (isDestroyed) return
 
             this.keyboardLayoutManager = layoutManager
             this.swipeDetector = detector
             this.spellCheckManager = spellCheckManager
+            this.wordLearningEngine = wordLearningEngine
 
             detector.setSwipeListener(this)
         }
@@ -801,8 +806,20 @@ class SwipeKeyboardView
 
                 val key = keyMapping[button]
                 if (key is KeyboardKey.Character) {
-                    val centerX = localRect.centerX().toFloat()
-                    val centerY = localRect.centerY().toFloat()
+                    val layoutParams = button.layoutParams as? LinearLayout.LayoutParams
+                    val topMargin = layoutParams?.topMargin ?: 0
+                    val bottomMargin = layoutParams?.bottomMargin ?: 0
+
+                    val touchTargetRect =
+                        Rect(
+                            localRect.left,
+                            localRect.top - topMargin,
+                            localRect.right,
+                            localRect.bottom + bottomMargin,
+                        )
+
+                    val centerX = touchTargetRect.centerX().toFloat()
+                    val centerY = touchTargetRect.centerY().toFloat()
                     keyCharacterPositions[key] = PointF(centerX, centerY)
                 }
             }
@@ -911,6 +928,26 @@ class SwipeKeyboardView
 
                 MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                     val wasSwipe = isSwipeActive
+
+                    if (!wasSwipe && touchStartPoint != null) {
+                        val dx = ev.x - touchStartPoint!!.x
+                        val dy = ev.y - touchStartPoint!!.y
+                        val distance = kotlin.math.sqrt(dx * dx + dy * dy)
+
+                        if (distance < 20f) {
+                            val hitButton =
+                                keyPositions.any { (_, rect) ->
+                                    rect.contains(ev.x.toInt(), ev.y.toInt())
+                                }
+
+                            if (!hitButton) {
+                                findKeyAt(ev.x, ev.y)?.let { key ->
+                                    onTap(key)
+                                }
+                            }
+                        }
+                    }
+
                     isSwipeActive = false
                     touchStartPoint = null
                     touchStartTime = null
@@ -924,17 +961,62 @@ class SwipeKeyboardView
         override fun onTouchEvent(event: MotionEvent): Boolean {
             if (isDestroyed) return false
 
-            if (isSwipeActive) {
-                val handled =
-                    swipeDetector?.handleTouchEvent(event) { x, y ->
-                        findKeyAt(x, y)
-                    } ?: false
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    touchStartPoint = PointF(event.x, event.y)
+                    touchStartTime = System.currentTimeMillis()
 
-                if (event.action == MotionEvent.ACTION_UP && handled) {
-                    performClick()
+                    val key = findKeyAt(event.x, event.y)
+                    if (key != null) {
+                        swipeDetector?.handleTouchEvent(event) { x, y -> findKeyAt(x, y) }
+                        return true
+                    }
+                    return false
                 }
 
-                return if (handled) true else super.onTouchEvent(event)
+                MotionEvent.ACTION_MOVE -> {
+                    if (isSwipeActive) {
+                        swipeDetector?.handleTouchEvent(event) { x, y -> findKeyAt(x, y) }
+                        return true
+                    }
+
+                    val isSwipe = swipeDetector?.handleTouchEvent(event) { x, y -> findKeyAt(x, y) } ?: false
+                    if (isSwipe) {
+                        isSwipeActive = true
+                        return true
+                    }
+
+                    return false
+                }
+
+                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                    val startPoint = touchStartPoint
+                    touchStartPoint = null
+                    touchStartTime = null
+
+                    if (isSwipeActive) {
+                        isSwipeActive = false
+                        swipeDetector?.handleTouchEvent(event) { x, y -> findKeyAt(x, y) }
+                        performClick()
+                        return true
+                    }
+
+                    if (startPoint != null) {
+                        val dx = event.x - startPoint.x
+                        val dy = event.y - startPoint.y
+                        val distance = kotlin.math.sqrt(dx * dx + dy * dy)
+
+                        if (distance < 20f) {
+                            findKeyAt(event.x, event.y)?.let { key ->
+                                onTap(key)
+                                performClick()
+                                return true
+                            }
+                        }
+                    }
+
+                    return false
+                }
             }
 
             return super.onTouchEvent(event)
@@ -971,12 +1053,7 @@ class SwipeKeyboardView
                 }
             }
 
-            val maxTouchDistance = 60f * context.resources.displayMetrics.density
-            if (closestButton != null && closestDistance <= maxTouchDistance) {
-                return keyMapping[closestButton]
-            }
-
-            return null
+            return if (closestButton != null) keyMapping[closestButton] else null
         }
 
         override fun onSwipeStart(startPoint: PointF) {
@@ -1032,33 +1109,34 @@ class SwipeKeyboardView
         }
 
         private suspend fun selectBestCandidate(candidates: List<WordCandidate>): String {
-            val candidateScores = mutableListOf<Pair<WordCandidate, Float>>()
+            if (candidates.isEmpty()) return ""
 
             val candidateWords = candidates.take(10).map { it.word }
             val learnedStatus =
                 try {
-                    spellCheckManager?.areWordsInDictionary(candidateWords) ?: emptyMap()
+                    wordLearningEngine?.areWordsLearned(candidateWords) ?: emptyMap()
                 } catch (_: Exception) {
                     emptyMap()
                 }
 
-            for (candidate in candidates.take(10)) {
+            val candidateScores =
+                candidates.take(10).map { candidate ->
+                    val isLearned = learnedStatus[candidate.word] ?: false
+                    val adjustedScore =
+                        if (isLearned) {
+                            candidate.combinedScore * 1.15f
+                        } else {
+                            candidate.combinedScore
+                        }
+                    candidate to adjustedScore
+                }
+
+            candidateScores.forEachIndexed { index, (candidate, score) ->
                 val isLearned = learnedStatus[candidate.word] ?: false
-
-                val adjustedScore =
-                    if (isLearned) {
-                        candidate.spatialScore * 0.90f + 0.10f
-                    } else {
-                        candidate.spatialScore * 0.85f + candidate.frequencyScore * 0.15f
-                    }
-
-                candidateScores.add(candidate to adjustedScore)
             }
 
             val bestCandidate = candidateScores.maxByOrNull { it.second }
-            val selectedWord = bestCandidate?.first?.word ?: candidates.first().word
-
-            return selectedWord
+            return bestCandidate?.first?.word ?: candidates.first().word
         }
 
         override fun onTap(key: KeyboardKey) {
@@ -1116,6 +1194,7 @@ class SwipeKeyboardView
             spellCheckManager = null
             keyboardLayoutManager = null
             swipeDetector = null
+            wordLearningEngine = null
 
             currentLayout = null
             currentState = null

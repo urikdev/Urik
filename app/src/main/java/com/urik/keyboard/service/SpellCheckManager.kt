@@ -767,10 +767,7 @@ class SpellCheckManager
                         return@withContext emptyList()
                     }
 
-                    val sortedWords =
-                        wordFrequencies
-                            .sortedByDescending { it.second }
-                            .take(maxResults)
+                    val sortedWords = wordFrequencies.sortedByDescending { it.second }
 
                     return@withContext sortedWords
                 } catch (_: Exception) {
