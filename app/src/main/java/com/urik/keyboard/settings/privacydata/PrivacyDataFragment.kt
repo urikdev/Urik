@@ -60,28 +60,11 @@ class PrivacyDataFragment : PreferenceFragmentCompat() {
             }
         screen.addPreference(clearLearnedPref)
 
-        val clearAllPref =
-            Preference(context).apply {
-                key = "clear_all_data"
-                title = resources.getString(R.string.privacy_settings_clear_learned_words)
-                summary = resources.getString(R.string.privacy_settings_clear_learned_words_summary)
-                setOnPreferenceClickListener {
-                    showConfirmDialog(
-                        resources.getString(R.string.privacy_settings_clear_learned_words),
-                        resources.getString(R.string.privacy_settings_clear_learned_words_confirm),
-                    ) {
-                        viewModel.clearAllData()
-                    }
-                    true
-                }
-            }
-        screen.addPreference(clearAllPref)
-
         val resetPref =
             Preference(context).apply {
                 key = "reset_defaults"
                 title = resources.getString(R.string.privacy_settings_reset_to_defaults)
-                summary = resources.getString(R.string.privacy_settings_reset_to_defaults_summary)
+                summary = ""
                 setOnPreferenceClickListener {
                     showConfirmDialog(
                         resources.getString(R.string.privacy_settings_reset_to_defaults),
@@ -143,7 +126,7 @@ class PrivacyDataFragment : PreferenceFragmentCompat() {
                 }
 
             startActivity(Intent.createChooser(shareIntent, resources.getString(R.string.privacy_settings_export_error_log)))
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             AlertDialog
                 .Builder(requireContext())
                 .setTitle(resources.getString(R.string.error_title))

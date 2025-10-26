@@ -32,15 +32,6 @@ class PrivacyDataViewModel
             }
         }
 
-        fun clearAllData() {
-            viewModelScope.launch {
-                settingsRepository
-                    .clearAllData()
-                    .onSuccess { _events.emit(SettingsEvent.Success.LearnedWordsCleared) }
-                    .onFailure { _events.emit(SettingsEvent.Error.ClearLearnedWordsFailed) }
-            }
-        }
-
         fun resetToDefaults() {
             viewModelScope.launch {
                 settingsRepository

@@ -14,32 +14,29 @@
         android:localeConfig="@xml/locales_config"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Material3.DayNight"
+        android:theme="@style/Theme.Urik"
         >
 
-        <!-- Main Activity with proper theme -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:theme="@style/Theme.Material3.DayNight">
+            android:theme="@style/Theme.Urik">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
-        <!-- Settings Activity -->
         <activity
             android:name=".settings.SettingsActivity"
             android:exported="false"
-            android:theme="@style/Theme.Material3.DayNight"
+            android:theme="@style/Theme.Urik"
             android:label="@string/settings_title" />
 
-        <!-- Licenses Activity -->
         <activity
             android:name=".settings.DictionaryAttributionActivity"
             android:exported="false"
-            android:theme="@style/Theme.Material3.DayNight"
+            android:theme="@style/Theme.Urik"
             android:label="@string/licenses_title" />
 
         <activity
@@ -52,7 +49,6 @@
             android:theme="@style/Theme.Urik.OssLicenses"
             tools:replace="android:theme"/>
 
-        <!-- Input Method Service -->
         <service
             android:name=".UrikInputMethodService"
             android:exported="true"
@@ -66,7 +62,6 @@
                 android:resource="@xml/method" />
         </service>
 
-        <!-- FileProvider for sharing error logs -->
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"

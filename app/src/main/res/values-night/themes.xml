@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
     <style name="Theme.Urik" parent="Theme.Material3.DayNight">
-        <item name="colorPrimary">@color/sage</item>
+        <item name="colorPrimary">@color/battleship_gray</item>
         <item name="colorOnPrimary">@color/content_on_accent</item>
-        <item name="colorPrimaryContainer">@color/light_orange</item>
-        <item name="colorOnPrimaryContainer">@color/wenge</item>
+        <item name="colorPrimaryContainer">@color/wenge</item>
+        <item name="colorOnPrimaryContainer">@color/sage</item>
 
-        <item name="colorSecondary">@color/battleship_gray</item>
-        <item name="colorOnSecondary">@color/content_on_accent</item>
-        <item name="colorSecondaryContainer">@color/sage</item>
-        <item name="colorOnSecondaryContainer">@color/wenge</item>
+        <item name="colorSecondary">@color/sage</item>
+        <item name="colorOnSecondary">@color/wenge</item>
+        <item name="colorSecondaryContainer">@color/battleship_gray</item>
+        <item name="colorOnSecondaryContainer">@color/light_orange</item>
 
-        <item name="colorTertiary">@color/delft_blue</item>
-        <item name="colorOnTertiary">@color/content_on_accent</item>
+        <item name="colorTertiary">@color/light_orange</item>
+        <item name="colorOnTertiary">@color/wenge</item>
 
         <item name="colorSurface">@color/surface_primary</item>
         <item name="colorOnSurface">@color/content_primary</item>
@@ -20,7 +20,7 @@
         <item name="colorOnSurfaceVariant">@color/content_secondary</item>
 
         <item name="colorOutline">@color/key_border</item>
-        <item name="colorOutlineVariant">@color/battleship_gray</item>
+        <item name="colorOutlineVariant">@color/wenge</item>
 
         <item name="android:windowBackground">@color/keyboard_background</item>
     </style>

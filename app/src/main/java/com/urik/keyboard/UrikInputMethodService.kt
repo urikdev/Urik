@@ -206,24 +206,18 @@ class UrikInputMethodService :
 
     /**
      * Clears spell confirmation state and optionally commits current word.
-     *
-     * @param commitWord Whether to commit word or restore composing text
      */
-    private fun clearSpellConfirmationState(commitWord: Boolean = false) {
+    private fun clearSpellConfirmationState() {
         spellConfirmationState = SpellConfirmationState.NORMAL
         pendingWordForLearning = null
 
-        if (commitWord) {
-            unhighlightCurrentWord()
-        } else {
-            try {
-                if (displayBuffer.isNotEmpty()) {
-                    currentInputConnection?.setComposingText(displayBuffer, 1)
-                } else {
-                    currentInputConnection?.finishComposingText()
-                }
-            } catch (_: Exception) {
+        try {
+            if (displayBuffer.isNotEmpty()) {
+                currentInputConnection?.setComposingText(displayBuffer, 1)
+            } else {
+                currentInputConnection?.finishComposingText()
             }
+        } catch (_: Exception) {
         }
     }
 
@@ -269,20 +263,16 @@ class UrikInputMethodService :
      * Learns word and invalidates relevant caches.
      *
      * @param word Word to learn
-     * @param inputMethod Method used to input word
      * @return True if learning succeeded or is disabled
      */
-    private suspend fun learnWordAndInvalidateCache(
-        word: String,
-        inputMethod: InputMethod,
-    ): Boolean {
+    private suspend fun learnWordAndInvalidateCache(word: String): Boolean {
         return try {
             val settings = textInputProcessor.getCurrentSettings()
             if (!settings.isWordLearningEnabled) {
                 return true
             }
 
-            val learnResult = wordLearningEngine.learnWord(word, inputMethod)
+            val learnResult = wordLearningEngine.learnWord(word, InputMethod.SELECTED_FROM_SUGGESTION)
             if (learnResult.isSuccess) {
                 spellCheckManager.invalidateWordCache(word)
                 spellCheckManager.removeFromBlacklist(word)
@@ -311,7 +301,6 @@ class UrikInputMethodService :
                     if (wordToLearn != null) {
                         learnWordAndInvalidateCache(
                             wordToLearn,
-                            InputMethod.SELECTED_FROM_SUGGESTION,
                         )
 
                         currentInputConnection?.finishComposingText()
@@ -405,7 +394,7 @@ class UrikInputMethodService :
                 currentInputConnection?.beginBatchEdit()
                 try {
                     currentInputConnection?.commitText("$suggestion ", 1)
-                    learnWordAndInvalidateCache(suggestion, InputMethod.SELECTED_FROM_SUGGESTION)
+                    learnWordAndInvalidateCache(suggestion)
 
                     displayBuffer = ""
                     wordState = WordState()
@@ -864,7 +853,7 @@ class UrikInputMethodService :
             }
 
             if (spellConfirmationState == SpellConfirmationState.AWAITING_CONFIRMATION) {
-                clearSpellConfirmationState(commitWord = false)
+                clearSpellConfirmationState()
             }
 
             isActivelyEditing = true
@@ -1062,7 +1051,7 @@ class UrikInputMethodService :
             }
 
             if (spellConfirmationState == SpellConfirmationState.AWAITING_CONFIRMATION) {
-                clearSpellConfirmationState(commitWord = false)
+                clearSpellConfirmationState()
             }
 
             if (validatedWord.isEmpty()) return
