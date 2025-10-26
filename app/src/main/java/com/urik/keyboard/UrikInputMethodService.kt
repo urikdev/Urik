@@ -317,7 +317,7 @@ class UrikInputMethodService :
                         currentInputConnection?.finishComposingText()
                         currentInputConnection?.commitText(" ", 1)
                     } else {
-                        coordinateWordCompletion(InputMethod.TYPED)
+                        coordinateWordCompletion()
                         currentInputConnection?.commitText(" ", 1)
                     }
 
@@ -328,7 +328,7 @@ class UrikInputMethodService :
             } catch (_: Exception) {
                 currentInputConnection?.beginBatchEdit()
                 try {
-                    coordinateWordCompletion(InputMethod.TYPED)
+                    coordinateWordCompletion()
                     currentInputConnection?.commitText(" ", 1)
                     coordinateStateClear()
                 } finally {
@@ -428,9 +428,8 @@ class UrikInputMethodService :
     /**
      * Completes current word and learns it.
      *
-     * @param inputMethod Method used to input word
      */
-    private suspend fun coordinateWordCompletion(inputMethod: InputMethod) {
+    private suspend fun coordinateWordCompletion() {
         withContext(Dispatchers.Main) {
             try {
                 isActivelyEditing = true
@@ -646,7 +645,7 @@ class UrikInputMethodService :
                 }
 
                 if (!isSecureField && displayBuffer.isNotEmpty()) {
-                    coordinateWordCompletion(InputMethod.TYPED)
+                    coordinateWordCompletion()
                 }
 
                 currentInputConnection?.commitText(emoji, 1)
@@ -795,15 +794,13 @@ class UrikInputMethodService :
         if (isSecureField) {
             clearSecureFieldState()
         } else {
-            serviceScope.launch {
-                try {
-                    currentInputConnection?.finishComposingText()
-                } catch (_: Exception) {
-                }
-
-                val textBefore = currentInputConnection?.getTextBeforeCursor(50, 0)?.toString()
-                viewModel.checkAndApplyAutoCapitalization(textBefore)
+            try {
+                currentInputConnection?.finishComposingText()
+            } catch (_: Exception) {
             }
+
+            val textBefore = currentInputConnection?.getTextBeforeCursor(50, 0)?.toString()
+            viewModel.checkAndApplyAutoCapitalization(textBefore)
         }
 
         updateKeyboardForCurrentAction()
@@ -1020,7 +1017,7 @@ class UrikInputMethodService :
 
                 currentInputConnection?.beginBatchEdit()
                 try {
-                    coordinateWordCompletion(InputMethod.TYPED)
+                    coordinateWordCompletion()
                     currentInputConnection?.commitText(char, 1)
 
                     if (char in setOf(".", "!", "?") && !isSecureField) {
@@ -1034,7 +1031,7 @@ class UrikInputMethodService :
             } catch (_: Exception) {
                 currentInputConnection?.beginBatchEdit()
                 try {
-                    coordinateWordCompletion(InputMethod.TYPED)
+                    coordinateWordCompletion()
                     currentInputConnection?.commitText(char, 1)
                 } finally {
                     currentInputConnection?.endBatchEdit()
@@ -1292,7 +1289,7 @@ class UrikInputMethodService :
                 if (actualTextBefore.isEmpty() && actualTextAfter.isEmpty()) {
                     coordinateStateClear()
                 } else {
-                    coordinateWordCompletion(InputMethod.TYPED)
+                    coordinateWordCompletion()
                 }
             }
 
@@ -1319,11 +1316,6 @@ class UrikInputMethodService :
             clearSpellConfirmationState()
         } catch (_: Exception) {
             coordinateStateClear()
-        }
-
-        if (!isSecureField) {
-            val textBefore = currentInputConnection?.getTextBeforeCursor(50, 0)?.toString()
-            viewModel.checkAndApplyAutoCapitalization(textBefore)
         }
     }
 
@@ -1732,7 +1724,7 @@ class UrikInputMethodService :
 
                 currentInputConnection?.beginBatchEdit()
                 try {
-                    coordinateWordCompletion(InputMethod.TYPED)
+                    coordinateWordCompletion()
                     currentInputConnection?.commitText(" ", 1)
 
                     val textBefore = currentInputConnection?.getTextBeforeCursor(50, 0)?.toString()
@@ -1743,7 +1735,7 @@ class UrikInputMethodService :
             } catch (_: Exception) {
                 currentInputConnection?.beginBatchEdit()
                 try {
-                    coordinateWordCompletion(InputMethod.TYPED)
+                    coordinateWordCompletion()
                     currentInputConnection?.commitText(" ", 1)
 
                     val textBefore = currentInputConnection?.getTextBeforeCursor(50, 0)?.toString()
@@ -1768,7 +1760,7 @@ class UrikInputMethodService :
                 if (actualTextBefore.isEmpty() && actualTextAfter.isEmpty()) {
                     coordinateStateClear()
                 } else {
-                    coordinateWordCompletion(InputMethod.TYPED)
+                    coordinateWordCompletion()
                 }
             }
         }
@@ -1801,6 +1793,9 @@ class UrikInputMethodService :
 
         if (isSecureField) {
             clearSecureFieldState()
+        } else {
+            val textBefore = currentInputConnection?.getTextBeforeCursor(50, 0)?.toString()
+            viewModel.checkAndApplyAutoCapitalization(textBefore)
         }
     }
 
@@ -1817,7 +1812,7 @@ class UrikInputMethodService :
                 if (actualTextBefore.isEmpty() && actualTextAfter.isEmpty()) {
                     coordinateStateClear()
                 } else {
-                    coordinateWordCompletion(InputMethod.TYPED)
+                    coordinateWordCompletion()
                 }
             }
 
@@ -1851,6 +1846,26 @@ class UrikInputMethodService :
         )
 
         if (isSecureField) return
+
+        if (newSelStart == 0 && newSelEnd == 0) {
+            val textBefore = currentInputConnection?.getTextBeforeCursor(50, 0)?.toString()
+            val textAfter = currentInputConnection?.getTextAfterCursor(50, 0)?.toString()
+
+            if (CursorEditingUtils.shouldClearStateOnEmptyField(
+                    newSelStart,
+                    newSelEnd,
+                    textBefore,
+                    textAfter,
+                    displayBuffer,
+                    wordState.hasContent,
+                )
+            ) {
+                coordinateStateClear()
+                clearSpellConfirmationState()
+            }
+
+            viewModel.checkAndApplyAutoCapitalization(textBefore)
+        }
 
         if (isActivelyEditing) {
             isActivelyEditing = false
@@ -1919,30 +1934,6 @@ class UrikInputMethodService :
         if (!hasComposingText && wordState.hasContent) {
             coordinateStateClear()
             clearSpellConfirmationState()
-        }
-
-        if (newSelStart == 0 && newSelEnd == 0) {
-            val textBefore = currentInputConnection?.getTextBeforeCursor(50, 0)?.toString()
-            val textAfter = currentInputConnection?.getTextAfterCursor(50, 0)?.toString()
-
-            if (CursorEditingUtils.shouldClearStateOnEmptyField(
-                    newSelStart,
-                    newSelEnd,
-                    textBefore,
-                    textAfter,
-                    displayBuffer,
-                    wordState.hasContent,
-                )
-            ) {
-                coordinateStateClear()
-                clearSpellConfirmationState()
-            }
-
-            serviceScope.launch {
-                withContext(Dispatchers.Main) {
-                    viewModel.checkAndApplyAutoCapitalization(textBefore)
-                }
-            }
         }
     }
 
