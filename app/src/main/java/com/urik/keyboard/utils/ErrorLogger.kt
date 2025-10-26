@@ -142,15 +142,6 @@ object ErrorLogger {
     fun exportLog(): File = logFile?.takeIf { it.exists() } ?: createEmptyLogFile()
 
     /**
-     * Clears all error logs.
-     */
-    fun clearLog() {
-        logFile?.delete()
-        fallbackFile?.delete()
-        validateOrCreateLogFile()
-    }
-
-    /**
      * Gets count of logged errors.
      *
      * @return Number of errors in log, or 0 if file missing/corrupted
@@ -173,7 +164,7 @@ object ErrorLogger {
                 index++
             }
             count
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             0
         }
     }
@@ -192,7 +183,7 @@ object ErrorLogger {
                 file.delete()
                 createEmptyLogFile()
             }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             file.delete()
             createEmptyLogFile()
         }
@@ -233,7 +224,7 @@ object ErrorLogger {
             file.writeText(updatedContent)
 
             rotateIfNeeded()
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             writeFallback(entry)
         }
     }
@@ -385,7 +376,7 @@ object ErrorLogger {
                 """.trimIndent()
 
             file.writeText(newJson)
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             file.delete()
             createEmptyLogFile()
         }
@@ -399,7 +390,7 @@ object ErrorLogger {
                     Date(entry.timestamp),
                 )} [${entry.severity}] ${entry.component} - ${entry.failurePoint}: ${entry.exceptionType} - ${entry.message}\n"
             file.appendText(line)
-        } catch (e: Exception) {
+        } catch (_: Exception) {
         }
     }
 

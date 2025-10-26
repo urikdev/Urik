@@ -175,45 +175,6 @@ class CacheMemoryManager
         }
 
         /**
-         * Returns current memory and cache statistics.
-         *
-         * @return Snapshot of system memory and managed cache state
-         */
-        fun getMemoryStats(): MemoryStats {
-            val localMemoryInfo = ActivityManager.MemoryInfo()
-            activityManager.getMemoryInfo(localMemoryInfo)
-
-            return MemoryStats(
-                availableMemoryMb = localMemoryInfo.availMem / (1024 * 1024),
-                totalMemoryMb = localMemoryInfo.totalMem / (1024 * 1024),
-                isLowMemory = localMemoryInfo.lowMemory,
-                managedCaches = managedCaches.size,
-                totalCacheEntries = managedCaches.values.sumOf { it.size() },
-                totalCacheCapacity = managedCaches.values.sumOf { it.maxSize },
-            )
-        }
-
-        /**
-         * Returns statistics for specific cache.
-         *
-         * @param name Cache identifier from createCache()
-         * @return Cache statistics or null if cache doesn't exist
-         */
-        fun getCacheStats(name: String): CacheStats? {
-            val cache = managedCaches[name] ?: return null
-
-            return CacheStats(
-                name = name,
-                size = cache.size(),
-                maxSize = cache.maxSize,
-                hitRate = cache.hitRate(),
-                evictionCount = 0L,
-                hitCount = cache.hits,
-                missCount = cache.misses,
-            )
-        }
-
-        /**
          * Cleans up resources and unregisters callbacks.
          *
          * Call when keyboard service destroyed.
