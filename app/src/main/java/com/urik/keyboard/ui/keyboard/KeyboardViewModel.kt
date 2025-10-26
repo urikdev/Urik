@@ -136,7 +136,7 @@ class KeyboardViewModel
             val lastChar = trimmed.lastOrNull()
             if (lastChar in setOf('.', '!', '?')) {
                 val afterPunctuation = textBeforeCursor.removePrefix(trimmed)
-                return afterPunctuation.isEmpty() || afterPunctuation.all { it.isWhitespace() }
+                return afterPunctuation.isNotEmpty() && afterPunctuation.all { it.isWhitespace() }
             }
 
             return false

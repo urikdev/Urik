@@ -67,8 +67,8 @@ class KeyboardViewModelTest {
     }
 
     @Test
-    fun `shouldAutoCapitalize returns true after period`() {
-        assertTrue(viewModel.shouldAutoCapitalize("Hello."))
+    fun `shouldAutoCapitalize returns false after period without space`() {
+        assertFalse(viewModel.shouldAutoCapitalize("Hello."))
     }
 
     @Test
@@ -82,8 +82,8 @@ class KeyboardViewModelTest {
     }
 
     @Test
-    fun `shouldAutoCapitalize returns true after exclamation`() {
-        assertTrue(viewModel.shouldAutoCapitalize("Hello!"))
+    fun `shouldAutoCapitalize returns false after exclamation without space`() {
+        assertFalse(viewModel.shouldAutoCapitalize("Hello!"))
     }
 
     @Test
@@ -92,13 +92,33 @@ class KeyboardViewModelTest {
     }
 
     @Test
-    fun `shouldAutoCapitalize returns true after question mark`() {
-        assertTrue(viewModel.shouldAutoCapitalize("Hello?"))
+    fun `shouldAutoCapitalize returns false after question mark without space`() {
+        assertFalse(viewModel.shouldAutoCapitalize("Hello?"))
     }
 
     @Test
     fun `shouldAutoCapitalize returns true after question mark with space`() {
         assertTrue(viewModel.shouldAutoCapitalize("Hello? "))
+    }
+
+    @Test
+    fun `shouldAutoCapitalize returns false for email addresses`() {
+        assertFalse(viewModel.shouldAutoCapitalize("user@example."))
+    }
+
+    @Test
+    fun `shouldAutoCapitalize returns false for file extensions`() {
+        assertFalse(viewModel.shouldAutoCapitalize("file."))
+    }
+
+    @Test
+    fun `shouldAutoCapitalize returns false for URLs`() {
+        assertFalse(viewModel.shouldAutoCapitalize("example."))
+    }
+
+    @Test
+    fun `shouldAutoCapitalize returns false for decimals`() {
+        assertFalse(viewModel.shouldAutoCapitalize("3."))
     }
 
     @Test
@@ -122,8 +142,13 @@ class KeyboardViewModelTest {
     }
 
     @Test
-    fun `shouldAutoCapitalize handles period at start`() {
-        assertTrue(viewModel.shouldAutoCapitalize("."))
+    fun `shouldAutoCapitalize returns false for period at start without space`() {
+        assertFalse(viewModel.shouldAutoCapitalize("."))
+    }
+
+    @Test
+    fun `shouldAutoCapitalize returns true for period with trailing space`() {
+        assertTrue(viewModel.shouldAutoCapitalize(". "))
     }
 
     @Test
@@ -307,7 +332,7 @@ class KeyboardViewModelTest {
         }
 
     @Test
-    fun `checkAndApplyAutoCapitalization enables shift after period`() {
+    fun `checkAndApplyAutoCapitalization enables shift after period with space`() {
         viewModel.checkAndApplyAutoCapitalization("Hello. ")
 
         assertTrue(viewModel.state.value.isShiftPressed)
@@ -323,6 +348,13 @@ class KeyboardViewModelTest {
     @Test
     fun `checkAndApplyAutoCapitalization does not enable shift mid-sentence`() {
         viewModel.checkAndApplyAutoCapitalization("Hello world")
+
+        assertFalse(viewModel.state.value.isShiftPressed)
+    }
+
+    @Test
+    fun `checkAndApplyAutoCapitalization does not enable shift after period without space`() {
+        viewModel.checkAndApplyAutoCapitalization("example.")
 
         assertFalse(viewModel.state.value.isShiftPressed)
     }
