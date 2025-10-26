@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="ime_label">Urik Tangentbord</string>
-    <string name="ime_description">Integritet först, tillgängligt tangentbord för dig.</string>
+    <string name="ime_description">Svepskrivning, stavningskontroll och flerspråkigt stöd utan att kompromissa med din integritet. Ingen telemetri. Ingen datainsamling. Allt finns kvar på din enhet.</string>
     <string name="enable_keyboard_title">Aktivera</string>
     <string name="open_settings">Öppna inställningar</string>
     <string name="error_opening_settings">Det går inte att öppna inställningarna</string>
@@ -54,7 +54,6 @@
     <string name="privacy_settings_clear_learned_words_summary">Ta bort alla inlärda ord</string>
     <string name="privacy_settings_clear_learned_words_confirm">Vill du rensa alla inlärda ord? Det här kan inte ångras.</string>
     <string name="privacy_settings_reset_to_defaults">Återställ till standardinställningar</string>
-    <string name="privacy_settings_reset_to_defaults_summary">Återställ standardinställningarna</string>
     <string name="privacy_settings_reset_to_defaults_confirm">Återställa alla inställningar till standardinställningarna?</string>
     <string name="error_title">Fel</string>
     <string name="error_update_theme">Misslyckades med att uppdatera temat</string>

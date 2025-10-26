@@ -95,9 +95,9 @@ kover {
             excludes {
                 classes(
                     "*Fragment",
-                    "*Fragment\$*",
+                    "*Fragment$*",
                     "*Activity",
-                    "*Activity\$*",
+                    "*Activity$*",
                     "*.databinding.*",
                     "*.BuildConfig",
                     "*_Factory",

@@ -2,7 +2,7 @@
     <string name="app_name" translatable="false">Urik</string>
     <string name="ime_name" translatable="false">Urik Keyboard</string>
     <string name="ime_label">Urik Keyboard</string>
-    <string name="ime_description">The privacy first, accessible keyboard for you.</string>
+    <string name="ime_description">Swipe typing, spell check, and multilingual support without compromising your privacy. No telemetry. No data collection. Everything stays on your device.</string>
 
     <!-- Settings -->
     <string name="enable_keyboard_title">Enable</string>
@@ -117,7 +117,6 @@
     <string name="privacy_settings_clear_learned_words_summary">Remove all learned vocabulary</string>
     <string name="privacy_settings_clear_learned_words_confirm">Clear all learned words? This cannot be undone.</string>
     <string name="privacy_settings_reset_to_defaults">Reset to Defaults</string>
-    <string name="privacy_settings_reset_to_defaults_summary">Restore default settings</string>
     <string name="privacy_settings_reset_to_defaults_confirm">Reset all settings to defaults?</string>
     <string name="privacy_settings_export_error_log">Export Error Log</string>
     <string name="privacy_settings_export_error_log_summary">Share diagnostic logs for debugging</string>

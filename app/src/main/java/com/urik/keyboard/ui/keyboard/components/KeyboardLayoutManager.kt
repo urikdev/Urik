@@ -425,6 +425,8 @@ class KeyboardLayoutManager(
                 val iconRes =
                     when (key.action) {
                         KeyboardKey.ActionType.SHIFT -> if (state.isCapsLockOn) R.drawable.shift_lock_48px else R.drawable.shift_48px
+                        KeyboardKey.ActionType.SPACE -> R.drawable.space_bar_48px
+                        KeyboardKey.ActionType.BACKSPACE -> R.drawable.backspace_48px
                         KeyboardKey.ActionType.ENTER -> R.drawable.keyboard_return_48px
                         KeyboardKey.ActionType.SEARCH -> R.drawable.search_48px
                         KeyboardKey.ActionType.SEND -> R.drawable.send_48px
@@ -561,10 +563,6 @@ class KeyboardLayoutManager(
             }
             is KeyboardKey.Action -> {
                 when (key.action) {
-                    KeyboardKey.ActionType.BACKSPACE -> "⌫"
-                    KeyboardKey.ActionType.SPACE -> context.getString(R.string.space_key_label)
-                    KeyboardKey.ActionType.ENTER -> "↵"
-                    KeyboardKey.ActionType.CAPS_LOCK -> "⇪"
                     KeyboardKey.ActionType.MODE_SWITCH_LETTERS -> context.getString(R.string.letters_mode_label)
                     KeyboardKey.ActionType.MODE_SWITCH_NUMBERS -> context.getString(R.string.numbers_mode_label)
                     KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS -> context.getString(R.string.symbols_mode_label)
