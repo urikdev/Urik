@@ -113,7 +113,7 @@ class UrikInputMethodService :
     private var doubleShiftThreshold: Long = 400L
 
     private var suggestionDebounceJob: Job? = null
-    private val suggestionDebounceDelay = 200L
+    private val suggestionDebounceDelay = 10L
 
     @Volatile
     private var displayBuffer = ""
