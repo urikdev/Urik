@@ -129,6 +129,49 @@ class SpellCheckManager
             }
         }
 
+        private suspend fun checkSymSpellDictionary(
+            normalizedWord: String,
+            languageCode: String,
+        ): Boolean {
+            val cacheKey = buildCacheKey(normalizedWord, languageCode)
+            dictionaryCache.getIfPresent(cacheKey)?.let { return it }
+
+            val spellChecker = getSpellCheckerForLanguage(languageCode)
+            if (spellChecker != null) {
+                val suggestions = spellChecker.lookup(normalizedWord, Verbosity.All, MAX_EDIT_DISTANCE)
+                val isInDictionary =
+                    suggestions.any {
+                        it.term.equals(normalizedWord, ignoreCase = true) && it.distance == 0.0
+                    }
+                dictionaryCache.put(cacheKey, isInDictionary)
+                return isInDictionary
+            } else {
+                dictionaryCache.put(cacheKey, false)
+                return false
+            }
+        }
+
+        suspend fun isWordInSymSpellDictionary(word: String): Boolean =
+            withContext(Dispatchers.Default) {
+                try {
+                    if (isDestroyed || !isValidInput(word)) {
+                        return@withContext false
+                    }
+
+                    if (!ensureInitialized()) {
+                        return@withContext false
+                    }
+
+                    val currentLang = getCurrentLanguage()
+                    val locale = getLocaleForLanguage()
+                    val normalizedWord = word.lowercase(locale).trim()
+
+                    return@withContext checkSymSpellDictionary(normalizedWord, currentLang)
+                } catch (_: Exception) {
+                    return@withContext false
+                }
+            }
+
         private suspend fun loadCommonWordsCache(languageCode: String) {
             if (languageCode == commonWordsCacheLanguage && commonWordsCache.isNotEmpty()) {
                 return
@@ -265,34 +308,11 @@ class SpellCheckManager
             languageCode: String,
         ): Boolean {
             val isLearned = wordLearningEngine.isWordLearned(normalizedWord)
-
             if (isLearned) {
-                val cacheKey = buildCacheKey(normalizedWord, languageCode)
-                dictionaryCache.put(cacheKey, true)
                 return true
             }
 
-            val cacheKey = buildCacheKey(normalizedWord, languageCode)
-            dictionaryCache.getIfPresent(cacheKey)?.let { cached ->
-                return cached
-            }
-
-            val spellChecker = getSpellCheckerForLanguage(languageCode)
-
-            if (spellChecker != null) {
-                val suggestions = spellChecker.lookup(normalizedWord, Verbosity.All, MAX_EDIT_DISTANCE)
-
-                val isInDictionary =
-                    suggestions.any {
-                        it.term.equals(normalizedWord, ignoreCase = true) && it.distance == 0.0
-                    }
-
-                dictionaryCache.put(cacheKey, isInDictionary)
-                return isInDictionary
-            } else {
-                dictionaryCache.put(cacheKey, false)
-                return false
-            }
+            return checkSymSpellDictionary(normalizedWord, languageCode)
         }
 
         /**
