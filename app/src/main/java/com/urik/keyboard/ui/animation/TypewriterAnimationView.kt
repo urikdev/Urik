@@ -188,11 +188,13 @@ class TypewriterAnimationView
         override fun onResume(owner: LifecycleOwner) {
             super.onResume(owner)
             editTextSimulator.resumeAnimation()
+            sequencer.resume()
         }
 
         override fun onPause(owner: LifecycleOwner) {
             super.onPause(owner)
             editTextSimulator.pauseAnimation()
+            sequencer.pause()
         }
 
         override fun onAttachedToWindow() {

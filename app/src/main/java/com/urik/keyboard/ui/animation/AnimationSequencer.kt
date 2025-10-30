@@ -1,16 +1,33 @@
 package com.urik.keyboard.ui.animation
 
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
 import kotlin.random.Random
 
 class AnimationSequencer(
     private val timing: AnimationTiming = AnimationTiming(),
 ) {
+    private val isPausedFlow = MutableStateFlow(false)
+
+    fun pause() {
+        isPausedFlow.value = true
+    }
+
+    fun resume() {
+        isPausedFlow.value = false
+    }
+
+    private suspend fun checkPause() {
+        isPausedFlow.first { !it }
+    }
+
     suspend fun animateSequence(
         fullSentence: String,
         typos: List<TypoConfig>,
         onStateChange: (TypewriterState) -> Unit,
     ) {
+        checkPause()
         delay(timing.initialDelay)
 
         var currentText = ""
@@ -20,6 +37,8 @@ class AnimationSequencer(
         var typoIndex = 0
 
         while (currentIndex < fullSentence.length) {
+            checkPause()
+
             val currentTypo = sortedTypos.getOrNull(typoIndex)
 
             if (currentTypo != null && currentIndex == currentTypo.startIndex) {
@@ -33,6 +52,7 @@ class AnimationSequencer(
                     )
                 currentIndex = currentTypo.startIndex + currentTypo.typoWord.length
 
+                checkPause()
                 delay(timing.preErrorPause)
 
                 onStateChange(
@@ -44,6 +64,7 @@ class AnimationSequencer(
                     ),
                 )
 
+                checkPause()
                 delay(timing.errorFadeIn)
 
                 onStateChange(
@@ -56,6 +77,7 @@ class AnimationSequencer(
                     ),
                 )
 
+                checkPause()
                 delay(timing.suggestionReadPause)
 
                 onStateChange(
@@ -68,6 +90,7 @@ class AnimationSequencer(
                     ),
                 )
 
+                checkPause()
                 delay(timing.tapRippleDuration)
 
                 currentText =
@@ -84,6 +107,7 @@ class AnimationSequencer(
                     ),
                 )
 
+                checkPause()
                 delay(timing.suggestionBarDisappear)
 
                 typoIndex++
@@ -107,11 +131,13 @@ class AnimationSequencer(
                         else -> timing.baseTypingSpeed + Random.nextLong(-timing.typingVariance, timing.typingVariance)
                     }
 
+                checkPause()
                 delay(charDelay)
             }
         }
 
         onStateChange(TypewriterState.Complete(text = currentText))
+        checkPause()
         delay(timing.completionPause)
     }
 
@@ -126,10 +152,13 @@ class AnimationSequencer(
         val wordStartIndex = startIndex
 
         if (isTypo) {
+            checkPause()
             delay(timing.preTypoPause)
         }
 
         word.forEachIndexed { index, char ->
+            checkPause()
+
             text += char
 
             if (isTypo && index >= 2) {
@@ -143,6 +172,7 @@ class AnimationSequencer(
                 )
 
                 if (index == 2) {
+                    checkPause()
                     delay(timing.underlineFadeIn)
                 }
             } else {
@@ -155,6 +185,7 @@ class AnimationSequencer(
             }
 
             val charDelay = timing.baseTypingSpeed + Random.nextLong(-timing.typingVariance, timing.typingVariance)
+            checkPause()
             delay(charDelay)
         }
 
