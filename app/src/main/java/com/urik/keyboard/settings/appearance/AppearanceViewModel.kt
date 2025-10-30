@@ -1,5 +1,6 @@
 package com.urik.keyboard.settings.appearance
 
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.urik.keyboard.settings.KeyLabelSize
@@ -48,7 +49,15 @@ class AppearanceViewModel
             viewModelScope.launch {
                 settingsRepository
                     .updateTheme(theme)
-                    .onFailure { _events.emit(SettingsEvent.Error.ThemeUpdateFailed) }
+                    .onSuccess {
+                        val nightMode =
+                            when (theme) {
+                                Theme.LIGHT -> AppCompatDelegate.MODE_NIGHT_NO
+                                Theme.DARK -> AppCompatDelegate.MODE_NIGHT_YES
+                                Theme.SYSTEM -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+                            }
+                        AppCompatDelegate.setDefaultNightMode(nightMode)
+                    }.onFailure { _events.emit(SettingsEvent.Error.ThemeUpdateFailed) }
             }
         }
 
