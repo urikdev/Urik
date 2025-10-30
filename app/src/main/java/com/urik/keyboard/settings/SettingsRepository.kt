@@ -320,14 +320,6 @@ class SettingsRepository
             }
 
         /**
-         * Alias to [clearLearnedWords].
-         *
-         * Provided for semantic clarity in UI contexts where "Clear All Data" is displayed.
-         * Does not clear user preferences or settings.
-         */
-        suspend fun clearAllData(): Result<Unit> = clearLearnedWords()
-
-        /**
          * Resets all preferences to default values.
          *
          * Does not affect learned words. Use [clearLearnedWords] to remove learned vocabulary.
