@@ -166,6 +166,7 @@ class UrikInputMethodService :
      * Clears all state for secure text fields.
      */
     private fun clearSecureFieldState() {
+        suggestionDebounceJob?.cancel()
         displayBuffer = ""
         wordState = WordState()
         synchronized(processingLock) {
@@ -177,6 +178,7 @@ class UrikInputMethodService :
         currentInputConnection?.finishComposingText()
 
         spellCheckManager.clearCaches()
+        spellCheckManager.clearBlacklist()
         textInputProcessor.clearCaches()
 
         lastSpaceTime = 0
