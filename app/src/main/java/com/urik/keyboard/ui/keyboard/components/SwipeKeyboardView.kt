@@ -81,6 +81,9 @@ class SwipeKeyboardView
         private var emojiPickerContainer: LinearLayout? = null
         private var isShowingEmojiPicker = false
 
+        private var cachedLocationArray = IntArray(2)
+        private var cachedParentLocationArray = IntArray(2)
+
         private var isDestroyed = false
 
         private var viewScopeJob = SupervisorJob()
@@ -94,6 +97,23 @@ class SwipeKeyboardView
                     LayoutParams.MATCH_PARENT,
                 ),
             )
+        }
+
+        private fun isTouchInEmojiPicker(
+            x: Float,
+            y: Float,
+        ): Boolean {
+            if (!isShowingEmojiPicker || emojiPickerContainer == null) return false
+
+            emojiPickerContainer!!.getLocationInWindow(cachedLocationArray)
+            this.getLocationInWindow(cachedParentLocationArray)
+
+            val left = cachedLocationArray[0] - cachedParentLocationArray[0]
+            val top = cachedLocationArray[1] - cachedParentLocationArray[1]
+            val right = left + emojiPickerContainer!!.width
+            val bottom = top + emojiPickerContainer!!.height
+
+            return x >= left && x < right && y >= top && y < bottom
         }
 
         /**
@@ -180,7 +200,6 @@ class SwipeKeyboardView
                 EmojiPickerView(themedContext).apply {
                     setOnEmojiPickedListener { emojiViewItem ->
                         onEmojiSelected(emojiViewItem.emoji)
-                        hideEmojiPicker()
                     }
                     layoutParams =
                         LinearLayout
@@ -195,7 +214,7 @@ class SwipeKeyboardView
 
             container.addView(emojiPickerView)
             emojiPickerContainer = container
-            addView(container, childCount - 1)
+            addView(container)
         }
 
         /**
@@ -884,6 +903,10 @@ class SwipeKeyboardView
         override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
             if (isDestroyed) return false
 
+            if (isTouchInEmojiPicker(ev.x, ev.y)) {
+                return false
+            }
+
             suggestionBar?.let { bar ->
                 if (bar.isVisible) {
                     val location = IntArray(2)
@@ -960,6 +983,10 @@ class SwipeKeyboardView
 
         override fun onTouchEvent(event: MotionEvent): Boolean {
             if (isDestroyed) return false
+
+            if (isTouchInEmojiPicker(event.x, event.y)) {
+                return false
+            }
 
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
