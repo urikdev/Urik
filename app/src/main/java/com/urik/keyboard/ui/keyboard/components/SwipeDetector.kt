@@ -238,6 +238,11 @@ class SwipeDetector
 
         private fun checkForSwipeStart(event: MotionEvent) {
             firstPoint?.let { start ->
+                val timeSinceDown = System.currentTimeMillis() - startTime
+                if (timeSinceDown < 100L) {
+                    return
+                }
+
                 val distance = calculateDistance(start.x, start.y, event.x, event.y)
                 if (distance > 35f) {
                     isSwiping = true
