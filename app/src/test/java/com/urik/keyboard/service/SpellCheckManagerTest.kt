@@ -541,7 +541,7 @@ class SpellCheckManagerTest {
     @Test
     fun `getCommonWords returns dictionary words with frequencies`() =
         runTest {
-            val words = spellCheckManager.getCommonWords(1000)
+            val words = spellCheckManager.getCommonWords()
 
             assertTrue(words.isNotEmpty())
             assertTrue(words.any { it.first == "hello" && it.second == 1000 })
@@ -551,7 +551,7 @@ class SpellCheckManagerTest {
     @Test
     fun `getCommonWords sorts by frequency descending`() =
         runTest {
-            val words = spellCheckManager.getCommonWords(5)
+            val words = spellCheckManager.getCommonWords()
 
             for (i in 0 until words.size - 1) {
                 assertTrue(words[i].second >= words[i + 1].second)
@@ -561,7 +561,7 @@ class SpellCheckManagerTest {
     @Test
     fun `getCommonWords filters by length`() =
         runTest {
-            val words = spellCheckManager.getCommonWords(100)
+            val words = spellCheckManager.getCommonWords()
 
             assertTrue(words.all { it.first.length in 2..15 })
         }
@@ -571,7 +571,7 @@ class SpellCheckManagerTest {
         runTest {
             spellCheckManager.blacklistSuggestion("hello")
 
-            val words = spellCheckManager.getCommonWords(100)
+            val words = spellCheckManager.getCommonWords()
 
             assertFalse(words.any { it.first == "hello" })
         }
@@ -579,7 +579,7 @@ class SpellCheckManagerTest {
     @Test
     fun `getCommonWords filters non-alphabetic words`() =
         runTest {
-            val words = spellCheckManager.getCommonWords(100)
+            val words = spellCheckManager.getCommonWords()
 
             assertTrue(
                 words.all { word ->
@@ -630,7 +630,7 @@ class SpellCheckManagerTest {
                 .thenThrow(java.io.IOException("File error"))
 
             val failingManager = SpellCheckManager(context, languageManager, wordLearningEngine, cacheMemoryManager, testDispatcher)
-            val words = failingManager.getCommonWords(10)
+            val words = failingManager.getCommonWords()
 
             assertTrue(words.isEmpty())
         }
@@ -655,7 +655,7 @@ class SpellCheckManagerTest {
             val dictResult = spellCheckManager.isWordInDictionary("test")
             val suggestions = spellCheckManager.generateSuggestions("test", 3)
             val batch = spellCheckManager.areWordsInDictionary(listOf("test"))
-            val common = spellCheckManager.getCommonWords(10)
+            val common = spellCheckManager.getCommonWords()
 
             assertFalse(dictResult)
             assertTrue(suggestions.isEmpty())

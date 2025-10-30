@@ -235,7 +235,7 @@ class SwipeInputIntegrationTest {
     @Test
     fun `word candidate scoring uses frequency data`() =
         runTest(testDispatcher) {
-            val commonWords = spellCheckManager.getCommonWords(100)
+            val commonWords = spellCheckManager.getCommonWords()
 
             assertTrue("Should retrieve common words for scoring", commonWords.isNotEmpty())
             assertTrue("Should include 'hello' with frequency", commonWords.any { it.first == "hello" })
