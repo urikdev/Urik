@@ -136,7 +136,7 @@ The Urik keyboard has **no INTERNET permission**. It is technically impossible f
 
 ### Secure Field Detection
 
-The keyboard automatically detects password fields, credit card inputs, and other secure text fields. In these fields:
+The keyboard automatically detects password fields, credit card inputs, email addresses, URL bars, and other secure text fields. In these fields:
 - No text is processed or cached
 - No suggestions are displayed
 - No words are learned
