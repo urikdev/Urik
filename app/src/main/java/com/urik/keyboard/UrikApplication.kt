@@ -1,8 +1,14 @@
 package com.urik.keyboard
 
 import android.app.Application
+import androidx.appcompat.app.AppCompatDelegate
+import com.urik.keyboard.settings.SettingsRepository
+import com.urik.keyboard.settings.Theme
 import com.urik.keyboard.utils.ErrorLogger
 import dagger.hilt.android.HiltAndroidApp
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
+import javax.inject.Inject
 
 /**
  * Application class for keyboard app initialization and dependency injection.
@@ -17,6 +23,9 @@ import dagger.hilt.android.HiltAndroidApp
  */
 @HiltAndroidApp
 class UrikApplication : Application() {
+    @Inject
+    lateinit var settingsRepository: SettingsRepository
+
     override fun onCreate() {
         super.onCreate()
 
@@ -38,7 +47,7 @@ class UrikApplication : Application() {
             try {
                 Class.forName("org.robolectric.RobolectricTestRunner")
                 true
-            } catch (e: ClassNotFoundException) {
+            } catch (_: ClassNotFoundException) {
                 false
             }
 
@@ -54,6 +63,28 @@ class UrikApplication : Application() {
                 )
                 throw e
             }
+        }
+
+        applyTheme()
+    }
+
+    private fun applyTheme() {
+        try {
+            val theme =
+                runBlocking {
+                    settingsRepository.settings.first().theme
+                }
+
+            val nightMode =
+                when (theme) {
+                    Theme.LIGHT -> AppCompatDelegate.MODE_NIGHT_NO
+                    Theme.DARK -> AppCompatDelegate.MODE_NIGHT_YES
+                    Theme.SYSTEM -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+                }
+
+            AppCompatDelegate.setDefaultNightMode(nightMode)
+        } catch (_: Exception) {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
         }
     }
 }
