@@ -360,6 +360,19 @@ class UrikInputMethodService :
         }
     }
 
+    private fun applyCapitalizationToSuggestions(suggestions: List<String>): List<String> {
+        val state = viewModel.state.value
+        return when {
+            state.isCapsLockOn -> suggestions.map { it.uppercase() }
+            state.isShiftPressed || displayBuffer.firstOrNull()?.isUpperCase() == true -> {
+                suggestions.map { it.replaceFirstChar { c -> c.uppercase() } }
+            }
+            else -> suggestions
+        }
+    }
+
+    private fun isSentenceEndingPunctuation(char: Char): Boolean = char in setOf('.', '!', '?')
+
     /**
      * Updates word state and displays suggestions.
      *
@@ -369,15 +382,7 @@ class UrikInputMethodService :
         wordState = newWordState
 
         if (newWordState.suggestions.isNotEmpty()) {
-            val currentWord = displayBuffer.ifEmpty { wordState.buffer }
-            val shouldCapitalize = currentWord.firstOrNull()?.isUpperCase() == true
-            val displaySuggestions =
-                if (shouldCapitalize) {
-                    newWordState.suggestions.map { it.replaceFirstChar { c -> c.uppercase() } }
-                } else {
-                    newWordState.suggestions
-                }
-
+            val displaySuggestions = applyCapitalizationToSuggestions(newWordState.suggestions)
             pendingSuggestions = displaySuggestions
             swipeKeyboardView?.updateSuggestions(displaySuggestions)
         } else {
@@ -414,6 +419,9 @@ class UrikInputMethodService :
                     swipeKeyboardView?.clearSuggestions()
 
                     currentInputConnection?.finishComposingText()
+
+                    val textBefore = currentInputConnection?.getTextBeforeCursor(50, 0)?.toString()
+                    viewModel.checkAndApplyAutoCapitalization(textBefore)
                 } finally {
                     currentInputConnection?.endBatchEdit()
                 }
@@ -797,7 +805,7 @@ class UrikInputMethodService :
 
         if (isSecureField) {
             clearSecureFieldState()
-        } else {
+        } else if (!isUrlOrEmailField) {
             try {
                 currentInputConnection?.finishComposingText()
             } catch (_: Exception) {
@@ -805,6 +813,11 @@ class UrikInputMethodService :
 
             val textBefore = currentInputConnection?.getTextBeforeCursor(50, 0)?.toString()
             viewModel.checkAndApplyAutoCapitalization(textBefore)
+        } else {
+            try {
+                currentInputConnection?.finishComposingText()
+            } catch (_: Exception) {
+            }
         }
 
         updateKeyboardForCurrentAction()
@@ -942,13 +955,7 @@ class UrikInputMethodService :
                                             wordState = result.wordState
 
                                             if (result.wordState.suggestions.isNotEmpty() && currentSettings.showSuggestions) {
-                                                val shouldCapitalize = displayBuffer.firstOrNull()?.isUpperCase() == true
-                                                val displaySuggestions =
-                                                    if (shouldCapitalize) {
-                                                        result.wordState.suggestions.map { it.replaceFirstChar { c -> c.uppercase() } }
-                                                    } else {
-                                                        result.wordState.suggestions
-                                                    }
+                                                val displaySuggestions = applyCapitalizationToSuggestions(result.wordState.suggestions)
                                                 pendingSuggestions = displaySuggestions
                                                 swipeKeyboardView?.updateSuggestions(displaySuggestions)
                                             } else {
@@ -1371,10 +1378,21 @@ class UrikInputMethodService :
                     }
 
                 if (cursorPosInWord > 0) {
+                    val deletedChar = displayBuffer.getOrNull(cursorPosInWord - 1)
+                    val shouldResetShift =
+                        deletedChar != null &&
+                            isSentenceEndingPunctuation(deletedChar) &&
+                            viewModel.state.value.isShiftPressed &&
+                            !viewModel.state.value.isCapsLockOn
+
                     val oldComposingStart = composingRegionStart
 
                     displayBuffer = displayBuffer.substring(0, cursorPosInWord - 1) +
                         displayBuffer.substring(cursorPosInWord)
+
+                    if (shouldResetShift) {
+                        viewModel.onEvent(KeyboardEvent.ShiftStateChanged(false))
+                    }
 
                     if (displayBuffer.isNotEmpty()) {
                         val newCursorPos = cursorPosInWord - 1
@@ -1427,17 +1445,8 @@ class UrikInputMethodService :
                                                             if (result.wordState.suggestions.isNotEmpty() &&
                                                                 currentSettings.showSuggestions
                                                             ) {
-                                                                val shouldCapitalize = displayBuffer.firstOrNull()?.isUpperCase() == true
                                                                 val displaySuggestions =
-                                                                    if (shouldCapitalize) {
-                                                                        result.wordState.suggestions.map {
-                                                                            it.replaceFirstChar { c ->
-                                                                                c.uppercase()
-                                                                            }
-                                                                        }
-                                                                    } else {
-                                                                        result.wordState.suggestions
-                                                                    }
+                                                                    applyCapitalizationToSuggestions(result.wordState.suggestions)
                                                                 pendingSuggestions = displaySuggestions
                                                                 swipeKeyboardView?.updateSuggestions(displaySuggestions)
                                                             } else {
@@ -1493,7 +1502,28 @@ class UrikInputMethodService :
             if (!textBeforeCursor.isNullOrEmpty()) {
                 currentInputConnection?.beginBatchEdit()
                 try {
+                    val deletedChar = textBeforeCursor.lastOrNull()
+
                     currentInputConnection?.deleteSurroundingText(1, 0)
+
+                    if (deletedChar != null) {
+                        val shouldResetShift =
+                            if (isSentenceEndingPunctuation(deletedChar)) {
+                                true
+                            } else if (deletedChar.isWhitespace()) {
+                                val trimmed = textBeforeCursor.dropLast(1).trimEnd()
+                                trimmed.isNotEmpty() && isSentenceEndingPunctuation(trimmed.last())
+                            } else {
+                                false
+                            }
+
+                        if (shouldResetShift &&
+                            viewModel.state.value.isShiftPressed &&
+                            !viewModel.state.value.isCapsLockOn
+                        ) {
+                            viewModel.onEvent(KeyboardEvent.ShiftStateChanged(false))
+                        }
+                    }
 
                     val remainingText = textBeforeCursor.dropLast(1)
                     val wordInfo = extractWordBeforeCursor(remainingText)
@@ -1534,24 +1564,10 @@ class UrikInputMethodService :
                                                     is ProcessingResult.Success -> {
                                                         wordState = result.wordState
                                                         if (result.wordState.suggestions.isNotEmpty() && currentSettings.showSuggestions) {
-                                                            val shouldCapitalize =
-                                                                displayBuffer
-                                                                    .firstOrNull()
-                                                                    ?.isUpperCase() == true
                                                             val displaySuggestions =
-                                                                if (shouldCapitalize) {
-                                                                    result.wordState.suggestions.map {
-                                                                        it.replaceFirstChar { c ->
-                                                                            c.uppercase()
-                                                                        }
-                                                                    }
-                                                                } else {
-                                                                    result.wordState.suggestions
-                                                                }
+                                                                applyCapitalizationToSuggestions(result.wordState.suggestions)
                                                             pendingSuggestions = displaySuggestions
-                                                            swipeKeyboardView?.updateSuggestions(
-                                                                displaySuggestions,
-                                                            )
+                                                            swipeKeyboardView?.updateSuggestions(displaySuggestions)
                                                         } else {
                                                             pendingSuggestions = emptyList()
                                                             swipeKeyboardView?.clearSuggestions()
@@ -1826,7 +1842,7 @@ class UrikInputMethodService :
 
         if (isSecureField) {
             clearSecureFieldState()
-        } else {
+        } else if (!isUrlOrEmailField) {
             val textBefore = currentInputConnection?.getTextBeforeCursor(50, 0)?.toString()
             viewModel.checkAndApplyAutoCapitalization(textBefore)
         }
@@ -2042,7 +2058,9 @@ class UrikInputMethodService :
                                                 is ProcessingResult.Success -> {
                                                     wordState = result.wordState
                                                     if (result.wordState.suggestions.isNotEmpty() && currentSettings.showSuggestions) {
-                                                        swipeKeyboardView?.updateSuggestions(result.wordState.suggestions)
+                                                        val displaySuggestions =
+                                                            applyCapitalizationToSuggestions(result.wordState.suggestions)
+                                                        swipeKeyboardView?.updateSuggestions(displaySuggestions)
                                                     } else {
                                                         swipeKeyboardView?.clearSuggestions()
                                                     }
