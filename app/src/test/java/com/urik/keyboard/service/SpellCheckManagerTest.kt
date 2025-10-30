@@ -230,12 +230,12 @@ class SpellCheckManagerTest {
     @Test
     fun `isWordInDictionary caches positive result`() =
         runTest {
-            whenever(wordLearningEngine.isWordLearned("custom")).thenReturn(true)
+            whenever(wordLearningEngine.isWordLearned("hello")).thenReturn(false)
 
-            spellCheckManager.isWordInDictionary("custom")
-            spellCheckManager.isWordInDictionary("custom")
+            spellCheckManager.isWordInDictionary("hello")
+            spellCheckManager.isWordInDictionary("hello")
 
-            val cacheKey = "en_custom"
+            val cacheKey = "en_hello"
             assertEquals(true, dictionaryCache.getIfPresent(cacheKey))
         }
 
@@ -254,21 +254,21 @@ class SpellCheckManagerTest {
     @Test
     fun `invalidateWordCache removes from dictionary cache`() =
         runTest {
-            whenever(wordLearningEngine.isWordLearned("word")).thenReturn(true)
-            spellCheckManager.isWordInDictionary("word")
-            assertTrue(dictionaryCache.getIfPresent("en_word") == true)
+            whenever(wordLearningEngine.isWordLearned("hello")).thenReturn(false)
+            spellCheckManager.isWordInDictionary("hello")
+            assertTrue(dictionaryCache.getIfPresent("en_hello") == true)
 
-            spellCheckManager.invalidateWordCache("word")
+            spellCheckManager.invalidateWordCache("hello")
 
-            assertEquals(null, dictionaryCache.getIfPresent("en_word"))
+            assertEquals(null, dictionaryCache.getIfPresent("en_hello"))
         }
 
     @Test
     fun `clearCaches removes all dictionary entries`() =
         runTest {
-            whenever(wordLearningEngine.isWordLearned(any())).thenReturn(true)
-            spellCheckManager.isWordInDictionary("word1")
-            spellCheckManager.isWordInDictionary("word2")
+            whenever(wordLearningEngine.isWordLearned(any())).thenReturn(false)
+            spellCheckManager.isWordInDictionary("hello")
+            spellCheckManager.isWordInDictionary("world")
             assertTrue(dictionaryCache.size() > 0)
 
             spellCheckManager.clearCaches()
@@ -522,7 +522,8 @@ class SpellCheckManagerTest {
     @Test
     fun `language switch creates separate cache namespace`() =
         runTest {
-            whenever(wordLearningEngine.isWordLearned("hello")).thenReturn(true)
+            whenever(wordLearningEngine.isWordLearned(any())).thenReturn(false)
+
             spellCheckManager.isWordInDictionary("hello")
             assertTrue(dictionaryCache.getIfPresent("en_hello") != null)
 
@@ -531,7 +532,6 @@ class SpellCheckManagerTest {
                 .thenReturn(ByteArrayInputStream(swedishDictionary.toByteArray()))
             currentLanguageFlow.emit("sv")
 
-            whenever(wordLearningEngine.isWordLearned("hej")).thenReturn(true)
             spellCheckManager.isWordInDictionary("hej")
 
             assertTrue(dictionaryCache.getIfPresent("en_hello") != null)

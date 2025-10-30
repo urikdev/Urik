@@ -266,6 +266,11 @@ class UrikInputMethodService :
                 return true
             }
 
+            val isInDictionary = spellCheckManager.isWordInSymSpellDictionary(word)
+            if (isInDictionary) {
+                return true
+            }
+
             val learnResult = wordLearningEngine.learnWord(word, InputMethod.SELECTED_FROM_SUGGESTION)
             if (learnResult.isSuccess) {
                 spellCheckManager.invalidateWordCache(word)
