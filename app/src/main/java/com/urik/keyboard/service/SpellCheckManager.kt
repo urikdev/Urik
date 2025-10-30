@@ -178,7 +178,7 @@ class SpellCheckManager
             }
 
             try {
-                val words = getCommonWords(5000)
+                val words = getCommonWords()
                 commonWordsCache = words
                 commonWordsCacheLanguage = languageCode
             } catch (_: Exception) {
@@ -581,7 +581,7 @@ class SpellCheckManager
         ): List<Pair<String, Int>> {
             if (languageCode != commonWordsCacheLanguage || commonWordsCache.isEmpty()) {
                 try {
-                    val words = getCommonWords(5000)
+                    val words = getCommonWords()
                     commonWordsCache = words
                     commonWordsCacheLanguage = languageCode
                 } catch (_: Exception) {
@@ -668,7 +668,6 @@ class SpellCheckManager
          */
         fun blacklistSuggestion(word: String) {
             try {
-                val currentLang = getCurrentLanguage()
                 val normalizedWord = word.lowercase(getLocaleForLanguage()).trim()
 
                 synchronized(blacklistedWords) {
@@ -685,7 +684,6 @@ class SpellCheckManager
          */
         fun removeFromBlacklist(word: String) {
             try {
-                val currentLang = getCurrentLanguage()
                 val normalizedWord = word.lowercase(getLocaleForLanguage()).trim()
 
                 var removed = false
@@ -702,7 +700,6 @@ class SpellCheckManager
 
         private fun isWordBlacklisted(word: String): Boolean =
             try {
-                val currentLang = getCurrentLanguage()
                 val normalizedWord = word.lowercase(getLocaleForLanguage()).trim()
                 synchronized(blacklistedWords) {
                     normalizedWord in blacklistedWords
@@ -710,6 +707,12 @@ class SpellCheckManager
             } catch (_: Exception) {
                 false
             }
+
+        fun clearBlacklist() {
+            synchronized(blacklistedWords) {
+                blacklistedWords.clear()
+            }
+        }
 
         private fun clearCachesForWord(word: String) {
             val currentLang = getCurrentLanguage()
@@ -722,12 +725,9 @@ class SpellCheckManager
          * Loads dictionary words sorted by frequency.
          *
          * Used for swipe word candidate generation and prefix completions.
-         * Filters: 2-15 chars, letters + apostrophes, not blacklisted.
-         *
-         * @param maxResults Number of most frequent words to return (default 10k)
          * @return List of (word, frequency) pairs
          */
-        suspend fun getCommonWords(maxResults: Int = 10000): List<Pair<String, Int>> =
+        suspend fun getCommonWords(): List<Pair<String, Int>> =
             withContext(ioDispatcher) {
                 try {
                     if (isDestroyed) {
