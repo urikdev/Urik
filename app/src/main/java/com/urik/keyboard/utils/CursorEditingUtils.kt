@@ -1,45 +1,58 @@
 package com.urik.keyboard.utils
 
 object CursorEditingUtils {
+    private fun isUrlContent(text: String): Boolean {
+        if (text.contains("://")) return true
+        if (text.startsWith("www.")) return true
+        if (text.contains("@") && text.contains(".") && !text.contains(" ")) return true
+        return false
+    }
+
     fun extractWordAtCursor(
         textBefore: String,
         textAfter: String,
     ): String? {
         if (textBefore.isEmpty() && textAfter.isEmpty()) return null
 
-        val limitedBefore = textBefore.takeLast(20)
-        val limitedAfter = textAfter.take(20)
+        val limitedBefore = textBefore.takeLast(50)
+        val limitedAfter = textAfter.take(50)
 
         val beforeLastBoundary =
             limitedBefore.indexOfLast { char ->
-                char.isWhitespace() || char in ".,!?;:\n"
+                char.isWhitespace() || char == '\n'
             }
 
         val afterFirstBoundary =
             limitedAfter.indexOfFirst { char ->
-                char.isWhitespace() || char in ".,!?;:\n"
+                char.isWhitespace() || char == '\n'
             }
 
-        val wordBefore =
+        val tokenBefore =
             if (beforeLastBoundary >= 0) {
                 limitedBefore.substring(beforeLastBoundary + 1)
             } else {
                 limitedBefore
             }
 
-        val wordAfter =
+        val tokenAfter =
             if (afterFirstBoundary >= 0) {
                 limitedAfter.substring(0, afterFirstBoundary)
             } else {
                 limitedAfter
             }
 
-        val fullWord = wordBefore + wordAfter
+        val fullToken = tokenBefore + tokenAfter
 
-        if (fullWord.length >= 40) return null
+        if (fullToken.length >= 200) return null
 
-        return if (fullWord.isNotEmpty() && isValidTextInput(fullWord)) {
-            fullWord
+        if (isUrlContent(fullToken)) return null
+
+        val trimmedWord = fullToken.trimEnd { it in ".,!?;:" }
+
+        if (trimmedWord.length >= 40) return null
+
+        return if (trimmedWord.isNotEmpty() && isValidTextInput(trimmedWord)) {
+            trimmedWord
         } else {
             null
         }

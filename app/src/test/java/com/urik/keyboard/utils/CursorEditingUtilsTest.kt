@@ -5,25 +5,23 @@ import org.junit.Test
 
 class CursorEditingUtilsTest {
     @Test
-    fun `extractWordAtCursor limits to 20 chars before cursor`() {
-        val textBefore = "a".repeat(50)
+    fun `extractWordAtCursor limits to 50 chars before cursor`() {
+        val textBefore = "a".repeat(100)
         val textAfter = "b".repeat(5)
 
         val word = CursorEditingUtils.extractWordAtCursor(textBefore, textAfter)
 
-        Assert.assertNotNull(word)
-        Assert.assertTrue(word!!.length <= 25)
+        Assert.assertNull(word)
     }
 
     @Test
-    fun `extractWordAtCursor limits to 20 chars after cursor`() {
+    fun `extractWordAtCursor limits to 50 chars after cursor`() {
         val textBefore = "a".repeat(5)
-        val textAfter = "b".repeat(50)
+        val textAfter = "b".repeat(100)
 
         val word = CursorEditingUtils.extractWordAtCursor(textBefore, textAfter)
 
-        Assert.assertNotNull(word)
-        Assert.assertTrue(word!!.length <= 25)
+        Assert.assertNull(word)
     }
 
     @Test
@@ -71,6 +69,76 @@ class CursorEditingUtilsTest {
         val word = CursorEditingUtils.extractWordAtCursor("", "")
 
         Assert.assertNull(word)
+    }
+
+    @Test
+    fun `extractWordAtCursor rejects https URLs`() {
+        val textBefore = "check out https://google"
+        val textAfter = ".com"
+
+        val word = CursorEditingUtils.extractWordAtCursor(textBefore, textAfter)
+
+        Assert.assertNull(word)
+    }
+
+    @Test
+    fun `extractWordAtCursor rejects www URLs`() {
+        val textBefore = "visit www.google"
+        val textAfter = ".com"
+
+        val word = CursorEditingUtils.extractWordAtCursor(textBefore, textAfter)
+
+        Assert.assertNull(word)
+    }
+
+    @Test
+    fun `extractWordAtCursor rejects email addresses`() {
+        val textBefore = "contact user@example"
+        val textAfter = ".com"
+
+        val word = CursorEditingUtils.extractWordAtCursor(textBefore, textAfter)
+
+        Assert.assertNull(word)
+    }
+
+    @Test
+    fun `extractWordAtCursor accepts filename with extension`() {
+        val textBefore = "open file"
+        val textAfter = ".txt"
+
+        val word = CursorEditingUtils.extractWordAtCursor(textBefore, textAfter)
+
+        Assert.assertEquals("file.txt", word)
+    }
+
+    @Test
+    fun `extractWordAtCursor accepts Mr with period`() {
+        val textBefore = "Hello Mr"
+        val textAfter = ". Smith"
+
+        val word = CursorEditingUtils.extractWordAtCursor(textBefore, textAfter)
+
+        Assert.assertEquals("Mr", word)
+    }
+
+    @Test
+    fun `extractWordAtCursor trims trailing punctuation from word`() {
+        val textBefore = "The word"
+        val textAfter = "!!! is here"
+
+        val word = CursorEditingUtils.extractWordAtCursor(textBefore, textAfter)
+
+        Assert.assertEquals("word", word)
+    }
+
+    @Test
+    fun `extractWordAtCursor handles URL with port number`() {
+        val textBefore = "localhost:8080"
+        val textAfter = "/api"
+
+        val word = CursorEditingUtils.extractWordAtCursor(textBefore, textAfter)
+
+        Assert.assertNotNull(word)
     }
 
     @Test
