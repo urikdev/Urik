@@ -152,6 +152,9 @@ class UrikInputMethodService :
     @Volatile
     private var isAcceleratedDeletion = false
 
+    @Volatile
+    private var isUrlOrEmailField: Boolean = false
+
     fun setAcceleratedDeletion(active: Boolean) {
         isAcceleratedDeletion = active
     }
@@ -345,6 +348,11 @@ class UrikInputMethodService :
         clearSpellConfirmationState()
         swipeKeyboardView?.clearSuggestions()
         composingRegionStart = -1
+
+        viewModel.onEvent(KeyboardEvent.ShiftStateChanged(false))
+        if (viewModel.state.value.isCapsLockOn) {
+            viewModel.onEvent(KeyboardEvent.CapsLockToggled)
+        }
 
         try {
             currentInputConnection?.finishComposingText()
@@ -776,6 +784,12 @@ class UrikInputMethodService :
         isSecureField = SecureFieldDetector.isSecure(info)
         currentInputAction = ActionDetector.detectAction(info)
 
+        val inputType = info?.inputType ?: 0
+        val variation = inputType and EditorInfo.TYPE_MASK_VARIATION
+        isUrlOrEmailField = variation == EditorInfo.TYPE_TEXT_VARIATION_URI ||
+            variation == EditorInfo.TYPE_TEXT_VARIATION_EMAIL_ADDRESS ||
+            variation == EditorInfo.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS
+
         val targetMode = KeyboardModeUtils.determineTargetMode(info, viewModel.state.value.currentMode)
         if (targetMode != viewModel.state.value.currentMode) {
             viewModel.onEvent(KeyboardEvent.ModeChanged(targetMode))
@@ -899,6 +913,10 @@ class UrikInputMethodService :
                     buffer = displayBuffer,
                     graphemeCount = displayBuffer.length,
                 )
+
+            if (isUrlOrEmailField) {
+                return
+            }
 
             val currentSequence = synchronized(processingLock) { ++processingSequence }
             val bufferSnapshot = displayBuffer
@@ -1757,25 +1775,30 @@ class UrikInputMethodService :
         swipeKeyboardView?.hideEmojiPicker()
 
         if (displayBuffer.isNotEmpty() && !isSecureField) {
-            serviceScope.launch {
-                val actualTextBefore = currentInputConnection?.getTextBeforeCursor(1, 0)?.toString() ?: ""
-                val actualTextAfter = currentInputConnection?.getTextAfterCursor(1, 0)?.toString() ?: ""
+            val actualTextBefore = currentInputConnection?.getTextBeforeCursor(1, 0)?.toString() ?: ""
+            val actualTextAfter = currentInputConnection?.getTextAfterCursor(1, 0)?.toString() ?: ""
 
-                if (actualTextBefore.isEmpty() && actualTextAfter.isEmpty()) {
+            if (actualTextBefore.isEmpty() && actualTextAfter.isEmpty()) {
+                coordinateStateClear()
+            } else {
+                try {
+                    isActivelyEditing = true
+                    val wordToCommit = displayBuffer.ifEmpty { wordState.buffer }
+                    if (wordToCommit.isNotEmpty()) {
+                        currentInputConnection?.finishComposingText()
+                    }
                     coordinateStateClear()
-                } else {
-                    coordinateWordCompletion()
+                } catch (_: Exception) {
+                    coordinateStateClear()
                 }
             }
         }
 
-        serviceScope.launch {
-            try {
-                currentInputConnection?.finishComposingText()
-                coordinateStateClear()
-            } catch (_: Exception) {
-                coordinateStateClear()
-            }
+        try {
+            currentInputConnection?.finishComposingText()
+            coordinateStateClear()
+        } catch (_: Exception) {
+            coordinateStateClear()
         }
 
         lifecycleRegistry.currentState = Lifecycle.State.STARTED
@@ -1795,6 +1818,12 @@ class UrikInputMethodService :
         isSecureField = SecureFieldDetector.isSecure(attribute)
         currentInputAction = ActionDetector.detectAction(attribute)
 
+        val inputType = attribute?.inputType ?: 0
+        val variation = inputType and EditorInfo.TYPE_MASK_VARIATION
+        isUrlOrEmailField = variation == EditorInfo.TYPE_TEXT_VARIATION_URI ||
+            variation == EditorInfo.TYPE_TEXT_VARIATION_EMAIL_ADDRESS ||
+            variation == EditorInfo.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS
+
         if (isSecureField) {
             clearSecureFieldState()
         } else {
@@ -1808,26 +1837,33 @@ class UrikInputMethodService :
 
         swipeKeyboardView?.hideEmojiPicker()
 
-        serviceScope.launch {
-            if (displayBuffer.isNotEmpty() && !isSecureField) {
-                val actualTextBefore = currentInputConnection?.getTextBeforeCursor(1, 0)?.toString() ?: ""
-                val actualTextAfter = currentInputConnection?.getTextAfterCursor(1, 0)?.toString() ?: ""
+        if (displayBuffer.isNotEmpty() && !isSecureField) {
+            val actualTextBefore = currentInputConnection?.getTextBeforeCursor(1, 0)?.toString() ?: ""
+            val actualTextAfter = currentInputConnection?.getTextAfterCursor(1, 0)?.toString() ?: ""
 
-                if (actualTextBefore.isEmpty() && actualTextAfter.isEmpty()) {
+            if (actualTextBefore.isEmpty() && actualTextAfter.isEmpty()) {
+                coordinateStateClear()
+            } else {
+                try {
+                    isActivelyEditing = true
+                    val wordToCommit = displayBuffer.ifEmpty { wordState.buffer }
+                    if (wordToCommit.isNotEmpty()) {
+                        currentInputConnection?.finishComposingText()
+                    }
                     coordinateStateClear()
-                } else {
-                    coordinateWordCompletion()
+                } catch (_: Exception) {
+                    coordinateStateClear()
                 }
             }
-
-            try {
-                currentInputConnection?.finishComposingText()
-            } catch (_: Exception) {
-            }
-
-            coordinateStateClear()
-            clearSpellConfirmationState()
         }
+
+        try {
+            currentInputConnection?.finishComposingText()
+        } catch (_: Exception) {
+        }
+
+        coordinateStateClear()
+        clearSpellConfirmationState()
 
         lifecycleRegistry.currentState = Lifecycle.State.CREATED
     }
@@ -1850,6 +1886,8 @@ class UrikInputMethodService :
         )
 
         if (isSecureField) return
+
+        if (isUrlOrEmailField) return
 
         if (newSelStart == 0 && newSelEnd == 0) {
             val textBefore = currentInputConnection?.getTextBeforeCursor(50, 0)?.toString()
