@@ -223,4 +223,21 @@
         <item>keyboards</item>
         <item>keyboardist</item>
     </string-array>
+
+    <!-- Tips -->
+    <string name="tip_1_title">Learning Words</string>
+    <string name="tip_1_description">Press space after a highlighted typo to add the word to your dictionary.</string>
+
+    <string name="tip_2_title">Punctuation Quick Menu</string>
+    <string name="tip_2_description">Long press the space bar to open a punctuation quick menu.</string>
+
+    <string name="tip_3_title">Character Variations</string>
+    <string name="tip_3_description">Long press on a character to select a variation for that character.</string>
+
+    <string name="tip_4_title">Remove Words</string>
+    <string name="tip_4_description">Long press on a suggestion to remove it from your dictionary.</string>
+
+
+    <string name="tip_icon_description">Tip icon</string>
+
 </resources>

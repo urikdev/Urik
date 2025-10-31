@@ -165,4 +165,13 @@
     <string name="licenses_title">Öppen källkodslicenser</string>
     <string name="licenses_description">Visa tredjepartsbibliotekslicenser</string>
     <string name="dictionary_attribution_title">Ordboksdata</string>
+    <string name="tip_1_title">Lärande ord</string>
+    <string name="tip_1_description">Tryck mellanslag efter ett markerat stavfel för att lägga till ordet i din ordbok.</string>
+    <string name="tip_2_title">Interpunktion</string>
+    <string name="tip_2_description">Långt tryck på mellanslagstangenten för att öppna en snabbmeny för skiljetecken.</string>
+    <string name="tip_3_title">Karaktärsvariationer</string>
+    <string name="tip_3_description">Tryck länge på ett tecken för att välja en variant av det tecknet.</string>
+    <string name="tip_4_title">Ta bort ord</string>
+    <string name="tip_4_description">Tryck länge på ett förslag för att ta bort det från din ordlista.</string>
+    <string name="tip_icon_description">Tipsikon</string>
 </resources>
