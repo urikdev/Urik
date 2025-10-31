@@ -40,17 +40,9 @@ private data class PendingCallbacks(
     val runnable: Runnable,
 )
 
-private enum class BackspaceMode {
-    IDLE,
-    CHAR_ACCELERATING,
-    CHAR_MAX_SPEED,
-    WORD_MODE,
-}
-
 class KeyboardLayoutManager(
     private val context: Context,
     private val onKeyClick: (KeyboardKey) -> Unit,
-    private val onWordDelete: () -> Unit,
     private val onAcceleratedDeletionChanged: (Boolean) -> Unit,
     private val characterVariationService: CharacterVariationService,
     private val languageManager: LanguageManager,
@@ -101,7 +93,6 @@ class KeyboardLayoutManager(
     private var backspaceHandler: Handler? = null
     private var backspaceRunnable: Runnable? = null
 
-    private var backspaceMode = BackspaceMode.IDLE
     private var backspaceStartTime = 0L
     private var backspaceCharsSinceLastHaptic = 0
 
@@ -836,7 +827,6 @@ class KeyboardLayoutManager(
 
         onAcceleratedDeletionChanged(true)
 
-        backspaceMode = BackspaceMode.CHAR_ACCELERATING
         backspaceStartTime = System.currentTimeMillis()
         backspaceCharsSinceLastHaptic = 0
 
@@ -846,27 +836,9 @@ class KeyboardLayoutManager(
                 override fun run() {
                     val elapsed = System.currentTimeMillis() - backspaceStartTime
 
-                    val newMode =
-                        when {
-                            elapsed >= 2000 -> BackspaceMode.WORD_MODE
-                            elapsed >= 1500 -> BackspaceMode.CHAR_MAX_SPEED
-                            else -> BackspaceMode.CHAR_ACCELERATING
-                        }
-
-                    if (newMode == BackspaceMode.WORD_MODE && backspaceMode != BackspaceMode.WORD_MODE) {
-                        performTransitionToWordMode()
-                    }
-
-                    backspaceMode = newMode
-
-                    if (backspaceMode == BackspaceMode.WORD_MODE) {
-                        onWordDelete()
-                        performHapticForBackspace(backspaceMode)
-                    } else {
-                        onKeyClick(KeyboardKey.Action(KeyboardKey.ActionType.BACKSPACE))
-                        backspaceCharsSinceLastHaptic++
-                        performHapticForBackspace(backspaceMode)
-                    }
+                    onKeyClick(KeyboardKey.Action(KeyboardKey.ActionType.BACKSPACE))
+                    backspaceCharsSinceLastHaptic++
+                    performHapticForBackspace(elapsed)
 
                     val nextInterval = calculateBackspaceInterval(elapsed)
                     backspaceHandler?.postDelayed(this, nextInterval)
@@ -882,55 +854,35 @@ class KeyboardLayoutManager(
         }
         backspaceHandler = null
         backspaceRunnable = null
-        backspaceMode = BackspaceMode.IDLE
         backspaceStartTime = 0L
         backspaceCharsSinceLastHaptic = 0
 
         onAcceleratedDeletionChanged(false)
     }
 
-    private fun calculateBackspaceInterval(elapsed: Long): Long =
-        when {
-            elapsed >= 2000 -> 150L
-            elapsed >= 1500 -> 25L
-            else -> {
-                val startSpeed = 100L
-                val endSpeed = 25L
-                val progress = elapsed / 1500f
-                (startSpeed - (startSpeed - endSpeed) * progress).toLong()
-            }
+    private fun calculateBackspaceInterval(elapsed: Long): Long {
+        val startSpeed = 100L
+        val endSpeed = 15L
+        val accelerationDuration = 2000f
+
+        if (elapsed >= accelerationDuration) {
+            return endSpeed
         }
 
-    private fun performHapticForBackspace(mode: BackspaceMode) {
-        when (mode) {
-            BackspaceMode.WORD_MODE -> {
-                performCustomHaptic(60L)
-            }
-            BackspaceMode.CHAR_MAX_SPEED -> {
-                if (backspaceCharsSinceLastHaptic >= 5) {
-                    performCustomHaptic()
-                    backspaceCharsSinceLastHaptic = 0
-                }
-            }
-            BackspaceMode.CHAR_ACCELERATING -> {
-                val interval = calculateBackspaceInterval(System.currentTimeMillis() - backspaceStartTime)
-                if (interval > 50) {
-                    performCustomHaptic()
-                    backspaceCharsSinceLastHaptic = 0
-                } else if (backspaceCharsSinceLastHaptic >= 3) {
-                    performCustomHaptic()
-                    backspaceCharsSinceLastHaptic = 0
-                }
-            }
-            BackspaceMode.IDLE -> {}
-        }
+        val progress = elapsed / accelerationDuration
+        return (startSpeed - (startSpeed - endSpeed) * progress).toLong()
     }
 
-    private fun performTransitionToWordMode() {
-        performCustomHaptic(40L)
-        backspaceHandler?.postDelayed({
-            performCustomHaptic(40L)
-        }, 60L)
+    private fun performHapticForBackspace(elapsed: Long) {
+        val interval = calculateBackspaceInterval(elapsed)
+
+        if (interval > 50) {
+            performCustomHaptic()
+            backspaceCharsSinceLastHaptic = 0
+        } else if (backspaceCharsSinceLastHaptic >= 5) {
+            performCustomHaptic()
+            backspaceCharsSinceLastHaptic = 0
+        }
     }
 
     private fun getKeyWeight(
