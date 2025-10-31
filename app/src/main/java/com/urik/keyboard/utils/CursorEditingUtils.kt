@@ -5,6 +5,7 @@ object CursorEditingUtils {
         if (text.contains("://")) return true
         if (text.startsWith("www.")) return true
         if (text.contains("@") && text.contains(".") && !text.contains(" ")) return true
+        if (text.contains("/") && text.contains(".") && !text.contains(" ")) return true
         return false
     }
 

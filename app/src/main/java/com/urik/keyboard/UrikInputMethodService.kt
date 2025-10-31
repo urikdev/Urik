@@ -488,7 +488,6 @@ class UrikInputMethodService :
                 KeyboardLayoutManager(
                     context = this,
                     onKeyClick = { key -> handleKeyPress(key) },
-                    onWordDelete = { handleBackspaceWord() },
                     onAcceleratedDeletionChanged = { active -> setAcceleratedDeletion(active) },
                     characterVariationService = characterVariationService,
                     languageManager = languageManager,
@@ -1607,68 +1606,6 @@ class UrikInputMethodService :
      */
     private fun extractWordBeforeCursor(textBeforeCursor: String): Pair<String, Int>? =
         BackspaceUtils.extractWordBeforeCursor(textBeforeCursor)
-
-    /**
-     * Handles word-mode backspace deletion.
-     *
-     * Deletes whole words without re-composition.
-     * If composing text exists, deletes char-by-char until empty.
-     */
-    private fun handleBackspaceWord() {
-        try {
-            if (isSecureField) {
-                handleBackspace()
-                return
-            }
-
-            if (displayBuffer.isNotEmpty()) {
-                val actualTextBefore = currentInputConnection?.getTextBeforeCursor(1, 0)?.toString() ?: ""
-                val actualTextAfter = currentInputConnection?.getTextAfterCursor(1, 0)?.toString() ?: ""
-
-                if (actualTextBefore.isEmpty() && actualTextAfter.isEmpty()) {
-                    coordinateStateClear()
-                    return
-                }
-            }
-
-            if (spellConfirmationState == SpellConfirmationState.AWAITING_CONFIRMATION) {
-                spellConfirmationState = SpellConfirmationState.NORMAL
-                pendingWordForLearning = null
-            }
-
-            if (displayBuffer.isNotEmpty()) {
-                currentInputConnection?.beginBatchEdit()
-                try {
-                    currentInputConnection?.setComposingText("", 1)
-                    coordinateStateClear()
-                } finally {
-                    currentInputConnection?.endBatchEdit()
-                }
-                return
-            }
-
-            val textBeforeCursor = currentInputConnection?.getTextBeforeCursor(50, 0)?.toString()
-
-            if (!textBeforeCursor.isNullOrEmpty()) {
-                val wordInfo = BackspaceUtils.extractWordBeforeCursor(textBeforeCursor)
-
-                if (wordInfo != null) {
-                    val (word, _) = wordInfo
-                    val shouldDeleteSpace = BackspaceUtils.shouldDeleteTrailingSpace(textBeforeCursor, word.length)
-                    val deleteLength = BackspaceUtils.calculateDeleteLength(word.length, shouldDeleteSpace)
-
-                    currentInputConnection?.deleteSurroundingText(deleteLength, 0)
-                } else {
-                    currentInputConnection?.deleteSurroundingText(1, 0)
-                }
-            }
-        } catch (_: Exception) {
-            try {
-                currentInputConnection?.deleteSurroundingText(1, 0)
-            } catch (_: Exception) {
-            }
-        }
-    }
 
     /**
      * Handles space key press.
