@@ -28,4 +28,9 @@
     <style name="Theme.Urik.OssLicenses" parent="Theme.Material3.DayNight">
         <item name="android:windowOptOutEdgeToEdgeEnforcement" tools:targetApi="35">true</item>
     </style>
+
+    <style name="Theme.Urik.NoActionBar" parent="Theme.Urik">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
 </resources>

@@ -3,42 +3,183 @@ package com.urik.keyboard
 import android.content.Intent
 import android.os.Bundle
 import android.provider.Settings
+import android.view.LayoutInflater
+import android.view.View
 import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
+import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.tabs.TabLayout
+import com.google.android.material.tabs.TabLayoutMediator
 import com.urik.keyboard.settings.SettingsActivity
 import com.urik.keyboard.ui.animation.TypewriterAnimationView
+import com.urik.keyboard.ui.tips.TipsAdapter
+import com.urik.keyboard.ui.tips.TipsRepository
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
+    @Inject
+    lateinit var tipsRepository: TipsRepository
+
+    private var tipsViewPager: ViewPager2? = null
+    private var autoSwipeJob: Job? = null
+
+    private var pageChangeCallback: ViewPager2.OnPageChangeCallback? = null
+    private var tabLayoutMediator: TabLayoutMediator? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(createAnimationLayout())
+        setContentView(createMainLayout())
     }
 
-    private fun createAnimationLayout(): LinearLayout =
+    override fun onResume() {
+        super.onResume()
+        startAutoSwipe()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        stopAutoSwipe()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        autoSwipeJob?.cancel()
+        autoSwipeJob = null
+
+        pageChangeCallback?.let { callback ->
+            tipsViewPager?.unregisterOnPageChangeCallback(callback)
+        }
+        pageChangeCallback = null
+
+        tabLayoutMediator?.detach()
+        tabLayoutMediator = null
+
+        tipsViewPager = null
+    }
+
+    private fun startAutoSwipe() {
+        autoSwipeJob?.cancel()
+        autoSwipeJob =
+            lifecycleScope.launch {
+                while (true) {
+                    delay(4000)
+                    tipsViewPager?.let { viewPager ->
+                        val currentItem = viewPager.currentItem
+                        val itemCount = viewPager.adapter?.itemCount ?: 0
+                        if (itemCount > 0) {
+                            val nextItem = (currentItem + 1) % itemCount
+                            viewPager.setCurrentItem(nextItem, true)
+                        }
+                    }
+                }
+            }
+    }
+
+    private fun stopAutoSwipe() {
+        autoSwipeJob?.cancel()
+        autoSwipeJob = null
+    }
+
+    private fun createMainLayout(): LinearLayout =
         LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            gravity = android.view.Gravity.CENTER
             setBackgroundColor(ContextCompat.getColor(context, R.color.surface_background))
 
             val padding = dpToPx(32)
             setPadding(padding, padding, padding, padding)
 
-            val animationView = TypewriterAnimationView(context)
-            val animationParams =
+            addView(createAnimationSection())
+            addView(createTipsSection())
+            addView(createButtonsSection())
+        }
+
+    private fun createAnimationSection(): TypewriterAnimationView =
+        TypewriterAnimationView(this).apply {
+            layoutParams =
                 LinearLayout
                     .LayoutParams(
                         LinearLayout.LayoutParams.MATCH_PARENT,
                         LinearLayout.LayoutParams.WRAP_CONTENT,
                     ).apply {
-                        val margin = dpToPx(48)
-                        setMargins(0, margin, 0, margin)
+                        val topMargin = dpToPx(120)
+                        val bottomMargin = dpToPx(48)
+                        setMargins(0, topMargin, 0, bottomMargin)
                     }
-            addView(animationView, animationParams)
+        }
+
+    private fun createTipsSection(): LinearLayout =
+        LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            layoutParams =
+                LinearLayout
+                    .LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                    ).apply {
+                        val bottomMargin = dpToPx(48)
+                        setMargins(0, 0, 0, bottomMargin)
+                    }
+
+            val viewPager =
+                ViewPager2(context).apply {
+                    id = View.generateViewId()
+                    layoutParams =
+                        LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT,
+                            dpToPx(120),
+                        )
+                    adapter = TipsAdapter(tipsRepository.getShuffledTips())
+
+                    val callback =
+                        object : ViewPager2.OnPageChangeCallback() {
+                            override fun onPageSelected(position: Int) {
+                                super.onPageSelected(position)
+                                stopAutoSwipe()
+                                startAutoSwipe()
+                            }
+                        }
+                    registerOnPageChangeCallback(callback)
+                    pageChangeCallback = callback
+                }
+
+            tipsViewPager = viewPager
+
+            val tabLayout =
+                LayoutInflater
+                    .from(context)
+                    .inflate(R.layout.tips_tab_layout, this, false) as TabLayout
+
+            tabLayout.layoutParams =
+                LinearLayout
+                    .LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                    ).apply {
+                        val margin = dpToPx(4)
+                        setMargins(0, margin, 0, 0)
+                    }
+
+            addView(viewPager)
+            addView(tabLayout)
+
+            val mediator = TabLayoutMediator(tabLayout, viewPager) { _, _ -> }
+            mediator.attach()
+            tabLayoutMediator = mediator
+        }
+
+    private fun createButtonsSection(): LinearLayout =
+        LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
 
             val enableButton =
                 MaterialButton(context).apply {
@@ -72,7 +213,7 @@ class MainActivity : AppCompatActivity() {
             val enableButtonParams =
                 LinearLayout
                     .LayoutParams(
-                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                        LinearLayout.LayoutParams.MATCH_PARENT,
                         LinearLayout.LayoutParams.WRAP_CONTENT,
                     ).apply {
                         val margin = dpToPx(8)
@@ -81,7 +222,7 @@ class MainActivity : AppCompatActivity() {
 
             val settingsButtonParams =
                 LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.MATCH_PARENT,
                     LinearLayout.LayoutParams.WRAP_CONTENT,
                 )
 
