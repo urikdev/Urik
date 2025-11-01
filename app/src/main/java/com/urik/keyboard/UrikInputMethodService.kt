@@ -2022,6 +2022,30 @@ class UrikInputMethodService :
         }
     }
 
+    override fun onLowMemory() {
+        super.onLowMemory()
+
+        try {
+            spellCheckManager.onLowMemory()
+            textInputProcessor.clearCaches()
+            layoutManager.onLowMemory()
+        } catch (_: Exception) {
+        }
+    }
+
+    override fun onTrimMemory(level: Int) {
+        super.onTrimMemory(level)
+
+        try {
+            if (level >= TRIM_MEMORY_UI_HIDDEN) {
+                spellCheckManager.onLowMemory()
+                textInputProcessor.clearCaches()
+                layoutManager.onLowMemory()
+            }
+        } catch (_: Exception) {
+        }
+    }
+
     override fun onDestroy() {
         serviceJob.cancel()
 
@@ -2032,8 +2056,11 @@ class UrikInputMethodService :
         swipeKeyboardView = null
 
         try {
-            spellCheckManager.clearCaches()
-            textInputProcessor.clearCaches()
+            spellCheckManager.cleanup()
+            textInputProcessor.cleanup()
+            wordLearningEngine.cleanup()
+            layoutManager.cleanup()
+            cacheMemoryManager.cleanup()
         } catch (_: Exception) {
         }
 

@@ -977,4 +977,9 @@ class KeyboardLayoutManager(
         variationPopup = null
         punctuationCache.invalidateAll()
     }
+
+    fun onLowMemory() {
+        returnActiveButtonsToPool()
+        buttonPool.clear()
+    }
 }
