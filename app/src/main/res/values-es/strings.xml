@@ -1,0 +1,244 @@
+<resources>
+    <string name="app_name" translatable="false">Urik</string>
+    <string name="ime_name" translatable="false">Teclado Urik</string>
+    <string name="ime_label">Teclado Urik</string>
+    <string name="ime_description">Escritura deslizando el dedo, corrector ortográfico y compatibilidad multilingüe sin comprometer tu privacidad. Sin telemetría. Sin recopilación de datos. Todo permanece en tu dispositivo.</string>
+
+    <!-- Settings -->
+    <string name="enable_keyboard_title">Activar</string>
+    <string name="open_settings">Abrir configuración</string>
+    <string name="error_opening_settings">No se puede abrir la configuración</string>
+
+    <!-- Settings Activity -->
+    <string name="settings_title">Configuración del teclado</string>
+    <string name="autocorrect_settings_title">Ajustes de autocorrección</string>
+    <string name="autocorrect_settings_description">Ortografía y sugerencias</string>
+    <string name="language_settings_title">Configuración de idioma</string>
+    <string name="language_settings_description">Elige los idiomas de tu teclado</string>
+    <string name="feedback_settings_title">Configuración de sonido y retroalimentación</string>
+    <string name="feedback_settings_description">Sonidos y vibraciones clave</string>
+    <string name="typing_settings_title">Configuración del comportamiento de escritura</string>
+    <string name="typing_settings_description">Puntuación, etc.</string>
+    <string name="layout_settings_title">Diseño y entrada</string>
+    <string name="layout_settings_description">Fila de números, tamaño de la barra espaciadora</string>
+    <string name="appearance_settings_title">Apariencia</string>
+    <string name="appearance_settings_description">Tema, tamaño</string>
+    <string name="privacy_settings_title">Privacidad y datos</string>
+    <string name="privacy_settings_description">Borrar datos, restablecer ajustes</string>
+    <string name="licenses_title">Licencias de código abierto</string>
+    <string name="licenses_description">Ver licencias de bibliotecas de terceros</string>
+    <string name="dictionary_attribution_title">Datos del diccionario</string>
+    <string name="dictionary_attribution_summary">Licencia y atribución de FrequencyWords</string>
+
+    <!-- Settings Enums -->
+    <!-- Theme -->
+    <string name="theme_system">Sistema de seguimiento</string>
+    <string name="theme_light">Claro</string>
+    <string name="theme_dark">Oscuro</string>
+
+    <!-- Key Size -->
+    <string name="key_size_small">Pequeño</string>
+    <string name="key_size_medium">Medio</string>
+    <string name="key_size_large">Grande</string>
+
+    <!-- Sound Volume -->
+    <string name="sound_volume_low">Bajo</string>
+    <string name="sound_volume_medium">Medio</string>
+    <string name="sound_volume_high">Alto</string>
+
+    <!-- Vibration Strength -->
+    <string name="vibration_strength_light">Bajo</string>
+    <string name="vibration_strength_medium">Medio</string>
+    <string name="vibration_strength_strong">Fuerte</string>
+
+    <!-- Long Press Duration -->
+    <string name="long_press_duration_short">Corto</string>
+    <string name="long_press_duration_medium">Medio</string>
+    <string name="long_press_duration_long">Largo</string>
+
+    <!-- Space Bar Size -->
+    <string name="space_bar_size_compact">Compacta</string>
+    <string name="space_bar_size_standard">Estándar</string>
+    <string name="space_bar_size_wide">Ancha</string>
+
+    <!-- Key Label Size -->
+    <string name="key_label_size_small">Pequeña</string>
+    <string name="key_label_size_medium">Media</string>
+    <string name="key_label_size_large">Grande</string>
+
+    <!-- Repeat Key Delay -->
+    <string name="repeat_key_delay_short">Corto</string>
+    <string name="repeat_key_delay_medium">Medio</string>
+    <string name="repeat_key_delay_long">Largo</string>
+
+    <!-- Appearance Settings -->
+    <string name="appearance_settings_theme">Tema</string>
+    <string name="appearance_settings_key_size">Tamaño de la tecla</string>
+    <string name="appearance_settings_key_label_size">Tamaño de la etiqueta tecla</string>
+    <string name="appearance_settings_repeat_key_delay">Retardo de repetición de tecla</string>
+
+    <!-- Auto-Correct Settings -->
+    <string name="autocorrect_settings_show_suggestions">Mostrar sugerencias</string>
+    <string name="autocorrect_settings_suggestions_on">Sugerencias mostradas</string>
+    <string name="autocorrect_settings_suggestions_off">Sugerencias ocultadas</string>
+    <string name="autocorrect_settings_suggestion_count">Número de sugerencias</string>
+    <string name="autocorrect_settings_learn_new_words">Aprende nuevas palabras</string>
+    <string name="autocorrect_settings_learn_new_words_on">El aprendizaje habilitado</string>
+    <string name="autocorrect_settings_learn_new_words_off">Aprendizaje desactivado</string>
+
+    <!-- Language Settings -->
+    <string name="language_settings_active_languages">Lenguas activas</string>
+    <string name="language_settings_primary_language">Idioma principal</string>
+
+    <!-- Sound & Feedback Settings -->
+    <string name="feedback_settings_key_click_sound">Sonido de clic de tecla</string>
+    <string name="feedback_settings_key_click_on">Clic de tecla activado</string>
+    <string name="feedback_settings_key_click_off">Clic de tecla desactivado</string>
+    <string name="feedback_settings_sound_volume">Volumen del sonido</string>
+    <string name="feedback_settings_haptic_feedback">Retroalimentación por vibración</string>
+    <string name="feedback_settings_haptic_on">Vibración activada</string>
+    <string name="feedback_settings_haptic_off">Vibración desactivado</string>
+    <string name="feedback_settings_vibration_strength">Intensidad de la vibración</string>
+
+    <!-- Typing Behavior Settings -->
+    <string name="typing_settings_double_space_period">Periodo de doble espacio</string>
+    <string name="typing_settings_double_space_on">Inserciones a doble espacio punto</string>
+    <string name="typing_settings_double_space_off">Espacio de inserción doble</string>
+    <string name="typing_settings_long_press_duration">Duración de pulsación larga</string>
+
+    <!-- Layout & Input Settings -->
+    <string name="layout_settings_show_number_row">Mostrar fila de números</string>
+    <string name="layout_settings_number_row_on">Fila de números mostrada</string>
+    <string name="layout_settings_number_row_off">Fila de números ocultada</string>
+    <string name="layout_settings_space_bar_size">Tamaño de la barra espaciadora</string>
+
+    <!-- Privacy & Data Settings -->
+    <string name="privacy_settings_clear_learned_words">Borradas las palabras aprendidas</string>
+    <string name="privacy_settings_clear_learned_words_summary">Eliminar todo el vocabulario aprendido</string>
+    <string name="privacy_settings_clear_learned_words_confirm">¿Borrar todas las palabras aprendidas? Esto no se puede deshacer.</string>
+    <string name="privacy_settings_reset_to_defaults">Restablecer valores predeterminados</string>
+    <string name="privacy_settings_reset_to_defaults_confirm">¿Restablecer todos los ajustes a los valores predeterminados?</string>
+    <string name="privacy_settings_export_error_log">Registro de errores de exportación</string>
+    <string name="privacy_settings_export_error_log_summary">Compartir registros de diagnóstico para la depuración</string>
+    <string name="privacy_settings_export_error_log_failed">No se pudo exportar el registro de errores.</string>
+
+    <!-- Error Messages -->
+    <string name="error_title">Error</string>
+    <string name="error_update_theme">No se pudo actualizar el tema</string>
+    <string name="error_update_key_size">Error al actualizar el tamaño de la tecla</string>
+    <string name="error_update_key_label_size">No se pudo actualizar el tamaño de la etiqueta</string>
+    <string name="error_update_repeat_key_delay">Error al actualizar el retardo de la tecla de repetición</string>
+    <string name="error_update_suggestions">No se pudo actualizar la configuración de sugerencias</string>
+    <string name="error_update_suggestion_count">No se pudo actualizar el recuento de sugerencias</string>
+    <string name="error_update_word_learning">No se pudo actualizar el aprendizaje de palabras.</string>
+    <string name="error_update_language">No se pudo actualizar la configuración de idioma</string>
+    <string name="error_update_key_click_sound">No se pudo actualizar el sonido de pulsación de tecla.</string>
+    <string name="error_update_sound_volume">No se pudo actualizar el volumen del sonido</string>
+    <string name="error_update_haptic_feedback">No se pudo actualizar la retroalimentación por vibración.</string>
+    <string name="error_update_vibration_strength">No se pudo actualizar la intensidad de la vibración.</string>
+    <string name="error_update_double_space_period">No se pudo actualizar el punto de doble espacio</string>
+    <string name="error_update_long_press_duration">No se pudo actualizar la duración de la pulsación larga.</string>
+    <string name="error_update_number_row">Error al actualizar la fila de números</string>
+    <string name="error_update_space_bar_size">No se pudo actualizar el tamaño de la barra espaciadora.</string>
+    <string name="error_clear_learned_words">No se pudo borrar las palabras aprendidas</string>
+    <string name="error_reset_to_defaults">No se pudo restablecer la configuración</string>
+
+    <!-- Success Messages -->
+    <string name="success_learned_words_cleared">Palabras aprendidas borradas</string>
+    <string name="success_settings_reset">La configuración se ha restablecido a los valores predeterminados.</string>
+
+    <!-- Keyboard descriptions -->
+    <string name="keyboard_description">Teclado virtual</string>
+
+    <!-- Default key labels -->
+    <string name="space_key_label">Espacio</string>
+    <string name="letters_mode_label">ABC</string>
+    <string name="numbers_mode_label">123</string>
+    <string name="symbols_mode_label">+=&lt;</string>
+
+    <!-- Accessibility descriptions -->
+    <string name="key_character_description">Tipo %1$s</string>
+    <string name="key_ideograph_description">Tipo ideograma %1$s</string>
+    <string name="key_syllable_description">Tipo sílaba %1$s</string>
+
+    <string name="shift_key_description">Tecla Mayúsculas, pulsa para poner en mayúscula la siguiente letra</string>
+    <string name="shift_active_description">La tecla Shift está activada; toca para desactivarla.</string>
+    <string name="shift_deactivate_description">Toca para desactivar la tecla Shift</string>
+    <string name="caps_lock_description">Bloquear Mayúsculas</string>
+    <string name="caps_lock_on_description">El bloqueo de mayúsculas está activado; toca para desactivarlo.</string>
+    <string name="backspace_key_description">Eliminar carácter anterior</string>
+    <string name="space_key_description">Barra espaciadora</string>
+    <string name="letters_mode_description">Cambiar a teclado de letras</string>
+    <string name="numbers_mode_description">Cambiar a teclado numérico</string>
+    <string name="symbols_mode_description">Cambiar al teclado de símbolos</string>
+    <string name="ime_prediction_description">Predicción: %1$s</string>
+
+    <!-- Action button labels -->
+    <string name="action_enter">Entrar</string>
+    <string name="action_search">Buscar</string>
+    <string name="action_send">Enviar</string>
+    <string name="action_done">Hecho</string>
+    <string name="action_go">Ir</string>
+    <string name="action_next">Siguiente</string>
+    <string name="action_previous">Anterior</string>
+
+    <!-- Action button accessibility descriptions -->
+    <string name="action_enter_description">Pulsa Entrar</string>
+    <string name="action_search_description">Buscar</string>
+    <string name="action_send_description">Enviar mensaje</string>
+    <string name="action_done_description">Edición finalizada</string>
+    <string name="action_go_description">Ir al destino</string>
+    <string name="action_next_description">Pasar al siguiente campo</string>
+    <string name="action_previous_description">Pasar al campo anterior</string>
+
+    <string name="action_emoji">Emoji</string>
+
+    <!-- Blacklisting Words -->
+    <string name="remove_suggestion">¿Eliminar %1$s de las sugerencias?</string>
+    <string name="remove_cancel">Cancelar</string>
+    <string name="remove_confirm">Eliminar</string>
+
+    <string name="animation_sentence">Urik. Un teclado multilingüe, accesible y que prioriza la privacidad. Recupera tus datos.</string>
+
+    <string name="animation_typo_1_correct">privacidad</string>
+    <string name="animation_typo_1_wrong">privacidad</string>
+    <string-array name="animation_typo_1_suggestions">
+        <item>privacidad</item>
+        <item>piratería</item>
+        <item>primacía</item>
+    </string-array>
+
+
+    <string name="animation_typo_2_correct">accesible</string>
+    <string name="animation_typo_2_wrong">accesible</string>
+    <string-array name="animation_typo_2_suggestions">
+        <item>accesible</item>
+        <item>inaccesible</item>
+        <item>accesibilidad</item>
+    </string-array>
+
+    <string name="animation_typo_3_correct">teclado</string>
+    <string name="animation_typo_3_wrong">teclado</string>
+    <string-array name="animation_typo_3_suggestions">
+        <item>teclado</item>
+        <item>teclados</item>
+        <item>teclista</item>
+    </string-array>
+
+    <!-- Tips -->
+    <string name="tip_1_title">Aprendiendo palabras</string>
+    <string name="tip_1_description">Pulsa la barra espaciadora después de resaltar una errata para añadir la palabra a tu diccionario.</string>
+
+    <string name="tip_2_title">Menú rápido de puntuación</string>
+    <string name="tip_2_description">Mantén pulsada la barra espaciadora para abrir un menú rápido de puntuación.</string>
+
+    <string name="tip_3_title">Variaciones de caracteres</string>
+    <string name="tip_3_description">Mantén pulsado un personaje para seleccionar una variante para ese personaje.</string>
+
+    <string name="tip_4_title">Eliminar palabras</string>
+    <string name="tip_4_description">Mantén pulsada una sugerencia para eliminarla de tu diccionario.</string>
+
+
+    <string name="tip_icon_description">Icono de sugerencia</string>
+
+</resources>
