@@ -785,10 +785,6 @@ class UrikInputMethodService :
             observerJobs.clear()
 
             observeViewModel()
-
-            serviceScope.launch {
-                initializeServices()
-            }
         }
 
         super.onStartInputView(info, restarting)
@@ -1332,7 +1328,6 @@ class UrikInputMethodService :
 
                 else -> {
                     currentInputConnection?.commitText("\n", 1)
-                    true
                 }
             }
 
