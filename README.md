@@ -28,6 +28,23 @@ All processing happens on-device. No data leaves your phone. User dictionary and
 
 - Android 8.0 or higher (API level 26+)
 
+## Building from Source
+```bash
+git clone https://github.com/urikdev/Urik.git
+cd Urik
+./gradlew assembleDebug
+```
+
+Requirements: Android Studio Ladybug+, JDK 17+, Android SDK 34+
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+## Security
+
+Report vulnerabilities via [SECURITY.md](SECURITY.md).
+
 ## Dictionary Data
 
 Spell checking uses word frequency lists from [FrequencyWords](https://github.com/hermitdave/FrequencyWords) by hermitdave, derived from the OpenSubtitles corpus.
