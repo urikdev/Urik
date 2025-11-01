@@ -1220,6 +1220,7 @@ class SwipeKeyboardView
 
             spellCheckManager = null
             keyboardLayoutManager = null
+            swipeDetector?.setSwipeListener(null)
             swipeDetector = null
             wordLearningEngine = null
 

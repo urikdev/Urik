@@ -785,6 +785,10 @@ class UrikInputMethodService :
             observerJobs.clear()
 
             observeViewModel()
+
+            serviceScope.launch {
+                initializeServices()
+            }
         }
 
         super.onStartInputView(info, restarting)
@@ -1727,6 +1731,7 @@ class UrikInputMethodService :
     override fun onFinishInputView(finishingInput: Boolean) {
         super.onFinishInputView(finishingInput)
 
+        suggestionDebounceJob?.cancel()
         swipeKeyboardView?.hideEmojiPicker()
 
         if (displayBuffer.isNotEmpty() && !isSecureField) {
@@ -1790,6 +1795,7 @@ class UrikInputMethodService :
     override fun onFinishInput() {
         super.onFinishInput()
 
+        suggestionDebounceJob?.cancel()
         swipeKeyboardView?.hideEmojiPicker()
 
         if (displayBuffer.isNotEmpty() && !isSecureField) {

@@ -38,8 +38,7 @@ class KeyboardViewModel
         private val _layout = MutableStateFlow<KeyboardLayout?>(null)
         val layout: StateFlow<KeyboardLayout?> = _layout.asStateFlow()
 
-        @Suppress("ktlint:standard:backing-property-naming")
-        private val _events = MutableSharedFlow<KeyboardEvent>()
+        private val events = MutableSharedFlow<KeyboardEvent>()
 
         private var currentActionType: KeyboardKey.ActionType = KeyboardKey.ActionType.ENTER
         private var loadJob: Job? = null
@@ -63,7 +62,7 @@ class KeyboardViewModel
             }
 
             viewModelScope.launch {
-                _events.collect { event ->
+                events.collect { event ->
                     handleEvent(event)
                 }
             }
@@ -71,7 +70,7 @@ class KeyboardViewModel
             viewModelScope.launch {
                 languageManager.currentLanguage
                     .drop(1)
-                    .collect { language ->
+                    .collect { _ ->
                         startLoadLayout(_state.value.currentMode)
                     }
             }
@@ -79,7 +78,7 @@ class KeyboardViewModel
 
         fun onEvent(event: KeyboardEvent) {
             viewModelScope.launch {
-                _events.emit(event)
+                events.emit(event)
             }
         }
 
@@ -116,12 +115,6 @@ class KeyboardViewModel
 
         /**
          * Checks if auto-capitalization should trigger.
-         *
-         * Triggers when:
-         * - Buffer empty (sentence start)
-         * - After sentence-ending punctuation (. ! ?) followed by whitespace only
-         *
-         * Does NOT trigger mid-sentence or after comma/semicolon.
          */
         fun shouldAutoCapitalize(textBeforeCursor: String?): Boolean {
             if (textBeforeCursor.isNullOrBlank()) {
