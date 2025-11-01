@@ -23,6 +23,10 @@ import javax.crypto.spec.GCMParameterSpec
 class DatabaseSecurityManager(
     private val context: Context,
 ) {
+    companion object {
+        private val secureRandom = java.security.SecureRandom()
+    }
+
     private val keyAlias = "urik_database_master_key"
     private val prefsFile = "urik_db_prefs"
     private val passphraseKey = "encrypted_passphrase"
@@ -74,7 +78,7 @@ class DatabaseSecurityManager(
         val secretKey = generateMasterKey()
 
         val passphrase = ByteArray(32)
-        java.security.SecureRandom().nextBytes(passphrase)
+        secureRandom.nextBytes(passphrase)
 
         val cipher = Cipher.getInstance("AES/GCM/NoPadding")
         cipher.init(Cipher.ENCRYPT_MODE, secretKey)
