@@ -180,7 +180,7 @@ class SwipeDetector
                 }
         }
 
-        fun setSwipeListener(listener: SwipeListener) {
+        fun setSwipeListener(listener: SwipeListener?) {
             this.swipeListener = listener
         }
 

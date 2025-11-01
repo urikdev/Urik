@@ -77,7 +77,7 @@ class SettingsRepository
                             preferences[PreferenceKeys.VIBRATION_STRENGTH]?.let {
                                 try {
                                     VibrationStrength.valueOf(it)
-                                } catch (e: IllegalArgumentException) {
+                                } catch (_: IllegalArgumentException) {
                                     VibrationStrength.MEDIUM
                                 }
                             } ?: VibrationStrength.MEDIUM,
@@ -86,7 +86,7 @@ class SettingsRepository
                             preferences[PreferenceKeys.LONG_PRESS_DURATION]?.let {
                                 try {
                                     LongPressDuration.valueOf(it)
-                                } catch (e: IllegalArgumentException) {
+                                } catch (_: IllegalArgumentException) {
                                     LongPressDuration.MEDIUM
                                 }
                             } ?: LongPressDuration.MEDIUM,
@@ -95,7 +95,7 @@ class SettingsRepository
                             preferences[PreferenceKeys.SPACE_BAR_SIZE]?.let {
                                 try {
                                     SpaceBarSize.valueOf(it)
-                                } catch (e: IllegalArgumentException) {
+                                } catch (_: IllegalArgumentException) {
                                     SpaceBarSize.STANDARD
                                 }
                             } ?: SpaceBarSize.STANDARD,
@@ -103,7 +103,7 @@ class SettingsRepository
                             preferences[PreferenceKeys.THEME]?.let {
                                 try {
                                     Theme.valueOf(it)
-                                } catch (e: IllegalArgumentException) {
+                                } catch (_: IllegalArgumentException) {
                                     Theme.SYSTEM
                                 }
                             } ?: Theme.SYSTEM,
@@ -111,7 +111,7 @@ class SettingsRepository
                             preferences[PreferenceKeys.KEY_SIZE]?.let {
                                 try {
                                     KeySize.valueOf(it)
-                                } catch (e: IllegalArgumentException) {
+                                } catch (_: IllegalArgumentException) {
                                     KeySize.MEDIUM
                                 }
                             } ?: KeySize.MEDIUM,
@@ -119,12 +119,12 @@ class SettingsRepository
                             preferences[PreferenceKeys.KEY_LABEL_SIZE]?.let {
                                 try {
                                     KeyLabelSize.valueOf(it)
-                                } catch (e: IllegalArgumentException) {
+                                } catch (_: IllegalArgumentException) {
                                     KeyLabelSize.MEDIUM
                                 }
                             } ?: KeyLabelSize.MEDIUM,
                     ).validated()
-                }.catch { exception ->
+                }.catch { _ ->
                     emit(getDefaultSettings())
                 }
 
