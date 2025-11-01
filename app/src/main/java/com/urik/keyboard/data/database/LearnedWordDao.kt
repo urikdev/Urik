@@ -41,26 +41,6 @@ interface LearnedWordDao {
     ): List<FastSuggestion>
 
     /**
-     * Prefix suggestions using range query
-     */
-    @Query(
-        """
-        SELECT word, frequency FROM learned_words
-        WHERE language_tag = :languageTag 
-        AND word_normalized >= :prefix
-        AND word_normalized < :prefix || 'z'
-        AND frequency >= 2
-        ORDER BY frequency DESC
-        LIMIT :limit
-    """,
-    )
-    suspend fun getRealtimeSuggestions(
-        prefix: String,
-        languageTag: String,
-        limit: Int = 3,
-    ): List<MinimalSuggestion>
-
-    /**
      * Full-text search for fuzzy word matching.
      *
      * Uses FTS4 for complex queries.
@@ -140,44 +120,6 @@ interface LearnedWordDao {
 
     @Query(
         """
-        SELECT * FROM learned_words 
-        WHERE language_tag = :languageTag 
-        AND last_used > :since
-        ORDER BY last_used DESC
-        LIMIT :limit
-    """,
-    )
-    suspend fun getRecentlyUsedWords(
-        languageTag: String,
-        since: Long,
-        limit: Int = 50,
-    ): List<LearnedWord>
-
-    /**
-     * Pattern matching for word games or partial recall.
-     *
-     * Matches exact grapheme count and substring pattern.
-     * Example: length=5, pattern="el" matches "hello" (5 chars, contains "el")
-     */
-    @Query(
-        """
-        SELECT * FROM learned_words 
-        WHERE character_count = :length
-        AND language_tag = :languageTag
-        AND word_normalized LIKE '%' || :pattern || '%'
-        ORDER BY frequency DESC
-        LIMIT :limit
-    """,
-    )
-    suspend fun findWordsByPattern(
-        languageTag: String,
-        length: Int,
-        pattern: String,
-        limit: Int = 20,
-    ): List<LearnedWord>
-
-    @Query(
-        """
         SELECT COUNT(*) FROM learned_words 
         WHERE language_tag = :languageTag
     """,
@@ -193,14 +135,6 @@ interface LearnedWordDao {
     """,
     )
     suspend fun getWordCountByLanguageRaw(): List<LanguageWordCount>
-
-    @Query(
-        """
-        SELECT AVG(frequency) FROM learned_words 
-        WHERE language_tag = :languageTag
-    """,
-    )
-    suspend fun getAverageFrequency(languageTag: String): Double
 
     @Query("SELECT COUNT(*) FROM learned_words")
     suspend fun getTotalWordCount(): Int
@@ -334,29 +268,6 @@ interface LearnedWordDao {
     @Query("DELETE FROM learned_words WHERE language_tag = :languageTag")
     suspend fun clearLanguage(languageTag: String): Int
 
-    /**
-     * Limits stored words per language to prevent unbounded growth.
-     *
-     * Keeps top N by frequency, then recency. Deletes least useful words.
-     * Default 10k words per language
-     */
-    @Query(
-        """
-        DELETE FROM learned_words 
-        WHERE id NOT IN (
-            SELECT id FROM learned_words 
-            WHERE language_tag = :languageTag
-            ORDER BY frequency DESC, last_used DESC 
-            LIMIT :keepCount
-        )
-        AND language_tag = :languageTag
-    """,
-    )
-    suspend fun limitWordsPerLanguage(
-        languageTag: String,
-        keepCount: Int = 10000,
-    ): Int
-
     @Query(
         """
         SELECT * FROM learned_words 
@@ -375,11 +286,6 @@ interface LearnedWordDao {
 }
 
 data class FastSuggestion(
-    val word: String,
-    val frequency: Int,
-)
-
-data class MinimalSuggestion(
     val word: String,
     val frequency: Int,
 )

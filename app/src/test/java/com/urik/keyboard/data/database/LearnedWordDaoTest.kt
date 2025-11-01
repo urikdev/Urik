@@ -257,18 +257,6 @@ class LearnedWordDaoTest {
         }
 
     @Test
-    fun `getRealtimeSuggestions uses range query`() =
-        runTest {
-            dao.insertWord(createTestWord("hello", "hello", "en", frequency = 5))
-            dao.insertWord(createTestWord("help", "help", "en", frequency = 3))
-            dao.insertWord(createTestWord("world", "world", "en", frequency = 4))
-
-            val results = dao.getRealtimeSuggestions("hel", "en", 10)
-
-            assertEquals(2, results.size)
-        }
-
-    @Test
     fun `findExistingWords returns only existing words`() =
         runTest {
             dao.insertWord(createTestWord("hello", "hello", "en"))
@@ -381,20 +369,6 @@ class LearnedWordDaoTest {
         }
 
     @Test
-    fun `limitWordsPerLanguage keeps top N words`() =
-        runTest {
-            for (i in 1..15) {
-                dao.insertWord(createTestWord("word$i", "word$i", "en", frequency = i))
-            }
-
-            dao.limitWordsPerLanguage("en", keepCount = 10)
-
-            assertEquals(10, dao.getWordCount("en"))
-            assertNotNull(dao.findExactWord("en", "word15"))
-            assertNull(dao.findExactWord("en", "word1"))
-        }
-
-    @Test
     fun `getWordCount returns correct count`() =
         runTest {
             dao.insertWord(createTestWord("hello", "hello", "en"))
@@ -410,18 +384,6 @@ class LearnedWordDaoTest {
             dao.insertWord(createTestWord("hej", "hej", "sv"))
 
             assertEquals(2, dao.getTotalWordCount())
-        }
-
-    @Test
-    fun `getAverageFrequency calculates correctly`() =
-        runTest {
-            dao.insertWord(createTestWord("word1", "word1", "en", frequency = 2))
-            dao.insertWord(createTestWord("word2", "word2", "en", frequency = 4))
-            dao.insertWord(createTestWord("word3", "word3", "en", frequency = 6))
-
-            val avg = dao.getAverageFrequency("en")
-
-            assertEquals(4.0, avg, 0.1)
         }
 
     @Test
@@ -452,35 +414,6 @@ class LearnedWordDaoTest {
             val swipedCount = results.find { it.source == WordSource.SWIPE_LEARNED }?.count
             assertEquals(2, typedCount)
             assertEquals(1, swipedCount)
-        }
-
-    @Test
-    fun `findWordsByPattern matches character count and pattern`() =
-        runTest {
-            dao.insertWord(createTestWord("hello", "hello", "en"))
-            dao.insertWord(createTestWord("world", "world", "en"))
-            dao.insertWord(createTestWord("hi", "hi", "en"))
-
-            val results = dao.findWordsByPattern("en", length = 5, pattern = "el", limit = 10)
-
-            assertEquals(1, results.size)
-            assertEquals("hello", results[0].word)
-        }
-
-    @Test
-    fun `getRecentlyUsedWords filters by timestamp`() =
-        runTest {
-            val old = System.currentTimeMillis() - 100000
-            val recent = System.currentTimeMillis()
-
-            dao.insertWord(createTestWord("old", "old", "en", lastUsed = old))
-            dao.insertWord(createTestWord("recent", "recent", "en", lastUsed = recent))
-
-            val since = System.currentTimeMillis() - 50000
-            val results = dao.getRecentlyUsedWords("en", since, 10)
-
-            assertEquals(1, results.size)
-            assertEquals("recent", results[0].word)
         }
 
     /**
