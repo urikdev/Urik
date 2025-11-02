@@ -39,11 +39,9 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:layout_marginStart="12dp"
-                android:textSize="18sp"
+                android:textSize="16sp"
                 android:textStyle="bold"
-                android:textColor="@color/content_primary"
-                android:maxLines="1"
-                android:ellipsize="end" />
+                android:textColor="@color/content_primary" />
 
         </LinearLayout>
 
@@ -55,9 +53,7 @@
             android:layout_marginTop="8dp"
             android:textSize="14sp"
             android:textColor="@color/content_primary"
-            android:lineSpacingMultiplier="1.2"
-            android:maxLines="3"
-            android:ellipsize="end" />
+            android:lineSpacingMultiplier="1.2" />
 
     </LinearLayout>
 
