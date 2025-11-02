@@ -815,6 +815,15 @@ class UrikInputMethodService :
             val textBefore = currentInputConnection?.getTextBeforeCursor(50, 0)?.toString()
             viewModel.checkAndApplyAutoCapitalization(textBefore)
         } else {
+            if (displayBuffer.isNotEmpty()) {
+                val actualTextBefore = currentInputConnection?.getTextBeforeCursor(1, 0)?.toString() ?: ""
+                val actualTextAfter = currentInputConnection?.getTextAfterCursor(1, 0)?.toString() ?: ""
+
+                if (actualTextBefore.isEmpty() && actualTextAfter.isEmpty()) {
+                    coordinateStateClear()
+                }
+            }
+
             try {
                 currentInputConnection?.finishComposingText()
             } catch (_: Exception) {
@@ -1374,8 +1383,26 @@ class UrikInputMethodService :
                         val absoluteCursorPos = currentInputConnection?.getTextBeforeCursor(1000, 0)?.length ?: displayBuffer.length
                         CursorEditingUtils.calculateCursorPositionInWord(absoluteCursorPos, composingRegionStart, displayBuffer.length)
                     } else {
-                        displayBuffer.length
+                        val absoluteCursorPos = currentInputConnection?.getTextBeforeCursor(1000, 0)?.length ?: displayBuffer.length
+                        val potentialStart = absoluteCursorPos - displayBuffer.length
+                        if (potentialStart >= 0) {
+                            composingRegionStart = potentialStart
+                            CursorEditingUtils.calculateCursorPositionInWord(absoluteCursorPos, composingRegionStart, displayBuffer.length)
+                        } else {
+                            displayBuffer.length
+                        }
                     }
+
+                if (cursorPosInWord == 0) {
+                    currentInputConnection?.beginBatchEdit()
+                    try {
+                        coordinateStateClear()
+                        currentInputConnection?.deleteSurroundingText(1, 0)
+                    } finally {
+                        currentInputConnection?.endBatchEdit()
+                    }
+                    return
+                }
 
                 if (cursorPosInWord > 0) {
                     val deletedChar = displayBuffer.getOrNull(cursorPosInWord - 1)
@@ -1843,8 +1870,6 @@ class UrikInputMethodService :
 
         if (isSecureField) return
 
-        if (isUrlOrEmailField) return
-
         if (newSelStart == 0 && newSelEnd == 0) {
             val textBefore = currentInputConnection?.getTextBeforeCursor(50, 0)?.toString()
             val textAfter = currentInputConnection?.getTextAfterCursor(50, 0)?.toString()
@@ -1862,8 +1887,12 @@ class UrikInputMethodService :
                 clearSpellConfirmationState()
             }
 
-            viewModel.checkAndApplyAutoCapitalization(textBefore)
+            if (!isUrlOrEmailField) {
+                viewModel.checkAndApplyAutoCapitalization(textBefore)
+            }
         }
+
+        if (isUrlOrEmailField) return
 
         if (isActivelyEditing) {
             isActivelyEditing = false
@@ -1950,7 +1979,7 @@ class UrikInputMethodService :
             try {
                 val beforeLastBoundary =
                     textBeforeCursor.indexOfLast { char ->
-                        char.isWhitespace() || char in ".,!?;:\n"
+                        char.isWhitespace() || char == '\n'
                     }
 
                 val wordStartOffset =

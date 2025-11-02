@@ -9,6 +9,17 @@ object CursorEditingUtils {
         return false
     }
 
+    fun isPunctuation(char: Char): Boolean {
+        if (char == '\'' || char == '\u2019' || char == '-') return false
+
+        val type = Character.getType(char.code)
+        return type == Character.START_PUNCTUATION.toInt() ||
+            type == Character.END_PUNCTUATION.toInt() ||
+            type == Character.OTHER_PUNCTUATION.toInt() ||
+            type == Character.INITIAL_QUOTE_PUNCTUATION.toInt() ||
+            type == Character.FINAL_QUOTE_PUNCTUATION.toInt()
+    }
+
     fun extractWordAtCursor(
         textBefore: String,
         textAfter: String,
@@ -48,7 +59,7 @@ object CursorEditingUtils {
 
         if (isUrlContent(fullToken)) return null
 
-        val trimmedWord = fullToken.trimEnd { it in ".,!?;:" }
+        val trimmedWord = fullToken.trim { isPunctuation(it) }
 
         if (trimmedWord.length >= 40) return null
 

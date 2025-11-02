@@ -1,12 +1,14 @@
 package com.urik.keyboard.utils
 
+import com.urik.keyboard.utils.CursorEditingUtils
+
 object BackspaceUtils {
     fun extractWordBeforeCursor(textBeforeCursor: String): Pair<String, Int>? {
         if (textBeforeCursor.isEmpty()) return null
 
         val lastWordBoundary =
             textBeforeCursor.indexOfLast { char ->
-                char.isWhitespace() || char in ".,!?;:\n"
+                char.isWhitespace() || char == '\n' || CursorEditingUtils.isPunctuation(char)
             }
 
         val wordBeforeCursor =
