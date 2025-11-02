@@ -249,6 +249,46 @@ class CursorEditingUtilsTest {
     }
 
     @Test
+    fun `extractWordAtCursor trims leading punctuation from word`() {
+        val textBefore = "word "
+        val textAfter = "!!!hello"
+
+        val word = CursorEditingUtils.extractWordAtCursor(textBefore, textAfter)
+
+        Assert.assertEquals("hello", word)
+    }
+
+    @Test
+    fun `extractWordAtCursor trims leading and trailing punctuation`() {
+        val textBefore = "word "
+        val textAfter = "!!!hello!!!"
+
+        val word = CursorEditingUtils.extractWordAtCursor(textBefore, textAfter)
+
+        Assert.assertEquals("hello", word)
+    }
+
+    @Test
+    fun `extractWordAtCursor returns null for pure punctuation between spaces`() {
+        val textBefore = "hello "
+        val textAfter = "!!!? world"
+
+        val word = CursorEditingUtils.extractWordAtCursor(textBefore, textAfter)
+
+        Assert.assertNull(word)
+    }
+
+    @Test
+    fun `extractWordAtCursor handles Spanish inverted punctuation`() {
+        val textBefore = "¡"
+        val textAfter = "Hola!"
+
+        val word = CursorEditingUtils.extractWordAtCursor(textBefore, textAfter)
+
+        Assert.assertEquals("Hola", word)
+    }
+
+    @Test
     fun `isValidTextInput accepts letters`() {
         Assert.assertTrue(CursorEditingUtils.isValidTextInput("hello"))
     }

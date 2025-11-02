@@ -163,4 +163,58 @@ class BackspaceUtilsTest {
         val deleteLength = BackspaceUtils.calculateDeleteLength(word.length, shouldDeleteSpace)
         assertEquals(4, deleteLength)
     }
+
+    @Test
+    fun `extractWordBeforeCursor treats period as boundary`() {
+        val result = BackspaceUtils.extractWordBeforeCursor("hello.world")
+
+        assertNotNull(result)
+        assertEquals("world", result!!.first)
+        assertEquals(5, result.second)
+    }
+
+    @Test
+    fun `extractWordBeforeCursor treats exclamation as boundary`() {
+        val result = BackspaceUtils.extractWordBeforeCursor("hello!world")
+
+        assertNotNull(result)
+        assertEquals("world", result!!.first)
+        assertEquals(5, result.second)
+    }
+
+    @Test
+    fun `extractWordBeforeCursor treats question mark as boundary`() {
+        val result = BackspaceUtils.extractWordBeforeCursor("hello?world")
+
+        assertNotNull(result)
+        assertEquals("world", result!!.first)
+        assertEquals(5, result.second)
+    }
+
+    @Test
+    fun `extractWordBeforeCursor handles Spanish inverted question mark`() {
+        val result = BackspaceUtils.extractWordBeforeCursor("¿Hola")
+
+        assertNotNull(result)
+        assertEquals("Hola", result!!.first)
+        assertEquals(0, result.second)
+    }
+
+    @Test
+    fun `extractWordBeforeCursor preserves apostrophes in words`() {
+        val result = BackspaceUtils.extractWordBeforeCursor("it's")
+
+        assertNotNull(result)
+        assertEquals("it's", result!!.first)
+        assertEquals(-1, result.second)
+    }
+
+    @Test
+    fun `extractWordBeforeCursor preserves hyphens in words`() {
+        val result = BackspaceUtils.extractWordBeforeCursor("co-worker")
+
+        assertNotNull(result)
+        assertEquals("co-worker", result!!.first)
+        assertEquals(-1, result.second)
+    }
 }
