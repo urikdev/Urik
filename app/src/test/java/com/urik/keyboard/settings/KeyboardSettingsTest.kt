@@ -26,7 +26,7 @@ class KeyboardSettingsTest {
     fun `validated defaults to english when all languages unsupported`() {
         val settings =
             KeyboardSettings(
-                activeLanguages = setOf("fr", "de", "es"),
+                activeLanguages = setOf("fr", "de", "it"),
                 primaryLanguage = "fr",
             )
 

@@ -7,6 +7,7 @@ import com.darkrockstudios.symspellkt.api.SpellChecker
 import com.darkrockstudios.symspellkt.common.SpellCheckSettings
 import com.darkrockstudios.symspellkt.common.Verbosity
 import com.darkrockstudios.symspellkt.impl.SymSpell
+import com.urik.keyboard.settings.KeyboardSettings
 import com.urik.keyboard.utils.CacheMemoryManager
 import com.urik.keyboard.utils.ErrorLogger
 import com.urik.keyboard.utils.ManagedCache
@@ -85,7 +86,6 @@ class SpellCheckManager
             private const val MAX_SUGGESTIONS = 5
             private const val MIN_COMPLETION_LENGTH = 4
             private const val APOSTROPHE_BOOST = 0.30
-            private val SUPPORTED_LANGUAGES = setOf("en", "sv")
         }
 
         init {
@@ -259,7 +259,7 @@ class SpellCheckManager
         private suspend fun getSpellCheckerForLanguage(languageCode: String): SpellChecker? {
             spellCheckers[languageCode]?.let { return it }
 
-            if (!isInitialized || languageCode !in SUPPORTED_LANGUAGES) {
+            if (!isInitialized || languageCode !in KeyboardSettings.SUPPORTED_LANGUAGES) {
                 return null
             }
 
@@ -739,7 +739,7 @@ class SpellCheckManager
                     }
 
                     val currentLang = getCurrentLanguage()
-                    if (currentLang !in SUPPORTED_LANGUAGES) {
+                    if (currentLang !in KeyboardSettings.SUPPORTED_LANGUAGES) {
                         return@withContext emptyList()
                     }
 
