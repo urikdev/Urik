@@ -194,12 +194,20 @@ class UrikInputMethodService :
     private fun isValidTextInput(text: String): Boolean = CursorEditingUtils.isValidTextInput(text)
 
     /**
-     * Checks if character input represents a letter.
+     * Checks if character input represents a letter or number
      *
      * @param char Character string to check
-     * @return True if character is valid letter input
+     * @return True if character is valid
      */
-    private fun isLetterInput(char: String): Boolean = char.isNotEmpty() && isValidTextInput(char)
+    private fun isAlphaNumericInput(char: String): Boolean {
+        if (char.isEmpty()) return false
+
+        if (displayBuffer.isNotEmpty() && char.all { it.isDigit() }) {
+            return true
+        }
+
+        return isValidTextInput(char)
+    }
 
     /**
      * Updates script context for all relevant components.
@@ -852,7 +860,7 @@ class UrikInputMethodService :
                     val char = viewModel.getCharacterForInput(key)
                     viewModel.clearShiftAfterCharacter(key)
 
-                    if (isLetterInput(char)) {
+                    if (isAlphaNumericInput(char)) {
                         handleLetterInput(char)
                     } else {
                         handleNonLetterInput(char)

@@ -100,7 +100,7 @@
           {"type": "character", "char": "!", "keyType": "symbol"},
           {"type": "character", "char": "@", "keyType": "symbol"},
           {"type": "character", "char": "#", "keyType": "symbol"},
-          {"type": "character", "char": "$", "keyType": "symbol"},
+          {"type": "character", "char": "€", "keyType": "symbol"},
           {"type": "character", "char": "%", "keyType": "symbol"},
           {"type": "character", "char": "^", "keyType": "symbol"},
           {"type": "character", "char": "&", "keyType": "symbol"},
@@ -121,21 +121,21 @@
           {"type": "character", "char": "|", "keyType": "symbol"}
         ],
         [
-          {"type": "character", "char": ";", "keyType": "symbol"},
-          {"type": "character", "char": ":", "keyType": "symbol"},
+          {"type": "character", "char": ".", "keyType": "symbol"},
+          {"type": "character", "char": ",", "keyType": "symbol"},
           {"type": "character", "char": "'", "keyType": "symbol"},
           {"type": "character", "char": "\"", "keyType": "symbol"},
-          {"type": "character", "char": ",", "keyType": "symbol"},
-          {"type": "character", "char": ".", "keyType": "symbol"},
+          {"type": "character", "char": ";", "keyType": "symbol"},
+          {"type": "character", "char": ":", "keyType": "symbol"},
           {"type": "character", "char": "<", "keyType": "symbol"},
           {"type": "character", "char": ">", "keyType": "symbol"},
           {"type": "character", "char": "/", "keyType": "symbol"},
-          {"type": "character", "char": "?", "keyType": "symbol"}
+          {"type": "character", "char": "?", "keyType": "symbol"},
+          {"type": "action", "action": "backspace"}
         ],
         [
           {"type": "action", "action": "mode_switch_letters"},
           {"type": "action", "action": "space"},
-          {"type": "action", "action": "backspace"},
           {"type": "action", "action": "dynamic_action"}
         ]
       ]

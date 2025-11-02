@@ -400,7 +400,7 @@ class KeyboardLayoutManager(
             importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_YES
             contentDescription = getKeyContentDescription(key, state)
 
-            setOnClickListener { view ->
+            setOnClickListener { _ ->
                 performCustomHaptic()
 
                 if (accessibilityManager.isEnabled) {
@@ -445,7 +445,7 @@ class KeyboardLayoutManager(
                 }
             }
 
-            if (key is KeyboardKey.Character && key.type == KeyboardKey.KeyType.LETTER) {
+            if (key is KeyboardKey.Character) {
                 setOnTouchListener { view, event ->
                     when (event.action) {
                         MotionEvent.ACTION_DOWN -> {
@@ -496,7 +496,7 @@ class KeyboardLayoutManager(
             }
 
             if (key is KeyboardKey.Action && key.action == KeyboardKey.ActionType.BACKSPACE) {
-                setOnLongClickListener { view ->
+                setOnLongClickListener { _ ->
                     performCustomHaptic()
                     startAcceleratedBackspace()
                     true
