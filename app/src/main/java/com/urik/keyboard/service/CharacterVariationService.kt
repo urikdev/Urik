@@ -289,9 +289,11 @@ class CharacterVariationService
             return errorCount >= maxAssetRetries && (now - lastError) < assetErrorCooldownMs
         }
 
+        @Suppress("DEPRECATION")
         private fun clearNonEssentialCaches() {
             val currentLanguageTag = languageManager.currentLanguage.value
-            val languagesToKeep = setOf(currentLanguageTag, "en")
+            val languagesToKeep =
+                setOf(currentLanguageTag, "en")
 
             val allCached = variationCache.asMap()
             allCached.keys.forEach { languageCode ->
@@ -300,7 +302,7 @@ class CharacterVariationService
                 }
             }
 
-            cacheMemoryManager.onLowMemory()
+            cacheMemoryManager.onTrimMemory(android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL)
         }
 
         /**

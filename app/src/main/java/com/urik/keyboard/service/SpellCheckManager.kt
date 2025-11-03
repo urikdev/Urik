@@ -829,10 +829,4 @@ class SpellCheckManager
             commonWordsCache = emptyList()
             commonWordsCacheLanguage = ""
         }
-
-        fun onLowMemory() {
-            spellCheckers.clear()
-            commonWordsCache = emptyList()
-            commonWordsCacheLanguage = ""
-        }
     }
