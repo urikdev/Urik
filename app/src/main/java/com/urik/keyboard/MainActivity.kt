@@ -15,7 +15,6 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import com.urik.keyboard.settings.SettingsActivity
-import com.urik.keyboard.ui.animation.TypewriterAnimationView
 import com.urik.keyboard.ui.tips.TipsAdapter
 import com.urik.keyboard.ui.tips.TipsRepository
 import dagger.hilt.android.AndroidEntryPoint
@@ -103,8 +102,8 @@ class MainActivity : AppCompatActivity() {
             addView(createButtonsSection())
         }
 
-    private fun createAnimationSection(): TypewriterAnimationView =
-        TypewriterAnimationView(this).apply {
+    private fun createAnimationSection(): LinearLayout =
+        LinearLayout(this).apply {
             layoutParams =
                 LinearLayout
                     .LayoutParams(
