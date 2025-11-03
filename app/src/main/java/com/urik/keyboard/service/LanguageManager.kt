@@ -4,7 +4,6 @@ import com.urik.keyboard.settings.SettingsRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,10 +27,7 @@ class LanguageManager
         private val _currentLanguage = MutableStateFlow("en")
         val currentLanguage: StateFlow<String> = _currentLanguage.asStateFlow()
 
-        private var collectionJob: Job? = null
-
         internal fun setDispatcher(dispatcher: CoroutineDispatcher) {
-            collectionJob?.cancel()
             scope.cancel()
             scope = CoroutineScope(dispatcher + SupervisorJob())
         }
@@ -39,15 +35,12 @@ class LanguageManager
         suspend fun initialize(): Result<Unit> =
             withContext(Dispatchers.IO) {
                 return@withContext try {
-                    collectionJob?.cancel()
-
                     _currentLanguage.value = settingsRepository.settings.first().primaryLanguage
 
-                    collectionJob =
-                        settingsRepository.settings
-                            .onEach { settings ->
-                                _currentLanguage.value = settings.primaryLanguage
-                            }.launchIn(scope)
+                    settingsRepository.settings
+                        .onEach { settings ->
+                            _currentLanguage.value = settings.primaryLanguage
+                        }.launchIn(scope)
 
                     Result.success(Unit)
                 } catch (e: Exception) {
@@ -56,7 +49,6 @@ class LanguageManager
             }
 
         fun cleanup() {
-            collectionJob?.cancel()
             scope.cancel()
         }
     }

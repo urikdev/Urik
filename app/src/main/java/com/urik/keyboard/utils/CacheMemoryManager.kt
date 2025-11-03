@@ -72,7 +72,7 @@ class CacheMemoryManager
                         try {
                             checkMemoryPressure()
                             delay(30000L)
-                        } catch (_: Exception) {
+                        } catch (e: Exception) {
                             delay(60000L)
                         }
                     }
@@ -85,30 +85,72 @@ class CacheMemoryManager
 
             when {
                 availableMemoryMb < criticalMemoryThresholdMb -> {
-                    onLowMemory()
+                    onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL)
                 }
                 availableMemoryMb < lowMemoryThresholdMb -> {
-                    onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN)
+                    onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_RUNNING_MODERATE)
                 }
             }
         }
 
+        /**
+         * Critical caches preserved during memory pressure.
+         *
+         * These caches contain user data or core functionality that should survive
+         * moderate memory pressure:
+         * - dictionary_cache: Spell check lookups
+         * - spell_suggestions: Suggestion generation
+         * - learned_words: User's learned vocabulary
+         * - suggestion_cache: Historical suggestions
+         * - generation_cache: Layout generation state
+         */
         private val criticalCacheNames =
             setOf(
                 "dictionary_cache",
                 "generation_cache",
                 "suggestion_cache",
-                "learned_words_cache",
+                "learned_words",
                 "spell_suggestions",
             )
 
+        @Suppress("DEPRECATION")
         override fun onTrimMemory(level: Int) {
-            if (level >= ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN) {
-                managedCaches.forEach { (name, cache) ->
-                    if (name in criticalCacheNames) {
-                        cache.trimToSize((cache.maxSize * 0.7).toInt())
-                    } else {
-                        cache.trimToSize(cache.maxSize / 2)
+            when (level) {
+                ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL,
+                ComponentCallbacks2.TRIM_MEMORY_COMPLETE,
+                -> {
+                    managedCaches.values.forEach { cache ->
+                        cache.trimToSize(cache.maxSize / 4)
+                    }
+                }
+
+                ComponentCallbacks2.TRIM_MEMORY_RUNNING_MODERATE,
+                ComponentCallbacks2.TRIM_MEMORY_MODERATE,
+                -> {
+                    managedCaches.forEach { (name, cache) ->
+                        if (name in criticalCacheNames) {
+                            cache.trimToSize((cache.maxSize * 0.7).toInt())
+                        } else {
+                            cache.trimToSize(cache.maxSize / 2)
+                        }
+                    }
+                }
+
+                ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW,
+                ComponentCallbacks2.TRIM_MEMORY_BACKGROUND,
+                -> {
+                    managedCaches.forEach { (name, cache) ->
+                        if (name !in criticalCacheNames) {
+                            cache.trimToSize((cache.maxSize * 0.8).toInt())
+                        }
+                    }
+                }
+
+                ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN -> {
+                    managedCaches.forEach { (name, cache) ->
+                        if (name !in criticalCacheNames && cache.size() > cache.maxSize / 2) {
+                            cache.trimToSize((cache.maxSize * 0.9).toInt())
+                        }
                     }
                 }
             }
@@ -117,23 +159,51 @@ class CacheMemoryManager
         override fun onConfigurationChanged(newConfig: Configuration) {
         }
 
-        @Deprecated("System calls this for backwards compatibility")
+        @Deprecated("Use onTrimMemory instead")
         override fun onLowMemory() {
-            managedCaches.values.forEach { cache ->
-                cache.trimToSize(cache.maxSize / 4)
-            }
+            onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL)
         }
 
+        /**
+         * Immediately clears all managed caches.
+         *
+         * Used by SettingsRepository for "Clear All Data" privacy operation.
+         * Triggers onEvict callbacks for all entries.
+         */
         fun forceCleanup() {
             managedCaches.values.forEach { it.invalidateAll() }
         }
 
+        /**
+         * Cleans up resources and unregisters callbacks.
+         *
+         * Call when keyboard service destroyed.
+         */
         fun cleanup() {
             memoryMonitoringJob?.cancel()
             context.unregisterComponentCallbacks(this)
             managedCaches.values.forEach { it.invalidateAll() }
             managedCaches.clear()
         }
+
+        data class MemoryStats(
+            val availableMemoryMb: Long,
+            val totalMemoryMb: Long,
+            val isLowMemory: Boolean,
+            val managedCaches: Int,
+            val totalCacheEntries: Int,
+            val totalCacheCapacity: Int,
+        )
+
+        data class CacheStats(
+            val name: String,
+            val size: Int,
+            val maxSize: Int,
+            val hitRate: Int,
+            val evictionCount: Long,
+            val hitCount: Long,
+            val missCount: Long,
+        )
     }
 
 /**
@@ -169,6 +239,14 @@ class ManagedCache<K : Any, V : Any>(
     var misses = 0L
         private set
 
+    /**
+     * Returns cached value if present, or null if not found.
+     *
+     * Updates access order for LRU eviction. Increments hit/miss counters.
+     *
+     * @param key Cache key
+     * @return Cached value or null
+     */
     @Synchronized
     fun getIfPresent(key: K): V? {
         val value = cache[key]
@@ -180,15 +258,37 @@ class ManagedCache<K : Any, V : Any>(
         return value
     }
 
+    /**
+     * Stores value in cache.
+     *
+     * If cache full, evicts least recently used entry before inserting.
+     *
+     * @param key Cache key
+     * @param value Value to cache
+     * @return Previous value if key existed, null otherwise
+     */
     @Synchronized
     fun put(
         key: K,
         value: V,
     ): V? = cache.put(key, value)
 
+    /**
+     * Removes entry from cache.
+     *
+     * Does NOT invoke onEvict callback (manual removal, not eviction).
+     *
+     * @param key Cache key to remove
+     * @return Removed value or null if not found
+     */
     @Synchronized
     fun invalidate(key: K): V? = cache.remove(key)
 
+    /**
+     * Clears all entries and resets hit/miss counters.
+     *
+     * Invokes onEvict for each entry if callback provided.
+     */
     @Synchronized
     fun invalidateAll() {
         cache.clear()
@@ -196,12 +296,25 @@ class ManagedCache<K : Any, V : Any>(
         misses = 0L
     }
 
+    /**
+     * Returns current number of cached entries.
+     */
     @Synchronized
     fun size(): Int = cache.size
 
+    /**
+     * Returns snapshot of cache contents.
+     *
+     * Copy of internal map - modifications don't affect cache.
+     */
     @Synchronized
     fun asMap(): Map<K, V> = cache.toMap()
 
+    /**
+     * Returns cache hit rate as percentage
+     *
+     * @return Hit rate percentage, or 0 if no accesses yet
+     */
     @Synchronized
     fun hitRate(): Int {
         val total = hits + misses

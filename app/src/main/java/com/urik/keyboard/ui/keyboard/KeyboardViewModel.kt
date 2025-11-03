@@ -38,7 +38,8 @@ class KeyboardViewModel
         private val _layout = MutableStateFlow<KeyboardLayout?>(null)
         val layout: StateFlow<KeyboardLayout?> = _layout.asStateFlow()
 
-        private val events = MutableSharedFlow<KeyboardEvent>()
+        @Suppress("ktlint:standard:backing-property-naming")
+        private val _events = MutableSharedFlow<KeyboardEvent>()
 
         private var currentActionType: KeyboardKey.ActionType = KeyboardKey.ActionType.ENTER
         private var loadJob: Job? = null
@@ -62,7 +63,7 @@ class KeyboardViewModel
             }
 
             viewModelScope.launch {
-                events.collect { event ->
+                _events.collect { event ->
                     handleEvent(event)
                 }
             }
@@ -70,7 +71,7 @@ class KeyboardViewModel
             viewModelScope.launch {
                 languageManager.currentLanguage
                     .drop(1)
-                    .collect { _ ->
+                    .collect { language ->
                         startLoadLayout(_state.value.currentMode)
                     }
             }
@@ -78,7 +79,7 @@ class KeyboardViewModel
 
         fun onEvent(event: KeyboardEvent) {
             viewModelScope.launch {
-                events.emit(event)
+                _events.emit(event)
             }
         }
 
