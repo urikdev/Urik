@@ -15,7 +15,6 @@ import java.io.FileNotFoundException
 import java.lang.ref.WeakReference
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.Result
 
 private data class LayoutErrorEntry(
     val count: Int,
@@ -239,10 +238,8 @@ class KeyboardRepository
         private fun parseKeyFromJson(
             keyData: JSONObject,
             currentAction: KeyboardKey.ActionType,
-        ): KeyboardKey {
-            val type = keyData.getString("type")
-
-            return when (type) {
+        ): KeyboardKey =
+            when (val type = keyData.getString("type")) {
                 "character" -> {
                     val char = keyData.getString("char")
                     val keyType =
@@ -275,7 +272,6 @@ class KeyboardRepository
 
                 else -> throw IllegalArgumentException("Unknown key type: $type")
             }
-        }
 
         private suspend fun tryLanguageFallback(
             context: Context,

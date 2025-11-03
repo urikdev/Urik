@@ -2,6 +2,7 @@ package com.urik.keyboard.settings
 
 import com.ibm.icu.util.ULocale
 import com.urik.keyboard.R
+import com.urik.keyboard.settings.KeyboardSettings.Companion.DEFAULT_LANGUAGE
 
 /**
  * Visual theme options.

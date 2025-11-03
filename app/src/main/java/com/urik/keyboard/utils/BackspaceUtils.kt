@@ -1,7 +1,5 @@
 package com.urik.keyboard.utils
 
-import com.urik.keyboard.utils.CursorEditingUtils
-
 object BackspaceUtils {
     fun extractWordBeforeCursor(textBeforeCursor: String): Pair<String, Int>? {
         if (textBeforeCursor.isEmpty()) return null
