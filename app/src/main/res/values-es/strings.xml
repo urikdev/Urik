@@ -1,5 +1,4 @@
 <resources>
-    <string name="app_name" translatable="false">Urik</string>
     <string name="ime_name" translatable="false">Teclado Urik</string>
     <string name="ime_label">Teclado Urik</string>
     <string name="ime_description">Escritura deslizando el dedo, corrector ortográfico y compatibilidad multilingüe sin comprometer tu privacidad. Sin telemetría. Sin recopilación de datos. Todo permanece en tu dispositivo.</string>

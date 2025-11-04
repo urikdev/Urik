@@ -4,8 +4,8 @@
 
 We support only the latest version available on Google Play. Please ensure automatic updates are enabled.
 
-| Version | Supported          |
-| ------- | ------------------ |
+| Version              | Supported          |
+|----------------------|--------------------|
 | Latest (Google Play) | :white_check_mark: |
 
 ## Reporting a Vulnerability
