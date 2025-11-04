@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="ime_name">Urik Tangentbord</string>
     <string name="ime_label">Urik Tangentbord</string>
     <string name="ime_description">Svepskrivning, stavningskontroll och flerspråkigt stöd utan att kompromissa med din integritet. Ingen telemetri. Ingen datainsamling. Allt finns kvar på din enhet.</string>
     <string name="enable_keyboard_title">Aktivera</string>

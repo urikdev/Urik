@@ -29,8 +29,8 @@
 3. Make your changes following code standards
 4. Run tests locally: `./gradlew test`
 5. Ensure ktlint passes: `./gradlew ktlintCheck`
-7. Push to your fork
-8. Open PR against `develop` branch
+6. Push to your fork
+7. Open PR against `develop` branch
 
 ## Code Standards
 
