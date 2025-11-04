@@ -10,9 +10,4 @@
     <style name="KeyTextAppearance.Action">
         <item name="android:textColor">@color/key_text_action</item>
     </style>
-
-    <style name="SuggestionTextAppearance">
-        <item name="android:textSize">@dimen/key_text_size</item>
-        <item name="android:textColor">@color/key_text_character</item>
-    </style>
 </resources>
