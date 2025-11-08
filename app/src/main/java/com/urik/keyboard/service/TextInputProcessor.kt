@@ -1,6 +1,7 @@
 package com.urik.keyboard.service
 
 import com.ibm.icu.lang.UScript
+import com.ibm.icu.text.BreakIterator
 import com.ibm.icu.util.ULocale
 import com.urik.keyboard.settings.KeyboardSettings
 import com.urik.keyboard.settings.SettingsRepository
@@ -259,7 +260,15 @@ class TextInputProcessor
             return text.lowercase(currentLocale.toLocale()).trim()
         }
 
-        private fun countGraphemeClusters(text: String): Int = text.length
+        private fun countGraphemeClusters(text: String): Int {
+            val iterator = BreakIterator.getCharacterInstance(currentLocale.toLocale())
+            iterator.setText(text)
+            var count = 0
+            while (iterator.next() != BreakIterator.DONE) {
+                count++
+            }
+            return count
+        }
 
         private fun isValidCharacterInput(char: String): Boolean {
             if (char.isBlank()) return false
