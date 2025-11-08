@@ -243,8 +243,6 @@ class WordLearningEngine
                     learnWordMutex.withLock {
                         if (isDestroyed.get()) return@withContext Result.success(null)
 
-                        learnedWordDao.learnWord(learnedWord)
-
                         synchronized(cacheLock) {
                             if (!isDestroyed.get()) {
                                 val cacheSet =
@@ -254,6 +252,8 @@ class WordLearningEngine
                                 learnedWordsCache.put(currentLanguage, cacheSet)
                             }
                         }
+
+                        learnedWordDao.learnWord(learnedWord)
                     }
 
                     onSuccessfulOperation()
