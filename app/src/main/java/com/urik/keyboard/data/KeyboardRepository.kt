@@ -12,7 +12,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.io.FileNotFoundException
-import java.lang.ref.WeakReference
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -76,11 +75,9 @@ private class BoundedLayoutErrorTracker(
 class KeyboardRepository
     @Inject
     constructor(
-        @ApplicationContext context: Context,
+        @ApplicationContext private val context: Context,
         cacheMemoryManager: CacheMemoryManager,
     ) {
-        private var contextRef: WeakReference<Context> = WeakReference(context)
-
         private val layoutCache: ManagedCache<String, KeyboardLayout> =
             cacheMemoryManager.createCache(
                 name = "keyboard_layouts",
@@ -163,8 +160,6 @@ class KeyboardRepository
                 if (shouldSkipLocale(localeTag)) {
                     return@withContext getFallbackLayout(mode, currentAction)
                 }
-
-                val context = contextRef.get() ?: return@withContext getFallbackLayout(mode, currentAction)
 
                 return@withContext try {
                     val layoutData = loadLayoutDataFromAssets(context, localeTag)
@@ -407,6 +402,5 @@ class KeyboardRepository
             layoutCache.invalidateAll()
             failedLocales.clear()
             errorTracker.clear()
-            contextRef.clear()
         }
     }
