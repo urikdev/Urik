@@ -1,6 +1,7 @@
 package com.urik.keyboard.service
 
 import com.ibm.icu.lang.UScript
+import com.ibm.icu.text.BreakIterator
 import com.ibm.icu.util.ULocale
 import com.urik.keyboard.settings.KeyboardSettings
 import com.urik.keyboard.settings.SettingsRepository
@@ -31,9 +32,7 @@ data class WordState(
 sealed class ProcessingResult {
     data class Success(
         val wordState: WordState,
-        val shouldGenerateSuggestions: Boolean = false,
         val shouldHighlight: Boolean = false,
-        val processed: Boolean = true,
     ) : ProcessingResult()
 
     data class Error(
@@ -197,12 +196,10 @@ class TextInputProcessor
                         requiresSpellCheck = requiresSpellCheck,
                     )
 
-                val shouldGenerateSuggestions = suggestionsEnabled && graphemeCount >= MIN_SUGGESTION_QUERY_LENGTH
                 val shouldHighlight = requiresSpellCheck && !isValid
 
                 return ProcessingResult.Success(
                     wordState = wordState,
-                    shouldGenerateSuggestions = shouldGenerateSuggestions,
                     shouldHighlight = shouldHighlight,
                 )
             } catch (e: Exception) {
@@ -259,7 +256,15 @@ class TextInputProcessor
             return text.lowercase(currentLocale.toLocale()).trim()
         }
 
-        private fun countGraphemeClusters(text: String): Int = text.length
+        private fun countGraphemeClusters(text: String): Int {
+            val iterator = BreakIterator.getCharacterInstance(currentLocale.toLocale())
+            iterator.setText(text)
+            var count = 0
+            while (iterator.next() != BreakIterator.DONE) {
+                count++
+            }
+            return count
+        }
 
         private fun isValidCharacterInput(char: String): Boolean {
             if (char.isBlank()) return false
