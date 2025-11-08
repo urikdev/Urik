@@ -1,5 +1,7 @@
 package com.urik.keyboard.utils
 
+import com.urik.keyboard.KeyboardConstants.TextProcessingConstants
+
 object CursorEditingUtils {
     private fun isUrlContent(text: String): Boolean {
         if (text.contains("://")) return true
@@ -26,8 +28,8 @@ object CursorEditingUtils {
     ): String? {
         if (textBefore.isEmpty() && textAfter.isEmpty()) return null
 
-        val limitedBefore = textBefore.takeLast(50)
-        val limitedAfter = textAfter.take(50)
+        val limitedBefore = textBefore.takeLast(TextProcessingConstants.CURSOR_CONTEXT_BEFORE_LENGTH)
+        val limitedAfter = textAfter.take(TextProcessingConstants.CURSOR_CONTEXT_AFTER_LENGTH)
 
         val beforeLastBoundary =
             limitedBefore.indexOfLast { char ->
@@ -55,13 +57,13 @@ object CursorEditingUtils {
 
         val fullToken = tokenBefore + tokenAfter
 
-        if (fullToken.length >= 200) return null
+        if (fullToken.length >= TextProcessingConstants.MAX_TOKEN_LENGTH_BEFORE_FILTER) return null
 
         if (isUrlContent(fullToken)) return null
 
         val trimmedWord = fullToken.trim { isPunctuation(it) }
 
-        if (trimmedWord.length >= 40) return null
+        if (trimmedWord.length >= TextProcessingConstants.MAX_WORD_LENGTH_AFTER_TRIM) return null
 
         return if (trimmedWord.isNotEmpty() && isValidTextInput(trimmedWord)) {
             trimmedWord

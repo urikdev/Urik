@@ -6,6 +6,7 @@ import android.graphics.PointF
 import android.view.MotionEvent
 import com.ibm.icu.lang.UScript
 import com.ibm.icu.util.ULocale
+import com.urik.keyboard.KeyboardConstants.SwipeDetectionConstants
 import com.urik.keyboard.model.KeyboardKey
 import com.urik.keyboard.service.SpellCheckManager
 import kotlinx.coroutines.CoroutineScope
@@ -44,16 +45,6 @@ class SwipeDetector
     constructor(
         private val spellCheckManager: SpellCheckManager,
     ) {
-        private companion object {
-            const val MAX_SWIPE_POINTS = 75
-            const val MIN_SAMPLING_INTERVAL = 2
-            const val MAX_SAMPLING_INTERVAL = 8
-            const val ADAPTIVE_THRESHOLD = 40
-            const val MIN_POINT_DISTANCE = 8f
-            const val MIN_CHARS_IN_BOUNDS_RATIO = 0.6f
-            const val MIN_EXCELLENT_CANDIDATES = 3
-        }
-
         /**
          * Captured swipe point with metadata.
          */
@@ -250,12 +241,12 @@ class SwipeDetector
         private fun checkForSwipeStart(event: MotionEvent) {
             firstPoint?.let { start ->
                 val timeSinceDown = System.currentTimeMillis() - startTime
-                if (timeSinceDown < 100L) {
+                if (timeSinceDown < SwipeDetectionConstants.SWIPE_TIME_THRESHOLD_MS) {
                     return
                 }
 
                 val distance = calculateDistance(start.x, start.y, event.x, event.y)
-                if (distance > 35f) {
+                if (distance > SwipeDetectionConstants.SWIPE_START_DISTANCE_PX) {
                     isSwiping = true
                     swipeListener?.onSwipeStart(PointF(start.x, start.y))
                     updateSwipePath(event)
@@ -268,7 +259,7 @@ class SwipeDetector
             counter: Int,
             velocity: Float,
         ): Boolean {
-            if (swipePoints.size < 3) return true
+            if (swipePoints.size < SwipeDetectionConstants.MIN_SWIPE_POINTS_FOR_SAMPLING) return true
 
             val lastPoint = swipePoints.lastOrNull() ?: return true
 
@@ -276,20 +267,20 @@ class SwipeDetector
             val dy = newPoint.y - lastPoint.y
             val distanceSquared = dx * dx + dy * dy
 
-            if (distanceSquared < MIN_POINT_DISTANCE * MIN_POINT_DISTANCE) return false
+            if (distanceSquared < SwipeDetectionConstants.MIN_POINT_DISTANCE * SwipeDetectionConstants.MIN_POINT_DISTANCE) return false
 
             val samplingInterval =
                 when {
-                    swipePoints.size < ADAPTIVE_THRESHOLD -> MIN_SAMPLING_INTERVAL
-                    swipePoints.size < MAX_SWIPE_POINTS * 0.75 -> MIN_SAMPLING_INTERVAL + 2
-                    else -> MAX_SAMPLING_INTERVAL
+                    swipePoints.size < SwipeDetectionConstants.ADAPTIVE_THRESHOLD -> SwipeDetectionConstants.MIN_SAMPLING_INTERVAL
+                    swipePoints.size < SwipeDetectionConstants.MAX_SWIPE_POINTS * SwipeDetectionConstants.ADAPTIVE_THRESHOLD_RATIO -> SwipeDetectionConstants.MIN_SAMPLING_INTERVAL + 2
+                    else -> SwipeDetectionConstants.MAX_SAMPLING_INTERVAL
                 }
 
             if (counter % samplingInterval != 0) return false
 
-            val isSlowPreciseMovement = velocity < 0.5f && swipePoints.size > 10
+            val isSlowPreciseMovement = velocity < SwipeDetectionConstants.SLOW_MOVEMENT_VELOCITY_THRESHOLD && swipePoints.size > 10
             if (isSlowPreciseMovement) {
-                return counter % MIN_SAMPLING_INTERVAL == 0
+                return counter % SwipeDetectionConstants.MIN_SAMPLING_INTERVAL == 0
             }
 
             return true
@@ -310,12 +301,12 @@ class SwipeDetector
 
             val shouldAddPoint = shouldSamplePoint(newPoint, pointCounter, velocity)
 
-            if (shouldAddPoint && swipePoints.size < MAX_SWIPE_POINTS) {
+            if (shouldAddPoint && swipePoints.size < SwipeDetectionConstants.MAX_SWIPE_POINTS) {
                 swipePoints.add(newPoint)
             }
 
             val now = System.currentTimeMillis()
-            if (now - lastUpdateTime >= 16) {
+            if (now - lastUpdateTime >= SwipeDetectionConstants.UI_UPDATE_INTERVAL_MS) {
                 lastUpdateTime = now
 
                 val currentPath =
@@ -492,7 +483,7 @@ class SwipeDetector
 
                         if (combinedScore > 0.95f) {
                             val excellentCandidates = candidatesMap.values.count { it.combinedScore > 0.90f }
-                            if (excellentCandidates >= MIN_EXCELLENT_CANDIDATES) {
+                            if (excellentCandidates >= SwipeDetectionConstants.MIN_EXCELLENT_CANDIDATES) {
                                 break
                             }
                         }
@@ -644,7 +635,7 @@ class SwipeDetector
                     char.lowercaseChar() in charsInBounds
                 }
 
-            val requiredChars = (word.length * MIN_CHARS_IN_BOUNDS_RATIO).toInt().coerceAtLeast(1)
+            val requiredChars = (word.length * SwipeDetectionConstants.MIN_CHARS_IN_BOUNDS_RATIO).toInt().coerceAtLeast(1)
             return charsInBoundsCount >= requiredChars
         }
 

@@ -2,6 +2,8 @@ package com.urik.keyboard.data
 
 import android.content.Context
 import com.ibm.icu.util.ULocale
+import com.urik.keyboard.KeyboardConstants.AssetLoadingConstants
+import com.urik.keyboard.KeyboardConstants.CacheConstants
 import com.urik.keyboard.model.KeyboardKey
 import com.urik.keyboard.model.KeyboardLayout
 import com.urik.keyboard.model.KeyboardMode
@@ -81,23 +83,23 @@ class KeyboardRepository
         private val layoutCache: ManagedCache<String, KeyboardLayout> =
             cacheMemoryManager.createCache(
                 name = "keyboard_layouts",
-                maxSize = 20,
+                maxSize = CacheConstants.LAYOUT_CACHE_SIZE,
                 onEvict = { _, _ -> },
             )
 
         private val failedLocales = mutableSetOf<String>()
-        private val errorTracker = BoundedLayoutErrorTracker(maxSize = 20)
+        private val errorTracker = BoundedLayoutErrorTracker(maxSize = AssetLoadingConstants.LAYOUT_ERROR_TRACKER_MAX_SIZE)
 
-        private val maxLayoutRetries = 3
-        private val layoutErrorCooldownMs = 60000L
-        private val errorStateExpiryMs = 3600000L
+        private val maxLayoutRetries = AssetLoadingConstants.MAX_LAYOUT_RETRIES
+        private val layoutErrorCooldownMs = AssetLoadingConstants.LAYOUT_ERROR_COOLDOWN_MS
+        private val errorStateExpiryMs = AssetLoadingConstants.LAYOUT_ERROR_STATE_EXPIRY_MS
 
         private var lastErrorCleanup = System.currentTimeMillis()
 
         private fun cleanupExpiredErrors() {
             val now = System.currentTimeMillis()
 
-            if ((now - lastErrorCleanup) > 600000L) {
+            if ((now - lastErrorCleanup) > AssetLoadingConstants.LAYOUT_ERROR_CLEANUP_INTERVAL_MS) {
                 errorTracker.cleanExpired(errorStateExpiryMs)
 
                 val iterator = failedLocales.iterator()
