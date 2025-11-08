@@ -32,9 +32,7 @@ data class WordState(
 sealed class ProcessingResult {
     data class Success(
         val wordState: WordState,
-        val shouldGenerateSuggestions: Boolean = false,
         val shouldHighlight: Boolean = false,
-        val processed: Boolean = true,
     ) : ProcessingResult()
 
     data class Error(
@@ -198,12 +196,10 @@ class TextInputProcessor
                         requiresSpellCheck = requiresSpellCheck,
                     )
 
-                val shouldGenerateSuggestions = suggestionsEnabled && graphemeCount >= MIN_SUGGESTION_QUERY_LENGTH
                 val shouldHighlight = requiresSpellCheck && !isValid
 
                 return ProcessingResult.Success(
                     wordState = wordState,
-                    shouldGenerateSuggestions = shouldGenerateSuggestions,
                     shouldHighlight = shouldHighlight,
                 )
             } catch (e: Exception) {
