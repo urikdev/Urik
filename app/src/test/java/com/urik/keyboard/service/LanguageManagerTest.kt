@@ -43,8 +43,7 @@ class LanguageManagerTest {
             )
         whenever(settingsRepository.settings).thenReturn(settingsFlow)
 
-        languageManager = LanguageManager(settingsRepository)
-        languageManager.setDispatcher(testDispatcher)
+        languageManager = LanguageManager(settingsRepository, testDispatcher)
     }
 
     @After

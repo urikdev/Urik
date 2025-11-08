@@ -355,6 +355,17 @@ class TextInputProcessor
             }
         }
 
+        suspend fun removeSuggestion(word: String): Result<Boolean> =
+            withContext(Dispatchers.Default) {
+                return@withContext try {
+                    val result = spellCheckManager.removeSuggestion(word)
+                    invalidateWord(word)
+                    result
+                } catch (e: Exception) {
+                    Result.failure(e)
+                }
+            }
+
         fun invalidateWord(word: String) {
             processingCache.remove(word)
             suggestionCache.remove(word)
