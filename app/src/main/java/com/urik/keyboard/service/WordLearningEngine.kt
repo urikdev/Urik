@@ -300,10 +300,7 @@ class WordLearningEngine
 
                     val normalized = normalizeWord(cleanWord)
 
-                    val cachedWords =
-                        synchronized(cacheLock) {
-                            learnedWordsCache.getIfPresent(currentLanguage)
-                        }
+                    val cachedWords = learnedWordsCache.getIfPresent(currentLanguage)
 
                     if (cachedWords != null) {
                         return@withContext cachedWords.contains(normalized.userSpecific)
@@ -471,10 +468,8 @@ class WordLearningEngine
                             )
 
                         if (removed > 0) {
-                            synchronized(cacheLock) {
-                                if (!isDestroyed.get()) {
-                                    learnedWordsCache.getIfPresent(currentLanguage)?.remove(normalized.userSpecific)
-                                }
+                            if (!isDestroyed.get()) {
+                                learnedWordsCache.getIfPresent(currentLanguage)?.remove(normalized.userSpecific)
                             }
 
                             consecutiveErrors.set(0)
@@ -797,9 +792,7 @@ class WordLearningEngine
          */
         fun clearCurrentLanguageCache() {
             val currentLanguage = languageManager.currentLanguage.value
-            synchronized(cacheLock) {
-                learnedWordsCache.invalidate(currentLanguage)
-            }
+            learnedWordsCache.invalidate(currentLanguage)
         }
 
         /**
@@ -811,9 +804,7 @@ class WordLearningEngine
 
             engineJob.cancel()
 
-            synchronized(cacheLock) {
-                learnedWordsCache.invalidateAll()
-            }
+            learnedWordsCache.invalidateAll()
 
             synchronized(errorLock) {
                 lastDatabaseError.set(0L)
