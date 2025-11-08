@@ -103,14 +103,18 @@ abstract class KeyboardDatabase : RoomDatabase() {
                         ).addCallback(DatabaseCallback())
                         .addMigrations(MIGRATION_1_2)
 
-                if (passphrase != null) {
-                    val factory = SupportOpenHelperFactory(passphrase)
-                    builder.openHelperFactory(factory)
-                }
+                try {
+                    if (passphrase != null) {
+                        val factory = SupportOpenHelperFactory(passphrase)
+                        builder.openHelperFactory(factory)
+                    }
 
-                val instance = builder.build()
-                INSTANCE = instance
-                instance
+                    val instance = builder.build()
+                    INSTANCE = instance
+                    instance
+                } finally {
+                    passphrase?.fill(0)
+                }
             }
 
         private fun validatePassphraseConsistency(passphrase: ByteArray?) {

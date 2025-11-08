@@ -180,6 +180,7 @@ class UrikInputMethodService :
         spellCheckManager.clearCaches()
         spellCheckManager.clearBlacklist()
         textInputProcessor.clearCaches()
+        wordLearningEngine.clearCurrentLanguageCache()
 
         lastSpaceTime = 0
         lastShiftTime = 0
@@ -924,20 +925,22 @@ class UrikInputMethodService :
 
             val newCursorPos = cursorPosInWord + 1
 
-            val ic = currentInputConnection ?: return
-            try {
-                ic.beginBatchEdit()
-                ic.setComposingText(displayBuffer, 1)
+            val ic = currentInputConnection
+            if (ic != null) {
+                try {
+                    ic.beginBatchEdit()
+                    ic.setComposingText(displayBuffer, 1)
 
-                if (oldComposingStart != -1) {
-                    val currentTextLength = ic.getTextBeforeCursor(1000, 0)?.length ?: displayBuffer.length
-                    composingRegionStart = CursorEditingUtils.recalculateComposingRegionStart(currentTextLength, displayBuffer.length)
+                    if (oldComposingStart != -1) {
+                        val currentTextLength = ic.getTextBeforeCursor(1000, 0)?.length ?: displayBuffer.length
+                        composingRegionStart = CursorEditingUtils.recalculateComposingRegionStart(currentTextLength, displayBuffer.length)
 
-                    val newAbsoluteCursorPos = composingRegionStart + newCursorPos
-                    ic.setSelection(newAbsoluteCursorPos, newAbsoluteCursorPos)
+                        val newAbsoluteCursorPos = composingRegionStart + newCursorPos
+                        ic.setSelection(newAbsoluteCursorPos, newAbsoluteCursorPos)
+                    }
+                } finally {
+                    ic.endBatchEdit()
                 }
-            } finally {
-                ic.endBatchEdit()
             }
 
             wordState =
@@ -1435,21 +1438,23 @@ class UrikInputMethodService :
                     if (displayBuffer.isNotEmpty()) {
                         val newCursorPos = cursorPosInWord - 1
 
-                        val ic = currentInputConnection ?: return
-                        try {
-                            ic.beginBatchEdit()
-                            ic.setComposingText(displayBuffer, 1)
+                        val ic = currentInputConnection
+                        if (ic != null) {
+                            try {
+                                ic.beginBatchEdit()
+                                ic.setComposingText(displayBuffer, 1)
 
-                            if (oldComposingStart != -1) {
-                                val currentTextLength = ic.getTextBeforeCursor(1000, 0)?.length ?: displayBuffer.length
-                                composingRegionStart =
-                                    CursorEditingUtils.recalculateComposingRegionStart(currentTextLength, displayBuffer.length)
+                                if (oldComposingStart != -1) {
+                                    val currentTextLength = ic.getTextBeforeCursor(1000, 0)?.length ?: displayBuffer.length
+                                    composingRegionStart =
+                                        CursorEditingUtils.recalculateComposingRegionStart(currentTextLength, displayBuffer.length)
 
-                                val newAbsoluteCursorPos = composingRegionStart + newCursorPos
-                                ic.setSelection(newAbsoluteCursorPos, newAbsoluteCursorPos)
+                                    val newAbsoluteCursorPos = composingRegionStart + newCursorPos
+                                    ic.setSelection(newAbsoluteCursorPos, newAbsoluteCursorPos)
+                                }
+                            } finally {
+                                ic.endBatchEdit()
                             }
-                        } finally {
-                            ic.endBatchEdit()
                         }
 
                         wordState =

@@ -739,4 +739,28 @@ class WordLearningEngineTest {
             val removeResult = wordLearningEngine.removeWord("word")
             assertEquals(false, removeResult.getOrNull())
         }
+
+    @Test
+    fun `clearCurrentLanguageCache invalidates cache for current language`() =
+        runTest {
+            val testWord = "testword"
+            val learnedWord =
+                LearnedWord.create(
+                    word = testWord,
+                    wordNormalized = testWord,
+                    languageTag = "en",
+                )
+
+            whenever(learnedWordDao.findExactWord("en", testWord)).thenReturn(learnedWord)
+
+            wordLearningEngine.learnWord(testWord, InputMethod.TYPED)
+            assertTrue(wordLearningEngine.isWordLearned(testWord))
+
+            verify(learnedWordDao, times(0)).findExactWord(any(), any())
+
+            wordLearningEngine.clearCurrentLanguageCache()
+
+            assertTrue(wordLearningEngine.isWordLearned(testWord))
+            verify(learnedWordDao, times(1)).findExactWord("en", testWord)
+        }
 }
