@@ -17,3 +17,9 @@ plugins {
     id("androidx.room") version "2.8.3" apply false
     id("org.jetbrains.kotlinx.kover") version "0.9.3" apply false
 }
+
+tasks.configureEach {
+    if (name.contains("OssLicenses")) {
+        notCompatibleWithConfigurationCache("OSS Licenses plugin doesn't support Gradle 9.2 config cache yet")
+    }
+}
