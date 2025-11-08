@@ -273,7 +273,8 @@ class TextInputProcessor
             }
         }
 
-        private fun isValidWordInput(word: String): Boolean = word.isNotBlank() && word.length <= TextProcessingConstants.MAX_WORD_INPUT_LENGTH
+        private fun isValidWordInput(word: String): Boolean =
+            word.isNotBlank() && word.length <= TextProcessingConstants.MAX_WORD_INPUT_LENGTH
 
         private fun getCachedProcessing(word: String): ProcessingCache? {
             val cached = processingCache[word]

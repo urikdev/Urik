@@ -5,8 +5,8 @@ import android.database.sqlite.SQLiteDatabaseLockedException
 import android.database.sqlite.SQLiteException
 import android.database.sqlite.SQLiteFullException
 import com.ibm.icu.text.Normalizer2
-import com.urik.keyboard.KeyboardConstants.WordLearningConstants
 import com.urik.keyboard.KeyboardConstants.CacheConstants
+import com.urik.keyboard.KeyboardConstants.WordLearningConstants
 import com.urik.keyboard.data.database.LearnedWord
 import com.urik.keyboard.data.database.LearnedWordDao
 import com.urik.keyboard.data.database.WordSource
@@ -404,7 +404,8 @@ class WordLearningEngine
                             val viableCandidates =
                                 candidates.filter { candidate ->
                                     val lengthDiff = kotlin.math.abs(candidate.wordNormalized.length - normalized.userSpecific.length)
-                                    lengthDiff <= WordLearningConstants.MAX_LENGTH_DIFFERENCE_FUZZY && candidate.wordNormalized.length <= WordLearningConstants.MAX_SIMILAR_WORD_LENGTH
+                                    lengthDiff <= WordLearningConstants.MAX_LENGTH_DIFFERENCE_FUZZY &&
+                                        candidate.wordNormalized.length <= WordLearningConstants.MAX_SIMILAR_WORD_LENGTH
                                 }
 
                             viableCandidates

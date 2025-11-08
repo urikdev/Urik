@@ -498,7 +498,11 @@ class SpellCheckManager
                             allSuggestions.add(
                                 SpellingSuggestion(
                                     word = word,
-                                    confidence = (baseConfidence + frequencyBoost).coerceIn(SpellCheckConstants.LEARNED_WORD_CONFIDENCE_MIN, SpellCheckConstants.LEARNED_WORD_CONFIDENCE_MAX),
+                                    confidence =
+                                        (baseConfidence + frequencyBoost).coerceIn(
+                                            SpellCheckConstants.LEARNED_WORD_CONFIDENCE_MIN,
+                                            SpellCheckConstants.LEARNED_WORD_CONFIDENCE_MAX,
+                                        ),
                                     ranking = index,
                                     source = "learned",
                                 ),
@@ -517,7 +521,11 @@ class SpellCheckManager
                             .forEachIndexed { index, (word, frequency) ->
                                 val lengthRatio = normalizedWord.length.toDouble() / word.length.toDouble()
                                 val frequencyScore = ln(frequency.toDouble() + 1.0) / SpellCheckConstants.FREQUENCY_SCORE_DIVISOR
-                                val confidence = (SpellCheckConstants.COMPLETION_LENGTH_WEIGHT * lengthRatio + SpellCheckConstants.COMPLETION_FREQUENCY_WEIGHT * frequencyScore).coerceIn(SpellCheckConstants.COMPLETION_CONFIDENCE_MIN, SpellCheckConstants.COMPLETION_CONFIDENCE_MAX)
+                                val confidence =
+                                    (
+                                        SpellCheckConstants.COMPLETION_LENGTH_WEIGHT * lengthRatio +
+                                            SpellCheckConstants.COMPLETION_FREQUENCY_WEIGHT * frequencyScore
+                                    ).coerceIn(SpellCheckConstants.COMPLETION_CONFIDENCE_MIN, SpellCheckConstants.COMPLETION_CONFIDENCE_MAX)
 
                                 allSuggestions.add(
                                     SpellingSuggestion(
@@ -555,7 +563,11 @@ class SpellCheckManager
                                         }
                                     }
 
-                                    result to confidence.coerceIn(SpellCheckConstants.SYMSPELL_CONFIDENCE_MIN, SpellCheckConstants.SYMSPELL_CONFIDENCE_MAX)
+                                    result to
+                                        confidence.coerceIn(
+                                            SpellCheckConstants.SYMSPELL_CONFIDENCE_MIN,
+                                            SpellCheckConstants.SYMSPELL_CONFIDENCE_MAX,
+                                        )
                                 }.sortedByDescending { it.second }
                                 .take(SpellCheckConstants.MAX_SUGGESTIONS)
 
@@ -777,7 +789,8 @@ class SpellCheckManager
                                         val word = parts[0].lowercase().trim()
                                         val frequency = parts[1].toIntOrNull() ?: 1
 
-                                        if (word.length in SpellCheckConstants.COMMON_WORD_MIN_LENGTH..SpellCheckConstants.COMMON_WORD_MAX_LENGTH &&
+                                        if (word.length in
+                                            SpellCheckConstants.COMMON_WORD_MIN_LENGTH..SpellCheckConstants.COMMON_WORD_MAX_LENGTH &&
                                             word.all {
                                                 Character.isLetter(it.code) ||
                                                     Character.getType(it.code) == Character.OTHER_LETTER.toInt() ||
@@ -790,7 +803,8 @@ class SpellCheckManager
                                         }
                                     } else if (parts.size == 1) {
                                         val word = parts[0].lowercase().trim()
-                                        if (word.length in SpellCheckConstants.COMMON_WORD_MIN_LENGTH..SpellCheckConstants.COMMON_WORD_MAX_LENGTH &&
+                                        if (word.length in
+                                            SpellCheckConstants.COMMON_WORD_MIN_LENGTH..SpellCheckConstants.COMMON_WORD_MAX_LENGTH &&
                                             word.all {
                                                 Character.isLetter(it.code) ||
                                                     Character.getType(it.code) == Character.OTHER_LETTER.toInt() ||

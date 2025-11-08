@@ -150,7 +150,9 @@ class CacheMemoryManager
 
                 ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN -> {
                     managedCaches.forEach { (name, cache) ->
-                        if (name !in criticalCacheNames && cache.size() > cache.maxSize * MemoryConstants.MODERATE_NON_CRITICAL_TRIM_RATIO) {
+                        if (name !in criticalCacheNames &&
+                            cache.size() > cache.maxSize * MemoryConstants.MODERATE_NON_CRITICAL_TRIM_RATIO
+                        ) {
                             cache.trimToSize((cache.maxSize * MemoryConstants.UI_HIDDEN_TRIM_RATIO).toInt())
                         }
                     }

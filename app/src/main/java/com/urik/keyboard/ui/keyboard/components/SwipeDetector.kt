@@ -272,7 +272,9 @@ class SwipeDetector
             val samplingInterval =
                 when {
                     swipePoints.size < SwipeDetectionConstants.ADAPTIVE_THRESHOLD -> SwipeDetectionConstants.MIN_SAMPLING_INTERVAL
-                    swipePoints.size < SwipeDetectionConstants.MAX_SWIPE_POINTS * SwipeDetectionConstants.ADAPTIVE_THRESHOLD_RATIO -> SwipeDetectionConstants.MIN_SAMPLING_INTERVAL + 2
+                    swipePoints.size < SwipeDetectionConstants.MAX_SWIPE_POINTS * SwipeDetectionConstants.ADAPTIVE_THRESHOLD_RATIO ->
+                        SwipeDetectionConstants.MIN_SAMPLING_INTERVAL +
+                            2
                     else -> SwipeDetectionConstants.MAX_SAMPLING_INTERVAL
                 }
 
