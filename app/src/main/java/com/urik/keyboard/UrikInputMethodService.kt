@@ -924,19 +924,20 @@ class UrikInputMethodService :
 
             val newCursorPos = cursorPosInWord + 1
 
-            currentInputConnection?.beginBatchEdit()
+            val ic = currentInputConnection ?: return
             try {
-                currentInputConnection?.setComposingText(displayBuffer, 1)
+                ic.beginBatchEdit()
+                ic.setComposingText(displayBuffer, 1)
 
                 if (oldComposingStart != -1) {
-                    val currentTextLength = currentInputConnection?.getTextBeforeCursor(1000, 0)?.length ?: displayBuffer.length
+                    val currentTextLength = ic.getTextBeforeCursor(1000, 0)?.length ?: displayBuffer.length
                     composingRegionStart = CursorEditingUtils.recalculateComposingRegionStart(currentTextLength, displayBuffer.length)
 
                     val newAbsoluteCursorPos = composingRegionStart + newCursorPos
-                    currentInputConnection?.setSelection(newAbsoluteCursorPos, newAbsoluteCursorPos)
+                    ic.setSelection(newAbsoluteCursorPos, newAbsoluteCursorPos)
                 }
             } finally {
-                currentInputConnection?.endBatchEdit()
+                ic.endBatchEdit()
             }
 
             wordState =
@@ -949,8 +950,10 @@ class UrikInputMethodService :
                 return
             }
 
-            val currentSequence = synchronized(processingLock) { ++processingSequence }
-            val bufferSnapshot = displayBuffer
+            val (currentSequence, bufferSnapshot) =
+                synchronized(processingLock) {
+                    ++processingSequence to displayBuffer
+                }
 
             suggestionDebounceJob?.cancel()
             suggestionDebounceJob =
@@ -1432,20 +1435,21 @@ class UrikInputMethodService :
                     if (displayBuffer.isNotEmpty()) {
                         val newCursorPos = cursorPosInWord - 1
 
-                        currentInputConnection?.beginBatchEdit()
+                        val ic = currentInputConnection ?: return
                         try {
-                            currentInputConnection?.setComposingText(displayBuffer, 1)
+                            ic.beginBatchEdit()
+                            ic.setComposingText(displayBuffer, 1)
 
                             if (oldComposingStart != -1) {
-                                val currentTextLength = currentInputConnection?.getTextBeforeCursor(1000, 0)?.length ?: displayBuffer.length
+                                val currentTextLength = ic.getTextBeforeCursor(1000, 0)?.length ?: displayBuffer.length
                                 composingRegionStart =
                                     CursorEditingUtils.recalculateComposingRegionStart(currentTextLength, displayBuffer.length)
 
                                 val newAbsoluteCursorPos = composingRegionStart + newCursorPos
-                                currentInputConnection?.setSelection(newAbsoluteCursorPos, newAbsoluteCursorPos)
+                                ic.setSelection(newAbsoluteCursorPos, newAbsoluteCursorPos)
                             }
                         } finally {
-                            currentInputConnection?.endBatchEdit()
+                            ic.endBatchEdit()
                         }
 
                         wordState =
@@ -1456,8 +1460,10 @@ class UrikInputMethodService :
                             )
 
                         if (!isAcceleratedDeletion) {
-                            val currentSequence = synchronized(processingLock) { ++processingSequence }
-                            val bufferSnapshot = displayBuffer
+                            val (currentSequence, bufferSnapshot) =
+                                synchronized(processingLock) {
+                                    ++processingSequence to displayBuffer
+                                }
 
                             suggestionDebounceJob?.cancel()
                             suggestionDebounceJob =
@@ -1577,8 +1583,10 @@ class UrikInputMethodService :
                                 graphemeCount = wordBeforeCursor.length,
                             )
 
-                        val currentSequence = synchronized(processingLock) { ++processingSequence }
-                        val bufferSnapshot = displayBuffer
+                        val (currentSequence, bufferSnapshot) =
+                            synchronized(processingLock) {
+                                ++processingSequence to displayBuffer
+                            }
 
                         suggestionDebounceJob?.cancel()
                         suggestionDebounceJob =
@@ -1997,63 +2005,69 @@ class UrikInputMethodService :
                         textBeforeCursor.length
                     }
 
-                val cursorPos = currentInputConnection?.getTextBeforeCursor(1000, 0)?.length ?: 0
-                val wordStart = cursorPos - wordStartOffset
-                val wordEnd = wordStart + word.length
+                val ic = currentInputConnection
+                if (ic != null) {
+                    val cursorPos = ic.getTextBeforeCursor(1000, 0)?.length ?: 0
+                    val wordStart = cursorPos - wordStartOffset
+                    val wordEnd = wordStart + word.length
 
-                currentInputConnection?.beginBatchEdit()
-                try {
-                    currentInputConnection?.setComposingRegion(wordStart, wordEnd)
-                    composingRegionStart = wordStart
+                    try {
+                        ic.beginBatchEdit()
+                        ic.setComposingRegion(wordStart, wordEnd)
+                        composingRegionStart = wordStart
 
-                    displayBuffer = word
-                    wordState =
-                        wordState.copy(
-                            buffer = word,
-                            normalizedBuffer = word.lowercase(),
-                            graphemeCount = word.length,
-                        )
+                        displayBuffer = word
+                        wordState =
+                            wordState.copy(
+                                buffer = word,
+                                normalizedBuffer = word.lowercase(),
+                                graphemeCount = word.length,
+                            )
 
-                    val currentSequence = synchronized(processingLock) { ++processingSequence }
+                        val (currentSequence, bufferSnapshot) =
+                            synchronized(processingLock) {
+                                ++processingSequence to displayBuffer
+                            }
 
-                    suggestionDebounceJob?.cancel()
-                    suggestionDebounceJob =
-                        serviceScope.launch(Dispatchers.Default) {
-                            try {
-                                delay(suggestionDebounceDelay)
+                        suggestionDebounceJob?.cancel()
+                        suggestionDebounceJob =
+                            serviceScope.launch(Dispatchers.Default) {
+                                try {
+                                    delay(suggestionDebounceDelay)
 
-                                val result =
-                                    textInputProcessor.processWordInput(
-                                        word,
-                                        InputMethod.TYPED,
-                                    )
+                                    val result =
+                                        textInputProcessor.processWordInput(
+                                            word,
+                                            InputMethod.TYPED,
+                                        )
 
-                                withContext(Dispatchers.Main) {
-                                    synchronized(processingLock) {
-                                        if (currentSequence == processingSequence && displayBuffer == word) {
-                                            when (result) {
-                                                is ProcessingResult.Success -> {
-                                                    wordState = result.wordState
-                                                    if (result.wordState.suggestions.isNotEmpty() && currentSettings.showSuggestions) {
-                                                        val displaySuggestions =
-                                                            applyCapitalizationToSuggestions(result.wordState.suggestions)
-                                                        swipeKeyboardView?.updateSuggestions(displaySuggestions)
-                                                    } else {
+                                    withContext(Dispatchers.Main) {
+                                        synchronized(processingLock) {
+                                            if (currentSequence == processingSequence && displayBuffer == bufferSnapshot) {
+                                                when (result) {
+                                                    is ProcessingResult.Success -> {
+                                                        wordState = result.wordState
+                                                        if (result.wordState.suggestions.isNotEmpty() && currentSettings.showSuggestions) {
+                                                            val displaySuggestions =
+                                                                applyCapitalizationToSuggestions(result.wordState.suggestions)
+                                                            swipeKeyboardView?.updateSuggestions(displaySuggestions)
+                                                        } else {
+                                                            swipeKeyboardView?.clearSuggestions()
+                                                        }
+                                                    }
+                                                    is ProcessingResult.Error -> {
                                                         swipeKeyboardView?.clearSuggestions()
                                                     }
-                                                }
-                                                is ProcessingResult.Error -> {
-                                                    swipeKeyboardView?.clearSuggestions()
                                                 }
                                             }
                                         }
                                     }
+                                } catch (_: Exception) {
                                 }
-                            } catch (_: Exception) {
                             }
-                        }
-                } finally {
-                    currentInputConnection?.endBatchEdit()
+                    } finally {
+                        ic.endBatchEdit()
+                    }
                 }
             } catch (_: Exception) {
             }
@@ -2070,8 +2084,8 @@ class UrikInputMethodService :
         swipeKeyboardView = null
 
         try {
-            spellCheckManager.clearCaches()
-            textInputProcessor.clearCaches()
+            spellCheckManager.cleanup()
+            textInputProcessor.cleanup()
         } catch (_: Exception) {
         }
 

@@ -368,7 +368,7 @@ class TextInputProcessor
         fun getCurrentSettings(): KeyboardSettings = currentSettings
 
         fun cleanup() {
-            clearCaches()
             processorJob.cancel()
+            clearCaches()
         }
     }
