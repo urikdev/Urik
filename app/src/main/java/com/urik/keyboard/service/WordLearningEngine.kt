@@ -243,6 +243,8 @@ class WordLearningEngine
                     learnWordMutex.withLock {
                         if (isDestroyed.get()) return@withContext Result.success(null)
 
+                        learnedWordDao.learnWord(learnedWord)
+
                         synchronized(cacheLock) {
                             if (!isDestroyed.get()) {
                                 val cacheSet =
@@ -252,8 +254,6 @@ class WordLearningEngine
                                 learnedWordsCache.put(currentLanguage, cacheSet)
                             }
                         }
-
-                        learnedWordDao.learnWord(learnedWord)
                     }
 
                     onSuccessfulOperation()
@@ -789,6 +789,18 @@ class WordLearningEngine
                 WordSource.IMPORTED -> InputMethod.TYPED
                 WordSource.SYSTEM_DEFAULT -> InputMethod.TYPED
             }
+
+        /**
+         * Clears learned words cache for current language.
+         *
+         * Call when entering secure fields to prevent cache leaks.
+         */
+        fun clearCurrentLanguageCache() {
+            val currentLanguage = languageManager.currentLanguage.value
+            synchronized(cacheLock) {
+                learnedWordsCache.invalidate(currentLanguage)
+            }
+        }
 
         /**
          * Cleans up resources and cancels settings observer.
