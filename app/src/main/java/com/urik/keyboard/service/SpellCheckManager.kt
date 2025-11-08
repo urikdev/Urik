@@ -674,6 +674,23 @@ class SpellCheckManager
         }
 
         /**
+         * Removes suggestion completely (learned word + blacklist).
+         *
+         * Coordinates removal across WordLearningEngine and SpellCheckManager.
+         * Use for long-press suggestion removal.
+         */
+        suspend fun removeSuggestion(word: String): Result<Boolean> =
+            withContext(ioDispatcher) {
+                return@withContext try {
+                    val result = wordLearningEngine.removeWord(word)
+                    blacklistSuggestion(word)
+                    result
+                } catch (e: Exception) {
+                    Result.failure(e)
+                }
+            }
+
+        /**
          * Permanently hides word from suggestions (global, all languages).
          *
          * Use for profanity, spam, or unwanted autocorrect.

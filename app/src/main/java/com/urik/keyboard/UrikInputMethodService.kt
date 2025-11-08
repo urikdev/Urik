@@ -1211,11 +1211,7 @@ class UrikInputMethodService :
     private fun handleSuggestionRemoval(suggestion: String) {
         serviceScope.launch {
             try {
-                wordLearningEngine.removeWord(suggestion)
-
-                spellCheckManager.blacklistSuggestion(suggestion)
-                spellCheckManager.invalidateWordCache(suggestion)
-                textInputProcessor.invalidateWord(suggestion)
+                textInputProcessor.removeSuggestion(suggestion)
 
                 withContext(Dispatchers.Main) {
                     val currentSuggestions = pendingSuggestions.filter { it != suggestion }

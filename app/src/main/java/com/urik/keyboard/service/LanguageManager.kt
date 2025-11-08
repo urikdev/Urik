@@ -21,16 +21,12 @@ class LanguageManager
     @Inject
     constructor(
         private val settingsRepository: SettingsRepository,
+        private val dispatcher: CoroutineDispatcher = Dispatchers.Default,
     ) {
-        private var scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
+        private var scope = CoroutineScope(dispatcher + SupervisorJob())
 
         private val _currentLanguage = MutableStateFlow("en")
         val currentLanguage: StateFlow<String> = _currentLanguage.asStateFlow()
-
-        internal fun setDispatcher(dispatcher: CoroutineDispatcher) {
-            scope.cancel()
-            scope = CoroutineScope(dispatcher + SupervisorJob())
-        }
 
         suspend fun initialize(): Result<Unit> =
             withContext(Dispatchers.IO) {
