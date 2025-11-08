@@ -271,9 +271,13 @@ class UrikInputMethodService :
      * Learns word and invalidates relevant caches.
      *
      * @param word Word to learn
+     * @param inputMethod Source of the word (TYPED, SWIPED, SELECTED_FROM_SUGGESTION)
      * @return True if learning succeeded or is disabled
      */
-    private suspend fun learnWordAndInvalidateCache(word: String): Boolean {
+    private suspend fun learnWordAndInvalidateCache(
+        word: String,
+        inputMethod: InputMethod,
+    ): Boolean {
         return try {
             val settings = textInputProcessor.getCurrentSettings()
             if (!settings.isWordLearningEnabled) {
@@ -285,7 +289,7 @@ class UrikInputMethodService :
                 return true
             }
 
-            val learnResult = wordLearningEngine.learnWord(word, InputMethod.SELECTED_FROM_SUGGESTION)
+            val learnResult = wordLearningEngine.learnWord(word, inputMethod)
             if (learnResult.isSuccess) {
                 spellCheckManager.invalidateWordCache(word)
                 spellCheckManager.removeFromBlacklist(word)
@@ -314,6 +318,7 @@ class UrikInputMethodService :
                     if (wordToLearn != null) {
                         learnWordAndInvalidateCache(
                             wordToLearn,
+                            InputMethod.TYPED,
                         )
 
                         currentInputConnection?.finishComposingText()
@@ -403,7 +408,10 @@ class UrikInputMethodService :
     }
 
     /**
-     * Commits selected suggestion and learns word.
+     * Commits selected suggestion without learning.
+     *
+     * Suggestions are already validated (dictionary or learned words),
+     * so we just commit them without adding to learned words again.
      *
      * @param suggestion Selected suggestion to commit
      */
@@ -419,7 +427,6 @@ class UrikInputMethodService :
                 currentInputConnection?.beginBatchEdit()
                 try {
                     currentInputConnection?.commitText("$suggestion ", 1)
-                    learnWordAndInvalidateCache(suggestion)
 
                     displayBuffer = ""
                     wordState = WordState()
