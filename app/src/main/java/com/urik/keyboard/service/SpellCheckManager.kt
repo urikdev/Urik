@@ -122,12 +122,7 @@ class SpellCheckManager
                 }
         }
 
-        private suspend fun ensureInitialized(): Boolean {
-            if (!initializationComplete.isCompleted) {
-                return false
-            }
-            return initializationComplete.await()
-        }
+        private suspend fun ensureInitialized(): Boolean = initializationComplete.await()
 
         private suspend fun initializeSymSpell() {
             try {

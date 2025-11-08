@@ -276,13 +276,19 @@ class ManagedCache<K : Any, V : Any>(
     /**
      * Removes entry from cache.
      *
-     * Does NOT invoke onEvict callback (manual removal, not eviction).
+     * Invokes onEvict callback if provided.
      *
      * @param key Cache key to remove
      * @return Removed value or null if not found
      */
     @Synchronized
-    fun invalidate(key: K): V? = cache.remove(key)
+    fun invalidate(key: K): V? {
+        val removed = cache.remove(key)
+        if (removed != null) {
+            onEvict?.invoke(key, removed)
+        }
+        return removed
+    }
 
     /**
      * Clears all entries and resets hit/miss counters.
@@ -291,6 +297,11 @@ class ManagedCache<K : Any, V : Any>(
      */
     @Synchronized
     fun invalidateAll() {
+        if (onEvict != null) {
+            cache.forEach { (key, value) ->
+                onEvict.invoke(key, value)
+            }
+        }
         cache.clear()
         hits = 0L
         misses = 0L

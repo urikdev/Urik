@@ -920,7 +920,9 @@ class UrikInputMethodService :
                     composingRegionStart = -1
                     char
                 } else {
-                    displayBuffer.substring(0, cursorPosInWord) + char + displayBuffer.substring(cursorPosInWord)
+                    StringBuilder(displayBuffer)
+                        .insert(cursorPosInWord, char)
+                        .toString()
                 }
 
             val newCursorPos = cursorPosInWord + 1
@@ -1428,8 +1430,10 @@ class UrikInputMethodService :
 
                     val oldComposingStart = composingRegionStart
 
-                    displayBuffer = displayBuffer.substring(0, cursorPosInWord - 1) +
-                        displayBuffer.substring(cursorPosInWord)
+                    displayBuffer =
+                        StringBuilder(displayBuffer)
+                            .deleteCharAt(cursorPosInWord - 1)
+                            .toString()
 
                     if (shouldResetShift) {
                         viewModel.onEvent(KeyboardEvent.ShiftStateChanged(false))
