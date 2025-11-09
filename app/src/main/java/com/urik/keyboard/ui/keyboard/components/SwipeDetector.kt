@@ -321,7 +321,7 @@ class SwipeDetector
                 return true
             } else {
                 val duration = System.currentTimeMillis() - startTime
-                if (duration <= 350L) {
+                if (duration <= SwipeDetectionConstants.TAP_DURATION_THRESHOLD_MS) {
                     val tappedKey = keyAt(event.x, event.y)
                     if (tappedKey != null) {
                         swipeListener?.onTap(tappedKey)
@@ -359,7 +359,7 @@ class SwipeDetector
                     val candidatesMap = mutableMapOf<String, WordCandidate>()
                     val pathBounds = calculatePathBounds(swipePath)
 
-                    val margin = 100f
+                    val margin = SwipeDetectionConstants.PATH_BOUNDS_MARGIN_PX
                     val charsInBounds =
                         keyPositionsSnapshot.keys
                             .filter { char ->
@@ -399,7 +399,7 @@ class SwipeDetector
                                     if (firstLetterPos != null && startingPos != null) {
                                         val dx = firstLetterPos.x - startingPos.x
                                         val dy = firstLetterPos.y - startingPos.y
-                                        dx * dx + dy * dy < 3600f
+                                        dx * dx + dy * dy < SwipeDetectionConstants.CLOSE_KEY_DISTANCE_THRESHOLD_SQ
                                     } else {
                                         false
                                     }
@@ -443,7 +443,7 @@ class SwipeDetector
                             candidatesMap[entry.word] = candidate
                         }
 
-                        if (combinedScore > 0.95f) {
+                        if (combinedScore > SwipeDetectionConstants.EXCELLENT_CANDIDATE_THRESHOLD) {
                             val excellentCandidates = candidatesMap.values.count { it.combinedScore > 0.90f }
                             if (excellentCandidates >= SwipeDetectionConstants.MIN_EXCELLENT_CANDIDATES) {
                                 break
@@ -469,17 +469,17 @@ class SwipeDetector
 
             var totalScore = 0f
 
-            val expThresh50 = 25000f
-            val twoSigma50Sq = 5000f
+            val expThresh50 = SwipeDetectionConstants.EXP_THRESHOLD_50
+            val twoSigma50Sq = SwipeDetectionConstants.TWO_SIGMA_50_SQ
 
-            val expThresh60 = 36000f
-            val twoSigma60Sq = 7200f
+            val expThresh60 = SwipeDetectionConstants.EXP_THRESHOLD_60
+            val twoSigma60Sq = SwipeDetectionConstants.TWO_SIGMA_60_SQ
 
             val basePenalty =
                 when {
-                    word.length <= 4 -> 400f
-                    word.length >= 8 -> 0f
-                    else -> 400f - (word.length - 4) * 100f
+                    word.length <= 4 -> SwipeDetectionConstants.BASE_PENALTY_SHORT_WORD
+                    word.length >= 8 -> SwipeDetectionConstants.BASE_PENALTY_LONG_WORD
+                    else -> SwipeDetectionConstants.BASE_PENALTY_SHORT_WORD - (word.length - 4) * 100f
                 }
 
             val penaltyStrength =
@@ -583,7 +583,8 @@ class SwipeDetector
 
             val spatialWithBonuses = (baseSpatialScore * sequencePenalty * lengthBonus).coerceAtMost(1.0f)
 
-            val repetitionPenalty = 1.0f - ((word.length - uniqueLetterCount) * 0.08f).coerceAtMost(0.20f)
+            val repetitionPenalty =
+                1.0f - ((word.length - uniqueLetterCount) * SwipeDetectionConstants.REPETITION_PENALTY_FACTOR).coerceAtMost(0.20f)
 
             return spatialWithBonuses * repetitionPenalty
         }
