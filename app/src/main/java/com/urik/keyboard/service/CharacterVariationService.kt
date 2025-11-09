@@ -1,6 +1,8 @@
 package com.urik.keyboard.service
 
 import android.content.Context
+import com.urik.keyboard.KeyboardConstants.AssetLoadingConstants
+import com.urik.keyboard.KeyboardConstants.CacheConstants
 import com.urik.keyboard.utils.CacheMemoryManager
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
@@ -82,15 +84,15 @@ class CharacterVariationService
         private val variationCache =
             cacheMemoryManager.createCache<String, Map<String, List<String>>>(
                 name = "character_variations",
-                maxSize = 8,
+                maxSize = CacheConstants.CHARACTER_VARIATIONS_CACHE_SIZE,
             )
 
         private val failedLanguages = mutableSetOf<String>()
-        private val errorTracker = BoundedVariationErrorTracker(maxSize = 15)
+        private val errorTracker = BoundedVariationErrorTracker(maxSize = AssetLoadingConstants.ERROR_TRACKER_MAX_SIZE)
 
-        private val maxAssetRetries = 3
-        private val assetErrorCooldownMs = 60000L
-        private val errorStateExpiryMs = 3600000L
+        private val maxAssetRetries = AssetLoadingConstants.MAX_ASSET_RETRIES
+        private val assetErrorCooldownMs = AssetLoadingConstants.ASSET_ERROR_COOLDOWN_MS
+        private val errorStateExpiryMs = AssetLoadingConstants.ERROR_STATE_EXPIRY_MS
 
         private var isDestroyed = false
         private var lastErrorCleanup = System.currentTimeMillis()
@@ -98,7 +100,7 @@ class CharacterVariationService
         private fun cleanupExpiredErrors() {
             val now = System.currentTimeMillis()
 
-            if ((now - lastErrorCleanup) > 600000L) {
+            if ((now - lastErrorCleanup) > AssetLoadingConstants.ERROR_CLEANUP_INTERVAL_MS) {
                 errorTracker.cleanExpired(errorStateExpiryMs)
 
                 val iterator = failedLanguages.iterator()

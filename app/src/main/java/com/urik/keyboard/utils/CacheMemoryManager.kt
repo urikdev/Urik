@@ -4,6 +4,8 @@ import android.app.ActivityManager
 import android.content.ComponentCallbacks2
 import android.content.Context
 import android.content.res.Configuration
+import com.urik.keyboard.KeyboardConstants.CacheConstants
+import com.urik.keyboard.KeyboardConstants.MemoryConstants
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -31,10 +33,10 @@ class CacheMemoryManager
 
         private val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
         private val memoryInfo = ActivityManager.MemoryInfo()
-        private val lowMemoryThresholdMb = 50L
-        private val criticalMemoryThresholdMb = 20L
+        private val lowMemoryThresholdMb = MemoryConstants.LOW_MEMORY_THRESHOLD_MB
+        private val criticalMemoryThresholdMb = MemoryConstants.CRITICAL_MEMORY_THRESHOLD_MB
 
-        private val defaultMaxSize = 100
+        private val defaultMaxSize = CacheConstants.DEFAULT_CACHE_MAX_SIZE
 
         init {
             context.registerComponentCallbacks(this)
@@ -71,9 +73,9 @@ class CacheMemoryManager
                     while (true) {
                         try {
                             checkMemoryPressure()
-                            delay(30000L)
+                            delay(MemoryConstants.MEMORY_CHECK_INTERVAL_MS)
                         } catch (e: Exception) {
-                            delay(60000L)
+                            delay(MemoryConstants.MEMORY_CHECK_ERROR_DELAY_MS)
                         }
                     }
                 }
@@ -120,7 +122,7 @@ class CacheMemoryManager
                 ComponentCallbacks2.TRIM_MEMORY_COMPLETE,
                 -> {
                     managedCaches.values.forEach { cache ->
-                        cache.trimToSize(cache.maxSize / 4)
+                        cache.trimToSize((cache.maxSize * MemoryConstants.CRITICAL_TRIM_RATIO).toInt())
                     }
                 }
 
@@ -129,9 +131,9 @@ class CacheMemoryManager
                 -> {
                     managedCaches.forEach { (name, cache) ->
                         if (name in criticalCacheNames) {
-                            cache.trimToSize((cache.maxSize * 0.7).toInt())
+                            cache.trimToSize((cache.maxSize * MemoryConstants.MODERATE_CRITICAL_TRIM_RATIO).toInt())
                         } else {
-                            cache.trimToSize(cache.maxSize / 2)
+                            cache.trimToSize((cache.maxSize * MemoryConstants.MODERATE_NON_CRITICAL_TRIM_RATIO).toInt())
                         }
                     }
                 }
@@ -141,15 +143,17 @@ class CacheMemoryManager
                 -> {
                     managedCaches.forEach { (name, cache) ->
                         if (name !in criticalCacheNames) {
-                            cache.trimToSize((cache.maxSize * 0.8).toInt())
+                            cache.trimToSize((cache.maxSize * MemoryConstants.LOW_MEMORY_NON_CRITICAL_TRIM_RATIO).toInt())
                         }
                     }
                 }
 
                 ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN -> {
                     managedCaches.forEach { (name, cache) ->
-                        if (name !in criticalCacheNames && cache.size() > cache.maxSize / 2) {
-                            cache.trimToSize((cache.maxSize * 0.9).toInt())
+                        if (name !in criticalCacheNames &&
+                            cache.size() > cache.maxSize * MemoryConstants.MODERATE_NON_CRITICAL_TRIM_RATIO
+                        ) {
+                            cache.trimToSize((cache.maxSize * MemoryConstants.UI_HIDDEN_TRIM_RATIO).toInt())
                         }
                     }
                 }
