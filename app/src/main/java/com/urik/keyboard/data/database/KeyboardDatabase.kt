@@ -6,6 +6,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
+import com.urik.keyboard.KeyboardConstants
 import net.zetetic.database.sqlcipher.SupportOpenHelperFactory
 
 /**
@@ -22,7 +23,7 @@ import net.zetetic.database.sqlcipher.SupportOpenHelperFactory
         LearnedWord::class,
         LearnedWordFts::class,
     ],
-    version = 2,
+    version = KeyboardConstants.DatabaseConstants.DATABASE_VERSION,
     exportSchema = true,
 )
 abstract class KeyboardDatabase : RoomDatabase() {
