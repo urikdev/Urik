@@ -758,6 +758,7 @@ class SpellCheckManager
         /**
          * Loads dictionary words sorted by frequency.
          *
+         * Cached per language to avoid redundant file I/O.
          * Used for swipe word candidate generation and prefix completions.
          * @return List of (word, frequency) pairs
          */
@@ -775,6 +776,10 @@ class SpellCheckManager
                     val currentLang = getCurrentLanguage()
                     if (currentLang !in KeyboardSettings.SUPPORTED_LANGUAGES) {
                         return@withContext emptyList()
+                    }
+
+                    if (currentLang == commonWordsCacheLanguage && commonWordsCache.isNotEmpty()) {
+                        return@withContext commonWordsCache
                     }
 
                     val dictionaryFile = "dictionaries/${currentLang}_symspell.txt"
@@ -824,6 +829,9 @@ class SpellCheckManager
                     }
 
                     val sortedWords = wordFrequencies.sortedByDescending { it.second }
+
+                    commonWordsCache = sortedWords
+                    commonWordsCacheLanguage = currentLang
 
                     return@withContext sortedWords
                 } catch (_: Exception) {
