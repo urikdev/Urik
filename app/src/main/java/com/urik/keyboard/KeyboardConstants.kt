@@ -93,10 +93,11 @@ object KeyboardConstants {
         const val CLOSE_KEY_DISTANCE_THRESHOLD_SQ = 3600f
         const val EXCELLENT_CANDIDATE_THRESHOLD = 0.95f
         const val REPETITION_PENALTY_FACTOR = 0.08f
-        const val MIN_POINTS_FOR_VELOCITY = 2
 
-        const val EXP_THRESHOLD_50 = 50.0
-        const val TWO_SIGMA_50_SQ = 800.0
+        const val EXP_THRESHOLD_50 = 25000f
+        const val TWO_SIGMA_50_SQ = 5000f
+        const val EXP_THRESHOLD_60 = 36000f
+        const val TWO_SIGMA_60_SQ = 7200f
         const val BASE_PENALTY_SHORT_WORD = 400f
         const val BASE_PENALTY_LONG_WORD = 0f
     }
