@@ -16,6 +16,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
 import com.ibm.icu.lang.UScript
 import com.ibm.icu.util.ULocale
+import com.urik.keyboard.KeyboardConstants.InputTimingConstants
 import com.urik.keyboard.data.KeyboardRepository
 import com.urik.keyboard.model.KeyboardEvent
 import com.urik.keyboard.model.KeyboardKey
@@ -107,13 +108,13 @@ class UrikInputMethodService :
     private var swipeKeyboardView: SwipeKeyboardView? = null
 
     private var lastSpaceTime: Long = 0
-    private var doubleTapSpaceThreshold: Long = 300L
+    private var doubleTapSpaceThreshold: Long = InputTimingConstants.DOUBLE_TAP_SPACE_THRESHOLD_MS
 
     private var lastShiftTime: Long = 0
-    private var doubleShiftThreshold: Long = 400L
+    private var doubleShiftThreshold: Long = InputTimingConstants.DOUBLE_SHIFT_THRESHOLD_MS
 
     private var suggestionDebounceJob: Job? = null
-    private val suggestionDebounceDelay = 10L
+    private val suggestionDebounceDelay = InputTimingConstants.SUGGESTION_DEBOUNCE_MS
 
     @Volatile
     private var displayBuffer = ""

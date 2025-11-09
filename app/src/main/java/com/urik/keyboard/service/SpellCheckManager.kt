@@ -7,6 +7,8 @@ import com.darkrockstudios.symspellkt.api.SpellChecker
 import com.darkrockstudios.symspellkt.common.SpellCheckSettings
 import com.darkrockstudios.symspellkt.common.Verbosity
 import com.darkrockstudios.symspellkt.impl.SymSpell
+import com.urik.keyboard.KeyboardConstants.CacheConstants
+import com.urik.keyboard.KeyboardConstants.SpellCheckConstants
 import com.urik.keyboard.settings.KeyboardSettings
 import com.urik.keyboard.utils.CacheMemoryManager
 import com.urik.keyboard.utils.ErrorLogger
@@ -66,14 +68,14 @@ class SpellCheckManager
         private val suggestionCache: ManagedCache<String, List<SpellingSuggestion>> =
             cacheMemoryManager.createCache(
                 name = "spell_suggestions",
-                maxSize = 500,
+                maxSize = CacheConstants.SUGGESTION_CACHE_SIZE,
                 onEvict = { _, _ -> },
             )
 
         private val dictionaryCache: ManagedCache<String, Boolean> =
             cacheMemoryManager.createCache(
                 name = "dictionary_cache",
-                maxSize = 1000,
+                maxSize = CacheConstants.DICTIONARY_CACHE_SIZE,
                 onEvict = { _, _ -> },
             )
 
@@ -90,15 +92,6 @@ class SpellCheckManager
 
         @Volatile
         private var isInitialized = false
-
-        companion object {
-            private const val MAX_EDIT_DISTANCE = 2.0
-            private const val PREFIX_LENGTH = 7
-            private const val COUNT_THRESHOLD = 1L
-            private const val MAX_SUGGESTIONS = 5
-            private const val MIN_COMPLETION_LENGTH = 4
-            private const val APOSTROPHE_BOOST = 0.30
-        }
 
         init {
             initializationJob =
@@ -150,7 +143,7 @@ class SpellCheckManager
 
             val spellChecker = getSpellCheckerForLanguage(languageCode)
             if (spellChecker != null) {
-                val suggestions = spellChecker.lookup(normalizedWord, Verbosity.All, MAX_EDIT_DISTANCE)
+                val suggestions = spellChecker.lookup(normalizedWord, Verbosity.All, SpellCheckConstants.MAX_EDIT_DISTANCE)
                 val isInDictionary =
                     suggestions.any {
                         it.term.equals(normalizedWord, ignoreCase = true) && it.distance == 0.0
@@ -206,9 +199,9 @@ class SpellCheckManager
                 try {
                     val settings =
                         SpellCheckSettings(
-                            maxEditDistance = MAX_EDIT_DISTANCE,
-                            prefixLength = PREFIX_LENGTH,
-                            countThreshold = COUNT_THRESHOLD,
+                            maxEditDistance = SpellCheckConstants.MAX_EDIT_DISTANCE,
+                            prefixLength = SpellCheckConstants.PREFIX_LENGTH,
+                            countThreshold = SpellCheckConstants.COUNT_THRESHOLD,
                         )
 
                     val symSpell = SymSpell(settings)
@@ -218,7 +211,7 @@ class SpellCheckManager
                     inputStream.bufferedReader().use { reader ->
                         val lines = reader.readLines()
 
-                        lines.chunked(500).forEach { batch ->
+                        lines.chunked(SpellCheckConstants.DICTIONARY_BATCH_SIZE).forEach { batch ->
                             ensureActive()
 
                             batch.forEach { line ->
@@ -391,7 +384,7 @@ class SpellCheckManager
                     }
 
                     if (spellChecker != null) {
-                        val suggestions = spellChecker.lookup(normalizedWord, Verbosity.All, MAX_EDIT_DISTANCE)
+                        val suggestions = spellChecker.lookup(normalizedWord, Verbosity.All, SpellCheckConstants.MAX_EDIT_DISTANCE)
                         val isInDictionary =
                             suggestions.any {
                                 it.term.equals(normalizedWord, ignoreCase = true) && it.distance == 0.0
@@ -499,13 +492,17 @@ class SpellCheckManager
                     learnedSuggestions
                         .filter { (word, _) -> !isWordBlacklisted(word) }
                         .forEachIndexed { index, (word, frequency) ->
-                            val frequencyBoost = ln(frequency.toDouble() + 1.0) * 0.02
-                            val baseConfidence = 0.95 - (index * 0.02)
+                            val frequencyBoost = ln(frequency.toDouble() + 1.0) * SpellCheckConstants.FREQUENCY_BOOST_MULTIPLIER
+                            val baseConfidence = SpellCheckConstants.LEARNED_WORD_BASE_CONFIDENCE - (index * 0.02)
 
                             allSuggestions.add(
                                 SpellingSuggestion(
                                     word = word,
-                                    confidence = (baseConfidence + frequencyBoost).coerceIn(0.85, 0.99),
+                                    confidence =
+                                        (baseConfidence + frequencyBoost).coerceIn(
+                                            SpellCheckConstants.LEARNED_WORD_CONFIDENCE_MIN,
+                                            SpellCheckConstants.LEARNED_WORD_CONFIDENCE_MAX,
+                                        ),
                                     ranking = index,
                                     source = "learned",
                                 ),
@@ -516,15 +513,19 @@ class SpellCheckManager
                 }
 
                 try {
-                    if (normalizedWord.length >= MIN_COMPLETION_LENGTH) {
+                    if (normalizedWord.length >= SpellCheckConstants.MIN_COMPLETION_LENGTH) {
                         val completions = getCompletionsForPrefix(normalizedWord, languageCode)
                         completions
                             .filter { (word, _) -> !seenWords.contains(word.lowercase()) && !isWordBlacklisted(word) }
-                            .take(5)
+                            .take(SpellCheckConstants.MAX_PREFIX_COMPLETIONS)
                             .forEachIndexed { index, (word, frequency) ->
                                 val lengthRatio = normalizedWord.length.toDouble() / word.length.toDouble()
-                                val frequencyScore = ln(frequency.toDouble() + 1.0) / 15.0
-                                val confidence = (0.70 * lengthRatio + 0.30 * frequencyScore).coerceIn(0.50, 0.84)
+                                val frequencyScore = ln(frequency.toDouble() + 1.0) / SpellCheckConstants.FREQUENCY_SCORE_DIVISOR
+                                val confidence =
+                                    (
+                                        SpellCheckConstants.COMPLETION_LENGTH_WEIGHT * lengthRatio +
+                                            SpellCheckConstants.COMPLETION_FREQUENCY_WEIGHT * frequencyScore
+                                    ).coerceIn(SpellCheckConstants.COMPLETION_CONFIDENCE_MIN, SpellCheckConstants.COMPLETION_CONFIDENCE_MAX)
 
                                 allSuggestions.add(
                                     SpellingSuggestion(
@@ -543,7 +544,7 @@ class SpellCheckManager
                 try {
                     val spellChecker = getSpellCheckerForLanguage(languageCode)
                     if (spellChecker != null) {
-                        val symSpellResults = spellChecker.lookup(normalizedWord, Verbosity.All, MAX_EDIT_DISTANCE)
+                        val symSpellResults = spellChecker.lookup(normalizedWord, Verbosity.All, SpellCheckConstants.MAX_EDIT_DISTANCE)
 
                         val scoredResults =
                             symSpellResults
@@ -551,20 +552,24 @@ class SpellCheckManager
                                     !seenWords.contains(result.term.lowercase()) && !isWordBlacklisted(result.term)
                                 }.map { result ->
                                     val editDistance = result.distance
-                                    val maxDistance = MAX_EDIT_DISTANCE
+                                    val maxDistance = SpellCheckConstants.MAX_EDIT_DISTANCE
                                     val distanceScore = (maxDistance - editDistance) / maxDistance
-                                    var confidence = 0.45 * distanceScore
+                                    var confidence = SpellCheckConstants.SYMSPELL_DISTANCE_WEIGHT * distanceScore
 
                                     if (result.term.contains('\'') && editDistance == 1.0) {
                                         val withoutApostrophe = result.term.replace("'", "").replace("'", "")
                                         if (withoutApostrophe.equals(normalizedWord, ignoreCase = true)) {
-                                            confidence += APOSTROPHE_BOOST
+                                            confidence += SpellCheckConstants.APOSTROPHE_BOOST
                                         }
                                     }
 
-                                    result to confidence.coerceIn(0.0, 0.49)
+                                    result to
+                                        confidence.coerceIn(
+                                            SpellCheckConstants.SYMSPELL_CONFIDENCE_MIN,
+                                            SpellCheckConstants.SYMSPELL_CONFIDENCE_MAX,
+                                        )
                                 }.sortedByDescending { it.second }
-                                .take(MAX_SUGGESTIONS)
+                                .take(SpellCheckConstants.MAX_SUGGESTIONS)
 
                         scoredResults.forEachIndexed { index, (result, confidence) ->
                             allSuggestions.add(
@@ -604,7 +609,7 @@ class SpellCheckManager
             return commonWordsCache
                 .filter { (word, _) ->
                     word.length > prefix.length && word.startsWith(prefix, ignoreCase = true)
-                }.take(10)
+                }.take(SpellCheckConstants.MAX_PREFIX_COMPLETION_RESULTS)
         }
 
         private fun isValidInput(text: String): Boolean {
@@ -620,7 +625,7 @@ class SpellCheckManager
                 }
 
             val codePointCount = text.codePointCount(0, text.length)
-            return hasValidChars && codePointCount in 1..100
+            return hasValidChars && codePointCount in 1..SpellCheckConstants.MAX_INPUT_CODEPOINTS
         }
 
         private fun getCurrentLanguage(): String =
@@ -784,7 +789,8 @@ class SpellCheckManager
                                         val word = parts[0].lowercase().trim()
                                         val frequency = parts[1].toIntOrNull() ?: 1
 
-                                        if (word.length in 2..15 &&
+                                        if (word.length in
+                                            SpellCheckConstants.COMMON_WORD_MIN_LENGTH..SpellCheckConstants.COMMON_WORD_MAX_LENGTH &&
                                             word.all {
                                                 Character.isLetter(it.code) ||
                                                     Character.getType(it.code) == Character.OTHER_LETTER.toInt() ||
@@ -797,7 +803,8 @@ class SpellCheckManager
                                         }
                                     } else if (parts.size == 1) {
                                         val word = parts[0].lowercase().trim()
-                                        if (word.length in 2..15 &&
+                                        if (word.length in
+                                            SpellCheckConstants.COMMON_WORD_MIN_LENGTH..SpellCheckConstants.COMMON_WORD_MAX_LENGTH &&
                                             word.all {
                                                 Character.isLetter(it.code) ||
                                                     Character.getType(it.code) == Character.OTHER_LETTER.toInt() ||

@@ -3,6 +3,8 @@ package com.urik.keyboard.service
 import com.ibm.icu.lang.UScript
 import com.ibm.icu.text.BreakIterator
 import com.ibm.icu.util.ULocale
+import com.urik.keyboard.KeyboardConstants.CacheConstants
+import com.urik.keyboard.KeyboardConstants.TextProcessingConstants
 import com.urik.keyboard.settings.KeyboardSettings
 import com.urik.keyboard.settings.SettingsRepository
 import kotlinx.coroutines.CoroutineScope
@@ -69,14 +71,6 @@ class TextInputProcessor
 
         private val processorJob = SupervisorJob()
         private val processorScope = CoroutineScope(processorJob + Dispatchers.Main)
-
-        private companion object {
-            const val MAX_CACHE_SIZE = 200
-            const val CACHE_TTL_MS = 300000L
-            const val CLEANUP_THRESHOLD = 250
-            const val MIN_SPELL_CHECK_LENGTH = 2
-            const val MIN_SUGGESTION_QUERY_LENGTH = 1
-        }
 
         init {
             settingsRepository.settings
@@ -160,7 +154,7 @@ class TextInputProcessor
                 val suggestionsEnabled = currentSettings.showSuggestions && spellCheckEnabled
                 val maxSuggestions = currentSettings.effectiveSuggestionCount
 
-                val requiresSpellCheck = spellCheckEnabled && graphemeCount >= MIN_SPELL_CHECK_LENGTH
+                val requiresSpellCheck = spellCheckEnabled && graphemeCount >= TextProcessingConstants.MIN_SPELL_CHECK_LENGTH
                 var isValid = true
                 var suggestions = emptyList<String>()
 
@@ -215,7 +209,7 @@ class TextInputProcessor
                 val suggestionsEnabled = currentSettings.showSuggestions && currentSettings.spellCheckEnabled
                 val maxSuggestions = currentSettings.effectiveSuggestionCount
 
-                if (!suggestionsEnabled || word.length < MIN_SUGGESTION_QUERY_LENGTH) {
+                if (!suggestionsEnabled || word.length < TextProcessingConstants.MIN_SUGGESTION_QUERY_LENGTH) {
                     return@withContext emptyList()
                 }
 
@@ -279,7 +273,8 @@ class TextInputProcessor
             }
         }
 
-        private fun isValidWordInput(word: String): Boolean = word.isNotBlank() && word.length <= 50
+        private fun isValidWordInput(word: String): Boolean =
+            word.isNotBlank() && word.length <= TextProcessingConstants.MAX_WORD_INPUT_LENGTH
 
         private fun getCachedProcessing(word: String): ProcessingCache? {
             val cached = processingCache[word]
@@ -296,11 +291,11 @@ class TextInputProcessor
             normalized: String,
             graphemeCount: Int,
         ) {
-            if (processingCache.size >= CLEANUP_THRESHOLD) {
+            if (processingCache.size >= CacheConstants.PROCESSING_CACHE_CLEANUP_THRESHOLD) {
                 cleanupExpiredEntries()
             }
 
-            if (processingCache.size < MAX_CACHE_SIZE) {
+            if (processingCache.size < CacheConstants.PROCESSING_CACHE_MAX_SIZE) {
                 processingCache[word] =
                     ProcessingCache(
                         normalized = normalized,
@@ -325,11 +320,11 @@ class TextInputProcessor
             suggestions: List<String>,
             isValid: Boolean,
         ) {
-            if (suggestionCache.size >= CLEANUP_THRESHOLD) {
+            if (suggestionCache.size >= CacheConstants.PROCESSING_CACHE_CLEANUP_THRESHOLD) {
                 cleanupSuggestionCache()
             }
 
-            if (suggestionCache.size < MAX_CACHE_SIZE) {
+            if (suggestionCache.size < CacheConstants.PROCESSING_CACHE_MAX_SIZE) {
                 suggestionCache[word] =
                     SuggestionCacheEntry(
                         suggestions = suggestions,
@@ -339,19 +334,19 @@ class TextInputProcessor
             }
         }
 
-        private fun isCacheExpired(timestamp: Long): Boolean = System.currentTimeMillis() - timestamp > CACHE_TTL_MS
+        private fun isCacheExpired(timestamp: Long): Boolean = System.currentTimeMillis() - timestamp > CacheConstants.CACHE_TTL_MS
 
         private fun cleanupExpiredEntries() {
             val currentTime = System.currentTimeMillis()
             processingCache.entries.removeIf { (_, cache) ->
-                currentTime - cache.timestamp > CACHE_TTL_MS
+                currentTime - cache.timestamp > CacheConstants.CACHE_TTL_MS
             }
         }
 
         private fun cleanupSuggestionCache() {
             val currentTime = System.currentTimeMillis()
             suggestionCache.entries.removeIf { (_, cache) ->
-                currentTime - cache.timestamp > CACHE_TTL_MS
+                currentTime - cache.timestamp > CacheConstants.CACHE_TTL_MS
             }
         }
 
