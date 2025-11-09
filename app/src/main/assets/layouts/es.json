@@ -123,7 +123,6 @@
           {"type": "character", "char": ",", "keyType": "symbol"},
           {"type": "character", "char": "'", "keyType": "symbol"},
           {"type": "character", "char": "\"", "keyType": "symbol"},
-          {"type": "character", "char": ";", "keyType": "symbol"},
           {"type": "character", "char": ":", "keyType": "symbol"},
           {"type": "character", "char": "<", "keyType": "symbol"},
           {"type": "character", "char": ">", "keyType": "symbol"},
