@@ -99,16 +99,9 @@ class SwipeDetector
         @Volatile
         private var keyCharacterPositions = emptyMap<Char, PointF>()
 
-        @Volatile
-        private var frequencyDictionary = emptyList<DictionaryEntry>()
-
-        @Volatile
-        private var dictionaryLanguage = ""
-
         private val scopeJob = SupervisorJob()
         private val scope = CoroutineScope(Dispatchers.Default + scopeJob)
         private var scoringJob: Job? = null
-        private var dictionaryLoadJob: Job? = null
 
         data class DictionaryEntry(
             val word: String,
@@ -134,52 +127,9 @@ class SwipeDetector
 
         /**
          * Updates script context when language changes.
-         *
-         * Reconfigures gesture parameters and reloads frequency dictionary.
-         * Cancels in-progress dictionary loads to prevent race conditions.
          */
         fun updateScriptContext(locale: ULocale) {
             currentLocale = locale
-            val languageCode = locale.language
-            if (languageCode != dictionaryLanguage) {
-                dictionaryLoadJob?.cancel()
-                loadFrequencyDictionary(languageCode)
-            }
-        }
-
-        private fun loadFrequencyDictionary(languageCode: String) {
-            dictionaryLoadJob =
-                scope.launch {
-                    try {
-                        val rawWords = spellCheckManager.getCommonWords()
-
-                        val wordFrequencyMap = mutableMapOf<String, Int>()
-                        rawWords.forEach { (word, frequency) ->
-                            if (word.isNotEmpty()) {
-                                val existing = wordFrequencyMap[word]
-                                if (existing == null || frequency > existing) {
-                                    wordFrequencyMap[word] = frequency
-                                }
-                            }
-                        }
-
-                        val newDictionary =
-                            wordFrequencyMap.entries
-                                .map { (word, frequency) ->
-                                    DictionaryEntry(
-                                        word = word,
-                                        frequencyScore = ln(frequency.toFloat() + 1f) / 20f,
-                                        firstChar = word.first().lowercaseChar(),
-                                        uniqueLetterCount = word.toSet().size,
-                                    )
-                                }.sortedByDescending { it.frequencyScore }
-
-                        frequencyDictionary = newDictionary
-                        dictionaryLanguage = languageCode
-                    } catch (_: Exception) {
-                        frequencyDictionary = emptyList()
-                    }
-                }
         }
 
         fun setSwipeListener(listener: SwipeListener?) {
@@ -390,11 +340,21 @@ class SwipeDetector
                     if (swipePath.isEmpty()) return@withContext emptyList()
 
                     val keyPositionsSnapshot = keyCharacterPositions
-                    val dictionarySnapshot = frequencyDictionary
+                    val rawWords = spellCheckManager.getCommonWords()
 
-                    if (keyPositionsSnapshot.isEmpty() || dictionarySnapshot.isEmpty()) {
+                    if (keyPositionsSnapshot.isEmpty() || rawWords.isEmpty()) {
                         return@withContext emptyList()
                     }
+
+                    val dictionarySnapshot =
+                        rawWords.map { (word, frequency) ->
+                            DictionaryEntry(
+                                word = word,
+                                frequencyScore = ln(frequency.toFloat() + 1f) / 20f,
+                                firstChar = word.first().lowercaseChar(),
+                                uniqueLetterCount = word.toSet().size,
+                            )
+                        }
 
                     val candidatesMap = mutableMapOf<String, WordCandidate>()
                     val pathBounds = calculatePathBounds(swipePath)
@@ -696,16 +656,12 @@ class SwipeDetector
 
         /**
          * Cleans up resources and cancels pending operations.
-         *
-         * Cancels scoring and dictionary loading jobs, clears listeners.
          */
         fun cleanup() {
             scoringJob?.cancel()
-            dictionaryLoadJob?.cancel()
             scopeJob.cancel()
             swipeListener = null
             keyCharacterPositions = emptyMap()
-            frequencyDictionary = emptyList()
             reset()
         }
     }
