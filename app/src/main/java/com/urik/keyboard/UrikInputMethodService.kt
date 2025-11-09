@@ -1057,9 +1057,10 @@ class UrikInputMethodService :
                             highlightCurrentWord()
 
                             val suggestions = textInputProcessor.getSuggestions(wordState.normalizedBuffer)
-                            pendingSuggestions = suggestions
-                            if (suggestions.isNotEmpty()) {
-                                swipeKeyboardView?.updateSuggestions(suggestions)
+                            val displaySuggestions = applyCapitalizationToSuggestions(suggestions)
+                            pendingSuggestions = displaySuggestions
+                            if (displaySuggestions.isNotEmpty()) {
+                                swipeKeyboardView?.updateSuggestions(displaySuggestions)
                             } else {
                                 swipeKeyboardView?.clearSuggestions()
                             }
@@ -1743,9 +1744,10 @@ class UrikInputMethodService :
                         pendingWordForLearning = wordState.normalizedBuffer
 
                         highlightCurrentWord()
-                        pendingSuggestions = suggestions
-                        if (suggestions.isNotEmpty()) {
-                            swipeKeyboardView?.updateSuggestions(suggestions)
+                        val displaySuggestions = applyCapitalizationToSuggestions(suggestions)
+                        pendingSuggestions = displaySuggestions
+                        if (displaySuggestions.isNotEmpty()) {
+                            swipeKeyboardView?.updateSuggestions(displaySuggestions)
                         } else {
                             swipeKeyboardView?.clearSuggestions()
                         }
