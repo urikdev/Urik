@@ -17,7 +17,7 @@ Urik is a privacy-first keyboard for Android. This privacy policy explains what 
 ## Data Controller
 
 **Urik Development**  
-Email: urikdevelopment@proton.me  
+Email: hello@urik.io
 GitHub: https://github.com/urikdev/Urik
 
 For privacy inquiries, contact us at the email above.
@@ -191,7 +191,7 @@ You have the right to:
 
 4. **Data Portability**
     - **Limitation:** While your learned words are stored locally in an SQLCipher database, there is no built-in feature to export them in a portable format
-    - **Manual Request:** If you need your data urgently, contact us at urikdevelopment@proton.me with device details, and we can provide instructions for manual database extraction (requires technical knowledge)
+    - **Manual Request:** If you need your data urgently, contact us at hello@urik.io with device details, and we can provide instructions for manual database extraction (requires technical knowledge)
 
 5. **Withdraw Consent**
     - Disable word learning: Settings → Typing Behavior → Disable "Learn Words"
@@ -200,7 +200,7 @@ You have the right to:
 6. **Lodge a Complaint**
     - EU residents: Contact your national data protection authority
     - Canadian residents: Contact the Office of the Privacy Commissioner of Canada
-    - Contact us first: urikdevelopment@proton.me
+    - Contact us first: hello@urik.io
 
 ### Rights Under CCPA (California)
 
@@ -213,7 +213,7 @@ California residents have the right to:
 
 ### Exercising Your Rights
 
-Most privacy rights can be exercised directly in the app via Settings → Privacy & Data. For requests that cannot be fulfilled through the app, email urikdevelopment@proton.me.
+Most privacy rights can be exercised directly in the app via Settings → Privacy & Data. For requests that cannot be fulfilled through the app, email hello@urik.io.
 
 ## Third-Party Data and Services
 
@@ -291,7 +291,7 @@ You can withdraw consent at any time by disabling word learning in settings or u
 
 For privacy questions, data requests, or concerns:
 
-**Email:** urikdevelopment@proton.me  
+**Email:** hello@urik.io
 **GitHub Issues:** https://github.com/urikdev/Urik/issues
 
 We will respond to privacy inquiries within 30 days.
