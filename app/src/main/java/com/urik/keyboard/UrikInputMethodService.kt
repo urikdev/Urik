@@ -430,7 +430,7 @@ class UrikInputMethodService :
 
                 currentInputConnection?.beginBatchEdit()
                 try {
-                    currentInputConnection?.commitText(suggestion, 1)
+                    currentInputConnection?.commitText("$suggestion ", 1)
 
                     displayBuffer = ""
                     wordState = WordState()
