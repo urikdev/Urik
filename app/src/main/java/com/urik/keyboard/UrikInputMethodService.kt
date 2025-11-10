@@ -51,6 +51,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import kotlin.code
 
 /**
  * Main input method service for the Urik keyboard.
@@ -387,7 +388,10 @@ class UrikInputMethodService :
         }
     }
 
-    private fun isSentenceEndingPunctuation(char: Char): Boolean = char in setOf('.', '!', '?')
+    private fun isSentenceEndingPunctuation(char: Char): Boolean {
+        val type = Character.getType(char.code)
+        return type == Character.END_PUNCTUATION.toInt()
+    }
 
     /**
      * Updates word state and displays suggestions.
@@ -1037,7 +1041,9 @@ class UrikInputMethodService :
                         confirmAndLearnWord()
                         currentInputConnection?.commitText(char, 1)
 
-                        if (char in setOf(".", "!", "?") && !isSecureField) {
+                        val singleChar = char.single()
+
+                        if (isSentenceEndingPunctuation(singleChar) && !isSecureField) {
                             val textBefore = currentInputConnection?.getTextBeforeCursor(50, 0)?.toString()
                             viewModel.checkAndApplyAutoCapitalization(textBefore)
                         }
@@ -1073,7 +1079,9 @@ class UrikInputMethodService :
                     coordinateWordCompletion()
                     currentInputConnection?.commitText(char, 1)
 
-                    if (char in setOf(".", "!", "?") && !isSecureField) {
+                    val singleChar = char.single()
+
+                    if (isSentenceEndingPunctuation(singleChar) && !isSecureField) {
                         val textBefore =
                             currentInputConnection?.getTextBeforeCursor(50, 0)?.toString()
                         viewModel.checkAndApplyAutoCapitalization(textBefore)
@@ -1465,13 +1473,6 @@ class UrikInputMethodService :
                             }
                         }
 
-                        wordState =
-                            wordState.copy(
-                                buffer = displayBuffer,
-                                normalizedBuffer = displayBuffer.lowercase(),
-                                graphemeCount = displayBuffer.length,
-                            )
-
                         if (!isAcceleratedDeletion) {
                             val (currentSequence, bufferSnapshot) =
                                 synchronized(processingLock) {
@@ -1589,12 +1590,6 @@ class UrikInputMethodService :
                         currentInputConnection?.setComposingText(wordBeforeCursor, 1)
 
                         displayBuffer = wordBeforeCursor
-                        wordState =
-                            wordState.copy(
-                                buffer = wordBeforeCursor,
-                                normalizedBuffer = wordBeforeCursor.lowercase(),
-                                graphemeCount = wordBeforeCursor.length,
-                            )
 
                         val (currentSequence, bufferSnapshot) =
                             synchronized(processingLock) {
