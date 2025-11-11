@@ -12,7 +12,7 @@ We support only the latest version available on Google Play. Please ensure autom
 
 **Please do NOT open public issues for security vulnerabilities.**
 
-Contact: **urikdevelopment@proton.me**
+Contact: **hello@urik.io**
 
 **Include in your report:**
 - Description of the vulnerability
