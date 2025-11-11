@@ -51,7 +51,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
-import kotlin.code
 
 /**
  * Main input method service for the Urik keyboard.

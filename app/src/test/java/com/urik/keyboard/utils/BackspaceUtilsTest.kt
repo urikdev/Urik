@@ -142,7 +142,7 @@ class BackspaceUtilsTest {
         val wordInfo = BackspaceUtils.extractWordBeforeCursor(text)
 
         assertNotNull(wordInfo)
-        val (word, boundary) = wordInfo!!
+        val (word, _) = wordInfo!!
         assertEquals("test", word)
 
         val shouldDeleteSpace = BackspaceUtils.shouldDeleteTrailingSpace(text, word.length)
@@ -158,7 +158,7 @@ class BackspaceUtilsTest {
         val wordInfo = BackspaceUtils.extractWordBeforeCursor(text)
 
         assertNotNull(wordInfo)
-        val (word, boundary) = wordInfo!!
+        val (word, _) = wordInfo!!
         assertEquals("test", word)
 
         val shouldDeleteSpace = BackspaceUtils.shouldDeleteTrailingSpace(text, word.length)

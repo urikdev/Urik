@@ -189,25 +189,6 @@ class CacheMemoryManager
             managedCaches.values.forEach { it.invalidateAll() }
             managedCaches.clear()
         }
-
-        data class MemoryStats(
-            val availableMemoryMb: Long,
-            val totalMemoryMb: Long,
-            val isLowMemory: Boolean,
-            val managedCaches: Int,
-            val totalCacheEntries: Int,
-            val totalCacheCapacity: Int,
-        )
-
-        data class CacheStats(
-            val name: String,
-            val size: Int,
-            val maxSize: Int,
-            val hitRate: Int,
-            val evictionCount: Long,
-            val hitCount: Long,
-            val missCount: Long,
-        )
     }
 
 /**
