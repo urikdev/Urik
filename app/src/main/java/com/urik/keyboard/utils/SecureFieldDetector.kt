@@ -43,18 +43,15 @@ object SecureFieldDetector {
         val inputClass = inputType and EditorInfo.TYPE_MASK_CLASS
         val inputVariation = inputType and EditorInfo.TYPE_MASK_VARIATION
 
-        when {
-            inputClass == EditorInfo.TYPE_CLASS_TEXT &&
-                (
-                    inputVariation == EditorInfo.TYPE_TEXT_VARIATION_PASSWORD ||
-                        inputVariation == EditorInfo.TYPE_TEXT_VARIATION_WEB_PASSWORD ||
-                        inputVariation == EditorInfo.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD ||
-                        inputVariation == EditorInfo.TYPE_TEXT_VARIATION_EMAIL_ADDRESS ||
-                        inputVariation == EditorInfo.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS
-                ) -> return true
-
-            inputClass == EditorInfo.TYPE_CLASS_NUMBER &&
-                inputVariation == EditorInfo.TYPE_NUMBER_VARIATION_PASSWORD -> return true
+        when (inputClass) {
+            EditorInfo.TYPE_CLASS_TEXT if (
+                inputVariation == EditorInfo.TYPE_TEXT_VARIATION_PASSWORD ||
+                    inputVariation == EditorInfo.TYPE_TEXT_VARIATION_WEB_PASSWORD ||
+                    inputVariation == EditorInfo.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD ||
+                    inputVariation == EditorInfo.TYPE_TEXT_VARIATION_EMAIL_ADDRESS ||
+                    inputVariation == EditorInfo.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS
+            ) -> return true
+            EditorInfo.TYPE_CLASS_NUMBER if inputVariation == EditorInfo.TYPE_NUMBER_VARIATION_PASSWORD -> return true
         }
 
         return false

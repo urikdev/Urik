@@ -50,7 +50,7 @@ object CursorEditingUtils {
 
         val tokenAfter =
             if (afterFirstBoundary >= 0) {
-                limitedAfter.substring(0, afterFirstBoundary)
+                limitedAfter.take(afterFirstBoundary)
             } else {
                 limitedAfter
             }

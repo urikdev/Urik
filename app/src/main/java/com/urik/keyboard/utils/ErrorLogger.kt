@@ -238,11 +238,11 @@ object ErrorLogger {
 
         val entryJson = buildEntryJson(entry)
 
-        val hasExistingErrors = json.substring(0, errorsEnd).contains("{\"timestamp\":")
+        val hasExistingErrors = json.take(errorsEnd).contains("{\"timestamp\":")
 
         val separator = if (hasExistingErrors) "," else ""
 
-        val before = json.substring(0, errorsEnd)
+        val before = json.take(errorsEnd)
         val after = json.substring(errorsEnd)
 
         val metadataRegex = """"totalErrors":\s*(\d+)""".toRegex()

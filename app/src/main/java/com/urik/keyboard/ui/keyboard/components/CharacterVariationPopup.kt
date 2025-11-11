@@ -174,10 +174,9 @@ class CharacterVariationPopup(
         val anchorWidth = anchorView.width
         val anchorHeight = anchorView.height
 
-        val spaceAbove = anchorY
         val spaceBelow = screenHeight - (anchorY + anchorHeight)
 
-        val showAbove = spaceAbove >= (height + gap) || spaceAbove > spaceBelow
+        val showAbove = anchorY >= (height + gap) || anchorY > spaceBelow
 
         val verticalOffset =
             if (showAbove) {

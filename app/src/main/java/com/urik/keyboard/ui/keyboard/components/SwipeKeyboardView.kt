@@ -317,8 +317,7 @@ class SwipeKeyboardView
         private fun insertSuggestionBar() {
             if (isDestroyed) return
 
-            val keyboardView = findKeyboardView() as? LinearLayout
-            if (keyboardView == null) return
+            val keyboardView = findKeyboardView() as? LinearLayout ?: return
 
             suggestionBar?.let { bar ->
                 (bar.parent as? ViewGroup)?.removeView(bar)
@@ -752,8 +751,7 @@ class SwipeKeyboardView
             if (isDestroyed) return
 
             for (i in 0 until viewGroup.childCount) {
-                val child = viewGroup.getChildAt(i)
-                when (child) {
+                when (val child = viewGroup.getChildAt(i)) {
                     is Button -> {
                         keyViews.add(child)
                         mapButtonToKey(child)
@@ -1158,8 +1156,8 @@ class SwipeKeyboardView
                     candidate to adjustedScore
                 }
 
-            candidateScores.forEachIndexed { index, (candidate, score) ->
-                val isLearned = learnedStatus[candidate.word] ?: false
+            candidateScores.forEachIndexed { index, (candidate, _) ->
+                learnedStatus[candidate.word] ?: false
             }
 
             val bestCandidate = candidateScores.maxByOrNull { it.second }
