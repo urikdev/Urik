@@ -21,7 +21,7 @@ class LanguageManager
     @Inject
     constructor(
         private val settingsRepository: SettingsRepository,
-        private val dispatcher: CoroutineDispatcher = Dispatchers.Default,
+        dispatcher: CoroutineDispatcher = Dispatchers.Default,
     ) {
         private var scope = CoroutineScope(dispatcher + SupervisorJob())
 
