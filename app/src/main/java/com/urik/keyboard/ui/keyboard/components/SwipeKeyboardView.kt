@@ -190,12 +190,14 @@ class SwipeKeyboardView
                         onBackspace()
                     }
 
-                    val marginParams = LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.WRAP_CONTENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT,
-                    ).apply {
-                        marginEnd = (8f * baseContext.resources.displayMetrics.density).toInt()
-                    }
+                    val marginParams =
+                        LinearLayout
+                            .LayoutParams(
+                                LinearLayout.LayoutParams.WRAP_CONTENT,
+                                LinearLayout.LayoutParams.WRAP_CONTENT,
+                            ).apply {
+                                marginEnd = (8f * baseContext.resources.displayMetrics.density).toInt()
+                            }
                     layoutParams = marginParams
                 }
 
@@ -753,7 +755,7 @@ class SwipeKeyboardView
                                             },
                                             onBackspace = {
                                                 onBackspacePressed?.invoke()
-                                            }
+                                            },
                                         )
                                     }
                                 }
