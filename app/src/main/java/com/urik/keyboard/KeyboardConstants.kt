@@ -28,6 +28,8 @@ object KeyboardConstants {
         const val MIN_PREFIX_MATCH_LENGTH = 2
         const val MIN_FUZZY_SEARCH_LENGTH = 4
         const val FUZZY_SEARCH_CANDIDATE_LIMIT = 30
+        const val STRIPPED_MATCH_LIMIT_SHORT = 200
+        const val STRIPPED_MATCH_LIMIT_MEDIUM = 100
         const val MAX_LENGTH_DIFFERENCE_FUZZY = 2
         const val MIN_EDIT_DISTANCE = 1
         const val MAX_EDIT_DISTANCE_FUZZY = 2
@@ -46,6 +48,7 @@ object KeyboardConstants {
         const val MAX_SUGGESTIONS = 5
         const val MIN_COMPLETION_LENGTH = 4
         const val APOSTROPHE_BOOST = 0.30
+        const val CONTRACTION_MATCH_CONFIDENCE = 0.75
 
         const val DICTIONARY_BATCH_SIZE = 500
 
