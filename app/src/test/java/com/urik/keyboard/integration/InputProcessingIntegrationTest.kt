@@ -123,8 +123,6 @@ class InputProcessingIntegrationTest {
     @After
     fun teardown() {
         database.close()
-        spellCheckManager.cleanup()
-        wordLearningEngine.cleanup()
         cacheMemoryManager.cleanup()
         Dispatchers.resetMain()
     }

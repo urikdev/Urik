@@ -97,7 +97,6 @@ class WordLearningEngineTest {
 
     @After
     fun teardown() {
-        wordLearningEngine.cleanup()
         Dispatchers.resetMain()
     }
 
@@ -141,17 +140,6 @@ class WordLearningEngineTest {
             val result = wordLearningEngine.initializeLearnedWordsCache("en")
 
             assertTrue(result.isFailure)
-        }
-
-    @Test
-    fun `initializeLearnedWordsCache returns failure when engine destroyed`() =
-        runTest {
-            wordLearningEngine.cleanup()
-
-            val result = wordLearningEngine.initializeLearnedWordsCache("en")
-
-            assertTrue(result.isFailure)
-            assertEquals("Engine destroyed", result.exceptionOrNull()?.message)
         }
 
     @Test
@@ -248,17 +236,6 @@ class WordLearningEngineTest {
         }
 
     @Test
-    fun `learnWord returns null when engine destroyed`() =
-        runTest {
-            wordLearningEngine.cleanup()
-
-            val result = wordLearningEngine.learnWord("word", InputMethod.TYPED)
-
-            assertTrue(result.isSuccess)
-            assertNull(result.getOrNull())
-        }
-
-    @Test
     fun `isWordLearned returns true for cached word`() =
         runTest {
             wordLearningEngine.learnWord("cached", InputMethod.TYPED)
@@ -320,16 +297,6 @@ class WordLearningEngineTest {
         runTest {
             whenever(learnedWordDao.findExactWord(any(), any()))
                 .thenThrow(android.database.sqlite.SQLiteException("DB error"))
-
-            val result = wordLearningEngine.isWordLearned("word")
-
-            assertFalse(result)
-        }
-
-    @Test
-    fun `isWordLearned returns false when engine destroyed`() =
-        runTest {
-            wordLearningEngine.cleanup()
 
             val result = wordLearningEngine.isWordLearned("word")
 
@@ -469,16 +436,6 @@ class WordLearningEngineTest {
         }
 
     @Test
-    fun `getSimilarLearnedWordsWithFrequency returns empty when destroyed`() =
-        runTest {
-            wordLearningEngine.cleanup()
-
-            val results = wordLearningEngine.getSimilarLearnedWordsWithFrequency("test", 3)
-
-            assertTrue(results.isEmpty())
-        }
-
-    @Test
     fun `areWordsLearned checks multiple words`() =
         runTest {
             whenever(learnedWordDao.findExistingWords("en", listOf("word1", "word2")))
@@ -535,16 +492,6 @@ class WordLearningEngineTest {
             assertEquals(2, results.size)
             assertEquals(false, results["word1"])
             assertEquals(false, results["word2"])
-        }
-
-    @Test
-    fun `areWordsLearned returns empty when destroyed`() =
-        runTest {
-            wordLearningEngine.cleanup()
-
-            val results = wordLearningEngine.areWordsLearned(listOf("word"))
-
-            assertTrue(results.isEmpty())
         }
 
     @Test
@@ -607,17 +554,6 @@ class WordLearningEngineTest {
         }
 
     @Test
-    fun `removeWord returns false when destroyed`() =
-        runTest {
-            wordLearningEngine.cleanup()
-
-            val result = wordLearningEngine.removeWord("word")
-
-            assertTrue(result.isSuccess)
-            assertEquals(false, result.getOrNull())
-        }
-
-    @Test
     fun `getLearningStats returns stats successfully`() =
         runTest {
             whenever(learnedWordDao.getTotalWordCount()).thenReturn(42)
@@ -643,19 +579,6 @@ class WordLearningEngineTest {
             assertTrue(result.isSuccess)
             val stats = result.getOrNull()!!
             assertEquals(0, stats.totalWordsLearned)
-        }
-
-    @Test
-    fun `getLearningStats returns default when destroyed`() =
-        runTest {
-            wordLearningEngine.cleanup()
-
-            val result = wordLearningEngine.getLearningStats()
-
-            assertTrue(result.isSuccess)
-            val stats = result.getOrNull()!!
-            assertEquals(0, stats.totalWordsLearned)
-            assertEquals("Unknown", stats.currentLanguage)
         }
 
     @Test
@@ -701,43 +624,6 @@ class WordLearningEngineTest {
             settingsFlow.value = KeyboardSettings(learnNewWords = false)
             val result2 = wordLearningEngine.learnWord("word2", InputMethod.TYPED)
             assertNull(result2.getOrNull())
-        }
-
-    @Test
-    fun `cleanup clears cache and resets state`() =
-        runTest {
-            wordLearningEngine.learnWord("word", InputMethod.TYPED)
-            assertTrue(wordLearningEngine.isWordLearned("word"))
-
-            wordLearningEngine.cleanup()
-
-            assertFalse(wordLearningEngine.isWordLearned("word"))
-        }
-
-    @Test
-    fun `cleanup is idempotent`() =
-        runTest {
-            wordLearningEngine.cleanup()
-            wordLearningEngine.cleanup()
-
-            val result = wordLearningEngine.learnWord("word", InputMethod.TYPED)
-            assertNull(result.getOrNull())
-        }
-
-    @Test
-    fun `operations after cleanup return safe defaults`() =
-        runTest {
-            wordLearningEngine.cleanup()
-
-            assertFalse(wordLearningEngine.isWordLearned("word"))
-            assertTrue(wordLearningEngine.getSimilarLearnedWordsWithFrequency("word").isEmpty())
-            assertTrue(wordLearningEngine.areWordsLearned(listOf("word")).isEmpty())
-
-            val learnResult = wordLearningEngine.learnWord("word", InputMethod.TYPED)
-            assertNull(learnResult.getOrNull())
-
-            val removeResult = wordLearningEngine.removeWord("word")
-            assertEquals(false, removeResult.getOrNull())
         }
 
     @Test
