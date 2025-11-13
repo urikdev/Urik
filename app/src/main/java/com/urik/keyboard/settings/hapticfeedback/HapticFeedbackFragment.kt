@@ -1,4 +1,4 @@
-package com.urik.keyboard.settings.soundfeedback
+package com.urik.keyboard.settings.hapticfeedback
 
 import android.os.Bundle
 import android.view.View
@@ -15,14 +15,9 @@ import com.urik.keyboard.settings.VibrationStrength
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
-/**
- * Settings fragment for sound and haptic feedback configuration.
- *
- * Manages haptic feedback toggle and vibration strength preferences.
- */
 @AndroidEntryPoint
-class SoundFeedbackFragment : PreferenceFragmentCompat() {
-    private lateinit var viewModel: SoundFeedbackViewModel
+class HapticFeedbackFragment : PreferenceFragmentCompat() {
+    private lateinit var viewModel: HapticFeedbackViewModel
     private lateinit var eventHandler: SettingsEventHandler
 
     private lateinit var hapticPref: SwitchPreferenceCompat
@@ -30,7 +25,7 @@ class SoundFeedbackFragment : PreferenceFragmentCompat() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        viewModel = ViewModelProvider(this)[SoundFeedbackViewModel::class.java]
+        viewModel = ViewModelProvider(this)[HapticFeedbackViewModel::class.java]
     }
 
     override fun onCreatePreferences(

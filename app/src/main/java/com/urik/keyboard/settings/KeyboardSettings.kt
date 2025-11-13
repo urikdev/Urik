@@ -88,7 +88,6 @@ data class KeyboardSettings(
     val learnNewWords: Boolean = true,
     val activeLanguages: Set<String> = setOf(DEFAULT_LANGUAGE),
     val primaryLanguage: String = DEFAULT_LANGUAGE,
-    val keyClickSound: Boolean = false,
     val hapticFeedback: Boolean = true,
     val vibrationStrength: VibrationStrength = VibrationStrength.MEDIUM,
     val doubleSpacePeriod: Boolean = true,
