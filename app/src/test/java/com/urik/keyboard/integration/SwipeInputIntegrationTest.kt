@@ -134,8 +134,6 @@ class SwipeInputIntegrationTest {
     @After
     fun teardown() {
         database.close()
-        spellCheckManager.cleanup()
-        wordLearningEngine.cleanup()
         swipeDetector.cleanup()
         cacheMemoryManager.cleanup()
         Dispatchers.resetMain()
