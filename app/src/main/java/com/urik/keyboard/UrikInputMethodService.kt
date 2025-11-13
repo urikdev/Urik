@@ -2091,12 +2091,6 @@ class UrikInputMethodService :
         coordinateStateClear()
         swipeKeyboardView = null
 
-        try {
-            spellCheckManager.cleanup()
-            textInputProcessor.cleanup()
-        } catch (_: Exception) {
-        }
-
         lifecycleRegistry.currentState = Lifecycle.State.DESTROYED
         super.onDestroy()
     }

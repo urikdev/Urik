@@ -126,7 +126,6 @@ class SpellCheckManagerTest {
 
     @After
     fun teardown() {
-        spellCheckManager.cleanup()
         Dispatchers.resetMain()
     }
 
@@ -640,33 +639,5 @@ class SpellCheckManagerTest {
             val words = failingManager.getCommonWords()
 
             assertTrue(words.isEmpty())
-        }
-
-    @Test
-    fun `cleanup clears all caches`() =
-        runTest {
-            dictionaryCache.put("en_test", true)
-            suggestionCache.put("en_test", emptyList())
-
-            spellCheckManager.cleanup()
-
-            assertEquals(0, dictionaryCache.size())
-            assertEquals(0, suggestionCache.size())
-        }
-
-    @Test
-    fun `operations after cleanup return safe defaults`() =
-        runTest {
-            spellCheckManager.cleanup()
-
-            val dictResult = spellCheckManager.isWordInDictionary("test")
-            val suggestions = spellCheckManager.generateSuggestions("test", 3)
-            val batch = spellCheckManager.areWordsInDictionary(listOf("test"))
-            val common = spellCheckManager.getCommonWords()
-
-            assertFalse(dictResult)
-            assertTrue(suggestions.isEmpty())
-            assertTrue(batch.isEmpty())
-            assertTrue(common.isEmpty())
         }
 }

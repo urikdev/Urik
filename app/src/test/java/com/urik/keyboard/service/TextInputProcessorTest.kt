@@ -65,7 +65,6 @@ class TextInputProcessorTest {
 
     @After
     fun teardown() {
-        processor.cleanup()
         Dispatchers.resetMain()
     }
 

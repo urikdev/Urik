@@ -88,9 +88,6 @@ class SpellCheckManager
         private var commonWordsCacheLanguage = ""
 
         @Volatile
-        private var isDestroyed = false
-
-        @Volatile
         private var isInitialized = false
 
         init {
@@ -159,7 +156,7 @@ class SpellCheckManager
         suspend fun isWordInSymSpellDictionary(word: String): Boolean =
             withContext(Dispatchers.Default) {
                 try {
-                    if (isDestroyed || !isValidInput(word)) {
+                    if (!isValidInput(word)) {
                         return@withContext false
                     }
 
@@ -289,7 +286,7 @@ class SpellCheckManager
         suspend fun isWordInDictionary(word: String): Boolean =
             withContext(Dispatchers.Default) {
                 try {
-                    if (isDestroyed || !isValidInput(word)) {
+                    if (!isValidInput(word)) {
                         return@withContext false
                     }
 
@@ -329,7 +326,7 @@ class SpellCheckManager
          */
         suspend fun areWordsInDictionary(words: List<String>): Map<String, Boolean> =
             withContext(Dispatchers.Default) {
-                if (isDestroyed || words.isEmpty()) {
+                if (words.isEmpty()) {
                     return@withContext emptyMap()
                 }
 
@@ -441,7 +438,7 @@ class SpellCheckManager
         suspend fun getSpellingSuggestionsWithConfidence(word: String): List<SpellingSuggestion> =
             withContext(Dispatchers.Default) {
                 try {
-                    if (isDestroyed || !isValidInput(word)) {
+                    if (!isValidInput(word)) {
                         return@withContext emptyList()
                     }
 
@@ -765,10 +762,6 @@ class SpellCheckManager
         suspend fun getCommonWords(): List<Pair<String, Int>> =
             withContext(ioDispatcher) {
                 try {
-                    if (isDestroyed) {
-                        return@withContext emptyList()
-                    }
-
                     if (!ensureInitialized()) {
                         return@withContext emptyList()
                     }
@@ -839,26 +832,4 @@ class SpellCheckManager
                 }
             }
 
-        /**
-         * Clears all state and cancels background initialization.
-         *
-         * Call when keyboard service destroyed.
-         */
-        fun cleanup() {
-            if (isDestroyed) return
-            isDestroyed = true
-
-            initializationJob?.cancel()
-            initScope.cancel()
-            spellCheckers.clear()
-
-            suggestionCache.invalidateAll()
-            dictionaryCache.invalidateAll()
-            synchronized(blacklistedWords) {
-                blacklistedWords.clear()
-            }
-
-            commonWordsCache = emptyList()
-            commonWordsCacheLanguage = ""
-        }
     }
