@@ -166,26 +166,10 @@ class WordLearningEngine
                 Character.isLetter(char.code) ||
                     Character.isIdeographic(char.code) ||
                     Character.getType(char.code) == Character.OTHER_LETTER.toInt() ||
-                    isValidWordPunctuation(char)
+                    com.urik.keyboard.utils.TextMatchingUtils
+                        .isValidWordPunctuation(char)
             }
         }
-
-        private fun isValidWordPunctuation(char: Char): Boolean =
-            when (char.code) {
-                0x0027 -> true
-                0x002D -> true
-                0x2019 -> true
-                0x060C -> true
-                0x061F -> true
-                0x0640 -> true
-                0x3001 -> true
-                0x3002 -> true
-                0xFF0C -> true
-                0xFF0E -> true
-                else ->
-                    Character.getType(char.code) == Character.DASH_PUNCTUATION.toInt() ||
-                        Character.getType(char.code) == Character.OTHER_PUNCTUATION.toInt()
-            }
 
         /**
          * Learns word from user input.
@@ -348,6 +332,9 @@ class WordLearningEngine
                     }
 
                     val results = mutableMapOf<String, Int>()
+                    val strippedInput =
+                        com.urik.keyboard.utils.TextMatchingUtils
+                            .stripWordPunctuation(normalized.userSpecific)
 
                     try {
                         val exactMatch =
@@ -374,6 +361,38 @@ class WordLearningEngine
                                     results[learnedWord.word] = learnedWord.frequency
                                 }
                             }
+                        } catch (_: Exception) {
+                        }
+                    }
+
+                    if (results.size < maxResults && strippedInput.length >= WordLearningConstants.MIN_PREFIX_MATCH_LENGTH) {
+                        try {
+                            val searchLimit =
+                                when {
+                                    strippedInput.length <= 3 -> WordLearningConstants.STRIPPED_MATCH_LIMIT_SHORT
+                                    strippedInput.length <= 5 -> WordLearningConstants.STRIPPED_MATCH_LIMIT_MEDIUM
+                                    else -> WordLearningConstants.FUZZY_SEARCH_CANDIDATE_LIMIT
+                                }
+
+                            val frequentWords =
+                                learnedWordDao.getMostFrequentWords(
+                                    languageTag = currentLanguage,
+                                    limit = searchLimit,
+                                )
+                            frequentWords
+                                .filter { candidate ->
+                                    val strippedCandidate =
+                                        com.urik.keyboard.utils.TextMatchingUtils.stripWordPunctuation(
+                                            candidate.wordNormalized,
+                                        )
+                                    strippedCandidate != candidate.wordNormalized &&
+                                        strippedCandidate.startsWith(strippedInput, ignoreCase = true) &&
+                                        !results.containsKey(candidate.word)
+                                }.sortedByDescending { it.frequency }
+                                .take(maxResults - results.size)
+                                .forEach { candidate ->
+                                    results[candidate.word] = candidate.frequency
+                                }
                         } catch (_: Exception) {
                         }
                     }
