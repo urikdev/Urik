@@ -55,6 +55,7 @@ class SwipeKeyboardView
         private var onSuggestionClickListener: ((String) -> Unit)? = null
         private var onSuggestionLongPressListener: ((String) -> Unit)? = null
         private var onEmojiSelected: ((String) -> Unit)? = null
+        private var onBackspacePressed: (() -> Unit)? = null
         private val keyViews = mutableListOf<Button>()
         private val keyPositions = mutableMapOf<Button, Rect>()
         private val keyMapping = mutableMapOf<Button, KeyboardKey>()
@@ -119,10 +120,13 @@ class SwipeKeyboardView
         /**
          * Shows full-screen emoji picker overlay.
          *
-         * Hides keyboard view, shows emoji grid with close button.
+         * Hides keyboard view, shows emoji grid with backspace and close buttons.
          * Auto-hidden on keyboard layout change.
          */
-        fun showEmojiPicker(onEmojiSelected: (String) -> Unit) {
+        fun showEmojiPicker(
+            onEmojiSelected: (String) -> Unit,
+            onBackspace: () -> Unit,
+        ) {
             if (isDestroyed || isShowingEmojiPicker) return
 
             isShowingEmojiPicker = true
@@ -170,6 +174,33 @@ class SwipeKeyboardView
                     setPadding(padding, padding / 2, padding, padding / 2)
                 }
 
+            val backspaceButton =
+                TextView(baseContext).apply {
+                    text = "⌫"
+                    setTextSize(TypedValue.COMPLEX_UNIT_SP, 20f)
+                    setTextColor(ContextCompat.getColor(baseContext, R.color.content_primary))
+
+                    val buttonPadding = (18f * baseContext.resources.displayMetrics.density).toInt()
+                    setPadding(buttonPadding, buttonPadding / 2, buttonPadding, buttonPadding / 2)
+
+                    setBackgroundColor(ContextCompat.getColor(baseContext, R.color.key_background_action))
+                    contentDescription = "Backspace"
+
+                    setOnClickListener {
+                        onBackspace()
+                    }
+
+                    val marginParams =
+                        LinearLayout
+                            .LayoutParams(
+                                LinearLayout.LayoutParams.WRAP_CONTENT,
+                                LinearLayout.LayoutParams.WRAP_CONTENT,
+                            ).apply {
+                                marginEnd = (8f * baseContext.resources.displayMetrics.density).toInt()
+                            }
+                    layoutParams = marginParams
+                }
+
             val closeButton =
                 TextView(baseContext).apply {
                     text = "✕"
@@ -187,6 +218,7 @@ class SwipeKeyboardView
                     }
                 }
 
+            closeButtonBar.addView(backspaceButton)
             closeButtonBar.addView(closeButton)
             container.addView(
                 closeButtonBar,
@@ -231,6 +263,8 @@ class SwipeKeyboardView
             emojiPickerContainer = null
 
             findKeyboardView()?.visibility = VISIBLE
+            requestLayout()
+            invalidate()
         }
 
         override fun onMeasure(
@@ -311,6 +345,12 @@ class SwipeKeyboardView
         fun setOnEmojiSelectedListener(listener: (String) -> Unit) {
             if (!isDestroyed) {
                 this.onEmojiSelected = listener
+            }
+        }
+
+        fun setOnBackspacePressedListener(listener: () -> Unit) {
+            if (!isDestroyed) {
+                this.onBackspacePressed = listener
             }
         }
 
@@ -638,7 +678,9 @@ class SwipeKeyboardView
             if (isDestroyed) return
 
             if (isShowingEmojiPicker) {
-                hideEmojiPicker()
+                if (currentLayout == null || currentLayout?.mode != layout.mode) {
+                    hideEmojiPicker()
+                }
             }
 
             clearCollections()
@@ -707,9 +749,14 @@ class SwipeKeyboardView
 
                                 setOnClickListener {
                                     if (!isDestroyed) {
-                                        showEmojiPicker { selectedEmoji ->
-                                            onEmojiSelected?.invoke(selectedEmoji)
-                                        }
+                                        showEmojiPicker(
+                                            onEmojiSelected = { selectedEmoji ->
+                                                onEmojiSelected?.invoke(selectedEmoji)
+                                            },
+                                            onBackspace = {
+                                                onBackspacePressed?.invoke()
+                                            },
+                                        )
                                     }
                                 }
 
@@ -1215,6 +1262,7 @@ class SwipeKeyboardView
             onSuggestionClickListener = null
             onSuggestionLongPressListener = null
             onEmojiSelected = null
+            onBackspacePressed = null
 
             spellCheckManager = null
             keyboardLayoutManager = null

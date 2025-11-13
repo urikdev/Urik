@@ -636,6 +636,9 @@ class UrikInputMethodService :
                     setOnEmojiSelectedListener { selectedEmoji ->
                         handleEmojiSelected(selectedEmoji)
                     }
+                    setOnBackspacePressedListener {
+                        handleBackspace()
+                    }
                 }
 
             swipeKeyboardView = swipeView
@@ -1380,9 +1383,10 @@ class UrikInputMethodService :
     private fun handleBackspace() {
         try {
             if (isSecureField) {
-                val textBefore = currentInputConnection?.getTextBeforeCursor(1, 0)
+                val textBefore = currentInputConnection?.getTextBeforeCursor(50, 0)?.toString()
                 if (!textBefore.isNullOrEmpty()) {
-                    currentInputConnection?.deleteSurroundingText(1, 0)
+                    val graphemeLength = BackspaceUtils.getLastGraphemeClusterLength(textBefore)
+                    currentInputConnection?.deleteSurroundingText(graphemeLength, 0)
                 }
                 return
             }
@@ -1424,7 +1428,11 @@ class UrikInputMethodService :
                     currentInputConnection?.beginBatchEdit()
                     try {
                         coordinateStateClear()
-                        currentInputConnection?.deleteSurroundingText(1, 0)
+                        val textBefore = currentInputConnection?.getTextBeforeCursor(50, 0)?.toString()
+                        if (!textBefore.isNullOrEmpty()) {
+                            val graphemeLength = BackspaceUtils.getLastGraphemeClusterLength(textBefore)
+                            currentInputConnection?.deleteSurroundingText(graphemeLength, 0)
+                        }
                     } finally {
                         currentInputConnection?.endBatchEdit()
                     }
@@ -1440,18 +1448,18 @@ class UrikInputMethodService :
                             !viewModel.state.value.isCapsLockOn
 
                     val oldComposingStart = composingRegionStart
+                    val oldBufferLength = displayBuffer.length
 
-                    displayBuffer =
-                        StringBuilder(displayBuffer)
-                            .deleteCharAt(cursorPosInWord - 1)
-                            .toString()
+                    displayBuffer = BackspaceUtils.deleteGraphemeClusterBeforePosition(displayBuffer, cursorPosInWord)
+
+                    val deletedLength = oldBufferLength - displayBuffer.length
 
                     if (shouldResetShift) {
                         viewModel.onEvent(KeyboardEvent.ShiftStateChanged(false))
                     }
 
                     if (displayBuffer.isNotEmpty()) {
-                        val newCursorPos = cursorPosInWord - 1
+                        val newCursorPos = cursorPosInWord - deletedLength
 
                         val ic = currentInputConnection
                         if (ic != null) {
@@ -1459,14 +1467,12 @@ class UrikInputMethodService :
                                 ic.beginBatchEdit()
                                 ic.setComposingText(displayBuffer, 1)
 
-                                if (oldComposingStart != -1) {
-                                    val currentTextLength = ic.getTextBeforeCursor(1000, 0)?.length ?: displayBuffer.length
-                                    composingRegionStart =
-                                        CursorEditingUtils.recalculateComposingRegionStart(currentTextLength, displayBuffer.length)
+                                val currentTextLength = ic.getTextBeforeCursor(1000, 0)?.length ?: displayBuffer.length
+                                composingRegionStart =
+                                    CursorEditingUtils.recalculateComposingRegionStart(currentTextLength, displayBuffer.length)
 
-                                    val newAbsoluteCursorPos = composingRegionStart + newCursorPos
-                                    ic.setSelection(newAbsoluteCursorPos, newAbsoluteCursorPos)
-                                }
+                                val newAbsoluteCursorPos = composingRegionStart + newCursorPos
+                                ic.setSelection(newAbsoluteCursorPos, newAbsoluteCursorPos)
                             } finally {
                                 ic.endBatchEdit()
                             }
@@ -1536,9 +1542,10 @@ class UrikInputMethodService :
             }
         } catch (_: Exception) {
             try {
-                val textBefore = currentInputConnection?.getTextBeforeCursor(1, 0)
+                val textBefore = currentInputConnection?.getTextBeforeCursor(50, 0)?.toString()
                 if (!textBefore.isNullOrEmpty()) {
-                    currentInputConnection?.deleteSurroundingText(1, 0)
+                    val graphemeLength = BackspaceUtils.getLastGraphemeClusterLength(textBefore)
+                    currentInputConnection?.deleteSurroundingText(graphemeLength, 0)
                 }
             } catch (_: Exception) {
             }
@@ -1556,9 +1563,10 @@ class UrikInputMethodService :
             if (!textBeforeCursor.isNullOrEmpty()) {
                 currentInputConnection?.beginBatchEdit()
                 try {
+                    val graphemeLength = BackspaceUtils.getLastGraphemeClusterLength(textBeforeCursor)
                     val deletedChar = textBeforeCursor.lastOrNull()
 
-                    currentInputConnection?.deleteSurroundingText(1, 0)
+                    currentInputConnection?.deleteSurroundingText(graphemeLength, 0)
 
                     if (deletedChar != null) {
                         val shouldResetShift =
