@@ -11,6 +11,7 @@ import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import com.urik.keyboard.R
 import com.urik.keyboard.settings.appearance.AppearanceFragment
 import com.urik.keyboard.settings.autocorrection.AutoCorrectionFragment
+import com.urik.keyboard.settings.hapticfeedback.HapticFeedbackFragment
 import com.urik.keyboard.settings.languages.LanguagesFragment
 import com.urik.keyboard.settings.layoutinput.LayoutInputFragment
 import com.urik.keyboard.settings.privacydata.PrivacyDataFragment
@@ -95,6 +96,18 @@ class MainSettingsFragment : PreferenceFragmentCompat() {
                 summary = resources.getString(R.string.typing_settings_description)
                 setOnPreferenceClickListener {
                     navigateToFragment(TypingBehaviorFragment())
+                    true
+                }
+            },
+        )
+
+        screen.addPreference(
+            Preference(context).apply {
+                key = "haptic_feedback_category"
+                title = resources.getString(R.string.feedback_settings_title)
+                summary = resources.getString(R.string.feedback_settings_description)
+                setOnPreferenceClickListener {
+                    navigateToFragment(HapticFeedbackFragment())
                     true
                 }
             },
