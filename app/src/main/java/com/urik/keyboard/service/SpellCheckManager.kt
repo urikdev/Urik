@@ -24,10 +24,12 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.coroutines.yield
 import java.io.IOException
 import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.TimeoutException
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.math.ln
@@ -114,7 +116,18 @@ class SpellCheckManager
                 }
         }
 
-        private suspend fun ensureInitialized(): Boolean = initializationComplete.await()
+        private suspend fun ensureInitialized(): Boolean =
+            withTimeoutOrNull(SpellCheckConstants.INITIALIZATION_TIMEOUT_MS) {
+                initializationComplete.await()
+            } ?: run {
+                ErrorLogger.logException(
+                    component = "SpellCheckManager",
+                    severity = ErrorLogger.Severity.CRITICAL,
+                    exception = TimeoutException("Initialization timeout after ${SpellCheckConstants.INITIALIZATION_TIMEOUT_MS}ms"),
+                    context = mapOf("phase" to "ensureInitialized"),
+                )
+                false
+            }
 
         private suspend fun initializeSymSpell() {
             try {
