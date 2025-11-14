@@ -112,6 +112,7 @@ object KeyboardConstants {
         const val MAX_WORD_INPUT_LENGTH = 50
 
         const val CURSOR_CONTEXT_BEFORE_LENGTH = 50
+        const val MAX_CURSOR_POSITION_CHARS = 1000
         const val CURSOR_CONTEXT_AFTER_LENGTH = 50
         const val MAX_TOKEN_LENGTH_BEFORE_FILTER = 200
         const val MAX_WORD_LENGTH_AFTER_TRIM = 40
