@@ -22,6 +22,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
@@ -114,6 +115,17 @@ class SpellCheckManager
                         }
                     initializationComplete.complete(success)
                 }
+
+            initScope.launch {
+                languageManager.currentLanguage.collect { newLanguage ->
+                    val languageCode = newLanguage.split("-").first()
+                    if (languageCode != currentLanguage && isInitialized) {
+                        withContext(ioDispatcher) {
+                            preloadLanguage(languageCode)
+                        }
+                    }
+                }
+            }
         }
 
         private suspend fun ensureInitialized(): Boolean =
@@ -143,6 +155,31 @@ class SpellCheckManager
             } catch (e: Exception) {
                 isInitialized = false
                 throw e
+            }
+        }
+
+        private suspend fun preloadLanguage(languageCode: String) {
+            try {
+                if (languageCode !in KeyboardSettings.SUPPORTED_LANGUAGES) {
+                    return
+                }
+
+                currentLanguage = languageCode
+
+                if (spellCheckers[languageCode] == null) {
+                    val spellChecker = createSpellChecker(context, languageCode)
+                    if (spellChecker != null) {
+                        spellCheckers[languageCode] = spellChecker
+                        loadCommonWordsCache(languageCode)
+                    }
+                }
+            } catch (e: Exception) {
+                ErrorLogger.logException(
+                    component = "SpellCheckManager",
+                    severity = ErrorLogger.Severity.HIGH,
+                    exception = e,
+                    context = mapOf("phase" to "language_preload", "language" to languageCode),
+                )
             }
         }
 
@@ -648,9 +685,9 @@ class SpellCheckManager
                     .stripWordPunctuation(prefix)
 
             return commonWordsCacheStripped
-                .filter { (_, _, strippedWord) ->
-                    strippedWord.length > strippedPrefix.length &&
-                        strippedWord.startsWith(strippedPrefix, ignoreCase = true)
+                .filter { (word, _, strippedWord) ->
+                    strippedWord.startsWith(strippedPrefix, ignoreCase = true) &&
+                        (strippedWord.length > strippedPrefix.length || word != strippedWord)
                 }.map { (word, freq, _) -> word to freq }
                 .take(SpellCheckConstants.MAX_PREFIX_COMPLETION_RESULTS)
         }
