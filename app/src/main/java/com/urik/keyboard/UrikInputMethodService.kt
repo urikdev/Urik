@@ -327,13 +327,25 @@ class UrikInputMethodService :
                 }
 
                 currentInputConnection?.commitText(" ", 1)
-                val cursorPos = currentInputConnection?.getTextBeforeCursor(KeyboardConstants.TextProcessingConstants.MAX_CURSOR_POSITION_CHARS, 0)?.length ?: 0
+                val cursorPos =
+                    currentInputConnection
+                        ?.getTextBeforeCursor(
+                            KeyboardConstants.TextProcessingConstants.MAX_CURSOR_POSITION_CHARS,
+                            0,
+                        )?.length
+                        ?: 0
                 currentInputConnection?.setSelection(cursorPos, cursorPos)
                 coordinateStateClear()
             } catch (_: Exception) {
                 coordinateWordCompletion()
                 currentInputConnection?.commitText(" ", 1)
-                val cursorPos = currentInputConnection?.getTextBeforeCursor(KeyboardConstants.TextProcessingConstants.MAX_CURSOR_POSITION_CHARS, 0)?.length ?: 0
+                val cursorPos =
+                    currentInputConnection
+                        ?.getTextBeforeCursor(
+                            KeyboardConstants.TextProcessingConstants.MAX_CURSOR_POSITION_CHARS,
+                            0,
+                        )?.length
+                        ?: 0
                 currentInputConnection?.setSelection(cursorPos, cursorPos)
                 coordinateStateClear()
             } finally {
@@ -427,7 +439,13 @@ class UrikInputMethodService :
                 currentInputConnection?.beginBatchEdit()
                 try {
                     currentInputConnection?.commitText("$suggestion ", 1)
-                    val cursorPos = currentInputConnection?.getTextBeforeCursor(KeyboardConstants.TextProcessingConstants.MAX_CURSOR_POSITION_CHARS, 0)?.length ?: 0
+                    val cursorPos =
+                        currentInputConnection
+                            ?.getTextBeforeCursor(
+                                KeyboardConstants.TextProcessingConstants.MAX_CURSOR_POSITION_CHARS,
+                                0,
+                            )?.length
+                            ?: 0
                     currentInputConnection?.setSelection(cursorPos, cursorPos)
 
                     displayBuffer = ""
@@ -677,7 +695,13 @@ class UrikInputMethodService :
                 }
 
                 currentInputConnection?.commitText(emoji, 1)
-                val cursorPos = currentInputConnection?.getTextBeforeCursor(KeyboardConstants.TextProcessingConstants.MAX_CURSOR_POSITION_CHARS, 0)?.length ?: 0
+                val cursorPos =
+                    currentInputConnection
+                        ?.getTextBeforeCursor(
+                            KeyboardConstants.TextProcessingConstants.MAX_CURSOR_POSITION_CHARS,
+                            0,
+                        )?.length
+                        ?: 0
                 currentInputConnection?.setSelection(cursorPos, cursorPos)
             } catch (_: Exception) {
             }
@@ -901,7 +925,13 @@ class UrikInputMethodService :
         try {
             if (isSecureField) {
                 currentInputConnection?.commitText(char, 1)
-                val cursorPos = currentInputConnection?.getTextBeforeCursor(KeyboardConstants.TextProcessingConstants.MAX_CURSOR_POSITION_CHARS, 0)?.length ?: 0
+                val cursorPos =
+                    currentInputConnection
+                        ?.getTextBeforeCursor(
+                            KeyboardConstants.TextProcessingConstants.MAX_CURSOR_POSITION_CHARS,
+                            0,
+                        )?.length
+                        ?: 0
                 currentInputConnection?.setSelection(cursorPos, cursorPos)
                 return
             }
@@ -923,7 +953,13 @@ class UrikInputMethodService :
 
             val cursorPosInWord =
                 if (composingRegionStart != -1 && displayBuffer.isNotEmpty()) {
-                    val absoluteCursorPos = currentInputConnection?.getTextBeforeCursor(KeyboardConstants.TextProcessingConstants.MAX_CURSOR_POSITION_CHARS, 0)?.length ?: displayBuffer.length
+                    val absoluteCursorPos =
+                        currentInputConnection
+                            ?.getTextBeforeCursor(
+                                KeyboardConstants.TextProcessingConstants.MAX_CURSOR_POSITION_CHARS,
+                                0,
+                            )?.length
+                            ?: displayBuffer.length
                     CursorEditingUtils.calculateCursorPositionInWord(absoluteCursorPos, composingRegionStart, displayBuffer.length)
                 } else {
                     displayBuffer.length
@@ -950,7 +986,9 @@ class UrikInputMethodService :
                     ic.setComposingText(displayBuffer, 1)
 
                     if (oldComposingStart != -1) {
-                        val currentTextLength = ic.getTextBeforeCursor(KeyboardConstants.TextProcessingConstants.MAX_CURSOR_POSITION_CHARS, 0)?.length ?: displayBuffer.length
+                        val currentTextLength =
+                            ic.getTextBeforeCursor(KeyboardConstants.TextProcessingConstants.MAX_CURSOR_POSITION_CHARS, 0)?.length
+                                ?: displayBuffer.length
                         composingRegionStart = CursorEditingUtils.recalculateComposingRegionStart(currentTextLength, displayBuffer.length)
 
                         val newAbsoluteCursorPos = composingRegionStart + newCursorPos
@@ -1015,7 +1053,9 @@ class UrikInputMethodService :
                 }
         } catch (_: Exception) {
             currentInputConnection?.commitText(char, 1)
-            val cursorPos = currentInputConnection?.getTextBeforeCursor(KeyboardConstants.TextProcessingConstants.MAX_CURSOR_POSITION_CHARS, 0)?.length ?: 0
+            val cursorPos =
+                currentInputConnection?.getTextBeforeCursor(KeyboardConstants.TextProcessingConstants.MAX_CURSOR_POSITION_CHARS, 0)?.length
+                    ?: 0
             currentInputConnection?.setSelection(cursorPos, cursorPos)
         }
     }
@@ -1030,7 +1070,13 @@ class UrikInputMethodService :
             try {
                 if (isSecureField) {
                     currentInputConnection?.commitText(char, 1)
-                    val cursorPos = currentInputConnection?.getTextBeforeCursor(KeyboardConstants.TextProcessingConstants.MAX_CURSOR_POSITION_CHARS, 0)?.length ?: 0
+                    val cursorPos =
+                        currentInputConnection
+                            ?.getTextBeforeCursor(
+                                KeyboardConstants.TextProcessingConstants.MAX_CURSOR_POSITION_CHARS,
+                                0,
+                            )?.length
+                            ?: 0
                     currentInputConnection?.setSelection(cursorPos, cursorPos)
                     return@launch
                 }
@@ -1049,7 +1095,13 @@ class UrikInputMethodService :
                     try {
                         confirmAndLearnWord()
                         currentInputConnection?.commitText(char, 1)
-                        val cursorPos = currentInputConnection?.getTextBeforeCursor(KeyboardConstants.TextProcessingConstants.MAX_CURSOR_POSITION_CHARS, 0)?.length ?: 0
+                        val cursorPos =
+                            currentInputConnection
+                                ?.getTextBeforeCursor(
+                                    KeyboardConstants.TextProcessingConstants.MAX_CURSOR_POSITION_CHARS,
+                                    0,
+                                )?.length
+                                ?: 0
                         currentInputConnection?.setSelection(cursorPos, cursorPos)
 
                         val singleChar = char.single()
@@ -1089,7 +1141,13 @@ class UrikInputMethodService :
                 try {
                     coordinateWordCompletion()
                     currentInputConnection?.commitText(char, 1)
-                    val cursorPos = currentInputConnection?.getTextBeforeCursor(KeyboardConstants.TextProcessingConstants.MAX_CURSOR_POSITION_CHARS, 0)?.length ?: 0
+                    val cursorPos =
+                        currentInputConnection
+                            ?.getTextBeforeCursor(
+                                KeyboardConstants.TextProcessingConstants.MAX_CURSOR_POSITION_CHARS,
+                                0,
+                            )?.length
+                            ?: 0
                     currentInputConnection?.setSelection(cursorPos, cursorPos)
 
                     val singleChar = char.single()
@@ -1107,7 +1165,13 @@ class UrikInputMethodService :
                 try {
                     coordinateWordCompletion()
                     currentInputConnection?.commitText(char, 1)
-                    val cursorPos = currentInputConnection?.getTextBeforeCursor(KeyboardConstants.TextProcessingConstants.MAX_CURSOR_POSITION_CHARS, 0)?.length ?: 0
+                    val cursorPos =
+                        currentInputConnection
+                            ?.getTextBeforeCursor(
+                                KeyboardConstants.TextProcessingConstants.MAX_CURSOR_POSITION_CHARS,
+                                0,
+                            )?.length
+                            ?: 0
                     currentInputConnection?.setSelection(cursorPos, cursorPos)
                 } finally {
                     currentInputConnection?.endBatchEdit()
@@ -1380,7 +1444,13 @@ class UrikInputMethodService :
 
                 else -> {
                     currentInputConnection?.commitText("\n", 1)
-                    val cursorPos = currentInputConnection?.getTextBeforeCursor(KeyboardConstants.TextProcessingConstants.MAX_CURSOR_POSITION_CHARS, 0)?.length ?: 0
+                    val cursorPos =
+                        currentInputConnection
+                            ?.getTextBeforeCursor(
+                                KeyboardConstants.TextProcessingConstants.MAX_CURSOR_POSITION_CHARS,
+                                0,
+                            )?.length
+                            ?: 0
                     currentInputConnection?.setSelection(cursorPos, cursorPos)
                 }
             }
@@ -1426,10 +1496,22 @@ class UrikInputMethodService :
             if (displayBuffer.isNotEmpty()) {
                 val cursorPosInWord =
                     if (composingRegionStart != -1) {
-                        val absoluteCursorPos = currentInputConnection?.getTextBeforeCursor(KeyboardConstants.TextProcessingConstants.MAX_CURSOR_POSITION_CHARS, 0)?.length ?: displayBuffer.length
+                        val absoluteCursorPos =
+                            currentInputConnection
+                                ?.getTextBeforeCursor(
+                                    KeyboardConstants.TextProcessingConstants.MAX_CURSOR_POSITION_CHARS,
+                                    0,
+                                )?.length
+                                ?: displayBuffer.length
                         CursorEditingUtils.calculateCursorPositionInWord(absoluteCursorPos, composingRegionStart, displayBuffer.length)
                     } else {
-                        val absoluteCursorPos = currentInputConnection?.getTextBeforeCursor(KeyboardConstants.TextProcessingConstants.MAX_CURSOR_POSITION_CHARS, 0)?.length ?: displayBuffer.length
+                        val absoluteCursorPos =
+                            currentInputConnection
+                                ?.getTextBeforeCursor(
+                                    KeyboardConstants.TextProcessingConstants.MAX_CURSOR_POSITION_CHARS,
+                                    0,
+                                )?.length
+                                ?: displayBuffer.length
                         val potentialStart = absoluteCursorPos - displayBuffer.length
                         if (potentialStart >= 0) {
                             composingRegionStart = potentialStart
@@ -1482,7 +1564,9 @@ class UrikInputMethodService :
                                 ic.beginBatchEdit()
                                 ic.setComposingText(displayBuffer, 1)
 
-                                val currentTextLength = ic.getTextBeforeCursor(KeyboardConstants.TextProcessingConstants.MAX_CURSOR_POSITION_CHARS, 0)?.length ?: displayBuffer.length
+                                val currentTextLength =
+                                    ic.getTextBeforeCursor(KeyboardConstants.TextProcessingConstants.MAX_CURSOR_POSITION_CHARS, 0)?.length
+                                        ?: displayBuffer.length
                                 composingRegionStart =
                                     CursorEditingUtils.recalculateComposingRegionStart(currentTextLength, displayBuffer.length)
 
@@ -1687,7 +1771,13 @@ class UrikInputMethodService :
             try {
                 if (isSecureField) {
                     currentInputConnection?.commitText(" ", 1)
-                    val cursorPos = currentInputConnection?.getTextBeforeCursor(KeyboardConstants.TextProcessingConstants.MAX_CURSOR_POSITION_CHARS, 0)?.length ?: 0
+                    val cursorPos =
+                        currentInputConnection
+                            ?.getTextBeforeCursor(
+                                KeyboardConstants.TextProcessingConstants.MAX_CURSOR_POSITION_CHARS,
+                                0,
+                            )?.length
+                            ?: 0
                     currentInputConnection?.setSelection(cursorPos, cursorPos)
                     return@launch
                 }
@@ -1716,7 +1806,13 @@ class UrikInputMethodService :
                         }
                         currentInputConnection?.deleteSurroundingText(1, 0)
                         currentInputConnection?.commitText(". ", 1)
-                        val cursorPos = currentInputConnection?.getTextBeforeCursor(KeyboardConstants.TextProcessingConstants.MAX_CURSOR_POSITION_CHARS, 0)?.length ?: 0
+                        val cursorPos =
+                            currentInputConnection
+                                ?.getTextBeforeCursor(
+                                    KeyboardConstants.TextProcessingConstants.MAX_CURSOR_POSITION_CHARS,
+                                    0,
+                                )?.length
+                                ?: 0
                         currentInputConnection?.setSelection(cursorPos, cursorPos)
 
                         val textBefore =
@@ -1745,7 +1841,13 @@ class UrikInputMethodService :
                             try {
                                 coordinateStateClear()
                                 currentInputConnection?.commitText(" ", 1)
-                                val cursorPos = currentInputConnection?.getTextBeforeCursor(KeyboardConstants.TextProcessingConstants.MAX_CURSOR_POSITION_CHARS, 0)?.length ?: 0
+                                val cursorPos =
+                                    currentInputConnection
+                                        ?.getTextBeforeCursor(
+                                            KeyboardConstants.TextProcessingConstants.MAX_CURSOR_POSITION_CHARS,
+                                            0,
+                                        )?.length
+                                        ?: 0
                                 currentInputConnection?.setSelection(cursorPos, cursorPos)
 
                                 val textBefore =
@@ -1781,7 +1883,13 @@ class UrikInputMethodService :
                 try {
                     coordinateWordCompletion()
                     currentInputConnection?.commitText(" ", 1)
-                    val cursorPos = currentInputConnection?.getTextBeforeCursor(KeyboardConstants.TextProcessingConstants.MAX_CURSOR_POSITION_CHARS, 0)?.length ?: 0
+                    val cursorPos =
+                        currentInputConnection
+                            ?.getTextBeforeCursor(
+                                KeyboardConstants.TextProcessingConstants.MAX_CURSOR_POSITION_CHARS,
+                                0,
+                            )?.length
+                            ?: 0
                     currentInputConnection?.setSelection(cursorPos, cursorPos)
 
                     val textBefore = currentInputConnection?.getTextBeforeCursor(50, 0)?.toString()
@@ -1794,7 +1902,13 @@ class UrikInputMethodService :
                 try {
                     coordinateWordCompletion()
                     currentInputConnection?.commitText(" ", 1)
-                    val cursorPos = currentInputConnection?.getTextBeforeCursor(KeyboardConstants.TextProcessingConstants.MAX_CURSOR_POSITION_CHARS, 0)?.length ?: 0
+                    val cursorPos =
+                        currentInputConnection
+                            ?.getTextBeforeCursor(
+                                KeyboardConstants.TextProcessingConstants.MAX_CURSOR_POSITION_CHARS,
+                                0,
+                            )?.length
+                            ?: 0
                     currentInputConnection?.setSelection(cursorPos, cursorPos)
 
                     val textBefore = currentInputConnection?.getTextBeforeCursor(50, 0)?.toString()
@@ -2047,7 +2161,8 @@ class UrikInputMethodService :
 
                 val ic = currentInputConnection
                 if (ic != null) {
-                    val cursorPos = ic.getTextBeforeCursor(KeyboardConstants.TextProcessingConstants.MAX_CURSOR_POSITION_CHARS, 0)?.length ?: 0
+                    val cursorPos =
+                        ic.getTextBeforeCursor(KeyboardConstants.TextProcessingConstants.MAX_CURSOR_POSITION_CHARS, 0)?.length ?: 0
                     val wordStart = cursorPos - wordStartOffset
                     val wordEnd = wordStart + word.length
 
