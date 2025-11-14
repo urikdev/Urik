@@ -156,7 +156,7 @@ data class KeyboardSettings(
         /**
          * Languages with full keyboard layout, dictionary, and localization support.
          */
-        val SUPPORTED_LANGUAGES = setOf("en", "es", "sv")
+        val SUPPORTED_LANGUAGES = setOf("de", "en", "es", "sv")
 
         /**
          * Returns localized display names for all supported languages.
