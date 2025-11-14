@@ -321,11 +321,12 @@ class UrikInputMethodService :
                             wordToLearn,
                             InputMethod.TYPED,
                         )
+
                         currentInputConnection?.finishComposingText()
-                        currentInputConnection?.commitText("", 1)
+                        currentInputConnection?.commitText(" ", 1)
                     } else {
                         coordinateWordCompletion()
-                        currentInputConnection?.commitText("", 1)
+                        currentInputConnection?.commitText(" ", 1)
                     }
 
                     coordinateStateClear()
@@ -336,7 +337,7 @@ class UrikInputMethodService :
                 currentInputConnection?.beginBatchEdit()
                 try {
                     coordinateWordCompletion()
-                    currentInputConnection?.commitText("", 1)
+                    currentInputConnection?.commitText(" ", 1)
                     coordinateStateClear()
                 } finally {
                     currentInputConnection?.endBatchEdit()

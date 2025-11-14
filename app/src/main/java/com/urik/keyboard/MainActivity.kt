@@ -28,6 +28,9 @@ class MainActivity : AppCompatActivity() {
     @Inject
     lateinit var tipsRepository: TipsRepository
 
+    @Inject
+    lateinit var spellCheckManager: com.urik.keyboard.service.SpellCheckManager
+
     private var tipsViewPager: ViewPager2? = null
     private var autoSwipeJob: Job? = null
 

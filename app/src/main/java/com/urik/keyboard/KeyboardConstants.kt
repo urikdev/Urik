@@ -50,7 +50,7 @@ object KeyboardConstants {
         const val APOSTROPHE_BOOST = 0.30
         const val CONTRACTION_MATCH_CONFIDENCE = 0.75
 
-        const val DICTIONARY_BATCH_SIZE = 500
+        const val DICTIONARY_BATCH_SIZE = 2000
         const val INITIALIZATION_TIMEOUT_MS = 5000L
 
         const val FREQUENCY_BOOST_MULTIPLIER = 0.02
