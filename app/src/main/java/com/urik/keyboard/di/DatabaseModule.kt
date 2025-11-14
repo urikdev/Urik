@@ -1,6 +1,7 @@
 package com.urik.keyboard.di
 
 import android.content.Context
+import android.database.sqlite.SQLiteDatabaseCorruptException
 import com.urik.keyboard.data.database.DatabaseSecurityManager
 import com.urik.keyboard.data.database.KeyboardDatabase
 import com.urik.keyboard.data.database.LearnedWordDao
@@ -19,6 +20,7 @@ import javax.inject.Singleton
  * - First launch: Creates encrypted database (if device has lock screen)
  * - Upgrade from unencrypted: Auto-migrates silently
  * - No lock screen: Falls back to unencrypted database
+ * - Corruption detection: Automatically deletes and recreates corrupt database
  *
  * Singleton providers ensure single database instance per app lifecycle.
  */
@@ -32,12 +34,13 @@ object DatabaseModule {
     ): DatabaseSecurityManager = DatabaseSecurityManager(context)
 
     /**
-     * Provides encrypted Room database with automatic migration.
+     * Provides encrypted Room database with automatic migration and corruption recovery.
      *
      * Behavior:
      * - Auto-migrates unencrypted → encrypted if device has lock screen
      * - Migration failures preserve original database (no data loss)
      * - Falls back to unencrypted if no device lock screen configured
+     * - Detects database corruption on initialization and recreates automatically
      *
      * @return Singleton KeyboardDatabase instance
      */
@@ -75,7 +78,22 @@ object DatabaseModule {
                     throw e
                 }
 
-            return KeyboardDatabase.getInstance(context, passphrase)
+            return try {
+                KeyboardDatabase.getInstance(context, passphrase)
+            } catch (e: SQLiteDatabaseCorruptException) {
+                ErrorLogger.logException(
+                    component = "DatabaseModule",
+                    severity = ErrorLogger.Severity.CRITICAL,
+                    exception = e,
+                    context = mapOf("phase" to "corruption_detected", "action" to "deleting_and_recreating"),
+                )
+
+                deleteDatabaseFiles(context)
+                KeyboardDatabase.resetInstance()
+
+                val freshPassphrase = securityManager.getDatabasePassphrase()
+                KeyboardDatabase.getInstance(context, freshPassphrase)
+            }
         } catch (e: Exception) {
             if (e.message?.contains("migration") != true && e.message?.contains("passphrase") != true) {
                 ErrorLogger.logException(
@@ -87,6 +105,17 @@ object DatabaseModule {
             }
             throw e
         }
+    }
+
+    private fun deleteDatabaseFiles(context: Context) {
+        val dbPath = context.applicationContext.getDatabasePath(KeyboardDatabase.DATABASE_NAME)
+        dbPath.delete()
+
+        dbPath.parentFile
+            ?.listFiles()
+            ?.filter {
+                it.name.startsWith(KeyboardDatabase.DATABASE_NAME)
+            }?.forEach { it.delete() }
     }
 
     @Provides
