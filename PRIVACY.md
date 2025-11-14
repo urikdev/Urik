@@ -1,7 +1,7 @@
 # Privacy Policy
 
 **Effective Date:** October 18, 2025  
-**Last Updated:** October 18, 2025
+**Last Updated:** November 13, 2025
 
 ## Introduction
 
