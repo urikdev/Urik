@@ -25,6 +25,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argThat
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
@@ -74,8 +75,8 @@ class WordLearningEngineTest {
         languageManager = mock()
         settingsRepository = mock()
         cacheMemoryManager = mock()
-        val realCache = ManagedCache<String, Boolean>("test", 100, null)
-        whenever(cacheMemoryManager.createCache<String, Boolean>(any(), any(), any())).thenReturn(realCache)
+        val realCache = ManagedCache<String, MutableSet<String>>("test", 100, null)
+        whenever(cacheMemoryManager.createCache<String, MutableSet<String>>(any(), any(), anyOrNull())).thenReturn(realCache)
 
         languageFlow = MutableStateFlow("en")
         whenever(languageManager.currentLanguage).thenReturn(languageFlow)

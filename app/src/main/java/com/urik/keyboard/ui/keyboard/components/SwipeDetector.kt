@@ -425,16 +425,24 @@ class SwipeDetector
                         val pathLengthRatio = entry.word.length.toFloat() / swipePath.size.toFloat()
                         val lengthPenalty =
                             when {
-                                pathLengthRatio < 0.06f -> 0.80f
-                                entry.word.length <= 2 && swipePath.size >= 15 -> 0.60f
-                                entry.word.length == 3 && swipePath.size >= 20 -> 0.85f
-                                entry.word.length == 4 && swipePath.size >= 50 -> 0.70f
-                                entry.word.length == 5 && swipePath.size >= 55 -> 0.80f
-                                else -> 1.0f
+                                pathLengthRatio < SwipeDetectionConstants.MIN_PATH_LENGTH_RATIO ->
+                                    SwipeDetectionConstants.PATH_LENGTH_PENALTY_STRONG
+                                entry.word.length <= 2 && swipePath.size >= 15 ->
+                                    SwipeDetectionConstants.PATH_LENGTH_PENALTY_VERY_STRONG
+                                entry.word.length == 3 && swipePath.size >= 20 ->
+                                    SwipeDetectionConstants.PATH_LENGTH_PENALTY_MODERATE
+                                entry.word.length == 4 && swipePath.size >= 50 ->
+                                    SwipeDetectionConstants.PATH_LENGTH_PENALTY_MEDIUM
+                                entry.word.length == 5 && swipePath.size >= 55 ->
+                                    SwipeDetectionConstants.PATH_LENGTH_PENALTY_STRONG
+                                else ->
+                                    SwipeDetectionConstants.PATH_LENGTH_NO_PENALTY
                             }
 
                         val adjustedSpatialScore = spatialScore * lengthPenalty
-                        val combinedScore = adjustedSpatialScore * 0.7f + entry.frequencyScore * 0.3f
+                        val combinedScore =
+                            adjustedSpatialScore * SwipeDetectionConstants.SPATIAL_SCORE_WEIGHT +
+                                entry.frequencyScore * SwipeDetectionConstants.FREQUENCY_SCORE_WEIGHT
 
                         val candidate = WordCandidate(entry.word, adjustedSpatialScore, entry.frequencyScore, combinedScore)
 

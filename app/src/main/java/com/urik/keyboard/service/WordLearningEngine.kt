@@ -41,17 +41,6 @@ data class LearningConfig(
 )
 
 /**
- * Normalized word variants.
- *
- * @property standard NFC normalization (preserves case)
- * @property userSpecific Language-aware normalization (lowercase for Latin, etc.)
- */
-private data class NormalizedWord(
-    val standard: String,
-    val userSpecific: String,
-)
-
-/**
  * Learning statistics for analytics.
  */
 data class LearningStats(
@@ -90,7 +79,6 @@ class WordLearningEngine
             cacheMemoryManager.createCache(
                 name = "learned_words_cache",
                 maxSize = CacheConstants.LEARNED_WORDS_CACHE_SIZE,
-                onEvict = { _, _ -> },
             )
 
         private val cacheLock = Any()
@@ -135,7 +123,7 @@ class WordLearningEngine
                 }
             }
 
-        private fun normalizeWord(word: String): NormalizedWord {
+        private fun normalizeWord(word: String): String {
             val standardNormalized = normalizer.normalize(word.trim())
             val currentLanguage = languageManager.currentLanguage.value
             val locale =
@@ -145,11 +133,9 @@ class WordLearningEngine
                 } catch (_: Exception) {
                     com.ibm.icu.util.ULocale.ENGLISH
                 }
-            val userNormalized =
-                com.ibm.icu.lang.UCharacter
-                    .toLowerCase(locale, standardNormalized)
-                    .trim()
-            return NormalizedWord(standardNormalized, userNormalized)
+            return com.ibm.icu.lang.UCharacter
+                .toLowerCase(locale, standardNormalized)
+                .trim()
         }
 
         private fun isValidWordForLearning(word: String): Boolean {
@@ -212,8 +198,8 @@ class WordLearningEngine
 
                     val learnedWord =
                         LearnedWord.create(
-                            word = normalized.userSpecific,
-                            wordNormalized = normalized.userSpecific,
+                            word = normalized,
+                            wordNormalized = normalized,
                             languageTag = currentLanguage,
                             frequency = 1,
                             source = wordSource,
@@ -226,7 +212,7 @@ class WordLearningEngine
                             val cacheSet =
                                 learnedWordsCache.getIfPresent(currentLanguage)
                                     ?: ConcurrentHashMap.newKeySet()
-                            cacheSet.add(normalized.userSpecific)
+                            cacheSet.add(normalized)
                             learnedWordsCache.put(currentLanguage, cacheSet)
                         }
                     }
@@ -276,14 +262,14 @@ class WordLearningEngine
                     val cachedWords = learnedWordsCache.getIfPresent(currentLanguage)
 
                     if (cachedWords != null) {
-                        return@withContext cachedWords.contains(normalized.userSpecific)
+                        return@withContext cachedWords.contains(normalized)
                     }
 
                     val learnedWord =
                         withContext(ioDispatcher) {
                             learnedWordDao.findExactWord(
                                 languageTag = currentLanguage,
-                                normalizedWord = normalized.userSpecific,
+                                normalizedWord = normalized,
                             )
                         }
 
@@ -323,7 +309,7 @@ class WordLearningEngine
                     }
 
                     val normalized = normalizeWord(cleanWord)
-                    if (normalized.userSpecific.length > WordLearningConstants.MAX_NORMALIZED_WORD_LENGTH) {
+                    if (normalized.length > WordLearningConstants.MAX_NORMALIZED_WORD_LENGTH) {
                         return@withContext emptyList()
                     }
 
@@ -334,13 +320,13 @@ class WordLearningEngine
                     val results = mutableMapOf<String, Int>()
                     val strippedInput =
                         com.urik.keyboard.utils.TextMatchingUtils
-                            .stripWordPunctuation(normalized.userSpecific)
+                            .stripWordPunctuation(normalized)
 
                     try {
                         val exactMatch =
                             learnedWordDao.findExactWord(
                                 languageTag = currentLanguage,
-                                normalizedWord = normalized.userSpecific,
+                                normalizedWord = normalized,
                             )
                         if (exactMatch != null) {
                             results[exactMatch.word] = exactMatch.frequency
@@ -348,12 +334,12 @@ class WordLearningEngine
                     } catch (_: Exception) {
                     }
 
-                    if (results.size < maxResults && normalized.userSpecific.length >= WordLearningConstants.MIN_PREFIX_MATCH_LENGTH) {
+                    if (results.size < maxResults && normalized.length >= WordLearningConstants.MIN_PREFIX_MATCH_LENGTH) {
                         try {
                             val prefixMatches =
                                 learnedWordDao.findWordsWithPrefix(
                                     languageTag = currentLanguage,
-                                    prefix = normalized.userSpecific,
+                                    prefix = normalized,
                                     limit = maxResults - results.size,
                                 )
                             prefixMatches.forEach { learnedWord ->
@@ -397,7 +383,7 @@ class WordLearningEngine
                         }
                     }
 
-                    if (results.size < maxResults && normalized.userSpecific.length >= WordLearningConstants.MIN_FUZZY_SEARCH_LENGTH) {
+                    if (results.size < maxResults && normalized.length >= WordLearningConstants.MIN_FUZZY_SEARCH_LENGTH) {
                         try {
                             val candidates =
                                 learnedWordDao.getMostFrequentWords(
@@ -407,18 +393,18 @@ class WordLearningEngine
 
                             val viableCandidates =
                                 candidates.filter { candidate ->
-                                    val lengthDiff = kotlin.math.abs(candidate.wordNormalized.length - normalized.userSpecific.length)
+                                    val lengthDiff = kotlin.math.abs(candidate.wordNormalized.length - normalized.length)
                                     lengthDiff <= WordLearningConstants.MAX_LENGTH_DIFFERENCE_FUZZY &&
                                         candidate.wordNormalized.length <= WordLearningConstants.MAX_SIMILAR_WORD_LENGTH
                                 }
 
                             viableCandidates
                                 .map { candidate ->
-                                    candidate to calculateEditDistance(candidate.wordNormalized, normalized.userSpecific)
+                                    candidate to calculateEditDistance(candidate.wordNormalized, normalized)
                                 }.filter { (candidate, distance) ->
                                     distance in WordLearningConstants.MIN_EDIT_DISTANCE..WordLearningConstants.MAX_EDIT_DISTANCE_FUZZY &&
                                         !results.containsKey(candidate.word) &&
-                                        candidate.word != normalized.userSpecific
+                                        candidate.word != normalized
                                 }.sortedBy { it.second }
                                 .take(maxResults - results.size)
                                 .forEach { (candidate, _) ->
@@ -469,11 +455,11 @@ class WordLearningEngine
                         val removed =
                             learnedWordDao.removeWordComplete(
                                 languageTag = currentLanguage,
-                                normalizedWord = normalized.userSpecific,
+                                normalizedWord = normalized,
                             )
 
                         if (removed > 0) {
-                            learnedWordsCache.getIfPresent(currentLanguage)?.remove(normalized.userSpecific)
+                            learnedWordsCache.getIfPresent(currentLanguage)?.remove(normalized)
 
                             consecutiveErrors.set(0)
 
@@ -583,8 +569,8 @@ class WordLearningEngine
 
                         val normalized = normalizeWord(cleanWord)
 
-                        validWords.add(normalized.userSpecific)
-                        originalToNormalized[word] = normalized.userSpecific
+                        validWords.add(normalized)
+                        originalToNormalized[word] = normalized
                     }
 
                     val existingWords =

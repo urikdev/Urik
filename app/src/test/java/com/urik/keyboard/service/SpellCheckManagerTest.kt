@@ -20,6 +20,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
@@ -94,7 +95,7 @@ class SpellCheckManagerTest {
             cacheMemoryManager.createCache<String, List<SpellingSuggestion>>(
                 eq("spell_suggestions"),
                 eq(500),
-                any(),
+                anyOrNull(),
             ),
         ).thenReturn(suggestionCache)
 
@@ -102,7 +103,7 @@ class SpellCheckManagerTest {
             cacheMemoryManager.createCache<String, Boolean>(
                 eq("dictionary_cache"),
                 eq(1000),
-                any(),
+                anyOrNull(),
             ),
         ).thenReturn(dictionaryCache)
 
