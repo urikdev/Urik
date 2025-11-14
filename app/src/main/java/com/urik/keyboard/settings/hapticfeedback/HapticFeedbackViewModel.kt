@@ -1,4 +1,4 @@
-package com.urik.keyboard.settings.soundfeedback
+package com.urik.keyboard.settings.hapticfeedback
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -16,11 +16,8 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-/**
- * Manages sound and feedback settings state and updates.
- */
 @HiltViewModel
-class SoundFeedbackViewModel
+class HapticFeedbackViewModel
     @Inject
     constructor(
         private val settingsRepository: SettingsRepository,
@@ -28,17 +25,17 @@ class SoundFeedbackViewModel
         private val _events = MutableSharedFlow<SettingsEvent>()
         val events: SharedFlow<SettingsEvent> = _events.asSharedFlow()
 
-        val uiState: StateFlow<SoundFeedbackUiState> =
+        val uiState: StateFlow<HapticFeedbackUiState> =
             settingsRepository.settings
                 .map { settings ->
-                    SoundFeedbackUiState(
+                    HapticFeedbackUiState(
                         hapticFeedback = settings.hapticFeedback,
                         vibrationStrength = settings.vibrationStrength,
                     )
                 }.stateIn(
                     scope = viewModelScope,
                     started = SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS),
-                    initialValue = SoundFeedbackUiState(),
+                    initialValue = HapticFeedbackUiState(),
                 )
 
         fun updateHapticFeedback(enabled: Boolean) {
@@ -62,10 +59,7 @@ class SoundFeedbackViewModel
         }
     }
 
-/**
- * UI state for sound and feedback settings.
- */
-data class SoundFeedbackUiState(
+data class HapticFeedbackUiState(
     val hapticFeedback: Boolean = true,
     val vibrationStrength: VibrationStrength = VibrationStrength.MEDIUM,
 )

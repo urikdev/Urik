@@ -335,7 +335,7 @@ class SwipeDetector
         }
 
         private suspend fun performSpatialScoringAsync(swipePath: List<SwipePoint>): List<WordCandidate> =
-            withContext(Dispatchers.Default) {
+            withContext(Dispatchers.IO) {
                 try {
                     if (swipePath.isEmpty()) return@withContext emptyList()
 

@@ -127,6 +127,14 @@ abstract class KeyboardDatabase : RoomDatabase() {
             }
         }
 
+        internal fun resetInstance() {
+            synchronized(this) {
+                INSTANCE?.close()
+                INSTANCE = null
+                instanceEncrypted = null
+            }
+        }
+
         private class DatabaseCallback : Callback() {
             override fun onCreate(db: SupportSQLiteDatabase) {
                 super.onCreate(db)

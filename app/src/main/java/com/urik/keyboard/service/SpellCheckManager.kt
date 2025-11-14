@@ -24,10 +24,12 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.coroutines.yield
 import java.io.IOException
 import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.TimeoutException
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.math.ln
@@ -84,6 +86,9 @@ class SpellCheckManager
         private var commonWordsCache = emptyList<Pair<String, Int>>()
 
         @Volatile
+        private var commonWordsCacheStripped = emptyList<Triple<String, Int, String>>()
+
+        @Volatile
         private var commonWordsCacheLanguage = ""
 
         @Volatile
@@ -111,7 +116,18 @@ class SpellCheckManager
                 }
         }
 
-        private suspend fun ensureInitialized(): Boolean = initializationComplete.await()
+        private suspend fun ensureInitialized(): Boolean =
+            withTimeoutOrNull(SpellCheckConstants.INITIALIZATION_TIMEOUT_MS) {
+                initializationComplete.await()
+            } ?: run {
+                ErrorLogger.logException(
+                    component = "SpellCheckManager",
+                    severity = ErrorLogger.Severity.CRITICAL,
+                    exception = TimeoutException("Initialization timeout after ${SpellCheckConstants.INITIALIZATION_TIMEOUT_MS}ms"),
+                    context = mapOf("phase" to "ensureInitialized"),
+                )
+                false
+            }
 
         private suspend fun initializeSymSpell() {
             try {
@@ -511,17 +527,33 @@ class SpellCheckManager
                 try {
                     if (normalizedWord.length >= SpellCheckConstants.MIN_COMPLETION_LENGTH) {
                         val completions = getCompletionsForPrefix(normalizedWord, languageCode)
+                        val strippedInput =
+                            com.urik.keyboard.utils.TextMatchingUtils
+                                .stripWordPunctuation(normalizedWord)
+
                         completions
                             .filter { (word, _) -> !seenWords.contains(word.lowercase()) && !isWordBlacklisted(word) }
                             .take(SpellCheckConstants.MAX_PREFIX_COMPLETIONS)
                             .forEachIndexed { index, (word, frequency) ->
-                                val lengthRatio = normalizedWord.length.toDouble() / word.length.toDouble()
-                                val frequencyScore = ln(frequency.toDouble() + 1.0) / SpellCheckConstants.FREQUENCY_SCORE_DIVISOR
+                                val strippedWord =
+                                    com.urik.keyboard.utils.TextMatchingUtils
+                                        .stripWordPunctuation(word)
+                                val isContractionMatch = strippedInput.equals(strippedWord, ignoreCase = true)
+
                                 val confidence =
-                                    (
-                                        SpellCheckConstants.COMPLETION_LENGTH_WEIGHT * lengthRatio +
-                                            SpellCheckConstants.COMPLETION_FREQUENCY_WEIGHT * frequencyScore
-                                    ).coerceIn(SpellCheckConstants.COMPLETION_CONFIDENCE_MIN, SpellCheckConstants.COMPLETION_CONFIDENCE_MAX)
+                                    if (isContractionMatch) {
+                                        SpellCheckConstants.CONTRACTION_MATCH_CONFIDENCE
+                                    } else {
+                                        val lengthRatio = normalizedWord.length.toDouble() / word.length.toDouble()
+                                        val frequencyScore = ln(frequency.toDouble() + 1.0) / SpellCheckConstants.FREQUENCY_SCORE_DIVISOR
+                                        (
+                                            SpellCheckConstants.COMPLETION_LENGTH_WEIGHT * lengthRatio +
+                                                SpellCheckConstants.COMPLETION_FREQUENCY_WEIGHT * frequencyScore
+                                        ).coerceIn(
+                                            SpellCheckConstants.COMPLETION_CONFIDENCE_MIN,
+                                            SpellCheckConstants.COMPLETION_CONFIDENCE_MAX,
+                                        )
+                                    }
 
                                 allSuggestions.add(
                                     SpellingSuggestion(
@@ -541,6 +573,9 @@ class SpellCheckManager
                     val spellChecker = getSpellCheckerForLanguage(languageCode)
                     if (spellChecker != null) {
                         val symSpellResults = spellChecker.lookup(normalizedWord, Verbosity.All, SpellCheckConstants.MAX_EDIT_DISTANCE)
+                        val strippedInput =
+                            com.urik.keyboard.utils.TextMatchingUtils
+                                .stripWordPunctuation(normalizedWord)
 
                         val scoredResults =
                             symSpellResults
@@ -548,22 +583,30 @@ class SpellCheckManager
                                     !seenWords.contains(result.term.lowercase()) && !isWordBlacklisted(result.term)
                                 }.map { result ->
                                     val editDistance = result.distance
-                                    val maxDistance = SpellCheckConstants.MAX_EDIT_DISTANCE
-                                    val distanceScore = (maxDistance - editDistance) / maxDistance
-                                    var confidence = SpellCheckConstants.SYMSPELL_DISTANCE_WEIGHT * distanceScore
+                                    val strippedResult =
+                                        com.urik.keyboard.utils.TextMatchingUtils
+                                            .stripWordPunctuation(result.term)
+                                    val isContractionMatch = strippedInput.equals(strippedResult, ignoreCase = true)
 
-                                    if (result.term.contains('\'') && editDistance == 1.0) {
-                                        val withoutApostrophe = result.term.replace("'", "").replace("'", "")
-                                        if (withoutApostrophe.equals(normalizedWord, ignoreCase = true)) {
-                                            confidence += SpellCheckConstants.APOSTROPHE_BOOST
+                                    val confidence =
+                                        if (isContractionMatch) {
+                                            SpellCheckConstants.CONTRACTION_MATCH_CONFIDENCE
+                                        } else {
+                                            val maxDistance = SpellCheckConstants.MAX_EDIT_DISTANCE
+                                            val distanceScore = (maxDistance - editDistance) / maxDistance
+                                            var baseConfidence = SpellCheckConstants.SYMSPELL_DISTANCE_WEIGHT * distanceScore
+
+                                            if (strippedResult != result.term && editDistance == 1.0) {
+                                                baseConfidence += SpellCheckConstants.APOSTROPHE_BOOST
+                                            }
+
+                                            baseConfidence.coerceIn(
+                                                SpellCheckConstants.SYMSPELL_CONFIDENCE_MIN,
+                                                SpellCheckConstants.SYMSPELL_CONFIDENCE_MAX,
+                                            )
                                         }
-                                    }
 
-                                    result to
-                                        confidence.coerceIn(
-                                            SpellCheckConstants.SYMSPELL_CONFIDENCE_MIN,
-                                            SpellCheckConstants.SYMSPELL_CONFIDENCE_MAX,
-                                        )
+                                    result to confidence
                                 }.sortedByDescending { it.second }
                                 .take(SpellCheckConstants.MAX_SUGGESTIONS)
 
@@ -592,20 +635,24 @@ class SpellCheckManager
             prefix: String,
             languageCode: String,
         ): List<Pair<String, Int>> {
-            if (languageCode != commonWordsCacheLanguage || commonWordsCache.isEmpty()) {
+            if (languageCode != commonWordsCacheLanguage || commonWordsCacheStripped.isEmpty()) {
                 try {
-                    val words = getCommonWords()
-                    commonWordsCache = words
-                    commonWordsCacheLanguage = languageCode
+                    getCommonWords()
                 } catch (_: Exception) {
                     return emptyList()
                 }
             }
 
-            return commonWordsCache
-                .filter { (word, _) ->
-                    word.length > prefix.length && word.startsWith(prefix, ignoreCase = true)
-                }.take(SpellCheckConstants.MAX_PREFIX_COMPLETION_RESULTS)
+            val strippedPrefix =
+                com.urik.keyboard.utils.TextMatchingUtils
+                    .stripWordPunctuation(prefix)
+
+            return commonWordsCacheStripped
+                .filter { (_, _, strippedWord) ->
+                    strippedWord.length > strippedPrefix.length &&
+                        strippedWord.startsWith(strippedPrefix, ignoreCase = true)
+                }.map { (word, freq, _) -> word to freq }
+                .take(SpellCheckConstants.MAX_PREFIX_COMPLETION_RESULTS)
         }
 
         private fun isValidInput(text: String): Boolean {
@@ -791,8 +838,8 @@ class SpellCheckManager
                                             word.all {
                                                 Character.isLetter(it.code) ||
                                                     Character.getType(it.code) == Character.OTHER_LETTER.toInt() ||
-                                                    it == '\'' ||
-                                                    it == '\u2019'
+                                                    com.urik.keyboard.utils.TextMatchingUtils
+                                                        .isValidWordPunctuation(it)
                                             } &&
                                             !isWordBlacklisted(word)
                                         ) {
@@ -805,8 +852,8 @@ class SpellCheckManager
                                             word.all {
                                                 Character.isLetter(it.code) ||
                                                     Character.getType(it.code) == Character.OTHER_LETTER.toInt() ||
-                                                    it == '\'' ||
-                                                    it == '\u2019'
+                                                    com.urik.keyboard.utils.TextMatchingUtils
+                                                        .isValidWordPunctuation(it)
                                             } &&
                                             !isWordBlacklisted(word)
                                         ) {
@@ -822,7 +869,18 @@ class SpellCheckManager
 
                     val sortedWords = wordFrequencies.sortedByDescending { it.second }
 
+                    val sortedWordsWithStripped =
+                        sortedWords.map { (word, freq) ->
+                            Triple(
+                                word,
+                                freq,
+                                com.urik.keyboard.utils.TextMatchingUtils
+                                    .stripWordPunctuation(word),
+                            )
+                        }
+
                     commonWordsCache = sortedWords
+                    commonWordsCacheStripped = sortedWordsWithStripped
                     commonWordsCacheLanguage = currentLang
 
                     return@withContext sortedWords
