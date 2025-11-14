@@ -51,6 +51,7 @@ object KeyboardConstants {
         const val CONTRACTION_MATCH_CONFIDENCE = 0.75
 
         const val DICTIONARY_BATCH_SIZE = 500
+        const val INITIALIZATION_TIMEOUT_MS = 5000L
 
         const val FREQUENCY_BOOST_MULTIPLIER = 0.02
         const val LEARNED_WORD_BASE_CONFIDENCE = 0.95
