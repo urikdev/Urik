@@ -148,7 +148,7 @@ The keyboard automatically detects password fields, credit card inputs, email ad
 - **Retention:** Indefinite, until you manually delete them or uninstall the app
 - **Deletion Options:**
     - Clear all learned words: Settings → Privacy & Data → Clear Learned Words
-    - Clear all data: Settings → Privacy & Data → Clear All Data
+    - Reset settings to defaults: Settings → Privacy & Data → Reset to Defaults
     - Uninstall app: Automatically deletes all data
 
 ### Settings
@@ -156,7 +156,7 @@ The keyboard automatically detects password fields, credit card inputs, email ad
 
 ### Error Logs
 - **Retention:** Maximum 100 entries or 500KB, automatically rotated
-- **Deletion:** Settings → Privacy & Data → Clear Error Logs
+- **Export Only:** Settings → Privacy & Data → Export Error Log
 
 ### Temporary Caches
 - **Retention:** Maximum 5 minutes, then automatically cleared
