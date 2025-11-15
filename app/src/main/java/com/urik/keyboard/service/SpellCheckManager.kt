@@ -71,14 +71,12 @@ class SpellCheckManager
             cacheMemoryManager.createCache(
                 name = "spell_suggestions",
                 maxSize = CacheConstants.SUGGESTION_CACHE_SIZE,
-                onEvict = { _, _ -> },
             )
 
         private val dictionaryCache: ManagedCache<String, Boolean> =
             cacheMemoryManager.createCache(
                 name = "dictionary_cache",
                 maxSize = CacheConstants.DICTIONARY_CACHE_SIZE,
-                onEvict = { _, _ -> },
             )
 
         private val blacklistedWords = mutableSetOf<String>()
