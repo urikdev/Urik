@@ -198,32 +198,6 @@
     <string name="remove_cancel">Cancel</string>
     <string name="remove_confirm">Remove</string>
 
-    <string name="animation_sentence">Urik. The privacy first, accessible, multilingual keyboard for you. Take back your data.</string>
-
-    <string name="animation_typo_1_correct">privacy</string>
-    <string name="animation_typo_1_wrong">prvacy</string>
-    <string-array name="animation_typo_1_suggestions">
-        <item>privacy</item>
-        <item>piracy</item>
-        <item>primacy</item>
-    </string-array>
-
-    <string name="animation_typo_2_correct">accessible</string>
-    <string name="animation_typo_2_wrong">acccessible</string>
-    <string-array name="animation_typo_2_suggestions">
-        <item>accessible</item>
-        <item>inaccessible</item>
-        <item>accessibility</item>
-    </string-array>
-
-    <string name="animation_typo_3_correct">keyboard</string>
-    <string name="animation_typo_3_wrong">keybord</string>
-    <string-array name="animation_typo_3_suggestions">
-        <item>keyboard</item>
-        <item>keyboards</item>
-        <item>keyboardist</item>
-    </string-array>
-
     <!-- Tips -->
     <string name="tip_1_title">Learning Words</string>
     <string name="tip_1_description">Press space after a highlighted typo to add the word to your dictionary.</string>

@@ -197,32 +197,6 @@
     <string name="remove_cancel">Abbrechen</string>
     <string name="remove_confirm">Entfernen</string>
 
-    <string name="animation_sentence">Urik. Das zugängliche, multilinguale privacy-first Keyboard für dich. Hol dir deine Daten zurück.</string>
-
-    <string name="animation_typo_1_correct">privacy</string>
-    <string name="animation_typo_1_wrong">prvacy</string>
-    <string-array name="animation_typo_1_suggestions">
-        <item>privacy</item>
-        <item>piracy</item>
-        <item>primacy</item>
-    </string-array>
-
-    <string name="animation_typo_2_correct">accessible</string>
-    <string name="animation_typo_2_wrong">acccessible</string>
-    <string-array name="animation_typo_2_suggestions">
-        <item>accessible</item>
-        <item>inaccessible</item>
-        <item>accessibility</item>
-    </string-array>
-
-    <string name="animation_typo_3_correct">keyboard</string>
-    <string name="animation_typo_3_wrong">keybord</string>
-    <string-array name="animation_typo_3_suggestions">
-        <item>keyboard</item>
-        <item>keyboards</item>
-        <item>keyboardist</item>
-    </string-array>
-
     <!-- Tips -->
     <string name="tip_1_title">Wörter erlernen</string>
     <string name="tip_1_description">Drück die Leertaste nach einem Schreibfehler um das Wort dem Wörterbuch hinzuzufügen.</string>

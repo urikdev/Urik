@@ -197,33 +197,6 @@
     <string name="remove_cancel">Cancelar</string>
     <string name="remove_confirm">Eliminar</string>
 
-    <string name="animation_sentence">Urik. Un teclado multilingüe, accesible y que prioriza la privacidad. Recupera tus datos.</string>
-
-    <string name="animation_typo_1_correct">privacidad</string>
-    <string name="animation_typo_1_wrong">privacidad</string>
-    <string-array name="animation_typo_1_suggestions">
-        <item>privacidad</item>
-        <item>piratería</item>
-        <item>primacía</item>
-    </string-array>
-
-
-    <string name="animation_typo_2_correct">accesible</string>
-    <string name="animation_typo_2_wrong">accesible</string>
-    <string-array name="animation_typo_2_suggestions">
-        <item>accesible</item>
-        <item>inaccesible</item>
-        <item>accesibilidad</item>
-    </string-array>
-
-    <string name="animation_typo_3_correct">teclado</string>
-    <string name="animation_typo_3_wrong">teclado</string>
-    <string-array name="animation_typo_3_suggestions">
-        <item>teclado</item>
-        <item>teclados</item>
-        <item>teclista</item>
-    </string-array>
-
     <!-- Tips -->
     <string name="tip_1_title">Aprendiendo palabras</string>
     <string name="tip_1_description">Pulsa la barra espaciadora después de resaltar una errata para añadir la palabra a tu diccionario.</string>
