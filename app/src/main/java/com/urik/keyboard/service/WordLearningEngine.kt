@@ -13,6 +13,7 @@ import com.urik.keyboard.data.database.WordSource
 import com.urik.keyboard.settings.KeyboardSettings
 import com.urik.keyboard.settings.SettingsRepository
 import com.urik.keyboard.utils.CacheMemoryManager
+import com.urik.keyboard.utils.ErrorLogger
 import com.urik.keyboard.utils.ManagedCache
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -115,7 +116,13 @@ class WordLearningEngine
                     }
 
                     Result.success(Unit)
-                } catch (_: SQLiteException) {
+                } catch (e: SQLiteException) {
+                    ErrorLogger.logException(
+                        component = "WordLearningEngine",
+                        severity = ErrorLogger.Severity.HIGH,
+                        exception = e,
+                        context = mapOf("operation" to "initializeLearnedWordsCache", "language" to languageTag),
+                    )
                     handleDatabaseError()
                     Result.failure(Exception("Database error initializing cache"))
                 } catch (e: Exception) {
@@ -220,10 +227,22 @@ class WordLearningEngine
                     onSuccessfulOperation()
 
                     Result.success(learnedWord)
-                } catch (_: SQLiteDatabaseCorruptException) {
+                } catch (e: SQLiteDatabaseCorruptException) {
+                    ErrorLogger.logException(
+                        component = "WordLearningEngine",
+                        severity = ErrorLogger.Severity.CRITICAL,
+                        exception = e,
+                        context = mapOf("operation" to "learnWord", "word_length" to word.length.toString()),
+                    )
                     handleDatabaseError()
                     Result.success(null)
-                } catch (_: SQLiteFullException) {
+                } catch (e: SQLiteFullException) {
+                    ErrorLogger.logException(
+                        component = "WordLearningEngine",
+                        severity = ErrorLogger.Severity.HIGH,
+                        exception = e,
+                        context = mapOf("operation" to "learnWord", "action" to "attempting_cleanup"),
+                    )
                     handleDatabaseError()
                     tryCleanupOldWords()
                     Result.success(null)
@@ -468,10 +487,22 @@ class WordLearningEngine
                             Result.success(false)
                         }
                     }
-                } catch (_: SQLiteDatabaseCorruptException) {
+                } catch (e: SQLiteDatabaseCorruptException) {
+                    ErrorLogger.logException(
+                        component = "WordLearningEngine",
+                        severity = ErrorLogger.Severity.CRITICAL,
+                        exception = e,
+                        context = mapOf("operation" to "removeWord"),
+                    )
                     handleDatabaseError()
                     Result.success(false)
-                } catch (_: SQLiteFullException) {
+                } catch (e: SQLiteFullException) {
+                    ErrorLogger.logException(
+                        component = "WordLearningEngine",
+                        severity = ErrorLogger.Severity.HIGH,
+                        exception = e,
+                        context = mapOf("operation" to "removeWord"),
+                    )
                     handleDatabaseError()
                     Result.success(false)
                 } catch (_: SQLiteDatabaseLockedException) {

@@ -50,6 +50,7 @@ object DatabaseModule {
         @ApplicationContext context: Context,
         securityManager: DatabaseSecurityManager,
     ): KeyboardDatabase {
+        var passphrase: ByteArray? = null
         try {
             if (securityManager.shouldMigrateToEncrypted(context)) {
                 try {
@@ -65,7 +66,7 @@ object DatabaseModule {
                 }
             }
 
-            val passphrase =
+            passphrase =
                 try {
                     securityManager.getDatabasePassphrase()
                 } catch (e: Exception) {
@@ -81,6 +82,9 @@ object DatabaseModule {
             return try {
                 KeyboardDatabase.getInstance(context, passphrase)
             } catch (e: SQLiteDatabaseCorruptException) {
+                passphrase?.fill(0)
+                passphrase = null
+
                 ErrorLogger.logException(
                     component = "DatabaseModule",
                     severity = ErrorLogger.Severity.CRITICAL,
@@ -92,9 +96,16 @@ object DatabaseModule {
                 KeyboardDatabase.resetInstance()
 
                 val freshPassphrase = securityManager.getDatabasePassphrase()
-                KeyboardDatabase.getInstance(context, freshPassphrase)
+                try {
+                    KeyboardDatabase.getInstance(context, freshPassphrase)
+                } catch (e: Exception) {
+                    freshPassphrase?.fill(0)
+                    throw e
+                }
             }
         } catch (e: Exception) {
+            passphrase?.fill(0)
+
             if (e.message?.contains("migration") != true && e.message?.contains("passphrase") != true) {
                 ErrorLogger.logException(
                     component = "DatabaseModule",
