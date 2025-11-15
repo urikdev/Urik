@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import android.util.Base64
+import com.urik.keyboard.utils.ErrorLogger
 import java.security.KeyStore
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
@@ -69,7 +70,13 @@ class DatabaseSecurityManager(
             }
 
             retrieveStoredPassphrase()
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            ErrorLogger.logException(
+                component = "DatabaseSecurityManager",
+                severity = ErrorLogger.Severity.CRITICAL,
+                exception = e,
+                context = mapOf("operation" to "getDatabasePassphrase"),
+            )
             null
         }
     }
@@ -89,7 +96,7 @@ class DatabaseSecurityManager(
         prefs.edit().apply {
             putString(passphraseKey, Base64.encodeToString(encryptedPassphrase, Base64.NO_WRAP))
             putString(ivKey, Base64.encodeToString(iv, Base64.NO_WRAP))
-            apply()
+            commit()
         }
 
         return passphrase
@@ -115,7 +122,13 @@ class DatabaseSecurityManager(
             cipher.init(Cipher.DECRYPT_MODE, secretKey, GCMParameterSpec(128, iv))
 
             cipher.doFinal(encryptedPassphrase)
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            ErrorLogger.logException(
+                component = "DatabaseSecurityManager",
+                severity = ErrorLogger.Severity.CRITICAL,
+                exception = e,
+                context = mapOf("operation" to "retrieveStoredPassphrase"),
+            )
             null
         }
     }
@@ -196,7 +209,13 @@ class DatabaseSecurityManager(
             tempDbPath.renameTo(unencryptedDbPath)
 
             true
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            ErrorLogger.logException(
+                component = "DatabaseSecurityManager",
+                severity = ErrorLogger.Severity.CRITICAL,
+                exception = e,
+                context = mapOf("operation" to "migrateToEncryptedDatabase"),
+            )
             tempDbPath.delete()
             false
         }
