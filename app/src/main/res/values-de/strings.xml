@@ -175,7 +175,6 @@
     <!-- Action button labels -->
     <string name="action_enter">Enter</string>
     <string name="action_search">Suchen</string>
-    <string name="action_send">Senden</string>
     <string name="action_done">Fertig</string>
     <string name="action_go">Los</string>
     <string name="action_next">Weiter</string>
@@ -184,7 +183,6 @@
     <!-- Action button accessibility descriptions -->
     <string name="action_enter_description">Enter drücken</string>
     <string name="action_search_description">Suchen</string>
-    <string name="action_send_description">Nachricht senden</string>
     <string name="action_done_description">Fertig</string>
     <string name="action_go_description">Gehe zu</string>
     <string name="action_next_description">Gehe zum nächsten Feld</string>
@@ -196,32 +194,6 @@
     <string name="remove_suggestion">Entferne %1$s aus den Verbesserungen?</string>
     <string name="remove_cancel">Abbrechen</string>
     <string name="remove_confirm">Entfernen</string>
-
-    <string name="animation_sentence">Urik. Das zugängliche, multilinguale privacy-first Keyboard für dich. Hol dir deine Daten zurück.</string>
-
-    <string name="animation_typo_1_correct">privacy</string>
-    <string name="animation_typo_1_wrong">prvacy</string>
-    <string-array name="animation_typo_1_suggestions">
-        <item>privacy</item>
-        <item>piracy</item>
-        <item>primacy</item>
-    </string-array>
-
-    <string name="animation_typo_2_correct">accessible</string>
-    <string name="animation_typo_2_wrong">acccessible</string>
-    <string-array name="animation_typo_2_suggestions">
-        <item>accessible</item>
-        <item>inaccessible</item>
-        <item>accessibility</item>
-    </string-array>
-
-    <string name="animation_typo_3_correct">keyboard</string>
-    <string name="animation_typo_3_wrong">keybord</string>
-    <string-array name="animation_typo_3_suggestions">
-        <item>keyboard</item>
-        <item>keyboards</item>
-        <item>keyboardist</item>
-    </string-array>
 
     <!-- Tips -->
     <string name="tip_1_title">Wörter erlernen</string>

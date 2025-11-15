@@ -2,6 +2,8 @@ package com.urik.keyboard.ui.keyboard
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ibm.icu.lang.UCharacter
+import com.ibm.icu.lang.UProperty
 import com.ibm.icu.util.ULocale
 import com.urik.keyboard.data.KeyboardRepository
 import com.urik.keyboard.model.KeyboardEvent
@@ -45,7 +47,7 @@ class KeyboardViewModel
         private var loadJob: Job? = null
 
         /**
-         * Updates action key type (enter/search/send/go/etc).
+         * Updates action key type (enter/search/done/go/etc).
          *
          * Cancels in-flight layout load, reloads current mode with new action.
          * Called when input field type changes (text → URL → email).
@@ -127,14 +129,21 @@ class KeyboardViewModel
                 return true
             }
 
-            val lastChar = trimmed.lastOrNull()
-            if (lastChar in setOf('.', '!', '?')) {
+            val lastChar = textBeforeCursor.lastOrNull()
+            if (lastChar == '\n') {
+                return true
+            }
+
+            val lastNonWhitespaceChar = trimmed.lastOrNull()
+            if (lastNonWhitespaceChar != null && isSentenceEndingPunctuation(lastNonWhitespaceChar)) {
                 val afterPunctuation = textBeforeCursor.removePrefix(trimmed)
                 return afterPunctuation.isNotEmpty() && afterPunctuation.all { it.isWhitespace() }
             }
 
             return false
         }
+
+        private fun isSentenceEndingPunctuation(char: Char): Boolean = UCharacter.hasBinaryProperty(char.code, UProperty.S_TERM)
 
         fun checkAndApplyAutoCapitalization(textBeforeCursor: String?) {
             if (shouldAutoCapitalize(textBeforeCursor) && !_state.value.isCapsLockOn) {

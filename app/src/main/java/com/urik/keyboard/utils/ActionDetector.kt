@@ -13,7 +13,6 @@ object ActionDetector {
      *
      * Maps EditorInfo IME action flags to KeyboardKey.ActionType enum:
      * - IME_ACTION_SEARCH → SEARCH
-     * - IME_ACTION_SEND → SEND
      * - IME_ACTION_DONE → DONE
      * - IME_ACTION_GO → GO
      * - IME_ACTION_NEXT → NEXT
@@ -28,7 +27,6 @@ object ActionDetector {
 
         return when (info.imeOptions and EditorInfo.IME_MASK_ACTION) {
             EditorInfo.IME_ACTION_SEARCH -> KeyboardKey.ActionType.SEARCH
-            EditorInfo.IME_ACTION_SEND -> KeyboardKey.ActionType.SEND
             EditorInfo.IME_ACTION_DONE -> KeyboardKey.ActionType.DONE
             EditorInfo.IME_ACTION_GO -> KeyboardKey.ActionType.GO
             EditorInfo.IME_ACTION_NEXT -> KeyboardKey.ActionType.NEXT
