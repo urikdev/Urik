@@ -104,6 +104,15 @@ object KeyboardConstants {
         const val TWO_SIGMA_60_SQ = 7200f
         const val BASE_PENALTY_SHORT_WORD = 400f
         const val BASE_PENALTY_LONG_WORD = 0f
+
+        const val MIN_PATH_LENGTH_RATIO = 0.06f
+        const val PATH_LENGTH_PENALTY_STRONG = 0.80f
+        const val PATH_LENGTH_PENALTY_VERY_STRONG = 0.60f
+        const val PATH_LENGTH_PENALTY_MODERATE = 0.85f
+        const val PATH_LENGTH_PENALTY_MEDIUM = 0.70f
+        const val PATH_LENGTH_NO_PENALTY = 1.0f
+        const val SPATIAL_SCORE_WEIGHT = 0.7f
+        const val FREQUENCY_SCORE_WEIGHT = 0.3f
     }
 
     object TextProcessingConstants {

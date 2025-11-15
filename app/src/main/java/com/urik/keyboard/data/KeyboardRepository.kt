@@ -84,7 +84,6 @@ class KeyboardRepository
             cacheMemoryManager.createCache(
                 name = "keyboard_layouts",
                 maxSize = CacheConstants.LAYOUT_CACHE_SIZE,
-                onEvict = { _, _ -> },
             )
 
         private val failedLocales = mutableSetOf<String>()
