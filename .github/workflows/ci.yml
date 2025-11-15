@@ -14,7 +14,7 @@ jobs:
   test:
     name: Unit Tests
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 10
     if: github.event_name == 'pull_request'
     permissions:
       contents: read
@@ -31,9 +31,12 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
+          cache: 'gradle'
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: ${{ github.ref != 'refs/heads/main' && github.ref != 'refs/heads/develop' }}
 
       - name: Run tests with coverage
         run: ./gradlew koverHtmlReport koverXmlReport --stacktrace --no-daemon
@@ -65,7 +68,7 @@ jobs:
   lint:
     name: Code Quality
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 10
     if: github.event_name == 'pull_request'
     permissions:
       contents: read
@@ -82,9 +85,12 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
+          cache: 'gradle'
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: ${{ github.ref != 'refs/heads/main' && github.ref != 'refs/heads/develop' }}
 
       - name: Run ktlint
         run: ./gradlew ktlintCheck --stacktrace --no-daemon
@@ -105,7 +111,7 @@ jobs:
   build-debug:
     name: Build Debug APK
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 15
     needs: [test, lint]
     if: github.event_name == 'pull_request'
     permissions:
@@ -123,9 +129,12 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
+          cache: 'gradle'
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: ${{ github.ref != 'refs/heads/main' && github.ref != 'refs/heads/develop' }}
 
       - name: Build debug APK
         run: ./gradlew assembleDebug --stacktrace --no-daemon
@@ -133,7 +142,7 @@ jobs:
   build-release:
     name: Build Release APK
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 15
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     permissions:
       contents: read
@@ -150,9 +159,12 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
+          cache: 'gradle'
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: ${{ github.ref != 'refs/heads/main' && github.ref != 'refs/heads/develop' }}
 
       - name: Build release APK
         run: ./gradlew assembleRelease --stacktrace --no-daemon
