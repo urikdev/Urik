@@ -12,6 +12,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import androidx.room.withTransaction
 import com.urik.keyboard.data.database.KeyboardDatabase
 import com.urik.keyboard.utils.CacheMemoryManager
+import com.urik.keyboard.utils.ErrorLogger
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
@@ -316,6 +317,12 @@ class SettingsRepository
                 cacheMemoryManager.forceCleanup()
                 Result.success(Unit)
             } catch (e: Exception) {
+                ErrorLogger.logException(
+                    component = "SettingsRepository",
+                    severity = ErrorLogger.Severity.CRITICAL,
+                    exception = e,
+                    context = mapOf("operation" to "clearLearnedWords"),
+                )
                 Result.failure(e)
             }
 
@@ -329,6 +336,12 @@ class SettingsRepository
                 dataStore.edit { it.clear() }
                 Result.success(Unit)
             } catch (e: Exception) {
+                ErrorLogger.logException(
+                    component = "SettingsRepository",
+                    severity = ErrorLogger.Severity.HIGH,
+                    exception = e,
+                    context = mapOf("operation" to "resetToDefaults"),
+                )
                 Result.failure(e)
             }
 

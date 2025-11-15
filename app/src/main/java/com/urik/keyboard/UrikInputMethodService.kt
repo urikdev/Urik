@@ -2238,6 +2238,8 @@ class UrikInputMethodService :
         coordinateStateClear()
         swipeKeyboardView = null
 
+        cacheMemoryManager.cleanup()
+
         lifecycleRegistry.currentState = Lifecycle.State.DESTROYED
         super.onDestroy()
     }
