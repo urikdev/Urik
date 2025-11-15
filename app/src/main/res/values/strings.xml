@@ -176,7 +176,6 @@
     <!-- Action button labels -->
     <string name="action_enter">Enter</string>
     <string name="action_search">Search</string>
-    <string name="action_send">Send</string>
     <string name="action_done">Done</string>
     <string name="action_go">Go</string>
     <string name="action_next">Next</string>
@@ -185,7 +184,6 @@
     <!-- Action button accessibility descriptions -->
     <string name="action_enter_description">Press enter</string>
     <string name="action_search_description">Search</string>
-    <string name="action_send_description">Send message</string>
     <string name="action_done_description">Done editing</string>
     <string name="action_go_description">Go to destination</string>
     <string name="action_next_description">Move to next field</string>

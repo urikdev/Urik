@@ -175,7 +175,6 @@
     <!-- Action button labels -->
     <string name="action_enter">Entrar</string>
     <string name="action_search">Buscar</string>
-    <string name="action_send">Enviar</string>
     <string name="action_done">Hecho</string>
     <string name="action_go">Ir</string>
     <string name="action_next">Siguiente</string>
@@ -184,7 +183,6 @@
     <!-- Action button accessibility descriptions -->
     <string name="action_enter_description">Pulsa Entrar</string>
     <string name="action_search_description">Buscar</string>
-    <string name="action_send_description">Enviar mensaje</string>
     <string name="action_done_description">Edición finalizada</string>
     <string name="action_go_description">Ir al destino</string>
     <string name="action_next_description">Pasar al siguiente campo</string>
