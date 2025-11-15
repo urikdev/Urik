@@ -262,9 +262,16 @@ class SwipeKeyboardView
             }
             emojiPickerContainer = null
 
-            findKeyboardView()?.visibility = VISIBLE
+            findKeyboardView()?.let { keyboardView ->
+                keyboardView.visibility = VISIBLE
+                suggestionBar?.let { bar ->
+                    val keyHeight = context.resources.getDimensionPixelSize(R.dimen.key_height)
+                    bar.minimumHeight = (keyHeight * 0.8f).toInt()
+                    bar.requestLayout()
+                }
+                keyboardView.requestLayout()
+            }
             requestLayout()
-            invalidate()
         }
 
         override fun onMeasure(
@@ -678,9 +685,7 @@ class SwipeKeyboardView
             if (isDestroyed) return
 
             if (isShowingEmojiPicker) {
-                if (currentLayout == null || currentLayout?.mode != layout.mode) {
-                    hideEmojiPicker()
-                }
+                hideEmojiPicker()
             }
 
             clearCollections()
@@ -833,8 +838,8 @@ class SwipeKeyboardView
                 viewTreeObserver.addOnGlobalLayoutListener(
                     object : ViewTreeObserver.OnGlobalLayoutListener {
                         override fun onGlobalLayout() {
+                            viewTreeObserver.removeOnGlobalLayoutListener(this)
                             if (!isDestroyed && isAttachedToWindow) {
-                                viewTreeObserver.removeOnGlobalLayoutListener(this)
                                 mapKeyPositions()
                             }
                         }
