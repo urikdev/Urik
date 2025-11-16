@@ -29,13 +29,12 @@ object BackspaceUtils {
     ): String {
         if (text.isEmpty() || codeUnitPosition <= 0 || codeUnitPosition > text.length) return text
 
-        val textBeforePosition = text.substring(0, codeUnitPosition)
+        val textBeforePosition = text.take(codeUnitPosition)
         val graphemeLength = getLastGraphemeClusterLength(textBeforePosition)
 
         val deleteStart = codeUnitPosition - graphemeLength
-        val deleteEnd = codeUnitPosition
 
-        return text.substring(0, deleteStart) + text.substring(deleteEnd)
+        return text.take(deleteStart) + text.substring(codeUnitPosition)
     }
 
     fun extractWordBeforeCursor(textBeforeCursor: String): Pair<String, Int>? {

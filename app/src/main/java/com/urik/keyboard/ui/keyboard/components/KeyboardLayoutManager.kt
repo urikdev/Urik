@@ -999,6 +999,9 @@ class KeyboardLayoutManager(
         backgroundJob.cancel()
         returnActiveButtonsToPool()
         buttonPool.clear()
+        buttonPendingCallbacks.forEach { (_, pending) ->
+            pending.handler.removeCallbacks(pending.runnable)
+        }
         buttonPendingCallbacks.clear()
         stopAcceleratedBackspace()
         variationPopup?.dismiss()
