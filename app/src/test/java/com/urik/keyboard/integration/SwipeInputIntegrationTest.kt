@@ -185,14 +185,14 @@ class SwipeInputIntegrationTest {
             )
         }
 
-//    @Test
-//    fun `spell check suggestions are dictionary-aware`() =
-//        runTest(testDispatcher) {
-//            val suggestions = spellCheckManager.generateSuggestions("helo", 5)
-//
-//            assertTrue("Should generate suggestions for typo", suggestions.isNotEmpty())
-//            assertTrue("Should suggest 'hello'", suggestions.contains("hello"))
-//        }
+    @Test
+    fun `spell check suggestions are dictionary-aware`() =
+        runTest(testDispatcher) {
+            val suggestions = spellCheckManager.generateSuggestions("helo", 5)
+
+            assertTrue("Should generate suggestions for typo", suggestions.isNotEmpty())
+            assertTrue("Should suggest 'hello'", suggestions.contains("hello"))
+        }
 
     @Test
     fun `swipe invalid word then learn prevents highlight`() =
@@ -241,15 +241,15 @@ class SwipeInputIntegrationTest {
             assertTrue("Word should be learned via swipe method", isLearned)
         }
 
-//    @Test
-//    fun `word candidate scoring uses frequency data`() =
-//        runTest(testDispatcher) {
-//            val commonWords = spellCheckManager.getCommonWords()
-//
-//            assertTrue("Should retrieve common words for scoring", commonWords.isNotEmpty())
-//            assertTrue("Should include 'hello' with frequency", commonWords.any { it.first == "hello" })
-//            assertTrue("Higher frequency words should rank higher", commonWords[0].second >= commonWords.last().second)
-//        }
+    @Test
+    fun `word candidate scoring uses frequency data`() =
+        runTest(testDispatcher) {
+            val commonWords = spellCheckManager.getCommonWords()
+
+            assertTrue("Should retrieve common words for scoring", commonWords.isNotEmpty())
+            assertTrue("Should include 'hello' with frequency", commonWords.any { it.first == "hello" })
+            assertTrue("Higher frequency words should rank higher", commonWords[0].second >= commonWords.last().second)
+        }
 
     @Test
     fun `learned words boost candidate confidence`() =
