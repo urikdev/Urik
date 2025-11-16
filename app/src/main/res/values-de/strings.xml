@@ -40,11 +40,6 @@
     <string name="key_size_medium">Medium</string>
     <string name="key_size_large">Groß</string>
 
-    <!-- Sound Volume -->
-    <string name="sound_volume_low">Niedrig</string>
-    <string name="sound_volume_medium">Medium</string>
-    <string name="sound_volume_high">Hoch</string>
-
     <!-- Vibration Strength -->
     <string name="vibration_strength_light">Leicht</string>
     <string name="vibration_strength_medium">Medium</string>
@@ -65,16 +60,10 @@
     <string name="key_label_size_medium">Medium</string>
     <string name="key_label_size_large">Groß</string>
 
-    <!-- Repeat Key Delay -->
-    <string name="repeat_key_delay_short">Kurz</string>
-    <string name="repeat_key_delay_medium">Medium</string>
-    <string name="repeat_key_delay_long">Lang</string>
-
     <!-- Appearance Settings -->
     <string name="appearance_settings_theme">Thema</string>
     <string name="appearance_settings_key_size">Tastengröße</string>
     <string name="appearance_settings_key_label_size">Tasten-Beschriftungs-Größe</string>
-    <string name="appearance_settings_repeat_key_delay">Tasten-Wiederholungs-Verzögerung</string>
 
     <!-- Auto-Correct Settings -->
     <string name="autocorrect_settings_show_suggestions">Verbesserungen anzeigen</string>
@@ -86,14 +75,8 @@
     <string name="autocorrect_settings_learn_new_words_off">Wörter werden nicht automatisch gelernt</string>
 
     <!-- Language Settings -->
-    <string name="language_settings_active_languages">Aktive Sprachen</string>
-    <string name="language_settings_primary_language">Primäre Sprache</string>
 
     <!-- Sound & Feedback Settings -->
-    <string name="feedback_settings_key_click_sound">Tastentöne</string>
-    <string name="feedback_settings_key_click_on">Tastentöne werden wiedergegeben</string>
-    <string name="feedback_settings_key_click_off">Tastentöne werden nicht wiedergegeben</string>
-    <string name="feedback_settings_sound_volume">Lautstärke</string>
     <string name="feedback_settings_haptic_feedback">Haptisches Feedback</string>
     <string name="feedback_settings_haptic_on">Haptisches Feedback ist an</string>
     <string name="feedback_settings_haptic_off">Haptisches Feedback ist aus</string>
@@ -126,13 +109,10 @@
     <string name="error_update_theme">Thema konnte nicht geändert werden</string>
     <string name="error_update_key_size">Tastengröße konnte nicht geändert werden</string>
     <string name="error_update_key_label_size">Beschriftungsgröße konnte nicht geändert werden</string>
-    <string name="error_update_repeat_key_delay">Tasten-Wiederholungs-Verzögerung konnte nicht geändert werden</string>
     <string name="error_update_suggestions">Verbesserungs-Einstellungen konnten nicht geändert werden</string>
     <string name="error_update_suggestion_count">Verbesserungsanzahl konnte nicht geändert werden</string>
     <string name="error_update_word_learning">Wörterbuch konnte nicht geändert werden</string>
     <string name="error_update_language">Sprach-Einstellungen konnten nicht geändert werden</string>
-    <string name="error_update_key_click_sound">Tastenton konnte nicht geändert werden</string>
-    <string name="error_update_sound_volume">Lautstärke konnte nicht geändert werden</string>
     <string name="error_update_haptic_feedback">Haptisches Feedback konnte nicht geändert werden</string>
     <string name="error_update_vibration_strength">Vibrationsstärke konnte nicht geändert werden</string>
     <string name="error_update_double_space_period">Doppel-Leerzeichen-Dauer konnte nicht geändert werden</string>
@@ -150,19 +130,15 @@
     <string name="keyboard_description">Virtuelle Tastatur</string>
 
     <!-- Default key labels -->
-    <string name="space_key_label">Leertaste</string>
     <string name="letters_mode_label">ABC</string>
     <string name="numbers_mode_label">123</string>
     <string name="symbols_mode_label">+=&lt;</string>
 
     <!-- Accessibility descriptions -->
     <string name="key_character_description">%1$s</string>
-    <string name="key_ideograph_description">Ideograph %1$s</string>
-    <string name="key_syllable_description">Silbe %1$s</string>
 
     <string name="shift_key_description">Umschalttaste</string>
     <string name="shift_active_description">Umschalttaste ist aktiv, antippen um auszuschalten</string>
-    <string name="shift_deactivate_description">Antippen um Shift auszuschalten</string>
     <string name="caps_lock_description">Feststelltaste</string>
     <string name="caps_lock_on_description">Feststelltaste ist aktiv, antippen um auszuschalten</string>
     <string name="backspace_key_description">Delete previous character</string>
@@ -171,14 +147,6 @@
     <string name="numbers_mode_description">Zur Zahleneingabe wechseln</string>
     <string name="symbols_mode_description">Zur Symboleingabe wechseln</string>
     <string name="ime_prediction_description">Vorhersage: %1$s</string>
-
-    <!-- Action button labels -->
-    <string name="action_enter">Enter</string>
-    <string name="action_search">Suchen</string>
-    <string name="action_done">Fertig</string>
-    <string name="action_go">Los</string>
-    <string name="action_next">Weiter</string>
-    <string name="action_previous">Zurück</string>
 
     <!-- Action button accessibility descriptions -->
     <string name="action_enter_description">Enter drücken</string>
@@ -207,7 +175,5 @@
 
     <string name="tip_4_title">Wörter vergessen</string>
     <string name="tip_4_description">Drück und halte auf eine Verbesserung um sie aus dem Wörterbuch zu entfernen.</string>
-
-    <string name="tip_icon_description">Tip-Symbol</string>
 
 </resources>

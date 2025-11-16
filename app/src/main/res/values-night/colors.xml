@@ -27,7 +27,6 @@
     <!-- INTERACTIVE STATES (visible on dark backgrounds) -->
     <!-- ============================================ -->
     <color name="state_pressed">@color/battleship_gray</color>       <!-- Lighter pressed state -->
-    <color name="state_focused">@color/sage</color>                  <!-- Sage focus (unchanged) -->
     <color name="state_activated">@color/battleship_gray</color>     <!-- Gray activated state -->
     <color name="state_caps_lock">@color/wenge</color>               <!-- Darker caps lock -->
 
@@ -51,16 +50,9 @@
     <color name="key_background_action">@color/surface_secondary</color>
     <color name="key_background_space">@color/surface_primary</color>
 
-    <!-- Key States -->
-    <color name="key_background_pressed">@color/state_pressed</color>
-    <color name="key_background_focused">@color/state_focused</color>
-    <color name="key_background_shift_active">@color/state_activated</color>
-    <color name="key_background_caps_lock">@color/state_caps_lock</color>
-
     <!-- Text Colors -->
     <color name="key_text_character">@color/content_primary</color>
     <color name="key_text_action">@color/content_secondary</color>
-    <color name="key_text_on_colored">@color/content_on_accent</color>
 
     <!-- Borders -->
     <color name="key_border">@color/battleship_gray</color>
@@ -68,7 +60,6 @@
     <color name="key_border_pressed">@color/light_orange</color>
 
     <!-- Missing colors for drawables -->
-    <color name="outline_accent">@color/sage</color>
     <color name="key_background_space_pressed">@color/state_pressed</color>
 
     <!-- ============================================ -->
@@ -76,26 +67,16 @@
     <!-- ============================================ -->
     <color name="suggestion_bar_background">@color/surface_accent</color>
     <color name="suggestion_text">@color/content_primary</color>
-    <color name="suggestion_text_highlighted">@color/content_secondary</color>
-    <color name="suggestion_background_selected">@color/state_pressed</color>
 
     <!-- ============================================ -->
     <!-- ACCESSIBILITY & SHADOWS -->
     <!-- ============================================ -->
     <color name="focus_indicator">@color/light_orange</color>
     <color name="key_shadow">#1AFFFFFF</color>              <!-- 10% white shadow -->
-    <color name="key_shadow_elevated">#33FFFFFF</color>     <!-- 20% white shadow -->
 
     <!-- ============================================ -->
     <!-- LEGACY COMPATIBILITY -->
     <!-- ============================================ -->
     <color name="primary">@color/battleship_gray</color>
-    <color name="primary_variant">@color/wenge</color>
     <color name="secondary">@color/sage</color>
-    <color name="background">@color/surface_background</color>
-    <color name="surface">@color/surface_primary</color>
-    <color name="on_primary">@color/content_on_accent</color>
-    <color name="on_secondary">@color/content_primary</color>
-    <color name="on_background">@color/content_primary</color>
-    <color name="on_surface">@color/content_primary</color>
 </resources>

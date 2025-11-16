@@ -41,11 +41,6 @@
     <string name="key_size_medium">Medium</string>
     <string name="key_size_large">Large</string>
 
-    <!-- Sound Volume -->
-    <string name="sound_volume_low">Low</string>
-    <string name="sound_volume_medium">Medium</string>
-    <string name="sound_volume_high">High</string>
-
     <!-- Vibration Strength -->
     <string name="vibration_strength_light">Light</string>
     <string name="vibration_strength_medium">Medium</string>
@@ -66,16 +61,10 @@
     <string name="key_label_size_medium">Medium</string>
     <string name="key_label_size_large">Large</string>
 
-    <!-- Repeat Key Delay -->
-    <string name="repeat_key_delay_short">Short</string>
-    <string name="repeat_key_delay_medium">Medium</string>
-    <string name="repeat_key_delay_long">Long</string>
-
     <!-- Appearance Settings -->
     <string name="appearance_settings_theme">Theme</string>
     <string name="appearance_settings_key_size">Key Size</string>
     <string name="appearance_settings_key_label_size">Key Label Size</string>
-    <string name="appearance_settings_repeat_key_delay">Repeat Key Delay</string>
 
     <!-- Auto-Correct Settings -->
     <string name="autocorrect_settings_show_suggestions">Show Suggestions</string>
@@ -87,14 +76,8 @@
     <string name="autocorrect_settings_learn_new_words_off">Learning disabled</string>
 
     <!-- Language Settings -->
-    <string name="language_settings_active_languages">Active Languages</string>
-    <string name="language_settings_primary_language">Primary Language</string>
 
     <!-- Sound & Feedback Settings -->
-    <string name="feedback_settings_key_click_sound">Key Click Sound</string>
-    <string name="feedback_settings_key_click_on">Key click enabled</string>
-    <string name="feedback_settings_key_click_off">Key click disabled</string>
-    <string name="feedback_settings_sound_volume">Sound Volume</string>
     <string name="feedback_settings_haptic_feedback">Haptic Feedback</string>
     <string name="feedback_settings_haptic_on">Haptic enabled</string>
     <string name="feedback_settings_haptic_off">Haptic disabled</string>
@@ -127,13 +110,10 @@
     <string name="error_update_theme">Failed to update theme</string>
     <string name="error_update_key_size">Failed to update key size</string>
     <string name="error_update_key_label_size">Failed to update label size</string>
-    <string name="error_update_repeat_key_delay">Failed to update repeat key delay</string>
     <string name="error_update_suggestions">Failed to update suggestion settings</string>
     <string name="error_update_suggestion_count">Failed to update suggestion count</string>
     <string name="error_update_word_learning">Failed to update word learning</string>
     <string name="error_update_language">Failed to update language settings</string>
-    <string name="error_update_key_click_sound">Failed to update key click sound</string>
-    <string name="error_update_sound_volume">Failed to update sound volume</string>
     <string name="error_update_haptic_feedback">Failed to update haptic feedback</string>
     <string name="error_update_vibration_strength">Failed to update vibration strength</string>
     <string name="error_update_double_space_period">Failed to update double-space period</string>
@@ -151,19 +131,15 @@
     <string name="keyboard_description">Virtual keyboard</string>
 
     <!-- Default key labels -->
-    <string name="space_key_label">Space</string>
     <string name="letters_mode_label">ABC</string>
     <string name="numbers_mode_label">123</string>
     <string name="symbols_mode_label">+=&lt;</string>
 
     <!-- Accessibility descriptions -->
     <string name="key_character_description">Type %1$s</string>
-    <string name="key_ideograph_description">Type ideograph %1$s</string>
-    <string name="key_syllable_description">Type syllable %1$s</string>
 
     <string name="shift_key_description">Shift key, tap to capitalize next letter</string>
     <string name="shift_active_description">Shift is active, tap to deactivate</string>
-    <string name="shift_deactivate_description">Tap to turn off shift</string>
     <string name="caps_lock_description">Caps lock</string>
     <string name="caps_lock_on_description">Caps lock is on, tap to turn off</string>
     <string name="backspace_key_description">Delete previous character</string>
@@ -172,14 +148,6 @@
     <string name="numbers_mode_description">Switch to number keyboard</string>
     <string name="symbols_mode_description">Switch to symbol keyboard</string>
     <string name="ime_prediction_description">Prediction: %1$s</string>
-
-    <!-- Action button labels -->
-    <string name="action_enter">Enter</string>
-    <string name="action_search">Search</string>
-    <string name="action_done">Done</string>
-    <string name="action_go">Go</string>
-    <string name="action_next">Next</string>
-    <string name="action_previous">Previous</string>
 
     <!-- Action button accessibility descriptions -->
     <string name="action_enter_description">Press enter</string>
@@ -208,8 +176,5 @@
 
     <string name="tip_4_title">Remove Words</string>
     <string name="tip_4_description">Long press on a suggestion to remove it from your dictionary.</string>
-
-
-    <string name="tip_icon_description">Tip icon</string>
 
 </resources>
