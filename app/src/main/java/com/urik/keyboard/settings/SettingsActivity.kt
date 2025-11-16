@@ -4,10 +4,15 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
+import android.view.View
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
+import com.google.android.material.appbar.MaterialToolbar
 import com.urik.keyboard.R
 import com.urik.keyboard.settings.appearance.AppearanceFragment
 import com.urik.keyboard.settings.autocorrection.AutoCorrectionFragment
@@ -25,20 +30,60 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
 
+        val toolbar = findViewById<MaterialToolbar>(R.id.settings_toolbar)
+        setSupportActionBar(toolbar)
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)
             setDisplayShowHomeEnabled(true)
             title = resources.getString(R.string.settings_title)
         }
 
+        applyWindowInsets()
+        setupFragmentTitleUpdates()
+
         if (savedInstanceState == null) {
             supportFragmentManager
                 .beginTransaction()
                 .replace(R.id.settings_container, MainSettingsFragment())
                 .commit()
+        }
+    }
+
+    private fun setupFragmentTitleUpdates() {
+        supportFragmentManager.addOnBackStackChangedListener {
+            updateToolbarTitle()
+        }
+    }
+
+    private fun updateToolbarTitle() {
+        val currentFragment = supportFragmentManager.findFragmentById(R.id.settings_container)
+        val title =
+            when (currentFragment) {
+                is AutoCorrectionFragment -> getString(R.string.autocorrect_settings_title)
+                is LanguagesFragment -> getString(R.string.language_settings_title)
+                is TypingBehaviorFragment -> getString(R.string.typing_settings_title)
+                is HapticFeedbackFragment -> getString(R.string.feedback_settings_title)
+                is LayoutInputFragment -> getString(R.string.layout_settings_title)
+                is AppearanceFragment -> getString(R.string.appearance_settings_title)
+                is PrivacyDataFragment -> getString(R.string.privacy_settings_title)
+                else -> getString(R.string.settings_title)
+            }
+        supportActionBar?.title = title
+    }
+
+    private fun applyWindowInsets() {
+        val rootView = findViewById<View>(R.id.settings_root)
+        val container = findViewById<View>(R.id.settings_container)
+
+        ViewCompat.setOnApplyWindowInsetsListener(rootView) { v, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(insets.left, insets.top, insets.right, 0)
+            container.setPadding(0, 0, 0, insets.bottom)
+            windowInsets
         }
     }
 

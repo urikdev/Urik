@@ -30,13 +30,13 @@
         <activity
             android:name=".settings.SettingsActivity"
             android:exported="false"
-            android:theme="@style/Theme.Urik"
+            android:theme="@style/Theme.Urik.NoActionBar"
             android:label="@string/settings_title" />
 
         <activity
             android:name=".settings.DictionaryAttributionActivity"
             android:exported="false"
-            android:theme="@style/Theme.Urik"
+            android:theme="@style/Theme.Urik.NoActionBar"
             android:label="@string/licenses_title" />
 
         <activity

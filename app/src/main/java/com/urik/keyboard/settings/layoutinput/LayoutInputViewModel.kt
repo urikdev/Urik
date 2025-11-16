@@ -66,6 +66,6 @@ class LayoutInputViewModel
  * UI state for layout and input settings.
  */
 data class LayoutInputUiState(
-    val showNumberRow: Boolean = false,
+    val showNumberRow: Boolean = true,
     val spaceBarSize: SpaceBarSize = SpaceBarSize.STANDARD,
 )
