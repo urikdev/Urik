@@ -7,8 +7,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.Toast
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.button.MaterialButton
@@ -38,8 +41,11 @@ class MainActivity : AppCompatActivity() {
     private var tabLayoutMediator: TabLayoutMediator? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        setContentView(createMainLayout())
+        val mainLayout = createMainLayout()
+        setContentView(mainLayout)
+        applyWindowInsets(mainLayout)
     }
 
     override fun onResume() {
@@ -96,9 +102,6 @@ class MainActivity : AppCompatActivity() {
         LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setBackgroundColor(ContextCompat.getColor(context, R.color.surface_background))
-
-            val padding = dpToPx(32)
-            setPadding(padding, padding, padding, padding)
 
             addView(createAnimationSection())
             addView(createTipsSection())
@@ -246,5 +249,23 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun applyWindowInsets(view: View) {
+        ViewCompat.setOnApplyWindowInsetsListener(view) { v, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            val basePadding = dpToPx(BASE_PADDING_DP)
+            v.setPadding(
+                basePadding + insets.left,
+                basePadding + insets.top,
+                basePadding + insets.right,
+                basePadding + insets.bottom,
+            )
+            WindowInsetsCompat.CONSUMED
+        }
+    }
+
     private fun dpToPx(dp: Int): Int = (dp * resources.displayMetrics.density).toInt()
+
+    companion object {
+        private const val BASE_PADDING_DP = 32
+    }
 }
