@@ -425,6 +425,7 @@ class KeyboardLayoutManager(
                         KeyboardKey.ActionType.BACKSPACE -> R.drawable.backspace_48px
                         KeyboardKey.ActionType.ENTER -> R.drawable.keyboard_return_48px
                         KeyboardKey.ActionType.SEARCH -> R.drawable.search_48px
+                        KeyboardKey.ActionType.SEND -> R.drawable.send_48px
                         KeyboardKey.ActionType.DONE -> R.drawable.done_48px
                         KeyboardKey.ActionType.GO -> R.drawable.arrow_forward_48px
                         KeyboardKey.ActionType.NEXT -> R.drawable.arrow_forward_48px
@@ -617,6 +618,7 @@ class KeyboardLayoutManager(
                     KeyboardKey.ActionType.SPACE -> context.getString(R.string.space_key_description)
                     KeyboardKey.ActionType.ENTER -> context.getString(R.string.action_enter_description)
                     KeyboardKey.ActionType.SEARCH -> context.getString(R.string.action_search_description)
+                    KeyboardKey.ActionType.SEND -> context.getString(R.string.action_send_description)
                     KeyboardKey.ActionType.DONE -> context.getString(R.string.action_done_description)
                     KeyboardKey.ActionType.GO -> context.getString(R.string.action_go_description)
                     KeyboardKey.ActionType.NEXT -> context.getString(R.string.action_next_description)

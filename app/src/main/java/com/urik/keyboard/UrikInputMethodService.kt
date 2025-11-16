@@ -1331,6 +1331,7 @@ class UrikInputMethodService :
 
             KeyboardKey.ActionType.ENTER,
             KeyboardKey.ActionType.SEARCH,
+            KeyboardKey.ActionType.SEND,
             KeyboardKey.ActionType.DONE,
             KeyboardKey.ActionType.GO,
             KeyboardKey.ActionType.NEXT,
@@ -1340,6 +1341,7 @@ class UrikInputMethodService :
                     performInputAction(
                         when (key.action) {
                             KeyboardKey.ActionType.SEARCH -> EditorInfo.IME_ACTION_SEARCH
+                            KeyboardKey.ActionType.SEND -> EditorInfo.IME_ACTION_SEND
                             KeyboardKey.ActionType.DONE -> EditorInfo.IME_ACTION_DONE
                             KeyboardKey.ActionType.GO -> EditorInfo.IME_ACTION_GO
                             KeyboardKey.ActionType.NEXT -> EditorInfo.IME_ACTION_NEXT
@@ -1430,6 +1432,7 @@ class UrikInputMethodService :
 
             when (imeAction) {
                 EditorInfo.IME_ACTION_SEARCH,
+                EditorInfo.IME_ACTION_SEND,
                 EditorInfo.IME_ACTION_DONE,
                 EditorInfo.IME_ACTION_GO,
                 EditorInfo.IME_ACTION_NEXT,

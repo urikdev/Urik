@@ -150,6 +150,7 @@
 
     <!-- Action button accessibility descriptions -->
     <string name="action_enter_description">Pulsa Entrar</string>
+    <string name="action_send_description">Enviar mensaje</string>
     <string name="action_search_description">Buscar</string>
     <string name="action_done_description">Edición finalizada</string>
     <string name="action_go_description">Ir al destino</string>

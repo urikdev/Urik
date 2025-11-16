@@ -151,6 +151,7 @@
 
     <!-- Action button accessibility descriptions -->
     <string name="action_enter_description">Press enter</string>
+    <string name="action_send_description">Send message</string>
     <string name="action_search_description">Search</string>
     <string name="action_done_description">Done editing</string>
     <string name="action_go_description">Go to destination</string>
