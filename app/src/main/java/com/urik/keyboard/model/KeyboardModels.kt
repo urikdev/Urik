@@ -71,6 +71,7 @@ sealed class KeyboardKey {
         SPACE,
         ENTER,
         SEARCH,
+        SEND,
         DONE,
         GO,
         NEXT,
