@@ -150,6 +150,7 @@
 
     <!-- Action button accessibility descriptions -->
     <string name="action_enter_description">Enter drücken</string>
+    <string name="action_send_description">Nachricht senden</string>
     <string name="action_search_description">Suchen</string>
     <string name="action_done_description">Fertig</string>
     <string name="action_go_description">Gehe zu</string>

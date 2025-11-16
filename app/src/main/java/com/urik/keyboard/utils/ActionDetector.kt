@@ -13,11 +13,16 @@ object ActionDetector {
      *
      * Maps EditorInfo IME action flags to KeyboardKey.ActionType enum:
      * - IME_ACTION_SEARCH → SEARCH
+     * - IME_ACTION_SEND → SEND (only if IME_FLAG_NO_ENTER_ACTION not set)
      * - IME_ACTION_DONE → DONE
      * - IME_ACTION_GO → GO
      * - IME_ACTION_NEXT → NEXT
      * - IME_ACTION_PREVIOUS → PREVIOUS
      * - All others → ENTER (default)
+     *
+     * For IME_ACTION_SEND: If IME_FLAG_NO_ENTER_ACTION is set, the app has its own
+     * send button and wants newlines, so we return ENTER. Otherwise, the app relies
+     * on the IME action button for sending.
      *
      * @param info EditorInfo from input field, or null if unavailable
      * @return Detected action type, defaults to ENTER if no specific action set
@@ -25,8 +30,14 @@ object ActionDetector {
     fun detectAction(info: EditorInfo?): KeyboardKey.ActionType {
         if (info == null) return KeyboardKey.ActionType.ENTER
 
-        return when (info.imeOptions and EditorInfo.IME_MASK_ACTION) {
+        val action = info.imeOptions and EditorInfo.IME_MASK_ACTION
+        val noEnterAction = (info.imeOptions and EditorInfo.IME_FLAG_NO_ENTER_ACTION) != 0
+
+        return when (action) {
             EditorInfo.IME_ACTION_SEARCH -> KeyboardKey.ActionType.SEARCH
+            EditorInfo.IME_ACTION_SEND -> {
+                if (noEnterAction) KeyboardKey.ActionType.ENTER else KeyboardKey.ActionType.SEND
+            }
             EditorInfo.IME_ACTION_DONE -> KeyboardKey.ActionType.DONE
             EditorInfo.IME_ACTION_GO -> KeyboardKey.ActionType.GO
             EditorInfo.IME_ACTION_NEXT -> KeyboardKey.ActionType.NEXT

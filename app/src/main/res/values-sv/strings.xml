@@ -83,6 +83,7 @@
     <string name="ime_prediction_description">Förutsägelse: %1$s</string>
     <string name="action_enter_description">Tryck enter</string>
     <string name="action_search_description">Söka</string>
+    <string name="action_send_description">Skicka meddelande</string>
     <string name="action_done_description">Redigering klar</string>
     <string name="action_go_description">Gå till destinationen</string>
     <string name="action_next_description">Gå till nästa fält</string>
