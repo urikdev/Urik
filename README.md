@@ -4,7 +4,7 @@
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Release](https://img.shields.io/github/v/release/urikdev/Urik?include_prereleases)](https://github.com/urikdev/Urik/releases)
 
-Privacy-first keyboard for Android with on-device processing and encrypted storage.
+Privacy-first keyboard for Android with on-device processing and encrypted storage. 100% community-funded, completely open-source.
 
 ## Status
 
@@ -23,6 +23,8 @@ Privacy-first keyboard for Android with on-device processing and encrypted stora
 ## Privacy
 
 All processing happens on-device. No data leaves your phone. User dictionary and learned words are stored in an encrypted local database.
+
+We answer to our users, not investors. 
 
 ## Requirements
 
