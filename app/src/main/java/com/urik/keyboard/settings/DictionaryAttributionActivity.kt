@@ -2,37 +2,99 @@ package com.urik.keyboard.settings
 
 import android.os.Bundle
 import android.view.MenuItem
+import android.view.View
+import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import com.google.android.material.appbar.MaterialToolbar
+import com.urik.keyboard.R
 
 class DictionaryAttributionActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
+        val rootLayout = createLayout()
+        setContentView(rootLayout)
+
+        val toolbar = rootLayout.findViewById<MaterialToolbar>(R.id.attribution_toolbar)
+        setSupportActionBar(toolbar)
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)
             setDisplayShowHomeEnabled(true)
-            title = "Dictionary Data"
+            title = getString(R.string.dictionary_attribution_title)
         }
 
-        val scrollView =
-            ScrollView(this).apply {
-                fitsSystemWindows = true
-            }
-
-        val textView =
-            TextView(this).apply {
-                val padding = (16 * resources.displayMetrics.density).toInt()
-                setPadding(padding, padding, padding, padding)
-                textSize = 14f
-                setTextIsSelectable(true)
-            }
-
-        scrollView.addView(textView)
-        setContentView(scrollView)
-
+        val textView = rootLayout.findViewById<TextView>(R.id.attribution_text)
         textView.text = buildAttributionText()
+
+        applyWindowInsets(rootLayout)
+    }
+
+    private fun createLayout(): LinearLayout =
+        LinearLayout(this).apply {
+            id = View.generateViewId()
+            orientation = LinearLayout.VERTICAL
+            layoutParams =
+                LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                )
+
+            val toolbar =
+                MaterialToolbar(context).apply {
+                    id = R.id.attribution_toolbar
+                    layoutParams =
+                        LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT,
+                            resources.getDimensionPixelSize(
+                                androidx.appcompat.R.dimen.abc_action_bar_default_height_material,
+                            ),
+                        )
+                }
+            addView(toolbar)
+
+            val scrollView =
+                ScrollView(context).apply {
+                    layoutParams =
+                        LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT,
+                            0,
+                            1f,
+                        )
+
+                    val textView =
+                        TextView(context).apply {
+                            id = R.id.attribution_text
+                            textSize = 14f
+                            setTextIsSelectable(true)
+                        }
+                    addView(textView)
+                }
+            addView(scrollView)
+        }
+
+    private fun applyWindowInsets(rootLayout: LinearLayout) {
+        val scrollView = rootLayout.getChildAt(1) as ScrollView
+        val textView = scrollView.getChildAt(0) as TextView
+
+        ViewCompat.setOnApplyWindowInsetsListener(rootLayout) { v, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            val basePadding = (BASE_PADDING_DP * resources.displayMetrics.density).toInt()
+
+            v.setPadding(insets.left, insets.top, insets.right, 0)
+            textView.setPadding(
+                basePadding,
+                basePadding,
+                basePadding,
+                basePadding + insets.bottom,
+            )
+            windowInsets
+        }
     }
 
     private fun buildAttributionText(): String {
@@ -74,4 +136,8 @@ class DictionaryAttributionActivity : AppCompatActivity() {
             }
             else -> super.onOptionsItemSelected(item)
         }
+
+    companion object {
+        private const val BASE_PADDING_DP = 16
+    }
 }
