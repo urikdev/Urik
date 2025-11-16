@@ -14,6 +14,8 @@ import androidx.core.view.WindowCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
+import com.ibm.icu.lang.UCharacter
+import com.ibm.icu.lang.UProperty
 import com.ibm.icu.lang.UScript
 import com.ibm.icu.util.ULocale
 import com.urik.keyboard.KeyboardConstants.InputTimingConstants
@@ -396,10 +398,7 @@ class UrikInputMethodService :
         }
     }
 
-    private fun isSentenceEndingPunctuation(char: Char): Boolean {
-        val type = Character.getType(char.code)
-        return type == Character.END_PUNCTUATION.toInt()
-    }
+    private fun isSentenceEndingPunctuation(char: Char): Boolean = UCharacter.hasBinaryProperty(char.code, UProperty.S_TERM)
 
     /**
      * Updates word state and displays suggestions.
@@ -1332,7 +1331,6 @@ class UrikInputMethodService :
 
             KeyboardKey.ActionType.ENTER,
             KeyboardKey.ActionType.SEARCH,
-            KeyboardKey.ActionType.SEND,
             KeyboardKey.ActionType.DONE,
             KeyboardKey.ActionType.GO,
             KeyboardKey.ActionType.NEXT,
@@ -1342,7 +1340,6 @@ class UrikInputMethodService :
                     performInputAction(
                         when (key.action) {
                             KeyboardKey.ActionType.SEARCH -> EditorInfo.IME_ACTION_SEARCH
-                            KeyboardKey.ActionType.SEND -> EditorInfo.IME_ACTION_SEND
                             KeyboardKey.ActionType.DONE -> EditorInfo.IME_ACTION_DONE
                             KeyboardKey.ActionType.GO -> EditorInfo.IME_ACTION_GO
                             KeyboardKey.ActionType.NEXT -> EditorInfo.IME_ACTION_NEXT
@@ -1433,7 +1430,6 @@ class UrikInputMethodService :
 
             when (imeAction) {
                 EditorInfo.IME_ACTION_SEARCH,
-                EditorInfo.IME_ACTION_SEND,
                 EditorInfo.IME_ACTION_DONE,
                 EditorInfo.IME_ACTION_GO,
                 EditorInfo.IME_ACTION_NEXT,
@@ -1457,6 +1453,11 @@ class UrikInputMethodService :
 
             coordinateStateClear()
             clearSpellConfirmationState()
+
+            if (imeAction == EditorInfo.IME_ACTION_NONE) {
+                val textBefore = currentInputConnection?.getTextBeforeCursor(50, 0)?.toString()
+                viewModel.checkAndApplyAutoCapitalization(textBefore)
+            }
         } catch (_: Exception) {
             coordinateStateClear()
         }
@@ -1686,64 +1687,68 @@ class UrikInputMethodService :
                         }
                     }
 
-                    val remainingText = textBeforeCursor.dropLast(1)
-                    val wordInfo = extractWordBeforeCursor(remainingText)
+                    if (!isAcceleratedDeletion) {
+                        val remainingText = textBeforeCursor.dropLast(1)
+                        val wordInfo = extractWordBeforeCursor(remainingText)
 
-                    if (wordInfo != null) {
-                        val (wordBeforeCursor, _) = wordInfo
+                        if (wordInfo != null) {
+                            val (wordBeforeCursor, _) = wordInfo
 
-                        currentInputConnection?.deleteSurroundingText(wordBeforeCursor.length, 0)
-                        currentInputConnection?.setComposingText(wordBeforeCursor, 1)
+                            currentInputConnection?.deleteSurroundingText(wordBeforeCursor.length, 0)
+                            currentInputConnection?.setComposingText(wordBeforeCursor, 1)
 
-                        displayBuffer = wordBeforeCursor
+                            displayBuffer = wordBeforeCursor
 
-                        val (currentSequence, bufferSnapshot) =
-                            synchronized(processingLock) {
-                                ++processingSequence to displayBuffer
-                            }
+                            val (currentSequence, bufferSnapshot) =
+                                synchronized(processingLock) {
+                                    ++processingSequence to displayBuffer
+                                }
 
-                        suggestionDebounceJob?.cancel()
-                        suggestionDebounceJob =
-                            serviceScope.launch(Dispatchers.Default) {
-                                try {
-                                    delay(suggestionDebounceDelay)
+                            suggestionDebounceJob?.cancel()
+                            suggestionDebounceJob =
+                                serviceScope.launch(Dispatchers.Default) {
+                                    try {
+                                        delay(suggestionDebounceDelay)
 
-                                    val result =
-                                        textInputProcessor.processWordInput(
-                                            bufferSnapshot,
-                                            InputMethod.TYPED,
-                                        )
+                                        val result =
+                                            textInputProcessor.processWordInput(
+                                                bufferSnapshot,
+                                                InputMethod.TYPED,
+                                            )
 
-                                    withContext(Dispatchers.Main) {
-                                        synchronized(processingLock) {
-                                            if (currentSequence == processingSequence && displayBuffer == bufferSnapshot) {
-                                                when (result) {
-                                                    is ProcessingResult.Success -> {
-                                                        wordState = result.wordState
-                                                        if (result.wordState.suggestions.isNotEmpty() && currentSettings.showSuggestions) {
-                                                            val displaySuggestions =
-                                                                applyCapitalizationToSuggestions(result.wordState.suggestions)
-                                                            pendingSuggestions = displaySuggestions
-                                                            swipeKeyboardView?.updateSuggestions(displaySuggestions)
-                                                        } else {
+                                        withContext(Dispatchers.Main) {
+                                            synchronized(processingLock) {
+                                                if (currentSequence == processingSequence && displayBuffer == bufferSnapshot) {
+                                                    when (result) {
+                                                        is ProcessingResult.Success -> {
+                                                            wordState = result.wordState
+                                                            if (result.wordState.suggestions.isNotEmpty() &&
+                                                                currentSettings.showSuggestions
+                                                            ) {
+                                                                val displaySuggestions =
+                                                                    applyCapitalizationToSuggestions(result.wordState.suggestions)
+                                                                pendingSuggestions = displaySuggestions
+                                                                swipeKeyboardView?.updateSuggestions(displaySuggestions)
+                                                            } else {
+                                                                pendingSuggestions = emptyList()
+                                                                swipeKeyboardView?.clearSuggestions()
+                                                            }
+                                                        }
+
+                                                        is ProcessingResult.Error -> {
                                                             pendingSuggestions = emptyList()
                                                             swipeKeyboardView?.clearSuggestions()
                                                         }
                                                     }
-
-                                                    is ProcessingResult.Error -> {
-                                                        pendingSuggestions = emptyList()
-                                                        swipeKeyboardView?.clearSuggestions()
-                                                    }
                                                 }
                                             }
                                         }
+                                    } catch (_: Exception) {
                                     }
-                                } catch (_: Exception) {
                                 }
-                            }
-                    } else {
-                        coordinateStateClear()
+                        } else {
+                            coordinateStateClear()
+                        }
                     }
                 } finally {
                     currentInputConnection?.endBatchEdit()

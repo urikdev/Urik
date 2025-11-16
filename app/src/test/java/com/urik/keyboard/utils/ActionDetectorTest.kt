@@ -32,15 +32,6 @@ class ActionDetectorTest {
     }
 
     @Test
-    fun `SEND action detected from IME options`() {
-        val editorInfo = createEditorInfo(imeAction = EditorInfo.IME_ACTION_SEND)
-
-        val result = ActionDetector.detectAction(editorInfo)
-
-        assertEquals(KeyboardKey.ActionType.SEND, result)
-    }
-
-    @Test
     fun `DONE action detected from IME options`() {
         val editorInfo = createEditorInfo(imeAction = EditorInfo.IME_ACTION_DONE)
 
@@ -200,36 +191,12 @@ class ActionDetectorTest {
     }
 
     @Test
-    fun `multiple IME flags don't interfere with action detection`() {
-        val complexOptions =
-            EditorInfo.IME_ACTION_SEND or
-                EditorInfo.IME_FLAG_NO_FULLSCREEN or
-                EditorInfo.IME_FLAG_NO_EXTRACT_UI
-
-        val editorInfo = EditorInfo()
-        editorInfo.imeOptions = complexOptions
-
-        val result = ActionDetector.detectAction(editorInfo)
-
-        assertEquals(KeyboardKey.ActionType.SEND, result)
-    }
-
-    @Test
     fun `search field in browser returns SEARCH`() {
         val searchField = createEditorInfo(imeAction = EditorInfo.IME_ACTION_SEARCH)
 
         val result = ActionDetector.detectAction(searchField)
 
         assertEquals(KeyboardKey.ActionType.SEARCH, result)
-    }
-
-    @Test
-    fun `messaging app returns SEND`() {
-        val messageField = createEditorInfo(imeAction = EditorInfo.IME_ACTION_SEND)
-
-        val result = ActionDetector.detectAction(messageField)
-
-        assertEquals(KeyboardKey.ActionType.SEND, result)
     }
 
     @Test

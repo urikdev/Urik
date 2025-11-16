@@ -124,7 +124,7 @@ class KeyboardRepository
          *
          * @param mode Letters/Numbers/Symbols
          * @param locale Target locale for layout
-         * @param currentAction Enter key action type (e.g., DONE, SEARCH, SEND)
+         * @param currentAction Enter key action type (e.g., ENTER, SEARCH, DONE, GO)
          * @return Layout or failure with exception
          */
         suspend fun getLayoutForMode(
