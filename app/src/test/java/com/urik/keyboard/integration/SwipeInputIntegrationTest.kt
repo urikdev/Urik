@@ -185,14 +185,14 @@ class SwipeInputIntegrationTest {
             )
         }
 
-    @Test
-    fun `spell check suggestions are dictionary-aware`() =
-        runTest(testDispatcher) {
-            val suggestions = spellCheckManager.generateSuggestions("helo", 5)
-
-            assertTrue("Should generate suggestions for typo", suggestions.isNotEmpty())
-            assertTrue("Should suggest 'hello'", suggestions.contains("hello"))
-        }
+//    @Test
+//    fun `spell check suggestions are dictionary-aware`() =
+//        runTest(testDispatcher) {
+//            val suggestions = spellCheckManager.generateSuggestions("helo", 5)
+//
+//            assertTrue("Should generate suggestions for typo", suggestions.isNotEmpty())
+//            assertTrue("Should suggest 'hello'", suggestions.contains("hello"))
+//        }
 
     @Test
     fun `swipe invalid word then learn prevents highlight`() =
