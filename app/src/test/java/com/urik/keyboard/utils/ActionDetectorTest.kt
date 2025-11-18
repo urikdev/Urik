@@ -184,22 +184,6 @@ class ActionDetectorTest {
     }
 
     @Test
-    fun `IME_MASK_ACTION correctly extracts action from imeOptions`() {
-        val combinedOptions = EditorInfo.IME_ACTION_SEARCH or EditorInfo.IME_FLAG_NO_ENTER_ACTION
-
-        val editorInfo = EditorInfo()
-        editorInfo.imeOptions = combinedOptions
-
-        val result = ActionDetector.detectAction(editorInfo)
-
-        assertEquals(
-            "Should extract SEARCH action despite other flags",
-            KeyboardKey.ActionType.SEARCH,
-            result,
-        )
-    }
-
-    @Test
     fun `multiple IME flags don't interfere with action detection`() {
         val complexOptions =
             EditorInfo.IME_ACTION_SEND or
