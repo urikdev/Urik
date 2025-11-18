@@ -30,14 +30,15 @@ object ActionDetector {
     fun detectAction(info: EditorInfo?): KeyboardKey.ActionType {
         if (info == null) return KeyboardKey.ActionType.ENTER
 
-        val action = info.imeOptions and EditorInfo.IME_MASK_ACTION
-        val noEnterAction = (info.imeOptions and EditorInfo.IME_FLAG_NO_ENTER_ACTION) != 0
+        val options = info.imeOptions
+        val action = options and EditorInfo.IME_MASK_ACTION
+        if ((options and EditorInfo.IME_FLAG_NO_ENTER_ACTION) != 0) {
+            return KeyboardKey.ActionType.ENTER
+        }
 
         return when (action) {
             EditorInfo.IME_ACTION_SEARCH -> KeyboardKey.ActionType.SEARCH
-            EditorInfo.IME_ACTION_SEND -> {
-                if (noEnterAction) KeyboardKey.ActionType.ENTER else KeyboardKey.ActionType.SEND
-            }
+            EditorInfo.IME_ACTION_SEND -> KeyboardKey.ActionType.SEND
             EditorInfo.IME_ACTION_DONE -> KeyboardKey.ActionType.DONE
             EditorInfo.IME_ACTION_GO -> KeyboardKey.ActionType.GO
             EditorInfo.IME_ACTION_NEXT -> KeyboardKey.ActionType.NEXT
