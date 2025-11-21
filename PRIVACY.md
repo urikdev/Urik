@@ -176,8 +176,8 @@ When you uninstall Urik, Android automatically deletes:
 You have the right to:
 
 1. **Access Your Data**
-    - View your learned words: Settings → Privacy & Data → Learned Words (feature not yet available, but data is on your device)
     - View error logs: Settings → Privacy & Data → Export Error Logs
+    - Your learned words are stored locally on your device in an encrypted database
 
 2. **Delete Your Data**
     - Clear specific learned words: Long-press suggestions to remove

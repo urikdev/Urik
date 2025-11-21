@@ -16,7 +16,7 @@
 ### Feature Requests
 1. Open an issue tagged `enhancement`
 2. Wait for maintainer approval before implementing
-3. PRs without prior approval are less likely to merge
+3. Do not submit PRs for unapproved features
 
 ### Translations
 - Default English: `res/values/strings.xml`
@@ -49,7 +49,7 @@
 ## Pull Request Requirements
 
 - Branch from `develop`, target `develop`
-- Include tests for new code
+- Add tests as appropriate
 - Pass all CI checks (ktlint, tests, build)
 - Reference related issue number if available
 
