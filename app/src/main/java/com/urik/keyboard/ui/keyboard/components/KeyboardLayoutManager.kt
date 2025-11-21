@@ -8,6 +8,8 @@ import android.graphics.Typeface
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.LayerDrawable
+import android.graphics.drawable.RippleDrawable
+import android.graphics.drawable.StateListDrawable
 import android.os.Handler
 import android.os.Looper
 import android.util.TypedValue
@@ -952,15 +954,49 @@ class KeyboardLayoutManager(
             }
 
         val cornerRadius = 8f * context.resources.displayMetrics.density
+        val strokeWidth = (1 * context.resources.displayMetrics.density).toInt()
+        val strokeWidthThick = (2 * context.resources.displayMetrics.density).toInt()
 
-        return GradientDrawable().apply {
-            setColor(backgroundColor)
-            this.cornerRadius = cornerRadius
-            setStroke(
-                (1 * context.resources.displayMetrics.density).toInt(),
-                theme.colors.keyBorder,
-            )
-        }
+        val normalDrawable =
+            GradientDrawable().apply {
+                setColor(backgroundColor)
+                this.cornerRadius = cornerRadius
+                setStroke(strokeWidth, theme.colors.keyBorder)
+            }
+
+        val pressedDrawable =
+            GradientDrawable().apply {
+                setColor(theme.colors.statePressed)
+                this.cornerRadius = cornerRadius
+                setStroke(strokeWidth, theme.colors.keyBorderPressed)
+            }
+
+        val focusedDrawable =
+            GradientDrawable().apply {
+                setColor(backgroundColor)
+                this.cornerRadius = cornerRadius
+                setStroke(strokeWidthThick, theme.colors.keyBorderFocused)
+            }
+
+        val activatedDrawable =
+            GradientDrawable().apply {
+                setColor(theme.colors.stateActivated)
+                this.cornerRadius = cornerRadius
+                setStroke(strokeWidthThick, theme.colors.keyBorderFocused)
+            }
+
+        val stateListDrawable = StateListDrawable()
+        stateListDrawable.addState(intArrayOf(android.R.attr.state_pressed), pressedDrawable)
+        stateListDrawable.addState(intArrayOf(android.R.attr.state_activated), activatedDrawable)
+        stateListDrawable.addState(intArrayOf(android.R.attr.state_focused), focusedDrawable)
+        stateListDrawable.addState(intArrayOf(), normalDrawable)
+
+        return RippleDrawable(
+            android.content.res.ColorStateList
+                .valueOf(theme.colors.statePressed),
+            stateListDrawable,
+            null,
+        )
     }
 
     private fun getKeyTextColor(key: KeyboardKey): Int =
