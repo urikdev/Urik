@@ -100,6 +100,7 @@
     <string name="key_size_small">Små</string>
     <string name="key_size_medium">Medium</string>
     <string name="key_size_large">Stor</string>
+    <string name="key_size_extra_large">Extra stor</string>
     <string name="vibration_strength_light">Ljus</string>
     <string name="vibration_strength_medium">Medium</string>
     <string name="vibration_strength_strong">Stark</string>

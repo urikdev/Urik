@@ -197,7 +197,11 @@ class KeyboardLayoutManager(
         cachedTextSizes.getOrPut(keyHeight) {
             val baseTextSize = keyHeight * 0.38f / context.resources.displayMetrics.density
             val minSize = 12f
-            val maxSize = 24f
+            val maxSize =
+                when (currentKeySize) {
+                    KeySize.EXTRA_LARGE -> 16f
+                    else -> 24f
+                }
             val adjusted = baseTextSize.coerceIn(minSize, maxSize)
             adjusted * currentKeyLabelSize.scaleFactor
         }
@@ -347,6 +351,8 @@ class KeyboardLayoutManager(
             )
 
             setTextSize(TypedValue.COMPLEX_UNIT_SP, finalTextSize)
+            maxLines = 1
+            gravity = Gravity.CENTER
 
             typeface = Typeface.DEFAULT
 
