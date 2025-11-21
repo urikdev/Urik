@@ -161,6 +161,12 @@ class KeyboardViewModel
             }
         }
 
+        fun disableCapsLockAfterPunctuation() {
+            if (_state.value.isCapsLockOn) {
+                updateState { it.copy(isCapsLockOn = false, isShiftPressed = true) }
+            }
+        }
+
         private fun handleEvent(event: KeyboardEvent) {
             when (event) {
                 is KeyboardEvent.KeyPressed -> handleKeyPress(event.key)
