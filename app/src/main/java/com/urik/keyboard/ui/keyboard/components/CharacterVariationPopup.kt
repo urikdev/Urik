@@ -10,6 +10,7 @@ import android.widget.HorizontalScrollView
 import android.widget.LinearLayout
 import android.widget.PopupWindow
 import androidx.core.graphics.drawable.toDrawable
+import com.urik.keyboard.R
 import com.urik.keyboard.theme.ThemeManager
 
 /**
@@ -70,12 +71,15 @@ class CharacterVariationPopup(
 
         variationContainer.removeAllViews()
 
+        val totalCount = variations.size + if (baseChar.isNotEmpty()) 1 else 0
+
         if (baseChar.isNotEmpty()) {
-            addCharacterView(baseChar, isBase = true)
+            addCharacterView(baseChar, isBase = true, index = 0, totalCount = totalCount)
         }
 
-        variations.forEach { variation ->
-            addCharacterView(variation, isBase = false)
+        variations.forEachIndexed { index, variation ->
+            val actualIndex = if (baseChar.isNotEmpty()) index + 1 else index
+            addCharacterView(variation, isBase = false, index = actualIndex, totalCount = totalCount)
         }
 
         val density = context.resources.displayMetrics.density
@@ -95,6 +99,8 @@ class CharacterVariationPopup(
     private fun addCharacterView(
         char: String,
         isBase: Boolean,
+        index: Int,
+        totalCount: Int,
     ) {
         val density = context.resources.displayMetrics.density
 
@@ -151,7 +157,13 @@ class CharacterVariationPopup(
                     dismiss()
                 }
 
-                contentDescription = "Character variation: $char"
+                contentDescription =
+                    context.getString(
+                        R.string.character_variation_position,
+                        index + 1,
+                        totalCount,
+                        char,
+                    )
             }
 
         variationContainer.addView(button)
