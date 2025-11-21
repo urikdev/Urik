@@ -5,17 +5,6 @@ import com.urik.keyboard.R
 import com.urik.keyboard.settings.KeyboardSettings.Companion.DEFAULT_LANGUAGE
 
 /**
- * Visual theme options.
- */
-enum class Theme(
-    val displayNameRes: Int,
-) {
-    SYSTEM(R.string.theme_system),
-    LIGHT(R.string.theme_light),
-    DARK(R.string.theme_dark),
-}
-
-/**
  * Key size scale factors.
  */
 enum class KeySize(
@@ -94,9 +83,10 @@ data class KeyboardSettings(
     val longPressDuration: LongPressDuration = LongPressDuration.MEDIUM,
     val showNumberRow: Boolean = true,
     val spaceBarSize: SpaceBarSize = SpaceBarSize.STANDARD,
-    val theme: Theme = Theme.SYSTEM,
     val keySize: KeySize = KeySize.MEDIUM,
     val keyLabelSize: KeyLabelSize = KeyLabelSize.MEDIUM,
+    val keyboardTheme: String = "default",
+    val favoriteThemes: Set<String> = emptySet(),
 ) {
     /**
      * Returns validated copy with constraints enforced.

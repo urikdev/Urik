@@ -41,6 +41,7 @@ import org.mockito.kotlin.whenever
 class KeyboardViewModelTest {
     private lateinit var repository: KeyboardRepository
     private lateinit var languageManager: LanguageManager
+    private lateinit var themeManager: com.urik.keyboard.theme.ThemeManager
     private lateinit var viewModel: KeyboardViewModel
     private val testDispatcher = UnconfinedTestDispatcher()
     private lateinit var languageFlow: MutableStateFlow<String>
@@ -50,16 +51,20 @@ class KeyboardViewModelTest {
         Dispatchers.setMain(testDispatcher)
         repository = mock()
         languageManager = mock()
+        themeManager = mock()
 
         languageFlow = MutableStateFlow("en")
         whenever(languageManager.currentLanguage).thenReturn(languageFlow)
+
+        val themeFlow = MutableStateFlow<com.urik.keyboard.theme.KeyboardTheme>(com.urik.keyboard.theme.Default)
+        whenever(themeManager.currentTheme).thenReturn(themeFlow)
 
         runTest {
             whenever(repository.getLayoutForMode(any(), any(), any()))
                 .thenReturn(Result.success(createMockLayout(KeyboardMode.LETTERS)))
         }
 
-        viewModel = KeyboardViewModel(repository, languageManager)
+        viewModel = KeyboardViewModel(repository, languageManager, themeManager)
     }
 
     @Test

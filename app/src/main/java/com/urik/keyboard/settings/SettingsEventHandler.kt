@@ -15,7 +15,6 @@ class SettingsEventHandler(
     fun handle(event: SettingsEvent) {
         val messageRes =
             when (event) {
-                is SettingsEvent.Error.ThemeUpdateFailed -> R.string.error_update_theme
                 is SettingsEvent.Error.KeySizeUpdateFailed -> R.string.error_update_key_size
                 is SettingsEvent.Error.KeyLabelSizeUpdateFailed -> R.string.error_update_key_label_size
                 is SettingsEvent.Error.SuggestionToggleFailed -> R.string.error_update_suggestions

@@ -53,9 +53,10 @@ class SettingsRepository
             val LONG_PRESS_DURATION = stringPreferencesKey("long_press_duration")
             val SHOW_NUMBER_ROW = booleanPreferencesKey("show_number_row")
             val SPACE_BAR_SIZE = stringPreferencesKey("space_bar_size")
-            val THEME = stringPreferencesKey("theme")
+            val KEYBOARD_THEME = stringPreferencesKey("keyboard_theme")
             val KEY_SIZE = stringPreferencesKey("key_size")
             val KEY_LABEL_SIZE = stringPreferencesKey("key_label_size")
+            val FAVORITE_THEMES = stringSetPreferencesKey("favorite_themes")
         }
 
         /**
@@ -100,14 +101,6 @@ class SettingsRepository
                                     SpaceBarSize.STANDARD
                                 }
                             } ?: SpaceBarSize.STANDARD,
-                        theme =
-                            preferences[PreferenceKeys.THEME]?.let {
-                                try {
-                                    Theme.valueOf(it)
-                                } catch (_: IllegalArgumentException) {
-                                    Theme.SYSTEM
-                                }
-                            } ?: Theme.SYSTEM,
                         keySize =
                             preferences[PreferenceKeys.KEY_SIZE]?.let {
                                 try {
@@ -124,6 +117,8 @@ class SettingsRepository
                                     KeyLabelSize.MEDIUM
                                 }
                             } ?: KeyLabelSize.MEDIUM,
+                        keyboardTheme = preferences[PreferenceKeys.KEYBOARD_THEME] ?: "default",
+                        favoriteThemes = preferences[PreferenceKeys.FAVORITE_THEMES] ?: emptySet(),
                     ).validated()
                 }.catch { _ ->
                     emit(getDefaultSettings())
@@ -268,17 +263,6 @@ class SettingsRepository
             }
 
         /**
-         * Updates keyboard theme.
-         */
-        suspend fun updateTheme(theme: Theme): Result<Unit> =
-            try {
-                dataStore.edit { it[PreferenceKeys.THEME] = theme.name }
-                Result.success(Unit)
-            } catch (e: Exception) {
-                Result.failure(e)
-            }
-
-        /**
          * Updates key size scale factor.
          */
         suspend fun updateKeySize(size: KeySize): Result<Unit> =
@@ -295,6 +279,25 @@ class SettingsRepository
         suspend fun updateKeyLabelSize(size: KeyLabelSize): Result<Unit> =
             try {
                 dataStore.edit { it[PreferenceKeys.KEY_LABEL_SIZE] = size.name }
+                Result.success(Unit)
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+
+        /**
+         * Updates keyboard theme by ID.
+         */
+        suspend fun updateKeyboardTheme(themeId: String): Result<Unit> =
+            try {
+                dataStore.edit { it[PreferenceKeys.KEYBOARD_THEME] = themeId }
+                Result.success(Unit)
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+
+        suspend fun updateFavoriteThemes(favorites: Set<String>): Result<Unit> =
+            try {
+                dataStore.edit { it[PreferenceKeys.FAVORITE_THEMES] = favorites }
                 Result.success(Unit)
             } catch (e: Exception) {
                 Result.failure(e)

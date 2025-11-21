@@ -1,13 +1,11 @@
 package com.urik.keyboard.settings.appearance
 
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.urik.keyboard.settings.KeyLabelSize
 import com.urik.keyboard.settings.KeySize
 import com.urik.keyboard.settings.SettingsEvent
 import com.urik.keyboard.settings.SettingsRepository
-import com.urik.keyboard.settings.Theme
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -35,7 +33,6 @@ class AppearanceViewModel
             settingsRepository.settings
                 .map { settings ->
                     AppearanceUiState(
-                        theme = settings.theme,
                         keySize = settings.keySize,
                         keyLabelSize = settings.keyLabelSize,
                     )
@@ -44,22 +41,6 @@ class AppearanceViewModel
                     started = SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS),
                     initialValue = AppearanceUiState(),
                 )
-
-        fun updateTheme(theme: Theme) {
-            viewModelScope.launch {
-                settingsRepository
-                    .updateTheme(theme)
-                    .onSuccess {
-                        val nightMode =
-                            when (theme) {
-                                Theme.LIGHT -> AppCompatDelegate.MODE_NIGHT_NO
-                                Theme.DARK -> AppCompatDelegate.MODE_NIGHT_YES
-                                Theme.SYSTEM -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
-                            }
-                        AppCompatDelegate.setDefaultNightMode(nightMode)
-                    }.onFailure { _events.emit(SettingsEvent.Error.ThemeUpdateFailed) }
-            }
-        }
 
         fun updateKeySize(size: KeySize) {
             viewModelScope.launch {
@@ -86,7 +67,6 @@ class AppearanceViewModel
  * UI state for appearance settings.
  */
 data class AppearanceUiState(
-    val theme: Theme = Theme.SYSTEM,
     val keySize: KeySize = KeySize.MEDIUM,
     val keyLabelSize: KeyLabelSize = KeyLabelSize.MEDIUM,
 )
