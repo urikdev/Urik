@@ -144,10 +144,13 @@ class KeyboardViewModel
                 return true
             }
 
-            val lastNonWhitespaceChar = trimmed.lastOrNull()
-            if (lastNonWhitespaceChar != null && isSentenceEndingPunctuation(lastNonWhitespaceChar)) {
-                val afterPunctuation = textBeforeCursor.removePrefix(trimmed)
-                return afterPunctuation.isNotEmpty() && afterPunctuation.all { it.isWhitespace() }
+            val lastNonWhitespaceIndex = textBeforeCursor.indexOfLast { !it.isWhitespace() }
+            if (lastNonWhitespaceIndex >= 0) {
+                val lastNonWhitespaceChar = textBeforeCursor[lastNonWhitespaceIndex]
+                if (isSentenceEndingPunctuation(lastNonWhitespaceChar)) {
+                    val afterPunctuation = textBeforeCursor.substring(lastNonWhitespaceIndex + 1)
+                    return afterPunctuation.isNotEmpty() && afterPunctuation.all { it.isWhitespace() }
+                }
             }
 
             return false
