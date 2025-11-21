@@ -65,7 +65,7 @@ class KeyboardPreviewRenderer(
                 setBackgroundColor(theme.colors.keyboardBackground)
             }
 
-        val textSize = calculateTextSize(keyHeight)
+        val textSize = calculateTextSize(keyHeight, keySize)
 
         rowsToRender.forEach { row ->
             val rowView =
@@ -117,10 +117,17 @@ class KeyboardPreviewRenderer(
         return scaledContainer
     }
 
-    private fun calculateTextSize(keyHeight: Int): Float {
+    private fun calculateTextSize(
+        keyHeight: Int,
+        keySize: KeySize,
+    ): Float {
         val baseTextSize = keyHeight * 0.38f / context.resources.displayMetrics.density
         val minSize = 12f
-        val maxSize = 24f
+        val maxSize =
+            when (keySize) {
+                KeySize.EXTRA_LARGE -> 16f
+                else -> 24f
+            }
         return baseTextSize.coerceIn(minSize, maxSize)
     }
 
@@ -221,6 +228,8 @@ class KeyboardPreviewRenderer(
 
             setTextAppearance(R.style.KeyTextAppearance)
             setTextSize(TypedValue.COMPLEX_UNIT_SP, textSize)
+            maxLines = 1
+            gravity = Gravity.CENTER
             typeface = Typeface.DEFAULT
 
             minHeight = 0

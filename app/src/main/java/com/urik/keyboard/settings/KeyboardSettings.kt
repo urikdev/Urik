@@ -14,6 +14,7 @@ enum class KeySize(
     SMALL(R.string.key_size_small, 0.85f),
     MEDIUM(R.string.key_size_medium, 1.0f),
     LARGE(R.string.key_size_large, 1.15f),
+    EXTRA_LARGE(R.string.key_size_extra_large, 1.35f),
 }
 
 /**
