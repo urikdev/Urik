@@ -376,13 +376,44 @@ class KeyboardViewModelTest {
     }
 
     @Test
-    fun `checkAndApplyAutoCapitalization does not override caps lock`() =
+    fun `checkAndApplyAutoCapitalization preserves caps lock after sentence end`() =
         runTest {
             viewModel.onEvent(KeyboardEvent.CapsLockToggled)
 
             viewModel.checkAndApplyAutoCapitalization("Hello. ")
 
             assertTrue(viewModel.state.value.isCapsLockOn)
+            assertFalse(viewModel.state.value.isShiftPressed)
+        }
+
+    @Test
+    fun `checkAndApplyAutoCapitalization preserves caps lock mid-sentence`() =
+        runTest {
+            viewModel.onEvent(KeyboardEvent.CapsLockToggled)
+
+            viewModel.checkAndApplyAutoCapitalization("HELLO ")
+
+            assertTrue(viewModel.state.value.isCapsLockOn)
+            assertFalse(viewModel.state.value.isShiftPressed)
+        }
+
+    @Test
+    fun `disableCapsLockAfterPunctuation turns off caps lock and enables shift`() =
+        runTest {
+            viewModel.onEvent(KeyboardEvent.CapsLockToggled)
+
+            viewModel.disableCapsLockAfterPunctuation()
+
+            assertFalse(viewModel.state.value.isCapsLockOn)
+            assertTrue(viewModel.state.value.isShiftPressed)
+        }
+
+    @Test
+    fun `disableCapsLockAfterPunctuation does nothing when caps lock is off`() =
+        runTest {
+            viewModel.disableCapsLockAfterPunctuation()
+
+            assertFalse(viewModel.state.value.isCapsLockOn)
             assertFalse(viewModel.state.value.isShiftPressed)
         }
 
