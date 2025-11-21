@@ -289,8 +289,8 @@ class SwipeKeyboardView
             findKeyboardView()?.let { keyboardView ->
                 keyboardView.visibility = VISIBLE
                 suggestionBar?.let { bar ->
-                    val keyHeight = context.resources.getDimensionPixelSize(R.dimen.key_height)
-                    bar.minimumHeight = (keyHeight * 0.8f).toInt()
+                    val minTouchTarget = context.resources.getDimensionPixelSize(R.dimen.minimum_touch_target)
+                    bar.minimumHeight = minTouchTarget
                     bar.requestLayout()
                 }
                 keyboardView.requestLayout()
@@ -778,8 +778,8 @@ class SwipeKeyboardView
                         val verticalPadding = (basePadding * 0.3f).toInt()
                         setPadding(basePadding, verticalPadding, basePadding, verticalPadding)
 
-                        val keyHeight = context.resources.getDimensionPixelSize(R.dimen.key_height)
-                        minimumHeight = (keyHeight * 0.8f).toInt()
+                        val minTouchTarget = context.resources.getDimensionPixelSize(R.dimen.minimum_touch_target)
+                        minimumHeight = minTouchTarget
                         setBackgroundColor(
                             themeManager!!
                                 .currentTheme.value.colors.suggestionBarBackground,

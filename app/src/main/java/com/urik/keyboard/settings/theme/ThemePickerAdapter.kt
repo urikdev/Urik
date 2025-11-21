@@ -128,6 +128,11 @@ class ThemePickerAdapter(
             favoriteIndicator.setImageResource(
                 if (isFavorite) R.drawable.ic_heart_filled else R.drawable.ic_heart_outline,
             )
+            favoriteIndicator.contentDescription =
+                rootView.context.getString(
+                    if (isFavorite) R.string.theme_remove_favorite else R.string.theme_add_favorite,
+                    theme.displayName,
+                )
             favoriteIndicator.setOnClickListener { onFavoriteClick() }
 
             cardView.strokeWidth =
@@ -137,6 +142,11 @@ class ThemePickerAdapter(
                     0
                 }
 
+            rootView.contentDescription =
+                rootView.context.getString(
+                    if (isSelected) R.string.theme_description_selected else R.string.theme_description,
+                    theme.displayName,
+                )
             rootView.setOnClickListener { onThemeClick() }
         }
 

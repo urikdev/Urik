@@ -161,6 +161,15 @@
 
     <string name="action_emoji">Emoji</string>
 
+    <!-- Theme Picker Accessibility -->
+    <string name="theme_description">Tema %1$s</string>
+    <string name="theme_description_selected">Tema %1$s, actualmente seleccionado</string>
+    <string name="theme_add_favorite">Añadir %1$s a favoritos</string>
+    <string name="theme_remove_favorite">Quitar %1$s de favoritos</string>
+
+    <!-- Character Variation Accessibility -->
+    <string name="character_variation_position">Variante de carácter %1$d de %2$d: %3$s</string>
+
     <!-- Blacklisting Words -->
     <string name="remove_suggestion">¿Eliminar %1$s de las sugerencias?</string>
     <string name="remove_cancel">Cancelar</string>
