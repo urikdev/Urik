@@ -380,9 +380,8 @@ class UrikInputMethodService :
         swipeKeyboardView?.clearSuggestions()
         composingRegionStart = -1
 
-        viewModel.onEvent(KeyboardEvent.ShiftStateChanged(false))
-        if (viewModel.state.value.isCapsLockOn) {
-            viewModel.onEvent(KeyboardEvent.CapsLockToggled)
+        if (!viewModel.state.value.isCapsLockOn) {
+            viewModel.onEvent(KeyboardEvent.ShiftStateChanged(false))
         }
 
         try {
@@ -1116,6 +1115,7 @@ class UrikInputMethodService :
                         val singleChar = char.single()
 
                         if (isSentenceEndingPunctuation(singleChar) && !isSecureField) {
+                            viewModel.disableCapsLockAfterPunctuation()
                             val textBefore = currentInputConnection?.getTextBeforeCursor(50, 0)?.toString()
                             viewModel.checkAndApplyAutoCapitalization(textBefore)
                         }
@@ -1162,6 +1162,7 @@ class UrikInputMethodService :
                     val singleChar = char.single()
 
                     if (isSentenceEndingPunctuation(singleChar) && !isSecureField) {
+                        viewModel.disableCapsLockAfterPunctuation()
                         val textBefore =
                             currentInputConnection?.getTextBeforeCursor(50, 0)?.toString()
                         viewModel.checkAndApplyAutoCapitalization(textBefore)
