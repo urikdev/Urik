@@ -45,6 +45,7 @@ import com.urik.keyboard.utils.CursorEditingUtils
 import com.urik.keyboard.utils.ErrorLogger
 import com.urik.keyboard.utils.KeyboardModeUtils
 import com.urik.keyboard.utils.SecureFieldDetector
+import com.urik.keyboard.utils.UrlEmailDetector
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -1127,21 +1128,34 @@ class UrikInputMethodService :
 
                 if (displayBuffer.isNotEmpty() && wordState.requiresSpellCheck) {
                     if (wordState.graphemeCount >= 2) {
-                        val isValid = textInputProcessor.validateWord(wordState.normalizedBuffer)
-                        if (!isValid) {
-                            spellConfirmationState = SpellConfirmationState.AWAITING_CONFIRMATION
-                            pendingWordForLearning = wordState.normalizedBuffer
-                            highlightCurrentWord()
+                        val textBefore =
+                            currentInputConnection
+                                ?.getTextBeforeCursor(100, 0)
+                                ?.toString() ?: ""
+                        val isUrlOrEmail =
+                            UrlEmailDetector.isUrlOrEmailContext(
+                                currentWord = displayBuffer,
+                                textBeforeCursor = textBefore,
+                                nextChar = char,
+                            )
 
-                            val suggestions = textInputProcessor.getSuggestions(wordState.normalizedBuffer)
-                            val displaySuggestions = applyCapitalizationToSuggestions(suggestions)
-                            pendingSuggestions = displaySuggestions
-                            if (displaySuggestions.isNotEmpty()) {
-                                swipeKeyboardView?.updateSuggestions(displaySuggestions)
-                            } else {
-                                swipeKeyboardView?.clearSuggestions()
+                        if (!isUrlOrEmail) {
+                            val isValid = textInputProcessor.validateWord(wordState.normalizedBuffer)
+                            if (!isValid) {
+                                spellConfirmationState = SpellConfirmationState.AWAITING_CONFIRMATION
+                                pendingWordForLearning = wordState.normalizedBuffer
+                                highlightCurrentWord()
+
+                                val suggestions = textInputProcessor.getSuggestions(wordState.normalizedBuffer)
+                                val displaySuggestions = applyCapitalizationToSuggestions(suggestions)
+                                pendingSuggestions = displaySuggestions
+                                if (displaySuggestions.isNotEmpty()) {
+                                    swipeKeyboardView?.updateSuggestions(displaySuggestions)
+                                } else {
+                                    swipeKeyboardView?.clearSuggestions()
+                                }
+                                return@launch
                             }
-                            return@launch
                         }
                     }
                 }
@@ -1854,47 +1868,60 @@ class UrikInputMethodService :
 
                 if (wordState.hasContent && wordState.requiresSpellCheck) {
                     if (wordState.graphemeCount >= 2) {
-                        val isValid = textInputProcessor.validateWord(wordState.normalizedBuffer)
-                        if (isValid) {
-                            currentInputConnection?.beginBatchEdit()
-                            try {
-                                coordinateStateClear()
-                                currentInputConnection?.commitText(" ", 1)
-                                val cursorPos =
-                                    currentInputConnection
-                                        ?.getTextBeforeCursor(
-                                            KeyboardConstants.TextProcessingConstants.MAX_CURSOR_POSITION_CHARS,
-                                            0,
-                                        )?.length
-                                        ?: 0
-                                currentInputConnection?.setSelection(cursorPos, cursorPos)
+                        val textBeforeForUrlCheck =
+                            currentInputConnection
+                                ?.getTextBeforeCursor(100, 0)
+                                ?.toString() ?: ""
+                        val isUrlOrEmail =
+                            UrlEmailDetector.isUrlOrEmailContext(
+                                currentWord = displayBuffer,
+                                textBeforeCursor = textBeforeForUrlCheck,
+                                nextChar = " ",
+                            )
 
-                                val textBefore =
-                                    currentInputConnection?.getTextBeforeCursor(50, 0)?.toString()
-                                viewModel.checkAndApplyAutoCapitalization(textBefore)
-                            } finally {
-                                currentInputConnection?.endBatchEdit()
+                        if (!isUrlOrEmail) {
+                            val isValid = textInputProcessor.validateWord(wordState.normalizedBuffer)
+                            if (isValid) {
+                                currentInputConnection?.beginBatchEdit()
+                                try {
+                                    coordinateStateClear()
+                                    currentInputConnection?.commitText(" ", 1)
+                                    val cursorPos =
+                                        currentInputConnection
+                                            ?.getTextBeforeCursor(
+                                                KeyboardConstants.TextProcessingConstants.MAX_CURSOR_POSITION_CHARS,
+                                                0,
+                                            )?.length
+                                            ?: 0
+                                    currentInputConnection?.setSelection(cursorPos, cursorPos)
+
+                                    val textBefore =
+                                        currentInputConnection?.getTextBeforeCursor(50, 0)?.toString()
+                                    viewModel.checkAndApplyAutoCapitalization(textBefore)
+                                } finally {
+                                    currentInputConnection?.endBatchEdit()
+                                }
+
+                                return@launch
+                            }
+
+                            val suggestions =
+                                textInputProcessor.getSuggestions(wordState.normalizedBuffer)
+
+                            spellConfirmationState = SpellConfirmationState.AWAITING_CONFIRMATION
+                            pendingWordForLearning = wordState.normalizedBuffer
+
+                            highlightCurrentWord()
+                            val displaySuggestions = applyCapitalizationToSuggestions(suggestions)
+                            pendingSuggestions = displaySuggestions
+                            if (displaySuggestions.isNotEmpty()) {
+                                swipeKeyboardView?.updateSuggestions(displaySuggestions)
+                            } else {
+                                swipeKeyboardView?.clearSuggestions()
                             }
 
                             return@launch
                         }
-
-                        val suggestions =
-                            textInputProcessor.getSuggestions(wordState.normalizedBuffer)
-
-                        spellConfirmationState = SpellConfirmationState.AWAITING_CONFIRMATION
-                        pendingWordForLearning = wordState.normalizedBuffer
-
-                        highlightCurrentWord()
-                        val displaySuggestions = applyCapitalizationToSuggestions(suggestions)
-                        pendingSuggestions = displaySuggestions
-                        if (displaySuggestions.isNotEmpty()) {
-                            swipeKeyboardView?.updateSuggestions(displaySuggestions)
-                        } else {
-                            swipeKeyboardView?.clearSuggestions()
-                        }
-
-                        return@launch
                     }
                 }
 
