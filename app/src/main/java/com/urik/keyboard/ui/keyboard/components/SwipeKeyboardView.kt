@@ -103,7 +103,15 @@ class SwipeKeyboardView
         }
 
         private fun setupSwipeOverlay() {
-            themeManager?.let { swipeOverlay.setThemeManager(it) }
+            themeManager?.let { manager ->
+                swipeOverlay.setThemeManager(manager)
+
+                viewScope.launch {
+                    manager.currentTheme.collect {
+                        swipeOverlay.resetColors()
+                    }
+                }
+            }
         }
 
         private fun isTouchInEmojiPicker(
