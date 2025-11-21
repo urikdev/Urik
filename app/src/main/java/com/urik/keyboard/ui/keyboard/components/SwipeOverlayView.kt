@@ -84,6 +84,10 @@ class SwipeOverlayView
             themeManager = manager
         }
 
+        fun resetColors() {
+            colorsInitialized = false
+        }
+
         private var pulseAnimator: ValueAnimator? = null
 
         private var colorsInitialized = false
