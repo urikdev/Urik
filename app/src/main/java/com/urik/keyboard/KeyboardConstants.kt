@@ -129,7 +129,7 @@ object KeyboardConstants {
 
     object InputTimingConstants {
         const val SUGGESTION_DEBOUNCE_MS = 10L
-        const val DOUBLE_TAP_SPACE_THRESHOLD_MS = 300L
+        const val DOUBLE_TAP_SPACE_THRESHOLD_MS = 200L
         const val DOUBLE_SHIFT_THRESHOLD_MS = 400L
     }
 

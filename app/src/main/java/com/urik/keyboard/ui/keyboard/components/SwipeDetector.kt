@@ -147,6 +147,11 @@ class SwipeDetector
         ): Boolean {
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
+                    val touchedKey = keyAt(event.x, event.y)
+                    if (touchedKey !is KeyboardKey.Character) {
+                        reset()
+                        return false
+                    }
                     startSwipeDetection(event)
                     return true
                 }
