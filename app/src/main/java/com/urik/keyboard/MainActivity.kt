@@ -1,10 +1,12 @@
 package com.urik.keyboard
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
+import android.view.accessibility.AccessibilityManager
 import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -76,6 +78,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startAutoSwipe() {
+        val accessibilityManager = getSystemService(Context.ACCESSIBILITY_SERVICE) as? AccessibilityManager
+        if (accessibilityManager?.isTouchExplorationEnabled == true) {
+            return
+        }
+
         autoSwipeJob?.cancel()
         autoSwipeJob =
             lifecycleScope.launch {
