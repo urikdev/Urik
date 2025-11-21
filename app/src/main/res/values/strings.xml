@@ -41,6 +41,7 @@
     <string name="key_size_small">Small</string>
     <string name="key_size_medium">Medium</string>
     <string name="key_size_large">Large</string>
+    <string name="key_size_extra_large">Extra Large</string>
 
     <!-- Vibration Strength -->
     <string name="vibration_strength_light">Light</string>
