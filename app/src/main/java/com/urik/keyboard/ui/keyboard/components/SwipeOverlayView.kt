@@ -9,8 +9,7 @@ import android.graphics.PointF
 import android.util.AttributeSet
 import android.view.View
 import android.view.animation.DecelerateInterpolator
-import androidx.core.content.ContextCompat
-import com.urik.keyboard.R
+import com.urik.keyboard.theme.ThemeManager
 
 /**
  * Visual overlay for swipe typing gesture trail.
@@ -78,6 +77,13 @@ class SwipeOverlayView
         private var fadeAlpha = 1.0f
         private var pulseScale = 1.0f
         private var fadeAnimator: ValueAnimator? = null
+
+        private var themeManager: ThemeManager? = null
+
+        fun setThemeManager(manager: ThemeManager) {
+            themeManager = manager
+        }
+
         private var pulseAnimator: ValueAnimator? = null
 
         private var colorsInitialized = false
@@ -129,15 +135,18 @@ class SwipeOverlayView
 
         private fun initializeColors() {
             try {
-                val swipeColor = ContextCompat.getColor(context, R.color.state_activated)
-                val startColor = ContextCompat.getColor(context, R.color.primary)
-                val currentColor = ContextCompat.getColor(context, R.color.secondary)
-                val shadowColor = 0x40000000
-
-                swipePaint.color = swipeColor
-                startDotPaint.color = startColor
-                currentDotPaint.color = currentColor
-                shadowPaint.color = shadowColor
+                val theme = themeManager?.currentTheme?.value
+                if (theme != null) {
+                    swipePaint.color = theme.colors.swipePrimary
+                    startDotPaint.color = theme.colors.swipePrimary
+                    currentDotPaint.color = theme.colors.swipeSecondary
+                    shadowPaint.color = 0x40000000
+                } else {
+                    swipePaint.color = 0xFFd4d2a5.toInt()
+                    startDotPaint.color = 0xFFd4d2a5.toInt()
+                    currentDotPaint.color = 0xFFfcdebe.toInt()
+                    shadowPaint.color = 0x40000000
+                }
             } catch (_: Exception) {
                 swipePaint.color = 0xFFd4d2a5.toInt()
                 startDotPaint.color = 0xFFd4d2a5.toInt()

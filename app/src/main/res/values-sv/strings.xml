@@ -92,6 +92,7 @@
     <string name="remove_suggestion">Ta bort %1$s från förslagen?</string>
     <string name="remove_cancel">Avboka</string>
     <string name="remove_confirm">Ta bort</string>
+    <string name="theme_picker_title">Tema</string>
     <string name="dictionary_attribution_summary">FrequencyWords-licens och tillskrivning</string>
     <string name="theme_system">Följ systemet</string>
     <string name="theme_light">Ljus</string>

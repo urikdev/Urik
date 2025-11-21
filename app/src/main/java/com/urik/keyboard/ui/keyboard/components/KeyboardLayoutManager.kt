@@ -5,6 +5,8 @@ package com.urik.keyboard.ui.keyboard.components
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Typeface
+import android.graphics.drawable.Drawable
+import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.LayerDrawable
 import android.os.Handler
 import android.os.Looper
@@ -28,7 +30,7 @@ import com.urik.keyboard.settings.KeyLabelSize
 import com.urik.keyboard.settings.KeySize
 import com.urik.keyboard.settings.LongPressDuration
 import com.urik.keyboard.settings.SpaceBarSize
-import com.urik.keyboard.settings.Theme
+import com.urik.keyboard.theme.ThemeManager
 import com.urik.keyboard.utils.CacheMemoryManager
 import com.urik.keyboard.utils.ManagedCache
 import kotlinx.coroutines.CoroutineScope
@@ -51,6 +53,7 @@ class KeyboardLayoutManager(
     private val onAcceleratedDeletionChanged: (Boolean) -> Unit,
     private val characterVariationService: CharacterVariationService,
     private val languageManager: LanguageManager,
+    private val themeManager: ThemeManager,
     cacheMemoryManager: CacheMemoryManager,
 ) {
     companion object {
@@ -74,15 +77,12 @@ class KeyboardLayoutManager(
     private var hapticEnabled = true
     private var hapticDurationMs = 20L
 
-    private var themedContext: Context = context
-
     private val accessibilityManager = context.getSystemService(Context.ACCESSIBILITY_SERVICE) as AccessibilityManager
 
     private var currentLongPressDuration = LongPressDuration.MEDIUM
     private var currentKeySize = KeySize.MEDIUM
     private var currentSpaceBarSize = SpaceBarSize.STANDARD
     private var currentKeyLabelSize = KeyLabelSize.MEDIUM
-    private var currentTheme = Theme.SYSTEM
 
     private val backgroundJob = SupervisorJob()
     private val backgroundScope = CoroutineScope(Dispatchers.IO + backgroundJob)
@@ -145,44 +145,6 @@ class KeyboardLayoutManager(
             invalidateCalculationCache()
         }
     }
-
-    fun updateTheme(theme: Theme) {
-        if (currentTheme != theme) {
-            currentTheme = theme
-            themedContext = createThemedContext()
-            returnActiveButtonsToPool()
-            buttonPool.clear()
-        }
-    }
-
-    private fun createThemedContext(): Context =
-        when (currentTheme) {
-            Theme.LIGHT -> {
-                val config = context.resources.configuration
-                val newConfig = android.content.res.Configuration(config)
-                newConfig.uiMode =
-                    (
-                        newConfig.uiMode and
-                            android.content.res.Configuration.UI_MODE_NIGHT_MASK
-                                .inv()
-                    ) or
-                    android.content.res.Configuration.UI_MODE_NIGHT_NO
-                context.createConfigurationContext(newConfig)
-            }
-            Theme.DARK -> {
-                val config = context.resources.configuration
-                val newConfig = android.content.res.Configuration(config)
-                newConfig.uiMode =
-                    (
-                        newConfig.uiMode and
-                            android.content.res.Configuration.UI_MODE_NIGHT_MASK
-                                .inv()
-                    ) or
-                    android.content.res.Configuration.UI_MODE_NIGHT_YES
-                context.createConfigurationContext(newConfig)
-            }
-            Theme.SYSTEM -> context
-        }
 
     fun updateHapticSettings(
         enabled: Boolean,
@@ -247,7 +209,7 @@ class KeyboardLayoutManager(
         returnActiveButtonsToPool()
 
         val keyboardContainer =
-            LinearLayout(themedContext).apply {
+            LinearLayout(context).apply {
                 orientation = LinearLayout.VERTICAL
                 layoutParams =
                     ViewGroup.LayoutParams(
@@ -259,7 +221,7 @@ class KeyboardLayoutManager(
                 val verticalPadding = context.resources.getDimensionPixelSize(R.dimen.keyboard_padding_vertical)
 
                 setPadding(horizontalPadding, verticalPadding, horizontalPadding, verticalPadding)
-                setBackgroundColor(getThemeAwareColor(R.color.surface_background))
+                setBackgroundColor(themeManager.currentTheme.value.colors.keyboardBackground)
 
                 importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_YES
                 contentDescription = context.getString(R.string.keyboard_description)
@@ -278,7 +240,7 @@ class KeyboardLayoutManager(
         state: KeyboardState,
     ): LinearLayout {
         val rowLayout =
-            LinearLayout(themedContext).apply {
+            LinearLayout(context).apply {
                 orientation = LinearLayout.HORIZONTAL
                 layoutParams =
                     LinearLayout
@@ -295,7 +257,7 @@ class KeyboardLayoutManager(
 
         if (is9LetterRow) {
             val spacer =
-                View(themedContext).apply {
+                View(context).apply {
                     layoutParams = LinearLayout.LayoutParams(0, 0, 0.5f)
                 }
             rowLayout.addView(spacer)
@@ -308,7 +270,7 @@ class KeyboardLayoutManager(
 
         if (is9LetterRow) {
             val spacer =
-                View(themedContext).apply {
+                View(context).apply {
                     layoutParams = LinearLayout.LayoutParams(0, 0, 0.5f)
                 }
             rowLayout.addView(spacer)
@@ -334,7 +296,7 @@ class KeyboardLayoutManager(
             if (buttonPool.isNotEmpty()) {
                 buttonPool.removeAt(buttonPool.size - 1)
             } else {
-                Button(themedContext)
+                Button(context)
             }
 
         configureButton(button, key, state, rowKeys)
@@ -395,7 +357,7 @@ class KeyboardLayoutManager(
             val verticalPadding = cachedDimensions["verticalPadding"]!!
             setPadding(horizontalPadding, verticalPadding, horizontalPadding, verticalPadding)
 
-            setBackgroundResource(getKeyBackground(key, state))
+            background = getKeyBackground(key, state)
             setTextColor(getKeyTextColor(key))
 
             isActivated = getKeyActivatedState(key, state)
@@ -434,8 +396,8 @@ class KeyboardLayoutManager(
                     }
 
                 if (iconRes != 0) {
-                    val keyBackground = ContextCompat.getDrawable(themedContext, getKeyBackground(key, state))
-                    val iconDrawable = ContextCompat.getDrawable(themedContext, iconRes)
+                    val keyBackground = getKeyBackground(key, state)
+                    val iconDrawable = ContextCompat.getDrawable(context, iconRes)
 
                     iconDrawable?.setTint(getKeyTextColor(key))
 
@@ -446,7 +408,7 @@ class KeyboardLayoutManager(
                     background = layerDrawable
                     text = ""
                 } else {
-                    setBackgroundResource(getKeyBackground(key, state))
+                    background = getKeyBackground(key, state)
                 }
             }
 
@@ -659,7 +621,7 @@ class KeyboardLayoutManager(
         anchorView.isPressed = false
 
         variationPopup =
-            CharacterVariationPopup(themedContext).apply {
+            CharacterVariationPopup(context, themeManager).apply {
                 setCharacterVariations("", punctuationList) { selectedPunctuation ->
                     performCustomHaptic()
                     val punctuationKey = KeyboardKey.Character(selectedPunctuation, KeyboardKey.KeyType.PUNCTUATION)
@@ -842,7 +804,7 @@ class KeyboardLayoutManager(
         anchorView.isPressed = false
 
         variationPopup =
-            CharacterVariationPopup(themedContext).apply {
+            CharacterVariationPopup(context, themeManager).apply {
                 setCharacterVariations(key.value, variations) { selectedChar ->
                     performCustomHaptic()
                     val selectedKey = KeyboardKey.Character(selectedChar, key.type)
@@ -971,31 +933,35 @@ class KeyboardLayoutManager(
     private fun getKeyBackground(
         key: KeyboardKey,
         state: KeyboardState,
-    ): Int =
-        when (key) {
-            is KeyboardKey.Character -> R.drawable.key_background_character
-            is KeyboardKey.Action ->
-                when (key.action) {
-                    KeyboardKey.ActionType.SHIFT -> {
-                        when {
-                            state.isCapsLockOn -> R.drawable.key_background_caps_lock_on
-                            else -> R.drawable.key_background_action
-                        }
+    ): Drawable {
+        val theme = themeManager.currentTheme.value
+        val backgroundColor =
+            when (key) {
+                is KeyboardKey.Character -> theme.colors.keyBackgroundCharacter
+                is KeyboardKey.Action ->
+                    when (key.action) {
+                        KeyboardKey.ActionType.SPACE -> theme.colors.keyBackgroundSpace
+                        else -> theme.colors.keyBackgroundAction
                     }
-                    KeyboardKey.ActionType.SPACE -> R.drawable.key_background_space
-                    else -> R.drawable.key_background_action
-                }
+            }
+
+        val cornerRadius = 8f * context.resources.displayMetrics.density
+
+        return GradientDrawable().apply {
+            setColor(backgroundColor)
+            this.cornerRadius = cornerRadius
+            setStroke(
+                (1 * context.resources.displayMetrics.density).toInt(),
+                theme.colors.keyBorder,
+            )
         }
+    }
 
     private fun getKeyTextColor(key: KeyboardKey): Int =
         when (key) {
-            is KeyboardKey.Character -> getThemeAwareColor(R.color.key_text_character)
-            is KeyboardKey.Action -> getThemeAwareColor(R.color.key_text_action)
+            is KeyboardKey.Character -> themeManager.currentTheme.value.colors.keyTextCharacter
+            is KeyboardKey.Action -> themeManager.currentTheme.value.colors.keyTextAction
         }
-
-    private fun getThemeAwareColor(colorRes: Int): Int = ContextCompat.getColor(themedContext, colorRes)
-
-    fun getThemedContext(): Context = themedContext
 
     fun cleanup() {
         backgroundJob.cancel()

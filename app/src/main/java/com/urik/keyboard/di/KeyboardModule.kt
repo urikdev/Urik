@@ -95,4 +95,10 @@ object KeyboardModule {
         database: KeyboardDatabase,
         cacheMemoryManager: CacheMemoryManager,
     ): SettingsRepository = SettingsRepository(context, database, cacheMemoryManager)
+
+    @Provides
+    @Singleton
+    fun provideThemeManager(settingsRepository: SettingsRepository): com.urik.keyboard.theme.ThemeManager =
+        com.urik.keyboard.theme
+            .ThemeManager(settingsRepository)
 }

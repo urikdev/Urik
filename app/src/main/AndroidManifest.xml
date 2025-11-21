@@ -40,6 +40,12 @@
             android:label="@string/licenses_title" />
 
         <activity
+            android:name=".settings.theme.ThemePickerActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Urik.NoActionBar"
+            android:label="@string/theme_picker_title" />
+
+        <activity
             android:name="com.google.android.gms.oss.licenses.OssLicensesMenuActivity"
             android:theme="@style/Theme.Urik.OssLicenses"
             tools:replace="android:theme"/>

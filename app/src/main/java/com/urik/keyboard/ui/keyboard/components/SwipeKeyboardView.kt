@@ -24,6 +24,7 @@ import com.urik.keyboard.model.KeyboardLayout
 import com.urik.keyboard.model.KeyboardState
 import com.urik.keyboard.service.SpellCheckManager
 import com.urik.keyboard.service.WordLearningEngine
+import com.urik.keyboard.theme.ThemeManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -49,6 +50,7 @@ class SwipeKeyboardView
         private var spellCheckManager: SpellCheckManager? = null
         private var keyboardLayoutManager: KeyboardLayoutManager? = null
         private var swipeDetector: SwipeDetector? = null
+        private var themeManager: ThemeManager? = null
 
         private var onKeyClickListener: ((KeyboardKey) -> Unit)? = null
         private var onSwipeWordListener: ((String) -> Unit)? = null
@@ -100,6 +102,10 @@ class SwipeKeyboardView
             )
         }
 
+        private fun setupSwipeOverlay() {
+            themeManager?.let { swipeOverlay.setThemeManager(it) }
+        }
+
         private fun isTouchInEmojiPicker(
             x: Float,
             y: Float,
@@ -132,7 +138,7 @@ class SwipeKeyboardView
             isShowingEmojiPicker = true
             findKeyboardView()?.visibility = GONE
 
-            val baseContext = keyboardLayoutManager?.getThemedContext() ?: context
+            val baseContext = context
 
             val themedContext =
                 androidx.appcompat.view.ContextThemeWrapper(
@@ -161,14 +167,20 @@ class SwipeKeyboardView
                             LayoutParams.MATCH_PARENT,
                             LayoutParams.MATCH_PARENT,
                         )
-                    setBackgroundColor(ContextCompat.getColor(baseContext, R.color.surface_background))
+                    setBackgroundColor(
+                        themeManager!!
+                            .currentTheme.value.colors.keyboardBackground,
+                    )
                 }
 
             val closeButtonBar =
                 LinearLayout(baseContext).apply {
                     orientation = LinearLayout.HORIZONTAL
                     gravity = Gravity.END
-                    setBackgroundColor(ContextCompat.getColor(baseContext, R.color.surface_accent))
+                    setBackgroundColor(
+                        themeManager!!
+                            .currentTheme.value.colors.suggestionBarBackground,
+                    )
 
                     val padding = baseContext.resources.getDimensionPixelSize(R.dimen.key_margin_horizontal)
                     setPadding(padding, padding / 2, padding, padding / 2)
@@ -178,12 +190,18 @@ class SwipeKeyboardView
                 TextView(baseContext).apply {
                     text = "⌫"
                     setTextSize(TypedValue.COMPLEX_UNIT_SP, 20f)
-                    setTextColor(ContextCompat.getColor(baseContext, R.color.content_primary))
+                    setTextColor(
+                        themeManager!!
+                            .currentTheme.value.colors.suggestionText,
+                    )
 
                     val buttonPadding = (18f * baseContext.resources.displayMetrics.density).toInt()
                     setPadding(buttonPadding, buttonPadding / 2, buttonPadding, buttonPadding / 2)
 
-                    setBackgroundColor(ContextCompat.getColor(baseContext, R.color.key_background_action))
+                    setBackgroundColor(
+                        themeManager!!
+                            .currentTheme.value.colors.keyBackgroundAction,
+                    )
                     contentDescription = "Backspace"
 
                     setOnClickListener {
@@ -205,12 +223,18 @@ class SwipeKeyboardView
                 TextView(baseContext).apply {
                     text = "✕"
                     setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
-                    setTextColor(ContextCompat.getColor(baseContext, R.color.content_primary))
+                    setTextColor(
+                        themeManager!!
+                            .currentTheme.value.colors.suggestionText,
+                    )
 
                     val buttonPadding = (18f * baseContext.resources.displayMetrics.density).toInt()
                     setPadding(buttonPadding, buttonPadding / 2, buttonPadding, buttonPadding / 2)
 
-                    setBackgroundColor(ContextCompat.getColor(baseContext, R.color.key_background_action))
+                    setBackgroundColor(
+                        themeManager!!
+                            .currentTheme.value.colors.keyBackgroundAction,
+                    )
                     contentDescription = "Close emoji picker"
 
                     setOnClickListener {
@@ -314,6 +338,7 @@ class SwipeKeyboardView
             detector: SwipeDetector,
             spellCheckManager: SpellCheckManager,
             wordLearningEngine: WordLearningEngine,
+            themeManager: ThemeManager,
         ) {
             if (isDestroyed) return
 
@@ -321,8 +346,10 @@ class SwipeKeyboardView
             this.swipeDetector = detector
             this.spellCheckManager = spellCheckManager
             this.wordLearningEngine = wordLearningEngine
+            this.themeManager = themeManager
 
             detector.setSwipeListener(this)
+            setupSwipeOverlay()
         }
 
         fun setOnKeyClickListener(listener: (KeyboardKey) -> Unit) {
@@ -434,7 +461,10 @@ class SwipeKeyboardView
 
                 val suggestionTextSize = calculateResponsiveSuggestionTextSize()
                 btn.setTextSize(TypedValue.COMPLEX_UNIT_SP, suggestionTextSize)
-                btn.setTextColor(ContextCompat.getColor(context, R.color.suggestion_text))
+                btn.setTextColor(
+                    themeManager!!
+                        .currentTheme.value.colors.suggestionText,
+                )
 
                 btn.maxLines = 1
                 btn.ellipsize = android.text.TextUtils.TruncateAt.MIDDLE
@@ -471,7 +501,10 @@ class SwipeKeyboardView
                 if (index < suggestions.take(3).size - 1) {
                     val divider = getOrCreateDividerView()
 
-                    divider.setBackgroundColor(ContextCompat.getColor(context, R.color.suggestion_text))
+                    divider.setBackgroundColor(
+                        themeManager!!
+                            .currentTheme.value.colors.keyBorder,
+                    )
 
                     val dividerParams =
                         LinearLayout
@@ -538,7 +571,10 @@ class SwipeKeyboardView
                         LinearLayout(context).apply {
                             orientation = LinearLayout.VERTICAL
                             gravity = Gravity.CENTER
-                            setBackgroundColor(ContextCompat.getColor(context, R.color.surface_background))
+                            setBackgroundColor(
+                                themeManager!!
+                                    .currentTheme.value.colors.keyboardBackground,
+                            )
 
                             val padding = context.resources.getDimensionPixelSize(R.dimen.key_margin_horizontal) * 2
                             setPadding(padding, padding, padding, padding)
@@ -547,7 +583,10 @@ class SwipeKeyboardView
                                 TextView(context).apply {
                                     text = context.getString(R.string.remove_suggestion, suggestion)
                                     setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
-                                    setTextColor(ContextCompat.getColor(context, R.color.content_primary))
+                                    setTextColor(
+                                        themeManager!!
+                                            .currentTheme.value.colors.suggestionText,
+                                    )
                                     gravity = Gravity.CENTER
                                     setPadding(0, 0, 0, padding)
                                 }
@@ -561,8 +600,14 @@ class SwipeKeyboardView
                                     val cancelBtn =
                                         Button(context).apply {
                                             text = context.getString(R.string.remove_cancel)
-                                            setTextColor(ContextCompat.getColor(context, R.color.content_secondary))
-                                            setBackgroundColor(ContextCompat.getColor(context, R.color.key_background_action))
+                                            setTextColor(
+                                                themeManager!!
+                                                    .currentTheme.value.colors.keyTextAction,
+                                            )
+                                            setBackgroundColor(
+                                                themeManager!!
+                                                    .currentTheme.value.colors.keyBackgroundAction,
+                                            )
                                             setOnClickListener { hideRemovalConfirmation() }
                                         }
 
@@ -735,12 +780,18 @@ class SwipeKeyboardView
 
                         val keyHeight = context.resources.getDimensionPixelSize(R.dimen.key_height)
                         minimumHeight = (keyHeight * 0.8f).toInt()
-                        setBackgroundColor(ContextCompat.getColor(context, R.color.suggestion_bar_background))
+                        setBackgroundColor(
+                            themeManager!!
+                                .currentTheme.value.colors.suggestionBarBackground,
+                        )
 
                         emojiButton =
                             TextView(context).apply {
                                 val emojiDrawable = ContextCompat.getDrawable(context, R.drawable.ic_emoji)
-                                emojiDrawable?.setTint(ContextCompat.getColor(context, R.color.key_text_action))
+                                emojiDrawable?.setTint(
+                                    themeManager!!
+                                        .currentTheme.value.colors.keyTextAction,
+                                )
 
                                 setCompoundDrawablesRelativeWithIntrinsicBounds(emojiDrawable, null, null, null)
 
@@ -748,7 +799,10 @@ class SwipeKeyboardView
 
                                 val padding = (emojiTextSize * context.resources.displayMetrics.density * 0.8f).toInt()
                                 setPadding(padding, padding, padding, padding)
-                                setBackgroundColor(ContextCompat.getColor(context, R.color.key_background_action))
+                                setBackgroundColor(
+                                    themeManager!!
+                                        .currentTheme.value.colors.keyBackgroundAction,
+                                )
 
                                 contentDescription = context.getString(R.string.action_emoji)
 
@@ -1273,6 +1327,7 @@ class SwipeKeyboardView
             keyboardLayoutManager = null
             swipeDetector?.setSwipeListener(null)
             swipeDetector = null
+            themeManager = null
             wordLearningEngine = null
 
             currentLayout = null

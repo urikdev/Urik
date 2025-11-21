@@ -27,6 +27,7 @@
     <string name="licenses_title">Open Source Lizenzen</string>
     <string name="licenses_description">Lizenzen zu Drittanbietersoftware</string>
     <string name="dictionary_attribution_title">Wörterbuch</string>
+    <string name="theme_picker_title">Thema</string>
     <string name="dictionary_attribution_summary">FrequencyWords Lizenz</string>
 
     <!-- Settings Enums -->

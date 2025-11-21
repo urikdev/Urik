@@ -27,6 +27,7 @@
     <string name="licenses_title">Licencias de código abierto</string>
     <string name="licenses_description">Ver licencias de bibliotecas de terceros</string>
     <string name="dictionary_attribution_title">Datos del diccionario</string>
+    <string name="theme_picker_title">Tema</string>
     <string name="dictionary_attribution_summary">Licencia y atribución de FrequencyWords</string>
 
     <!-- Settings Enums -->

@@ -271,4 +271,26 @@ class KeyboardSettingsTest {
         assertEquals(result1.primaryLanguage, result2.primaryLanguage)
         assertEquals(result1.suggestionCount, result2.suggestionCount)
     }
+
+    @Test
+    fun `validated preserves favoriteThemes`() {
+        val favorites = setOf("ocean", "crimson", "lavender")
+        val settings =
+            KeyboardSettings(
+                activeLanguages = setOf("en", "fr"),
+                primaryLanguage = "fr",
+                favoriteThemes = favorites,
+            )
+
+        val validated = settings.validated()
+
+        assertEquals(favorites, validated.favoriteThemes)
+    }
+
+    @Test
+    fun `favoriteThemes defaults to empty set`() {
+        val settings = KeyboardSettings()
+
+        assertEquals(emptySet<String>(), settings.favoriteThemes)
+    }
 }

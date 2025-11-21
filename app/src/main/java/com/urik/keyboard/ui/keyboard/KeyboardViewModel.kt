@@ -12,6 +12,7 @@ import com.urik.keyboard.model.KeyboardLayout
 import com.urik.keyboard.model.KeyboardMode
 import com.urik.keyboard.model.KeyboardState
 import com.urik.keyboard.service.LanguageManager
+import com.urik.keyboard.theme.ThemeManager
 import com.urik.keyboard.utils.ErrorLogger
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -33,6 +34,7 @@ class KeyboardViewModel
     constructor(
         private val repository: KeyboardRepository,
         private val languageManager: LanguageManager,
+        private val themeManager: ThemeManager,
     ) : ViewModel() {
         private val _state = MutableStateFlow(KeyboardState())
         val state: StateFlow<KeyboardState> = _state.asStateFlow()
@@ -74,6 +76,14 @@ class KeyboardViewModel
                 languageManager.currentLanguage
                     .drop(1)
                     .collect { language ->
+                        startLoadLayout(_state.value.currentMode)
+                    }
+            }
+
+            viewModelScope.launch {
+                themeManager.currentTheme
+                    .drop(1)
+                    .collect { theme ->
                         startLoadLayout(_state.value.currentMode)
                     }
             }

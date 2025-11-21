@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <style name="Theme.Urik" parent="Theme.Material3.DayNight">
+    <style name="Theme.Urik" parent="Theme.Material3.Dark">
         <item name="colorPrimary">@color/sage</item>
         <item name="colorOnPrimary">@color/content_on_accent</item>
         <item name="colorPrimaryContainer">@color/light_orange</item>
@@ -25,7 +25,7 @@
         <item name="android:windowBackground">@color/keyboard_background</item>
     </style>
 
-    <style name="Theme.Urik.OssLicenses" parent="Theme.Material3.DayNight">
+    <style name="Theme.Urik.OssLicenses" parent="Theme.Material3.Dark">
         <item name="android:windowOptOutEdgeToEdgeEnforcement" tools:targetApi="35">true</item>
     </style>
 

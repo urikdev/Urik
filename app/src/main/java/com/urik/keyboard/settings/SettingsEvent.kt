@@ -8,8 +8,6 @@ sealed interface SettingsEvent {
      * Error events requiring user notification.
      */
     sealed interface Error : SettingsEvent {
-        data object ThemeUpdateFailed : Error
-
         data object KeySizeUpdateFailed : Error
 
         data object KeyLabelSizeUpdateFailed : Error
