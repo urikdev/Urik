@@ -12,13 +12,19 @@ Privacy-first keyboard for Android with on-device processing and encrypted stora
 
 ## Features
 
-- Swipe and tap input
-- On-device spell checking (no network requests)
-- Multilingual support
-- Encrypted local database (SQLCipher)
-- Word learning with privacy controls
-- No telemetry or analytics
-- No network permissions
+- Swipe and tap input with gesture detection
+- On-device spell checking using SymSpell algorithm
+- Smart autocorrect (skips URLs/emails, handles punctuation context)
+- Word learning with encrypted SQLCipher database
+- 16 themes with favorites
+- Multilingual support with per-language character variations
+- Accessibility features (WCAG AA contrast, TalkBack support)
+- Configurable key sizes, haptic feedback, typing behavior
+- No telemetry, analytics, or network permissions
+
+## Architecture
+
+Debounced async text processing with optimistic UI updates. State management prevents stale updates during rapid typing. All spell checking and suggestions run on-device with 10ms debounce.
 
 ## Privacy
 
