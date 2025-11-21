@@ -33,6 +33,7 @@ import com.urik.keyboard.service.WordLearningEngine
 import com.urik.keyboard.service.WordState
 import com.urik.keyboard.settings.KeyboardSettings
 import com.urik.keyboard.settings.SettingsRepository
+import com.urik.keyboard.theme.ThemeManager
 import com.urik.keyboard.ui.keyboard.KeyboardViewModel
 import com.urik.keyboard.ui.keyboard.components.KeyboardLayoutManager
 import com.urik.keyboard.ui.keyboard.components.SwipeDetector
@@ -98,6 +99,9 @@ class UrikInputMethodService :
 
     @Inject
     lateinit var settingsRepository: SettingsRepository
+
+    @Inject
+    lateinit var themeManager: ThemeManager
 
     private lateinit var viewModel: KeyboardViewModel
     private lateinit var layoutManager: KeyboardLayoutManager
@@ -518,7 +522,7 @@ class UrikInputMethodService :
      */
     private fun initializeCoreComponents() {
         try {
-            viewModel = KeyboardViewModel(repository, languageManager)
+            viewModel = KeyboardViewModel(repository, languageManager, themeManager)
             layoutManager =
                 KeyboardLayoutManager(
                     context = this,
@@ -526,6 +530,7 @@ class UrikInputMethodService :
                     onAcceleratedDeletionChanged = { active -> setAcceleratedDeletion(active) },
                     characterVariationService = characterVariationService,
                     languageManager = languageManager,
+                    themeManager = themeManager,
                     cacheMemoryManager = cacheMemoryManager,
                 )
         } catch (e: Exception) {
@@ -640,7 +645,7 @@ class UrikInputMethodService :
 
             val swipeView =
                 SwipeKeyboardView(this).apply {
-                    initialize(layoutManager, swipeDetector, spellCheckManager, wordLearningEngine)
+                    initialize(layoutManager, swipeDetector, spellCheckManager, wordLearningEngine, themeManager)
                     setOnKeyClickListener { key -> handleKeyPress(key) }
                     setOnSwipeWordListener { validatedWord -> handleSwipeWord(validatedWord) }
                     setOnSuggestionClickListener { suggestion -> handleSuggestionSelected(suggestion) }
@@ -722,7 +727,6 @@ class UrikInputMethodService :
                         currentSettings.keySize != newSettings.keySize ||
                             currentSettings.spaceBarSize != newSettings.spaceBarSize ||
                             currentSettings.keyLabelSize != newSettings.keyLabelSize ||
-                            currentSettings.theme != newSettings.theme ||
                             currentSettings.showNumberRow != newSettings.showNumberRow
 
                     currentSettings = newSettings
@@ -732,7 +736,6 @@ class UrikInputMethodService :
                     layoutManager.updateKeySize(newSettings.keySize)
                     layoutManager.updateSpaceBarSize(newSettings.spaceBarSize)
                     layoutManager.updateKeyLabelSize(newSettings.keyLabelSize)
-                    layoutManager.updateTheme(newSettings.theme)
 
                     layoutManager.updateHapticSettings(
                         newSettings.hapticFeedback,
@@ -779,6 +782,14 @@ class UrikInputMethodService :
             },
         )
 
+        observerJobs.add(
+            serviceScope.launch {
+                themeManager.currentTheme.collect {
+                    updateSwipeKeyboard()
+                }
+            },
+        )
+
         observeSettings()
     }
 
@@ -816,7 +827,6 @@ class UrikInputMethodService :
         layoutManager.updateKeySize(currentSettings.keySize)
         layoutManager.updateSpaceBarSize(currentSettings.spaceBarSize)
         layoutManager.updateKeyLabelSize(currentSettings.keyLabelSize)
-        layoutManager.updateTheme(currentSettings.theme)
 
         layoutManager.updateHapticSettings(
             currentSettings.hapticFeedback,

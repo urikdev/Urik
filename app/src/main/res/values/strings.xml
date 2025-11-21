@@ -28,6 +28,7 @@
     <string name="licenses_title">Open Source Licenses</string>
     <string name="licenses_description">View third-party library licenses</string>
     <string name="dictionary_attribution_title">Dictionary Data</string>
+    <string name="theme_picker_title">Keyboard Theme</string>
     <string name="dictionary_attribution_summary">FrequencyWords license and attribution</string>
 
     <!-- Settings Enums -->

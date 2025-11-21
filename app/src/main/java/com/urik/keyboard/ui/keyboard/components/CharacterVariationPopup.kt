@@ -2,15 +2,15 @@ package com.urik.keyboard.ui.keyboard.components
 
 import android.content.Context
 import android.graphics.Color
+import android.graphics.drawable.GradientDrawable
 import android.view.Gravity
 import android.view.View
 import android.widget.Button
 import android.widget.HorizontalScrollView
 import android.widget.LinearLayout
 import android.widget.PopupWindow
-import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toDrawable
-import com.urik.keyboard.R
+import com.urik.keyboard.theme.ThemeManager
 
 /**
  * Character variation popup for long-press key menu.
@@ -18,6 +18,7 @@ import com.urik.keyboard.R
  */
 class CharacterVariationPopup(
     private val context: Context,
+    private val themeManager: ThemeManager,
 ) : PopupWindow() {
     private var onVariationSelected: ((String) -> Unit)? = null
 
@@ -36,7 +37,7 @@ class CharacterVariationPopup(
             val paddingV = (4 * density).toInt()
             setPadding(paddingH, paddingV, paddingH, paddingV)
 
-            setBackgroundColor(ContextCompat.getColor(context, R.color.key_background_action))
+            setBackgroundColor(themeManager.currentTheme.value.colors.keyBackgroundAction)
             elevation = 8f * density
         }
 
@@ -109,21 +110,33 @@ class CharacterVariationPopup(
                     }
 
                 textSize = 14f
+
+                val theme = themeManager.currentTheme.value
                 setTextColor(
                     if (isBase) {
-                        ContextCompat.getColor(context, R.color.key_text_action)
+                        theme.colors.keyTextAction
                     } else {
-                        ContextCompat.getColor(context, R.color.key_text_character)
+                        theme.colors.keyTextCharacter
                     },
                 )
 
-                setBackgroundResource(
+                val backgroundColor =
                     if (isBase) {
-                        R.drawable.key_background_action
+                        theme.colors.keyBackgroundAction
                     } else {
-                        R.drawable.key_background_character
-                    },
-                )
+                        theme.colors.keyBackgroundCharacter
+                    }
+
+                val cornerRadius = 8f * density
+                background =
+                    GradientDrawable().apply {
+                        setColor(backgroundColor)
+                        this.cornerRadius = cornerRadius
+                        setStroke(
+                            (1 * density).toInt(),
+                            theme.colors.keyBorder,
+                        )
+                    }
 
                 minHeight = 0
                 minimumHeight = 0
