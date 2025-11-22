@@ -221,4 +221,148 @@ class BackspaceUtilsTest {
         assertEquals("co-worker", result!!.first)
         assertEquals(-1, result.second)
     }
+
+    @Test
+    fun `getLastGraphemeClusterLength handles empty string`() {
+        val length = BackspaceUtils.getLastGraphemeClusterLength("")
+        assertEquals(0, length)
+    }
+
+    @Test
+    fun `getLastGraphemeClusterLength handles single ASCII character`() {
+        val length = BackspaceUtils.getLastGraphemeClusterLength("a")
+        assertEquals(1, length)
+    }
+
+    @Test
+    fun `getLastGraphemeClusterLength handles multiple ASCII characters`() {
+        val length = BackspaceUtils.getLastGraphemeClusterLength("hello")
+        assertEquals(1, length)
+    }
+
+    @Test
+    fun `getLastGraphemeClusterLength handles simple emoji`() {
+        val length = BackspaceUtils.getLastGraphemeClusterLength("😀")
+        assertEquals(2, length)
+    }
+
+    @Test
+    fun `getLastGraphemeClusterLength handles emoji with text`() {
+        val length = BackspaceUtils.getLastGraphemeClusterLength("hello😀")
+        assertEquals(2, length)
+    }
+
+    @Test
+    fun `getLastGraphemeClusterLength handles emoji with skin tone modifier`() {
+        val length = BackspaceUtils.getLastGraphemeClusterLength("👋🏽")
+        assertEquals(4, length)
+    }
+
+    @Test
+    fun `getLastGraphemeClusterLength handles combining diacritical marks`() {
+        val length = BackspaceUtils.getLastGraphemeClusterLength("e\u0301")
+        assertEquals(2, length)
+    }
+
+    @Test
+    fun `getLastGraphemeClusterLength handles family emoji sequence`() {
+        val length = BackspaceUtils.getLastGraphemeClusterLength("👨‍👩‍👧‍👦")
+        assertEquals(11, length)
+    }
+
+    @Test
+    fun `getLastGraphemeClusterLength handles flag emoji`() {
+        val length = BackspaceUtils.getLastGraphemeClusterLength("🇺🇸")
+        assertEquals(4, length)
+    }
+
+    @Test
+    fun `getLastGraphemeClusterLength handles German umlaut`() {
+        val length = BackspaceUtils.getLastGraphemeClusterLength("ü")
+        assertEquals(1, length)
+    }
+
+    @Test
+    fun `getLastGraphemeClusterLength handles Spanish character`() {
+        val length = BackspaceUtils.getLastGraphemeClusterLength("ñ")
+        assertEquals(1, length)
+    }
+
+    @Test
+    fun `deleteGraphemeClusterBeforePosition handles empty string`() {
+        val result = BackspaceUtils.deleteGraphemeClusterBeforePosition("", 0)
+        assertEquals("", result)
+    }
+
+    @Test
+    fun `deleteGraphemeClusterBeforePosition handles position zero`() {
+        val result = BackspaceUtils.deleteGraphemeClusterBeforePosition("hello", 0)
+        assertEquals("hello", result)
+    }
+
+    @Test
+    fun `deleteGraphemeClusterBeforePosition handles position beyond text length`() {
+        val result = BackspaceUtils.deleteGraphemeClusterBeforePosition("hello", 10)
+        assertEquals("hello", result)
+    }
+
+    @Test
+    fun `deleteGraphemeClusterBeforePosition handles negative position`() {
+        val result = BackspaceUtils.deleteGraphemeClusterBeforePosition("hello", -1)
+        assertEquals("hello", result)
+    }
+
+    @Test
+    fun `deleteGraphemeClusterBeforePosition deletes ASCII character`() {
+        val result = BackspaceUtils.deleteGraphemeClusterBeforePosition("hello", 5)
+        assertEquals("hell", result)
+    }
+
+    @Test
+    fun `deleteGraphemeClusterBeforePosition deletes character from middle`() {
+        val result = BackspaceUtils.deleteGraphemeClusterBeforePosition("hello", 3)
+        assertEquals("helo", result)
+    }
+
+    @Test
+    fun `deleteGraphemeClusterBeforePosition deletes first character`() {
+        val result = BackspaceUtils.deleteGraphemeClusterBeforePosition("hello", 1)
+        assertEquals("ello", result)
+    }
+
+    @Test
+    fun `deleteGraphemeClusterBeforePosition deletes simple emoji`() {
+        val result = BackspaceUtils.deleteGraphemeClusterBeforePosition("hello😀", 7)
+        assertEquals("hello", result)
+    }
+
+    @Test
+    fun `deleteGraphemeClusterBeforePosition deletes emoji with skin tone`() {
+        val result = BackspaceUtils.deleteGraphemeClusterBeforePosition("hello👋🏽", 9)
+        assertEquals("hello", result)
+    }
+
+    @Test
+    fun `deleteGraphemeClusterBeforePosition deletes combining character`() {
+        val result = BackspaceUtils.deleteGraphemeClusterBeforePosition("cafe\u0301", 5)
+        assertEquals("caf", result)
+    }
+
+    @Test
+    fun `deleteGraphemeClusterBeforePosition deletes flag emoji`() {
+        val result = BackspaceUtils.deleteGraphemeClusterBeforePosition("USA🇺🇸", 7)
+        assertEquals("USA", result)
+    }
+
+    @Test
+    fun `deleteGraphemeClusterBeforePosition deletes from text with multiple emoji`() {
+        val result = BackspaceUtils.deleteGraphemeClusterBeforePosition("😀😂", 4)
+        assertEquals("😀", result)
+    }
+
+    @Test
+    fun `deleteGraphemeClusterBeforePosition preserves text after position`() {
+        val result = BackspaceUtils.deleteGraphemeClusterBeforePosition("hello world", 5)
+        assertEquals("hell world", result)
+    }
 }
