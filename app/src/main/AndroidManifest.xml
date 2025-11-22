@@ -12,6 +12,7 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:localeConfig="@xml/locales_config"
+        android:networkSecurityConfig="@xml/network_security_config"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Urik"
@@ -47,11 +48,13 @@
 
         <activity
             android:name="com.google.android.gms.oss.licenses.OssLicensesMenuActivity"
+            android:exported="false"
             android:theme="@style/Theme.Urik.OssLicenses"
             tools:replace="android:theme"/>
 
         <activity
             android:name="com.google.android.gms.oss.licenses.OssLicensesActivity"
+            android:exported="false"
             android:theme="@style/Theme.Urik.OssLicenses"
             tools:replace="android:theme"/>
 

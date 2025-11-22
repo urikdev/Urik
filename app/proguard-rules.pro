@@ -2,23 +2,13 @@
     public protected <methods>;
 }
 
--keep class com.urik.keyboard.data.database.LearnedWord { *; }
--keep class * extends androidx.room.RoomDatabase { *; }
 -keep @androidx.room.Entity class * { *; }
+-keep class * extends androidx.room.RoomDatabase { *; }
 
--keep class net.zetetic.database.** { *; }
+-keep,includedescriptorclasses class net.zetetic.database.** { *; }
+-keep,includedescriptorclasses interface net.zetetic.database.** { *; }
 
--keep class * extends dagger.hilt.android.internal.managers.ViewComponentManager$FragmentContextWrapper { *; }
--keep @dagger.hilt.android.lifecycle.HiltViewModel class * { *; }
--keep class **_HiltModules$** { *; }
--keep class **_HiltComponents$** { *; }
--keep class **_Factory { *; }
--keep class **_MembersInjector { *; }
--keepclassmembers class * {
-    @javax.inject.Inject <init>(...);
-    @javax.inject.Inject <fields>;
-    @javax.inject.Inject <methods>;
-}
+-keepnames @dagger.hilt.android.lifecycle.HiltViewModel class * extends androidx.lifecycle.ViewModel
 
 -keepattributes SourceFile,LineNumberTable
 -renamesourcefileattribute SourceFile
@@ -29,5 +19,4 @@
     public static int third_party_license_metadata;
 }
 
--allowaccessmodification
--repackageclasses ''
+-repackageclasses
