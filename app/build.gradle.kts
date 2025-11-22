@@ -59,6 +59,14 @@ android {
         jniLibs {
             useLegacyPackaging = false
         }
+        resources {
+            excludes +=
+                setOf(
+                    "/META-INF/{AL2.0,LGPL2.1}",
+                    "/META-INF/LICENSE.md",
+                    "/META-INF/LICENSE-notice.md",
+                )
+        }
     }
 
     testOptions {
