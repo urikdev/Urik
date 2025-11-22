@@ -5,8 +5,6 @@ import android.view.MotionEvent
 import com.urik.keyboard.model.KeyboardKey
 import com.urik.keyboard.service.SpellCheckManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -19,7 +17,6 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -182,11 +179,12 @@ class SwipeDetectorTest {
 
     @Test
     fun `updateKeyPositions stores character positions`() {
-        val positions = mapOf(
-            KeyboardKey.Character("a", KeyboardKey.KeyType.LETTER) to PointF(10f, 20f),
-            KeyboardKey.Character("b", KeyboardKey.KeyType.LETTER) to PointF(30f, 40f),
-            KeyboardKey.Character("", KeyboardKey.KeyType.LETTER) to PointF(50f, 60f)
-        )
+        val positions =
+            mapOf(
+                KeyboardKey.Character("a", KeyboardKey.KeyType.LETTER) to PointF(10f, 20f),
+                KeyboardKey.Character("b", KeyboardKey.KeyType.LETTER) to PointF(30f, 40f),
+                KeyboardKey.Character("", KeyboardKey.KeyType.LETTER) to PointF(50f, 60f),
+            )
 
         swipeDetector.updateKeyPositions(positions)
 
@@ -233,15 +231,14 @@ class SwipeDetectorTest {
         action: Int,
         x: Float,
         y: Float,
-        eventTime: Long = System.currentTimeMillis()
-    ): MotionEvent {
-        return MotionEvent.obtain(
+        eventTime: Long = System.currentTimeMillis(),
+    ): MotionEvent =
+        MotionEvent.obtain(
             eventTime - 100,
             eventTime,
             action,
             x,
             y,
-            0
+            0,
         )
-    }
 }
