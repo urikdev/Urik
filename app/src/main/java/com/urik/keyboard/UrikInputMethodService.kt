@@ -155,6 +155,36 @@ class UrikInputMethodService :
     @Volatile
     private var currentInputAction: KeyboardKey.ActionType = KeyboardKey.ActionType.ENTER
 
+    private fun safeGetTextBeforeCursor(
+        length: Int,
+        flags: Int = 0,
+    ): String {
+        return try {
+            currentInputConnection
+                ?.getTextBeforeCursor(length, flags)
+                ?.toString()
+                ?.take(length)
+                ?: ""
+        } catch (_: Exception) {
+            ""
+        }
+    }
+
+    private fun safeGetTextAfterCursor(
+        length: Int,
+        flags: Int = 0,
+    ): String {
+        return try {
+            currentInputConnection
+                ?.getTextAfterCursor(length, flags)
+                ?.toString()
+                ?.take(length)
+                ?: ""
+        } catch (_: Exception) {
+            ""
+        }
+    }
+
     private var currentSettings: KeyboardSettings = KeyboardSettings()
 
     @Volatile
@@ -359,7 +389,7 @@ class UrikInputMethodService :
                 currentInputConnection?.endBatchEdit()
             }
 
-            val textBefore = currentInputConnection?.getTextBeforeCursor(50, 0)?.toString()
+            val textBefore = safeGetTextBeforeCursor(50)
             viewModel.checkAndApplyAutoCapitalization(textBefore)
         }
     }
@@ -461,7 +491,7 @@ class UrikInputMethodService :
 
                     currentInputConnection?.finishComposingText()
 
-                    val textBefore = currentInputConnection?.getTextBeforeCursor(50, 0)?.toString()
+                    val textBefore = safeGetTextBeforeCursor(50)
                     viewModel.checkAndApplyAutoCapitalization(textBefore)
                 } finally {
                     currentInputConnection?.endBatchEdit()
@@ -686,8 +716,8 @@ class UrikInputMethodService :
         serviceScope.launch {
             try {
                 if (displayBuffer.isNotEmpty()) {
-                    val actualTextBefore = currentInputConnection?.getTextBeforeCursor(1, 0)?.toString() ?: ""
-                    val actualTextAfter = currentInputConnection?.getTextAfterCursor(1, 0)?.toString() ?: ""
+                    val actualTextBefore = safeGetTextBeforeCursor(1)
+                    val actualTextAfter = safeGetTextAfterCursor(1)
 
                     if (actualTextBefore.isEmpty() && actualTextAfter.isEmpty()) {
                         coordinateStateClear()
@@ -868,12 +898,12 @@ class UrikInputMethodService :
             } catch (_: Exception) {
             }
 
-            val textBefore = currentInputConnection?.getTextBeforeCursor(50, 0)?.toString()
+            val textBefore = safeGetTextBeforeCursor(50)
             viewModel.checkAndApplyAutoCapitalization(textBefore)
         } else {
             if (displayBuffer.isNotEmpty()) {
-                val actualTextBefore = currentInputConnection?.getTextBeforeCursor(1, 0)?.toString() ?: ""
-                val actualTextAfter = currentInputConnection?.getTextAfterCursor(1, 0)?.toString() ?: ""
+                val actualTextBefore = safeGetTextBeforeCursor(1)
+                val actualTextAfter = safeGetTextAfterCursor(1)
 
                 if (actualTextBefore.isEmpty() && actualTextAfter.isEmpty()) {
                     coordinateStateClear()
@@ -946,8 +976,8 @@ class UrikInputMethodService :
             }
 
             if (displayBuffer.isNotEmpty()) {
-                val actualTextBefore = currentInputConnection?.getTextBeforeCursor(1, 0)?.toString() ?: ""
-                val actualTextAfter = currentInputConnection?.getTextAfterCursor(1, 0)?.toString() ?: ""
+                val actualTextBefore = safeGetTextBeforeCursor(1)
+                val actualTextAfter = safeGetTextAfterCursor(1)
 
                 if (actualTextBefore.isEmpty() && actualTextAfter.isEmpty()) {
                     coordinateStateClear()
@@ -959,6 +989,19 @@ class UrikInputMethodService :
             }
 
             isActivelyEditing = true
+
+            if (composingRegionStart != -1 && displayBuffer.isNotEmpty()) {
+                val currentText = safeGetTextBeforeCursor(displayBuffer.length + 10)
+                val expectedComposingText = if (currentText.length >= displayBuffer.length) {
+                    currentText.substring(maxOf(0, currentText.length - displayBuffer.length))
+                } else {
+                    ""
+                }
+
+                if (expectedComposingText != displayBuffer) {
+                    composingRegionStart = -1
+                }
+            }
 
             val cursorPosInWord =
                 if (composingRegionStart != -1 && displayBuffer.isNotEmpty()) {
@@ -1091,8 +1134,8 @@ class UrikInputMethodService :
                 }
 
                 if (displayBuffer.isNotEmpty()) {
-                    val actualTextBefore = currentInputConnection?.getTextBeforeCursor(1, 0)?.toString() ?: ""
-                    val actualTextAfter = currentInputConnection?.getTextAfterCursor(1, 0)?.toString() ?: ""
+                    val actualTextBefore = safeGetTextBeforeCursor(1)
+                    val actualTextAfter = safeGetTextAfterCursor(1)
 
                     if (actualTextBefore.isEmpty() && actualTextAfter.isEmpty()) {
                         coordinateStateClear()
@@ -1117,7 +1160,7 @@ class UrikInputMethodService :
 
                         if (isSentenceEndingPunctuation(singleChar) && !isSecureField) {
                             viewModel.disableCapsLockAfterPunctuation()
-                            val textBefore = currentInputConnection?.getTextBeforeCursor(50, 0)?.toString()
+                            val textBefore = safeGetTextBeforeCursor(50)
                             viewModel.checkAndApplyAutoCapitalization(textBefore)
                         }
                     } finally {
@@ -1128,10 +1171,7 @@ class UrikInputMethodService :
 
                 if (displayBuffer.isNotEmpty() && wordState.requiresSpellCheck) {
                     if (wordState.graphemeCount >= 2) {
-                        val textBefore =
-                            currentInputConnection
-                                ?.getTextBeforeCursor(100, 0)
-                                ?.toString() ?: ""
+                        val textBefore = safeGetTextBeforeCursor(100)
                         val isUrlOrEmail =
                             UrlEmailDetector.isUrlOrEmailContext(
                                 currentWord = displayBuffer,
@@ -1178,7 +1218,7 @@ class UrikInputMethodService :
                     if (isSentenceEndingPunctuation(singleChar) && !isSecureField) {
                         viewModel.disableCapsLockAfterPunctuation()
                         val textBefore =
-                            currentInputConnection?.getTextBeforeCursor(50, 0)?.toString()
+                            safeGetTextBeforeCursor(50)
                         viewModel.checkAndApplyAutoCapitalization(textBefore)
                     }
                 } finally {
@@ -1217,8 +1257,8 @@ class UrikInputMethodService :
             }
 
             if (displayBuffer.isNotEmpty()) {
-                val actualTextBefore = currentInputConnection?.getTextBeforeCursor(1, 0)?.toString() ?: ""
-                val actualTextAfter = currentInputConnection?.getTextAfterCursor(1, 0)?.toString() ?: ""
+                val actualTextBefore = safeGetTextBeforeCursor(1)
+                val actualTextAfter = safeGetTextAfterCursor(1)
 
                 if (actualTextBefore.isEmpty() && actualTextAfter.isEmpty()) {
                     coordinateStateClear()
@@ -1443,8 +1483,8 @@ class UrikInputMethodService :
     private suspend fun performInputAction(imeAction: Int) {
         try {
             if (!isSecureField && displayBuffer.isNotEmpty()) {
-                val actualTextBefore = currentInputConnection?.getTextBeforeCursor(1, 0)?.toString() ?: ""
-                val actualTextAfter = currentInputConnection?.getTextAfterCursor(1, 0)?.toString() ?: ""
+                val actualTextBefore = safeGetTextBeforeCursor(1)
+                val actualTextAfter = safeGetTextAfterCursor(1)
 
                 if (actualTextBefore.isEmpty() && actualTextAfter.isEmpty()) {
                     coordinateStateClear()
@@ -1483,7 +1523,7 @@ class UrikInputMethodService :
             clearSpellConfirmationState()
 
             if (imeAction == EditorInfo.IME_ACTION_NONE) {
-                val textBefore = currentInputConnection?.getTextBeforeCursor(50, 0)?.toString()
+                val textBefore = safeGetTextBeforeCursor(50)
                 viewModel.checkAndApplyAutoCapitalization(textBefore)
             }
         } catch (_: Exception) {
@@ -1497,7 +1537,7 @@ class UrikInputMethodService :
     private fun handleBackspace() {
         try {
             if (isSecureField) {
-                val textBefore = currentInputConnection?.getTextBeforeCursor(50, 0)?.toString()
+                val textBefore = safeGetTextBeforeCursor(50)
                 if (!textBefore.isNullOrEmpty()) {
                     val graphemeLength = BackspaceUtils.getLastGraphemeClusterLength(textBefore)
                     currentInputConnection?.deleteSurroundingText(graphemeLength, 0)
@@ -1506,8 +1546,8 @@ class UrikInputMethodService :
             }
 
             if (displayBuffer.isNotEmpty()) {
-                val actualTextBefore = currentInputConnection?.getTextBeforeCursor(1, 0)?.toString() ?: ""
-                val actualTextAfter = currentInputConnection?.getTextAfterCursor(1, 0)?.toString() ?: ""
+                val actualTextBefore = safeGetTextBeforeCursor(1)
+                val actualTextAfter = safeGetTextAfterCursor(1)
 
                 if (actualTextBefore.isEmpty() && actualTextAfter.isEmpty()) {
                     coordinateStateClear()
@@ -1523,6 +1563,22 @@ class UrikInputMethodService :
             isActivelyEditing = true
 
             if (displayBuffer.isNotEmpty()) {
+                if (composingRegionStart != -1) {
+                    val currentText = safeGetTextBeforeCursor(displayBuffer.length + 10)
+                    val expectedComposingText = if (currentText.length >= displayBuffer.length) {
+                        currentText.substring(maxOf(0, currentText.length - displayBuffer.length))
+                    } else {
+                        ""
+                    }
+
+                    if (expectedComposingText != displayBuffer) {
+                        composingRegionStart = -1
+                        coordinateStateClear()
+                        handleCommittedTextBackspace()
+                        return
+                    }
+                }
+
                 val cursorPosInWord =
                     if (composingRegionStart != -1) {
                         val absoluteCursorPos =
@@ -1554,7 +1610,7 @@ class UrikInputMethodService :
                     currentInputConnection?.beginBatchEdit()
                     try {
                         coordinateStateClear()
-                        val textBefore = currentInputConnection?.getTextBeforeCursor(50, 0)?.toString()
+                        val textBefore = safeGetTextBeforeCursor(50)
                         if (!textBefore.isNullOrEmpty()) {
                             val graphemeLength = BackspaceUtils.getLastGraphemeClusterLength(textBefore)
                             currentInputConnection?.deleteSurroundingText(graphemeLength, 0)
@@ -1669,7 +1725,7 @@ class UrikInputMethodService :
             }
         } catch (_: Exception) {
             try {
-                val textBefore = currentInputConnection?.getTextBeforeCursor(50, 0)?.toString()
+                val textBefore = safeGetTextBeforeCursor(50)
                 if (!textBefore.isNullOrEmpty()) {
                     val graphemeLength = BackspaceUtils.getLastGraphemeClusterLength(textBefore)
                     currentInputConnection?.deleteSurroundingText(graphemeLength, 0)
@@ -1685,7 +1741,7 @@ class UrikInputMethodService :
      */
     private fun handleCommittedTextBackspace() {
         try {
-            val textBeforeCursor = currentInputConnection?.getTextBeforeCursor(50, 0)?.toString()
+            val textBeforeCursor = safeGetTextBeforeCursor(50)
 
             if (!textBeforeCursor.isNullOrEmpty()) {
                 currentInputConnection?.beginBatchEdit()
@@ -1815,8 +1871,8 @@ class UrikInputMethodService :
                 }
 
                 if (displayBuffer.isNotEmpty()) {
-                    val actualTextBefore = currentInputConnection?.getTextBeforeCursor(1, 0)?.toString() ?: ""
-                    val actualTextAfter = currentInputConnection?.getTextAfterCursor(1, 0)?.toString() ?: ""
+                    val actualTextBefore = safeGetTextBeforeCursor(1)
+                    val actualTextAfter = safeGetTextAfterCursor(1)
 
                     if (actualTextBefore.isEmpty() && actualTextAfter.isEmpty()) {
                         coordinateStateClear()
@@ -1848,7 +1904,7 @@ class UrikInputMethodService :
                         currentInputConnection?.setSelection(cursorPos, cursorPos)
 
                         val textBefore =
-                            currentInputConnection?.getTextBeforeCursor(50, 0)?.toString()
+                            safeGetTextBeforeCursor(50)
                         viewModel.checkAndApplyAutoCapitalization(textBefore)
                     } finally {
                         currentInputConnection?.endBatchEdit()
@@ -1867,10 +1923,7 @@ class UrikInputMethodService :
 
                 if (wordState.hasContent && wordState.requiresSpellCheck) {
                     if (wordState.graphemeCount >= 2) {
-                        val textBeforeForUrlCheck =
-                            currentInputConnection
-                                ?.getTextBeforeCursor(100, 0)
-                                ?.toString() ?: ""
+                        val textBeforeForUrlCheck = safeGetTextBeforeCursor(100)
                         val isUrlOrEmail =
                             UrlEmailDetector.isUrlOrEmailContext(
                                 currentWord = displayBuffer,
@@ -1895,7 +1948,7 @@ class UrikInputMethodService :
                                     currentInputConnection?.setSelection(cursorPos, cursorPos)
 
                                     val textBefore =
-                                        currentInputConnection?.getTextBeforeCursor(50, 0)?.toString()
+                                        safeGetTextBeforeCursor(50)
                                     viewModel.checkAndApplyAutoCapitalization(textBefore)
                                 } finally {
                                     currentInputConnection?.endBatchEdit()
@@ -1937,7 +1990,7 @@ class UrikInputMethodService :
                             ?: 0
                     currentInputConnection?.setSelection(cursorPos, cursorPos)
 
-                    val textBefore = currentInputConnection?.getTextBeforeCursor(50, 0)?.toString()
+                    val textBefore = safeGetTextBeforeCursor(50)
                     viewModel.checkAndApplyAutoCapitalization(textBefore)
                 } finally {
                     currentInputConnection?.endBatchEdit()
@@ -1956,7 +2009,7 @@ class UrikInputMethodService :
                             ?: 0
                     currentInputConnection?.setSelection(cursorPos, cursorPos)
 
-                    val textBefore = currentInputConnection?.getTextBeforeCursor(50, 0)?.toString()
+                    val textBefore = safeGetTextBeforeCursor(50)
                     viewModel.checkAndApplyAutoCapitalization(textBefore)
                 } finally {
                     currentInputConnection?.endBatchEdit()
@@ -1972,8 +2025,8 @@ class UrikInputMethodService :
         swipeKeyboardView?.hideEmojiPicker()
 
         if (displayBuffer.isNotEmpty() && !isSecureField) {
-            val actualTextBefore = currentInputConnection?.getTextBeforeCursor(1, 0)?.toString() ?: ""
-            val actualTextAfter = currentInputConnection?.getTextAfterCursor(1, 0)?.toString() ?: ""
+            val actualTextBefore = safeGetTextBeforeCursor(1)
+            val actualTextAfter = safeGetTextAfterCursor(1)
 
             if (actualTextBefore.isEmpty() && actualTextAfter.isEmpty()) {
                 coordinateStateClear()
@@ -2024,7 +2077,7 @@ class UrikInputMethodService :
         if (isSecureField) {
             clearSecureFieldState()
         } else if (!isUrlOrEmailField) {
-            val textBefore = currentInputConnection?.getTextBeforeCursor(50, 0)?.toString()
+            val textBefore = safeGetTextBeforeCursor(50)
             viewModel.checkAndApplyAutoCapitalization(textBefore)
         }
     }
@@ -2036,8 +2089,8 @@ class UrikInputMethodService :
         swipeKeyboardView?.hideEmojiPicker()
 
         if (displayBuffer.isNotEmpty() && !isSecureField) {
-            val actualTextBefore = currentInputConnection?.getTextBeforeCursor(1, 0)?.toString() ?: ""
-            val actualTextAfter = currentInputConnection?.getTextAfterCursor(1, 0)?.toString() ?: ""
+            val actualTextBefore = safeGetTextBeforeCursor(1)
+            val actualTextAfter = safeGetTextAfterCursor(1)
 
             if (actualTextBefore.isEmpty() && actualTextAfter.isEmpty()) {
                 coordinateStateClear()
@@ -2086,8 +2139,8 @@ class UrikInputMethodService :
         if (isSecureField) return
 
         if (newSelStart == 0 && newSelEnd == 0) {
-            val textBefore = currentInputConnection?.getTextBeforeCursor(50, 0)?.toString()
-            val textAfter = currentInputConnection?.getTextAfterCursor(50, 0)?.toString()
+            val textBefore = safeGetTextBeforeCursor(50)
+            val textAfter = safeGetTextAfterCursor(50)
 
             if (CursorEditingUtils.shouldClearStateOnEmptyField(
                     newSelStart,
@@ -2130,8 +2183,8 @@ class UrikInputMethodService :
             coordinateStateClear()
             clearSpellConfirmationState()
 
-            val textBeforeCursor = currentInputConnection?.getTextBeforeCursor(50, 0)?.toString()
-            val textAfterCursor = currentInputConnection?.getTextAfterCursor(50, 0)?.toString()
+            val textBeforeCursor = safeGetTextBeforeCursor(50)
+            val textAfterCursor = safeGetTextAfterCursor(50)
 
             if (!textBeforeCursor.isNullOrEmpty() || !textAfterCursor.isNullOrEmpty()) {
                 val wordAtCursor = extractWordAtCursor(textBeforeCursor ?: "", textAfterCursor ?: "")
@@ -2153,8 +2206,8 @@ class UrikInputMethodService :
         if (!hasComposingText && !hasSelection) {
             if (isRecomposing) return
 
-            val textBeforeCursor = currentInputConnection?.getTextBeforeCursor(50, 0)?.toString()
-            val textAfterCursor = currentInputConnection?.getTextAfterCursor(50, 0)?.toString()
+            val textBeforeCursor = safeGetTextBeforeCursor(50)
+            val textAfterCursor = safeGetTextAfterCursor(50)
 
             if (!textBeforeCursor.isNullOrEmpty() || !textAfterCursor.isNullOrEmpty()) {
                 val wordAtCursor = extractWordAtCursor(textBeforeCursor ?: "", textAfterCursor ?: "")
