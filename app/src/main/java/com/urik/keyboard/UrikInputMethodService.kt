@@ -1573,7 +1573,6 @@ class UrikInputMethodService :
                             viewModel.state.value.isShiftPressed &&
                             !viewModel.state.value.isCapsLockOn
 
-                    val oldComposingStart = composingRegionStart
                     val oldBufferLength = displayBuffer.length
 
                     displayBuffer = BackspaceUtils.deleteGraphemeClusterBeforePosition(displayBuffer, cursorPosInWord)

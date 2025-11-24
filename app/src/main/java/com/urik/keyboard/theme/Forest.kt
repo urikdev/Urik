@@ -1,30 +1,30 @@
 package com.urik.keyboard.theme
 
-import android.graphics.Color
+import androidx.core.graphics.toColorInt
 
 data object Forest : KeyboardTheme {
     override val id = "forest"
     override val displayName = "Forest"
     override val colors =
         ThemeColors(
-            keyboardBackground = Color.parseColor("#1a2419"),
-            keyBackgroundCharacter = Color.parseColor("#2d4a2b"),
-            keyBackgroundAction = Color.parseColor("#3d3428"),
-            keyBackgroundSpace = Color.parseColor("#2d4a2b"),
-            keyTextCharacter = Color.parseColor("#c4d9a8"),
-            keyTextAction = Color.parseColor("#f5d99b"),
-            keyBorder = Color.parseColor("#4a5c48"),
-            keyBorderFocused = Color.parseColor("#f5d99b"),
-            keyBorderPressed = Color.parseColor("#f5d99b"),
-            statePressed = Color.parseColor("#3d5a3a"),
-            stateActivated = Color.parseColor("#3d5a3a"),
-            stateCapsLock = Color.parseColor("#3d3428"),
-            suggestionBarBackground = Color.parseColor("#3d3428"),
-            suggestionText = Color.parseColor("#c4d9a8"),
+            keyboardBackground = "#1a2419".toColorInt(),
+            keyBackgroundCharacter = "#2d4a2b".toColorInt(),
+            keyBackgroundAction = "#3d3428".toColorInt(),
+            keyBackgroundSpace = "#2d4a2b".toColorInt(),
+            keyTextCharacter = "#c4d9a8".toColorInt(),
+            keyTextAction = "#f5d99b".toColorInt(),
+            keyBorder = "#4a5c48".toColorInt(),
+            keyBorderFocused = "#f5d99b".toColorInt(),
+            keyBorderPressed = "#f5d99b".toColorInt(),
+            statePressed = "#3d5a3a".toColorInt(),
+            stateActivated = "#3d5a3a".toColorInt(),
+            stateCapsLock = "#3d3428".toColorInt(),
+            suggestionBarBackground = "#3d3428".toColorInt(),
+            suggestionText = "#c4d9a8".toColorInt(),
             keyShadow = 0x1A000000,
-            focusIndicator = Color.parseColor("#f5d99b"),
-            swipePrimary = Color.parseColor("#c4d9a8"),
-            swipeSecondary = Color.parseColor("#f5d99b"),
-            swipeCurrent = Color.parseColor("#4a5c48"),
+            focusIndicator = "#f5d99b".toColorInt(),
+            swipePrimary = "#c4d9a8".toColorInt(),
+            swipeSecondary = "#f5d99b".toColorInt(),
+            swipeCurrent = "#4a5c48".toColorInt(),
         )
 }

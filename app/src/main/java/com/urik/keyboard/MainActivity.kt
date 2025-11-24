@@ -1,6 +1,5 @@
 package com.urik.keyboard
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.provider.Settings
@@ -78,7 +77,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startAutoSwipe() {
-        val accessibilityManager = getSystemService(Context.ACCESSIBILITY_SERVICE) as? AccessibilityManager
+        val accessibilityManager = getSystemService(ACCESSIBILITY_SERVICE) as? AccessibilityManager
         if (accessibilityManager?.isTouchExplorationEnabled == true) {
             return
         }

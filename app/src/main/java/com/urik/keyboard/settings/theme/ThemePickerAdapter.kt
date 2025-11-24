@@ -1,6 +1,5 @@
 package com.urik.keyboard.settings.theme
 
-import android.graphics.Color
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
@@ -8,6 +7,8 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.core.graphics.toColorInt
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.card.MaterialCardView
 import com.urik.keyboard.R
@@ -35,7 +36,7 @@ class ThemePickerAdapter(
 
     fun setPreviewLayout(layout: KeyboardLayout) {
         previewLayout = layout
-        notifyDataSetChanged()
+        notifyItemRangeChanged(0, themes.size, PAYLOAD_PREVIEW_UPDATE)
     }
 
     override fun onCreateViewHolder(
@@ -66,6 +67,23 @@ class ThemePickerAdapter(
         )
     }
 
+    override fun onBindViewHolder(
+        holder: ThemeViewHolder,
+        position: Int,
+        payloads: MutableList<Any>,
+    ) {
+        if (payloads.isEmpty()) {
+            super.onBindViewHolder(holder, position, payloads)
+        } else {
+            val theme = themes[position]
+            for (payload in payloads) {
+                when (payload) {
+                    PAYLOAD_PREVIEW_UPDATE -> holder.updatePreview(theme, previewLayout, previewRenderer)
+                }
+            }
+        }
+    }
+
     override fun onViewRecycled(holder: ThemeViewHolder) {
         super.onViewRecycled(holder)
         holder.clearPreview()
@@ -87,12 +105,41 @@ class ThemePickerAdapter(
     }
 
     fun updateFavoriteThemes(favoriteIds: Set<String>) {
+        val oldThemes = themes
+        val oldFavorites = favoriteThemeIds
         favoriteThemeIds = favoriteIds
-        themes = sortThemes(allThemes, favoriteThemeIds)
-        notifyDataSetChanged()
+        val newThemes = sortThemes(allThemes, favoriteThemeIds)
+
+        val diffResult =
+            DiffUtil.calculateDiff(
+                object : DiffUtil.Callback() {
+                    override fun getOldListSize() = oldThemes.size
+
+                    override fun getNewListSize() = newThemes.size
+
+                    override fun areItemsTheSame(
+                        oldPos: Int,
+                        newPos: Int,
+                    ) = oldThemes[oldPos].id == newThemes[newPos].id
+
+                    override fun areContentsTheSame(
+                        oldPos: Int,
+                        newPos: Int,
+                    ) = oldThemes[oldPos].id == newThemes[newPos].id &&
+                        oldFavorites.contains(oldThemes[oldPos].id) ==
+                        favoriteThemeIds.contains(newThemes[newPos].id)
+                },
+            )
+
+        themes = newThemes
+        diffResult.dispatchUpdatesTo(this)
     }
 
     fun getCurrentThemePosition(themeId: String): Int = themes.indexOfFirst { it.id == themeId }
+
+    companion object {
+        private const val PAYLOAD_PREVIEW_UPDATE = "preview_update"
+    }
 
     class ThemeViewHolder(
         private val rootView: FrameLayout,
@@ -150,6 +197,21 @@ class ThemePickerAdapter(
             rootView.setOnClickListener { onThemeClick() }
         }
 
+        fun updatePreview(
+            theme: KeyboardTheme,
+            previewLayout: KeyboardLayout?,
+            previewRenderer: KeyboardPreviewRenderer?,
+        ) {
+            previewContainer.removeAllViews()
+
+            if (previewLayout != null && previewRenderer != null) {
+                val keyboardPreview = previewRenderer.createPreviewView(previewLayout, theme, PREVIEW_HEIGHT_DP)
+                previewContainer.addView(keyboardPreview)
+            } else {
+                previewContainer.setBackgroundColor(theme.colors.keyboardBackground)
+            }
+        }
+
         fun clearPreview() {
             previewContainer.removeAllViews()
         }
@@ -160,15 +222,13 @@ class ThemePickerAdapter(
             private const val VIEW_ID_THEME_NAME = 1003
             private const val VIEW_ID_SELECTED_INDICATOR = 1004
             private const val VIEW_ID_FAVORITE_INDICATOR = 1005
-
-            private const val CARD_HEIGHT_DP = 120
             private const val PREVIEW_HEIGHT_DP = 80
             private const val CARD_MARGIN_DP = 12
 
-            private val ICON_COLOR = Color.parseColor("#d4d2a5")
-            private val TEXT_COLOR = Color.parseColor("#e9e6d5")
-            private val CARD_BG_COLOR = Color.parseColor("#1f2230")
-            private val STROKE_COLOR = Color.parseColor("#d4d2a5")
+            private val ICON_COLOR = "#d4d2a5".toColorInt()
+            private val TEXT_COLOR = "#e9e6d5".toColorInt()
+            private val CARD_BG_COLOR = "#1f2230".toColorInt()
+            private val STROKE_COLOR = "#d4d2a5".toColorInt()
 
             fun create(parent: ViewGroup): ThemeViewHolder {
                 val context = parent.context
