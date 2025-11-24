@@ -158,8 +158,8 @@ class UrikInputMethodService :
     private fun safeGetTextBeforeCursor(
         length: Int,
         flags: Int = 0,
-    ): String {
-        return try {
+    ): String =
+        try {
             currentInputConnection
                 ?.getTextBeforeCursor(length, flags)
                 ?.toString()
@@ -168,13 +168,12 @@ class UrikInputMethodService :
         } catch (_: Exception) {
             ""
         }
-    }
 
     private fun safeGetTextAfterCursor(
         length: Int,
         flags: Int = 0,
-    ): String {
-        return try {
+    ): String =
+        try {
             currentInputConnection
                 ?.getTextAfterCursor(length, flags)
                 ?.toString()
@@ -183,7 +182,6 @@ class UrikInputMethodService :
         } catch (_: Exception) {
             ""
         }
-    }
 
     private var currentSettings: KeyboardSettings = KeyboardSettings()
 
@@ -992,11 +990,12 @@ class UrikInputMethodService :
 
             if (composingRegionStart != -1 && displayBuffer.isNotEmpty()) {
                 val currentText = safeGetTextBeforeCursor(displayBuffer.length + 10)
-                val expectedComposingText = if (currentText.length >= displayBuffer.length) {
-                    currentText.substring(maxOf(0, currentText.length - displayBuffer.length))
-                } else {
-                    ""
-                }
+                val expectedComposingText =
+                    if (currentText.length >= displayBuffer.length) {
+                        currentText.substring(maxOf(0, currentText.length - displayBuffer.length))
+                    } else {
+                        ""
+                    }
 
                 if (expectedComposingText != displayBuffer) {
                     composingRegionStart = -1
@@ -1565,11 +1564,12 @@ class UrikInputMethodService :
             if (displayBuffer.isNotEmpty()) {
                 if (composingRegionStart != -1) {
                     val currentText = safeGetTextBeforeCursor(displayBuffer.length + 10)
-                    val expectedComposingText = if (currentText.length >= displayBuffer.length) {
-                        currentText.substring(maxOf(0, currentText.length - displayBuffer.length))
-                    } else {
-                        ""
-                    }
+                    val expectedComposingText =
+                        if (currentText.length >= displayBuffer.length) {
+                            currentText.substring(maxOf(0, currentText.length - displayBuffer.length))
+                        } else {
+                            ""
+                        }
 
                     if (expectedComposingText != displayBuffer) {
                         composingRegionStart = -1
