@@ -641,4 +641,37 @@ class SpellCheckManagerTest {
 
             assertTrue(words.isEmpty())
         }
+
+    @Test
+    fun `blacklistSuggestion removes word from cached suggestion lists`() =
+        runTest {
+            whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency("te", 5))
+                .thenReturn(listOf("test" to 100, "team" to 80, "text" to 60))
+
+            val suggestions1 = spellCheckManager.getSpellingSuggestionsWithConfidence("te")
+            assertTrue(suggestions1.any { it.word == "test" })
+
+            spellCheckManager.blacklistSuggestion("test")
+
+            val suggestions2 = spellCheckManager.getSpellingSuggestionsWithConfidence("te")
+            assertFalse(suggestions2.any { it.word == "test" })
+            assertTrue(suggestions2.any { it.word == "team" })
+        }
+
+    @Test
+    fun `removeFromBlacklist includes word in cached suggestion lists`() =
+        runTest {
+            whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency("te", 5))
+                .thenReturn(listOf("test" to 100, "team" to 80))
+
+            spellCheckManager.blacklistSuggestion("test")
+
+            val suggestions1 = spellCheckManager.getSpellingSuggestionsWithConfidence("te")
+            assertFalse(suggestions1.any { it.word == "test" })
+
+            spellCheckManager.removeFromBlacklist("test")
+
+            val suggestions2 = spellCheckManager.getSpellingSuggestionsWithConfidence("te")
+            assertTrue(suggestions2.any { it.word == "test" })
+        }
 }
