@@ -741,6 +741,8 @@ class SpellCheckManager
          *
          * CRITICAL: Must be called after word removal from learned words.
          * Otherwise cache marks removed word as valid (stale data).
+         *
+         * Clears entire suggestion cache since cached prefix lists may contain this word.
          */
         fun invalidateWordCache(word: String) {
             try {
@@ -750,7 +752,7 @@ class SpellCheckManager
                 val cacheKey = buildCacheKey(normalizedWord, currentLang)
 
                 dictionaryCache.invalidate(cacheKey)
-                suggestionCache.invalidate(cacheKey)
+                suggestionCache.invalidateAll()
             } catch (_: Exception) {
             }
         }
@@ -776,6 +778,7 @@ class SpellCheckManager
          * Permanently hides word from suggestions (global, all languages).
          *
          * Use for profanity, spam, or unwanted autocorrect.
+         * Clears entire suggestion cache since cached prefix lists may contain this word.
          */
         fun blacklistSuggestion(word: String) {
             try {
@@ -785,13 +788,17 @@ class SpellCheckManager
                     blacklistedWords.add(normalizedWord)
                 }
 
-                clearCachesForWord(normalizedWord)
+                val currentLang = getCurrentLanguage()
+                val cacheKey = buildCacheKey(normalizedWord, currentLang)
+                dictionaryCache.invalidate(cacheKey)
+                suggestionCache.invalidateAll()
             } catch (_: Exception) {
             }
         }
 
         /**
          * Removes word from blacklist, allowing it in suggestions again.
+         * Clears entire suggestion cache since cached prefix lists excluded this word.
          */
         fun removeFromBlacklist(word: String) {
             try {
@@ -803,7 +810,10 @@ class SpellCheckManager
                 }
 
                 if (removed) {
-                    clearCachesForWord(normalizedWord)
+                    val currentLang = getCurrentLanguage()
+                    val cacheKey = buildCacheKey(normalizedWord, currentLang)
+                    dictionaryCache.invalidate(cacheKey)
+                    suggestionCache.invalidateAll()
                 }
             } catch (_: Exception) {
             }
@@ -823,13 +833,6 @@ class SpellCheckManager
             synchronized(blacklistedWords) {
                 blacklistedWords.clear()
             }
-        }
-
-        private fun clearCachesForWord(word: String) {
-            val currentLang = getCurrentLanguage()
-            val cacheKey = buildCacheKey(word, currentLang)
-            dictionaryCache.invalidate(cacheKey)
-            suggestionCache.invalidate(cacheKey)
         }
 
         /**
