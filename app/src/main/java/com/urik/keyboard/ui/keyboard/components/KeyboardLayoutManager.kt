@@ -365,7 +365,7 @@ class KeyboardLayoutManager(
             val verticalPadding = cachedDimensions["verticalPadding"]!!
             setPadding(horizontalPadding, verticalPadding, horizontalPadding, verticalPadding)
 
-            background = getKeyBackground(key, state)
+            background = getKeyBackground(key)
             setTextColor(getKeyTextColor(key))
 
             isActivated = getKeyActivatedState(key, state)
@@ -375,7 +375,7 @@ class KeyboardLayoutManager(
             importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_YES
             contentDescription = getKeyContentDescription(key, state)
 
-            setOnClickListener { view ->
+            setOnClickListener { _ ->
                 performCustomHaptic()
 
                 if (accessibilityManager.isEnabled) {
@@ -404,7 +404,7 @@ class KeyboardLayoutManager(
                     }
 
                 if (iconRes != 0) {
-                    val keyBackground = getKeyBackground(key, state)
+                    val keyBackground = getKeyBackground(key)
                     val iconDrawable = ContextCompat.getDrawable(context, iconRes)
 
                     iconDrawable?.setTint(getKeyTextColor(key))
@@ -416,7 +416,7 @@ class KeyboardLayoutManager(
                     background = layerDrawable
                     text = ""
                 } else {
-                    background = getKeyBackground(key, state)
+                    background = getKeyBackground(key)
                 }
             }
 
@@ -496,7 +496,7 @@ class KeyboardLayoutManager(
             }
 
             if (key is KeyboardKey.Action && key.action == KeyboardKey.ActionType.BACKSPACE) {
-                setOnLongClickListener { view ->
+                setOnLongClickListener { _ ->
                     performCustomHaptic()
                     startAcceleratedBackspace()
                     true
@@ -938,10 +938,7 @@ class KeyboardLayoutManager(
             else -> false
         }
 
-    private fun getKeyBackground(
-        key: KeyboardKey,
-        state: KeyboardState,
-    ): Drawable {
+    private fun getKeyBackground(key: KeyboardKey): Drawable {
         val theme = themeManager.currentTheme.value
         val backgroundColor =
             when (key) {
