@@ -403,6 +403,14 @@ class WordLearningEngine
                     }
 
                     if (results.size < maxResults && normalized.length >= WordLearningConstants.MIN_FUZZY_SEARCH_LENGTH) {
+                        val runtime = Runtime.getRuntime()
+                        val availableMemory = runtime.maxMemory() - (runtime.totalMemory() - runtime.freeMemory())
+                        val memoryThresholdBytes = com.urik.keyboard.KeyboardConstants.MemoryConstants.LOW_MEMORY_THRESHOLD_MB * 1024 * 1024
+
+                        if (availableMemory < memoryThresholdBytes) {
+                            return@withContext results.toList().sortedByDescending { it.second }.take(maxResults)
+                        }
+
                         try {
                             val candidates =
                                 learnedWordDao.getMostFrequentWords(
