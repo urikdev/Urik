@@ -11,7 +11,6 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
-import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import com.google.android.material.appbar.MaterialToolbar
 import com.urik.keyboard.R
 import com.urik.keyboard.settings.appearance.AppearanceFragment
@@ -200,7 +199,7 @@ class MainSettingsFragment : PreferenceFragmentCompat() {
                 title = resources.getString(R.string.licenses_title)
                 summary = resources.getString(R.string.licenses_description)
                 setOnPreferenceClickListener {
-                    startActivity(Intent(context, OssLicensesMenuActivity::class.java))
+                    startActivity(Intent(context, OssLicensesActivity::class.java))
                     true
                 }
             },

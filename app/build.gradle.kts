@@ -10,8 +10,6 @@ plugins {
     id("org.jetbrains.kotlinx.kover")
 }
 
-apply(plugin = "com.google.android.gms.oss-licenses-plugin")
-
 android {
     namespace = "com.urik.keyboard"
     compileSdk = 35
@@ -157,7 +155,6 @@ dependencies {
 
     implementation(libs.android.database.sqlcipher)
     implementation(libs.androidx.sqlite.ktx)
-    implementation(libs.play.services.oss.licenses)
 
     testImplementation(libs.junit)
     testImplementation(libs.mockito.core)
