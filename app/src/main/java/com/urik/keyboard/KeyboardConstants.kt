@@ -45,6 +45,7 @@ object KeyboardConstants {
         const val MAX_EDIT_DISTANCE = 2.0
         const val PREFIX_LENGTH = 7
         const val COUNT_THRESHOLD = 1L
+        const val TOP_K = 100
         const val MAX_SUGGESTIONS = 5
         const val MIN_COMPLETION_LENGTH = 4
         const val APOSTROPHE_BOOST = 0.30
@@ -66,8 +67,14 @@ object KeyboardConstants {
         const val COMPLETION_CONFIDENCE_MAX = 0.84
 
         const val SYMSPELL_DISTANCE_WEIGHT = 0.45
+        const val SYMSPELL_FREQUENCY_WEIGHT = 0.05
         const val SYMSPELL_CONFIDENCE_MIN = 0.0
-        const val SYMSPELL_CONFIDENCE_MAX = 0.49
+        const val SYMSPELL_CONFIDENCE_MAX = 0.70
+        const val MAX_DICT_FREQUENCY = 30_000_000.0
+
+        const val SAME_LENGTH_BONUS = 0.10
+        const val SAME_FIRST_LETTER_BONUS = 0.15
+        const val SAME_LAST_LETTER_BONUS = 0.10
 
         const val MAX_PREFIX_COMPLETION_RESULTS = 10
         const val MAX_INPUT_CODEPOINTS = 100
