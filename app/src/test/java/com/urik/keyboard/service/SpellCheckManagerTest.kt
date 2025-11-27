@@ -59,6 +59,17 @@ class SpellCheckManagerTest {
         helpful 250
         computer 200
         keyboard 150
+        does 450
+        goes 420
+        hose 100
+        hots 90
+        hogs 85
+        hops 80
+        hows 75
+        toes 400
+        foes 70
+        woes 65
+        shoes 380
         """.trimIndent()
 
     @Before
@@ -673,5 +684,23 @@ class SpellCheckManagerTest {
 
             val suggestions2 = spellCheckManager.getSpellingSuggestionsWithConfidence("te")
             assertTrue(suggestions2.any { it.word == "test" })
+        }
+
+    @Test
+    fun `corrections from symspell have varied confidence based on frequency`() =
+        runTest {
+            whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency(any(), any()))
+                .thenReturn(emptyList())
+
+            val suggestions = spellCheckManager.getSpellingSuggestionsWithConfidence("helo")
+
+            val symspellSuggestions = suggestions.filter { it.source == "symspell" }
+            assertTrue("Should have multiple SymSpell suggestions", symspellSuggestions.size >= 2)
+
+            val confidences = symspellSuggestions.map { it.confidence }.distinct()
+            assertTrue(
+                "SymSpell suggestions should have different confidence scores based on frequency, not all capped at same value",
+                confidences.size > 1,
+            )
         }
 }
