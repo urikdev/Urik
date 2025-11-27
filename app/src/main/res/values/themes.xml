@@ -25,10 +25,6 @@
         <item name="android:windowBackground">@color/keyboard_background</item>
     </style>
 
-    <style name="Theme.Urik.OssLicenses" parent="Theme.Material3.Dark">
-        <item name="android:windowOptOutEdgeToEdgeEnforcement" tools:targetApi="35">true</item>
-    </style>
-
     <style name="Theme.Urik.NoActionBar" parent="Theme.Urik">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
