@@ -1,0 +1,14 @@
+  Privacy-first keyboard with on-device processing and encrypted storage.
+
+  Features:
+  * Swipe and tap input with gesture detection
+  * On-device spell checking using SymSpell algorithm
+  * Smart autocorrect (skips URLs/emails, handles punctuation context)
+  * Word learning with encrypted SQLCipher database
+  * 16 themes with favorites
+  * Multilingual support with per-language character variations
+  * Accessibility features (WCAG AA contrast, TalkBack support)
+  * Configurable key sizes, haptic feedback, typing behavior
+  * No telemetry, analytics, or network permissions
+
+  All processing happens on-device. No data leaves your phone. User dictionary and learned words are stored in an encrypted local database.
