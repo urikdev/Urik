@@ -87,3 +87,6 @@ error_log_fallback.txt
 
 # Navigation editor temp files
 navigation.json
+
+# F-Droid metadata
+com.urik.keyboard.yml

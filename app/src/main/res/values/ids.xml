@@ -2,6 +2,8 @@
 <resources>
     <item name="attribution_toolbar" type="id" />
     <item name="attribution_text" type="id" />
+    <item name="oss_licenses_toolbar" type="id" />
+    <item name="oss_licenses_text" type="id" />
     <item name="theme_picker_toolbar" type="id" />
     <item name="theme_picker_recycler" type="id" />
 </resources>
