@@ -66,6 +66,8 @@ class SpellCheckManager
         private val spellCheckers = ConcurrentHashMap<String, SpellChecker>()
         private var currentLanguage: String = "en"
 
+        private val wordFrequencies = ConcurrentHashMap<String, Long>()
+
         private val suggestionCache: ManagedCache<String, List<SpellingSuggestion>> =
             cacheMemoryManager.createCache(
                 name = "spell_suggestions",
@@ -248,6 +250,7 @@ class SpellCheckManager
                             maxEditDistance = SpellCheckConstants.MAX_EDIT_DISTANCE,
                             prefixLength = SpellCheckConstants.PREFIX_LENGTH,
                             countThreshold = SpellCheckConstants.COUNT_THRESHOLD,
+                            topK = SpellCheckConstants.TOP_K,
                         )
 
                     val symSpell = SymSpell(settings)
@@ -265,9 +268,11 @@ class SpellCheckManager
                                     val parts = line.trim().split(" ", limit = 2)
                                     if (parts.size >= 2) {
                                         val word = parts[0]
-                                        val frequency = parts[1].toIntOrNull() ?: 1
-                                        symSpell.createDictionaryEntry(word, frequency)
+                                        val frequency = parts[1].toLongOrNull() ?: 1L
+                                        wordFrequencies[word.lowercase()] = frequency
+                                        symSpell.createDictionaryEntry(word, frequency.toInt())
                                     } else if (parts.size == 1) {
+                                        wordFrequencies[parts[0].lowercase()] = 1L
                                         symSpell.createDictionaryEntry(parts[0], 1)
                                     }
                                 }
@@ -607,6 +612,7 @@ class SpellCheckManager
                     val spellChecker = getSpellCheckerForLanguage(languageCode)
                     if (spellChecker != null) {
                         val symSpellResults = spellChecker.lookup(normalizedWord, Verbosity.All, SpellCheckConstants.MAX_EDIT_DISTANCE)
+
                         val strippedInput =
                             com.urik.keyboard.utils.TextMatchingUtils
                                 .stripWordPunctuation(normalizedWord)
@@ -622,13 +628,30 @@ class SpellCheckManager
                                             .stripWordPunctuation(result.term)
                                     val isContractionMatch = strippedInput.equals(strippedResult, ignoreCase = true)
 
+                                    val frequency = wordFrequencies[result.term.lowercase()] ?: 1L
+
                                     val confidence =
                                         if (isContractionMatch) {
                                             SpellCheckConstants.CONTRACTION_MATCH_CONFIDENCE
                                         } else {
                                             val maxDistance = SpellCheckConstants.MAX_EDIT_DISTANCE
                                             val distanceScore = (maxDistance - editDistance) / maxDistance
-                                            var baseConfidence = SpellCheckConstants.SYMSPELL_DISTANCE_WEIGHT * distanceScore
+                                            val freqScore = ln(frequency.toDouble() + 1.0) / ln(SpellCheckConstants.MAX_DICT_FREQUENCY)
+                                            var baseConfidence =
+                                                (SpellCheckConstants.SYMSPELL_DISTANCE_WEIGHT * distanceScore) +
+                                                    (SpellCheckConstants.SYMSPELL_FREQUENCY_WEIGHT * freqScore)
+
+                                            if (editDistance == 1.0 && normalizedWord.length == result.term.length) {
+                                                baseConfidence += SpellCheckConstants.SAME_LENGTH_BONUS
+
+                                                if (normalizedWord.firstOrNull() == result.term.firstOrNull()) {
+                                                    baseConfidence += SpellCheckConstants.SAME_FIRST_LETTER_BONUS
+                                                }
+
+                                                if (normalizedWord.length > 1 && normalizedWord.lastOrNull() == result.term.lastOrNull()) {
+                                                    baseConfidence += SpellCheckConstants.SAME_LAST_LETTER_BONUS
+                                                }
+                                            }
 
                                             if (strippedResult != result.term && editDistance == 1.0) {
                                                 baseConfidence += SpellCheckConstants.APOSTROPHE_BOOST
