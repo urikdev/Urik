@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
     <style name="Theme.Urik" parent="Theme.Material3.Dark">
         <item name="colorPrimary">@color/sage</item>
         <item name="colorOnPrimary">@color/content_on_accent</item>
