@@ -543,17 +543,26 @@ class SpellCheckManager
                     learnedSuggestions
                         .filter { (word, _) -> !isWordBlacklisted(word) }
                         .forEachIndexed { index, (word, frequency) ->
-                            val frequencyBoost = ln(frequency.toDouble() + 1.0) * SpellCheckConstants.FREQUENCY_BOOST_MULTIPLIER
-                            val baseConfidence = SpellCheckConstants.LEARNED_WORD_BASE_CONFIDENCE - (index * 0.02)
+                            val isContraction =
+                                com.urik.keyboard.utils.TextMatchingUtils
+                                    .isContractionSuggestion(normalizedWord, word)
+
+                            val confidence =
+                                if (isContraction) {
+                                    SpellCheckConstants.CONTRACTION_GUARANTEED_CONFIDENCE
+                                } else {
+                                    val frequencyBoost = ln(frequency.toDouble() + 1.0) * SpellCheckConstants.FREQUENCY_BOOST_MULTIPLIER
+                                    val baseConfidence = SpellCheckConstants.LEARNED_WORD_BASE_CONFIDENCE - (index * 0.02)
+                                    (baseConfidence + frequencyBoost).coerceIn(
+                                        SpellCheckConstants.LEARNED_WORD_CONFIDENCE_MIN,
+                                        SpellCheckConstants.LEARNED_WORD_CONFIDENCE_MAX,
+                                    )
+                                }
 
                             allSuggestions.add(
                                 SpellingSuggestion(
                                     word = word,
-                                    confidence =
-                                        (baseConfidence + frequencyBoost).coerceIn(
-                                            SpellCheckConstants.LEARNED_WORD_CONFIDENCE_MIN,
-                                            SpellCheckConstants.LEARNED_WORD_CONFIDENCE_MAX,
-                                        ),
+                                    confidence = confidence,
                                     ranking = index,
                                     source = "learned",
                                 ),
@@ -566,22 +575,18 @@ class SpellCheckManager
                 try {
                     if (normalizedWord.length >= SpellCheckConstants.MIN_COMPLETION_LENGTH) {
                         val completions = getCompletionsForPrefix(normalizedWord, languageCode)
-                        val strippedInput =
-                            com.urik.keyboard.utils.TextMatchingUtils
-                                .stripWordPunctuation(normalizedWord)
 
                         completions
                             .filter { (word, _) -> !seenWords.contains(word.lowercase()) && !isWordBlacklisted(word) }
                             .take(SpellCheckConstants.MAX_PREFIX_COMPLETIONS)
                             .forEachIndexed { index, (word, frequency) ->
-                                val strippedWord =
+                                val isContraction =
                                     com.urik.keyboard.utils.TextMatchingUtils
-                                        .stripWordPunctuation(word)
-                                val isContractionMatch = strippedInput.equals(strippedWord, ignoreCase = true)
+                                        .isContractionSuggestion(normalizedWord, word)
 
                                 val confidence =
-                                    if (isContractionMatch) {
-                                        SpellCheckConstants.CONTRACTION_MATCH_CONFIDENCE
+                                    if (isContraction) {
+                                        SpellCheckConstants.CONTRACTION_GUARANTEED_CONFIDENCE
                                     } else {
                                         val lengthRatio = normalizedWord.length.toDouble() / word.length.toDouble()
                                         val frequencyScore = ln(frequency.toDouble() + 1.0) / SpellCheckConstants.FREQUENCY_SCORE_DIVISOR
@@ -613,26 +618,21 @@ class SpellCheckManager
                     if (spellChecker != null) {
                         val symSpellResults = spellChecker.lookup(normalizedWord, Verbosity.All, SpellCheckConstants.MAX_EDIT_DISTANCE)
 
-                        val strippedInput =
-                            com.urik.keyboard.utils.TextMatchingUtils
-                                .stripWordPunctuation(normalizedWord)
-
                         val scoredResults =
                             symSpellResults
                                 .filter { result ->
                                     !seenWords.contains(result.term.lowercase()) && !isWordBlacklisted(result.term)
                                 }.map { result ->
                                     val editDistance = result.distance
-                                    val strippedResult =
+                                    val isContraction =
                                         com.urik.keyboard.utils.TextMatchingUtils
-                                            .stripWordPunctuation(result.term)
-                                    val isContractionMatch = strippedInput.equals(strippedResult, ignoreCase = true)
+                                            .isContractionSuggestion(normalizedWord, result.term)
 
                                     val frequency = wordFrequencies[result.term.lowercase()] ?: 1L
 
                                     val confidence =
-                                        if (isContractionMatch) {
-                                            SpellCheckConstants.CONTRACTION_MATCH_CONFIDENCE
+                                        if (isContraction) {
+                                            SpellCheckConstants.CONTRACTION_GUARANTEED_CONFIDENCE
                                         } else {
                                             val maxDistance = SpellCheckConstants.MAX_EDIT_DISTANCE
                                             val distanceScore = (maxDistance - editDistance) / maxDistance
@@ -653,6 +653,9 @@ class SpellCheckManager
                                                 }
                                             }
 
+                                            val strippedResult =
+                                                com.urik.keyboard.utils.TextMatchingUtils
+                                                    .stripWordPunctuation(result.term)
                                             if (strippedResult != result.term && editDistance == 1.0) {
                                                 baseConfidence += SpellCheckConstants.APOSTROPHE_BOOST
                                             }

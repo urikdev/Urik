@@ -4,6 +4,7 @@ package com.urik.keyboard.service
 
 import android.content.Context
 import android.content.res.AssetManager
+import com.urik.keyboard.KeyboardConstants.SpellCheckConstants
 import com.urik.keyboard.utils.CacheMemoryManager
 import com.urik.keyboard.utils.ManagedCache
 import kotlinx.coroutines.Dispatchers
@@ -16,6 +17,8 @@ import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -70,6 +73,17 @@ class SpellCheckManagerTest {
         foes 70
         woes 65
         shoes 380
+        don't 500
+        haven't 450
+        can't 480
+        you're 460
+        canteen 200
+        canton 180
+        cantor 170
+        cantaloupe 160
+        donate 220
+        donkey 210
+        done 230
         """.trimIndent()
 
     @Before
@@ -602,7 +616,10 @@ class SpellCheckManagerTest {
             assertTrue(
                 words.all { word ->
                     word.first.all { char ->
-                        Character.isLetter(char.code) || Character.getType(char.code) == Character.OTHER_LETTER.toInt()
+                        Character.isLetter(char.code) ||
+                            Character.getType(char.code) == Character.OTHER_LETTER.toInt() ||
+                            com.urik.keyboard.utils.TextMatchingUtils
+                                .isValidWordPunctuation(char)
                     }
                 },
             )
@@ -701,6 +718,202 @@ class SpellCheckManagerTest {
             assertTrue(
                 "SymSpell suggestions should have different confidence scores based on frequency, not all capped at same value",
                 confidences.size > 1,
+            )
+        }
+
+    @Test
+    fun `learned word contraction gets guaranteed confidence`() =
+        runTest {
+            whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency("dont", 5))
+                .thenReturn(listOf("don't" to 5))
+
+            val suggestions = spellCheckManager.getSpellingSuggestionsWithConfidence("dont")
+
+            val contractionSuggestion = suggestions.find { it.word == "don't" && it.source == "learned" }
+            assertNotNull("Should find learned contraction don't", contractionSuggestion)
+            assertEquals(
+                "Learned contraction should have guaranteed confidence",
+                SpellCheckConstants.CONTRACTION_GUARANTEED_CONFIDENCE,
+                contractionSuggestion!!.confidence,
+                0.001,
+            )
+        }
+
+    @Test
+    fun `prefix completion contraction gets guaranteed confidence`() =
+        runTest {
+            whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency(any(), any()))
+                .thenReturn(emptyList())
+
+            val suggestions = spellCheckManager.getSpellingSuggestionsWithConfidence("dont")
+
+            val contractionSuggestion = suggestions.find { it.word == "don't" }
+            assertNotNull("Should find contraction don't from dictionary", contractionSuggestion)
+            assertEquals(
+                "Prefix completion contraction should have guaranteed confidence",
+                SpellCheckConstants.CONTRACTION_GUARANTEED_CONFIDENCE,
+                contractionSuggestion!!.confidence,
+                0.001,
+            )
+        }
+
+    @Test
+    fun `symspell contraction gets guaranteed confidence`() =
+        runTest {
+            whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency(any(), any()))
+                .thenReturn(emptyList())
+
+            val suggestions = spellCheckManager.getSpellingSuggestionsWithConfidence("havent")
+
+            val contractionSuggestion = suggestions.find { it.word == "haven't" }
+            assertNotNull("Should find contraction haven't from SymSpell", contractionSuggestion)
+            assertEquals(
+                "SymSpell contraction should have guaranteed confidence",
+                SpellCheckConstants.CONTRACTION_GUARANTEED_CONFIDENCE,
+                contractionSuggestion!!.confidence,
+                0.001,
+            )
+        }
+
+    @Test
+    fun `contraction ranks higher than high frequency learned words`() =
+        runTest {
+            whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency("dont", 5))
+                .thenReturn(
+                    listOf(
+                        "donate" to 100,
+                        "donkey" to 90,
+                        "done" to 80,
+                    ),
+                )
+
+            val suggestions = spellCheckManager.getSpellingSuggestionsWithConfidence("dont")
+
+            val contractionSuggestion = suggestions.find { it.word == "don't" }
+            assertNotNull("Should find contraction don't", contractionSuggestion)
+
+            val contractionIndex = suggestions.indexOfFirst { it.word == "don't" }
+            assertEquals(
+                "Contraction should rank first despite lower learned word frequencies",
+                0,
+                contractionIndex,
+            )
+        }
+
+    @Test
+    fun `contraction appears when many high confidence suggestions exist`() =
+        runTest {
+            whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency("cant", 5))
+                .thenReturn(
+                    listOf(
+                        "canteen" to 100,
+                        "canton" to 90,
+                        "cantor" to 80,
+                        "cantaloupe" to 70,
+                    ),
+                )
+
+            val suggestions = spellCheckManager.getSpellingSuggestionsWithConfidence("cant")
+
+            val contractionSuggestion = suggestions.find { it.word == "can't" }
+            assertNotNull("Should find contraction can't despite many learned words", contractionSuggestion)
+
+            val contractionIndex = suggestions.indexOfFirst { it.word == "can't" }
+            assertTrue(
+                "Contraction should appear in top 3 positions",
+                contractionIndex < 3,
+            )
+        }
+
+    @Test
+    fun `contraction not boosted when user types with apostrophe`() =
+        runTest {
+            whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency(any(), any()))
+                .thenReturn(emptyList())
+
+            val suggestions = spellCheckManager.getSpellingSuggestionsWithConfidence("don't")
+
+            val dontSuggestion = suggestions.find { it.word == "don't" }
+            if (dontSuggestion != null) {
+                assertNotEquals(
+                    "Should not apply contraction boost when input already has apostrophe",
+                    SpellCheckConstants.CONTRACTION_GUARANTEED_CONFIDENCE,
+                    dontSuggestion.confidence,
+                    0.001,
+                )
+            }
+        }
+
+    @Test
+    fun `reverse direction contraction not boosted`() =
+        runTest {
+            whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency("don't", 5))
+                .thenReturn(listOf("dont" to 10))
+
+            val suggestions = spellCheckManager.getSpellingSuggestionsWithConfidence("don't")
+
+            val dontSuggestion = suggestions.find { it.word == "dont" }
+            if (dontSuggestion != null) {
+                assertNotEquals(
+                    "Should not apply contraction boost for reverse direction (don't -> dont)",
+                    SpellCheckConstants.CONTRACTION_GUARANTEED_CONFIDENCE,
+                    dontSuggestion.confidence,
+                    0.001,
+                )
+            }
+        }
+
+    @Test
+    fun `multiple contractions can coexist with correct ranking`() =
+        runTest {
+            whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency(any(), any()))
+                .thenReturn(emptyList())
+
+            val suggestions = spellCheckManager.getSpellingSuggestionsWithConfidence("youre")
+
+            val contractionSuggestion = suggestions.find { it.word == "you're" }
+            assertNotNull("Should find you're contraction", contractionSuggestion)
+            assertEquals(
+                "you're should have guaranteed confidence",
+                SpellCheckConstants.CONTRACTION_GUARANTEED_CONFIDENCE,
+                contractionSuggestion!!.confidence,
+                0.001,
+            )
+        }
+
+    @Test
+    fun `i18n French contraction l'homme gets guaranteed confidence`() =
+        runTest {
+            whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency("lhomme", 5))
+                .thenReturn(listOf("l'homme" to 10))
+
+            val suggestions = spellCheckManager.getSpellingSuggestionsWithConfidence("lhomme")
+
+            val contractionSuggestion = suggestions.find { it.word == "l'homme" }
+            assertNotNull("Should find French contraction l'homme", contractionSuggestion)
+            assertEquals(
+                "French contraction should have guaranteed confidence",
+                SpellCheckConstants.CONTRACTION_GUARANTEED_CONFIDENCE,
+                contractionSuggestion!!.confidence,
+                0.001,
+            )
+        }
+
+    @Test
+    fun `i18n German hyphenated compound gets guaranteed confidence`() =
+        runTest {
+            whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency("coworker", 5))
+                .thenReturn(listOf("co-worker" to 10))
+
+            val suggestions = spellCheckManager.getSpellingSuggestionsWithConfidence("coworker")
+
+            val hyphenatedSuggestion = suggestions.find { it.word == "co-worker" }
+            assertNotNull("Should find hyphenated word co-worker", hyphenatedSuggestion)
+            assertEquals(
+                "Hyphenated compound should have guaranteed confidence",
+                SpellCheckConstants.CONTRACTION_GUARANTEED_CONFIDENCE,
+                hyphenatedSuggestion!!.confidence,
+                0.001,
             )
         }
 }

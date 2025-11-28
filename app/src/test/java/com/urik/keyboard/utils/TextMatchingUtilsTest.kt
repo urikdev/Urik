@@ -212,4 +212,101 @@ class TextMatchingUtilsTest {
         val result = TextMatchingUtils.stripWordPunctuation("café")
         assertEquals("café", result)
     }
+
+    @Test
+    fun `isContractionSuggestion returns true for dont to don't`() {
+        assertTrue(TextMatchingUtils.isContractionSuggestion("dont", "don't"))
+    }
+
+    @Test
+    fun `isContractionSuggestion returns true for havent to haven't`() {
+        assertTrue(TextMatchingUtils.isContractionSuggestion("havent", "haven't"))
+    }
+
+    @Test
+    fun `isContractionSuggestion returns true for cant to can't`() {
+        assertTrue(TextMatchingUtils.isContractionSuggestion("cant", "can't"))
+    }
+
+    @Test
+    fun `isContractionSuggestion returns true for youre to you're`() {
+        assertTrue(TextMatchingUtils.isContractionSuggestion("youre", "you're"))
+    }
+
+    @Test
+    fun `isContractionSuggestion returns true for im to I'm case insensitive`() {
+        assertTrue(TextMatchingUtils.isContractionSuggestion("im", "I'm"))
+    }
+
+    @Test
+    fun `isContractionSuggestion returns true for well to we'll`() {
+        assertTrue(TextMatchingUtils.isContractionSuggestion("well", "we'll"))
+    }
+
+    @Test
+    fun `isContractionSuggestion returns false for reverse direction don't to dont`() {
+        assertFalse(TextMatchingUtils.isContractionSuggestion("don't", "dont"))
+    }
+
+    @Test
+    fun `isContractionSuggestion returns false for reverse direction haven't to havent`() {
+        assertFalse(TextMatchingUtils.isContractionSuggestion("haven't", "havent"))
+    }
+
+    @Test
+    fun `isContractionSuggestion returns false for completely different words`() {
+        assertFalse(TextMatchingUtils.isContractionSuggestion("hello", "world"))
+    }
+
+    @Test
+    fun `isContractionSuggestion returns false when both have apostrophes`() {
+        assertFalse(TextMatchingUtils.isContractionSuggestion("don't", "can't"))
+    }
+
+    @Test
+    fun `isContractionSuggestion returns false when neither has apostrophes`() {
+        assertFalse(TextMatchingUtils.isContractionSuggestion("hello", "hello"))
+    }
+
+    @Test
+    fun `isContractionSuggestion returns false for empty input`() {
+        assertFalse(TextMatchingUtils.isContractionSuggestion("", "don't"))
+    }
+
+    @Test
+    fun `isContractionSuggestion returns false for empty candidate`() {
+        assertFalse(TextMatchingUtils.isContractionSuggestion("dont", ""))
+    }
+
+    @Test
+    fun `isContractionSuggestion returns false for both empty`() {
+        assertFalse(TextMatchingUtils.isContractionSuggestion("", ""))
+    }
+
+    @Test
+    fun `isContractionSuggestion returns true for French l'homme from lhomme`() {
+        assertTrue(TextMatchingUtils.isContractionSuggestion("lhomme", "l'homme"))
+    }
+
+    @Test
+    fun `isContractionSuggestion returns true for German Ost-Berlin from ostberlin`() {
+        assertTrue(TextMatchingUtils.isContractionSuggestion("ostberlin", "Ost-Berlin"))
+    }
+
+    @Test
+    fun `isContractionSuggestion returns false when input already has hyphen`() {
+        assertFalse(TextMatchingUtils.isContractionSuggestion("co-worker", "coworker"))
+    }
+
+    @Test
+    fun `isContractionSuggestion returns true for hyphen suggestion coworker to co-worker`() {
+        assertTrue(TextMatchingUtils.isContractionSuggestion("coworker", "co-worker"))
+    }
+
+    @Test
+    fun `isContractionSuggestion handles case insensitivity`() {
+        assertTrue(TextMatchingUtils.isContractionSuggestion("DONT", "don't"))
+        assertTrue(TextMatchingUtils.isContractionSuggestion("dont", "DON'T"))
+        assertTrue(TextMatchingUtils.isContractionSuggestion("DoNt", "DoN't"))
+    }
 }
