@@ -56,4 +56,30 @@ object TextMatchingUtils {
         if (word.isEmpty()) return word
         return word.filter { !isWordSeparatingPunctuation(it) }
     }
+
+    /**
+     * Checks if candidate is a contraction suggestion for input.
+     *
+     * Returns true only for "add punctuation" direction:
+     * - Input has no punctuation (e.g., "dont")
+     * - Candidate has punctuation (e.g., "don't")
+     * - Stripped forms match
+     *
+     * @param input User-typed word (normalized)
+     * @param candidate Dictionary/learned word to suggest
+     * @return true if candidate is valid contraction suggestion
+     */
+    fun isContractionSuggestion(
+        input: String,
+        candidate: String,
+    ): Boolean {
+        if (input.isEmpty() || candidate.isEmpty()) return false
+
+        val strippedInput = stripWordPunctuation(input)
+        val strippedCandidate = stripWordPunctuation(candidate)
+
+        return strippedInput.equals(strippedCandidate, ignoreCase = true) &&
+            candidate != strippedCandidate &&
+            input == strippedInput
+    }
 }

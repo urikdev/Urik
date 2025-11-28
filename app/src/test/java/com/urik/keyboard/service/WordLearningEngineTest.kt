@@ -650,4 +650,156 @@ class WordLearningEngineTest {
             assertTrue(wordLearningEngine.isWordLearned(testWord))
             verify(learnedWordDao, times(1)).findExactWord("en", testWord)
         }
+
+    @Test
+    fun `stripped prefix search returns contractions when typing without apostrophe`() =
+        runTest {
+            val contractionWord =
+                LearnedWord.create(
+                    word = "don't",
+                    wordNormalized = "don't",
+                    languageTag = "en",
+                    frequency = 10,
+                )
+
+            whenever(learnedWordDao.findExactWord("en", "dont")).thenReturn(null)
+            whenever(learnedWordDao.findWordsWithPrefix("en", "dont", 5)).thenReturn(emptyList())
+            whenever(learnedWordDao.getMostFrequentWords("en", 100))
+                .thenReturn(listOf(contractionWord))
+
+            val results = wordLearningEngine.getSimilarLearnedWordsWithFrequency("dont", 5)
+
+            assertTrue("Should find don't when searching for dont", results.any { it.first == "don't" })
+        }
+
+    @Test
+    fun `stripped prefix search only returns words with punctuation`() =
+        runTest {
+            val contractionWord =
+                LearnedWord.create(
+                    word = "don't",
+                    wordNormalized = "don't",
+                    languageTag = "en",
+                    frequency = 10,
+                )
+            val plainWord =
+                LearnedWord.create(
+                    word = "dont",
+                    wordNormalized = "dont",
+                    languageTag = "en",
+                    frequency = 5,
+                )
+
+            whenever(learnedWordDao.findExactWord("en", "dont")).thenReturn(plainWord)
+            whenever(learnedWordDao.findWordsWithPrefix("en", "dont", 4)).thenReturn(emptyList())
+            whenever(learnedWordDao.getMostFrequentWords("en", 100))
+                .thenReturn(listOf(contractionWord, plainWord))
+
+            val results = wordLearningEngine.getSimilarLearnedWordsWithFrequency("dont", 5)
+
+            val strippedResults =
+                results.filter { (word, _) ->
+                    val stripped =
+                        com.urik.keyboard.utils.TextMatchingUtils
+                            .stripWordPunctuation(word)
+                    stripped != word && stripped == "dont"
+                }
+
+            assertTrue("Should find don't via stripped prefix", strippedResults.any { it.first == "don't" })
+            assertFalse("Should not include plain 'dont' in stripped results", strippedResults.any { it.first == "dont" })
+        }
+
+    @Test
+    fun `stripped prefix search handles French contractions`() =
+        runTest {
+            val frenchContraction =
+                LearnedWord.create(
+                    word = "l'homme",
+                    wordNormalized = "l'homme",
+                    languageTag = "fr",
+                    frequency = 15,
+                )
+
+            whenever(learnedWordDao.findExactWord("fr", "lhomme")).thenReturn(null)
+            whenever(learnedWordDao.findWordsWithPrefix("fr", "lhomme", 5)).thenReturn(emptyList())
+            whenever(learnedWordDao.getMostFrequentWords("fr", 100))
+                .thenReturn(listOf(frenchContraction))
+
+            whenever(languageManager.currentLanguage).thenReturn(MutableStateFlow("fr"))
+
+            val results = wordLearningEngine.getSimilarLearnedWordsWithFrequency("lhomme", 5)
+
+            assertTrue("Should find l'homme when searching for lhomme", results.any { it.first == "l'homme" })
+        }
+
+    @Test
+    fun `stripped prefix search handles hyphenated compounds`() =
+        runTest {
+            val hyphenatedWord =
+                LearnedWord.create(
+                    word = "co-worker",
+                    wordNormalized = "co-worker",
+                    languageTag = "en",
+                    frequency = 20,
+                )
+
+            whenever(learnedWordDao.findExactWord("en", "coworker")).thenReturn(null)
+            whenever(learnedWordDao.findWordsWithPrefix("en", "coworker", 5)).thenReturn(emptyList())
+            whenever(learnedWordDao.getMostFrequentWords("en", 100))
+                .thenReturn(listOf(hyphenatedWord))
+
+            val results = wordLearningEngine.getSimilarLearnedWordsWithFrequency("coworker", 5)
+
+            assertTrue("Should find co-worker when searching for coworker", results.any { it.first == "co-worker" })
+        }
+
+    @Test
+    fun `stripped prefix search respects maxResults limit`() =
+        runTest {
+            val contractions =
+                listOf(
+                    LearnedWord.create("don't", "don't", "en", frequency = 100),
+                    LearnedWord.create("won't", "won't", "en", frequency = 90),
+                    LearnedWord.create("can't", "can't", "en", frequency = 80),
+                    LearnedWord.create("shouldn't", "shouldn't", "en", frequency = 70),
+                )
+
+            whenever(learnedWordDao.findExactWord(any(), any())).thenReturn(null)
+            whenever(learnedWordDao.findWordsWithPrefix(any(), any(), any())).thenReturn(emptyList())
+            whenever(learnedWordDao.getMostFrequentWords("en", 200))
+                .thenReturn(contractions)
+
+            val results = wordLearningEngine.getSimilarLearnedWordsWithFrequency("ont", maxResults = 2)
+
+            assertTrue("Should respect maxResults limit", results.size <= 2)
+        }
+
+    @Test
+    fun `stripped prefix search returns empty when input too short`() =
+        runTest {
+            val results = wordLearningEngine.getSimilarLearnedWordsWithFrequency("a", 5)
+
+            assertTrue("Should return empty for single character input", results.isEmpty())
+        }
+
+    @Test
+    fun `stripped prefix search sorts by frequency descending`() =
+        runTest {
+            val contractions =
+                listOf(
+                    LearnedWord.create("won't", "won't", "en", frequency = 50),
+                    LearnedWord.create("don't", "don't", "en", frequency = 100),
+                    LearnedWord.create("can't", "can't", "en", frequency = 75),
+                )
+
+            whenever(learnedWordDao.findExactWord(any(), any())).thenReturn(null)
+            whenever(learnedWordDao.findWordsWithPrefix(any(), any(), any())).thenReturn(emptyList())
+            whenever(learnedWordDao.getMostFrequentWords("en", 200))
+                .thenReturn(contractions)
+
+            val results = wordLearningEngine.getSimilarLearnedWordsWithFrequency("ont", 5)
+
+            val frequencies = results.map { it.second }
+            assertEquals("Should be sorted by frequency descending", frequencies, frequencies.sortedDescending())
+        }
 }

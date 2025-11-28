@@ -373,10 +373,10 @@ class WordLearningEngine
                     if (results.size < maxResults && strippedInput.length >= WordLearningConstants.MIN_PREFIX_MATCH_LENGTH) {
                         try {
                             val searchLimit =
-                                when {
-                                    strippedInput.length <= 3 -> WordLearningConstants.STRIPPED_MATCH_LIMIT_SHORT
-                                    strippedInput.length <= 5 -> WordLearningConstants.STRIPPED_MATCH_LIMIT_MEDIUM
-                                    else -> WordLearningConstants.FUZZY_SEARCH_CANDIDATE_LIMIT
+                                if (strippedInput.length <= 3) {
+                                    WordLearningConstants.STRIPPED_MATCH_LIMIT_SHORT
+                                } else {
+                                    WordLearningConstants.STRIPPED_MATCH_LIMIT_MEDIUM
                                 }
 
                             val frequentWords =
