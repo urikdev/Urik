@@ -1064,25 +1064,6 @@ class SwipeKeyboardView
                 MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                     val wasSwipe = isSwipeActive
 
-                    if (!wasSwipe && touchStartPoint != null) {
-                        val dx = ev.x - touchStartPoint!!.x
-                        val dy = ev.y - touchStartPoint!!.y
-                        val distance = kotlin.math.sqrt(dx * dx + dy * dy)
-
-                        if (distance < 20f) {
-                            val hitButton =
-                                keyPositions.any { (_, rect) ->
-                                    rect.contains(ev.x.toInt(), ev.y.toInt())
-                                }
-
-                            if (!hitButton) {
-                                findKeyAt(ev.x, ev.y)?.let { key ->
-                                    onTap(key)
-                                }
-                            }
-                        }
-                    }
-
                     isSwipeActive = false
                     touchStartPoint = null
                     touchStartTime = null
