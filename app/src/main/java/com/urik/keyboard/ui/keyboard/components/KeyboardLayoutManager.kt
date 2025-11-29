@@ -104,6 +104,101 @@ class KeyboardLayoutManager(
     private var backspaceCharsSinceLastHaptic = 0
 
     private var variationPopup: CharacterVariationPopup? = null
+    private var currentVariationKeyType: KeyboardKey.KeyType? = null
+
+    private val characterVariationCallback: (String) -> Unit = { selectedChar ->
+        performCustomHaptic()
+        val keyType = currentVariationKeyType ?: KeyboardKey.KeyType.LETTER
+        val selectedKey = KeyboardKey.Character(selectedChar, keyType)
+        onKeyClick(selectedKey)
+    }
+
+    private val punctuationVariationCallback: (String) -> Unit = { selectedPunctuation ->
+        performCustomHaptic()
+        val punctuationKey = KeyboardKey.Character(selectedPunctuation, KeyboardKey.KeyType.PUNCTUATION)
+        onKeyClick(punctuationKey)
+    }
+
+    private val keyClickListener =
+        View.OnClickListener { view ->
+            val key = view.getTag(R.id.key_data) as? KeyboardKey ?: return@OnClickListener
+            performCustomHaptic()
+
+            if (accessibilityManager.isEnabled) {
+                val event = AccessibilityEvent.obtain(AccessibilityEvent.TYPE_VIEW_CLICKED)
+                event.contentDescription = view.contentDescription
+                accessibilityManager.sendAccessibilityEvent(event)
+            }
+
+            onKeyClick(key)
+        }
+
+    private val characterLongPressTouchListener =
+        View.OnTouchListener { view, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    val key = view.getTag(R.id.key_data) as? KeyboardKey.Character ?: return@OnTouchListener false
+                    val handler = Handler(Looper.getMainLooper())
+                    val runnable =
+                        Runnable {
+                            performCustomHaptic()
+                            handleCharacterLongPress(key, view)
+                        }
+                    buttonPendingCallbacks[view as Button] = PendingCallbacks(handler, runnable)
+                    handler.postDelayed(runnable, currentLongPressDuration.durationMs)
+                    false
+                }
+                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                    buttonPendingCallbacks.remove(view as Button)?.let { pending ->
+                        pending.handler.removeCallbacks(pending.runnable)
+                    }
+                    false
+                }
+                else -> false
+            }
+        }
+
+    private val spaceLongPressTouchListener =
+        View.OnTouchListener { view, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    val handler = Handler(Looper.getMainLooper())
+                    val runnable =
+                        Runnable {
+                            performCustomHaptic()
+                            handleSpaceLongPress(view)
+                        }
+                    buttonPendingCallbacks[view as Button] = PendingCallbacks(handler, runnable)
+                    handler.postDelayed(runnable, currentLongPressDuration.durationMs)
+                    false
+                }
+                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                    buttonPendingCallbacks.remove(view as Button)?.let { pending ->
+                        pending.handler.removeCallbacks(pending.runnable)
+                    }
+                    false
+                }
+                else -> false
+            }
+        }
+
+    private val backspaceLongClickListener =
+        View.OnLongClickListener { _ ->
+            performCustomHaptic()
+            startAcceleratedBackspace()
+            true
+        }
+
+    private val backspaceTouchListener =
+        View.OnTouchListener { _, event ->
+            when (event.action) {
+                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                    stopAcceleratedBackspace()
+                    false
+                }
+                else -> false
+            }
+        }
 
     private val punctuationCache: ManagedCache<String, List<String>> =
         cacheMemoryManager.createCache(
@@ -375,17 +470,8 @@ class KeyboardLayoutManager(
             importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_YES
             contentDescription = getKeyContentDescription(key, state)
 
-            setOnClickListener { _ ->
-                performCustomHaptic()
-
-                if (accessibilityManager.isEnabled) {
-                    val event = AccessibilityEvent.obtain(AccessibilityEvent.TYPE_VIEW_CLICKED)
-                    event.contentDescription = contentDescription
-                    accessibilityManager.sendAccessibilityEvent(event)
-                }
-
-                onKeyClick(key)
-            }
+            setTag(R.id.key_data, key)
+            setOnClickListener(keyClickListener)
 
             if (key is KeyboardKey.Action) {
                 val iconRes =
@@ -421,96 +507,20 @@ class KeyboardLayoutManager(
             }
 
             if (key is KeyboardKey.Character && key.type == KeyboardKey.KeyType.LETTER) {
-                setOnTouchListener { view, event ->
-                    when (event.action) {
-                        MotionEvent.ACTION_DOWN -> {
-                            val handler = Handler(Looper.getMainLooper())
-                            val runnable =
-                                Runnable {
-                                    performCustomHaptic()
-                                    handleCharacterLongPress(key, view)
-                                }
-                            buttonPendingCallbacks[this] = PendingCallbacks(handler, runnable)
-                            handler.postDelayed(runnable, currentLongPressDuration.durationMs)
-                            false
-                        }
-                        MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                            buttonPendingCallbacks.remove(this)?.let { pending ->
-                                pending.handler.removeCallbacks(pending.runnable)
-                            }
-                            false
-                        }
-                        else -> false
-                    }
-                }
+                setOnTouchListener(characterLongPressTouchListener)
             }
 
             if (key is KeyboardKey.Character && key.type == KeyboardKey.KeyType.SYMBOL) {
-                setOnTouchListener { view, event ->
-                    when (event.action) {
-                        MotionEvent.ACTION_DOWN -> {
-                            val handler = Handler(Looper.getMainLooper())
-                            val runnable =
-                                Runnable {
-                                    performCustomHaptic()
-                                    handleCharacterLongPress(key, view)
-                                }
-                            buttonPendingCallbacks[this] = PendingCallbacks(handler, runnable)
-                            handler.postDelayed(runnable, currentLongPressDuration.durationMs)
-                            false
-                        }
-                        MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                            buttonPendingCallbacks.remove(this)?.let { pending ->
-                                pending.handler.removeCallbacks(pending.runnable)
-                            }
-                            false
-                        }
-                        else -> false
-                    }
-                }
+                setOnTouchListener(characterLongPressTouchListener)
             }
 
             if (key is KeyboardKey.Action && key.action == KeyboardKey.ActionType.SPACE) {
-                setOnTouchListener { view, event ->
-                    when (event.action) {
-                        MotionEvent.ACTION_DOWN -> {
-                            val handler = Handler(Looper.getMainLooper())
-                            val runnable =
-                                Runnable {
-                                    performCustomHaptic()
-                                    handleSpaceLongPress(view)
-                                }
-                            buttonPendingCallbacks[this] = PendingCallbacks(handler, runnable)
-                            handler.postDelayed(runnable, currentLongPressDuration.durationMs)
-                            false
-                        }
-                        MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                            buttonPendingCallbacks.remove(this)?.let { pending ->
-                                pending.handler.removeCallbacks(pending.runnable)
-                            }
-                            false
-                        }
-                        else -> false
-                    }
-                }
+                setOnTouchListener(spaceLongPressTouchListener)
             }
 
             if (key is KeyboardKey.Action && key.action == KeyboardKey.ActionType.BACKSPACE) {
-                setOnLongClickListener { _ ->
-                    performCustomHaptic()
-                    startAcceleratedBackspace()
-                    true
-                }
-
-                setOnTouchListener { _, event ->
-                    when (event.action) {
-                        MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                            stopAcceleratedBackspace()
-                            false
-                        }
-                        else -> false
-                    }
-                }
+                setOnLongClickListener(backspaceLongClickListener)
+                setOnTouchListener(backspaceTouchListener)
             }
         }
     }
@@ -630,11 +640,7 @@ class KeyboardLayoutManager(
 
         variationPopup =
             CharacterVariationPopup(context, themeManager).apply {
-                setCharacterVariations("", punctuationList) { selectedPunctuation ->
-                    performCustomHaptic()
-                    val punctuationKey = KeyboardKey.Character(selectedPunctuation, KeyboardKey.KeyType.PUNCTUATION)
-                    onKeyClick(punctuationKey)
-                }
+                setCharacterVariations("", punctuationList, punctuationVariationCallback)
                 showAboveAnchor(anchorView)
             }
     }
@@ -811,13 +817,11 @@ class KeyboardLayoutManager(
 
         anchorView.isPressed = false
 
+        currentVariationKeyType = key.type
+
         variationPopup =
             CharacterVariationPopup(context, themeManager).apply {
-                setCharacterVariations(key.value, variations) { selectedChar ->
-                    performCustomHaptic()
-                    val selectedKey = KeyboardKey.Character(selectedChar, key.type)
-                    onKeyClick(selectedKey)
-                }
+                setCharacterVariations(key.value, variations, characterVariationCallback)
                 showAboveAnchor(anchorView)
             }
     }
