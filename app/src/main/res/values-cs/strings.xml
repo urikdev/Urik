@@ -1,0 +1,192 @@
+<resources>
+    <string name="app_name" translatable="false">Urik</string>
+    <string name="ime_name">Klávesnice Urik</string>
+    <string name="ime_label">Klávesnice Urik</string>
+    <string name="ime_description">Psaní tahem, kontrola pravopisu, a vícejazyčná podpora bez ohrožení vašeho soukromí. Žádná telemetrie. Žádný sběr dat. Vše zůstává na vašem zařízení.</string>
+
+    <!-- Settings -->
+    <string name="enable_keyboard_title">Zapnout</string>
+    <string name="open_settings">Otevřít nastavení</string>
+    <string name="error_opening_settings">Nelze otevřít nastavení.</string>
+
+    <!-- Settings Activity -->
+    <string name="settings_title">Nastavení klávesnice</string>
+    <string name="autocorrect_settings_title">Nastavení autokorekce</string>
+    <string name="autocorrect_settings_description">Kontrola pravopisu a návrhy</string>
+    <string name="language_settings_title">Nastavení jazyka</string>
+    <string name="language_settings_description">Zvolte jazyky klávesnice</string>
+    <string name="feedback_settings_title">Zvuk &amp; Nastavení zpětné vazby</string>
+    <string name="feedback_settings_description">Zvuky a vibrace při stisku</string>
+    <string name="typing_settings_title">Nastavení chování při psaní</string>
+    <string name="typing_settings_description">Interpunkce atd.</string>
+    <string name="layout_settings_title">Rozložení &amp; Vstup</string>
+    <string name="layout_settings_description">Řádek čísel, velikost mezerníku</string>
+    <string name="appearance_settings_title">Vzhled</string>
+    <string name="appearance_settings_description">Téma, velikost</string>
+    <string name="privacy_settings_title">Soukromí &amp; Data</string>
+    <string name="privacy_settings_description">Vyčistit data, obnovit nastavení</string>
+    <string name="licenses_title">Open Source licence</string>
+    <string name="licenses_description">Zobrazit licence třetích stran</string>
+    <string name="dictionary_attribution_title">Data slovníku</string>
+    <string name="theme_picker_title">Téma klávesnice</string>
+    <string name="dictionary_attribution_summary">Licence a atribuce FrequencyWords</string>
+
+    <!-- Settings Enums -->
+    <!-- Theme -->
+    <string name="theme_system">Podle systému</string>
+    <string name="theme_light">Světlý</string>
+    <string name="theme_dark">Tmavý</string>
+
+    <!-- Key Size -->
+    <string name="key_size_small">Malá</string>
+    <string name="key_size_medium">Střední</string>
+    <string name="key_size_large">Velká</string>
+    <string name="key_size_extra_large">Extra velká</string>
+
+    <!-- Vibration Strength -->
+    <string name="vibration_strength_light">Lehká</string>
+    <string name="vibration_strength_medium">Střední</string>
+    <string name="vibration_strength_strong">Silná</string>
+
+    <!-- Long Press Duration -->
+    <string name="long_press_duration_short">Krátká</string>
+    <string name="long_press_duration_medium">Střední</string>
+    <string name="long_press_duration_long">Dlouhá</string>
+
+    <!-- Space Bar Size -->
+    <string name="space_bar_size_compact">Kompaktní</string>
+    <string name="space_bar_size_standard">Standartní</string>
+    <string name="space_bar_size_wide">Široký</string>
+
+    <!-- Key Label Size -->
+    <string name="key_label_size_small">Malý</string>
+    <string name="key_label_size_medium">Střední</string>
+    <string name="key_label_size_large">Velký</string>
+
+    <!-- Appearance Settings -->
+    <string name="appearance_settings_theme">Téma</string>
+    <string name="appearance_settings_key_size">Velikost kláves</string>
+    <string name="appearance_settings_key_label_size">Velikost popisu kláves</string>
+
+    <!-- Auto-Correct Settings -->
+    <string name="autocorrect_settings_show_suggestions">Ukázat doporučení</string>
+    <string name="autocorrect_settings_suggestions_on">Doporučení ukázána</string>
+    <string name="autocorrect_settings_suggestions_off">Doporučení skryta</string>
+    <string name="autocorrect_settings_suggestion_count">Počet doporučení</string>
+    <string name="autocorrect_settings_learn_new_words">Naučit nová slova</string>
+    <string name="autocorrect_settings_learn_new_words_on">Učení zapnuto</string>
+    <string name="autocorrect_settings_learn_new_words_off">Učení vypnuto</string>
+
+    <!-- Language Settings -->
+
+    <!-- Sound & Feedback Settings -->
+    <string name="feedback_settings_haptic_feedback">Haptická odezva</string>
+    <string name="feedback_settings_haptic_on">Haptika zapnuta</string>
+    <string name="feedback_settings_haptic_off">Haptika vypnuta</string>
+    <string name="feedback_settings_vibration_strength">Síla vibrací</string>
+
+    <!-- Typing Behavior Settings -->
+    <string name="typing_settings_double_space_period">Tečka po dvojté mezeře</string>
+    <string name="typing_settings_double_space_on">Dvojtá mezera vloží tečku</string>
+    <string name="typing_settings_double_space_off">Dvojtá mezera vloží mezeru</string>
+    <string name="typing_settings_long_press_duration">Délka dlouhého stisku</string>
+
+    <!-- Layout & Input Settings -->
+    <string name="layout_settings_show_number_row">Zobrazit číselnou řadu</string>
+    <string name="layout_settings_number_row_on">Číselná řada zobrazena</string>
+    <string name="layout_settings_number_row_off">Číselná řada skryta</string>
+    <string name="layout_settings_space_bar_size">Velikost mezerníku</string>
+
+    <!-- Privacy & Data Settings -->
+    <string name="privacy_settings_clear_learned_words">Smazat naučená slova</string>
+    <string name="privacy_settings_clear_learned_words_summary">Smazat celý naučený slovník</string>
+    <string name="privacy_settings_clear_learned_words_confirm">Opravdu chcete smazat celý naučený slovník? Toto nelze zvrátit.</string>
+    <string name="privacy_settings_reset_to_defaults">Obnovit výchozí</string>
+    <string name="privacy_settings_reset_to_defaults_confirm">Obnovit všechna nastavení na výchozí?</string>
+    <string name="privacy_settings_export_error_log">Exportovat hlášení chyb</string>
+    <string name="privacy_settings_export_error_log_summary">Sdílet diagnostické hlášení k ladění</string>
+    <string name="privacy_settings_export_error_log_failed">Nepovedlo se exportovat chybová hlášení</string>
+
+    <!-- Error Messages -->
+    <string name="error_title">Chyba</string>
+    <string name="error_update_theme">Nepodařilo se aktualizovat téma</string>
+    <string name="error_update_key_size">Nepodařilo se změnit velikost kláves</string>
+    <string name="error_update_key_label_size">Nepodařilo se aktualizovat velikost popisů</string>
+    <string name="error_update_suggestions">Nepodařilo se aktualizovat nastavení doporučení</string>
+    <string name="error_update_suggestion_count">Nepodařilo se aktualizovat počet doporučení</string>
+    <string name="error_update_word_learning">Nepodařilo se aktualizovat učení slov</string>
+    <string name="error_update_language">Nepodařilo se aktualizovat nastavení jazyka</string>
+    <string name="error_update_haptic_feedback">Nepodařilo se aktualizovat haptiku</string>
+    <string name="error_update_vibration_strength">Nepodařilo se aktualizovat sílu vibrací</string>
+    <string name="error_update_double_space_period">Nepodařilo se aktualizovat dvojmezeru tečka</string>
+    <string name="error_update_long_press_duration">Nepodařilo se aktualizovat dobu dlouhého stistknutí</string>
+    <string name="error_update_number_row">Nepodařilo se aktualizovat číselnou řadu</string>
+    <string name="error_update_space_bar_size">Nepodařilo se aktualizovat veliost mezerníku</string>
+    <string name="error_clear_learned_words">Nepodařilo se smazat naučená slova</string>
+    <string name="error_reset_to_defaults">Nepodařilo se obnovit nastavení</string>
+
+    <!-- Success Messages -->
+    <string name="success_learned_words_cleared">Naučená slova smazána</string>
+    <string name="success_settings_reset">Obnoveno výchozí nasstavení</string>
+
+    <!-- Keyboard descriptions -->
+    <string name="keyboard_description">Virtuální klávesnice</string>
+
+    <!-- Default key labels -->
+    <string name="letters_mode_label">ABC</string>
+    <string name="numbers_mode_label">123</string>
+    <string name="symbols_mode_label">+=&lt;</string>
+
+    <!-- Accessibility descriptions -->
+    <string name="key_character_description">Psát %1$s</string>
+
+    <string name="shift_key_description">Klávesa shift, stiskněte pro zvětšení dalšího písmene</string>
+    <string name="shift_active_description">Shift je aktivní, stiskněte pro deaktivaci</string>
+    <string name="caps_lock_description">Caps lock</string>
+    <string name="caps_lock_on_description">Caps lock je zapnutý, stiskněěte pro vypnutí</string>
+    <string name="backspace_key_description">Smazat předchozí znak</string>
+    <string name="space_key_description">Mezerník</string>
+    <string name="letters_mode_description">Přepnout na písmenou klávesnici</string>
+    <string name="numbers_mode_description">Přepnout na číselnou klávesnici</string>
+    <string name="symbols_mode_description">Přepnout na symbolovou klávesnici</string>
+    <string name="ime_prediction_description">Předpověď: %1$s</string>
+
+    <!-- Action button accessibility descriptions -->
+    <string name="action_enter_description">Stiskněte enter</string>
+    <string name="action_send_description">Poslat zprávu</string>
+    <string name="action_search_description">Hledat</string>
+    <string name="action_done_description">Dokončit úpravy</string>
+    <string name="action_go_description">Jít na pozici</string>
+    <string name="action_next_description">Přesunout do dalšího pole</string>
+    <string name="action_previous_description">Přesunout do předchozího pole</string>
+
+    <string name="action_emoji">Emoji</string>
+
+    <!-- Theme Picker Accessibility -->
+    <string name="theme_description">%1$s téma</string>
+    <string name="theme_description_selected">%1$s téma, momentálně zvoleno</string>
+    <string name="theme_add_favorite">Přidat %1$s mezi oblíbené</string>
+    <string name="theme_remove_favorite">Odebrat %1$s z oblíbených</string>
+
+    <!-- Character Variation Accessibility -->
+    <string name="character_variation_position">Variace znaků %1$d z %2$d: %3$s</string>
+
+    <!-- Blacklisting Words -->
+    <string name="remove_suggestion">Odstranit %1$s z doporučení?</string>
+    <string name="remove_cancel">Zrušit</string>
+    <string name="remove_confirm">Odebrat</string>
+
+    <!-- Tips -->
+    <string name="tip_1_title">Učení slov</string>
+    <string name="tip_1_description">Stiskněte mezerník pro přidání zvýrazněného překlepu do vašeho slovníku</string>
+
+    <string name="tip_2_title">Ryhclé menu interpunkce</string>
+    <string name="tip_2_description">Dlouze stiskněte mezerník pro otevření rychlého menu interpunkce.</string>
+
+    <string name="tip_3_title">Variace znaků</string>
+    <string name="tip_3_description">Dlouze stiskněte znak pro zobrazení variant znaku.</string>
+
+    <string name="tip_4_title">Odebrat slova</string>
+    <string name="tip_4_description">Dlouze podržte na slovo pro odebrání z vašeho slovníku.</string>
+
+</resources>
