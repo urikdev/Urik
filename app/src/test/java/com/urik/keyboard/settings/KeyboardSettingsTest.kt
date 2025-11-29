@@ -39,6 +39,20 @@ class KeyboardSettingsTest {
     }
 
     @Test
+    fun `validated preserves czech as supported language`() {
+        val settings =
+            KeyboardSettings(
+                activeLanguages = setOf("cs", "en", "fr"),
+                primaryLanguage = "cs",
+            )
+
+        val validated = settings.validated()
+
+        assertEquals(setOf("cs", "en"), validated.activeLanguages)
+        assertEquals("cs", validated.primaryLanguage)
+    }
+
+    @Test
     fun `validated defaults to english when all languages unsupported`() {
         val settings =
             KeyboardSettings(
@@ -208,6 +222,14 @@ class KeyboardSettingsTest {
 
         assertEquals(setOf("de"), settings.activeLanguages)
         assertEquals("de", settings.primaryLanguage)
+    }
+
+    @Test
+    fun `defaultForLocale supports czech`() {
+        val settings = KeyboardSettings.defaultForLocale("cs")
+
+        assertEquals(setOf("cs"), settings.activeLanguages)
+        assertEquals("cs", settings.primaryLanguage)
     }
 
     @Test
