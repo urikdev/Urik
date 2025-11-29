@@ -92,6 +92,45 @@ class SwipeKeyboardView
         private var viewScopeJob = SupervisorJob()
         private var viewScope = CoroutineScope(Dispatchers.Main + viewScopeJob)
 
+        private val suggestionClickListener =
+            View.OnClickListener { view ->
+                if (isDestroyed) return@OnClickListener
+                val suggestion = view.getTag(R.id.suggestion_text) as? String ?: return@OnClickListener
+                keyboardLayoutManager?.triggerHapticFeedback()
+                onSuggestionClickListener?.invoke(suggestion)
+            }
+
+        private val suggestionLongClickListener =
+            View.OnLongClickListener { view ->
+                if (isDestroyed) return@OnLongClickListener false
+                val suggestion = view.getTag(R.id.suggestion_text) as? String ?: return@OnLongClickListener false
+                showRemovalConfirmation(suggestion)
+                true
+            }
+
+        private val emojiButtonClickListener =
+            View.OnClickListener {
+                if (isDestroyed) return@OnClickListener
+                showEmojiPicker(
+                    onEmojiSelected = { selectedEmoji ->
+                        onEmojiSelected?.invoke(selectedEmoji)
+                    },
+                    onBackspace = {
+                        onBackspacePressed?.invoke()
+                    },
+                )
+            }
+
+        private val globalLayoutListener =
+            object : ViewTreeObserver.OnGlobalLayoutListener {
+                override fun onGlobalLayout() {
+                    viewTreeObserver.removeOnGlobalLayoutListener(this)
+                    if (!isDestroyed && isAttachedToWindow) {
+                        mapKeyPositions()
+                    }
+                }
+            }
+
         init {
             addView(
                 swipeOverlay,
@@ -485,21 +524,9 @@ class SwipeKeyboardView
 
                 btn.typeface = android.graphics.Typeface.DEFAULT
 
-                btn.setOnClickListener {
-                    if (!isDestroyed) {
-                        keyboardLayoutManager?.triggerHapticFeedback()
-                        onSuggestionClickListener?.invoke(suggestion)
-                    }
-                }
-
-                btn.setOnLongClickListener {
-                    if (!isDestroyed) {
-                        showRemovalConfirmation(suggestion)
-                        true
-                    } else {
-                        false
-                    }
-                }
+                btn.setTag(R.id.suggestion_text, suggestion)
+                btn.setOnClickListener(suggestionClickListener)
+                btn.setOnLongClickListener(suggestionLongClickListener)
 
                 activeSuggestionViews.add(btn)
 
@@ -814,18 +841,7 @@ class SwipeKeyboardView
 
                                 contentDescription = context.getString(R.string.action_emoji)
 
-                                setOnClickListener {
-                                    if (!isDestroyed) {
-                                        showEmojiPicker(
-                                            onEmojiSelected = { selectedEmoji ->
-                                                onEmojiSelected?.invoke(selectedEmoji)
-                                            },
-                                            onBackspace = {
-                                                onBackspacePressed?.invoke()
-                                            },
-                                        )
-                                    }
-                                }
+                                setOnClickListener(emojiButtonClickListener)
 
                                 layoutParams =
                                     LinearLayout
@@ -897,16 +913,7 @@ class SwipeKeyboardView
 
         private fun safeMappingPost() {
             if (!isDestroyed && isAttachedToWindow && viewTreeObserver.isAlive) {
-                viewTreeObserver.addOnGlobalLayoutListener(
-                    object : ViewTreeObserver.OnGlobalLayoutListener {
-                        override fun onGlobalLayout() {
-                            viewTreeObserver.removeOnGlobalLayoutListener(this)
-                            if (!isDestroyed && isAttachedToWindow) {
-                                mapKeyPositions()
-                            }
-                        }
-                    },
-                )
+                viewTreeObserver.addOnGlobalLayoutListener(globalLayoutListener)
             }
         }
 
