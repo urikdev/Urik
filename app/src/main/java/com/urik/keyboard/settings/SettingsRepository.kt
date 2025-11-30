@@ -43,6 +43,7 @@ class SettingsRepository
 
         private object PreferenceKeys {
             val SHOW_SUGGESTIONS = booleanPreferencesKey("show_suggestions")
+            val SPELL_CHECK_ENABLED = booleanPreferencesKey("spell_check_enabled")
             val SUGGESTION_COUNT = intPreferencesKey("suggestion_count")
             val LEARN_NEW_WORDS = booleanPreferencesKey("learn_new_words")
             val ACTIVE_LANGUAGES = stringSetPreferencesKey("active_languages")
@@ -69,6 +70,7 @@ class SettingsRepository
             dataStore.data
                 .map { preferences ->
                     KeyboardSettings(
+                        spellCheckEnabled = preferences[PreferenceKeys.SPELL_CHECK_ENABLED] ?: true,
                         showSuggestions = preferences[PreferenceKeys.SHOW_SUGGESTIONS] ?: true,
                         suggestionCount = preferences[PreferenceKeys.SUGGESTION_COUNT] ?: 3,
                         learnNewWords = preferences[PreferenceKeys.LEARN_NEW_WORDS] ?: true,
@@ -123,6 +125,17 @@ class SettingsRepository
                 }.catch { _ ->
                     emit(getDefaultSettings())
                 }
+
+        /**
+         * Updates spell check toggle.
+         */
+        suspend fun updateSpellCheckEnabled(enabled: Boolean): Result<Unit> =
+            try {
+                dataStore.edit { it[PreferenceKeys.SPELL_CHECK_ENABLED] = enabled }
+                Result.success(Unit)
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
 
         /**
          * Updates suggestion visibility.

@@ -24,6 +24,7 @@ class AutoCorrectionFragment : PreferenceFragmentCompat() {
     private lateinit var viewModel: AutoCorrectionViewModel
     private lateinit var eventHandler: SettingsEventHandler
 
+    private lateinit var spellCheckPref: SwitchPreferenceCompat
     private lateinit var suggestionsPref: SwitchPreferenceCompat
     private lateinit var countPref: ListPreference
     private lateinit var learnPref: SwitchPreferenceCompat
@@ -41,6 +42,15 @@ class AutoCorrectionFragment : PreferenceFragmentCompat() {
         val screen = preferenceManager.createPreferenceScreen(context)
 
         eventHandler = SettingsEventHandler(requireContext())
+
+        spellCheckPref =
+            SwitchPreferenceCompat(context).apply {
+                key = "spell_check_enabled"
+                title = resources.getString(R.string.autocorrect_settings_spell_check)
+                summaryOn = resources.getString(R.string.autocorrect_settings_spell_check_on)
+                summaryOff = resources.getString(R.string.autocorrect_settings_spell_check_off)
+            }
+        screen.addPreference(spellCheckPref)
 
         suggestionsPref =
             SwitchPreferenceCompat(context).apply {
@@ -79,6 +89,11 @@ class AutoCorrectionFragment : PreferenceFragmentCompat() {
     ) {
         super.onViewCreated(view, savedInstanceState)
 
+        spellCheckPref.setOnPreferenceChangeListener { _, newValue ->
+            viewModel.updateSpellCheckEnabled(newValue as Boolean)
+            true
+        }
+
         suggestionsPref.setOnPreferenceChangeListener { _, newValue ->
             viewModel.updateShowSuggestions(newValue as Boolean)
             true
@@ -98,6 +113,7 @@ class AutoCorrectionFragment : PreferenceFragmentCompat() {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
                     viewModel.uiState.collect { state ->
+                        spellCheckPref.isChecked = state.spellCheckEnabled
                         suggestionsPref.isChecked = state.showSuggestions
                         countPref.value = state.suggestionCount.toString()
                         learnPref.isChecked = state.learnNewWords
