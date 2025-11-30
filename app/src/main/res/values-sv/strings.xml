@@ -24,6 +24,9 @@
     <string name="appearance_settings_theme">Tema</string>
     <string name="appearance_settings_key_size">Nyckelstorlek</string>
     <string name="appearance_settings_key_label_size">Storlek på nyckeletiketten</string>
+    <string name="autocorrect_settings_spell_check">Stavningskontroll</string>
+    <string name="autocorrect_settings_spell_check_on">Stavningskontroll aktiverad</string>
+    <string name="autocorrect_settings_spell_check_off">Stavningskontroll inaktiverad</string>
     <string name="autocorrect_settings_show_suggestions">Visa förslag</string>
     <string name="autocorrect_settings_suggestions_on">Förslag visade</string>
     <string name="autocorrect_settings_suggestions_off">Förslag dolda</string>
@@ -52,6 +55,7 @@
     <string name="error_update_theme">Misslyckades med att uppdatera temat</string>
     <string name="error_update_key_size">Misslyckades med att uppdatera nyckelstorleken</string>
     <string name="error_update_key_label_size">Misslyckades med att uppdatera etikettstorleken</string>
+    <string name="error_update_spell_check">Misslyckades med att uppdatera stavningskontroll</string>
     <string name="error_update_suggestions">Det gick inte att uppdatera förslagsinställningarna</string>
     <string name="error_update_suggestion_count">Misslyckades med att uppdatera förslagsantalet</string>
     <string name="error_update_word_learning">Misslyckades med att uppdatera ordinlärningen</string>

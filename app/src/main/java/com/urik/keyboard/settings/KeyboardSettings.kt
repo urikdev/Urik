@@ -122,11 +122,11 @@ data class KeyboardSettings(
         get() = learnNewWords
 
     /**
-     * Effective suggestion count respecting spell check and suggestion toggles.
-     * Returns 0 if either is disabled.
+     * Effective suggestion count respecting suggestion toggle.
+     * Returns 0 if suggestions are disabled.
      */
     val effectiveSuggestionCount: Int
-        get() = if (showSuggestions && spellCheckEnabled) suggestionCount else 0
+        get() = if (showSuggestions) suggestionCount else 0
 
     /**
      * Effective vibration duration respecting haptic feedback toggle.

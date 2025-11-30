@@ -69,6 +69,9 @@
     <string name="appearance_settings_key_label_size">Key Label Size</string>
 
     <!-- Auto-Correct Settings -->
+    <string name="autocorrect_settings_spell_check">Spell Check</string>
+    <string name="autocorrect_settings_spell_check_on">Spell check enabled</string>
+    <string name="autocorrect_settings_spell_check_off">Spell check disabled</string>
     <string name="autocorrect_settings_show_suggestions">Show Suggestions</string>
     <string name="autocorrect_settings_suggestions_on">Suggestions shown</string>
     <string name="autocorrect_settings_suggestions_off">Suggestions hidden</string>
@@ -112,6 +115,7 @@
     <string name="error_update_theme">Failed to update theme</string>
     <string name="error_update_key_size">Failed to update key size</string>
     <string name="error_update_key_label_size">Failed to update label size</string>
+    <string name="error_update_spell_check">Failed to update spell check</string>
     <string name="error_update_suggestions">Failed to update suggestion settings</string>
     <string name="error_update_suggestion_count">Failed to update suggestion count</string>
     <string name="error_update_word_learning">Failed to update word learning</string>

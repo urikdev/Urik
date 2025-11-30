@@ -31,6 +31,7 @@ class AutoCorrectionViewModel
             settingsRepository.settings
                 .map { settings ->
                     AutoCorrectionUiState(
+                        spellCheckEnabled = settings.spellCheckEnabled,
                         showSuggestions = settings.showSuggestions,
                         suggestionCount = settings.suggestionCount,
                         learnNewWords = settings.learnNewWords,
@@ -40,6 +41,14 @@ class AutoCorrectionViewModel
                     started = SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS),
                     initialValue = AutoCorrectionUiState(),
                 )
+
+        fun updateSpellCheckEnabled(enabled: Boolean) {
+            viewModelScope.launch {
+                settingsRepository
+                    .updateSpellCheckEnabled(enabled)
+                    .onFailure { _events.emit(SettingsEvent.Error.SpellCheckToggleFailed) }
+            }
+        }
 
         fun updateShowSuggestions(show: Boolean) {
             viewModelScope.launch {
@@ -74,6 +83,7 @@ class AutoCorrectionViewModel
  * UI state for auto-correction settings.
  */
 data class AutoCorrectionUiState(
+    val spellCheckEnabled: Boolean = true,
     val showSuggestions: Boolean = true,
     val suggestionCount: Int = 3,
     val learnNewWords: Boolean = true,

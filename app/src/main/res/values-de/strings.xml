@@ -68,6 +68,9 @@
     <string name="appearance_settings_key_label_size">Tasten-Beschriftungs-Größe</string>
 
     <!-- Auto-Correct Settings -->
+    <string name="autocorrect_settings_spell_check">Rechtschreibprüfung</string>
+    <string name="autocorrect_settings_spell_check_on">Rechtschreibprüfung aktiviert</string>
+    <string name="autocorrect_settings_spell_check_off">Rechtschreibprüfung deaktiviert</string>
     <string name="autocorrect_settings_show_suggestions">Verbesserungen anzeigen</string>
     <string name="autocorrect_settings_suggestions_on">Verbesserungen werden angezeigt</string>
     <string name="autocorrect_settings_suggestions_off">Verbesserungen werden versteckt</string>
@@ -111,6 +114,7 @@
     <string name="error_update_theme">Thema konnte nicht geändert werden</string>
     <string name="error_update_key_size">Tastengröße konnte nicht geändert werden</string>
     <string name="error_update_key_label_size">Beschriftungsgröße konnte nicht geändert werden</string>
+    <string name="error_update_spell_check">Rechtschreibprüfung konnte nicht geändert werden</string>
     <string name="error_update_suggestions">Verbesserungs-Einstellungen konnten nicht geändert werden</string>
     <string name="error_update_suggestion_count">Verbesserungsanzahl konnte nicht geändert werden</string>
     <string name="error_update_word_learning">Wörterbuch konnte nicht geändert werden</string>

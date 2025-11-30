@@ -69,6 +69,9 @@
     <string name="appearance_settings_key_label_size">Velikost popisu kláves</string>
 
     <!-- Auto-Correct Settings -->
+    <string name="autocorrect_settings_spell_check">Kontrola pravopisu</string>
+    <string name="autocorrect_settings_spell_check_on">Kontrola pravopisu zapnuta</string>
+    <string name="autocorrect_settings_spell_check_off">Kontrola pravopisu vypnuta</string>
     <string name="autocorrect_settings_show_suggestions">Ukázat doporučení</string>
     <string name="autocorrect_settings_suggestions_on">Doporučení ukázána</string>
     <string name="autocorrect_settings_suggestions_off">Doporučení skryta</string>
@@ -112,6 +115,7 @@
     <string name="error_update_theme">Nepodařilo se aktualizovat téma</string>
     <string name="error_update_key_size">Nepodařilo se změnit velikost kláves</string>
     <string name="error_update_key_label_size">Nepodařilo se aktualizovat velikost popisů</string>
+    <string name="error_update_spell_check">Nepodařilo se aktualizovat kontrolu pravopisu</string>
     <string name="error_update_suggestions">Nepodařilo se aktualizovat nastavení doporučení</string>
     <string name="error_update_suggestion_count">Nepodařilo se aktualizovat počet doporučení</string>
     <string name="error_update_word_learning">Nepodařilo se aktualizovat učení slov</string>

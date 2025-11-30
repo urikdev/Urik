@@ -142,7 +142,7 @@ class KeyboardSettingsTest {
     }
 
     @Test
-    fun `effectiveSuggestionCount returns zero when spell check disabled`() {
+    fun `effectiveSuggestionCount returns count when spell check disabled but suggestions enabled`() {
         val settings =
             KeyboardSettings(
                 spellCheckEnabled = false,
@@ -150,7 +150,7 @@ class KeyboardSettingsTest {
                 suggestionCount = 3,
             )
 
-        assertEquals(0, settings.effectiveSuggestionCount)
+        assertEquals(3, settings.effectiveSuggestionCount)
     }
 
     @Test
