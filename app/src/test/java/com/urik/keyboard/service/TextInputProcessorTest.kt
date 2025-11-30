@@ -197,7 +197,11 @@ class TextInputProcessorTest {
     @Test
     fun `disabling spell check prevents spell checking`() =
         runTest {
-            val settingsWithSpellCheckOff = KeyboardSettings(spellCheckEnabled = false)
+            val settingsWithSpellCheckOff =
+                KeyboardSettings(
+                    spellCheckEnabled = false,
+                    showSuggestions = false,
+                )
             settingsFlow.emit(settingsWithSpellCheckOff)
             testDispatcher.scheduler.advanceUntilIdle()
 
@@ -207,6 +211,26 @@ class TextInputProcessorTest {
             assertTrue(result is ProcessingResult.Success)
             val success = result as ProcessingResult.Success
             assertFalse(success.wordState.requiresSpellCheck)
+        }
+
+    @Test
+    fun `suggestions work when spell check disabled`() =
+        runTest {
+            val settingsWithSpellCheckOff = KeyboardSettings(spellCheckEnabled = false)
+            settingsFlow.emit(settingsWithSpellCheckOff)
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            whenever(spellCheckManager.generateSuggestions("helllo", maxSuggestions = 3))
+                .thenReturn(listOf("hello", "hell", "hallow"))
+
+            val result = processor.processCharacterInput("o", "helllo", InputMethod.TYPED)
+
+            verify(spellCheckManager, never()).isWordInDictionary(any())
+            verify(spellCheckManager).generateSuggestions("helllo", maxSuggestions = 3)
+            assertTrue(result is ProcessingResult.Success)
+            val success = result as ProcessingResult.Success
+            assertFalse(success.wordState.requiresSpellCheck)
+            assertEquals(listOf("hello", "hell", "hallow"), success.wordState.suggestions)
         }
 
     @Test

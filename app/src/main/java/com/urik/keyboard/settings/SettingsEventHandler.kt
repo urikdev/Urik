@@ -17,6 +17,7 @@ class SettingsEventHandler(
             when (event) {
                 is SettingsEvent.Error.KeySizeUpdateFailed -> R.string.error_update_key_size
                 is SettingsEvent.Error.KeyLabelSizeUpdateFailed -> R.string.error_update_key_label_size
+                is SettingsEvent.Error.SpellCheckToggleFailed -> R.string.error_update_spell_check
                 is SettingsEvent.Error.SuggestionToggleFailed -> R.string.error_update_suggestions
                 is SettingsEvent.Error.SuggestionCountUpdateFailed -> R.string.error_update_suggestion_count
                 is SettingsEvent.Error.WordLearningToggleFailed -> R.string.error_update_word_learning

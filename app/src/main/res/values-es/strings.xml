@@ -68,6 +68,9 @@
     <string name="appearance_settings_key_label_size">Tamaño de la etiqueta tecla</string>
 
     <!-- Auto-Correct Settings -->
+    <string name="autocorrect_settings_spell_check">Corrección ortográfica</string>
+    <string name="autocorrect_settings_spell_check_on">Corrección ortográfica activada</string>
+    <string name="autocorrect_settings_spell_check_off">Corrección ortográfica desactivada</string>
     <string name="autocorrect_settings_show_suggestions">Mostrar sugerencias</string>
     <string name="autocorrect_settings_suggestions_on">Sugerencias mostradas</string>
     <string name="autocorrect_settings_suggestions_off">Sugerencias ocultadas</string>
@@ -111,6 +114,7 @@
     <string name="error_update_theme">No se pudo actualizar el tema</string>
     <string name="error_update_key_size">Error al actualizar el tamaño de la tecla</string>
     <string name="error_update_key_label_size">No se pudo actualizar el tamaño de la etiqueta</string>
+    <string name="error_update_spell_check">No se pudo actualizar la corrección ortográfica</string>
     <string name="error_update_suggestions">No se pudo actualizar la configuración de sugerencias</string>
     <string name="error_update_suggestion_count">No se pudo actualizar el recuento de sugerencias</string>
     <string name="error_update_word_learning">No se pudo actualizar el aprendizaje de palabras.</string>

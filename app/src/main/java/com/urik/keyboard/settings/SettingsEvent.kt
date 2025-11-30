@@ -12,6 +12,8 @@ sealed interface SettingsEvent {
 
         data object KeyLabelSizeUpdateFailed : Error
 
+        data object SpellCheckToggleFailed : Error
+
         data object SuggestionToggleFailed : Error
 
         data object SuggestionCountUpdateFailed : Error

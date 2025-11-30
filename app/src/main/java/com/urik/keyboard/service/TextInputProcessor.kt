@@ -151,30 +151,31 @@ class TextInputProcessor
                     }
 
                 val spellCheckEnabled = currentSettings.spellCheckEnabled
-                val suggestionsEnabled = currentSettings.showSuggestions && spellCheckEnabled
+                val suggestionsEnabled = currentSettings.showSuggestions
                 val maxSuggestions = currentSettings.effectiveSuggestionCount
 
                 val requiresSpellCheck = spellCheckEnabled && graphemeCount >= TextProcessingConstants.MIN_SPELL_CHECK_LENGTH
+                val shouldGenerateSuggestions = suggestionsEnabled && graphemeCount >= TextProcessingConstants.MIN_SPELL_CHECK_LENGTH
                 var isValid = true
                 var suggestions = emptyList<String>()
 
-                if (requiresSpellCheck) {
+                if (requiresSpellCheck || shouldGenerateSuggestions) {
                     val cachedEntry = getCachedSuggestions(normalized)
                     if (cachedEntry != null) {
                         suggestions = cachedEntry.suggestions.take(maxSuggestions)
                         isValid = cachedEntry.isValid
                     } else {
-                        isValid = spellCheckManager.isWordInDictionary(normalized)
-                        if (suggestionsEnabled) {
+                        if (requiresSpellCheck) {
+                            isValid = spellCheckManager.isWordInDictionary(normalized)
+                        }
+                        if (shouldGenerateSuggestions) {
                             suggestions =
                                 spellCheckManager.generateSuggestions(
                                     normalized,
                                     maxSuggestions = maxSuggestions,
                                 )
-                            cacheSuggestions(normalized, suggestions, isValid)
-                        } else {
-                            cacheSuggestions(normalized, emptyList(), isValid)
                         }
+                        cacheSuggestions(normalized, suggestions, isValid)
                     }
                 }
 
