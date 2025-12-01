@@ -46,6 +46,9 @@
     <string name="layout_settings_number_row_on">Nummerrad visas</string>
     <string name="layout_settings_number_row_off">Nummerrad dold</string>
     <string name="layout_settings_space_bar_size">Storlek på mellanslagstangenten</string>
+    <string name="privacy_settings_clipboard_history">Urklippshistorik</string>
+    <string name="privacy_settings_clipboard_history_on">Urklippshistorik aktiverad</string>
+    <string name="privacy_settings_clipboard_history_off">Urklippshistorik inaktiverad</string>
     <string name="privacy_settings_clear_learned_words">Tydliga inlärda ord</string>
     <string name="privacy_settings_clear_learned_words_summary">Ta bort alla inlärda ord</string>
     <string name="privacy_settings_clear_learned_words_confirm">Vill du rensa alla inlärda ord? Det här kan inte ångras.</string>
@@ -59,6 +62,7 @@
     <string name="error_update_suggestions">Det gick inte att uppdatera förslagsinställningarna</string>
     <string name="error_update_suggestion_count">Misslyckades med att uppdatera förslagsantalet</string>
     <string name="error_update_word_learning">Misslyckades med att uppdatera ordinlärningen</string>
+    <string name="error_update_clipboard">Misslyckades med att uppdatera urklippsinställningar</string>
     <string name="error_update_language">Misslyckades med att uppdatera språkinställningarna</string>
     <string name="error_update_haptic_feedback">Misslyckades med att uppdatera haptisk feedback</string>
     <string name="error_update_vibration_strength">Misslyckades med att uppdatera vibrationsstyrkan</string>
@@ -136,4 +140,16 @@
     <string name="tip_3_description">Tryck länge på ett tecken för att välja en variant av det tecknet.</string>
     <string name="tip_4_title">Ta bort ord</string>
     <string name="tip_4_description">Tryck länge på ett förslag för att ta bort det från din ordlista.</string>
+    <string name="clipboard_panel_title">Urklipp</string>
+    <string name="clipboard_panel_pinned">Fästa</string>
+    <string name="clipboard_panel_recent">Senaste</string>
+    <string name="clipboard_panel_empty">Ingen urklippshistorik</string>
+    <string name="clipboard_panel_delete_all">Ta bort alla</string>
+    <string name="clipboard_panel_delete_all_confirm">Ta bort alla ofästa urklippsobjekt?</string>
+    <string name="clipboard_consent_message">Urik kan läsa och lagra innehållet i urklippet på obestämd tid. Om du inte vill ha detta, gå till inställningar och stäng av urklippshistoriken.</string>
+    <string name="clipboard_button_description">Öppna urklippshistorik</string>
+    <string name="clipboard_item_description">Urklippsobjekt: %1$s</string>
+    <string name="clipboard_item_pin">Fäst urklippsobjekt</string>
+    <string name="clipboard_item_unpin">Lossa urklippsobjekt</string>
+    <string name="clipboard_item_delete">Ta bort urklippsobjekt</string>
 </resources>

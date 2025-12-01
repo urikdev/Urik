@@ -20,6 +20,8 @@ sealed interface SettingsEvent {
 
         data object WordLearningToggleFailed : Error
 
+        data object ClipboardToggleFailed : Error
+
         data object LanguageUpdateFailed : Error
 
         data object HapticFeedbackToggleFailed : Error

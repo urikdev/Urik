@@ -22,12 +22,15 @@ import net.zetetic.database.sqlcipher.SupportOpenHelperFactory
     entities = [
         LearnedWord::class,
         LearnedWordFts::class,
+        ClipboardItem::class,
     ],
     version = KeyboardConstants.DatabaseConstants.DATABASE_VERSION,
     exportSchema = true,
 )
 abstract class KeyboardDatabase : RoomDatabase() {
     abstract fun learnedWordDao(): LearnedWordDao
+
+    abstract fun clipboardDao(): ClipboardDao
 
     companion object {
         const val DATABASE_NAME = "keyboard_database"
@@ -44,12 +47,12 @@ abstract class KeyboardDatabase : RoomDatabase() {
                 override fun migrate(db: SupportSQLiteDatabase) {
                     db.execSQL(
                         """
-                    DELETE FROM learned_words 
+                    DELETE FROM learned_words
                     WHERE id NOT IN (
                         SELECT id FROM (
-                            SELECT id, 
+                            SELECT id,
                                    ROW_NUMBER() OVER (
-                                       PARTITION BY language_tag, word_normalized 
+                                       PARTITION BY language_tag, word_normalized
                                        ORDER BY frequency DESC, last_used DESC
                                    ) as rn
                             FROM learned_words
@@ -65,9 +68,38 @@ abstract class KeyboardDatabase : RoomDatabase() {
 
                     db.execSQL(
                         """
-                    CREATE UNIQUE INDEX idx_exact_lookup 
+                    CREATE UNIQUE INDEX idx_exact_lookup
                     ON learned_words(language_tag, word_normalized)
                 """,
+                    )
+                }
+            }
+
+        private val MIGRATION_2_3 =
+            object : Migration(2, 3) {
+                override fun migrate(db: SupportSQLiteDatabase) {
+                    db.execSQL(
+                        """
+                        CREATE TABLE IF NOT EXISTS clipboard_items (
+                            id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                            content TEXT NOT NULL,
+                            content_hash INTEGER NOT NULL,
+                            timestamp INTEGER NOT NULL,
+                            is_pinned INTEGER NOT NULL DEFAULT 0
+                        )
+                    """,
+                    )
+
+                    db.execSQL(
+                        "CREATE UNIQUE INDEX idx_clipboard_content_hash ON clipboard_items(content_hash)",
+                    )
+
+                    db.execSQL(
+                        "CREATE INDEX idx_clipboard_timestamp ON clipboard_items(timestamp)",
+                    )
+
+                    db.execSQL(
+                        "CREATE INDEX idx_clipboard_pinned ON clipboard_items(is_pinned, timestamp)",
                     )
                 }
             }
@@ -102,7 +134,7 @@ abstract class KeyboardDatabase : RoomDatabase() {
                             KeyboardDatabase::class.java,
                             DATABASE_NAME,
                         ).addCallback(DatabaseCallback())
-                        .addMigrations(MIGRATION_1_2)
+                        .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
 
                 try {
                     if (passphrase != null) {

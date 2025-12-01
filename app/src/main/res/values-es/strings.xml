@@ -100,6 +100,9 @@
     <string name="layout_settings_space_bar_size">Tamaño de la barra espaciadora</string>
 
     <!-- Privacy & Data Settings -->
+    <string name="privacy_settings_clipboard_history">Historial del portapapeles</string>
+    <string name="privacy_settings_clipboard_history_on">Historial del portapapeles activado</string>
+    <string name="privacy_settings_clipboard_history_off">Historial del portapapeles desactivado</string>
     <string name="privacy_settings_clear_learned_words">Borradas las palabras aprendidas</string>
     <string name="privacy_settings_clear_learned_words_summary">Eliminar todo el vocabulario aprendido</string>
     <string name="privacy_settings_clear_learned_words_confirm">¿Borrar todas las palabras aprendidas? Esto no se puede deshacer.</string>
@@ -118,6 +121,7 @@
     <string name="error_update_suggestions">No se pudo actualizar la configuración de sugerencias</string>
     <string name="error_update_suggestion_count">No se pudo actualizar el recuento de sugerencias</string>
     <string name="error_update_word_learning">No se pudo actualizar el aprendizaje de palabras.</string>
+    <string name="error_update_clipboard">No se pudo actualizar la configuración del portapapeles</string>
     <string name="error_update_language">No se pudo actualizar la configuración de idioma</string>
     <string name="error_update_haptic_feedback">No se pudo actualizar la retroalimentación por vibración.</string>
     <string name="error_update_vibration_strength">No se pudo actualizar la intensidad de la vibración.</string>
@@ -191,5 +195,21 @@
 
     <string name="tip_4_title">Eliminar palabras</string>
     <string name="tip_4_description">Mantén pulsada una sugerencia para eliminarla de tu diccionario.</string>
+
+    <!-- Clipboard Panel -->
+    <string name="clipboard_panel_title">Portapapeles</string>
+    <string name="clipboard_panel_pinned">Fijados</string>
+    <string name="clipboard_panel_recent">Recientes</string>
+    <string name="clipboard_panel_empty">Sin historial del portapapeles</string>
+    <string name="clipboard_panel_delete_all">Eliminar todo</string>
+    <string name="clipboard_panel_delete_all_confirm">¿Eliminar todos los elementos del portapapeles no fijados?</string>
+
+    <!-- Clipboard Accessibility -->
+    <string name="clipboard_consent_message">Urik puede leer y almacenar el contenido del portapapeles indefinidamente. Si no lo desea, vaya a la configuración y desactive el historial del portapapeles.</string>
+    <string name="clipboard_button_description">Abrir historial del portapapeles</string>
+    <string name="clipboard_item_description">Elemento del portapapeles: %1$s</string>
+    <string name="clipboard_item_pin">Fijar elemento del portapapeles</string>
+    <string name="clipboard_item_unpin">Desfijar elemento del portapapeles</string>
+    <string name="clipboard_item_delete">Eliminar elemento del portapapeles</string>
 
 </resources>

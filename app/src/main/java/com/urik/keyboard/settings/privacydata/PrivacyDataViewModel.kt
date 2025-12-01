@@ -7,7 +7,11 @@ import com.urik.keyboard.settings.SettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -22,6 +26,30 @@ class PrivacyDataViewModel
     ) : ViewModel() {
         private val _events = MutableSharedFlow<SettingsEvent>()
         val events: SharedFlow<SettingsEvent> = _events.asSharedFlow()
+
+        data class PrivacyDataUiState(
+            val clipboardEnabled: Boolean = false,
+        )
+
+        val uiState: StateFlow<PrivacyDataUiState> =
+            settingsRepository.settings
+                .map { settings ->
+                    PrivacyDataUiState(
+                        clipboardEnabled = settings.clipboardEnabled,
+                    )
+                }.stateIn(
+                    scope = viewModelScope,
+                    started = SharingStarted.WhileSubscribed(5000),
+                    initialValue = PrivacyDataUiState(),
+                )
+
+        fun updateClipboardEnabled(enabled: Boolean) {
+            viewModelScope.launch {
+                settingsRepository
+                    .updateClipboardEnabled(enabled)
+                    .onFailure { _events.emit(SettingsEvent.Error.ClipboardToggleFailed) }
+            }
+        }
 
         fun clearLearnedWords() {
             viewModelScope.launch {
