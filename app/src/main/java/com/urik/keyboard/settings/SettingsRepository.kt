@@ -46,6 +46,8 @@ class SettingsRepository
             val SPELL_CHECK_ENABLED = booleanPreferencesKey("spell_check_enabled")
             val SUGGESTION_COUNT = intPreferencesKey("suggestion_count")
             val LEARN_NEW_WORDS = booleanPreferencesKey("learn_new_words")
+            val CLIPBOARD_ENABLED = booleanPreferencesKey("clipboard_enabled")
+            val CLIPBOARD_CONSENT_SHOWN = booleanPreferencesKey("clipboard_consent_shown")
             val ACTIVE_LANGUAGES = stringSetPreferencesKey("active_languages")
             val PRIMARY_LANGUAGE = stringPreferencesKey("primary_language")
             val HAPTIC_FEEDBACK = booleanPreferencesKey("haptic_feedback")
@@ -74,6 +76,8 @@ class SettingsRepository
                         showSuggestions = preferences[PreferenceKeys.SHOW_SUGGESTIONS] ?: true,
                         suggestionCount = preferences[PreferenceKeys.SUGGESTION_COUNT] ?: 3,
                         learnNewWords = preferences[PreferenceKeys.LEARN_NEW_WORDS] ?: true,
+                        clipboardEnabled = preferences[PreferenceKeys.CLIPBOARD_ENABLED] ?: true,
+                        clipboardConsentShown = preferences[PreferenceKeys.CLIPBOARD_CONSENT_SHOWN] ?: false,
                         activeLanguages = preferences[PreferenceKeys.ACTIVE_LANGUAGES] ?: setOf(KeyboardSettings.DEFAULT_LANGUAGE),
                         primaryLanguage = preferences[PreferenceKeys.PRIMARY_LANGUAGE] ?: KeyboardSettings.DEFAULT_LANGUAGE,
                         hapticFeedback = preferences[PreferenceKeys.HAPTIC_FEEDBACK] ?: true,
@@ -171,6 +175,28 @@ class SettingsRepository
         suspend fun updateLearnNewWords(learn: Boolean): Result<Unit> =
             try {
                 dataStore.edit { it[PreferenceKeys.LEARN_NEW_WORDS] = learn }
+                Result.success(Unit)
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+
+        /**
+         * Updates clipboard history toggle.
+         */
+        suspend fun updateClipboardEnabled(enabled: Boolean): Result<Unit> =
+            try {
+                dataStore.edit { it[PreferenceKeys.CLIPBOARD_ENABLED] = enabled }
+                Result.success(Unit)
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+
+        /**
+         * Marks clipboard consent message as shown.
+         */
+        suspend fun updateClipboardConsentShown(shown: Boolean): Result<Unit> =
+            try {
+                dataStore.edit { it[PreferenceKeys.CLIPBOARD_CONSENT_SHOWN] = shown }
                 Result.success(Unit)
             } catch (e: Exception) {
                 Result.failure(e)

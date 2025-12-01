@@ -35,6 +35,7 @@ import com.urik.keyboard.settings.KeyboardSettings
 import com.urik.keyboard.settings.SettingsRepository
 import com.urik.keyboard.theme.ThemeManager
 import com.urik.keyboard.ui.keyboard.KeyboardViewModel
+import com.urik.keyboard.ui.keyboard.components.ClipboardPanel
 import com.urik.keyboard.ui.keyboard.components.KeyboardLayoutManager
 import com.urik.keyboard.ui.keyboard.components.SwipeDetector
 import com.urik.keyboard.ui.keyboard.components.SwipeKeyboardView
@@ -52,6 +53,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -104,6 +106,9 @@ class UrikInputMethodService :
     @Inject
     lateinit var themeManager: ThemeManager
 
+    @Inject
+    lateinit var clipboardRepository: com.urik.keyboard.data.ClipboardRepository
+
     private lateinit var viewModel: KeyboardViewModel
     private lateinit var layoutManager: KeyboardLayoutManager
     private lateinit var lifecycleRegistry: LifecycleRegistry
@@ -136,9 +141,6 @@ class UrikInputMethodService :
 
     @Volatile
     private var isActivelyEditing = false
-
-    @Volatile
-    private var isRecomposing = false
 
     @Volatile
     private var pendingSuggestions: List<String> = emptyList()
@@ -682,6 +684,9 @@ class UrikInputMethodService :
                             suggestion,
                         )
                     }
+                    setOnClipboardClickListener {
+                        handleClipboardButtonClick()
+                    }
                     setOnEmojiSelectedListener { selectedEmoji ->
                         handleEmojiSelected(selectedEmoji)
                     }
@@ -741,6 +746,124 @@ class UrikInputMethodService :
     }
 
     /**
+     * Handles clipboard button click.
+     *
+     * Shows clipboard panel with consent screen or clipboard items.
+     */
+    private fun handleClipboardButtonClick() {
+        serviceScope.launch {
+            try {
+                val settings = settingsRepository.settings.first()
+
+                val clipboardPanel = ClipboardPanel(this@UrikInputMethodService, themeManager)
+
+                if (!settings.clipboardConsentShown) {
+                    clipboardPanel.showConsentScreen {
+                        serviceScope.launch {
+                            settingsRepository.updateClipboardConsentShown(true)
+                            clipboardPanel.dismiss()
+                        }
+                    }
+                } else {
+                    val pinnedResult = clipboardRepository.getPinnedItems()
+                    val recentResult = clipboardRepository.getRecentItems()
+
+                    val pinnedItems = pinnedResult.getOrElse { emptyList() }
+                    val recentItems = recentResult.getOrElse { emptyList() }
+
+                    clipboardPanel.showClipboardContent(
+                        pinnedItems = pinnedItems,
+                        recentItems = recentItems,
+                        onItemClick = { content ->
+                            handleClipboardItemPaste(content)
+                            clipboardPanel.dismiss()
+                        },
+                        onPinToggle = { item ->
+                            handleClipboardPinToggle(item, clipboardPanel)
+                        },
+                        onDelete = { item ->
+                            handleClipboardItemDelete(item, clipboardPanel)
+                        },
+                        onDeleteAll = {
+                            handleClipboardDeleteAll(clipboardPanel)
+                        },
+                    )
+                }
+
+                withContext(Dispatchers.Main) {
+                    val anchorView = swipeKeyboardView ?: return@withContext
+                    clipboardPanel.width = anchorView.width
+                    clipboardPanel.height = (anchorView.height * 0.75).toInt()
+                    clipboardPanel.showAsDropDown(anchorView, 0, -anchorView.height)
+                }
+            } catch (e: Exception) {
+                ErrorLogger.logException(
+                    component = "UrikInputMethodService",
+                    severity = ErrorLogger.Severity.HIGH,
+                    exception = e,
+                    context = mapOf("operation" to "handleClipboardButtonClick"),
+                )
+            }
+        }
+    }
+
+    private fun handleClipboardItemPaste(content: String) {
+        serviceScope.launch {
+            try {
+                currentInputConnection?.commitText(content, 1)
+                val cursorPos =
+                    currentInputConnection
+                        ?.getTextBeforeCursor(
+                            KeyboardConstants.TextProcessingConstants.MAX_CURSOR_POSITION_CHARS,
+                            0,
+                        )?.length
+                        ?: 0
+                currentInputConnection?.setSelection(cursorPos, cursorPos)
+            } catch (_: Exception) {
+            }
+        }
+    }
+
+    private suspend fun refreshClipboardPanel(panel: ClipboardPanel) {
+        val pinnedResult = clipboardRepository.getPinnedItems()
+        val recentResult = clipboardRepository.getRecentItems()
+
+        val pinnedItems = pinnedResult.getOrElse { emptyList() }
+        val recentItems = recentResult.getOrElse { emptyList() }
+
+        withContext(Dispatchers.Main) {
+            panel.refreshContent(pinnedItems, recentItems)
+        }
+    }
+
+    private fun handleClipboardPinToggle(
+        item: com.urik.keyboard.data.database.ClipboardItem,
+        panel: ClipboardPanel,
+    ) {
+        serviceScope.launch {
+            clipboardRepository.togglePin(item.id, !item.isPinned)
+            refreshClipboardPanel(panel)
+        }
+    }
+
+    private fun handleClipboardItemDelete(
+        item: com.urik.keyboard.data.database.ClipboardItem,
+        panel: ClipboardPanel,
+    ) {
+        serviceScope.launch {
+            clipboardRepository.deleteItem(item.id)
+            refreshClipboardPanel(panel)
+        }
+    }
+
+    private fun handleClipboardDeleteAll(panel: ClipboardPanel) {
+        serviceScope.launch {
+            clipboardRepository.deleteAllUnpinned()
+            refreshClipboardPanel(panel)
+        }
+    }
+
+    /**
      * Observes settings changes and updates keyboard components.
      */
     private fun observeSettings() {
@@ -769,6 +892,8 @@ class UrikInputMethodService :
                         newSettings.hapticFeedback,
                         newSettings.vibrationStrength.durationMs,
                     )
+
+                    swipeKeyboardView?.setClipboardEnabled(newSettings.clipboardEnabled)
 
                     if (needsLayoutRebuild) {
                         withContext(Dispatchers.Main) {
@@ -842,6 +967,7 @@ class UrikInputMethodService :
                     }
 
                 swipeKeyboardView?.updateKeyboard(filteredLayout, state)
+                swipeKeyboardView?.setClipboardEnabled(currentSettings.clipboardEnabled)
             }
         } catch (_: Exception) {
         }
@@ -2174,156 +2300,16 @@ class UrikInputMethodService :
                 newSelStart <= candidatesEnd &&
                 newSelEnd >= candidatesStart &&
                 newSelEnd <= candidatesEnd
-        val hasSelection = (newSelStart != newSelEnd)
 
-        if (hasComposingText && !cursorInComposingRegion && !hasSelection) {
-            if (isRecomposing) return
-
-            isActivelyEditing = true
+        if (hasComposingText && !cursorInComposingRegion) {
             coordinateStateClear()
             clearSpellConfirmationState()
-
-            val textBeforeCursor = safeGetTextBeforeCursor(50)
-            val textAfterCursor = safeGetTextAfterCursor(50)
-
-            if (!textBeforeCursor.isNullOrEmpty() || !textAfterCursor.isNullOrEmpty()) {
-                val wordAtCursor = extractWordAtCursor(textBeforeCursor ?: "", textAfterCursor ?: "")
-
-                if (wordAtCursor != null) {
-                    isRecomposing = true
-                    serviceScope.launch {
-                        try {
-                            recomposeWordAtCursor(wordAtCursor, textBeforeCursor ?: "")
-                        } finally {
-                            isRecomposing = false
-                        }
-                    }
-                }
-            }
-            return
-        }
-
-        if (!hasComposingText && !hasSelection) {
-            if (isRecomposing) return
-
-            val textBeforeCursor = safeGetTextBeforeCursor(50)
-            val textAfterCursor = safeGetTextAfterCursor(50)
-
-            if (!textBeforeCursor.isNullOrEmpty() || !textAfterCursor.isNullOrEmpty()) {
-                val wordAtCursor = extractWordAtCursor(textBeforeCursor ?: "", textAfterCursor ?: "")
-
-                if (wordAtCursor != null) {
-                    isRecomposing = true
-                    serviceScope.launch {
-                        try {
-                            recomposeWordAtCursor(wordAtCursor, textBeforeCursor ?: "")
-                        } finally {
-                            isRecomposing = false
-                        }
-                    }
-                }
-            }
             return
         }
 
         if (!hasComposingText && wordState.hasContent) {
             coordinateStateClear()
             clearSpellConfirmationState()
-        }
-    }
-
-    private fun extractWordAtCursor(
-        textBefore: String,
-        textAfter: String,
-    ): String? = CursorEditingUtils.extractWordAtCursor(textBefore, textAfter)
-
-    private suspend fun recomposeWordAtCursor(
-        word: String,
-        textBeforeCursor: String,
-    ) {
-        withContext(Dispatchers.Main) {
-            isActivelyEditing = true
-
-            try {
-                val beforeLastBoundary =
-                    textBeforeCursor.indexOfLast { char ->
-                        char.isWhitespace() || char == '\n'
-                    }
-
-                val wordStartOffset =
-                    if (beforeLastBoundary >= 0) {
-                        textBeforeCursor.length - beforeLastBoundary - 1
-                    } else {
-                        textBeforeCursor.length
-                    }
-
-                val ic = currentInputConnection
-                if (ic != null) {
-                    val cursorPos =
-                        ic.getTextBeforeCursor(KeyboardConstants.TextProcessingConstants.MAX_CURSOR_POSITION_CHARS, 0)?.length ?: 0
-                    val wordStart = cursorPos - wordStartOffset
-                    val wordEnd = wordStart + word.length
-
-                    try {
-                        ic.beginBatchEdit()
-                        ic.setComposingRegion(wordStart, wordEnd)
-                        composingRegionStart = wordStart
-
-                        displayBuffer = word
-                        wordState =
-                            wordState.copy(
-                                buffer = word,
-                                normalizedBuffer = word.lowercase(),
-                                graphemeCount = word.length,
-                            )
-
-                        val (currentSequence, bufferSnapshot) =
-                            synchronized(processingLock) {
-                                ++processingSequence to displayBuffer
-                            }
-
-                        suggestionDebounceJob?.cancel()
-                        suggestionDebounceJob =
-                            serviceScope.launch(Dispatchers.Default) {
-                                try {
-                                    delay(suggestionDebounceDelay)
-
-                                    val result =
-                                        textInputProcessor.processWordInput(
-                                            word,
-                                            InputMethod.TYPED,
-                                        )
-
-                                    withContext(Dispatchers.Main) {
-                                        synchronized(processingLock) {
-                                            if (currentSequence == processingSequence && displayBuffer == bufferSnapshot) {
-                                                when (result) {
-                                                    is ProcessingResult.Success -> {
-                                                        wordState = result.wordState
-                                                        if (result.wordState.suggestions.isNotEmpty() && currentSettings.showSuggestions) {
-                                                            val displaySuggestions =
-                                                                applyCapitalizationToSuggestions(result.wordState.suggestions)
-                                                            swipeKeyboardView?.updateSuggestions(displaySuggestions)
-                                                        } else {
-                                                            swipeKeyboardView?.clearSuggestions()
-                                                        }
-                                                    }
-                                                    is ProcessingResult.Error -> {
-                                                        swipeKeyboardView?.clearSuggestions()
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                } catch (_: Exception) {
-                                }
-                            }
-                    } finally {
-                        ic.endBatchEdit()
-                    }
-                }
-            } catch (_: Exception) {
-            }
         }
     }
 

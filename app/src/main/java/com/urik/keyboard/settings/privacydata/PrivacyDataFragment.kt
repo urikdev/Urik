@@ -11,6 +11,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
+import androidx.preference.SwitchPreferenceCompat
 import com.urik.keyboard.R
 import com.urik.keyboard.settings.SettingsEventHandler
 import com.urik.keyboard.utils.ErrorLogger
@@ -20,13 +21,14 @@ import kotlinx.coroutines.launch
 /**
  * Settings fragment for privacy and data management.
  *
- * Provides options to clear learned words, clear all data, reset settings to defaults,
- * and export error logs for debugging.
+ * Provides options to configure clipboard history, clear learned words,
+ * reset settings to defaults, and export error logs for debugging.
  */
 @AndroidEntryPoint
 class PrivacyDataFragment : PreferenceFragmentCompat() {
     private lateinit var viewModel: PrivacyDataViewModel
     private lateinit var eventHandler: SettingsEventHandler
+    private lateinit var clipboardPref: SwitchPreferenceCompat
     private var exportErrorLogPref: Preference? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -42,6 +44,15 @@ class PrivacyDataFragment : PreferenceFragmentCompat() {
         val screen = preferenceManager.createPreferenceScreen(context)
 
         eventHandler = SettingsEventHandler(requireContext())
+
+        clipboardPref =
+            SwitchPreferenceCompat(context).apply {
+                key = "clipboard_enabled"
+                title = resources.getString(R.string.privacy_settings_clipboard_history)
+                summaryOn = resources.getString(R.string.privacy_settings_clipboard_history_on)
+                summaryOff = resources.getString(R.string.privacy_settings_clipboard_history_off)
+            }
+        screen.addPreference(clipboardPref)
 
         val clearLearnedPref =
             Preference(context).apply {
@@ -98,10 +109,23 @@ class PrivacyDataFragment : PreferenceFragmentCompat() {
     ) {
         super.onViewCreated(view, savedInstanceState)
 
+        clipboardPref.setOnPreferenceChangeListener { _, newValue ->
+            viewModel.updateClipboardEnabled(newValue as Boolean)
+            true
+        }
+
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.events.collect { event ->
-                    eventHandler.handle(event)
+                launch {
+                    viewModel.uiState.collect { state ->
+                        clipboardPref.isChecked = state.clipboardEnabled
+                    }
+                }
+
+                launch {
+                    viewModel.events.collect { event ->
+                        eventHandler.handle(event)
+                    }
                 }
             }
         }

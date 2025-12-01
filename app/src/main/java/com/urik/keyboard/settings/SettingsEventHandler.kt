@@ -21,6 +21,7 @@ class SettingsEventHandler(
                 is SettingsEvent.Error.SuggestionToggleFailed -> R.string.error_update_suggestions
                 is SettingsEvent.Error.SuggestionCountUpdateFailed -> R.string.error_update_suggestion_count
                 is SettingsEvent.Error.WordLearningToggleFailed -> R.string.error_update_word_learning
+                is SettingsEvent.Error.ClipboardToggleFailed -> R.string.error_update_clipboard
                 is SettingsEvent.Error.LanguageUpdateFailed -> R.string.error_update_language
                 is SettingsEvent.Error.HapticFeedbackToggleFailed -> R.string.error_update_haptic_feedback
                 is SettingsEvent.Error.VibrationStrengthUpdateFailed -> R.string.error_update_vibration_strength

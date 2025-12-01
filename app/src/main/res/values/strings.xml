@@ -101,6 +101,9 @@
     <string name="layout_settings_space_bar_size">Space Bar Size</string>
 
     <!-- Privacy & Data Settings -->
+    <string name="privacy_settings_clipboard_history">Clipboard History</string>
+    <string name="privacy_settings_clipboard_history_on">Clipboard history enabled</string>
+    <string name="privacy_settings_clipboard_history_off">Clipboard history disabled</string>
     <string name="privacy_settings_clear_learned_words">Clear Learned Words</string>
     <string name="privacy_settings_clear_learned_words_summary">Remove all learned vocabulary</string>
     <string name="privacy_settings_clear_learned_words_confirm">Clear all learned words? This cannot be undone.</string>
@@ -119,6 +122,7 @@
     <string name="error_update_suggestions">Failed to update suggestion settings</string>
     <string name="error_update_suggestion_count">Failed to update suggestion count</string>
     <string name="error_update_word_learning">Failed to update word learning</string>
+    <string name="error_update_clipboard">Failed to update clipboard settings</string>
     <string name="error_update_language">Failed to update language settings</string>
     <string name="error_update_haptic_feedback">Failed to update haptic feedback</string>
     <string name="error_update_vibration_strength">Failed to update vibration strength</string>
@@ -192,5 +196,21 @@
 
     <string name="tip_4_title">Remove Words</string>
     <string name="tip_4_description">Long press on a suggestion to remove it from your dictionary.</string>
+
+    <!-- Clipboard Panel -->
+    <string name="clipboard_panel_title">Clipboard</string>
+    <string name="clipboard_panel_pinned">Pinned</string>
+    <string name="clipboard_panel_recent">Recent</string>
+    <string name="clipboard_panel_empty">No clipboard history</string>
+    <string name="clipboard_panel_delete_all">Delete All</string>
+    <string name="clipboard_panel_delete_all_confirm">Delete all unpinned clipboard items?</string>
+    <string name="clipboard_consent_message">Urik can read and store clipboard contents indefinitely. If you do not want this, go to settings and turn off clipboard history.</string>
+
+    <!-- Clipboard Accessibility -->
+    <string name="clipboard_button_description">Open clipboard history</string>
+    <string name="clipboard_item_description">Clipboard item: %1$s</string>
+    <string name="clipboard_item_pin">Pin clipboard item</string>
+    <string name="clipboard_item_unpin">Unpin clipboard item</string>
+    <string name="clipboard_item_delete">Delete clipboard item</string>
 
 </resources>
