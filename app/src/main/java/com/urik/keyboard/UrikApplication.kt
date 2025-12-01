@@ -1,8 +1,16 @@
 package com.urik.keyboard
 
 import android.app.Application
+import com.urik.keyboard.di.ApplicationScope
+import com.urik.keyboard.service.ClipboardMonitorService
+import com.urik.keyboard.settings.SettingsRepository
 import com.urik.keyboard.utils.ErrorLogger
 import dagger.hilt.android.HiltAndroidApp
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 /**
  * Application class for keyboard app initialization and dependency injection.
@@ -14,9 +22,23 @@ import dagger.hilt.android.HiltAndroidApp
  * ## Error Logging
  * Installs global exception handler for critical failures.
  * Logs to local file for debugging, no user data captured.
+ *
+ * ## Clipboard Monitoring
+ * Observes settings and starts/stops clipboard monitoring system-wide.
+ * Runs independently of keyboard visibility for complete clipboard capture.
  */
 @HiltAndroidApp
 class UrikApplication : Application() {
+    @Inject
+    lateinit var clipboardMonitorService: ClipboardMonitorService
+
+    @Inject
+    lateinit var settingsRepository: SettingsRepository
+
+    @Inject
+    @ApplicationScope
+    lateinit var applicationScope: CoroutineScope
+
     override fun onCreate() {
         super.onCreate()
 
@@ -54,6 +76,23 @@ class UrikApplication : Application() {
                 )
                 throw e
             }
+        }
+
+        observeClipboardSettings()
+    }
+
+    private fun observeClipboardSettings() {
+        applicationScope.launch {
+            settingsRepository.settings
+                .map { it.clipboardEnabled }
+                .distinctUntilChanged()
+                .collect { enabled ->
+                    if (enabled) {
+                        clipboardMonitorService.startMonitoring()
+                    } else {
+                        clipboardMonitorService.stopMonitoring()
+                    }
+                }
         }
     }
 }

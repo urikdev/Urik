@@ -76,6 +76,8 @@ data class KeyboardSettings(
     val showSuggestions: Boolean = true,
     val suggestionCount: Int = 3,
     val learnNewWords: Boolean = true,
+    val clipboardEnabled: Boolean = true,
+    val clipboardConsentShown: Boolean = false,
     val activeLanguages: Set<String> = setOf(DEFAULT_LANGUAGE),
     val primaryLanguage: String = DEFAULT_LANGUAGE,
     val hapticFeedback: Boolean = true,

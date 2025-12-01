@@ -2,6 +2,7 @@ package com.urik.keyboard.di
 
 import android.content.Context
 import android.database.sqlite.SQLiteDatabaseCorruptException
+import com.urik.keyboard.data.database.ClipboardDao
 import com.urik.keyboard.data.database.DatabaseSecurityManager
 import com.urik.keyboard.data.database.KeyboardDatabase
 import com.urik.keyboard.data.database.LearnedWordDao
@@ -131,4 +132,7 @@ object DatabaseModule {
 
     @Provides
     fun provideLearnedWordDao(database: KeyboardDatabase): LearnedWordDao = database.learnedWordDao()
+
+    @Provides
+    fun provideClipboardDao(database: KeyboardDatabase): ClipboardDao = database.clipboardDao()
 }

@@ -1,0 +1,225 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 3,
+    "identityHash": "1882b20d83728fd50a5ef24db887051d",
+    "entities": [
+      {
+        "tableName": "learned_words",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `word` TEXT NOT NULL, `word_normalized` TEXT NOT NULL, `language_tag` TEXT NOT NULL, `frequency` INTEGER NOT NULL, `source` TEXT NOT NULL, `character_count` INTEGER NOT NULL, `created_at` INTEGER NOT NULL, `last_used` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "word",
+            "columnName": "word",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "wordNormalized",
+            "columnName": "word_normalized",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "languageTag",
+            "columnName": "language_tag",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "frequency",
+            "columnName": "frequency",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "source",
+            "columnName": "source",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "characterCount",
+            "columnName": "character_count",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "created_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastUsed",
+            "columnName": "last_used",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "idx_exact_lookup",
+            "unique": true,
+            "columnNames": [
+              "language_tag",
+              "word_normalized"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `idx_exact_lookup` ON `${TABLE_NAME}` (`language_tag`, `word_normalized`)"
+          },
+          {
+            "name": "idx_frequency_recent",
+            "unique": false,
+            "columnNames": [
+              "language_tag",
+              "frequency",
+              "last_used"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `idx_frequency_recent` ON `${TABLE_NAME}` (`language_tag`, `frequency`, `last_used`)"
+          },
+          {
+            "name": "idx_cleanup",
+            "unique": false,
+            "columnNames": [
+              "frequency",
+              "last_used"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `idx_cleanup` ON `${TABLE_NAME}` (`frequency`, `last_used`)"
+          }
+        ]
+      },
+      {
+        "tableName": "learned_words_fts",
+        "createSql": "CREATE VIRTUAL TABLE IF NOT EXISTS `${TABLE_NAME}` USING FTS4(`word` TEXT NOT NULL, `word_normalized` TEXT NOT NULL, content=`learned_words`)",
+        "fields": [
+          {
+            "fieldPath": "word",
+            "columnName": "word",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "wordNormalized",
+            "columnName": "word_normalized",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "rowid"
+          ]
+        },
+        "ftsVersion": "FTS4",
+        "ftsOptions": {
+          "tokenizer": "simple",
+          "tokenizerArgs": [],
+          "contentTable": "learned_words",
+          "languageIdColumnName": "",
+          "matchInfo": "FTS4",
+          "notIndexedColumns": [],
+          "prefixSizes": [],
+          "preferredOrder": "ASC"
+        },
+        "contentSyncTriggers": [
+          "CREATE TRIGGER IF NOT EXISTS room_fts_content_sync_learned_words_fts_BEFORE_UPDATE BEFORE UPDATE ON `learned_words` BEGIN DELETE FROM `learned_words_fts` WHERE `docid`=OLD.`rowid`; END",
+          "CREATE TRIGGER IF NOT EXISTS room_fts_content_sync_learned_words_fts_BEFORE_DELETE BEFORE DELETE ON `learned_words` BEGIN DELETE FROM `learned_words_fts` WHERE `docid`=OLD.`rowid`; END",
+          "CREATE TRIGGER IF NOT EXISTS room_fts_content_sync_learned_words_fts_AFTER_UPDATE AFTER UPDATE ON `learned_words` BEGIN INSERT INTO `learned_words_fts`(`docid`, `word`, `word_normalized`) VALUES (NEW.`rowid`, NEW.`word`, NEW.`word_normalized`); END",
+          "CREATE TRIGGER IF NOT EXISTS room_fts_content_sync_learned_words_fts_AFTER_INSERT AFTER INSERT ON `learned_words` BEGIN INSERT INTO `learned_words_fts`(`docid`, `word`, `word_normalized`) VALUES (NEW.`rowid`, NEW.`word`, NEW.`word_normalized`); END"
+        ]
+      },
+      {
+        "tableName": "clipboard_items",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `content` TEXT NOT NULL, `content_hash` INTEGER NOT NULL, `timestamp` INTEGER NOT NULL, `is_pinned` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "content",
+            "columnName": "content",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "contentHash",
+            "columnName": "content_hash",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timestamp",
+            "columnName": "timestamp",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isPinned",
+            "columnName": "is_pinned",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "idx_clipboard_content_hash",
+            "unique": true,
+            "columnNames": [
+              "content_hash"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `idx_clipboard_content_hash` ON `${TABLE_NAME}` (`content_hash`)"
+          },
+          {
+            "name": "idx_clipboard_timestamp",
+            "unique": false,
+            "columnNames": [
+              "timestamp"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `idx_clipboard_timestamp` ON `${TABLE_NAME}` (`timestamp`)"
+          },
+          {
+            "name": "idx_clipboard_pinned",
+            "unique": false,
+            "columnNames": [
+              "is_pinned",
+              "timestamp"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `idx_clipboard_pinned` ON `${TABLE_NAME}` (`is_pinned`, `timestamp`)"
+          }
+        ]
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '1882b20d83728fd50a5ef24db887051d')"
+    ]
+  }
+}

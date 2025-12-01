@@ -1,5 +1,4 @@
 <resources>
-    <string name="app_name" translatable="false">Urik</string>
     <string name="ime_name">Klávesnice Urik</string>
     <string name="ime_label">Klávesnice Urik</string>
     <string name="ime_description">Psaní tahem, kontrola pravopisu, a vícejazyčná podpora bez ohrožení vašeho soukromí. Žádná telemetrie. Žádný sběr dat. Vše zůstává na vašem zařízení.</string>
@@ -101,6 +100,9 @@
     <string name="layout_settings_space_bar_size">Velikost mezerníku</string>
 
     <!-- Privacy & Data Settings -->
+    <string name="privacy_settings_clipboard_history">Historie schránky</string>
+    <string name="privacy_settings_clipboard_history_on">Historie schránky zapnuta</string>
+    <string name="privacy_settings_clipboard_history_off">Historie schránky vypnuta</string>
     <string name="privacy_settings_clear_learned_words">Smazat naučená slova</string>
     <string name="privacy_settings_clear_learned_words_summary">Smazat celý naučený slovník</string>
     <string name="privacy_settings_clear_learned_words_confirm">Opravdu chcete smazat celý naučený slovník? Toto nelze zvrátit.</string>
@@ -119,6 +121,7 @@
     <string name="error_update_suggestions">Nepodařilo se aktualizovat nastavení doporučení</string>
     <string name="error_update_suggestion_count">Nepodařilo se aktualizovat počet doporučení</string>
     <string name="error_update_word_learning">Nepodařilo se aktualizovat učení slov</string>
+    <string name="error_update_clipboard">Nepodařilo se aktualizovat nastavení schránky</string>
     <string name="error_update_language">Nepodařilo se aktualizovat nastavení jazyka</string>
     <string name="error_update_haptic_feedback">Nepodařilo se aktualizovat haptiku</string>
     <string name="error_update_vibration_strength">Nepodařilo se aktualizovat sílu vibrací</string>
@@ -192,5 +195,21 @@
 
     <string name="tip_4_title">Odebrat slova</string>
     <string name="tip_4_description">Dlouze podržte na slovo pro odebrání z vašeho slovníku.</string>
+
+    <!-- Clipboard Panel -->
+    <string name="clipboard_panel_title">Schránka</string>
+    <string name="clipboard_panel_pinned">Připnuté</string>
+    <string name="clipboard_panel_recent">Nedávné</string>
+    <string name="clipboard_panel_empty">Žádná historie schránky</string>
+    <string name="clipboard_panel_delete_all">Smazat vše</string>
+    <string name="clipboard_panel_delete_all_confirm">Smazat všechny nepřipnuté položky schránky?</string>
+
+    <!-- Clipboard Accessibility -->
+    <string name="clipboard_consent_message">Urik může číst a ukládat obsah schránky donekonečna. Pokud si to nepřejete, přejděte do nastavení a vypněte historii schránky.</string>
+    <string name="clipboard_button_description">Otevřít historii schránky</string>
+    <string name="clipboard_item_description">Položka schránky: %1$s</string>
+    <string name="clipboard_item_pin">Připnout položku schránky</string>
+    <string name="clipboard_item_unpin">Odepnout položku schránky</string>
+    <string name="clipboard_item_delete">Smazat položku schránky</string>
 
 </resources>

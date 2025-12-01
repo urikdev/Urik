@@ -100,6 +100,9 @@
     <string name="layout_settings_space_bar_size">Leertastenbreite</string>
 
     <!-- Privacy & Data Settings -->
+    <string name="privacy_settings_clipboard_history">Zwischenablage-Verlauf</string>
+    <string name="privacy_settings_clipboard_history_on">Zwischenablage-Verlauf aktiviert</string>
+    <string name="privacy_settings_clipboard_history_off">Zwischenablage-Verlauf deaktiviert</string>
     <string name="privacy_settings_clear_learned_words">Erlernte Wörter löschen</string>
     <string name="privacy_settings_clear_learned_words_summary">Lösche alle erlernten Wörter im Wörterbuch</string>
     <string name="privacy_settings_clear_learned_words_confirm">Alle erlernten Wörter löschen? Die kann nicht rückgängig gemacht werden.</string>
@@ -118,6 +121,7 @@
     <string name="error_update_suggestions">Verbesserungs-Einstellungen konnten nicht geändert werden</string>
     <string name="error_update_suggestion_count">Verbesserungsanzahl konnte nicht geändert werden</string>
     <string name="error_update_word_learning">Wörterbuch konnte nicht geändert werden</string>
+    <string name="error_update_clipboard">Zwischenablage-Einstellungen konnten nicht geändert werden</string>
     <string name="error_update_language">Sprach-Einstellungen konnten nicht geändert werden</string>
     <string name="error_update_haptic_feedback">Haptisches Feedback konnte nicht geändert werden</string>
     <string name="error_update_vibration_strength">Vibrationsstärke konnte nicht geändert werden</string>
@@ -191,5 +195,21 @@
 
     <string name="tip_4_title">Wörter vergessen</string>
     <string name="tip_4_description">Drück und halte auf eine Verbesserung um sie aus dem Wörterbuch zu entfernen.</string>
+
+    <!-- Clipboard Panel -->
+    <string name="clipboard_panel_title">Zwischenablage</string>
+    <string name="clipboard_panel_pinned">Angeheftet</string>
+    <string name="clipboard_panel_recent">Kürzlich</string>
+    <string name="clipboard_panel_empty">Kein Zwischenablage-Verlauf</string>
+    <string name="clipboard_panel_delete_all">Alles löschen</string>
+    <string name="clipboard_panel_delete_all_confirm">Alle nicht angehefteten Zwischenablage-Elemente löschen?</string>
+
+    <!-- Clipboard Accessibility -->
+    <string name="clipboard_consent_message">Urik kann Inhalte der Zwischenablage unbegrenzt lesen und speichern. Wenn Sie dies nicht wünschen, deaktivieren Sie den Verlauf der Zwischenablage in den Einstellungen.</string>
+    <string name="clipboard_button_description">Zwischenablage-Verlauf öffnen</string>
+    <string name="clipboard_item_description">Zwischenablage-Element: %1$s</string>
+    <string name="clipboard_item_pin">Zwischenablage-Element anheften</string>
+    <string name="clipboard_item_unpin">Zwischenablage-Element lösen</string>
+    <string name="clipboard_item_delete">Zwischenablage-Element löschen</string>
 
 </resources>
