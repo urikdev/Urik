@@ -1,6 +1,7 @@
 package com.urik.keyboard.data.database
 
 import android.content.Context
+import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
@@ -10,13 +11,7 @@ import com.urik.keyboard.KeyboardConstants
 import net.zetetic.database.sqlcipher.SupportOpenHelperFactory
 
 /**
- * Room database for keyboard learned words with SQLCipher encryption.
- *
- * Entities:
- * - LearnedWord: User-typed words with frequency tracking
- * - LearnedWordFts: Full-text search table for prefix matching
- *
- * Encryption: Optional SQLCipher passphrase from Android Keystore.
+ * Room database for keyboard learned words and clipboard history with SQLCipher encryption.
  */
 @Database(
     entities = [
@@ -26,6 +21,9 @@ import net.zetetic.database.sqlcipher.SupportOpenHelperFactory
     ],
     version = KeyboardConstants.DatabaseConstants.DATABASE_VERSION,
     exportSchema = true,
+    autoMigrations = [
+        AutoMigration(from = 2, to = 3),
+    ],
 )
 abstract class KeyboardDatabase : RoomDatabase() {
     abstract fun learnedWordDao(): LearnedWordDao
@@ -35,12 +33,9 @@ abstract class KeyboardDatabase : RoomDatabase() {
     companion object {
         const val DATABASE_NAME = "keyboard_database"
 
-        @Suppress("ktlint:standard:property-naming")
-        @Volatile
-        private var INSTANCE: KeyboardDatabase? = null
+        @Volatile private var instance: KeyboardDatabase? = null
 
-        @Volatile
-        private var instanceEncrypted: Boolean? = null
+        @Volatile private var isEncrypted: Boolean? = null
 
         private val MIGRATION_1_2 =
             object : Migration(1, 2) {
@@ -61,54 +56,21 @@ abstract class KeyboardDatabase : RoomDatabase() {
                 """,
                     )
 
-                    db.execSQL("DROP INDEX IF EXISTS idx_learned_words_normalized")
-
                     db.execSQL("DROP INDEX IF EXISTS idx_prefix_suggestions")
                     db.execSQL("DROP INDEX IF EXISTS idx_exact_lookup")
+                    db.execSQL("DROP INDEX IF EXISTS idx_learned_words_normalized")
+                    db.execSQL("DROP INDEX IF EXISTS idx_learned_words_language_frequency")
 
-                    db.execSQL(
-                        """
-                    CREATE UNIQUE INDEX idx_exact_lookup
-                    ON learned_words(language_tag, word_normalized)
-                """,
-                    )
-                }
-            }
+                    db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS idx_exact_lookup ON learned_words(language_tag, word_normalized)")
 
-        private val MIGRATION_2_3 =
-            object : Migration(2, 3) {
-                override fun migrate(db: SupportSQLiteDatabase) {
-                    db.execSQL(
-                        """
-                        CREATE TABLE IF NOT EXISTS clipboard_items (
-                            id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-                            content TEXT NOT NULL,
-                            content_hash INTEGER NOT NULL,
-                            timestamp INTEGER NOT NULL,
-                            is_pinned INTEGER NOT NULL DEFAULT 0
-                        )
-                    """,
-                    )
+                    db.execSQL("CREATE INDEX IF NOT EXISTS idx_frequency_recent ON learned_words(language_tag, frequency, last_used)")
 
-                    db.execSQL(
-                        "CREATE UNIQUE INDEX idx_clipboard_content_hash ON clipboard_items(content_hash)",
-                    )
-
-                    db.execSQL(
-                        "CREATE INDEX idx_clipboard_timestamp ON clipboard_items(timestamp)",
-                    )
-
-                    db.execSQL(
-                        "CREATE INDEX idx_clipboard_pinned ON clipboard_items(is_pinned, timestamp)",
-                    )
+                    db.execSQL("CREATE INDEX IF NOT EXISTS idx_cleanup ON learned_words(frequency, last_used)")
                 }
             }
 
         /**
          * Returns singleton database instance.
-         *
-         * Thread-safe singleton with encryption consistency validation.
-         * passphrase parameter only used on first call - subsequent calls validate consistency.
          *
          * @param context Application context
          * @param passphrase SQLCipher key from Android Keystore, or null for unencrypted
@@ -119,13 +81,15 @@ abstract class KeyboardDatabase : RoomDatabase() {
             context: Context,
             passphrase: ByteArray? = null,
         ): KeyboardDatabase =
-            INSTANCE ?: synchronized(this) {
-                INSTANCE?.let {
-                    validatePassphraseConsistency(passphrase)
+            instance ?: synchronized(this) {
+                instance?.let {
+                    check((isEncrypted == (passphrase != null))) {
+                        "Encryption mode mismatch: Database instance already created with ${if (isEncrypted == true) "encryption" else "no encryption"}"
+                    }
                     return it
                 }
 
-                instanceEncrypted = (passphrase != null)
+                isEncrypted = (passphrase != null)
 
                 val builder =
                     Room
@@ -133,50 +97,22 @@ abstract class KeyboardDatabase : RoomDatabase() {
                             context.applicationContext,
                             KeyboardDatabase::class.java,
                             DATABASE_NAME,
-                        ).addCallback(DatabaseCallback())
-                        .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+                        ).addMigrations(MIGRATION_1_2)
 
-                try {
-                    if (passphrase != null) {
-                        val factory = SupportOpenHelperFactory(passphrase)
-                        builder.openHelperFactory(factory)
-                    }
-
-                    val instance = builder.build()
-                    INSTANCE = instance
-                    instance
-                } finally {
-                    passphrase?.fill(0)
+                if (passphrase != null) {
+                    builder.openHelperFactory(SupportOpenHelperFactory(passphrase))
                 }
-            }
 
-        private fun validatePassphraseConsistency(passphrase: ByteArray?) {
-            val requestEncrypted = (passphrase != null)
-            if (instanceEncrypted != requestEncrypted) {
-                throw IllegalStateException(
-                    "Database instance already created with ${if (instanceEncrypted == true) "encryption" else "no encryption"}",
-                )
+                builder
+                    .build()
+                    .also { instance = it }
             }
-        }
 
         internal fun resetInstance() {
             synchronized(this) {
-                INSTANCE?.close()
-                INSTANCE = null
-                instanceEncrypted = null
-            }
-        }
-
-        private class DatabaseCallback : Callback() {
-            override fun onCreate(db: SupportSQLiteDatabase) {
-                super.onCreate(db)
-
-                db.execSQL(
-                    """
-                    CREATE INDEX IF NOT EXISTS idx_learned_words_language_frequency 
-                    ON learned_words(language_tag, frequency DESC, last_used DESC)
-                """,
-                )
+                instance?.close()
+                instance = null
+                isEncrypted = null
             }
         }
     }

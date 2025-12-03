@@ -242,6 +242,7 @@ class ClipboardPanel(
                 pinnedListContainer.isVisible = true
                 recentListContainer.isVisible = false
             }
+
             Tab.RECENT -> {
                 recentTab.background = createTabBackground(isSelected = true)
                 recentTab.setTextColor(themeManager.currentTheme.value.colors.keyTextAction)
@@ -342,7 +343,9 @@ class ClipboardPanel(
 
     private fun getOrCreateItemView(): LinearLayout =
         if (itemViewPool.isNotEmpty()) {
-            itemViewPool.removeAt(itemViewPool.size - 1)
+            itemViewPool.removeAt(itemViewPool.size - 1).apply {
+                (parent as? LinearLayout)?.removeView(this)
+            }
         } else {
             createEmptyItemView()
         }
