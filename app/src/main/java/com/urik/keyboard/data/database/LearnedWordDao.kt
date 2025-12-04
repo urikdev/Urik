@@ -182,9 +182,6 @@ interface LearnedWordDao {
     @Upsert
     suspend fun upsertWord(word: LearnedWord): Long
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertWordFts(wordFts: LearnedWordFts)
-
     /**
      * Learns word with frequency tracking and FTS synchronization.
      *
@@ -198,22 +195,8 @@ interface LearnedWordDao {
         if (existing != null) {
             val updated = existing.incrementFrequency()
             updateWord(updated)
-            insertWordFts(
-                LearnedWordFts(
-                    rowid = updated.id,
-                    word = updated.word,
-                    wordNormalized = updated.wordNormalized,
-                ),
-            )
         } else {
-            val newId = insertWord(word)
-            insertWordFts(
-                LearnedWordFts(
-                    rowid = newId,
-                    word = word.word,
-                    wordNormalized = word.wordNormalized,
-                ),
-            )
+            insertWord(word)
         }
     }
 
