@@ -25,7 +25,12 @@ class ClipboardRepository
                         timestamp = System.currentTimeMillis(),
                     )
                 clipboardDao.insert(item)
-                clipboardDao.enforceMaxItems()
+
+                val currentCount = clipboardDao.getUnpinnedCount()
+                if (currentCount > com.urik.keyboard.KeyboardConstants.DatabaseConstants.MAX_CLIPBOARD_ITEMS) {
+                    clipboardDao.enforceMaxItems()
+                }
+
                 Result.success(Unit)
             } catch (e: Exception) {
                 ErrorLogger.logException(
