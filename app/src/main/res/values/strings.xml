@@ -207,7 +207,6 @@
     <string name="clipboard_consent_message">Urik can read and store clipboard contents indefinitely. If you do not want this, go to settings and turn off clipboard history.</string>
 
     <!-- Clipboard Accessibility -->
-    <string name="clipboard_button_description">Open clipboard history</string>
     <string name="clipboard_item_description">Clipboard item: %1$s</string>
     <string name="clipboard_item_pin">Pin clipboard item</string>
     <string name="clipboard_item_unpin">Unpin clipboard item</string>

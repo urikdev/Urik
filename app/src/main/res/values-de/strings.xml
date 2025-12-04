@@ -206,7 +206,6 @@
 
     <!-- Clipboard Accessibility -->
     <string name="clipboard_consent_message">Urik kann Inhalte der Zwischenablage unbegrenzt lesen und speichern. Wenn Sie dies nicht wünschen, deaktivieren Sie den Verlauf der Zwischenablage in den Einstellungen.</string>
-    <string name="clipboard_button_description">Zwischenablage-Verlauf öffnen</string>
     <string name="clipboard_item_description">Zwischenablage-Element: %1$s</string>
     <string name="clipboard_item_pin">Zwischenablage-Element anheften</string>
     <string name="clipboard_item_unpin">Zwischenablage-Element lösen</string>

@@ -147,7 +147,6 @@
     <string name="clipboard_panel_delete_all">Ta bort alla</string>
     <string name="clipboard_panel_delete_all_confirm">Ta bort alla ofästa urklippsobjekt?</string>
     <string name="clipboard_consent_message">Urik kan läsa och lagra innehållet i urklippet på obestämd tid. Om du inte vill ha detta, gå till inställningar och stäng av urklippshistoriken.</string>
-    <string name="clipboard_button_description">Öppna urklippshistorik</string>
     <string name="clipboard_item_description">Urklippsobjekt: %1$s</string>
     <string name="clipboard_item_pin">Fäst urklippsobjekt</string>
     <string name="clipboard_item_unpin">Lossa urklippsobjekt</string>

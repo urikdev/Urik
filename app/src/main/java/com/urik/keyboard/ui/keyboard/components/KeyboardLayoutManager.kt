@@ -59,6 +59,8 @@ class KeyboardLayoutManager(
     private val themeManager: ThemeManager,
     cacheMemoryManager: CacheMemoryManager,
 ) {
+    private var clipboardEnabled = false
+
     companion object {
         private const val STANDARD_KEY_WEIGHT = 1f
         private const val SHIFT_KEY_WEIGHT = 1.5f
@@ -281,6 +283,10 @@ class KeyboardLayoutManager(
     ) {
         hapticEnabled = enabled
         hapticDurationMs = durationMs
+    }
+
+    fun updateClipboardEnabled(enabled: Boolean) {
+        clipboardEnabled = enabled
     }
 
     private fun performCustomHaptic(durationMs: Long = hapticDurationMs) {
@@ -533,6 +539,22 @@ class KeyboardLayoutManager(
 
                     background = layerDrawable
                     text = ""
+                } else if (key.action == KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS && clipboardEnabled) {
+                    val keyBackground = getKeyBackground(key)
+                    val clipboardIcon = ContextCompat.getDrawable(context, R.drawable.ic_clipboard)
+
+                    clipboardIcon?.setTint(getKeyTextColor(key))
+
+                    val iconSize = (10 * context.resources.displayMetrics.density).toInt()
+                    val leftInset = (5 * context.resources.displayMetrics.density).toInt()
+                    val topInset = (4 * context.resources.displayMetrics.density).toInt()
+
+                    val layerDrawable = LayerDrawable(arrayOf(keyBackground, clipboardIcon))
+                    layerDrawable.setLayerSize(1, iconSize, iconSize)
+                    layerDrawable.setLayerInset(1, leftInset, topInset, 0, 0)
+                    layerDrawable.setLayerGravity(1, Gravity.TOP or Gravity.START)
+
+                    background = layerDrawable
                 } else {
                     background = getKeyBackground(key)
                 }
