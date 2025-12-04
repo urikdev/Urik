@@ -53,6 +53,7 @@ class KeyboardLayoutManager(
     private val context: Context,
     private val onKeyClick: (KeyboardKey) -> Unit,
     private val onAcceleratedDeletionChanged: (Boolean) -> Unit,
+    private val onSymbolsLongPress: () -> Unit,
     private val characterVariationService: CharacterVariationService,
     private val languageManager: LanguageManager,
     private val themeManager: ThemeManager,
@@ -92,6 +93,7 @@ class KeyboardLayoutManager(
     private val buttonPool = mutableListOf<Button>()
     private val activeButtons = mutableSetOf<Button>()
     private val buttonPendingCallbacks = ConcurrentHashMap<Button, PendingCallbacks>()
+    private val symbolsLongPressFired = ConcurrentHashMap.newKeySet<Button>()
 
     private val cachedTextSizes = mutableMapOf<Int, Float>()
     private val cachedDimensions = mutableMapOf<String, Int>()
@@ -177,6 +179,36 @@ class KeyboardLayoutManager(
                         pending.handler.removeCallbacks(pending.runnable)
                     }
                     false
+                }
+                else -> false
+            }
+        }
+
+    private val symbolsLongPressTouchListener =
+        View.OnTouchListener { view, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    val button = view as Button
+                    symbolsLongPressFired.remove(button)
+                    val handler = Handler(Looper.getMainLooper())
+                    val runnable =
+                        Runnable {
+                            symbolsLongPressFired.add(button)
+                            button.isPressed = false
+                            performCustomHaptic()
+                            onSymbolsLongPress()
+                        }
+                    buttonPendingCallbacks[button] = PendingCallbacks(handler, runnable)
+                    handler.postDelayed(runnable, currentLongPressDuration.durationMs)
+                    false
+                }
+                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                    val button = view as Button
+                    buttonPendingCallbacks.remove(button)?.let { pending ->
+                        pending.handler.removeCallbacks(pending.runnable)
+                    }
+                    val longPressFired = symbolsLongPressFired.remove(button)
+                    longPressFired
                 }
                 else -> false
             }
@@ -518,6 +550,10 @@ class KeyboardLayoutManager(
                 setOnTouchListener(spaceLongPressTouchListener)
             }
 
+            if (key is KeyboardKey.Action && key.action == KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS) {
+                setOnTouchListener(symbolsLongPressTouchListener)
+            }
+
             if (key is KeyboardKey.Action && key.action == KeyboardKey.ActionType.BACKSPACE) {
                 setOnLongClickListener(backspaceLongClickListener)
                 setOnTouchListener(backspaceTouchListener)
@@ -530,6 +566,7 @@ class KeyboardLayoutManager(
         buttonPendingCallbacks.remove(button)?.let { pending ->
             pending.handler.removeCallbacks(pending.runnable)
         }
+        symbolsLongPressFired.remove(button)
 
         button.setOnClickListener(null)
         button.setOnLongClickListener(null)

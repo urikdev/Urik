@@ -88,10 +88,12 @@ class ClipboardMonitorService
 
                     if (text.isNullOrBlank()) return@launch
 
-                    val textHash = text.hashCode()
+                    val truncatedText = text.take(com.urik.keyboard.KeyboardConstants.DatabaseConstants.MAX_CLIPBOARD_CONTENT_LENGTH)
+
+                    val textHash = truncatedText.hashCode()
                     if (textHash == lastClipContentHash) return@launch
 
-                    clipboardRepository.addItem(text)
+                    clipboardRepository.addItem(truncatedText)
                     lastClipContentHash = textHash
                 } catch (e: Exception) {
                     ErrorLogger.logException(
