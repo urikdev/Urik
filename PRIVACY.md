@@ -1,7 +1,7 @@
 # Privacy Policy
 
-**Effective Date:** October 18, 2025  
-**Last Updated:** November 13, 2025
+**Effective Date:** October 18, 2025
+**Last Updated:** December 4, 2025
 
 ## Introduction
 
@@ -51,7 +51,53 @@ For privacy inquiries, contact us at the email above.
 
 **Fallback:** If your device does not have a lock screen configured, learned words are stored without encryption, and you will see a warning about this in the app.
 
-### 2. Keyboard Settings (Not Encrypted)
+### 2. Clipboard History (Encrypted)
+
+**What:** Text content copied to your device's system clipboard from any app.
+
+**Purpose:** To provide quick access to your recent clipboard history for convenient re-use.
+
+**Storage:** Encrypted local SQLCipher database on your device using hardware-backed encryption (Android Keystore).
+
+**Details Stored:**
+- Text content of clipboard items (truncated to first 100,000 characters if longer)
+- Timestamp when copied
+- Pin status (if you manually pin items)
+
+**What We Don't Store:**
+- Which app copied the text
+- Context or surrounding content
+- Your location when copying
+- Device identifiers
+- User identifiers
+
+**Encryption:** Same AES-256 encryption as learned words. The encryption key is stored in the Android Keystore and protected by your device lock screen.
+
+**Monitoring Behavior:**
+- **Enabled by default** on first install
+- Monitors all clipboard activity system-wide (not limited to keyboard input)
+- Stores text copied from any app (web browser, messaging, password managers, etc.)
+- Starts monitoring immediately when keyboard is installed
+- Consent screen shown when you first access clipboard history (long-press symbols key)
+
+**Limitations:**
+- Text truncated to 100,000 characters (approximately 100KB)
+- Maximum 100 unpinned items (oldest automatically deleted)
+- Pinned items never auto-deleted
+- Only stores text content (ignores images, files, etc.)
+- Duplicate detection prevents storing identical consecutive copies
+
+**User Control:**
+- **Access clipboard history:** Long-press symbols key on keyboard
+- **Pin items:** Tap pin icon to prevent auto-deletion
+- **Delete individual items:** Tap × button
+- **Delete all unpinned items:** Tap "Delete All" button in Recent tab
+- **Disable monitoring completely:** Settings → Privacy & Data → Clipboard History (toggle off)
+- **Clear all clipboard data:** Settings → Privacy & Data → Clear All Data
+
+**Important:** Clipboard monitoring captures text from all apps, including sensitive data if you copy passwords, credit card numbers, or private messages. While stored encrypted, consider disabling the feature if you frequently copy sensitive information. The keyboard cannot distinguish between sensitive and non-sensitive clipboard content.
+
+### 3. Keyboard Settings (Not Encrypted)
 
 **What:** Your keyboard preferences and configuration.
 
@@ -66,7 +112,7 @@ For privacy inquiries, contact us at the email above.
 
 **Purpose:** To remember your keyboard customization choices.
 
-### 3. Error Logs (Local Only)
+### 4. Error Logs (Local Only)
 
 **What:** Technical error information when the keyboard encounters critical failures.
 
@@ -87,7 +133,7 @@ For privacy inquiries, contact us at the email above.
 
 **Sharing:** Error logs are never transmitted automatically. You can manually export and share them via the settings menu if you choose to report a bug.
 
-### 4. Temporary In-Memory Data
+### 5. Temporary In-Memory Data
 
 **What:** Recent words and processing data held briefly in RAM for performance.
 
@@ -109,6 +155,7 @@ For privacy inquiries, contact us at the email above.
 All data processing occurs locally on your device:
 
 - **Learned Words:** Generate personalized suggestions and autocorrect
+- **Clipboard History:** Quick access to recently copied text for re-use
 - **Settings:** Apply your keyboard preferences
 - **Error Logs:** Debug issues (only if you share them)
 - **Temporary Caches:** Improve typing performance and responsiveness
@@ -151,6 +198,15 @@ The keyboard automatically detects password fields, credit card inputs, email ad
     - Reset settings to defaults: Settings → Privacy & Data → Reset to Defaults
     - Uninstall app: Automatically deletes all data
 
+### Clipboard History
+- **Retention:** Indefinite for pinned items; unpinned items auto-deleted after 100 items reached (oldest first)
+- **Deletion Options:**
+    - Delete individual items: Long-press symbols key → tap × button
+    - Delete all unpinned items: Long-press symbols key → Recent tab → Delete All
+    - Disable monitoring: Settings → Privacy & Data → Clipboard History (toggle off)
+    - Clear all clipboard data: Settings → Privacy & Data → Clear All Data
+    - Uninstall app: Automatically deletes all data
+
 ### Settings
 - **Retention:** Until you reset to defaults or uninstall the app
 
@@ -164,6 +220,7 @@ The keyboard automatically detects password fields, credit card inputs, email ad
 ### On Uninstall
 When you uninstall Urik, Android automatically deletes:
 - All learned words (encrypted database)
+- All clipboard history (encrypted database)
 - All settings
 - All error logs
 - All cached data
@@ -176,13 +233,16 @@ When you uninstall Urik, Android automatically deletes:
 You have the right to:
 
 1. **Access Your Data**
+    - View clipboard history: Long-press symbols key on keyboard
     - View error logs: Settings → Privacy & Data → Export Error Logs
-    - Your learned words are stored locally on your device in an encrypted database
+    - Your learned words and clipboard history are stored locally on your device in an encrypted database
 
 2. **Delete Your Data**
     - Clear specific learned words: Long-press suggestions to remove
+    - Clear specific clipboard items: Long-press symbols key → tap × button
+    - Clear all clipboard unpinned items: Long-press symbols key → Recent tab → Delete All
     - Clear all learned words: Settings → Privacy & Data → Clear Learned Words
-    - Clear all data: Settings → Privacy & Data → Clear All Data
+    - Clear all data (includes clipboard): Settings → Privacy & Data → Clear All Data
     - Uninstall the app to delete everything
 
 3. **Rectify Your Data**
@@ -194,6 +254,7 @@ You have the right to:
     - **Manual Request:** If you need your data urgently, contact us at hello@urik.io with device details, and we can provide instructions for manual database extraction (requires technical knowledge)
 
 5. **Withdraw Consent**
+    - Disable clipboard monitoring: Settings → Privacy & Data → Clipboard History (toggle off)
     - Disable word learning: Settings → Typing Behavior → Disable "Learn Words"
     - Disable spell check: Settings → Typing Behavior → Disable "Spell Check"
 
@@ -282,10 +343,12 @@ We encourage security researchers and privacy advocates to audit the code and re
 
 Under GDPR Article 6, our legal bases for processing your personal data are:
 
-1. **Consent (Article 6(1)(a)):** You consent to word learning by using the keyboard with word learning enabled
+1. **Consent (Article 6(1)(a)):**
+    - Word learning: By using the keyboard with word learning enabled
+    - Clipboard monitoring: By continuing to use the keyboard after first install with clipboard monitoring enabled by default (opt-out consent model)
 2. **Legitimate Interest (Article 6(1)(f)):** We have a legitimate interest in processing error logs to maintain and improve the keyboard
 
-You can withdraw consent at any time by disabling word learning in settings or uninstalling the app.
+You can withdraw consent at any time by disabling clipboard monitoring, disabling word learning in settings, or uninstalling the app.
 
 ## Contact Us
 

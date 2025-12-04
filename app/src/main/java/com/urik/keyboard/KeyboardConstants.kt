@@ -171,5 +171,6 @@ object KeyboardConstants {
     object DatabaseConstants {
         const val DATABASE_VERSION = 3
         const val MAX_CLIPBOARD_ITEMS = 100
+        const val MAX_CLIPBOARD_CONTENT_LENGTH = 100_000
     }
 }

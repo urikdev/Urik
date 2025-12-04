@@ -56,7 +56,6 @@ class SwipeKeyboardView
         private var onSwipeWordListener: ((String) -> Unit)? = null
         private var onSuggestionClickListener: ((String) -> Unit)? = null
         private var onSuggestionLongPressListener: ((String) -> Unit)? = null
-        private var onClipboardClickListener: (() -> Unit)? = null
         private var onEmojiSelected: ((String) -> Unit)? = null
         private var onBackspacePressed: (() -> Unit)? = null
         private val keyViews = mutableListOf<Button>()
@@ -73,7 +72,6 @@ class SwipeKeyboardView
 
         private var suggestionBar: LinearLayout? = null
 
-        private var clipboardButton: TextView? = null
         private var emojiButton: TextView? = null
 
         private var isSwipeActive = false
@@ -108,13 +106,6 @@ class SwipeKeyboardView
                 val suggestion = view.getTag(R.id.suggestion_text) as? String ?: return@OnLongClickListener false
                 showRemovalConfirmation(suggestion)
                 true
-            }
-
-        private val clipboardButtonClickListener =
-            View.OnClickListener {
-                if (isDestroyed) return@OnClickListener
-                keyboardLayoutManager?.triggerHapticFeedback()
-                onClipboardClickListener?.invoke()
             }
 
         private val emojiButtonClickListener =
@@ -432,12 +423,6 @@ class SwipeKeyboardView
             }
         }
 
-        fun setOnClipboardClickListener(listener: () -> Unit) {
-            if (!isDestroyed) {
-                this.onClipboardClickListener = listener
-            }
-        }
-
         fun setOnEmojiSelectedListener(listener: (String) -> Unit) {
             if (!isDestroyed) {
                 this.onEmojiSelected = listener
@@ -447,12 +432,6 @@ class SwipeKeyboardView
         fun setOnBackspacePressedListener(listener: () -> Unit) {
             if (!isDestroyed) {
                 this.onBackspacePressed = listener
-            }
-        }
-
-        fun setClipboardEnabled(enabled: Boolean) {
-            if (!isDestroyed) {
-                clipboardButton?.isVisible = enabled
             }
         }
 
@@ -494,19 +473,11 @@ class SwipeKeyboardView
             if (isDestroyed) return
 
             suggestionBar?.let { bar ->
-                val clipBtn = clipboardButton
                 val emojiBtn = emojiButton
 
                 returnSuggestionViewsToPool()
 
                 bar.removeAllViews()
-
-                clipBtn?.let { btn ->
-                    if (btn.parent != null) {
-                        (btn.parent as? android.view.ViewGroup)?.removeView(btn)
-                    }
-                    bar.addView(btn)
-                }
 
                 if (suggestions.isNotEmpty()) {
                     populateSuggestions(bar, suggestions)
@@ -851,44 +822,6 @@ class SwipeKeyboardView
                             themeManager!!
                                 .currentTheme.value.colors.suggestionBarBackground,
                         )
-
-                        clipboardButton =
-                            TextView(context).apply {
-                                val clipboardDrawable = ContextCompat.getDrawable(context, R.drawable.ic_clipboard)
-                                clipboardDrawable?.setTint(
-                                    themeManager!!
-                                        .currentTheme.value.colors.keyTextAction,
-                                )
-
-                                setCompoundDrawablesRelativeWithIntrinsicBounds(clipboardDrawable, null, null, null)
-
-                                val textSize = calculateResponsiveSuggestionTextSize()
-                                val padding = (textSize * context.resources.displayMetrics.density * 0.8f).toInt()
-                                setPadding(padding, padding, padding, padding)
-                                setBackgroundColor(
-                                    themeManager!!
-                                        .currentTheme.value.colors.keyBackgroundAction,
-                                )
-
-                                contentDescription = context.getString(R.string.clipboard_button_description)
-
-                                setOnClickListener(clipboardButtonClickListener)
-
-                                isVisible = false
-
-                                layoutParams =
-                                    LinearLayout
-                                        .LayoutParams(
-                                            LinearLayout.LayoutParams.WRAP_CONTENT,
-                                            LinearLayout.LayoutParams.WRAP_CONTENT,
-                                            0f,
-                                        ).apply {
-                                            gravity = Gravity.START
-                                            marginEnd = context.resources.getDimensionPixelSize(R.dimen.key_margin_horizontal)
-                                        }
-                            }
-
-                        addView(clipboardButton)
 
                         emojiButton =
                             TextView(context).apply {

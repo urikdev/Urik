@@ -558,6 +558,7 @@ class UrikInputMethodService :
                     context = this,
                     onKeyClick = { key -> handleKeyPress(key) },
                     onAcceleratedDeletionChanged = { active -> setAcceleratedDeletion(active) },
+                    onSymbolsLongPress = { handleClipboardButtonClick() },
                     characterVariationService = characterVariationService,
                     languageManager = languageManager,
                     themeManager = themeManager,
@@ -683,9 +684,6 @@ class UrikInputMethodService :
                         handleSuggestionRemoval(
                             suggestion,
                         )
-                    }
-                    setOnClipboardClickListener {
-                        handleClipboardButtonClick()
                     }
                     setOnEmojiSelectedListener { selectedEmoji ->
                         handleEmojiSelected(selectedEmoji)
@@ -893,8 +891,6 @@ class UrikInputMethodService :
                         newSettings.vibrationStrength.durationMs,
                     )
 
-                    swipeKeyboardView?.setClipboardEnabled(newSettings.clipboardEnabled)
-
                     if (needsLayoutRebuild) {
                         withContext(Dispatchers.Main) {
                             updateSwipeKeyboard()
@@ -967,7 +963,6 @@ class UrikInputMethodService :
                     }
 
                 swipeKeyboardView?.updateKeyboard(filteredLayout, state)
-                swipeKeyboardView?.setClipboardEnabled(currentSettings.clipboardEnabled)
             }
         } catch (_: Exception) {
         }
