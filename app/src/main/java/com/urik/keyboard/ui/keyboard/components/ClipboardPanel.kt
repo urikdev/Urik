@@ -32,6 +32,8 @@ class ClipboardPanel(
     private var onItemDeleted: ((ClipboardItem) -> Unit)? = null
     private var onDeleteAllUnpinned: (() -> Unit)? = null
 
+    private var deleteAllConfirmationOverlay: FrameLayout? = null
+
     private val rootContainer: FrameLayout =
         FrameLayout(context).apply {
             val density = context.resources.displayMetrics.density
@@ -193,6 +195,7 @@ class ClipboardPanel(
         setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
 
         setOnDismissListener {
+            hideDeleteAllConfirmation()
             onConsentAccepted = null
             onItemSelected = null
             onItemPinToggled = null
@@ -336,7 +339,7 @@ class ClipboardPanel(
                         setMargins(margin, margin, margin, margin)
                     }
             setOnClickListener {
-                onDeleteAllUnpinned?.invoke()
+                showDeleteAllConfirmation()
             }
         }
     }
@@ -493,6 +496,103 @@ class ClipboardPanel(
                 onItemDeleted?.invoke(item)
             }
         }
+    }
+
+    private fun showDeleteAllConfirmation() {
+        if (deleteAllConfirmationOverlay != null) return
+
+        val density = context.resources.displayMetrics.density
+
+        deleteAllConfirmationOverlay =
+            FrameLayout(context).apply {
+                setBackgroundColor(ContextCompat.getColor(context, android.R.color.black))
+                alpha = 0.8f
+
+                val container =
+                    LinearLayout(context).apply {
+                        orientation = LinearLayout.VERTICAL
+                        gravity = Gravity.CENTER
+                        setBackgroundColor(themeManager.currentTheme.value.colors.keyboardBackground)
+
+                        val padding = (16 * density).toInt()
+                        setPadding(padding, padding, padding, padding)
+
+                        val message =
+                            TextView(context).apply {
+                                text = context.getString(R.string.clipboard_panel_delete_all_confirm)
+                                setTextColor(themeManager.currentTheme.value.colors.suggestionText)
+                                gravity = Gravity.CENTER
+                                setPadding(0, 0, 0, padding)
+                            }
+                        addView(message)
+
+                        val buttonsContainer =
+                            LinearLayout(context).apply {
+                                orientation = LinearLayout.HORIZONTAL
+                                gravity = Gravity.CENTER
+
+                                val cancelBtn =
+                                    Button(context).apply {
+                                        text = context.getString(android.R.string.cancel)
+                                        setTextColor(themeManager.currentTheme.value.colors.keyTextAction)
+                                        setBackgroundColor(themeManager.currentTheme.value.colors.keyBackgroundAction)
+                                        setOnClickListener { hideDeleteAllConfirmation() }
+                                    }
+
+                                val deleteBtn =
+                                    Button(context).apply {
+                                        text = context.getString(R.string.clipboard_panel_delete_all)
+                                        setTextColor(ContextCompat.getColor(context, android.R.color.white))
+                                        setBackgroundColor(ContextCompat.getColor(context, android.R.color.holo_red_dark))
+                                        setOnClickListener { confirmDeleteAll() }
+                                    }
+
+                                val margin = padding / 2
+                                addView(
+                                    cancelBtn,
+                                    LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply {
+                                        marginEnd = margin
+                                    },
+                                )
+                                addView(
+                                    deleteBtn,
+                                    LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply {
+                                        marginStart = margin
+                                    },
+                                )
+                            }
+                        addView(buttonsContainer)
+                    }
+
+                addView(
+                    container,
+                    FrameLayout.LayoutParams(
+                        FrameLayout.LayoutParams.WRAP_CONTENT,
+                        FrameLayout.LayoutParams.WRAP_CONTENT,
+                        Gravity.CENTER,
+                    ),
+                )
+            }
+
+        rootContainer.addView(
+            deleteAllConfirmationOverlay,
+            FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT,
+            ),
+        )
+    }
+
+    private fun hideDeleteAllConfirmation() {
+        deleteAllConfirmationOverlay?.let { overlay ->
+            rootContainer.removeView(overlay)
+        }
+        deleteAllConfirmationOverlay = null
+    }
+
+    private fun confirmDeleteAll() {
+        hideDeleteAllConfirmation()
+        onDeleteAllUnpinned?.invoke()
     }
 
     private fun returnItemViewsToPool() {
