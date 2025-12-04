@@ -1156,16 +1156,6 @@ class UrikInputMethodService :
                 try {
                     ic.beginBatchEdit()
                     ic.setComposingText(displayBuffer, 1)
-
-                    if (oldComposingStart != -1) {
-                        val currentTextLength =
-                            ic.getTextBeforeCursor(KeyboardConstants.TextProcessingConstants.MAX_CURSOR_POSITION_CHARS, 0)?.length
-                                ?: displayBuffer.length
-                        composingRegionStart = CursorEditingUtils.recalculateComposingRegionStart(currentTextLength, displayBuffer.length)
-
-                        val newAbsoluteCursorPos = composingRegionStart + newCursorPos
-                        ic.setSelection(newAbsoluteCursorPos, newAbsoluteCursorPos)
-                    }
                 } finally {
                     ic.endBatchEdit()
                 }
@@ -1761,22 +1751,11 @@ class UrikInputMethodService :
                     }
 
                     if (displayBuffer.isNotEmpty()) {
-                        val newCursorPos = cursorPosInWord - deletedLength
-
                         val ic = currentInputConnection
                         if (ic != null) {
                             try {
                                 ic.beginBatchEdit()
                                 ic.setComposingText(displayBuffer, 1)
-
-                                val currentTextLength =
-                                    ic.getTextBeforeCursor(KeyboardConstants.TextProcessingConstants.MAX_CURSOR_POSITION_CHARS, 0)?.length
-                                        ?: displayBuffer.length
-                                composingRegionStart =
-                                    CursorEditingUtils.recalculateComposingRegionStart(currentTextLength, displayBuffer.length)
-
-                                val newAbsoluteCursorPos = composingRegionStart + newCursorPos
-                                ic.setSelection(newAbsoluteCursorPos, newAbsoluteCursorPos)
                             } finally {
                                 ic.endBatchEdit()
                             }
