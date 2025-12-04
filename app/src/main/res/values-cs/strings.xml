@@ -206,7 +206,6 @@
 
     <!-- Clipboard Accessibility -->
     <string name="clipboard_consent_message">Urik může číst a ukládat obsah schránky donekonečna. Pokud si to nepřejete, přejděte do nastavení a vypněte historii schránky.</string>
-    <string name="clipboard_button_description">Otevřít historii schránky</string>
     <string name="clipboard_item_description">Položka schránky: %1$s</string>
     <string name="clipboard_item_pin">Připnout položku schránky</string>
     <string name="clipboard_item_unpin">Odepnout položku schránky</string>

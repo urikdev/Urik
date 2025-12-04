@@ -876,7 +876,8 @@ class UrikInputMethodService :
                         currentSettings.keySize != newSettings.keySize ||
                             currentSettings.spaceBarSize != newSettings.spaceBarSize ||
                             currentSettings.keyLabelSize != newSettings.keyLabelSize ||
-                            currentSettings.showNumberRow != newSettings.showNumberRow
+                            currentSettings.showNumberRow != newSettings.showNumberRow ||
+                            currentSettings.clipboardEnabled != newSettings.clipboardEnabled
 
                     currentSettings = newSettings
 
@@ -890,6 +891,8 @@ class UrikInputMethodService :
                         newSettings.hapticFeedback,
                         newSettings.vibrationStrength.durationMs,
                     )
+
+                    layoutManager.updateClipboardEnabled(newSettings.clipboardEnabled)
 
                     if (needsLayoutRebuild) {
                         withContext(Dispatchers.Main) {
@@ -981,6 +984,8 @@ class UrikInputMethodService :
             currentSettings.hapticFeedback,
             currentSettings.vibrationStrength.durationMs,
         )
+
+        layoutManager.updateClipboardEnabled(currentSettings.clipboardEnabled)
 
         if (serviceJob.isCancelled) {
             serviceJob = SupervisorJob()
