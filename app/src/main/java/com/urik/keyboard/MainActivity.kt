@@ -185,7 +185,7 @@ class MainActivity : AppCompatActivity() {
                         android.widget.FrameLayout.LayoutParams.WRAP_CONTENT,
                         android.widget.FrameLayout.LayoutParams.WRAP_CONTENT,
                     ).apply {
-                        gravity = android.view.Gravity.TOP or android.view.Gravity.END
+                        gravity = Gravity.TOP or Gravity.END
                         val margin = dpToPx(16)
                         setMargins(margin, margin, margin, margin)
                     }
@@ -205,7 +205,7 @@ class MainActivity : AppCompatActivity() {
                         android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
                         android.widget.FrameLayout.LayoutParams.WRAP_CONTENT,
                     ).apply {
-                        gravity = android.view.Gravity.BOTTOM
+                        gravity = Gravity.BOTTOM
                     }
 
             val enableButton =
