@@ -197,6 +197,7 @@
     <string name="tip_4_description">Dlouze podržte na slovo pro odebrání z vašeho slovníku.</string>
 
     <!-- Clipboard Panel -->
+    <string name="tip_5_description">Dlouhým stisknutím klávesy se symbolem otevřete Správce schránky.</string>
     <string name="clipboard_panel_title">Schránka</string>
     <string name="clipboard_panel_pinned">Připnuté</string>
     <string name="clipboard_panel_recent">Nedávné</string>
@@ -210,5 +211,6 @@
     <string name="clipboard_item_pin">Připnout položku schránky</string>
     <string name="clipboard_item_unpin">Odepnout položku schránky</string>
     <string name="clipboard_item_delete">Smazat položku schránky</string>
+    <string name="tip_5_title">Správce schránky</string>
 
 </resources>
