@@ -137,6 +137,7 @@ class KeyboardLayoutManager(
             onKeyClick(key)
         }
 
+    @SuppressLint("ClickableViewAccessibility")
     private val characterLongPressTouchListener =
         View.OnTouchListener { view, event ->
             when (event.action) {
@@ -162,6 +163,7 @@ class KeyboardLayoutManager(
             }
         }
 
+    @SuppressLint("ClickableViewAccessibility")
     private val spaceLongPressTouchListener =
         View.OnTouchListener { view, event ->
             when (event.action) {
@@ -186,6 +188,7 @@ class KeyboardLayoutManager(
             }
         }
 
+    @SuppressLint("ClickableViewAccessibility")
     private val symbolsLongPressTouchListener =
         View.OnTouchListener { view, event ->
             when (event.action) {
@@ -223,6 +226,7 @@ class KeyboardLayoutManager(
             true
         }
 
+    @SuppressLint("ClickableViewAccessibility")
     private val backspaceTouchListener =
         View.OnTouchListener { _, event ->
             when (event.action) {

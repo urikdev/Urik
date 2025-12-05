@@ -31,11 +31,6 @@
     <string name="dictionary_attribution_summary">Licence a atribuce FrequencyWords</string>
 
     <!-- Settings Enums -->
-    <!-- Theme -->
-    <string name="theme_system">Podle systému</string>
-    <string name="theme_light">Světlý</string>
-    <string name="theme_dark">Tmavý</string>
-
     <!-- Key Size -->
     <string name="key_size_small">Malá</string>
     <string name="key_size_medium">Střední</string>

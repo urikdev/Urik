@@ -1932,9 +1932,8 @@ class UrikInputMethodService :
                                     )?.length
                                     ?: 0
                             val wordStart = actualCursorPos - wordBeforeCursor.length
-                            val wordEnd = actualCursorPos
 
-                            currentInputConnection?.setComposingRegion(wordStart, wordEnd)
+                            currentInputConnection?.setComposingRegion(wordStart, actualCursorPos)
 
                             displayBuffer = wordBeforeCursor
                             composingRegionStart = wordStart
@@ -2359,8 +2358,7 @@ class UrikInputMethodService :
                 val trimmedWordAfter = if (wordAfter.isNotEmpty() && CursorEditingUtils.isValidTextInput(wordAfter)) wordAfter else ""
 
                 val fullWord = wordBeforeInfo.first + trimmedWordAfter
-                val actualCursorPos = newSelStart
-                val wordStart = actualCursorPos - wordBeforeInfo.first.length
+                val wordStart = newSelStart - wordBeforeInfo.first.length
 
                 if (fullWord.length >= 2) {
                     currentInputConnection?.setComposingRegion(wordStart, wordStart + fullWord.length)

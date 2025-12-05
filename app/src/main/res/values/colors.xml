@@ -30,16 +30,6 @@
     <color name="state_activated">@color/battleship_gray</color>
     <color name="state_caps_lock">@color/wenge</color>
 
-    <color name="key_background_disabled">@color/wenge</color>
-    <color name="key_shadow_disabled">#0DFFFFFF</color>
-    <color name="key_background_character_pressed">@color/state_pressed</color>
-    <color name="key_focus_indicator">@color/focus_indicator</color>
-
-    <color name="key_shadow_activated">@color/battleship_gray</color>
-    <color name="key_background_action_activated">@color/state_activated</color>
-    <color name="key_border_activated">@color/sage</color>
-    <color name="key_background_action_pressed">@color/state_pressed</color>
-
     <!-- ============================================ -->
     <!-- KEYBOARD COLORS -->
     <!-- ============================================ -->
@@ -58,8 +48,6 @@
     <color name="key_border">@color/battleship_gray</color>
     <color name="key_border_focused">@color/sage</color>
     <color name="key_border_pressed">@color/light_orange</color>
-
-    <color name="key_background_space_pressed">@color/state_pressed</color>
 
     <!-- ============================================ -->
     <!-- SUGGESTION BAR -->
