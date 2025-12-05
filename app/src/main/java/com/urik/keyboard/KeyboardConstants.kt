@@ -93,33 +93,26 @@ object KeyboardConstants {
         const val MIN_CHARS_IN_BOUNDS_RATIO = 0.6f
         const val MIN_EXCELLENT_CANDIDATES = 3
 
-        const val SWIPE_TIME_THRESHOLD_MS = 200L
-        const val SWIPE_START_DISTANCE_PX = 35f
+        const val SWIPE_TIME_THRESHOLD_MS = 50L
+        const val SWIPE_START_DISTANCE_PX = 18f
         const val MIN_SWIPE_POINTS_FOR_SAMPLING = 3
         const val SLOW_MOVEMENT_VELOCITY_THRESHOLD = 0.5f
         const val UI_UPDATE_INTERVAL_MS = 16
         const val TAP_DURATION_THRESHOLD_MS = 350L
 
         const val PATH_BOUNDS_MARGIN_PX = 100f
-        const val CLOSE_KEY_DISTANCE_THRESHOLD_SQ = 3600f
+        const val CLOSE_KEY_DISTANCE_THRESHOLD_SQ = 6400f
         const val EXCELLENT_CANDIDATE_THRESHOLD = 0.95f
         const val REPETITION_PENALTY_FACTOR = 0.08f
 
-        const val EXP_THRESHOLD_50 = 25000f
-        const val TWO_SIGMA_50_SQ = 5000f
-        const val EXP_THRESHOLD_60 = 36000f
-        const val TWO_SIGMA_60_SQ = 7200f
-        const val BASE_PENALTY_SHORT_WORD = 400f
+        const val EXP_THRESHOLD_50 = 12100f
+        const val TWO_SIGMA_50_SQ = 4000f
+        const val EXP_THRESHOLD_60 = 12100f
+        const val TWO_SIGMA_60_SQ = 4000f
+        const val BASE_PENALTY_SHORT_WORD = 50f
         const val BASE_PENALTY_LONG_WORD = 0f
-
-        const val MIN_PATH_LENGTH_RATIO = 0.06f
-        const val PATH_LENGTH_PENALTY_STRONG = 0.80f
-        const val PATH_LENGTH_PENALTY_VERY_STRONG = 0.60f
-        const val PATH_LENGTH_PENALTY_MODERATE = 0.85f
-        const val PATH_LENGTH_PENALTY_MEDIUM = 0.70f
-        const val PATH_LENGTH_NO_PENALTY = 1.0f
-        const val SPATIAL_SCORE_WEIGHT = 0.7f
-        const val FREQUENCY_SCORE_WEIGHT = 0.3f
+        const val SPATIAL_SCORE_WEIGHT = 0.70f
+        const val FREQUENCY_SCORE_WEIGHT = 0.30f
     }
 
     object TextProcessingConstants {

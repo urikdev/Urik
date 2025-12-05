@@ -28,7 +28,6 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argThat
 import org.mockito.kotlin.doReturn
-import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.times
@@ -439,8 +438,16 @@ class WordLearningEngineTest {
     @Test
     fun `areWordsLearned checks multiple words`() =
         runTest {
-            whenever(learnedWordDao.findExistingWords("en", listOf("word1", "word2")))
-                .thenReturn(listOf("word1"))
+            val learnedWord1 =
+                LearnedWord.create(
+                    word = "word1",
+                    wordNormalized = "word1",
+                    languageTag = "en",
+                    frequency = 1,
+                    source = WordSource.USER_TYPED,
+                )
+            whenever(learnedWordDao.getAllLearnedWordsForLanguage("en"))
+                .thenReturn(listOf(learnedWord1))
 
             val results = wordLearningEngine.areWordsLearned(listOf("word1", "word2"))
 
@@ -455,25 +462,36 @@ class WordLearningEngineTest {
             val results = wordLearningEngine.areWordsLearned(emptyList())
 
             assertTrue(results.isEmpty())
-            verify(learnedWordDao, never()).findExistingWords(any(), any())
+            verify(learnedWordDao, never()).getAllLearnedWordsForLanguage(any())
         }
 
     @Test
     fun `areWordsLearned filters invalid words`() =
         runTest {
+            whenever(learnedWordDao.getAllLearnedWordsForLanguage("en"))
+                .thenReturn(emptyList())
+
             val results = wordLearningEngine.areWordsLearned(listOf("", "   ", "valid"))
 
             assertEquals(3, results.size)
             assertEquals(false, results[""])
             assertEquals(false, results["   "])
-            verify(learnedWordDao).findExistingWords("en", listOf("valid"))
+            assertEquals(false, results["valid"])
         }
 
     @Test
     fun `areWordsLearned normalizes words`() =
         runTest {
-            whenever(learnedWordDao.findExistingWords(eq("en"), any()))
-                .thenReturn(listOf("hello"))
+            val learnedWord =
+                LearnedWord.create(
+                    word = "hello",
+                    wordNormalized = "hello",
+                    languageTag = "en",
+                    frequency = 1,
+                    source = WordSource.USER_TYPED,
+                )
+            whenever(learnedWordDao.getAllLearnedWordsForLanguage("en"))
+                .thenReturn(listOf(learnedWord))
 
             val results = wordLearningEngine.areWordsLearned(listOf("HELLO", "  hello  "))
 
@@ -485,7 +503,7 @@ class WordLearningEngineTest {
     @Test
     fun `areWordsLearned handles DB exception`() =
         runTest {
-            whenever(learnedWordDao.findExistingWords(any(), any()))
+            whenever(learnedWordDao.getAllLearnedWordsForLanguage(any()))
                 .thenThrow(android.database.sqlite.SQLiteException("DB error"))
 
             val results = wordLearningEngine.areWordsLearned(listOf("word1", "word2"))
