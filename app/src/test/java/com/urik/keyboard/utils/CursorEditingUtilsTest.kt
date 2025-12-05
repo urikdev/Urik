@@ -136,4 +136,64 @@ class CursorEditingUtilsTest {
     fun `isValidTextInput rejects pure punctuation`() {
         Assert.assertFalse(CursorEditingUtils.isValidTextInput("..."))
     }
+
+    @Test
+    fun `isPunctuation recognizes common English punctuation`() {
+        Assert.assertTrue(CursorEditingUtils.isPunctuation('.'))
+        Assert.assertTrue(CursorEditingUtils.isPunctuation(','))
+        Assert.assertTrue(CursorEditingUtils.isPunctuation('!'))
+        Assert.assertTrue(CursorEditingUtils.isPunctuation('?'))
+        Assert.assertTrue(CursorEditingUtils.isPunctuation(';'))
+        Assert.assertTrue(CursorEditingUtils.isPunctuation(':'))
+    }
+
+    @Test
+    fun `isPunctuation recognizes quotes and brackets`() {
+        Assert.assertTrue(CursorEditingUtils.isPunctuation('"'))
+        Assert.assertTrue(CursorEditingUtils.isPunctuation('('))
+        Assert.assertTrue(CursorEditingUtils.isPunctuation(')'))
+        Assert.assertTrue(CursorEditingUtils.isPunctuation('['))
+        Assert.assertTrue(CursorEditingUtils.isPunctuation(']'))
+    }
+
+    @Test
+    fun `isPunctuation recognizes international punctuation`() {
+        Assert.assertTrue(CursorEditingUtils.isPunctuation('。'))
+        Assert.assertTrue(CursorEditingUtils.isPunctuation('？'))
+        Assert.assertTrue(CursorEditingUtils.isPunctuation('！'))
+        Assert.assertTrue(CursorEditingUtils.isPunctuation('،'))
+        Assert.assertTrue(CursorEditingUtils.isPunctuation('؛'))
+        Assert.assertTrue(CursorEditingUtils.isPunctuation('¿'))
+        Assert.assertTrue(CursorEditingUtils.isPunctuation('¡'))
+    }
+
+    @Test
+    fun `isPunctuation rejects apostrophes and hyphens`() {
+        Assert.assertFalse(CursorEditingUtils.isPunctuation('\''))
+        Assert.assertFalse(CursorEditingUtils.isPunctuation('\u2019'))
+        Assert.assertFalse(CursorEditingUtils.isPunctuation('-'))
+    }
+
+    @Test
+    fun `isPunctuation rejects letters and digits`() {
+        Assert.assertFalse(CursorEditingUtils.isPunctuation('a'))
+        Assert.assertFalse(CursorEditingUtils.isPunctuation('Z'))
+        Assert.assertFalse(CursorEditingUtils.isPunctuation('5'))
+        Assert.assertFalse(CursorEditingUtils.isPunctuation('ñ'))
+        Assert.assertFalse(CursorEditingUtils.isPunctuation('č'))
+    }
+
+    @Test
+    fun `isPunctuation recognizes at symbol`() {
+        Assert.assertTrue(CursorEditingUtils.isPunctuation('@'))
+    }
+
+    @Test
+    fun `isPunctuation rejects symbols with special semantic meaning`() {
+        Assert.assertFalse(CursorEditingUtils.isPunctuation('#'))
+        Assert.assertFalse(CursorEditingUtils.isPunctuation('$'))
+        Assert.assertFalse(CursorEditingUtils.isPunctuation('%'))
+        Assert.assertFalse(CursorEditingUtils.isPunctuation('&'))
+        Assert.assertFalse(CursorEditingUtils.isPunctuation('*'))
+    }
 }

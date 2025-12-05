@@ -4,6 +4,10 @@ object CursorEditingUtils {
     fun isPunctuation(char: Char): Boolean {
         if (char == '\'' || char == '\u2019' || char == '-') return false
 
+        if (char == '#' || char == '$' || char == '%' || char == '&' || char == '*') {
+            return false
+        }
+
         val type = Character.getType(char.code)
         return type == Character.START_PUNCTUATION.toInt() ||
             type == Character.END_PUNCTUATION.toInt() ||
