@@ -1297,19 +1297,54 @@ class UrikInputMethodService :
                         if (!isUrlOrEmail) {
                             val isValid = textInputProcessor.validateWord(wordState.normalizedBuffer)
                             if (!isValid) {
-                                spellConfirmationState = SpellConfirmationState.AWAITING_CONFIRMATION
-                                pendingWordForLearning = wordState.normalizedBuffer
-                                highlightCurrentWord()
+                                val isPunctuation =
+                                    char.length == 1 && CursorEditingUtils.isPunctuation(char.single())
 
-                                val suggestions = textInputProcessor.getSuggestions(wordState.normalizedBuffer)
-                                val displaySuggestions = applyCapitalizationToSuggestions(suggestions)
-                                pendingSuggestions = displaySuggestions
-                                if (displaySuggestions.isNotEmpty()) {
-                                    swipeKeyboardView?.updateSuggestions(displaySuggestions)
+                                if (isPunctuation) {
+                                    currentInputConnection?.beginBatchEdit()
+                                    try {
+                                        learnWordAndInvalidateCache(
+                                            wordState.normalizedBuffer,
+                                            InputMethod.TYPED,
+                                        )
+                                        currentInputConnection?.finishComposingText()
+                                        currentInputConnection?.commitText(char, 1)
+                                        val cursorPos =
+                                            currentInputConnection
+                                                ?.getTextBeforeCursor(
+                                                    KeyboardConstants.TextProcessingConstants.MAX_CURSOR_POSITION_CHARS,
+                                                    0,
+                                                )?.length
+                                                ?: 0
+                                        currentInputConnection?.setSelection(cursorPos, cursorPos)
+
+                                        val singleChar = char.single()
+                                        if (isSentenceEndingPunctuation(singleChar) && !isSecureField) {
+                                            viewModel.disableCapsLockAfterPunctuation()
+                                            val textAfter = safeGetTextBeforeCursor(50)
+                                            viewModel.checkAndApplyAutoCapitalization(textAfter)
+                                        }
+
+                                        coordinateStateClear()
+                                    } finally {
+                                        currentInputConnection?.endBatchEdit()
+                                    }
+                                    return@launch
                                 } else {
-                                    swipeKeyboardView?.clearSuggestions()
+                                    spellConfirmationState = SpellConfirmationState.AWAITING_CONFIRMATION
+                                    pendingWordForLearning = wordState.normalizedBuffer
+                                    highlightCurrentWord()
+
+                                    val suggestions = textInputProcessor.getSuggestions(wordState.normalizedBuffer)
+                                    val displaySuggestions = applyCapitalizationToSuggestions(suggestions)
+                                    pendingSuggestions = displaySuggestions
+                                    if (displaySuggestions.isNotEmpty()) {
+                                        swipeKeyboardView?.updateSuggestions(displaySuggestions)
+                                    } else {
+                                        swipeKeyboardView?.clearSuggestions()
+                                    }
+                                    return@launch
                                 }
-                                return@launch
                             }
                         }
                     }
@@ -1651,10 +1686,15 @@ class UrikInputMethodService :
      */
     private fun handleBackspace() {
         try {
+            val textBeforeCursor = safeGetTextBeforeCursor(50)
+            android.util.Log.d(
+                "UrikDebug",
+                "handleBackspace: displayBuffer='$displayBuffer' composingStart=$composingRegionStart textBefore='$textBeforeCursor'",
+            )
+
             if (isSecureField) {
-                val textBefore = safeGetTextBeforeCursor(50)
-                if (!textBefore.isNullOrEmpty()) {
-                    val graphemeLength = BackspaceUtils.getLastGraphemeClusterLength(textBefore)
+                if (!textBeforeCursor.isNullOrEmpty()) {
+                    val graphemeLength = BackspaceUtils.getLastGraphemeClusterLength(textBeforeCursor)
                     currentInputConnection?.deleteSurroundingText(graphemeLength, 0)
                 }
                 return
@@ -1665,54 +1705,55 @@ class UrikInputMethodService :
                 val actualTextAfter = safeGetTextAfterCursor(1)
 
                 if (actualTextBefore.isEmpty() && actualTextAfter.isEmpty()) {
+                    android.util.Log.d("UrikDebug", "handleBackspace: clearing state - empty field")
                     coordinateStateClear()
                     return
                 }
             }
 
             if (spellConfirmationState == SpellConfirmationState.AWAITING_CONFIRMATION) {
+                android.util.Log.d("UrikDebug", "handleBackspace: clearing AWAITING_CONFIRMATION")
                 spellConfirmationState = SpellConfirmationState.NORMAL
                 pendingWordForLearning = null
+            }
+
+            if (displayBuffer.isNotEmpty()) {
+                val currentText = safeGetTextBeforeCursor(displayBuffer.length + 10)
+                val expectedComposingText =
+                    if (currentText.length >= displayBuffer.length) {
+                        currentText.substring(maxOf(0, currentText.length - displayBuffer.length))
+                    } else {
+                        ""
+                    }
+
+                android.util.Log.d(
+                    "UrikDebug",
+                    "handleBackspace: validation - currentText='$currentText' expected='$expectedComposingText' displayBuffer='$displayBuffer'",
+                )
+
+                if (expectedComposingText != displayBuffer) {
+                    android.util.Log.d("UrikDebug", "handleBackspace: MISMATCH - clearing and delegating to handleCommittedTextBackspace")
+                    coordinateStateClear()
+                    handleCommittedTextBackspace()
+                    return
+                }
             }
 
             isActivelyEditing = true
 
             if (displayBuffer.isNotEmpty()) {
-                if (composingRegionStart != -1) {
-                    val currentText = safeGetTextBeforeCursor(displayBuffer.length + 10)
-                    val expectedComposingText =
-                        if (currentText.length >= displayBuffer.length) {
-                            currentText.substring(maxOf(0, currentText.length - displayBuffer.length))
-                        } else {
-                            ""
-                        }
-
-                    if (expectedComposingText != displayBuffer) {
-                        composingRegionStart = -1
-                        coordinateStateClear()
-                        handleCommittedTextBackspace()
-                        return
-                    }
-                }
+                val absoluteCursorPos =
+                    currentInputConnection
+                        ?.getTextBeforeCursor(
+                            KeyboardConstants.TextProcessingConstants.MAX_CURSOR_POSITION_CHARS,
+                            0,
+                        )?.length
+                        ?: displayBuffer.length
 
                 val cursorPosInWord =
                     if (composingRegionStart != -1) {
-                        val absoluteCursorPos =
-                            currentInputConnection
-                                ?.getTextBeforeCursor(
-                                    KeyboardConstants.TextProcessingConstants.MAX_CURSOR_POSITION_CHARS,
-                                    0,
-                                )?.length
-                                ?: displayBuffer.length
                         CursorEditingUtils.calculateCursorPositionInWord(absoluteCursorPos, composingRegionStart, displayBuffer.length)
                     } else {
-                        val absoluteCursorPos =
-                            currentInputConnection
-                                ?.getTextBeforeCursor(
-                                    KeyboardConstants.TextProcessingConstants.MAX_CURSOR_POSITION_CHARS,
-                                    0,
-                                )?.length
-                                ?: displayBuffer.length
                         val potentialStart = absoluteCursorPos - displayBuffer.length
                         if (potentialStart >= 0) {
                             composingRegionStart = potentialStart
@@ -2241,6 +2282,11 @@ class UrikInputMethodService :
             candidatesEnd,
         )
 
+        android.util.Log.d(
+            "UrikDebug",
+            "onUpdateSelection: old=($oldSelStart,$oldSelEnd) new=($newSelStart,$newSelEnd) candidates=($candidatesStart,$candidatesEnd) displayBuffer='$displayBuffer' composingStart=$composingRegionStart isActivelyEditing=$isActivelyEditing",
+        )
+
         if (isSecureField) return
 
         if (newSelStart == 0 && newSelEnd == 0) {
@@ -2281,14 +2327,44 @@ class UrikInputMethodService :
                 newSelEnd <= candidatesEnd
 
         if (hasComposingText && !cursorInComposingRegion) {
+            android.util.Log.d("UrikDebug", "onUpdateSelection: cursor moved outside composing region - clearing")
             coordinateStateClear()
             clearSpellConfirmationState()
             return
         }
 
-        if (!hasComposingText && wordState.hasContent) {
+        if (!hasComposingText && (wordState.hasContent || displayBuffer.isNotEmpty())) {
+            android.util.Log.d("UrikDebug", "onUpdateSelection: no composing text but state exists - clearing")
             coordinateStateClear()
             clearSpellConfirmationState()
+            return
+        }
+
+        if (!hasComposingText && !isActivelyEditing && newSelStart == newSelEnd) {
+            val textBefore = safeGetTextBeforeCursor(50)
+            val textAfter = safeGetTextAfterCursor(50)
+
+            val wordBeforeInfo = if (textBefore.isNotEmpty()) extractWordBeforeCursor(textBefore) else null
+
+            if (wordBeforeInfo != null && wordBeforeInfo.first.isNotEmpty()) {
+                val wordAfterStart =
+                    textAfter.indexOfFirst { char ->
+                        char.isWhitespace() || char == '\n' || CursorEditingUtils.isPunctuation(char)
+                    }
+                val wordAfter = if (wordAfterStart >= 0) textAfter.substring(0, wordAfterStart) else textAfter
+                val trimmedWordAfter = if (wordAfter.isNotEmpty() && CursorEditingUtils.isValidTextInput(wordAfter)) wordAfter else ""
+
+                val fullWord = wordBeforeInfo.first + trimmedWordAfter
+                val cursorPos = textBefore.length
+                val wordStart = cursorPos - wordBeforeInfo.first.length
+
+                if (fullWord.length >= 2) {
+                    android.util.Log.d("UrikDebug", "onUpdateSelection: setting composing on word='$fullWord' at start=$wordStart")
+                    currentInputConnection?.setComposingRegion(wordStart, wordStart + fullWord.length)
+                    displayBuffer = fullWord
+                    composingRegionStart = wordStart
+                }
+            }
         }
     }
 
