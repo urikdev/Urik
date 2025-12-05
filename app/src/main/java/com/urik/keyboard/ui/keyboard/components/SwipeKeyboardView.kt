@@ -63,8 +63,8 @@ class SwipeKeyboardView
         private val keyMapping = mutableMapOf<Button, KeyboardKey>()
         private val keyCharacterPositions = mutableMapOf<KeyboardKey.Character, PointF>()
 
-        private var currentLayout: KeyboardLayout? = null
-        private var currentState: KeyboardState? = null
+        internal var currentLayout: KeyboardLayout? = null
+        internal var currentState: KeyboardState? = null
 
         private var wordLearningEngine: WordLearningEngine? = null
 

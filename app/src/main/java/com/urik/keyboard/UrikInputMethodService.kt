@@ -118,6 +118,7 @@ class UrikInputMethodService :
     private val observerJobs = mutableListOf<Job>()
 
     private var swipeKeyboardView: SwipeKeyboardView? = null
+    private var lastDisplayDensity: Float = 0f
 
     private var lastSpaceTime: Long = 0
     private var doubleTapSpaceThreshold: Long = InputTimingConstants.DOUBLE_TAP_SPACE_THRESHOLD_MS
@@ -537,6 +538,8 @@ class UrikInputMethodService :
             lifecycleRegistry = LifecycleRegistry(this)
             lifecycleRegistry.currentState = Lifecycle.State.CREATED
 
+            lastDisplayDensity = resources.displayMetrics.density
+
             initializeCoreComponents()
 
             serviceScope.launch {
@@ -758,6 +761,8 @@ class UrikInputMethodService :
         serviceScope.launch {
             try {
                 val settings = settingsRepository.settings.first()
+
+                if (!settings.clipboardEnabled) return@launch
 
                 val clipboardPanel = ClipboardPanel(this@UrikInputMethodService, themeManager)
 
@@ -1690,10 +1695,6 @@ class UrikInputMethodService :
     private fun handleBackspace() {
         try {
             val textBeforeCursor = safeGetTextBeforeCursor(50)
-            android.util.Log.d(
-                "UrikDebug",
-                "handleBackspace: displayBuffer='$displayBuffer' composingStart=$composingRegionStart textBefore='$textBeforeCursor'",
-            )
 
             if (isSecureField) {
                 if (textBeforeCursor.isNotEmpty()) {
@@ -1708,14 +1709,12 @@ class UrikInputMethodService :
                 val actualTextAfter = safeGetTextAfterCursor(1)
 
                 if (actualTextBefore.isEmpty() && actualTextAfter.isEmpty()) {
-                    android.util.Log.d("UrikDebug", "handleBackspace: clearing state - empty field")
                     coordinateStateClear()
                     return
                 }
             }
 
             if (spellConfirmationState == SpellConfirmationState.AWAITING_CONFIRMATION) {
-                android.util.Log.d("UrikDebug", "handleBackspace: clearing AWAITING_CONFIRMATION")
                 spellConfirmationState = SpellConfirmationState.NORMAL
                 pendingWordForLearning = null
             }
@@ -1729,13 +1728,7 @@ class UrikInputMethodService :
                         ""
                     }
 
-                android.util.Log.d(
-                    "UrikDebug",
-                    "handleBackspace: validation - currentText='$currentText' expected='$expectedComposingText' displayBuffer='$displayBuffer'",
-                )
-
                 if (expectedComposingText != displayBuffer) {
-                    android.util.Log.d("UrikDebug", "handleBackspace: MISMATCH - clearing and delegating to handleCommittedTextBackspace")
                     coordinateStateClear()
                     handleCommittedTextBackspace()
                     return
@@ -1856,13 +1849,21 @@ class UrikInputMethodService :
                                 }
                         }
                     } else {
-                        currentInputConnection?.beginBatchEdit()
-                        try {
-                            currentInputConnection?.setComposingText("", 1)
-                            coordinateStateClear()
-                            composingRegionStart = -1
-                        } finally {
-                            currentInputConnection?.endBatchEdit()
+                        currentInputConnection?.setComposingText("", 1)
+
+                        synchronized(processingLock) {
+                            processingSequence++
+                        }
+                        suggestionDebounceJob?.cancel()
+                        displayBuffer = ""
+                        wordState = WordState()
+                        pendingSuggestions = emptyList()
+                        clearSpellConfirmationState()
+                        swipeKeyboardView?.clearSuggestions()
+                        composingRegionStart = -1
+
+                        if (!viewModel.state.value.isCapsLockOn) {
+                            viewModel.onEvent(KeyboardEvent.ShiftStateChanged(false))
                         }
                     }
                 }
@@ -1923,10 +1924,20 @@ class UrikInputMethodService :
                         if (wordInfo != null) {
                             val (wordBeforeCursor, _) = wordInfo
 
-                            currentInputConnection?.deleteSurroundingText(wordBeforeCursor.length, 0)
-                            currentInputConnection?.setComposingText(wordBeforeCursor, 1)
+                            val actualCursorPos =
+                                currentInputConnection
+                                    ?.getTextBeforeCursor(
+                                        KeyboardConstants.TextProcessingConstants.MAX_CURSOR_POSITION_CHARS,
+                                        0,
+                                    )?.length
+                                    ?: 0
+                            val wordStart = actualCursorPos - wordBeforeCursor.length
+                            val wordEnd = actualCursorPos
+
+                            currentInputConnection?.setComposingRegion(wordStart, wordEnd)
 
                             displayBuffer = wordBeforeCursor
+                            composingRegionStart = wordStart
 
                             val (currentSequence, bufferSnapshot) =
                                 synchronized(processingLock) {
@@ -2282,11 +2293,6 @@ class UrikInputMethodService :
             candidatesEnd,
         )
 
-        android.util.Log.d(
-            "UrikDebug",
-            "onUpdateSelection: old=($oldSelStart,$oldSelEnd) new=($newSelStart,$newSelEnd) candidates=($candidatesStart,$candidatesEnd) displayBuffer='$displayBuffer' composingStart=$composingRegionStart isActivelyEditing=$isActivelyEditing",
-        )
-
         if (isSecureField) return
 
         if (newSelStart == 0 && newSelEnd == 0) {
@@ -2327,14 +2333,12 @@ class UrikInputMethodService :
                 newSelEnd <= candidatesEnd
 
         if (hasComposingText && !cursorInComposingRegion) {
-            android.util.Log.d("UrikDebug", "onUpdateSelection: cursor moved outside composing region - clearing")
             coordinateStateClear()
             clearSpellConfirmationState()
             return
         }
 
         if (!hasComposingText && (wordState.hasContent || displayBuffer.isNotEmpty())) {
-            android.util.Log.d("UrikDebug", "onUpdateSelection: no composing text but state exists - clearing")
             coordinateStateClear()
             clearSpellConfirmationState()
             return
@@ -2355,17 +2359,32 @@ class UrikInputMethodService :
                 val trimmedWordAfter = if (wordAfter.isNotEmpty() && CursorEditingUtils.isValidTextInput(wordAfter)) wordAfter else ""
 
                 val fullWord = wordBeforeInfo.first + trimmedWordAfter
-                val cursorPos = textBefore.length
-                val wordStart = cursorPos - wordBeforeInfo.first.length
+                val actualCursorPos = newSelStart
+                val wordStart = actualCursorPos - wordBeforeInfo.first.length
 
                 if (fullWord.length >= 2) {
-                    android.util.Log.d("UrikDebug", "onUpdateSelection: setting composing on word='$fullWord' at start=$wordStart")
                     currentInputConnection?.setComposingRegion(wordStart, wordStart + fullWord.length)
                     displayBuffer = fullWord
                     composingRegionStart = wordStart
                 }
             }
         }
+    }
+
+    override fun onConfigurationChanged(newConfig: android.content.res.Configuration) {
+        super.onConfigurationChanged(newConfig)
+
+        val currentDensity = resources.displayMetrics.density
+
+        if (lastDisplayDensity != 0f && lastDisplayDensity != currentDensity) {
+            swipeKeyboardView?.let { view ->
+                if (view.currentLayout != null && view.currentState != null) {
+                    view.updateKeyboard(view.currentLayout!!, view.currentState!!)
+                }
+            }
+        }
+
+        lastDisplayDensity = currentDensity
     }
 
     override fun onDestroy() {
