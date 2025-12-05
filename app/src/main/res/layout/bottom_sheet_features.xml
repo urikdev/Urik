@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:background="@color/surface_background">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginBottom="12dp">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/tip_1_title"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="@color/content_primary" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/tip_1_description"
+                android:textSize="13sp"
+                android:textColor="@color/content_primary"
+                android:layout_marginTop="2dp"
+                android:alpha="0.8" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginBottom="12dp">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/tip_2_title"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="@color/content_primary" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/tip_2_description"
+                android:textSize="13sp"
+                android:textColor="@color/content_primary"
+                android:layout_marginTop="2dp"
+                android:alpha="0.8" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginBottom="12dp">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/tip_3_title"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="@color/content_primary" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/tip_3_description"
+                android:textSize="13sp"
+                android:textColor="@color/content_primary"
+                android:layout_marginTop="2dp"
+                android:alpha="0.8" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginBottom="12dp">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/tip_4_title"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="@color/content_primary" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/tip_4_description"
+                android:textSize="13sp"
+                android:textColor="@color/content_primary"
+                android:layout_marginTop="2dp"
+                android:alpha="0.8" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/tip_5_title"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="@color/content_primary" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/tip_5_description"
+                android:textSize="13sp"
+                android:textColor="@color/content_primary"
+                android:layout_marginTop="2dp"
+                android:alpha="0.8" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>
