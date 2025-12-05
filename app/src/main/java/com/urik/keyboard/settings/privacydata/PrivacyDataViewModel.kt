@@ -28,7 +28,7 @@ class PrivacyDataViewModel
         val events: SharedFlow<SettingsEvent> = _events.asSharedFlow()
 
         data class PrivacyDataUiState(
-            val clipboardEnabled: Boolean = false,
+            val clipboardEnabled: Boolean = true,
         )
 
         val uiState: StateFlow<PrivacyDataUiState> =
