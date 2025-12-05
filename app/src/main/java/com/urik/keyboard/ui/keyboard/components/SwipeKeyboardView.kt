@@ -93,7 +93,7 @@ class SwipeKeyboardView
         private var viewScope = CoroutineScope(Dispatchers.Main + viewScopeJob)
 
         private val suggestionClickListener =
-            View.OnClickListener { view ->
+            OnClickListener { view ->
                 if (isDestroyed) return@OnClickListener
                 val suggestion = view.getTag(R.id.suggestion_text) as? String ?: return@OnClickListener
                 keyboardLayoutManager?.triggerHapticFeedback()
@@ -101,7 +101,7 @@ class SwipeKeyboardView
             }
 
         private val suggestionLongClickListener =
-            View.OnLongClickListener { view ->
+            OnLongClickListener { view ->
                 if (isDestroyed) return@OnLongClickListener false
                 val suggestion = view.getTag(R.id.suggestion_text) as? String ?: return@OnLongClickListener false
                 showRemovalConfirmation(suggestion)
@@ -109,7 +109,7 @@ class SwipeKeyboardView
             }
 
         private val emojiButtonClickListener =
-            View.OnClickListener {
+            OnClickListener {
                 if (isDestroyed) return@OnClickListener
                 showEmojiPicker(
                     onEmojiSelected = { selectedEmoji ->
@@ -491,7 +491,7 @@ class SwipeKeyboardView
 
                 emojiBtn?.let { btn ->
                     if (btn.parent != null) {
-                        (btn.parent as? android.view.ViewGroup)?.removeView(btn)
+                        (btn.parent as? ViewGroup)?.removeView(btn)
                     }
                     bar.addView(btn)
                 }
@@ -889,7 +889,10 @@ class SwipeKeyboardView
                         keyViews.add(child)
                         mapButtonToKey(child)
                     }
-                    is ViewGroup -> extractButtonViews(child)
+
+                    is ViewGroup -> {
+                        extractButtonViews(child)
+                    }
                 }
             }
         }
