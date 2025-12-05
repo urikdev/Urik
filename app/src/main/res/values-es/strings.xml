@@ -197,6 +197,7 @@
     <string name="tip_4_description">Mantén pulsada una sugerencia para eliminarla de tu diccionario.</string>
 
     <!-- Clipboard Panel -->
+    <string name="tip_5_description">Mantenga presionada la tecla de símbolo para abrir el Administrador de portapapeles.</string>
     <string name="clipboard_panel_title">Portapapeles</string>
     <string name="clipboard_panel_pinned">Fijados</string>
     <string name="clipboard_panel_recent">Recientes</string>
@@ -210,5 +211,6 @@
     <string name="clipboard_item_pin">Fijar elemento del portapapeles</string>
     <string name="clipboard_item_unpin">Desfijar elemento del portapapeles</string>
     <string name="clipboard_item_delete">Eliminar elemento del portapapeles</string>
+    <string name="tip_5_title">Administrador del portapapeles</string>
 
 </resources>
