@@ -170,6 +170,29 @@ class SwipeKeyboardView
             return x >= left && x < right && y >= top && y < bottom
         }
 
+        private fun isTouchInSuggestionBar(
+            x: Float,
+            y: Float,
+        ): Boolean {
+            val bar = suggestionBar ?: return false
+            if (!bar.isVisible) return false
+
+            val location = IntArray(2)
+            bar.getLocationInWindow(location)
+            val parentLocation = IntArray(2)
+            this.getLocationInWindow(parentLocation)
+
+            val barRect =
+                Rect(
+                    location[0] - parentLocation[0],
+                    location[1] - parentLocation[1],
+                    location[0] - parentLocation[0] + bar.width,
+                    location[1] - parentLocation[1] + bar.height,
+                )
+
+            return barRect.contains(x.toInt(), y.toInt())
+        }
+
         /**
          * Shows full-screen emoji picker overlay.
          *
@@ -1032,25 +1055,8 @@ class SwipeKeyboardView
                 return false
             }
 
-            suggestionBar?.let { bar ->
-                if (bar.isVisible) {
-                    val location = IntArray(2)
-                    bar.getLocationInWindow(location)
-                    val parentLocation = IntArray(2)
-                    this.getLocationInWindow(parentLocation)
-
-                    val barRect =
-                        Rect(
-                            location[0] - parentLocation[0],
-                            location[1] - parentLocation[1],
-                            location[0] - parentLocation[0] + bar.width,
-                            location[1] - parentLocation[1] + bar.height,
-                        )
-
-                    if (barRect.contains(ev.x.toInt(), ev.y.toInt())) {
-                        return false
-                    }
-                }
+            if (isTouchInSuggestionBar(ev.x, ev.y)) {
+                return false
             }
 
             when (ev.action) {
@@ -1091,6 +1097,10 @@ class SwipeKeyboardView
             if (isDestroyed) return false
 
             if (isTouchInEmojiPicker(event.x, event.y)) {
+                return false
+            }
+
+            if (isTouchInSuggestionBar(event.x, event.y)) {
                 return false
             }
 
