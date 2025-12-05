@@ -1,0 +1,216 @@
+<resources>
+    <string name="app_name" translatable="false">Urik</string>
+    <string name="ime_name">Clavier Urik</string>
+    <string name="ime_label">Clavier Urik</string>
+    <string name="ime_description">Saisie par glissement, correction d'orthographe, prise en charge multilingue, le tout sans compromettre la vie privée. Aucune télémétrie. Pas de collecte de données. Tout reste sur votre appaireil.</string>
+
+    <!-- Settings -->
+    <string name="enable_keyboard_title">Activer</string>
+    <string name="open_settings">Paramètres</string>
+    <string name="error_opening_settings">Immpossible d'ouvrir les paramètres</string>
+
+    <!-- Settings Activity -->
+    <string name="settings_title">Paramètres du clavier</string>
+    <string name="autocorrect_settings_title">Paramètres de la Correcion de texte</string>
+    <string name="autocorrect_settings_description">Discours et suggestion</string>
+    <string name="language_settings_title">Paramètres de la langue</string>
+    <string name="language_settings_description">Choisissez les langues de votre clavier</string>
+    <string name="feedback_settings_title">Son &amp; Paramètres de feedback</string>
+    <string name="feedback_settings_description">Vibrations et son du clavier</string>
+    <string name="typing_settings_title">Paramètres du comportement du clavier</string>
+    <string name="typing_settings_description">Ponctuation etc.</string>
+    <string name="layout_settings_title">Mise en page &amp; entrée</string>
+    <string name="layout_settings_description">Lignes, taille de la barre espace</string>
+    <string name="appearance_settings_title">Apparance</string>
+    <string name="appearance_settings_description">Thème, taille</string>
+    <string name="privacy_settings_title">Confidentialité &amp; Données</string>
+    <string name="privacy_settings_description">Vider les données, réinitaliser les paramètres</string>
+    <string name="licenses_title">Licences Open Source</string>
+    <string name="licenses_description">Voir les licences des librairies third-party</string>
+    <string name="dictionary_attribution_title">Données du dictionnaire</string>
+    <string name="theme_picker_title">Thème du clavier</string>
+    <string name="dictionary_attribution_summary">Licence et attributaion de FrequencyWords</string>
+
+    <!-- Settings Enums -->
+    <!-- Theme -->
+    <string name="theme_system">Similaire au système</string>
+    <string name="theme_light">Clair</string>
+    <string name="theme_dark">Sombre</string>
+
+    <!-- Key Size -->
+    <string name="key_size_small">Petit</string>
+    <string name="key_size_medium">Moyen</string>
+    <string name="key_size_large">Large</string>
+    <string name="key_size_extra_large">Très Large</string>
+
+    <!-- Vibration Strength -->
+    <string name="vibration_strength_light">légère</string>
+    <string name="vibration_strength_medium">Moyenne</string>
+    <string name="vibration_strength_strong">Forte</string>
+
+    <!-- Long Press Duration -->
+    <string name="long_press_duration_short">Courte</string>
+    <string name="long_press_duration_medium">Moyenne</string>
+    <string name="long_press_duration_long">Longue</string>
+
+    <!-- Space Bar Size -->
+    <string name="space_bar_size_compact">Compact</string>
+    <string name="space_bar_size_standard">Standard</string>
+    <string name="space_bar_size_wide">Large</string>
+
+    <!-- Key Label Size -->
+    <string name="key_label_size_small">Petit</string>
+    <string name="key_label_size_medium">Moyen</string>
+    <string name="key_label_size_large">Large</string>
+
+    <!-- Appearance Settings -->
+    <string name="appearance_settings_theme">Thème</string>
+    <string name="appearance_settings_key_size">Taille des touches</string>
+    <string name="appearance_settings_key_label_size">Taille des label des touches</string>
+
+    <!-- Auto-Correct Settings -->
+    <string name="autocorrect_settings_spell_check">Vérification d'orthographe</string>
+    <string name="autocorrect_settings_spell_check_on">Vérification d'orthographe activée</string>
+    <string name="autocorrect_settings_spell_check_off">Vérification d'orthographe désactivée</string>
+    <string name="autocorrect_settings_show_suggestions">Montrer les Suggestions</string>
+    <string name="autocorrect_settings_suggestions_on">Suggestions affichées</string>
+    <string name="autocorrect_settings_suggestions_off">Suggestions cachées</string>
+    <string name="autocorrect_settings_suggestion_count">Nombre de Suggestion</string>
+    <string name="autocorrect_settings_learn_new_words">Apprendre de Nouveaux Mots</string>
+    <string name="autocorrect_settings_learn_new_words_on">Apprentissage activé</string>
+    <string name="autocorrect_settings_learn_new_words_off">Apprentissage désactivé</string>
+
+    <!-- Language Settings -->
+
+    <!-- Sound & Feedback Settings -->
+    <string name="feedback_settings_haptic_feedback">Retour Haptique</string>
+    <string name="feedback_settings_haptic_on">Retour Haptique activé</string>
+    <string name="feedback_settings_haptic_off">Retour Haptique désactivé</string>
+    <string name="feedback_settings_vibration_strength">Force des vibrations</string>
+
+    <!-- Typing Behavior Settings -->
+    <string name="typing_settings_double_space_period">Double appuie sur la barre espace pour faire un point</string>
+    <string name="typing_settings_double_space_on">Un double appui sur la barre espace ajoute un point</string>
+    <string name="typing_settings_double_space_off">Un double appui sur la barre espace ajoute un espacee</string>
+    <string name="typing_settings_long_press_duration">Durée d'une pression longue</string>
+
+    <!-- Layout & Input Settings -->
+    <string name="layout_settings_show_number_row">Montrer le numéro de la ligne</string>
+    <string name="layout_settings_number_row_on">Numéro de ligne montré</string>
+    <string name="layout_settings_number_row_off">Numéro de ligne caché</string>
+    <string name="layout_settings_space_bar_size">Taille de la barre espace</string>
+
+    <!-- Privacy & Data Settings -->
+    <string name="privacy_settings_clipboard_history">Historique du presse-papiers</string>
+    <string name="privacy_settings_clipboard_history_on">Historique du press-papiers activé</string>
+    <string name="privacy_settings_clipboard_history_off">Historique du presse-papiers désactivé</string>
+    <string name="privacy_settings_clear_learned_words">Vider les mots appris</string>
+    <string name="privacy_settings_clear_learned_words_summary">Supprimer tout le vocabulaire apprit</string>
+    <string name="privacy_settings_clear_learned_words_confirm">Supprimer tout les mots appris ? Cette action ne peut pas être annulée.</string>
+    <string name="privacy_settings_reset_to_defaults">Réinitialiser aux paramètres par défaut</string>
+    <string name="privacy_settings_reset_to_defaults_confirm">Réinitialiser aux paramètres par défaut ?</string>
+    <string name="privacy_settings_export_error_log">Exporter les logs d'erreur</string>
+    <string name="privacy_settings_export_error_log_summary">Partager les logs de diagnostique pour le débugging</string>
+    <string name="privacy_settings_export_error_log_failed">Echec de l'exportation des logs</string>
+
+    <!-- Error Messages -->
+    <string name="error_title">Erreur</string>
+    <string name="error_update_theme">Mise à jour du thème échouée</string>
+    <string name="error_update_key_size">Mise à jour de la taille des touches échouée</string>
+    <string name="error_update_key_label_size">Mise à jour de la taille du label échouée</string>
+    <string name="error_update_spell_check">Mise à jour de la correction d'orthographe échouée</string>
+    <string name="error_update_suggestions">Mise à jour des paramètres de suggestions échouée</string>
+    <string name="error_update_suggestion_count">Mise à jour du nombre de suggestions échouée</string>
+    <string name="error_update_word_learning">Mise à jour de l'apprentissage des mots échouée</string>
+    <string name="error_update_clipboard">Mise à jour des paramètres du presse-papiers échouée</string>
+    <string name="error_update_language">Mise à jour des paramètres de langue échouée</string>
+    <string name="error_update_haptic_feedback">Mise à jour du retour haptique échouée</string>
+    <string name="error_update_vibration_strength">Mise à jour de la force des vibrations échouée</string>
+    <string name="error_update_double_space_period">Mise à jour du double appui qui insère un point échouée</string>
+    <string name="error_update_long_press_duration">Mise à jour de la durée d'une pression longue échouée</string>
+    <string name="error_update_number_row">Mise à jour du nombre de lignes échouées</string>
+    <string name="error_update_space_bar_size">Changement de la taille de la barre espace échouée</string>
+    <string name="error_clear_learned_words">Echec de la suppression des mots appris</string>
+    <string name="error_reset_to_defaults">Echec de la réinitialisation des paramètres</string>
+
+    <!-- Success Messages -->
+    <string name="success_learned_words_cleared">Mots appris supprimés</string>
+    <string name="success_settings_reset">Paramètres par défaut appliqués</string>
+
+    <!-- Keyboard descriptions -->
+    <string name="keyboard_description">Clavier virtuel</string>
+
+    <!-- Default key labels -->
+    <string name="letters_mode_label">ABC</string>
+    <string name="numbers_mode_label">123</string>
+    <string name="symbols_mode_label">+=&lt;</string>
+
+    <!-- Accessibility descriptions -->
+    <string name="key_character_description">Type %1$s</string>
+
+    <string name="shift_key_description">Touche Maj, appuyez pour que la lettre soit en majuscule</string>
+    <string name="shift_active_description">Touche Maj active, appuyez pour ésactiver</string>
+    <string name="caps_lock_description">Maj lock</string>
+    <string name="caps_lock_on_description">Maj lock est activé, appuyez pour désactiver</string>
+    <string name="backspace_key_description">Supprimer le dernier caractère</string>
+    <string name="space_key_description">Barre espace</string>
+    <string name="letters_mode_description">Passer au clavier alphanumérique</string>
+    <string name="numbers_mode_description">Passer au clavier numérique</string>
+    <string name="symbols_mode_description">Passer aux symboles</string>
+    <string name="ime_prediction_description">Prédiction: %1$s</string>
+
+    <!-- Action button accessibility descriptions -->
+    <string name="action_enter_description">Appuyer sur entrée</string>
+    <string name="action_send_description">Envoyer un message</string>
+    <string name="action_search_description">Rechercher</string>
+    <string name="action_done_description">Eition terminée</string>
+    <string name="action_go_description">Aller à la destination</string>
+    <string name="action_next_description">Se déplacer au champ suivant</string>
+    <string name="action_previous_description">Se déplacer au champ précédent</string>
+
+    <string name="action_emoji">Emoji</string>
+
+    <!-- Theme Picker Accessibility -->
+    <string name="theme_description">Thème %1$s</string>
+    <string name="theme_description_selected">Thème %1$s utilisé</string>
+    <string name="theme_add_favorite">Ajouter %1$s aux favoris</string>
+    <string name="theme_remove_favorite">Retirer %1$s des favoris</string>
+
+    <!-- Character Variation Accessibility -->
+    <string name="character_variation_position">Variante du caractère %1$d de %2$d: %3$s</string>
+
+    <!-- Blacklisting Words -->
+    <string name="remove_suggestion">Supprimer %1$s des suggestions?</string>
+    <string name="remove_cancel">Annuler</string>
+    <string name="remove_confirm">Supprimer</string>
+
+    <!-- Tips -->
+    <string name="tip_1_title">Apprendre des mots</string>
+    <string name="tip_1_description">Appuyez sur la barre espace après un mot surligné pour ajouter le mot à votre dictionnaire.</string>
+
+    <string name="tip_2_title">Menu rapide des ponctuations</string>
+    <string name="tip_2_description">Appui long sur la barre espace pour ouvrir le menu des ponctuations.</string>
+
+    <string name="tip_3_title">Variations des caractères</string>
+    <string name="tip_3_description">Appui long sur le caractère pour choisir une variation à celui-ci.</string>
+
+    <string name="tip_4_title">Supprimer des mots</string>
+    <string name="tip_4_description">Appuie long sur une suggesstion pour la retirer de votre dictionnaire.</string>
+
+    <!-- Clipboard Panel -->
+    <string name="clipboard_panel_title">Presse-papiers</string>
+    <string name="clipboard_panel_pinned">Epinglé</string>
+    <string name="clipboard_panel_recent">Récent</string>
+    <string name="clipboard_panel_empty">Pas d'historique de presse-papiers</string>
+    <string name="clipboard_panel_delete_all">Tout supprimer</string>
+    <string name="clipboard_panel_delete_all_confirm">Supprimer tout les éléments non épinglés ?</string>
+    <string name="clipboard_consent_message">Urik peut lire et stocker le contenu ed votre presse-papiers indéfiniment. Si vous ne le souhaitez pas, allez dans les paramètres et désactivez l'historique du presse-papiers.</string>
+
+    <!-- Clipboard Accessibility -->
+    <string name="clipboard_button_description">Ouvrir l'historique du presse-papiers</string>
+    <string name="clipboard_item_description">Eléments dans le presse-papiers: %1$s</string>
+    <string name="clipboard_item_pin">Eléments épinglés</string>
+    <string name="clipboard_item_unpin">Retirer l'épingle</string>
+    <string name="clipboard_item_delete">Supprimer l'élément du presse-papiers</string>
+
+</resources>
