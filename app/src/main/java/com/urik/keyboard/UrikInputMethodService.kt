@@ -424,11 +424,17 @@ class UrikInputMethodService :
     private fun applyCapitalizationToSuggestions(suggestions: List<String>): List<String> {
         val state = viewModel.state.value
         return when {
-            state.isCapsLockOn -> suggestions.map { it.uppercase() }
+            state.isCapsLockOn -> {
+                suggestions.map { it.uppercase() }
+            }
+
             state.isShiftPressed || displayBuffer.firstOrNull()?.isUpperCase() == true -> {
                 suggestions.map { it.replaceFirstChar { c -> c.uppercase() } }
             }
-            else -> suggestions
+
+            else -> {
+                suggestions
+            }
         }
     }
 
@@ -1142,8 +1148,6 @@ class UrikInputMethodService :
                     displayBuffer.length
                 }
 
-            val oldComposingStart = composingRegionStart
-
             displayBuffer =
                 if (displayBuffer.isEmpty()) {
                     composingRegionStart = -1
@@ -1153,8 +1157,6 @@ class UrikInputMethodService :
                         .insert(cursorPosInWord, char)
                         .toString()
                 }
-
-            val newCursorPos = cursorPosInWord + 1
 
             val ic = currentInputConnection
             if (ic != null) {
@@ -1210,6 +1212,7 @@ class UrikInputMethodService :
                                                 swipeKeyboardView?.clearSuggestions()
                                             }
                                         }
+
                                         is ProcessingResult.Error -> {}
                                     }
                                 }
@@ -1693,7 +1696,7 @@ class UrikInputMethodService :
             )
 
             if (isSecureField) {
-                if (!textBeforeCursor.isNullOrEmpty()) {
+                if (textBeforeCursor.isNotEmpty()) {
                     val graphemeLength = BackspaceUtils.getLastGraphemeClusterLength(textBeforeCursor)
                     currentInputConnection?.deleteSurroundingText(graphemeLength, 0)
                 }
@@ -1768,7 +1771,7 @@ class UrikInputMethodService :
                     try {
                         coordinateStateClear()
                         val textBefore = safeGetTextBeforeCursor(50)
-                        if (!textBefore.isNullOrEmpty()) {
+                        if (textBefore.isNotEmpty()) {
                             val graphemeLength = BackspaceUtils.getLastGraphemeClusterLength(textBefore)
                             currentInputConnection?.deleteSurroundingText(graphemeLength, 0)
                         }
@@ -1786,11 +1789,7 @@ class UrikInputMethodService :
                             viewModel.state.value.isShiftPressed &&
                             !viewModel.state.value.isCapsLockOn
 
-                    val oldBufferLength = displayBuffer.length
-
                     displayBuffer = BackspaceUtils.deleteGraphemeClusterBeforePosition(displayBuffer, cursorPosInWord)
-
-                    val deletedLength = oldBufferLength - displayBuffer.length
 
                     if (shouldResetShift) {
                         viewModel.onEvent(KeyboardEvent.ShiftStateChanged(false))
@@ -1843,6 +1842,7 @@ class UrikInputMethodService :
                                                                 swipeKeyboardView?.clearSuggestions()
                                                             }
                                                         }
+
                                                         is ProcessingResult.Error -> {
                                                             pendingSuggestions = emptyList()
                                                             swipeKeyboardView?.clearSuggestions()
@@ -1872,7 +1872,7 @@ class UrikInputMethodService :
         } catch (_: Exception) {
             try {
                 val textBefore = safeGetTextBeforeCursor(50)
-                if (!textBefore.isNullOrEmpty()) {
+                if (textBefore.isNotEmpty()) {
                     val graphemeLength = BackspaceUtils.getLastGraphemeClusterLength(textBefore)
                     currentInputConnection?.deleteSurroundingText(graphemeLength, 0)
                 }
@@ -1889,7 +1889,7 @@ class UrikInputMethodService :
         try {
             val textBeforeCursor = safeGetTextBeforeCursor(50)
 
-            if (!textBeforeCursor.isNullOrEmpty()) {
+            if (textBeforeCursor.isNotEmpty()) {
                 currentInputConnection?.beginBatchEdit()
                 try {
                     val graphemeLength = BackspaceUtils.getLastGraphemeClusterLength(textBeforeCursor)
@@ -2351,7 +2351,7 @@ class UrikInputMethodService :
                     textAfter.indexOfFirst { char ->
                         char.isWhitespace() || char == '\n' || CursorEditingUtils.isPunctuation(char)
                     }
-                val wordAfter = if (wordAfterStart >= 0) textAfter.substring(0, wordAfterStart) else textAfter
+                val wordAfter = if (wordAfterStart >= 0) textAfter.take(wordAfterStart) else textAfter
                 val trimmedWordAfter = if (wordAfter.isNotEmpty() && CursorEditingUtils.isValidTextInput(wordAfter)) wordAfter else ""
 
                 val fullWord = wordBeforeInfo.first + trimmedWordAfter

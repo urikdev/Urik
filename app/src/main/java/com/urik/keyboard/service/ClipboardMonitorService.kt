@@ -8,6 +8,7 @@ import com.urik.keyboard.settings.SettingsRepository
 import com.urik.keyboard.utils.ErrorLogger
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
@@ -32,7 +33,6 @@ class ClipboardMonitorService
 
         private var lastClipContentHash: Int? = null
         private val isMonitoring = AtomicBoolean(false)
-        private var clipboardEnabled = false
 
         private val listener =
             ClipboardManager.OnPrimaryClipChangedListener {
@@ -43,11 +43,9 @@ class ClipboardMonitorService
             if (!isMonitoring.compareAndSet(false, true)) return
 
             try {
-                clipboardEnabled = true
                 clipboardManager?.addPrimaryClipChangedListener(listener)
             } catch (e: Exception) {
                 isMonitoring.set(false)
-                clipboardEnabled = false
                 ErrorLogger.logException(
                     component = "ClipboardMonitorService",
                     severity = ErrorLogger.Severity.HIGH,
@@ -61,11 +59,9 @@ class ClipboardMonitorService
             if (!isMonitoring.compareAndSet(true, false)) return
 
             try {
-                clipboardEnabled = false
                 clipboardManager?.removePrimaryClipChangedListener(listener)
             } catch (e: Exception) {
                 isMonitoring.set(true)
-                clipboardEnabled = true
                 ErrorLogger.logException(
                     component = "ClipboardMonitorService",
                     severity = ErrorLogger.Severity.HIGH,
@@ -76,10 +72,11 @@ class ClipboardMonitorService
         }
 
         private fun onClipboardChanged() {
-            if (!clipboardEnabled) return
-
             applicationScope.launch {
                 try {
+                    val settings = settingsRepository.settings.first()
+                    if (!settings.clipboardEnabled) return@launch
+
                     val clip = clipboardManager?.primaryClip
                     if (clip == null || clip.itemCount == 0) return@launch
 

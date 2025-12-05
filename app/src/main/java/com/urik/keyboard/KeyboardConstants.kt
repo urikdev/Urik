@@ -49,7 +49,6 @@ object KeyboardConstants {
         const val MAX_SUGGESTIONS = 5
         const val MIN_COMPLETION_LENGTH = 4
         const val APOSTROPHE_BOOST = 0.30
-        const val CONTRACTION_MATCH_CONFIDENCE = 0.75
         const val CONTRACTION_GUARANTEED_CONFIDENCE = 0.995
 
         const val DICTIONARY_BATCH_SIZE = 2000
@@ -127,17 +126,12 @@ object KeyboardConstants {
         const val MIN_SPELL_CHECK_LENGTH = 2
         const val MIN_SUGGESTION_QUERY_LENGTH = 1
         const val MAX_WORD_INPUT_LENGTH = 50
-
-        const val CURSOR_CONTEXT_BEFORE_LENGTH = 50
         const val MAX_CURSOR_POSITION_CHARS = 1000
-        const val CURSOR_CONTEXT_AFTER_LENGTH = 50
-        const val MAX_TOKEN_LENGTH_BEFORE_FILTER = 200
-        const val MAX_WORD_LENGTH_AFTER_TRIM = 40
     }
 
     object InputTimingConstants {
         const val SUGGESTION_DEBOUNCE_MS = 10L
-        const val DOUBLE_TAP_SPACE_THRESHOLD_MS = 200L
+        const val DOUBLE_TAP_SPACE_THRESHOLD_MS = 250L
         const val DOUBLE_SHIFT_THRESHOLD_MS = 400L
     }
 
