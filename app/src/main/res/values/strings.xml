@@ -32,11 +32,6 @@
     <string name="dictionary_attribution_summary">FrequencyWords license and attribution</string>
 
     <!-- Settings Enums -->
-    <!-- Theme -->
-    <string name="theme_system">Follow System</string>
-    <string name="theme_light">Light</string>
-    <string name="theme_dark">Dark</string>
-
     <!-- Key Size -->
     <string name="key_size_small">Small</string>
     <string name="key_size_medium">Medium</string>

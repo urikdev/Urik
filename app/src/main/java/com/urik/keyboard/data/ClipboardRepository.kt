@@ -112,17 +112,4 @@ class ClipboardRepository
                 )
                 Result.failure(e)
             }
-
-        suspend fun getCount(): Result<Int> =
-            try {
-                Result.success(clipboardDao.getCount())
-            } catch (e: Exception) {
-                ErrorLogger.logException(
-                    component = "ClipboardRepository",
-                    severity = ErrorLogger.Severity.HIGH,
-                    exception = e,
-                    context = mapOf("operation" to "getCount"),
-                )
-                Result.success(0)
-            }
     }

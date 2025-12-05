@@ -3,15 +3,9 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="24dp"
-    android:background="@color/surface_background">
+    android:padding="24dp">
 
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
-
-        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
@@ -119,7 +113,5 @@
                 android:layout_marginTop="2dp"
                 android:alpha="0.8" />
         </LinearLayout>
-
-    </LinearLayout>
 
 </LinearLayout>

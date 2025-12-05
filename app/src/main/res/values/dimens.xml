@@ -10,5 +10,4 @@
     <dimen name="minimum_touch_target">48dp</dimen>
 
     <dimen name="key_corner_radius">6dp</dimen>
-    <dimen name="key_corner_radius_small">3dp</dimen>
 </resources>
