@@ -586,6 +586,22 @@ class WordLearningEngine
          *
          * @return Map of original word → learned status
          */
+        private suspend fun ensureCacheLoaded(languageTag: String) {
+            synchronized(cacheLock) {
+                if (learnedWordsCache.getIfPresent(languageTag) != null) {
+                    return
+                }
+            }
+
+            val allWords = learnedWordDao.getAllLearnedWordsForLanguage(languageTag).map { it.wordNormalized }.toSet()
+            val cacheSet = ConcurrentHashMap.newKeySet<String>()
+            cacheSet.addAll(allWords)
+
+            synchronized(cacheLock) {
+                learnedWordsCache.put(languageTag, cacheSet)
+            }
+        }
+
         suspend fun areWordsLearned(words: List<String>): Map<String, Boolean> =
             withContext(ioDispatcher) {
                 if (words.isEmpty()) {
@@ -595,8 +611,9 @@ class WordLearningEngine
                 val currentLanguage = languageManager.currentLanguage.value
 
                 return@withContext try {
+                    ensureCacheLoaded(currentLanguage)
+
                     val results = mutableMapOf<String, Boolean>()
-                    val validWords = mutableListOf<String>()
                     val originalToNormalized = mutableMapOf<String, String>()
 
                     for (word in words) {
@@ -607,22 +624,12 @@ class WordLearningEngine
                         }
 
                         val normalized = normalizeWord(cleanWord)
-
-                        validWords.add(normalized)
                         originalToNormalized[word] = normalized
                     }
 
-                    val existingWords =
-                        if (validWords.isNotEmpty()) {
-                            val found =
-                                learnedWordDao
-                                    .findExistingWords(
-                                        languageTag = currentLanguage,
-                                        normalizedWords = validWords,
-                                    ).toSet()
-                            found
-                        } else {
-                            emptySet()
+                    val cachedWords =
+                        synchronized(cacheLock) {
+                            learnedWordsCache.getIfPresent(currentLanguage) ?: emptySet()
                         }
 
                     for (word in words) {
@@ -631,17 +638,7 @@ class WordLearningEngine
                         }
 
                         val normalizedWord = originalToNormalized[word]
-                        results[word] = normalizedWord != null && existingWords.contains(normalizedWord)
-                    }
-
-                    if (existingWords.isNotEmpty()) {
-                        synchronized(cacheLock) {
-                            val cacheSet =
-                                learnedWordsCache.getIfPresent(currentLanguage)
-                                    ?: ConcurrentHashMap.newKeySet()
-                            existingWords.forEach { cacheSet.add(it) }
-                            learnedWordsCache.put(currentLanguage, cacheSet)
-                        }
+                        results[word] = normalizedWord != null && cachedWords.contains(normalizedWord)
                     }
 
                     consecutiveErrors.set(0)
