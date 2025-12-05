@@ -155,6 +155,7 @@ class SwipeDetector
                     startSwipeDetection(event)
                     return true
                 }
+
                 MotionEvent.ACTION_MOVE -> {
                     if (isSwiping) {
                         updateSwipePath(event)
@@ -164,9 +165,11 @@ class SwipeDetector
                         return isSwiping
                     }
                 }
+
                 MotionEvent.ACTION_UP -> {
                     return endSwipeDetection(event, keyAt)
                 }
+
                 MotionEvent.ACTION_CANCEL -> {
                     reset()
                     return false
@@ -226,11 +229,18 @@ class SwipeDetector
 
             val samplingInterval =
                 when {
-                    swipePoints.size < SwipeDetectionConstants.ADAPTIVE_THRESHOLD -> SwipeDetectionConstants.MIN_SAMPLING_INTERVAL
-                    swipePoints.size < SwipeDetectionConstants.MAX_SWIPE_POINTS * SwipeDetectionConstants.ADAPTIVE_THRESHOLD_RATIO ->
+                    swipePoints.size < SwipeDetectionConstants.ADAPTIVE_THRESHOLD -> {
+                        SwipeDetectionConstants.MIN_SAMPLING_INTERVAL
+                    }
+
+                    swipePoints.size < SwipeDetectionConstants.MAX_SWIPE_POINTS * SwipeDetectionConstants.ADAPTIVE_THRESHOLD_RATIO -> {
                         SwipeDetectionConstants.MIN_SAMPLING_INTERVAL +
                             2
-                    else -> SwipeDetectionConstants.MAX_SAMPLING_INTERVAL
+                    }
+
+                    else -> {
+                        SwipeDetectionConstants.MAX_SAMPLING_INTERVAL
+                    }
                 }
 
             if (counter % samplingInterval != 0) return false
@@ -428,7 +438,7 @@ class SwipeDetector
 
                         val pointsPerLetter = swipePath.size.toFloat() / entry.word.length.toFloat()
                         val optimalRatio = 4.0f
-                        val ratioDiff = kotlin.math.abs(pointsPerLetter - optimalRatio)
+                        val ratioDiff = abs(pointsPerLetter - optimalRatio)
                         val ratioPercentageDiff = ratioDiff / optimalRatio
                         val ratioPenalty =
                             when {

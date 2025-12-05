@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.provider.Settings
 import android.util.TypedValue
 import android.view.Gravity
-import android.view.LayoutInflater
 import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -56,7 +55,7 @@ class MainActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                themeManager.currentTheme.collect { theme ->
+                themeManager.currentTheme.collect { _ ->
                     updatePreview()
                 }
             }
@@ -259,7 +258,12 @@ class MainActivity : AppCompatActivity() {
 
     private fun showFeaturesBottomSheet() {
         val bottomSheet = BottomSheetDialog(this)
-        val view = LayoutInflater.from(this).inflate(R.layout.bottom_sheet_features, null)
+        val view =
+            layoutInflater.inflate(
+                R.layout.bottom_sheet_features,
+                findViewById(android.R.id.content),
+                false,
+            )
         bottomSheet.setContentView(view)
         bottomSheet.show()
     }

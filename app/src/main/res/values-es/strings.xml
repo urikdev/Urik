@@ -31,11 +31,6 @@
     <string name="dictionary_attribution_summary">Licencia y atribución de FrequencyWords</string>
 
     <!-- Settings Enums -->
-    <!-- Theme -->
-    <string name="theme_system">Sistema de seguimiento</string>
-    <string name="theme_light">Claro</string>
-    <string name="theme_dark">Oscuro</string>
-
     <!-- Key Size -->
     <string name="key_size_small">Pequeño</string>
     <string name="key_size_medium">Medio</string>
