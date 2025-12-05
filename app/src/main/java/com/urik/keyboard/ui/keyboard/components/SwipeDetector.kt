@@ -418,7 +418,6 @@ class SwipeDetector
                         if (!couldMatchPath(entry.word, charsInBounds)) {
                             continue
                         }
-
                         val spatialScore =
                             calculateSpatialScore(
                                 entry.word,
@@ -427,24 +426,18 @@ class SwipeDetector
                                 entry.uniqueLetterCount,
                             )
 
-                        val pathLengthRatio = entry.word.length.toFloat() / swipePath.size.toFloat()
-                        val lengthPenalty =
+                        val pointsPerLetter = swipePath.size.toFloat() / entry.word.length.toFloat()
+                        val optimalRatio = 4.0f
+                        val ratioDiff = kotlin.math.abs(pointsPerLetter - optimalRatio)
+                        val ratioPercentageDiff = ratioDiff / optimalRatio
+                        val ratioPenalty =
                             when {
-                                pathLengthRatio < SwipeDetectionConstants.MIN_PATH_LENGTH_RATIO ->
-                                    SwipeDetectionConstants.PATH_LENGTH_PENALTY_STRONG
-                                entry.word.length <= 2 && swipePath.size >= 15 ->
-                                    SwipeDetectionConstants.PATH_LENGTH_PENALTY_VERY_STRONG
-                                entry.word.length == 3 && swipePath.size >= 20 ->
-                                    SwipeDetectionConstants.PATH_LENGTH_PENALTY_MODERATE
-                                entry.word.length == 4 && swipePath.size >= 50 ->
-                                    SwipeDetectionConstants.PATH_LENGTH_PENALTY_MEDIUM
-                                entry.word.length == 5 && swipePath.size >= 55 ->
-                                    SwipeDetectionConstants.PATH_LENGTH_PENALTY_STRONG
-                                else ->
-                                    SwipeDetectionConstants.PATH_LENGTH_NO_PENALTY
+                                ratioPercentageDiff > 0.75f -> 0.70f
+                                ratioPercentageDiff > 0.55f -> 0.85f
+                                else -> 1.0f
                             }
 
-                        val adjustedSpatialScore = spatialScore * lengthPenalty
+                        val adjustedSpatialScore = spatialScore * ratioPenalty
                         val combinedScore =
                             adjustedSpatialScore * SwipeDetectionConstants.SPATIAL_SCORE_WEIGHT +
                                 entry.frequencyScore * SwipeDetectionConstants.FREQUENCY_SCORE_WEIGHT
@@ -522,19 +515,25 @@ class SwipeDetector
 
                 val expectedProgress = letterIndex.toFloat() / wordLastIndex
 
+                val isRepeatedLetter = letterIndex > 0 && word[letterIndex] == word[letterIndex - 1]
+
                 swipePath.forEachIndexed { pointIndex, point ->
                     val dx = keyPos.x - point.x
                     val dy = keyPos.y - point.y
                     val spatialDistanceSquared = dx * dx + dy * dy
 
-                    val pathProgress = pathProgressValues[pointIndex]
-                    val progressDiff = abs(pathProgress - expectedProgress)
-
-                    val temporalPenalty = 1.0f + (progressDiff * penaltyStrength)
-                    val adjustedDistance = spatialDistanceSquared * temporalPenalty
+                    val adjustedDistance =
+                        if (isRepeatedLetter) {
+                            spatialDistanceSquared
+                        } else {
+                            val pathProgress = pathProgressValues[pointIndex]
+                            val progressDiff = abs(pathProgress - expectedProgress)
+                            val temporalPenalty = 1.0f + (progressDiff * penaltyStrength)
+                            spatialDistanceSquared * temporalPenalty
+                        }
 
                     if (adjustedDistance < minDistanceSquared) {
-                        minDistanceSquared = spatialDistanceSquared
+                        minDistanceSquared = adjustedDistance
                         closestPointIndex = pointIndex
                     }
                 }

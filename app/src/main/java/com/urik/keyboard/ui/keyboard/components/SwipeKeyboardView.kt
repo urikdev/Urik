@@ -1267,16 +1267,12 @@ class SwipeKeyboardView
                     val isLearned = learnedStatus[candidate.word] ?: false
                     val adjustedScore =
                         if (isLearned) {
-                            candidate.combinedScore * 1.15f
+                            candidate.combinedScore * 1.8f
                         } else {
                             candidate.combinedScore
                         }
                     candidate to adjustedScore
                 }
-
-            candidateScores.forEachIndexed { index, (candidate, _) ->
-                learnedStatus[candidate.word] ?: false
-            }
 
             val bestCandidate = candidateScores.maxByOrNull { it.second }
             return bestCandidate?.first?.word ?: candidates.first().word
