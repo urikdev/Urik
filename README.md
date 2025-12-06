@@ -8,7 +8,9 @@ Privacy-first keyboard for Android with on-device processing and encrypted stora
 
 ## Status
 
-**Beta Software** - In closed beta testing. Under active development.
+**Beta Software** - In open beta testing. Join the Google Play open beta today!
+<p><a href="https://play.google.com/store/apps/details?id=com.urik.keyboard" target="_blank"><img src="https://raw.githubusercontent.com/pioug/google-play-badges/06ccd9252af1501613da2ca28eaffe31307a4e6d/svg/English.svg" alt="Google Play Open Beta"></a></p>
+
 
 ## Features
 
