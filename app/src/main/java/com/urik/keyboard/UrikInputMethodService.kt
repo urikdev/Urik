@@ -1113,6 +1113,28 @@ class UrikInputMethodService :
                 return
             }
 
+            if (displayBuffer.isNotEmpty() && wordState.isFromSwipe) {
+                currentInputConnection?.beginBatchEdit()
+                try {
+                    currentInputConnection?.commitText("$displayBuffer ", 1)
+                    val cursorPos =
+                        currentInputConnection
+                            ?.getTextBeforeCursor(
+                                KeyboardConstants.TextProcessingConstants.MAX_CURSOR_POSITION_CHARS,
+                                0,
+                            )?.length
+                            ?: 0
+                    currentInputConnection?.setSelection(cursorPos, cursorPos)
+
+                    coordinateStateClear()
+
+                    val textBefore = safeGetTextBeforeCursor(50)
+                    viewModel.checkAndApplyAutoCapitalization(textBefore)
+                } finally {
+                    currentInputConnection?.endBatchEdit()
+                }
+            }
+
             if (displayBuffer.isNotEmpty()) {
                 val actualTextBefore = safeGetTextBeforeCursor(1)
                 val actualTextAfter = safeGetTextAfterCursor(1)
@@ -1418,11 +1440,24 @@ class UrikInputMethodService :
             }
 
             if (displayBuffer.isNotEmpty()) {
-                val actualTextBefore = safeGetTextBeforeCursor(1)
-                val actualTextAfter = safeGetTextAfterCursor(1)
+                currentInputConnection?.beginBatchEdit()
+                try {
+                    currentInputConnection?.commitText("$displayBuffer ", 1)
+                    val cursorPos =
+                        currentInputConnection
+                            ?.getTextBeforeCursor(
+                                KeyboardConstants.TextProcessingConstants.MAX_CURSOR_POSITION_CHARS,
+                                0,
+                            )?.length
+                            ?: 0
+                    currentInputConnection?.setSelection(cursorPos, cursorPos)
 
-                if (actualTextBefore.isEmpty() && actualTextAfter.isEmpty()) {
                     coordinateStateClear()
+
+                    val textBefore = safeGetTextBeforeCursor(50)
+                    viewModel.checkAndApplyAutoCapitalization(textBefore)
+                } finally {
+                    currentInputConnection?.endBatchEdit()
                 }
             }
 
@@ -1697,6 +1732,19 @@ class UrikInputMethodService :
      */
     private fun handleBackspace() {
         try {
+            val selectedText = currentInputConnection?.getSelectedText(0)
+            if (!selectedText.isNullOrEmpty()) {
+                currentInputConnection?.commitText("", 1)
+                coordinateStateClear()
+                return
+            }
+
+            if (displayBuffer.isNotEmpty() && wordState.isFromSwipe) {
+                currentInputConnection?.setComposingText("", 1)
+                coordinateStateClear()
+                return
+            }
+
             val textBeforeCursor = safeGetTextBeforeCursor(50)
 
             if (isSecureField) {
