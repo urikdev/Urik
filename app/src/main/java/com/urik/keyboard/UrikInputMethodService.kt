@@ -539,6 +539,7 @@ class UrikInputMethodService :
             lifecycleRegistry.currentState = Lifecycle.State.CREATED
 
             lastDisplayDensity = resources.displayMetrics.density
+            swipeDetector.updateDisplayMetrics(lastDisplayDensity)
 
             initializeCoreComponents()
 
@@ -891,6 +892,8 @@ class UrikInputMethodService :
                             currentSettings.clipboardEnabled != newSettings.clipboardEnabled
 
                     currentSettings = newSettings
+
+                    swipeDetector.setSwipeEnabled(newSettings.swipeEnabled)
 
                     layoutManager.updateLongPressDuration(newSettings.longPressDuration)
 
@@ -2375,6 +2378,7 @@ class UrikInputMethodService :
         val currentDensity = resources.displayMetrics.density
 
         if (lastDisplayDensity != 0f && lastDisplayDensity != currentDensity) {
+            swipeDetector.updateDisplayMetrics(currentDensity)
             swipeKeyboardView?.let { view ->
                 if (view.currentLayout != null && view.currentState != null) {
                     view.updateKeyboard(view.currentLayout!!, view.currentState!!)

@@ -87,6 +87,9 @@
     <string name="typing_settings_double_space_period">Double-Space Period</string>
     <string name="typing_settings_double_space_on">Double-space inserts period</string>
     <string name="typing_settings_double_space_off">Double-space inserts space</string>
+    <string name="typing_settings_swipe_enabled">Swipe Typing</string>
+    <string name="typing_settings_swipe_on">Swipe to type enabled</string>
+    <string name="typing_settings_swipe_off">Swipe to type disabled</string>
     <string name="typing_settings_long_press_duration">Long Press Duration</string>
 
     <!-- Layout & Input Settings -->
@@ -122,6 +125,7 @@
     <string name="error_update_haptic_feedback">Failed to update haptic feedback</string>
     <string name="error_update_vibration_strength">Failed to update vibration strength</string>
     <string name="error_update_double_space_period">Failed to update double-space period</string>
+    <string name="error_update_swipe">Failed to update swipe typing</string>
     <string name="error_update_long_press_duration">Failed to update long press duration</string>
     <string name="error_update_number_row">Failed to update number row</string>
     <string name="error_update_space_bar_size">Failed to update space bar size</string>

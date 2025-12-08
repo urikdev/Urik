@@ -53,6 +53,7 @@ class SettingsRepository
             val HAPTIC_FEEDBACK = booleanPreferencesKey("haptic_feedback")
             val VIBRATION_STRENGTH = stringPreferencesKey("vibration_strength")
             val DOUBLE_SPACE_PERIOD = booleanPreferencesKey("double_space_period")
+            val SWIPE_ENABLED = booleanPreferencesKey("swipe_enabled")
             val LONG_PRESS_DURATION = stringPreferencesKey("long_press_duration")
             val SHOW_NUMBER_ROW = booleanPreferencesKey("show_number_row")
             val SPACE_BAR_SIZE = stringPreferencesKey("space_bar_size")
@@ -90,6 +91,7 @@ class SettingsRepository
                                 }
                             } ?: VibrationStrength.MEDIUM,
                         doubleSpacePeriod = preferences[PreferenceKeys.DOUBLE_SPACE_PERIOD] ?: true,
+                        swipeEnabled = preferences[PreferenceKeys.SWIPE_ENABLED] ?: true,
                         longPressDuration =
                             preferences[PreferenceKeys.LONG_PRESS_DURATION]?.let {
                                 try {
@@ -263,6 +265,17 @@ class SettingsRepository
         suspend fun updateDoubleSpacePeriod(enabled: Boolean): Result<Unit> =
             try {
                 dataStore.edit { it[PreferenceKeys.DOUBLE_SPACE_PERIOD] = enabled }
+                Result.success(Unit)
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+
+        /**
+         * Updates swipe typing toggle.
+         */
+        suspend fun updateSwipeEnabled(enabled: Boolean): Result<Unit> =
+            try {
+                dataStore.edit { it[PreferenceKeys.SWIPE_ENABLED] = enabled }
                 Result.success(Unit)
             } catch (e: Exception) {
                 Result.failure(e)
