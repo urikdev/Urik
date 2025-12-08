@@ -41,6 +41,8 @@
     <string name="typing_settings_double_space_period">Dubbel mellanslagspunkt</string>
     <string name="typing_settings_double_space_on">Dubbelt mellanslag infogar punkt</string>
     <string name="typing_settings_double_space_off">Dubbelt mellanslag infogar mellanslag</string>
+    <string name="typing_settings_swipe_on">Svep för att skriva aktiverat</string>
+    <string name="typing_settings_swipe_off">Svep för att skriva inaktiverat</string>
     <string name="typing_settings_long_press_duration">Lång tryckningstid</string>
     <string name="layout_settings_show_number_row">Visa nummerrad</string>
     <string name="layout_settings_number_row_on">Nummerrad visas</string>
@@ -67,6 +69,7 @@
     <string name="error_update_haptic_feedback">Misslyckades med att uppdatera haptisk feedback</string>
     <string name="error_update_vibration_strength">Misslyckades med att uppdatera vibrationsstyrkan</string>
     <string name="error_update_double_space_period">Misslyckades med att uppdatera dubbelt mellanslag</string>
+    <string name="error_update_swipe">Misslyckades med att uppdatera svepningsinmatningen</string>
     <string name="error_update_long_press_duration">Misslyckades med att uppdatera lång trycktid</string>
     <string name="error_update_number_row">Misslyckades med att uppdatera nummerraden</string>
     <string name="error_update_space_bar_size">Misslyckades med att uppdatera mellanslagstangentens storlek</string>
@@ -150,4 +153,5 @@
     <string name="clipboard_item_unpin">Lossa urklippsobjekt</string>
     <string name="clipboard_item_delete">Ta bort urklippsobjekt</string>
     <string name="tip_5_title">Urklippshanteraren</string>
+    <string name="typing_settings_swipe_enabled">Svepskrivning</string>
 </resources>

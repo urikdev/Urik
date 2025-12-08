@@ -86,6 +86,8 @@
     <string name="typing_settings_double_space_period">Ponto com duplo espaço</string>
     <string name="typing_settings_double_space_on">Inserção de ponto ao usar duplo espaço</string>
     <string name="typing_settings_double_space_off">Duplo espaço sem inserir ponto</string>
+    <string name="typing_settings_swipe_on">Digitação por gestos ativada</string>
+    <string name="typing_settings_swipe_off">Deslizar para digitar desativado</string>
     <string name="typing_settings_long_press_duration">Duração do toque prolongado</string>
 
     <!-- Layout & Input Settings -->
@@ -121,6 +123,7 @@
     <string name="error_update_haptic_feedback">Não foi possível atualizar o feedback por vibração</string>
     <string name="error_update_vibration_strength">Não foi possível atualizar a intensidade da vibração</string>
     <string name="error_update_double_space_period">Não foi possível atualizar o ponto com duplo espaço</string>
+    <string name="error_update_swipe">Falha ao atualizar a digitação por gestos</string>
     <string name="error_update_long_press_duration">Não foi possível atualizar a duração do toque prolongado</string>
     <string name="error_update_number_row">Erro ao atualizar a linha de números</string>
     <string name="error_update_space_bar_size">Não foi possível atualizar o tamanho da barra de espaço</string>
@@ -207,5 +210,6 @@
     <string name="clipboard_item_unpin">Desafixar item da área de transferência</string>
     <string name="clipboard_item_delete">Eliminar item da área de transferência</string>
     <string name="tip_5_title">Gestor de área de transferência</string>
+    <string name="typing_settings_swipe_enabled">Digitação por gestos</string>
 
 </resources>

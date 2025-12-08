@@ -33,6 +33,7 @@ class TypingBehaviorViewModel
                 .map { settings ->
                     TypingBehaviorUiState(
                         doubleSpacePeriod = settings.doubleSpacePeriod,
+                        swipeEnabled = settings.swipeEnabled,
                         longPressDuration = settings.longPressDuration,
                     )
                 }.stateIn(
@@ -46,6 +47,14 @@ class TypingBehaviorViewModel
                 settingsRepository
                     .updateDoubleSpacePeriod(enabled)
                     .onFailure { _events.emit(SettingsEvent.Error.DoubleSpacePeriodToggleFailed) }
+            }
+        }
+
+        fun updateSwipeEnabled(enabled: Boolean) {
+            viewModelScope.launch {
+                settingsRepository
+                    .updateSwipeEnabled(enabled)
+                    .onFailure { _events.emit(SettingsEvent.Error.SwipeToggleFailed) }
             }
         }
 
@@ -67,5 +76,6 @@ class TypingBehaviorViewModel
  */
 data class TypingBehaviorUiState(
     val doubleSpacePeriod: Boolean = true,
+    val swipeEnabled: Boolean = true,
     val longPressDuration: LongPressDuration = LongPressDuration.MEDIUM,
 )
