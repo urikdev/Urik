@@ -97,6 +97,12 @@ class SwipeDetector
         private var currentLocale: ULocale? = null
 
         @Volatile
+        private var swipeEnabled = true
+
+        @Volatile
+        private var swipeStartDistancePx = 50f
+
+        @Volatile
         private var keyCharacterPositions = emptyMap<Char, PointF>()
 
         private val scopeJob = SupervisorJob()
@@ -132,6 +138,23 @@ class SwipeDetector
             currentLocale = locale
         }
 
+        /**
+         * Enables or disables swipe typing.
+         */
+        fun setSwipeEnabled(enabled: Boolean) {
+            swipeEnabled = enabled
+            if (!enabled) {
+                reset()
+            }
+        }
+
+        /**
+         * Updates swipe distance threshold based on screen density.
+         */
+        fun updateDisplayMetrics(density: Float) {
+            swipeStartDistancePx = SwipeDetectionConstants.SWIPE_START_DISTANCE_DP * density
+        }
+
         fun setSwipeListener(listener: SwipeListener?) {
             this.swipeListener = listener
         }
@@ -145,8 +168,35 @@ class SwipeDetector
             event: MotionEvent,
             keyAt: (Float, Float) -> KeyboardKey?,
         ): Boolean {
+            if (!swipeEnabled) {
+                when (event.action) {
+                    MotionEvent.ACTION_DOWN -> {
+                        startTime = System.currentTimeMillis()
+                        return false
+                    }
+                    MotionEvent.ACTION_UP -> {
+                        val duration = System.currentTimeMillis() - startTime
+                        if (duration > 0 && duration <= SwipeDetectionConstants.TAP_DURATION_THRESHOLD_MS) {
+                            val tappedKey = keyAt(event.x, event.y)
+                            if (tappedKey != null) {
+                                swipeListener?.onTap(tappedKey)
+                                reset()
+                                return true
+                            }
+                        }
+                        reset()
+                        return false
+                    }
+                    else -> return false
+                }
+            }
+
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
+                    if (event.pointerCount > 1) {
+                        reset()
+                        return false
+                    }
                     val touchedKey = keyAt(event.x, event.y)
                     if (touchedKey !is KeyboardKey.Character) {
                         reset()
@@ -204,7 +254,7 @@ class SwipeDetector
                 }
 
                 val distance = calculateDistance(start.x, start.y, event.x, event.y)
-                if (distance > SwipeDetectionConstants.SWIPE_START_DISTANCE_PX) {
+                if (distance > swipeStartDistancePx) {
                     isSwiping = true
                     swipeListener?.onSwipeStart(PointF(start.x, start.y))
                     updateSwipePath(event)
@@ -361,15 +411,20 @@ class SwipeDetector
                         return@withContext emptyList()
                     }
 
+                    val minLength = (swipePath.size / 7).coerceAtLeast(2)
+                    val maxLength = (swipePath.size).coerceAtMost(20)
+
                     val dictionarySnapshot =
-                        rawWords.map { (word, frequency) ->
-                            DictionaryEntry(
-                                word = word,
-                                frequencyScore = ln(frequency.toFloat() + 1f) / 20f,
-                                firstChar = word.first().lowercaseChar(),
-                                uniqueLetterCount = word.toSet().size,
-                            )
-                        }
+                        rawWords
+                            .filter { (word, _) -> word.length in minLength..maxLength }
+                            .map { (word, frequency) ->
+                                DictionaryEntry(
+                                    word = word,
+                                    frequencyScore = ln(frequency.toFloat() + 1f) / 20f,
+                                    firstChar = word.first().lowercaseChar(),
+                                    uniqueLetterCount = word.toSet().size,
+                                )
+                            }
 
                     val candidatesMap = mutableMapOf<String, WordCandidate>()
                     val pathBounds = calculatePathBounds(swipePath)

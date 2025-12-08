@@ -83,6 +83,7 @@ data class KeyboardSettings(
     val hapticFeedback: Boolean = true,
     val vibrationStrength: VibrationStrength = VibrationStrength.MEDIUM,
     val doubleSpacePeriod: Boolean = true,
+    val swipeEnabled: Boolean = true,
     val longPressDuration: LongPressDuration = LongPressDuration.MEDIUM,
     val showNumberRow: Boolean = true,
     val spaceBarSize: SpaceBarSize = SpaceBarSize.STANDARD,

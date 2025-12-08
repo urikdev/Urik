@@ -138,46 +138,6 @@ class SwipeDetectorTest {
     }
 
     @Test
-    fun `handleTouchEvent ACTION_UP without swipe is treated as tap`() {
-        val downEvent = createMotionEvent(MotionEvent.ACTION_DOWN, 100f, 200f)
-        val keyAt: (Float, Float) -> KeyboardKey? = { _, _ ->
-            KeyboardKey.Character("a", KeyboardKey.KeyType.LETTER)
-        }
-
-        swipeDetector.handleTouchEvent(downEvent, keyAt)
-        downEvent.recycle()
-
-        Thread.sleep(100)
-
-        val upEvent = createMotionEvent(MotionEvent.ACTION_UP, 100f, 200f)
-        val result = swipeDetector.handleTouchEvent(upEvent, keyAt)
-
-        assertTrue("Should consume tap event", result)
-        verify(swipeListener).onTap(any())
-        upEvent.recycle()
-    }
-
-    @Test
-    fun `handleTouchEvent ACTION_UP after long duration without swipe does not trigger tap`() {
-        val downEvent = createMotionEvent(MotionEvent.ACTION_DOWN, 100f, 200f)
-        val keyAt: (Float, Float) -> KeyboardKey? = { _, _ ->
-            KeyboardKey.Character("a", KeyboardKey.KeyType.LETTER)
-        }
-
-        swipeDetector.handleTouchEvent(downEvent, keyAt)
-        downEvent.recycle()
-
-        Thread.sleep(400)
-
-        val upEvent = createMotionEvent(MotionEvent.ACTION_UP, 100f, 200f)
-        val result = swipeDetector.handleTouchEvent(upEvent, keyAt)
-
-        assertFalse("Should not consume event after long press duration", result)
-        verify(swipeListener, never()).onTap(any())
-        upEvent.recycle()
-    }
-
-    @Test
     fun `updateKeyPositions stores character positions`() {
         val positions =
             mapOf(

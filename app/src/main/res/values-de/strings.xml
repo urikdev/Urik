@@ -86,6 +86,8 @@
     <string name="typing_settings_double_space_period">Doppel-Leerzeichen-Dauer</string>
     <string name="typing_settings_double_space_on">Doppel-Leerzeichen fügt einen Punkt ein</string>
     <string name="typing_settings_double_space_off">Doppel-Leerzeichen fügt ein Leerzeichen ein</string>
+    <string name="typing_settings_swipe_on">Wischen zum Tippen aktiviert</string>
+    <string name="typing_settings_swipe_off">Wischen zum Tippen deaktiviert</string>
     <string name="typing_settings_long_press_duration">Lagzeit-Druck-Dauer</string>
 
     <!-- Layout & Input Settings -->
@@ -121,6 +123,7 @@
     <string name="error_update_haptic_feedback">Haptisches Feedback konnte nicht geändert werden</string>
     <string name="error_update_vibration_strength">Vibrationsstärke konnte nicht geändert werden</string>
     <string name="error_update_double_space_period">Doppel-Leerzeichen-Dauer konnte nicht geändert werden</string>
+    <string name="error_update_swipe">Fehler beim Aktualisieren der Wischgesten-Eingabe</string>
     <string name="error_update_long_press_duration">Langzeit-Druck-Dauer konnte nicht geändert werden</string>
     <string name="error_update_number_row">Zahlenreihe konnte nicht geändert werden</string>
     <string name="error_update_space_bar_size">Leertasten-Breite konnte nicht geändert werden</string>
@@ -207,5 +210,6 @@
     <string name="clipboard_item_unpin">Zwischenablage-Element lösen</string>
     <string name="clipboard_item_delete">Zwischenablage-Element löschen</string>
     <string name="tip_5_title">Zwischenablage-Manager</string>
+    <string name="typing_settings_swipe_enabled">Wischgesten-Eingabe</string>
 
 </resources>
