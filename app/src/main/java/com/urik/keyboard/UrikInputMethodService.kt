@@ -8,9 +8,7 @@ import android.text.style.BackgroundColorSpan
 import android.text.style.ForegroundColorSpan
 import android.view.Gravity
 import android.view.View
-import android.view.WindowManager
 import android.view.inputmethod.EditorInfo
-import androidx.core.view.WindowCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
@@ -652,12 +650,8 @@ class UrikInputMethodService :
 
             val actualWindow = window?.window
             if (actualWindow != null) {
-                WindowCompat.setDecorFitsSystemWindows(actualWindow, false)
-
                 val layoutParams = actualWindow.attributes
                 layoutParams.gravity = Gravity.BOTTOM
-                layoutParams.flags =
-                    layoutParams.flags or WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
                 actualWindow.attributes = layoutParams
             }
 
@@ -969,14 +963,33 @@ class UrikInputMethodService :
 
             if (layout != null && swipeKeyboardView != null) {
                 val filteredLayout =
-                    if (
+                    when {
                         !currentSettings.showNumberRow &&
-                        layout.mode == KeyboardMode.LETTERS &&
-                        layout.rows.isNotEmpty()
-                    ) {
-                        layout.copy(rows = layout.rows.drop(1))
-                    } else {
-                        layout
+                            layout.mode == KeyboardMode.LETTERS &&
+                            layout.rows.isNotEmpty() -> {
+                            layout.copy(rows = layout.rows.drop(1))
+                        }
+
+                        currentSettings.showNumberRow &&
+                            layout.mode == KeyboardMode.SYMBOLS &&
+                            layout.rows.isNotEmpty() -> {
+                            val numberRow =
+                                listOf(
+                                    KeyboardKey.Character("1", KeyboardKey.KeyType.NUMBER),
+                                    KeyboardKey.Character("2", KeyboardKey.KeyType.NUMBER),
+                                    KeyboardKey.Character("3", KeyboardKey.KeyType.NUMBER),
+                                    KeyboardKey.Character("4", KeyboardKey.KeyType.NUMBER),
+                                    KeyboardKey.Character("5", KeyboardKey.KeyType.NUMBER),
+                                    KeyboardKey.Character("6", KeyboardKey.KeyType.NUMBER),
+                                    KeyboardKey.Character("7", KeyboardKey.KeyType.NUMBER),
+                                    KeyboardKey.Character("8", KeyboardKey.KeyType.NUMBER),
+                                    KeyboardKey.Character("9", KeyboardKey.KeyType.NUMBER),
+                                    KeyboardKey.Character("0", KeyboardKey.KeyType.NUMBER),
+                                )
+                            layout.copy(rows = listOf(numberRow) + layout.rows)
+                        }
+
+                        else -> layout
                     }
 
                 swipeKeyboardView?.updateKeyboard(filteredLayout, state)
@@ -2426,6 +2439,7 @@ class UrikInputMethodService :
         val currentDensity = resources.displayMetrics.density
 
         if (lastDisplayDensity != 0f && lastDisplayDensity != currentDensity) {
+            layoutManager.onDensityChanged()
             swipeDetector.updateDisplayMetrics(currentDensity)
             swipeKeyboardView?.let { view ->
                 if (view.currentLayout != null && view.currentState != null) {
