@@ -142,6 +142,18 @@ class MainActivity : AppCompatActivity() {
                     val intent = Intent(context, ThemePickerActivity::class.java)
                     startActivity(intent)
                 }
+
+                val containerLayout =
+                    LinearLayout(context).apply {
+                        orientation = LinearLayout.VERTICAL
+                        layoutParams =
+                            LinearLayout.LayoutParams(
+                                LinearLayout.LayoutParams.MATCH_PARENT,
+                                LinearLayout.LayoutParams.WRAP_CONTENT,
+                            )
+                    }
+
+                addView(containerLayout)
             }
 
         previewContainer = card
@@ -165,8 +177,27 @@ class MainActivity : AppCompatActivity() {
                 val renderer = KeyboardPreviewRenderer(this@MainActivity)
                 val preview = renderer.createPreviewView(layout, theme, 200)
 
-                container.removeAllViews()
-                container.addView(preview)
+                val containerLayout = container.getChildAt(0) as? LinearLayout ?: return@launch
+                containerLayout.removeAllViews()
+                containerLayout.addView(preview)
+
+                val themeNameTextView =
+                    TextView(this@MainActivity).apply {
+                        text = theme.displayName
+                        setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
+                        setTextColor(theme.colors.suggestionText)
+                        setBackgroundColor(theme.colors.suggestionBarBackground)
+                        gravity = Gravity.CENTER
+                        val padding = dpToPx(12)
+                        setPadding(0, padding, 0, padding)
+                        layoutParams =
+                            LinearLayout.LayoutParams(
+                                LinearLayout.LayoutParams.MATCH_PARENT,
+                                LinearLayout.LayoutParams.WRAP_CONTENT,
+                            )
+                    }
+
+                containerLayout.addView(themeNameTextView)
             }
         }
     }
