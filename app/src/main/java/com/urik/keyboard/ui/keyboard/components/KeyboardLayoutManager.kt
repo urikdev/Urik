@@ -281,6 +281,10 @@ class KeyboardLayoutManager(
         }
     }
 
+    fun onDensityChanged() {
+        invalidateCalculationCache()
+    }
+
     fun updateHapticSettings(
         enabled: Boolean,
         durationMs: Long,
@@ -325,9 +329,9 @@ class KeyboardLayoutManager(
 
         cachedDimensions["minTarget"] = (baseMinTouchTarget * keySizeMultiplier).toInt()
         cachedDimensions["keyHeight"] = (baseKeyHeight * keySizeMultiplier).toInt()
-        cachedDimensions["horizontalPadding"] = (basePadding * keySizeMultiplier).toInt()
+        cachedDimensions["horizontalPadding"] = basePadding
         cachedDimensions["verticalPadding"] = (basePadding * 0.5f * keySizeMultiplier).toInt()
-        cachedDimensions["horizontalMargin"] = (baseHorizontalMargin * keySizeMultiplier).toInt()
+        cachedDimensions["horizontalMargin"] = baseHorizontalMargin
 
         cacheValid = true
     }
@@ -958,24 +962,27 @@ class KeyboardLayoutManager(
     ): Float {
         val isNumberModeRow = isNumberModeRow(rowKeys)
 
-        if (isNumberModeRow) {
-            return STANDARD_KEY_WEIGHT
-        }
+        val baseWeight =
+            if (isNumberModeRow) {
+                STANDARD_KEY_WEIGHT
+            } else {
+                when (key) {
+                    is KeyboardKey.Character ->
+                        when (key.type) {
+                            KeyboardKey.KeyType.PUNCTUATION -> 0.7f
+                            else -> STANDARD_KEY_WEIGHT
+                        }
+                    is KeyboardKey.Action ->
+                        when (key.action) {
+                            KeyboardKey.ActionType.SPACE -> return currentSpaceBarSize.widthMultiplier
+                            KeyboardKey.ActionType.SHIFT -> SHIFT_KEY_WEIGHT
+                            KeyboardKey.ActionType.BACKSPACE -> BACKSPACE_KEY_WEIGHT
+                            else -> STANDARD_KEY_WEIGHT
+                        }
+                }
+            }
 
-        return when (key) {
-            is KeyboardKey.Character ->
-                when (key.type) {
-                    KeyboardKey.KeyType.PUNCTUATION -> 0.7f
-                    else -> STANDARD_KEY_WEIGHT
-                }
-            is KeyboardKey.Action ->
-                when (key.action) {
-                    KeyboardKey.ActionType.SPACE -> currentSpaceBarSize.widthMultiplier
-                    KeyboardKey.ActionType.SHIFT -> SHIFT_KEY_WEIGHT
-                    KeyboardKey.ActionType.BACKSPACE -> BACKSPACE_KEY_WEIGHT
-                    else -> STANDARD_KEY_WEIGHT
-                }
-        }
+        return baseWeight * currentKeySize.scaleFactor
     }
 
     private fun isNumberModeRow(rowKeys: List<KeyboardKey>): Boolean {
