@@ -1176,6 +1176,10 @@ class SwipeKeyboardView
         ): KeyboardKey? {
             if (isDestroyed) return null
 
+            if (keyPositions.isEmpty() && keyViews.isNotEmpty()) {
+                return findKeyAtDirect(x, y)
+            }
+
             keyPositions.forEach { (button, rect) ->
                 if (rect.contains(x.toInt(), y.toInt())) {
                     return keyMapping[button]
@@ -1197,6 +1201,30 @@ class SwipeKeyboardView
             }
 
             return if (closestButton != null) keyMapping[closestButton] else null
+        }
+
+        private fun findKeyAtDirect(
+            x: Float,
+            y: Float,
+        ): KeyboardKey? {
+            val thisLocation = IntArray(2)
+            this.getLocationInWindow(thisLocation)
+
+            keyViews.forEach { button ->
+                val buttonLocation = IntArray(2)
+                button.getLocationInWindow(buttonLocation)
+
+                val localX = buttonLocation[0] - thisLocation[0]
+                val localY = buttonLocation[1] - thisLocation[1]
+
+                val rect = Rect(localX, localY, localX + button.width, localY + button.height)
+
+                if (rect.contains(x.toInt(), y.toInt())) {
+                    return keyMapping[button]
+                }
+            }
+
+            return null
         }
 
         override fun onSwipeStart(startPoint: PointF) {
