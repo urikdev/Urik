@@ -26,16 +26,22 @@ android {
 
     signingConfigs {
         create("release") {
-            storeFile = file(System.getenv("RELEASE_KEYSTORE_PATH") ?: "release.keystore")
-            storePassword = System.getenv("RELEASE_STORE_PASSWORD")
-            keyAlias = System.getenv("RELEASE_KEY_ALIAS")
-            keyPassword = System.getenv("RELEASE_KEY_PASSWORD")
+            val keystorePath = System.getenv("RELEASE_KEYSTORE_PATH")
+            if (keystorePath != null) {
+                storeFile = file(keystorePath)
+                storePassword = System.getenv("RELEASE_STORE_PASSWORD")
+                keyAlias = System.getenv("RELEASE_KEY_ALIAS")
+                keyPassword = System.getenv("RELEASE_KEY_PASSWORD")
+            }
         }
     }
 
     buildTypes {
         release {
-            signingConfig = signingConfigs.getByName("release")
+            val keystorePath = System.getenv("RELEASE_KEYSTORE_PATH")
+            if (keystorePath != null) {
+                signingConfig = signingConfigs.getByName("release")
+            }
             isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
