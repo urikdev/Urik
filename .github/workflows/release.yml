@@ -19,22 +19,20 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@v4
 
       - name: Validate Gradle wrapper
-        uses: gradle/actions/wrapper-validation@cc4b5b8838f784ce6c6e2276112e5bc465a391e5 # v4.2.1
+        uses: gradle/wrapper-validation-action@v3
 
       - name: Set up JDK 17
-        uses: actions/setup-java@7a6d8a8234af8eb26422e24e3006232cccaa061b # v4.6.0
+        uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
           cache: 'gradle'
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@cc4b5b8838f784ce6c6e2276112e5bc465a391e5 # v4.2.1
-        with:
-          cache-read-only: false
+        uses: gradle/gradle-build-action@v3
 
       - name: Decode keystore
         run: |
@@ -83,7 +81,7 @@ jobs:
           rm -f release.keystore
 
       - name: Create Release
-        uses: softprops/action-gh-release@da0143ee99caf367752a66f172f522b1244c323c # v2.2.0
+        uses: softprops/action-gh-release@v2
         with:
           files: |
             app/build/outputs/apk/release/Urik-${{ steps.get_version.outputs.VERSION }}.apk
