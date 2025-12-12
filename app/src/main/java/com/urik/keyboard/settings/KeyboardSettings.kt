@@ -18,15 +18,15 @@ enum class KeySize(
 }
 
 /**
- * Vibration duration levels in milliseconds.
+ * Vibration amplitude levels.
  */
 enum class VibrationStrength(
     val displayNameRes: Int,
-    val durationMs: Long,
+    val amplitude: Int,
 ) {
-    LIGHT(R.string.vibration_strength_light, 10L),
-    MEDIUM(R.string.vibration_strength_medium, 20L),
-    STRONG(R.string.vibration_strength_strong, 40L),
+    LIGHT(R.string.vibration_strength_light, 140),
+    MEDIUM(R.string.vibration_strength_medium, 210),
+    STRONG(R.string.vibration_strength_strong, 255),
 }
 
 /**
@@ -132,11 +132,11 @@ data class KeyboardSettings(
         get() = if (showSuggestions) suggestionCount else 0
 
     /**
-     * Effective vibration duration respecting haptic feedback toggle.
+     * Effective vibration amplitude respecting haptic feedback toggle.
      * Returns 0 if haptic feedback is disabled.
      */
-    val effectiveVibrationDurationMs: Long
-        get() = if (hapticFeedback) vibrationStrength.durationMs else 0L
+    val effectiveVibrationAmplitude: Int
+        get() = if (hapticFeedback) vibrationStrength.amplitude else 0
 
     companion object {
         const val MIN_SUGGESTION_COUNT = 1
