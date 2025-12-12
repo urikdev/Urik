@@ -100,8 +100,8 @@ object KeyboardConstants {
         const val UI_UPDATE_INTERVAL_MS = 16
         const val TAP_DURATION_THRESHOLD_MS = 350L
 
-        const val PATH_BOUNDS_MARGIN_PX = 100f
-        const val CLOSE_KEY_DISTANCE_THRESHOLD_SQ = 6400f
+        const val PATH_BOUNDS_MARGIN_PX = 50f
+        const val CLOSE_KEY_DISTANCE_THRESHOLD_SQ = 25600f
         const val EXCELLENT_CANDIDATE_THRESHOLD = 0.95f
         const val REPETITION_PENALTY_FACTOR = 0.08f
 
@@ -111,8 +111,8 @@ object KeyboardConstants {
         const val TWO_SIGMA_60_SQ = 4000f
         const val BASE_PENALTY_SHORT_WORD = 50f
         const val BASE_PENALTY_LONG_WORD = 0f
-        const val SPATIAL_SCORE_WEIGHT = 0.70f
-        const val FREQUENCY_SCORE_WEIGHT = 0.30f
+        const val SPATIAL_SCORE_WEIGHT = 0.50f
+        const val FREQUENCY_SCORE_WEIGHT = 0.50f
     }
 
     object TextProcessingConstants {

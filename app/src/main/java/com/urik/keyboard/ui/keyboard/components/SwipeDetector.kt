@@ -18,7 +18,6 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.yield
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.math.abs
 import kotlin.math.exp
 import kotlin.math.ln
 import kotlin.math.max
@@ -112,6 +111,7 @@ class SwipeDetector
         data class DictionaryEntry(
             val word: String,
             val frequencyScore: Float,
+            val rawFrequency: Long,
             val firstChar: Char,
             val uniqueLetterCount: Int,
         )
@@ -414,17 +414,29 @@ class SwipeDetector
                     val minLength = (swipePath.size / 7).coerceAtLeast(2)
                     val maxLength = (swipePath.size).coerceAtMost(20)
 
-                    val dictionarySnapshot =
+                    val velocities = swipePath.map { it.velocity }
+                    val avgVelocity = if (velocities.isNotEmpty()) velocities.average() else 0.0
+                    val maxVelocity = velocities.maxOrNull() ?: 0f
+
+                    val durationMs =
+                        if (swipePath.size >= 2) {
+                            swipePath.last().timestamp - swipePath.first().timestamp
+                        } else {
+                            0L
+                        }
+
+                    val dictionaryByFirstChar =
                         rawWords
                             .filter { (word, _) -> word.length in minLength..maxLength }
                             .map { (word, frequency) ->
                                 DictionaryEntry(
                                     word = word,
                                     frequencyScore = ln(frequency.toFloat() + 1f) / 20f,
+                                    rawFrequency = frequency.toLong(),
                                     firstChar = word.first().lowercaseChar(),
                                     uniqueLetterCount = word.toSet().size,
                                 )
-                            }
+                            }.groupBy { it.firstChar }
 
                     val candidatesMap = mutableMapOf<String, WordCandidate>()
                     val pathBounds = calculatePathBounds(swipePath)
@@ -440,14 +452,32 @@ class SwipeDetector
                                     pos.y <= pathBounds.maxY + margin
                             }.toSet()
 
-                    val startingKey =
+                    val candidateStartKeys =
                         swipePath.firstOrNull()?.let { firstPoint ->
-                            keyPositionsSnapshot.entries
-                                .minByOrNull { (_, pos) ->
-                                    val dx = pos.x - firstPoint.x
-                                    val dy = pos.y - firstPoint.y
-                                    dx * dx + dy * dy
-                                }?.key
+                            val keysWithDist =
+                                keyPositionsSnapshot.entries
+                                    .map { (char, pos) ->
+                                        val dx = pos.x - firstPoint.x
+                                        val dy = pos.y - firstPoint.y
+                                        val distSq = dx * dx + dy * dy
+                                        Triple(char, distSq, kotlin.math.sqrt(distSq).toInt())
+                                    }.sortedBy { it.second }
+                                    .take(8)
+                                    .filter { it.second < SwipeDetectionConstants.CLOSE_KEY_DISTANCE_THRESHOLD_SQ }
+
+                            keysWithDist.map { it.first }
+                        } ?: emptyList()
+
+                    val relevantChars =
+                        if (candidateStartKeys.isNotEmpty()) {
+                            candidateStartKeys.toSet()
+                        } else {
+                            dictionaryByFirstChar.keys
+                        }
+
+                    val dictionarySnapshot =
+                        relevantChars.flatMap { char ->
+                            dictionaryByFirstChar[char] ?: emptyList()
                         }
 
                     val wordsToCheck = dictionarySnapshot.size
@@ -458,27 +488,6 @@ class SwipeDetector
                         }
 
                         val entry = dictionarySnapshot[i]
-
-                        if (startingKey != null) {
-                            val startsWithCorrectLetter = entry.firstChar == startingKey
-                            if (!startsWithCorrectLetter) {
-                                val firstLetterPos = keyPositionsSnapshot[entry.firstChar]
-                                val startingPos = keyPositionsSnapshot[startingKey]
-
-                                val isCloseKey =
-                                    if (firstLetterPos != null && startingPos != null) {
-                                        val dx = firstLetterPos.x - startingPos.x
-                                        val dy = firstLetterPos.y - startingPos.y
-                                        dx * dx + dy * dy < SwipeDetectionConstants.CLOSE_KEY_DISTANCE_THRESHOLD_SQ
-                                    } else {
-                                        false
-                                    }
-
-                                if (!isCloseKey) {
-                                    continue
-                                }
-                            }
-                        }
 
                         if (!couldMatchPath(entry.word, charsInBounds)) {
                             continue
@@ -492,20 +501,31 @@ class SwipeDetector
                             )
 
                         val pointsPerLetter = swipePath.size.toFloat() / entry.word.length.toFloat()
-                        val optimalRatio = 4.0f
-                        val ratioDiff = abs(pointsPerLetter - optimalRatio)
-                        val ratioPercentageDiff = ratioDiff / optimalRatio
+                        val optimalRatio = if (entry.word.length <= 3) 3.0f else 4.0f
                         val ratioPenalty =
                             when {
-                                ratioPercentageDiff > 0.75f -> 0.70f
-                                ratioPercentageDiff > 0.55f -> 0.85f
+                                pointsPerLetter < optimalRatio * 0.70f -> 0.75f
+                                pointsPerLetter < optimalRatio * 0.75f -> 0.85f
+                                pointsPerLetter > optimalRatio * 2.00f -> 0.60f
+                                pointsPerLetter > optimalRatio * 1.60f -> 0.75f
+                                pointsPerLetter > optimalRatio * 1.40f -> 0.85f
                                 else -> 1.0f
                             }
 
                         val adjustedSpatialScore = spatialScore * ratioPenalty
+
+                        val frequencyBoost =
+                            when {
+                                entry.rawFrequency > 10_000_000L -> 1.20f
+                                entry.rawFrequency > 5_000_000L -> 1.15f
+                                entry.rawFrequency > 2_000_000L -> 1.10f
+                                else -> 1.0f
+                            }
+                        val boostedFrequencyScore = entry.frequencyScore * frequencyBoost
+
                         val combinedScore =
                             adjustedSpatialScore * SwipeDetectionConstants.SPATIAL_SCORE_WEIGHT +
-                                entry.frequencyScore * SwipeDetectionConstants.FREQUENCY_SCORE_WEIGHT
+                                boostedFrequencyScore * SwipeDetectionConstants.FREQUENCY_SCORE_WEIGHT
 
                         val candidate = WordCandidate(entry.word, adjustedSpatialScore, entry.frequencyScore, combinedScore)
 
@@ -522,7 +542,7 @@ class SwipeDetector
                         }
                     }
 
-                    val topCandidates = candidatesMap.values.sortedByDescending { it.combinedScore }.take(10)
+                    val topCandidates = candidatesMap.values.sortedByDescending { it.combinedScore }.take(3)
 
                     return@withContext topCandidates
                 } catch (_: Exception) {
@@ -546,59 +566,38 @@ class SwipeDetector
             val expThresh60 = SwipeDetectionConstants.EXP_THRESHOLD_60
             val twoSigma60Sq = SwipeDetectionConstants.TWO_SIGMA_60_SQ
 
-            val basePenalty =
-                when {
-                    word.length <= 4 -> SwipeDetectionConstants.BASE_PENALTY_SHORT_WORD
-                    word.length >= 8 -> SwipeDetectionConstants.BASE_PENALTY_LONG_WORD
-                    else -> SwipeDetectionConstants.BASE_PENALTY_SHORT_WORD - (word.length - 4) * 100f
-                }
-
-            val penaltyStrength =
-                if (basePenalty > 0f) {
-                    val pathLengthFactor = (swipePath.size.toFloat() / 15f).coerceIn(1.0f, 2.5f)
-                    basePenalty / pathLengthFactor
-                } else {
-                    0f
-                }
-
-            val swipePathLastIndex = swipePath.size - 1
-            val pathProgressValues = FloatArray(swipePath.size) { it.toFloat() / swipePathLastIndex }
-
-            val wordLastIndex = (word.length - 1).coerceAtLeast(1)
-
             val letterPathIndices = mutableListOf<Int>()
+            val letterScores = mutableListOf<Pair<Char, Float>>()
 
             word.forEachIndexed { letterIndex, char ->
                 val keyPos = keyPositions[char.lowercaseChar()] ?: return 0f
 
+                val isFirstLetter = letterIndex == 0
                 val isLastLetter = letterIndex == word.length - 1
                 val expThreshold = if (isLastLetter) expThresh60 else expThresh50
                 val twoSigmaSquared = if (isLastLetter) twoSigma60Sq else twoSigma50Sq
 
+                val searchRange =
+                    when {
+                        isFirstLetter -> (swipePath.size * 0.30).toInt().coerceAtLeast(3)
+                        isLastLetter -> swipePath.size - (swipePath.size * 0.30).toInt().coerceAtLeast(swipePath.size - 3)
+                        else -> swipePath.size
+                    }
+
                 var minDistanceSquared = Float.MAX_VALUE
                 var closestPointIndex = -1
 
-                val expectedProgress = letterIndex.toFloat() / wordLastIndex
+                val searchStart = if (isLastLetter) swipePath.size - searchRange else 0
+                val searchEnd = if (isFirstLetter) searchRange else swipePath.size
 
-                val isRepeatedLetter = letterIndex > 0 && word[letterIndex] == word[letterIndex - 1]
-
-                swipePath.forEachIndexed { pointIndex, point ->
+                swipePath.subList(searchStart, searchEnd).forEachIndexed { relativeIndex, point ->
+                    val pointIndex = searchStart + relativeIndex
                     val dx = keyPos.x - point.x
                     val dy = keyPos.y - point.y
                     val spatialDistanceSquared = dx * dx + dy * dy
 
-                    val adjustedDistance =
-                        if (isRepeatedLetter) {
-                            spatialDistanceSquared
-                        } else {
-                            val pathProgress = pathProgressValues[pointIndex]
-                            val progressDiff = abs(pathProgress - expectedProgress)
-                            val temporalPenalty = 1.0f + (progressDiff * penaltyStrength)
-                            spatialDistanceSquared * temporalPenalty
-                        }
-
-                    if (adjustedDistance < minDistanceSquared) {
-                        minDistanceSquared = adjustedDistance
+                    if (spatialDistanceSquared < minDistanceSquared) {
+                        minDistanceSquared = spatialDistanceSquared
                         closestPointIndex = pointIndex
                     }
                 }
@@ -611,6 +610,7 @@ class SwipeDetector
                     }
 
                 letterPathIndices.add(closestPointIndex)
+                letterScores.add(char to letterScore)
                 totalScore += letterScore
             }
 
@@ -633,12 +633,15 @@ class SwipeDetector
                 }
             }
 
-            val maxTolerableViolations =
+            val baseTolerableViolations =
                 when {
                     word.length <= 4 -> 0
                     word.length <= 6 -> 1
                     else -> 2
                 }
+
+            val repetitionCount = word.length - uniqueLetterCount
+            val maxTolerableViolations = baseTolerableViolations + repetitionCount
 
             val sequencePenalty =
                 when {
@@ -650,20 +653,31 @@ class SwipeDetector
 
             val baseSpatialScore = totalScore / word.length.toFloat()
 
+            val hasBadLetter = letterScores.any { it.second < 0.30f }
+            val wrongLetterPenalty = if (hasBadLetter && word.length >= 4) 0.85f else 1.0f
+
             val lengthBonus =
                 when {
-                    word.length >= 8 -> 1.08f
-                    word.length == 7 -> 1.05f
-                    word.length == 6 -> 1.03f
+                    word.length >= 8 -> 1.25f
+                    word.length == 7 -> 1.18f
+                    word.length == 6 -> 1.12f
+                    word.length == 5 -> 1.06f
                     else -> 1.0f
                 }
 
-            val spatialWithBonuses = (baseSpatialScore * sequencePenalty * lengthBonus).coerceAtMost(1.0f)
+            val spatialWithBonuses = (baseSpatialScore * sequencePenalty * lengthBonus * wrongLetterPenalty).coerceAtMost(1.0f)
 
+            val repetitionRatio = repetitionCount.toFloat() / word.length.toFloat()
             val repetitionPenalty =
-                1.0f - ((word.length - uniqueLetterCount) * SwipeDetectionConstants.REPETITION_PENALTY_FACTOR).coerceAtMost(0.20f)
+                if (repetitionRatio > 0.30f) {
+                    1.0f - ((repetitionCount - 1) * SwipeDetectionConstants.REPETITION_PENALTY_FACTOR).coerceAtMost(0.20f)
+                } else {
+                    1.0f
+                }
 
-            return spatialWithBonuses * repetitionPenalty
+            val finalScore = spatialWithBonuses * repetitionPenalty
+
+            return finalScore
         }
 
         private fun couldMatchPath(

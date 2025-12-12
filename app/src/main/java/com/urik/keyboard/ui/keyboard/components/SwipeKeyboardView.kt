@@ -973,20 +973,8 @@ class SwipeKeyboardView
 
                 val key = keyMapping[button]
                 if (key is KeyboardKey.Character) {
-                    val layoutParams = button.layoutParams as? LinearLayout.LayoutParams
-                    val topMargin = layoutParams?.topMargin ?: 0
-                    val bottomMargin = layoutParams?.bottomMargin ?: 0
-
-                    val touchTargetRect =
-                        Rect(
-                            localRect.left,
-                            localRect.top - topMargin,
-                            localRect.right,
-                            localRect.bottom + bottomMargin,
-                        )
-
-                    val centerX = touchTargetRect.centerX().toFloat()
-                    val centerY = touchTargetRect.centerY().toFloat()
+                    val centerX = localRect.centerX().toFloat()
+                    val centerY = localRect.centerY().toFloat()
                     keyCharacterPositions[key] = PointF(centerX, centerY)
                 }
             }
