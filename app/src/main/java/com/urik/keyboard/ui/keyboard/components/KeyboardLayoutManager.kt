@@ -37,8 +37,11 @@ import com.urik.keyboard.utils.CacheMemoryManager
 import com.urik.keyboard.utils.ManagedCache
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONException
@@ -80,7 +83,7 @@ class KeyboardLayoutManager(
             context.getSystemService(Context.VIBRATOR_SERVICE) as? android.os.Vibrator
         }
     private var hapticEnabled = true
-    private var hapticDurationMs = 20L
+    private var hapticAmplitude = 170
 
     private val accessibilityManager = context.getSystemService(Context.ACCESSIBILITY_SERVICE) as AccessibilityManager
 
@@ -103,30 +106,30 @@ class KeyboardLayoutManager(
 
     private var backspaceHandler: Handler? = null
     private var backspaceRunnable: Runnable? = null
+    private var backspaceVibrationJob: Job? = null
 
     private var backspaceStartTime = 0L
-    private var backspaceCharsSinceLastHaptic = 0
 
     private var variationPopup: CharacterVariationPopup? = null
     private var currentVariationKeyType: KeyboardKey.KeyType? = null
 
     private val characterVariationCallback: (String) -> Unit = { selectedChar ->
-        performCustomHaptic()
         val keyType = currentVariationKeyType ?: KeyboardKey.KeyType.LETTER
         val selectedKey = KeyboardKey.Character(selectedChar, keyType)
+        performContextualHaptic(selectedKey)
         onKeyClick(selectedKey)
     }
 
     private val punctuationVariationCallback: (String) -> Unit = { selectedPunctuation ->
-        performCustomHaptic()
         val punctuationKey = KeyboardKey.Character(selectedPunctuation, KeyboardKey.KeyType.PUNCTUATION)
+        performContextualHaptic(punctuationKey)
         onKeyClick(punctuationKey)
     }
 
     private val keyClickListener =
         View.OnClickListener { view ->
             val key = view.getTag(R.id.key_data) as? KeyboardKey ?: return@OnClickListener
-            performCustomHaptic()
+            performContextualHaptic(key)
 
             if (accessibilityManager.isEnabled) {
                 val event = AccessibilityEvent.obtain(AccessibilityEvent.TYPE_VIEW_CLICKED)
@@ -146,7 +149,7 @@ class KeyboardLayoutManager(
                     val handler = Handler(Looper.getMainLooper())
                     val runnable =
                         Runnable {
-                            performCustomHaptic()
+                            performContextualHaptic(key)
                             handleCharacterLongPress(key, view)
                         }
                     buttonPendingCallbacks[view as Button] = PendingCallbacks(handler, runnable)
@@ -171,7 +174,7 @@ class KeyboardLayoutManager(
                     val handler = Handler(Looper.getMainLooper())
                     val runnable =
                         Runnable {
-                            performCustomHaptic()
+                            performContextualHaptic(KeyboardKey.Action(KeyboardKey.ActionType.SPACE))
                             handleSpaceLongPress(view)
                         }
                     buttonPendingCallbacks[view as Button] = PendingCallbacks(handler, runnable)
@@ -200,7 +203,7 @@ class KeyboardLayoutManager(
                         Runnable {
                             symbolsLongPressFired.add(button)
                             button.isPressed = false
-                            performCustomHaptic()
+                            performContextualHaptic(null)
                             onSymbolsLongPress()
                         }
                     buttonPendingCallbacks[button] = PendingCallbacks(handler, runnable)
@@ -221,7 +224,7 @@ class KeyboardLayoutManager(
 
     private val backspaceLongClickListener =
         View.OnLongClickListener { _ ->
-            performCustomHaptic()
+            performContextualHaptic(KeyboardKey.Action(KeyboardKey.ActionType.BACKSPACE))
             startAcceleratedBackspace()
             true
         }
@@ -256,7 +259,7 @@ class KeyboardLayoutManager(
     }
 
     fun triggerHapticFeedback() {
-        performCustomHaptic()
+        performContextualHaptic(null)
     }
 
     fun updateLongPressDuration(duration: LongPressDuration) {
@@ -287,26 +290,42 @@ class KeyboardLayoutManager(
 
     fun updateHapticSettings(
         enabled: Boolean,
-        durationMs: Long,
+        amplitude: Int,
     ) {
         hapticEnabled = enabled
-        hapticDurationMs = durationMs
+        hapticAmplitude = amplitude
     }
 
     fun updateClipboardEnabled(enabled: Boolean) {
         clipboardEnabled = enabled
     }
 
-    private fun performCustomHaptic(durationMs: Long = hapticDurationMs) {
-        if (!hapticEnabled) return
+    private fun performContextualHaptic(key: KeyboardKey?) {
+        if (!hapticEnabled || hapticAmplitude == 0) return
 
         try {
-            vibrator?.vibrate(
-                android.os.VibrationEffect.createOneShot(
-                    durationMs,
-                    android.os.VibrationEffect.DEFAULT_AMPLITUDE,
-                ),
-            )
+            val signature =
+                when (key) {
+                    is KeyboardKey.Character ->
+                        when (key.type) {
+                            KeyboardKey.KeyType.LETTER -> HapticSignature.LetterClick
+                            KeyboardKey.KeyType.PUNCTUATION -> HapticSignature.PunctuationTick
+                            KeyboardKey.KeyType.NUMBER -> HapticSignature.NumberClick
+                            KeyboardKey.KeyType.SYMBOL -> HapticSignature.PunctuationTick
+                        }
+                    is KeyboardKey.Action ->
+                        when (key.action) {
+                            KeyboardKey.ActionType.SPACE -> HapticSignature.SpaceThump
+                            KeyboardKey.ActionType.BACKSPACE -> HapticSignature.BackspaceChirp
+                            KeyboardKey.ActionType.SHIFT -> HapticSignature.ShiftPulse
+                            KeyboardKey.ActionType.ENTER -> HapticSignature.EnterCompletion
+                            else -> HapticSignature.LetterClick
+                        }
+                    null -> HapticSignature.LetterClick
+                }
+
+            val effect = signature.createEffect(hapticAmplitude)
+            vibrator?.vibrate(effect)
         } catch (_: Exception) {
         }
     }
@@ -678,7 +697,7 @@ class KeyboardLayoutManager(
         }
 
     private fun handleSpaceLongPress(view: View) {
-        performCustomHaptic()
+        performContextualHaptic(KeyboardKey.Action(KeyboardKey.ActionType.SPACE))
 
         val currentLanguage = languageManager.currentLanguage.value
         val languageCode = currentLanguage.split("-").first()
@@ -880,7 +899,7 @@ class KeyboardLayoutManager(
         variations: List<String>,
     ) {
         variationPopup?.dismiss()
-        performCustomHaptic()
+        performContextualHaptic(key)
 
         anchorView.isPressed = false
 
@@ -899,19 +918,15 @@ class KeyboardLayoutManager(
         onAcceleratedDeletionChanged(true)
 
         backspaceStartTime = System.currentTimeMillis()
-        backspaceCharsSinceLastHaptic = 0
+        startBackspaceSpinUp()
 
         backspaceHandler = Handler(Looper.getMainLooper())
         backspaceRunnable =
             object : Runnable {
                 override fun run() {
-                    val elapsed = System.currentTimeMillis() - backspaceStartTime
-
                     onKeyClick(KeyboardKey.Action(KeyboardKey.ActionType.BACKSPACE))
-                    backspaceCharsSinceLastHaptic++
-                    performHapticForBackspace(elapsed)
 
-                    val nextInterval = calculateBackspaceInterval(elapsed)
+                    val nextInterval = calculateBackspaceInterval(System.currentTimeMillis() - backspaceStartTime)
                     backspaceHandler?.postDelayed(this, nextInterval)
                 }
             }
@@ -926,9 +941,107 @@ class KeyboardLayoutManager(
         backspaceHandler = null
         backspaceRunnable = null
         backspaceStartTime = 0L
-        backspaceCharsSinceLastHaptic = 0
+        stopBackspaceSpinUp()
 
         onAcceleratedDeletionChanged(false)
+    }
+
+    private fun startBackspaceSpinUp() {
+        stopBackspaceSpinUp()
+
+        backspaceVibrationJob =
+            backgroundScope.launch {
+                var phase = 1
+
+                while (isActive) {
+                    val elapsed = System.currentTimeMillis() - backspaceStartTime
+
+                    when {
+                        elapsed < 500 -> {
+                            if (phase != 1) {
+                                phase = 1
+                                withContext(Dispatchers.Main) {
+                                    vibrator?.cancel()
+                                }
+                            }
+                            delay(50)
+                        }
+
+                        elapsed < 1500 -> {
+                            if (phase != 2) {
+                                phase = 2
+                                withContext(Dispatchers.Main) {
+                                    vibrator?.cancel()
+                                }
+                            }
+
+                            val phaseProgress = (elapsed - 500) / 1000f
+                            val intervalMs = (60 - phaseProgress * 30).toLong().coerceAtLeast(30)
+                            val intensity = 0.7f + phaseProgress * 0.3f
+                            val amplitude = (hapticAmplitude * intensity).toInt().coerceIn(1, 255)
+
+                            withContext(Dispatchers.Main) {
+                                vibrator?.vibrate(
+                                    android.os.VibrationEffect.createOneShot(intervalMs / 2, amplitude),
+                                )
+                            }
+                            delay(intervalMs)
+                        }
+
+                        else -> {
+                            if (phase != 3) {
+                                phase = 3
+                                startContinuousBackspaceRumble()
+                            }
+                            delay(50)
+                        }
+                    }
+                }
+            }
+    }
+
+    private fun startContinuousBackspaceRumble() {
+        if (!hapticEnabled || hapticAmplitude == 0) return
+
+        val rampSteps = 30
+        val timings =
+            LongArray(rampSteps + 10) { i ->
+                if (i < rampSteps) 50L else 40L
+            }
+
+        val amplitudes =
+            IntArray(rampSteps + 10) { i ->
+                val progress =
+                    if (i < rampSteps) {
+                        i / rampSteps.toFloat()
+                    } else {
+                        1.0f
+                    }
+
+                val intensity = 0.4f + progress * 0.7f
+                (hapticAmplitude * intensity).toInt().coerceIn(1, 255)
+            }
+
+        backgroundScope.launch {
+            withContext(Dispatchers.Main) {
+                try {
+                    vibrator?.vibrate(
+                        android.os.VibrationEffect.createWaveform(
+                            timings,
+                            amplitudes,
+                            rampSteps + 2,
+                        ),
+                    )
+                } catch (_: Exception) {
+                }
+            }
+        }
+    }
+
+    private fun stopBackspaceSpinUp() {
+        backspaceVibrationJob?.cancel()
+        backspaceVibrationJob = null
+        vibrator?.cancel()
     }
 
     private fun calculateBackspaceInterval(elapsed: Long): Long {
@@ -942,18 +1055,6 @@ class KeyboardLayoutManager(
 
         val progress = elapsed / accelerationDuration
         return (startSpeed - (startSpeed - endSpeed) * progress).toLong()
-    }
-
-    private fun performHapticForBackspace(elapsed: Long) {
-        val interval = calculateBackspaceInterval(elapsed)
-
-        if (interval > 50) {
-            performCustomHaptic()
-            backspaceCharsSinceLastHaptic = 0
-        } else if (backspaceCharsSinceLastHaptic >= 5) {
-            performCustomHaptic()
-            backspaceCharsSinceLastHaptic = 0
-        }
     }
 
     private fun getKeyWeight(

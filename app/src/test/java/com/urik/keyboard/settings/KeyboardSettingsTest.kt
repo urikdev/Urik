@@ -192,25 +192,25 @@ class KeyboardSettingsTest {
     }
 
     @Test
-    fun `effectiveVibrationDurationMs returns duration when enabled`() {
+    fun `effectiveVibrationAmplitude returns amplitude when enabled`() {
         val settings =
             KeyboardSettings(
                 hapticFeedback = true,
                 vibrationStrength = VibrationStrength.STRONG,
             )
 
-        assertEquals(40L, settings.effectiveVibrationDurationMs)
+        assertEquals(255, settings.effectiveVibrationAmplitude)
     }
 
     @Test
-    fun `effectiveVibrationDurationMs returns zero when disabled`() {
+    fun `effectiveVibrationAmplitude returns zero when disabled`() {
         val settings =
             KeyboardSettings(
                 hapticFeedback = false,
                 vibrationStrength = VibrationStrength.STRONG,
             )
 
-        assertEquals(0L, settings.effectiveVibrationDurationMs)
+        assertEquals(0, settings.effectiveVibrationAmplitude)
     }
 
     @Test
