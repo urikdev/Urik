@@ -19,7 +19,7 @@
     <string name="feedback_settings_description">Звуки клавиш и вибрация</string>
     <string name="typing_settings_title">Настройки Поведения Ввода</string>
     <string name="typing_settings_description">Пунктуация и т.д.</string>
-    <string name="layout_settings_title">Макет и Ввод</string>
+    <string name="layout_settings_title">Раскладка и Ввод</string>
     <string name="layout_settings_description">Ряд цифр, размер пробела</string>
     <string name="appearance_settings_title">Внешний Вид</string>
     <string name="appearance_settings_description">Тема, размер</string>
@@ -39,9 +39,9 @@
     <string name="key_size_extra_large">Очень Большой</string>
 
     <!-- Vibration Strength -->
-    <string name="vibration_strength_light">Слабая</string>
-    <string name="vibration_strength_medium">Средняя</string>
-    <string name="vibration_strength_strong">Сильная</string>
+    <string name="vibration_strength_light">Слабый</string>
+    <string name="vibration_strength_medium">Средний</string>
+    <string name="vibration_strength_strong">Сильный</string>
 
     <!-- Long Press Duration -->
     <string name="long_press_duration_short">Короткая</string>
