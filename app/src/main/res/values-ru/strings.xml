@@ -81,10 +81,6 @@
     <string name="feedback_settings_haptic_feedback">Тактильная Отдача</string>
     <string name="feedback_settings_haptic_on">Тактильная отдача включена</string>
     <string name="feedback_settings_haptic_off">Тактильная отдача отключена</string>
-    <string name="feedback_settings_vibration_strength">Сила Вибрации</string>
-    <string name="feedback_settings_haptic_feedback">Тактильная Отдача</string>
-    <string name="feedback_settings_haptic_on">Тактильная отдача включена</string>
-    <string name="feedback_settings_haptic_off">Тактильная отдача отключена</string>
     <string name="feedback_settings_vibration_strength">Уровень Вибрации</string>
 
     <!-- Typing Behavior Settings -->
