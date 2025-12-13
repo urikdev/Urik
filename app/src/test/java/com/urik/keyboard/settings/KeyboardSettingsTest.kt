@@ -255,6 +255,50 @@ class KeyboardSettingsTest {
     }
 
     @Test
+    fun `defaultForLocale supports russian`() {
+        val settings = KeyboardSettings.defaultForLocale("ru")
+
+        assertEquals(setOf("ru"), settings.activeLanguages)
+        assertEquals("ru", settings.primaryLanguage)
+    }
+
+    @Test
+    fun `validated preserves russian as supported language`() {
+        val settings =
+            KeyboardSettings(
+                activeLanguages = setOf("ru", "en", "fr"),
+                primaryLanguage = "ru",
+            )
+
+        val validated = settings.validated()
+
+        assertEquals(setOf("ru", "en"), validated.activeLanguages)
+        assertEquals("ru", validated.primaryLanguage)
+    }
+
+    @Test
+    fun `defaultForLocale supports ukrainian`() {
+        val settings = KeyboardSettings.defaultForLocale("uk")
+
+        assertEquals(setOf("uk"), settings.activeLanguages)
+        assertEquals("uk", settings.primaryLanguage)
+    }
+
+    @Test
+    fun `validated preserves ukrainian as supported language`() {
+        val settings =
+            KeyboardSettings(
+                activeLanguages = setOf("uk", "en", "fr"),
+                primaryLanguage = "uk",
+            )
+
+        val validated = settings.validated()
+
+        assertEquals(setOf("uk", "en"), validated.activeLanguages)
+        assertEquals("uk", validated.primaryLanguage)
+    }
+
+    @Test
     fun `defaultForLocale falls back to english for unsupported`() {
         val settings = KeyboardSettings.defaultForLocale("fr")
 
