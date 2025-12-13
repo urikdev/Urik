@@ -9,6 +9,7 @@ import com.ibm.icu.util.ULocale
 import com.urik.keyboard.KeyboardConstants.SwipeDetectionConstants
 import com.urik.keyboard.model.KeyboardKey
 import com.urik.keyboard.service.SpellCheckManager
+import com.urik.keyboard.service.WordLearningEngine
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -43,6 +44,7 @@ class SwipeDetector
     @Inject
     constructor(
         private val spellCheckManager: SpellCheckManager,
+        private val wordLearningEngine: WordLearningEngine,
     ) {
         /**
          * Captured swipe point with metadata.
@@ -405,14 +407,26 @@ class SwipeDetector
                     if (swipePath.isEmpty()) return@withContext emptyList()
 
                     val keyPositionsSnapshot = keyCharacterPositions
-                    val rawWords = spellCheckManager.getCommonWords()
+
+                    val minLength = (swipePath.size / 7).coerceAtLeast(2)
+                    val maxLength = (swipePath.size).coerceAtMost(20)
+
+                    val dictionaryWords = spellCheckManager.getCommonWords()
+                    val learnedWords = wordLearningEngine.getLearnedWordsForSwipe(minLength, maxLength)
+
+                    val rawWords =
+                        if (learnedWords.isNotEmpty()) {
+                            val combined = (dictionaryWords + learnedWords).groupBy { it.first }
+                            combined.map { (word, entries) ->
+                                word to entries.maxOf { it.second }
+                            }
+                        } else {
+                            dictionaryWords
+                        }
 
                     if (keyPositionsSnapshot.isEmpty() || rawWords.isEmpty()) {
                         return@withContext emptyList()
                     }
-
-                    val minLength = (swipePath.size / 7).coerceAtLeast(2)
-                    val maxLength = (swipePath.size).coerceAtMost(20)
 
                     val velocities = swipePath.map { it.velocity }
                     val avgVelocity = if (velocities.isNotEmpty()) velocities.average() else 0.0
@@ -523,9 +537,14 @@ class SwipeDetector
                             }
                         val boostedFrequencyScore = entry.frequencyScore * frequencyBoost
 
-                        val combinedScore =
-                            adjustedSpatialScore * SwipeDetectionConstants.SPATIAL_SCORE_WEIGHT +
-                                boostedFrequencyScore * SwipeDetectionConstants.FREQUENCY_SCORE_WEIGHT
+                        val (spatialWeight, frequencyWeight) =
+                            if (entry.word.length == 2 && adjustedSpatialScore > 0.75f) {
+                                0.85f to 0.15f
+                            } else {
+                                SwipeDetectionConstants.SPATIAL_SCORE_WEIGHT to SwipeDetectionConstants.FREQUENCY_SCORE_WEIGHT
+                            }
+
+                        val combinedScore = adjustedSpatialScore * spatialWeight + boostedFrequencyScore * frequencyWeight
 
                         val candidate = WordCandidate(entry.word, adjustedSpatialScore, entry.frequencyScore, combinedScore)
 
@@ -654,7 +673,13 @@ class SwipeDetector
             val baseSpatialScore = totalScore / word.length.toFloat()
 
             val hasBadLetter = letterScores.any { it.second < 0.30f }
-            val wrongLetterPenalty = if (hasBadLetter && word.length >= 4) 0.85f else 1.0f
+            val wrongLetterPenalty =
+                when {
+                    hasBadLetter && word.length == 2 -> 0.50f
+                    hasBadLetter && word.length == 3 -> 0.65f
+                    hasBadLetter && word.length >= 4 -> 0.85f
+                    else -> 1.0f
+                }
 
             val lengthBonus =
                 when {
