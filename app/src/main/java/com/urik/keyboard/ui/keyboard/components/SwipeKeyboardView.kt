@@ -10,7 +10,6 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
-import android.view.WindowInsets
 import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.LinearLayout
@@ -216,19 +215,6 @@ class SwipeKeyboardView
                     R.style.Theme_Urik,
                 )
 
-            val windowInsets = rootWindowInsets
-            val bottomInset =
-                if (windowInsets != null) {
-                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
-                        windowInsets.getInsets(WindowInsets.Type.systemBars()).bottom
-                    } else {
-                        @Suppress("DEPRECATION")
-                        windowInsets.systemWindowInsetBottom
-                    }
-                } else {
-                    0
-                }
-
             val container =
                 LinearLayout(baseContext).apply {
                     orientation = LinearLayout.VERTICAL
@@ -333,9 +319,7 @@ class SwipeKeyboardView
                                 LinearLayout.LayoutParams.MATCH_PARENT,
                                 0,
                                 1f,
-                            ).apply {
-                                bottomMargin = bottomInset
-                            }
+                            )
                 }
 
             container.addView(emojiPickerView)
@@ -376,19 +360,7 @@ class SwipeKeyboardView
 
             if (keyboardView != null) {
                 keyboardView.measure(widthMeasureSpec, MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED))
-                var keyboardHeight = keyboardView.measuredHeight
-
-                val windowInsets = rootWindowInsets
-                if (windowInsets != null) {
-                    val bottomInset =
-                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
-                            windowInsets.getInsets(WindowInsets.Type.systemBars()).bottom
-                        } else {
-                            @Suppress("DEPRECATION")
-                            windowInsets.systemWindowInsetBottom
-                        }
-                    keyboardHeight += bottomInset
-                }
+                val keyboardHeight = keyboardView.measuredHeight
 
                 val constrainedHeight = MeasureSpec.makeMeasureSpec(keyboardHeight, MeasureSpec.EXACTLY)
                 super.onMeasure(widthMeasureSpec, constrainedHeight)

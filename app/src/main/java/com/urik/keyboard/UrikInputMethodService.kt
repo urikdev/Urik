@@ -8,7 +8,11 @@ import android.text.style.BackgroundColorSpan
 import android.text.style.ForegroundColorSpan
 import android.view.Gravity
 import android.view.View
+import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
+import android.widget.LinearLayout
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
@@ -655,7 +659,33 @@ class UrikInputMethodService :
                 actualWindow.attributes = layoutParams
             }
 
-            return createSwipeKeyboardView()
+            val keyboardView = createSwipeKeyboardView() ?: return null
+
+            return LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                layoutParams =
+                    ViewGroup.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT,
+                    )
+
+                ViewCompat.setOnApplyWindowInsetsListener(this) { _, insets ->
+                    val navBarInsets = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
+                    (keyboardView.layoutParams as? ViewGroup.MarginLayoutParams)?.apply {
+                        bottomMargin = navBarInsets.bottom
+                    }
+                    keyboardView.requestLayout()
+                    WindowInsetsCompat.CONSUMED
+                }
+
+                addView(
+                    keyboardView,
+                    LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                    ),
+                )
+            }
         } catch (e: Exception) {
             ErrorLogger.logException(
                 component = "UrikInputMethodService",
