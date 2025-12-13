@@ -1,5 +1,4 @@
 <resources>
-    <string name="app_name" translatable="false">Urik</string>
     <string name="ime_name">Klawiatura Urik</string>
     <string name="ime_label">Klawiatura Urik</string>
     <string name="ime_description">Pisanie gestami, sprawdzanie pisowni i obsługa wielu języków bez naruszania prywatności. Bez telemetrii. Bez gromadzenia danych. Wszystko pozostaje na twoim urządzeniu.</string>
@@ -33,6 +32,7 @@
 
     <!-- Settings Enums -->
     <!-- Key Size -->
+    <string name="test_field_hint">Zmiany testowe</string>
     <string name="key_size_small">Małe</string>
     <string name="key_size_medium">Średnie</string>
     <string name="key_size_large">Duże</string>
