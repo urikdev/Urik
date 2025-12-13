@@ -417,11 +417,6 @@ class UrikInputMethodService :
         if (!viewModel.state.value.isCapsLockOn) {
             viewModel.onEvent(KeyboardEvent.ShiftStateChanged(false))
         }
-
-        try {
-            currentInputConnection?.finishComposingText()
-        } catch (_: Exception) {
-        }
     }
 
     private fun applyCapitalizationToSuggestions(suggestions: List<String>): List<String> {
@@ -472,10 +467,6 @@ class UrikInputMethodService :
     private suspend fun coordinateSuggestionSelection(suggestion: String) {
         withContext(Dispatchers.Main) {
             try {
-                synchronized(processingLock) {
-                    processingSequence++
-                }
-
                 isActivelyEditing = true
 
                 currentInputConnection?.beginBatchEdit()
@@ -490,15 +481,7 @@ class UrikInputMethodService :
                             ?: 0
                     currentInputConnection?.setSelection(cursorPos, cursorPos)
 
-                    displayBuffer = ""
-                    wordState = WordState()
-                    pendingSuggestions = emptyList()
-                    spellConfirmationState = SpellConfirmationState.NORMAL
-                    pendingWordForLearning = null
-                    composingRegionStart = -1
-                    swipeKeyboardView?.clearSuggestions()
-
-                    currentInputConnection?.finishComposingText()
+                    coordinateStateClear()
 
                     val textBefore = safeGetTextBeforeCursor(50)
                     viewModel.checkAndApplyAutoCapitalization(textBefore)
@@ -1759,7 +1742,6 @@ class UrikInputMethodService :
             }
 
             coordinateStateClear()
-            clearSpellConfirmationState()
 
             if (imeAction == EditorInfo.IME_ACTION_NONE) {
                 val textBefore = safeGetTextBeforeCursor(50)
@@ -1944,21 +1926,7 @@ class UrikInputMethodService :
                         }
                     } else {
                         currentInputConnection?.setComposingText("", 1)
-
-                        synchronized(processingLock) {
-                            processingSequence++
-                        }
-                        suggestionDebounceJob?.cancel()
-                        displayBuffer = ""
-                        wordState = WordState()
-                        pendingSuggestions = emptyList()
-                        clearSpellConfirmationState()
-                        swipeKeyboardView?.clearSuggestions()
-                        composingRegionStart = -1
-
-                        if (!viewModel.state.value.isCapsLockOn) {
-                            viewModel.onEvent(KeyboardEvent.ShiftStateChanged(false))
-                        }
+                        coordinateStateClear()
                     }
                 }
             } else {
@@ -2364,7 +2332,6 @@ class UrikInputMethodService :
         }
 
         coordinateStateClear()
-        clearSpellConfirmationState()
 
         lifecycleRegistry.currentState = Lifecycle.State.CREATED
     }
@@ -2402,7 +2369,6 @@ class UrikInputMethodService :
                 )
             ) {
                 coordinateStateClear()
-                clearSpellConfirmationState()
             }
 
             if (!isUrlOrEmailField) {
@@ -2411,11 +2377,6 @@ class UrikInputMethodService :
         }
 
         if (isUrlOrEmailField) return
-
-        if (isActivelyEditing) {
-            isActivelyEditing = false
-            return
-        }
 
         val hasComposingText = (candidatesStart != -1 && candidatesEnd != -1)
         val cursorInComposingRegion =
@@ -2427,13 +2388,16 @@ class UrikInputMethodService :
 
         if (hasComposingText && !cursorInComposingRegion) {
             coordinateStateClear()
-            clearSpellConfirmationState()
             return
         }
 
         if (!hasComposingText && (wordState.hasContent || displayBuffer.isNotEmpty())) {
             coordinateStateClear()
-            clearSpellConfirmationState()
+            return
+        }
+
+        if (isActivelyEditing) {
+            isActivelyEditing = false
             return
         }
 
