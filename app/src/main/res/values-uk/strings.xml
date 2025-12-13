@@ -19,7 +19,7 @@
     <string name="feedback_settings_description">Звуки та вібрація клавіш</string>
     <string name="typing_settings_title">Налаштування Поведінки Вводу</string>
     <string name="typing_settings_description">Пунктуація тощо</string>
-    <string name="layout_settings_title">Макет та Ввід</string>
+    <string name="layout_settings_title">Розкладка та Ввід</string>
     <string name="layout_settings_description">Ряд цифр, розмір пробілу</string>
     <string name="appearance_settings_title">Зовнішній Вигляд</string>
     <string name="appearance_settings_description">Тема, розмір</string>
@@ -39,9 +39,9 @@
     <string name="key_size_extra_large">Дуже Великий</string>
 
     <!-- Vibration Strength -->
-    <string name="vibration_strength_light">Легка</string>
-    <string name="vibration_strength_medium">Середня</string>
-    <string name="vibration_strength_strong">Сильна</string>
+    <string name="vibration_strength_light">Легкий</string>
+    <string name="vibration_strength_medium">Середній</string>
+    <string name="vibration_strength_strong">Сильний</string>
 
     <!-- Long Press Duration -->
     <string name="long_press_duration_short">Коротка</string>
