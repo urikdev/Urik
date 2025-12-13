@@ -29,6 +29,7 @@
     <string name="dictionary_attribution_title">Wörterbuch</string>
     <string name="theme_picker_title">Thema</string>
     <string name="dictionary_attribution_summary">FrequencyWords Lizenz</string>
+    <string name="test_field_hint">Änderungen testen</string>
 
     <!-- Settings Enums -->
     <!-- Key Size -->

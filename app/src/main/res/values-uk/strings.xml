@@ -1,5 +1,4 @@
 <resources>
-    <string name="app_name" translatable="false">Urik</string>
     <string name="ime_name">Клавіатура Urik</string>
     <string name="ime_label">Клавіатура Urik</string>
     <string name="ime_description">Безперервний ввід, перевірка орфографії та багатомовна підтримка без шкоди для вашої конфіденційності. Без телеметрії. Без збору даних. Усе залишається на вашому пристрої.</string>
@@ -33,6 +32,7 @@
 
     <!-- Settings Enums -->
     <!-- Key Size -->
+    <string name="test_field_hint">Зміни в тестах</string>
     <string name="key_size_small">Малий</string>
     <string name="key_size_medium">Середній</string>
     <string name="key_size_large">Великий</string>

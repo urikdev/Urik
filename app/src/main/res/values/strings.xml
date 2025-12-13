@@ -30,6 +30,7 @@
     <string name="dictionary_attribution_title">Dictionary Data</string>
     <string name="theme_picker_title">Keyboard Theme</string>
     <string name="dictionary_attribution_summary">FrequencyWords license and attribution</string>
+    <string name="test_field_hint">Test changes</string>
 
     <!-- Settings Enums -->
     <!-- Key Size -->

@@ -1,7 +1,10 @@
 package com.urik.keyboard.settings.layoutinput
 
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
+import android.widget.EditText
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -27,10 +30,24 @@ class LayoutInputFragment : PreferenceFragmentCompat() {
 
     private lateinit var numberRowPref: SwitchPreferenceCompat
     private lateinit var spaceBarPref: ListPreference
+    private var testField: EditText? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewModel = ViewModelProvider(this)[LayoutInputViewModel::class.java]
+    }
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?,
+    ): View {
+        val preferenceView = super.onCreateView(inflater, container, savedInstanceState)
+        val wrapper = inflater.inflate(R.layout.preference_fragment_with_test_field, container, false)
+        val preferenceContainer = wrapper.findViewById<ViewGroup>(R.id.preference_container)
+        preferenceContainer.addView(preferenceView)
+        testField = wrapper.findViewById(R.id.test_field)
+        return wrapper
     }
 
     override fun onCreatePreferences(
@@ -96,5 +113,10 @@ class LayoutInputFragment : PreferenceFragmentCompat() {
                 }
             }
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        testField = null
     }
 }
