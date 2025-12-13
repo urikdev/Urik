@@ -132,6 +132,7 @@
     <string name="licenses_title">Öppen källkodslicenser</string>
     <string name="licenses_description">Visa tredjepartsbibliotekslicenser</string>
     <string name="dictionary_attribution_title">Ordboksdata</string>
+    <string name="test_field_hint">Testa ändringar</string>
     <string name="tip_1_title">Lärande ord</string>
     <string name="tip_1_description">Tryck mellanslag efter ett markerat stavfel för att lägga till ordet i din ordbok.</string>
     <string name="tip_2_title">Interpunktion</string>

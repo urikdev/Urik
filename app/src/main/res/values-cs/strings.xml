@@ -29,6 +29,7 @@
     <string name="dictionary_attribution_title">Data slovníku</string>
     <string name="theme_picker_title">Téma klávesnice</string>
     <string name="dictionary_attribution_summary">Licence a atribuce FrequencyWords</string>
+    <string name="test_field_hint">Otestovat změny</string>
 
     <!-- Settings Enums -->
     <!-- Key Size -->
