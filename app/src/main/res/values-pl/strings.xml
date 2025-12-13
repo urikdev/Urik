@@ -1,0 +1,217 @@
+<resources>
+    <string name="ime_name">Klawiatura Urik</string>
+    <string name="ime_label">Klawiatura Urik</string>
+    <string name="ime_description">Pisanie gestami, sprawdzanie pisowni i obsługa wielu języków bez naruszania prywatności. Bez telemetrii. Bez gromadzenia danych. Wszystko pozostaje na twoim urządzeniu.</string>
+
+    <!-- Settings -->
+    <string name="enable_keyboard_title">Włączyć</string>
+    <string name="open_settings">Otwórz ustawienia</string>
+    <string name="error_opening_settings">Nie można otworzyć ustawień</string>
+
+    <!-- Settings Activity -->
+    <string name="settings_title">Ustawienia klawiatury</string>
+    <string name="autocorrect_settings_title">Ustawienia autokorekty</string>
+    <string name="autocorrect_settings_description">Pisownia i sugestie</string>
+    <string name="language_settings_title">Ustawienia językowe</string>
+    <string name="language_settings_description">Wybierz język klawiatury</string>
+    <string name="feedback_settings_title">Ustawienia dźwięku i opinii</string>
+    <string name="feedback_settings_description">Dźwięki klawiszy i wibracje</string>
+    <string name="typing_settings_title">Ustawienia zachowania podczas pisania</string>
+    <string name="typing_settings_description">Interpunkcja itp.</string>
+    <string name="layout_settings_title">Układ i Wprowadzanie</string>
+    <string name="layout_settings_description">Numer wiersza, rozmiar spacji</string>
+    <string name="appearance_settings_title">Wygląd</string>
+    <string name="appearance_settings_description">Motyw, rozmiar</string>
+    <string name="privacy_settings_title">Prywatność i dane</string>
+    <string name="privacy_settings_description">Wyczyść dane, zresetuj ustawienia</string>
+    <string name="licenses_title">Licencje open source</string>
+    <string name="licenses_description">Wyświetl licencje bibliotek stron trzecich</string>
+    <string name="dictionary_attribution_title">Dane słownika</string>
+    <string name="theme_picker_title">Motyw klawiatury</string>
+    <string name="dictionary_attribution_summary">Licencja i atrybucja FrequencyWords</string>
+
+    <!-- Settings Enums -->
+    <!-- Key Size -->
+    <string name="test_field_hint">Zmiany testowe</string>
+    <string name="key_size_small">Małe</string>
+    <string name="key_size_medium">Średnie</string>
+    <string name="key_size_large">Duże</string>
+    <string name="key_size_extra_large">Bardzo duże</string>
+
+    <!-- Vibration Strength -->
+    <string name="vibration_strength_light">Lekki</string>
+    <string name="vibration_strength_medium">Średni</string>
+    <string name="vibration_strength_strong">Mocny</string>
+
+    <!-- Long Press Duration -->
+    <string name="long_press_duration_short">Krótki</string>
+    <string name="long_press_duration_medium">Średni</string>
+    <string name="long_press_duration_long">Długi</string>
+
+    <!-- Space Bar Size -->
+    <string name="space_bar_size_compact">Kompaktowy</string>
+    <string name="space_bar_size_standard">Standardowy</string>
+    <string name="space_bar_size_wide">Szeroki</string>
+
+    <!-- Key Label Size -->
+    <string name="key_label_size_small">Mały</string>
+    <string name="key_label_size_medium">Średni</string>
+    <string name="key_label_size_large">Duży</string>
+
+    <!-- Appearance Settings -->
+    <string name="appearance_settings_theme">Motyw</string>
+    <string name="appearance_settings_key_size">Rozmiar klawiszy</string>
+    <string name="appearance_settings_key_label_size">Rozmiar etykiety klawiszy</string>
+
+    <!-- Auto-Correct Settings -->
+    <string name="autocorrect_settings_spell_check">Sprawdzanie pisowni</string>
+    <string name="autocorrect_settings_spell_check_on">Sprawdzanie pisowni włączone</string>
+    <string name="autocorrect_settings_spell_check_off">Sprawdzanie pisowni wyłączone</string>
+    <string name="autocorrect_settings_show_suggestions">Pokaż sugestie</string>
+    <string name="autocorrect_settings_suggestions_on">Sugestie wyświetlane</string>
+    <string name="autocorrect_settings_suggestions_off">Sugestie ukryte</string>
+    <string name="autocorrect_settings_suggestion_count">Liczba sugestii</string>
+    <string name="autocorrect_settings_learn_new_words">Ucz się nowych słów</string>
+    <string name="autocorrect_settings_learn_new_words_on">Nauka włączona</string>
+    <string name="autocorrect_settings_learn_new_words_off">Nauka wyłączona</string>
+
+    <!-- Language Settings -->
+
+    <!-- Sound & Feedback Settings -->
+    <string name="feedback_settings_haptic_feedback">Wibracje haptyczne</string>
+    <string name="feedback_settings_haptic_on">Wibracje haptyczne włączone</string>
+    <string name="feedback_settings_haptic_off">Wibracje haptyczne wyłączone</string>
+    <string name="feedback_settings_vibration_strength">Moc wibracji</string>
+
+    <!-- Typing Behavior Settings -->
+    <string name="typing_settings_double_space_period">Podwójna Spacja Kropka</string>
+    <string name="typing_settings_double_space_on">Podwójna spacja wstawia kropkę</string>
+    <string name="typing_settings_double_space_off">Podwójna spacja wstawia spację</string>
+    <string name="typing_settings_swipe_enabled">Pisanie Gestem</string>
+    <string name="typing_settings_swipe_on">Pisanie gestem włączone</string>
+    <string name="typing_settings_swipe_off">Pisanie gestem wyłączone</string>
+    <string name="typing_settings_long_press_duration">Czas trwania długiego naciśnięcia</string>
+
+    <!-- Layout & Input Settings -->
+    <string name="layout_settings_show_number_row">Pokaż numer wiersza</string>
+    <string name="layout_settings_number_row_on">Wyświetlana liczba wierszy</string>
+    <string name="layout_settings_number_row_off">Ukryj wiersz z numerami</string>
+    <string name="layout_settings_space_bar_size">Rozmiar spacji</string>
+
+    <!-- Privacy & Data Settings -->
+    <string name="privacy_settings_clipboard_history">Historia Schowka</string>
+    <string name="privacy_settings_clipboard_history_on">Historia schowka włączona</string>
+    <string name="privacy_settings_clipboard_history_off">Historia schowka wyłączona</string>
+    <string name="privacy_settings_clear_learned_words">Wyczyść nauczone słowa</string>
+    <string name="privacy_settings_clear_learned_words_summary">Usuń całe nauczone słownictwo</string>
+    <string name="privacy_settings_clear_learned_words_confirm">Czy na pewno chcesz wyczyścić wszystkie nauczone słowa? Tego nie można cofnąć.</string>
+    <string name="privacy_settings_reset_to_defaults">Przywróć Domyślne Ustawienia</string>
+    <string name="privacy_settings_reset_to_defaults_confirm">Czy na pewno chcesz przywrócić wszystkie ustawienia do domyślnych?</string>
+    <string name="privacy_settings_export_error_log">Eksportuj Dziennik Błędów</string>
+    <string name="privacy_settings_export_error_log_summary">Udostępnij dzienniki diagnostyczne do debugowania</string>
+    <string name="privacy_settings_export_error_log_failed">Nie udało się wyeksportować dziennika błędów</string>
+
+    <!-- Error Messages -->
+    <string name="error_title">Błąd</string>
+    <string name="error_update_theme">Nie udało się zaktualizować motywu</string>
+    <string name="error_update_key_size">Nie udało się zaktualizować rozmiaru klawiszy</string>
+    <string name="error_update_key_label_size">Nie udało się zaktualizować rozmiaru etykiet klawiszy</string>
+    <string name="error_update_spell_check">Nie udało się zaktualizować sprawdzania pisowni</string>
+    <string name="error_update_suggestions">Nie udało się zaktualizować ustawień sugestii</string>
+    <string name="error_update_suggestion_count">Nie udało się zaktualizować liczby sugestii</string>
+    <string name="error_update_word_learning">Nie udało się zaktualizować nauki słów</string>
+    <string name="error_update_clipboard">Nie udało się zaktualizować ustawień schowka</string>
+    <string name="error_update_language">Nie udało się zaktualizować ustawień językowych</string>
+    <string name="error_update_haptic_feedback">Nie udało się zaktualizować wibracji haptycznych</string>
+    <string name="error_update_vibration_strength">Nie udało się zaktualizować siły wibracji</string>
+    <string name="error_update_double_space_period">Nie udało się zaktualizować podwójnej spacji na kropkę</string>
+    <string name="error_update_swipe">Nie udało się zaktualizować funkcji pisania gestami</string>
+    <string name="error_update_long_press_duration">Nie udało się zaktualizować czasu długiego naciśnięcia</string>
+    <string name="error_update_number_row">Nie udało się zaktualizować wiersza liczb</string>
+    <string name="error_update_space_bar_size">Nie udało się zaktualizować rozmiaru klawisza spacji</string>
+    <string name="error_clear_learned_words">Nie udało się wyczyścić nabytych słów</string>
+    <string name="error_reset_to_defaults">Nie udało się przywrócić ustawień do domyślnych</string>
+
+    <!-- Success Messages -->
+    <string name="success_learned_words_cleared">Nauczone słowa wyczyszczone</string>
+    <string name="success_settings_reset">Ustawienia przywrócone do domyślnych</string>
+
+    <!-- Keyboard descriptions -->
+    <string name="keyboard_description">Klawiatura wirtualna</string>
+
+    <!-- Default key labels -->
+    <string name="letters_mode_label">ABC</string>
+    <string name="numbers_mode_label">123</string>
+    <string name="symbols_mode_label">+=&lt;</string>
+
+    <!-- Accessibility descriptions -->
+    <string name="key_character_description">Wpisz %1$s</string>
+
+    <string name="shift_key_description">Klawisz Shift, naciśnij, aby następna litera była wielka</string>
+    <string name="shift_active_description">Shift aktywny, kliknij, aby dezaktywować</string>
+    <string name="caps_lock_description">Caps lock</string>
+    <string name="caps_lock_on_description">Caps Lock jest włączony, dotknij, aby wyłączyć</string>
+    <string name="backspace_key_description">Usuń poprzedni znak</string>
+    <string name="space_key_description">Spacja</string>
+   <string name="letters_mode_description">Przełącz na klawiaturę literową</string>
+    <string name="numbers_mode_description">Przełącz na klawiaturę numeryczną</string>
+    <string name="symbols_mode_description">Przełącz na klawiaturę symboli</string>
+    <string name="ime_prediction_description">Przewidywanie: %1$s</string>
+
+    <!-- Action button accessibility descriptions -->
+    <string name="action_enter_description">Naciśnij Enter</string>
+    <string name="action_send_description">Wyślij wiadomość</string>
+    <string name="action_search_description">Wyszukaj</string>
+    <string name="action_done_description">Zakończ edytowanie</string>
+    <string name="action_go_description">Przejdź do celu</string>
+    <string name="action_next_description">Przejdź do następnego pola</string>
+    <string name="action_previous_description">Przejdź do poprzedniego pola</string>
+
+    <string name="action_emoji">Emoji</string>
+
+    <!-- Theme Picker Accessibility -->
+    <string name="theme_description">Motyw %1$s</string>
+    <string name="theme_description_selected">Motyw %1$s, obecnie wybrany</string>
+    <string name="theme_add_favorite">Dodaj %1$s do ulubionych</string>
+    <string name="theme_remove_favorite">Usuń %1$s z ulubionych</string>
+
+    <!-- Character Variation Accessibility -->
+    <string name="character_variation_position">Wariant znaku %1$d z %2$d: %3$s</string>
+
+    <!-- Blacklisting Words -->
+    <string name="remove_suggestion">Usunąć %1$s z sugestii?</string>
+    <string name="remove_cancel">Anuluj</string>
+    <string name="remove_confirm">Usuń</string>
+
+    <!-- Tips -->
+    <string name="tip_1_title">Nauka Słów</string>
+    <string name="tip_1_description">Naciśnij spację po zaznaczonym błędzie, aby dodać słowo do swojego słownika.</string>
+
+    <string name="tip_2_title">Szybkie Menu Interpunkcji</string>
+    <string name="tip_2_description">Długie naciśnięcie klawisza spacji otworzy szybkie menu interpunkcji.</string>
+
+    <string name="tip_3_title">Warianty Znaków</string>
+    <string name="tip_3_description">Długie naciśnięcie na znaku pozwoli wybrać wariant dla tego znaku.</string>
+
+    <string name="tip_4_title">Usuń Słowa</string>
+    <string name="tip_4_description">Długie naciśnięcie na sugestii usunie ją z twojego słownika.</string>
+
+    <string name="tip_5_title">Menedżer Schowka</string>
+    <string name="tip_5_description">Długie naciśnięcie na klawiszu symbolu otworzy zarządzanie schowka.</string>
+
+    <!-- Clipboard Panel -->
+    <string name="clipboard_panel_title">Schowek</string>
+    <string name="clipboard_panel_pinned">Przypięte</string>
+    <string name="clipboard_panel_recent">Ostatnie</string>
+    <string name="clipboard_panel_empty">Brak historii schowka</string>
+    <string name="clipboard_panel_delete_all">Usuń Wszystko</string>
+    <string name="clipboard_panel_delete_all_confirm">Usunąć wszystkie nieprzypięte elementy schowka?</string>
+    <string name="clipboard_consent_message">Urik może odczytywać i przechowywać zawartość schowka w nieskończoność. Jeśli nie chcesz, aby to się działo, przejdź do ustawień i wyłącz historię schowka.</string>
+
+    <!-- Clipboard Accessibility -->
+    <string name="clipboard_item_description">Element schowka: %1$s</string>
+    <string name="clipboard_item_pin">Przypnij element schowka</string>
+    <string name="clipboard_item_unpin">Odepnij element schowka</string>
+    <string name="clipboard_item_delete">Usuń element schowka</string>
+
+</resources>

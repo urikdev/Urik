@@ -79,9 +79,11 @@ class SettingsActivity : AppCompatActivity() {
         val container = findViewById<View>(R.id.settings_container)
 
         ViewCompat.setOnApplyWindowInsetsListener(rootView) { v, windowInsets ->
-            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(insets.left, insets.top, insets.right, 0)
-            container.setPadding(0, 0, 0, insets.bottom)
+            val systemBars = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            val ime = windowInsets.getInsets(WindowInsetsCompat.Type.ime())
+
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0)
+            container.setPadding(0, 0, 0, maxOf(systemBars.bottom, ime.bottom))
             windowInsets
         }
     }
