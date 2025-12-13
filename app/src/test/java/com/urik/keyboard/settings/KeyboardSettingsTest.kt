@@ -299,6 +299,28 @@ class KeyboardSettingsTest {
     }
 
     @Test
+    fun `defaultForLocale supports polish`() {
+        val settings = KeyboardSettings.defaultForLocale("pl")
+
+        assertEquals(setOf("pl"), settings.activeLanguages)
+        assertEquals("pl", settings.primaryLanguage)
+    }
+
+    @Test
+    fun `validated preserves polish as supported language`() {
+        val settings =
+            KeyboardSettings(
+                activeLanguages = setOf("pl", "en", "fr"),
+                primaryLanguage = "pl",
+            )
+
+        val validated = settings.validated()
+
+        assertEquals(setOf("pl", "en"), validated.activeLanguages)
+        assertEquals("pl", validated.primaryLanguage)
+    }
+
+    @Test
     fun `defaultForLocale falls back to english for unsupported`() {
         val settings = KeyboardSettings.defaultForLocale("fr")
 
