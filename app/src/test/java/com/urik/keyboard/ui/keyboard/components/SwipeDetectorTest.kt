@@ -4,6 +4,7 @@ import android.graphics.PointF
 import android.view.MotionEvent
 import com.urik.keyboard.model.KeyboardKey
 import com.urik.keyboard.service.SpellCheckManager
+import com.urik.keyboard.service.WordLearningEngine
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.After
 import org.junit.Assert.assertFalse
@@ -26,6 +27,9 @@ class SwipeDetectorTest {
     private lateinit var spellCheckManager: SpellCheckManager
 
     @Mock
+    private lateinit var wordLearningEngine: WordLearningEngine
+
+    @Mock
     private lateinit var swipeListener: SwipeDetector.SwipeListener
 
     private lateinit var swipeDetector: SwipeDetector
@@ -34,7 +38,7 @@ class SwipeDetectorTest {
     @Before
     fun setup() {
         closeable = MockitoAnnotations.openMocks(this)
-        swipeDetector = SwipeDetector(spellCheckManager)
+        swipeDetector = SwipeDetector(spellCheckManager, wordLearningEngine)
         swipeDetector.setSwipeListener(swipeListener)
     }
 
