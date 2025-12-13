@@ -897,7 +897,7 @@ class UrikInputMethodService :
 
                     layoutManager.updateHapticSettings(
                         newSettings.hapticFeedback,
-                        newSettings.vibrationStrength.durationMs,
+                        newSettings.vibrationStrength.amplitude,
                     )
 
                     layoutManager.updateClipboardEnabled(newSettings.clipboardEnabled)
@@ -1009,7 +1009,7 @@ class UrikInputMethodService :
 
         layoutManager.updateHapticSettings(
             currentSettings.hapticFeedback,
-            currentSettings.vibrationStrength.durationMs,
+            currentSettings.vibrationStrength.amplitude,
         )
 
         layoutManager.updateClipboardEnabled(currentSettings.clipboardEnabled)
@@ -2459,6 +2459,10 @@ class UrikInputMethodService :
 
         coordinateStateClear()
         swipeKeyboardView = null
+
+        if (::layoutManager.isInitialized) {
+            layoutManager.cleanup()
+        }
 
         cacheMemoryManager.cleanup()
 
