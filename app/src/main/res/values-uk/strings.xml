@@ -1,0 +1,217 @@
+<resources>
+    <string name="app_name" translatable="false">Urik</string>
+    <string name="ime_name">Клавіатура Urik</string>
+    <string name="ime_label">Клавіатура Urik</string>
+    <string name="ime_description">Безперервний ввід, перевірка орфографії та багатомовна підтримка без шкоди для вашої конфіденційності. Без телеметрії. Без збору даних. Усе залишається на вашому пристрої.</string>
+
+    <!-- Settings -->
+    <string name="enable_keyboard_title">Увімкнути</string>
+    <string name="open_settings">Відкрити Налаштування</string>
+    <string name="error_opening_settings">Не вдалося відкрити налаштування</string>
+
+    <!-- Settings Activity -->
+    <string name="settings_title">Налаштування Клавіатури</string>
+    <string name="autocorrect_settings_title">Налаштування Автокорегування</string>
+    <string name="autocorrect_settings_description">Правопис та пропозиції</string>
+    <string name="language_settings_title">Налаштування Мови</string>
+    <string name="language_settings_description">Оберіть мови вашої клавіатури</string>
+    <string name="feedback_settings_title">Налаштування Звуку та Вібровідгуку</string>
+    <string name="feedback_settings_description">Звуки та вібрація клавіш</string>
+    <string name="typing_settings_title">Налаштування Поведінки Вводу</string>
+    <string name="typing_settings_description">Пунктуація тощо</string>
+    <string name="layout_settings_title">Макет та Ввід</string>
+    <string name="layout_settings_description">Ряд цифр, розмір пробілу</string>
+    <string name="appearance_settings_title">Зовнішній Вигляд</string>
+    <string name="appearance_settings_description">Тема, розмір</string>
+    <string name="privacy_settings_title">Конфіденційність та Дані</string>
+    <string name="privacy_settings_description">Очистити дані, скинути налаштування</string>
+    <string name="licenses_title">Ліцензії Відкритого Коду</string>
+    <string name="licenses_description">Переглянути ліцензії сторонніх бібліотек</string>
+    <string name="dictionary_attribution_title">Дані Словника</string>
+    <string name="theme_picker_title">Тема Клавіатури</string>
+    <string name="dictionary_attribution_summary">Ліцензія та зазначення авторства FrequencyWords</string>
+
+    <!-- Settings Enums -->
+    <!-- Key Size -->
+    <string name="key_size_small">Малий</string>
+    <string name="key_size_medium">Середній</string>
+    <string name="key_size_large">Великий</string>
+    <string name="key_size_extra_large">Дуже Великий</string>
+
+    <!-- Vibration Strength -->
+    <string name="vibration_strength_light">Легка</string>
+    <string name="vibration_strength_medium">Середня</string>
+    <string name="vibration_strength_strong">Сильна</string>
+
+    <!-- Long Press Duration -->
+    <string name="long_press_duration_short">Коротка</string>
+    <string name="long_press_duration_medium">Середня</string>
+    <string name="long_press_duration_long">Довга</string>
+
+    <!-- Space Bar Size -->
+    <string name="space_bar_size_compact">Компактний</string>
+    <string name="space_bar_size_standard">Стандартний</string>
+    <string name="space_bar_size_wide">Широкий</string>
+
+    <!-- Key Label Size -->
+    <string name="key_label_size_small">Малий</string>
+    <string name="key_label_size_medium">Середній</string>
+    <string name="key_label_size_large">Великий</string>
+
+    <!-- Appearance Settings -->
+    <string name="appearance_settings_theme">Тема</string>
+    <string name="appearance_settings_key_size">Розмір Клавіш</string>
+    <string name="appearance_settings_key_label_size">Розмір Підписів Клавіш</string>
+
+    <!-- Auto-Correct Settings -->
+    <string name="autocorrect_settings_spell_check">Перевірка Орфографії</string>
+    <string name="autocorrect_settings_spell_check_on">Перевірка орфографії увімкнена</string>
+    <string name="autocorrect_settings_spell_check_off">Перевірка орфографії вимкнена</string>
+    <string name="autocorrect_settings_show_suggestions">Показувати Пропозиції Слів</string>
+    <string name="autocorrect_settings_suggestions_on">Пропозиції відображаються</string>
+    <string name="autocorrect_settings_suggestions_off">Пропозиції приховані</string>
+    <string name="autocorrect_settings_suggestion_count">Кількість Пропозицій</string>
+    <string name="autocorrect_settings_learn_new_words">Запам'ятовувати Нові Слова</string>
+    <string name="autocorrect_settings_learn_new_words_on">Запам'ятовування увімкнено</string>
+    <string name="autocorrect_settings_learn_new_words_off">Запам'ятовування вимкнено</string>
+
+    <!-- Language Settings -->
+
+    <!-- Sound & Feedback Settings -->
+    <string name="feedback_settings_haptic_feedback">Тактильна Віддача</string>
+    <string name="feedback_settings_haptic_on">Тактильна віддача увімкнена</string>
+    <string name="feedback_settings_haptic_off">Тактильна віддача вимкнена</string>
+    <string name="feedback_settings_vibration_strength">Рівень Вібрації</string>
+
+    <!-- Typing Behavior Settings -->
+    <string name="typing_settings_double_space_period">Крапка При Подвійному Пробілі</string>
+    <string name="typing_settings_double_space_on">Подвійний пробіл вставляє крапку</string>
+    <string name="typing_settings_double_space_off">Подвійний пробіл вставляє пробіл</string>
+    <string name="typing_settings_swipe_enabled">Безперервний Ввід</string>
+    <string name="typing_settings_swipe_on">Безперервний Ввід увімкнено</string>
+    <string name="typing_settings_swipe_off">Безперервний Ввід вимкнено</string>
+    <string name="typing_settings_long_press_duration">Тривалість Довгого Натискання</string>
+
+    <!-- Layout & Input Settings -->
+    <string name="layout_settings_show_number_row">Показувати Ряд Цифр</string>
+    <string name="layout_settings_number_row_on">Ряд цифр відображається</string>
+    <string name="layout_settings_number_row_off">Ряд цифр приховується</string>
+    <string name="layout_settings_space_bar_size">Розмір Клавіші Пробілу</string>
+
+    <!-- Privacy & Data Settings -->
+    <string name="privacy_settings_clipboard_history">Історія Буфера Обміну</string>
+    <string name="privacy_settings_clipboard_history_on">Історію буфера обміну увімкнено</string>
+    <string name="privacy_settings_clipboard_history_off">Історію буфера обміну вимкнено</string>
+    <string name="privacy_settings_clear_learned_words">Видалити Вивчені Слова</string>
+    <string name="privacy_settings_clear_learned_words_summary">Очистити весь вивчений словниковий запас</string>
+    <string name="privacy_settings_clear_learned_words_confirm">Видалити всі вивчені слова? Цю дію не можна скасувати.</string>
+    <string name="privacy_settings_reset_to_defaults">Скинути до Стандартних Налаштувань</string>
+    <string name="privacy_settings_reset_to_defaults_confirm">Скинути всі налаштування до стандартних?</string>
+    <string name="privacy_settings_export_error_log">Експорт Журналу Помилок</string>
+    <string name="privacy_settings_export_error_log_summary">Поділитися діагностичними журналами для налагодження</string>
+    <string name="privacy_settings_export_error_log_failed">Не вдалося експортувати журнал помилок</string>
+
+    <!-- Error Messages -->
+    <string name="error_title">Помилка</string>
+    <string name="error_update_theme">Не вдалося оновити тему</string>
+    <string name="error_update_key_size">Не вдалося оновити розмір клавіш</string>
+    <string name="error_update_key_label_size">Не вдалося оновити розмір підписів</string>
+    <string name="error_update_spell_check">Не вдалося оновити перевірку орфографії</string>
+    <string name="error_update_suggestions">Не вдалося оновити налаштування пропозицій</string>
+    <string name="error_update_suggestion_count">Не вдалося оновити кількість пропозицій</string>
+    <string name="error_update_word_learning">Не вдалося оновити запам'ятовування слів</string>
+    <string name="error_update_clipboard">Не вдалося оновити налаштування буфера обміну</string>
+    <string name="error_update_language">Не вдалося оновити налаштування мови</string>
+    <string name="error_update_haptic_feedback">Не вдалося оновити тактильну віддачу</string>
+    <string name="error_update_vibration_strength">Не вдалося оновити рівень вібрації</string>
+    <string name="error_update_double_space_period">Не вдалося оновити крапку при подвійному пробілі</string>
+    <string name="error_update_swipe">Не вдалося оновити безперервний ввід</string>
+    <string name="error_update_long_press_duration">Не вдалося оновити тривалість довгого натискання</string>
+    <string name="error_update_number_row">Не вдалося оновити ряд цифр</string>
+    <string name="error_update_space_bar_size">Не вдалося оновити розмір клавіші пробілу</string>
+    <string name="error_clear_learned_words">Не вдалося видалити вивчені слова</string>
+    <string name="error_reset_to_defaults">Не вдалося скинути налаштування</string>
+
+    <!-- Success Messages -->
+    <string name="success_learned_words_cleared">Запам'ятовані слова видалені</string>
+    <string name="success_settings_reset">Налаштування скинуто до стандартних</string>
+
+    <!-- Keyboard descriptions -->
+    <string name="keyboard_description">Віртуальна клавіатура</string>
+
+    <!-- Default key labels -->
+    <string name="letters_mode_label">АБВ</string>
+    <string name="numbers_mode_label">123</string>
+    <string name="symbols_mode_label">+=&lt;</string>
+
+    <!-- Accessibility descriptions -->
+    <string name="key_character_description">Ввести %1$s</string>
+
+    <string name="shift_key_description">Клавіша Shift, натисніть, щоб зробити наступну літеру великою</string>
+    <string name="shift_active_description">Shift активний, натисніть, щоб деактивувати</string>
+    <string name="caps_lock_description">Caps Lock</string>
+    <string name="caps_lock_on_description">Caps Lock увімкнено, натисніть, щоб вимкнути</string>
+    <string name="backspace_key_description">Видалити попередній символ</string>
+    <string name="space_key_description">Клавіша пробілу</string>
+    <string name="letters_mode_description">Переключитися на клавіатуру з літерами</string>
+    <string name="numbers_mode_description">Переключитися на клавіатуру з цифрами</string>
+    <string name="symbols_mode_description">Переключитися на клавіатуру з символами</string>
+    <string name="ime_prediction_description">Пропозиція: %1$s</string>
+
+    <!-- Action button accessibility descriptions -->
+    <string name="action_enter_description">Натиснути Enter</string>
+    <string name="action_send_description">Надіслати повідомлення</string>
+    <string name="action_search_description">Пошук</string>
+    <string name="action_done_description">Готово</string>
+    <string name="action_go_description">Перейти</string>
+    <string name="action_next_description">Перейти до наступного поля</string>
+    <string name="action_previous_description">Перейти до попереднього поля</string>
+
+    <string name="action_emoji">Емодзі</string>
+
+    <!-- Theme Picker Accessibility -->
+    <string name="theme_description">Тема %1$s</string>
+    <string name="theme_description_selected">Тема %1$s, наразі активна</string>
+    <string name="theme_add_favorite">Додати %1$s до вибраного</string>
+    <string name="theme_remove_favorite">Видалити %1$s з вибраного</string>
+
+    <!-- Character Variation Accessibility -->
+    <string name="character_variation_position">Варіація символу %1$d з %2$d: %3$s</string>
+
+    <!-- Blacklisting Words -->
+    <string name="remove_suggestion">Видалити %1$s з пропозицій?</string>
+    <string name="remove_cancel">Скасувати</string>
+    <string name="remove_confirm">Видалити</string>
+
+    <!-- Tips -->
+    <string name="tip_1_title">Вивчення Слів</string>
+    <string name="tip_1_description">Натисніть пробіл після виділеної опечатки, щоб додати слово до вашого словника.</string>
+
+    <string name="tip_2_title">Швидке Меню Пунктуації</string>
+    <string name="tip_2_description">Натисніть та тримайте пробіл, щоб відкрити швидке меню пунктуації.</string>
+
+    <string name="tip_3_title">Варіації Символів</string>
+    <string name="tip_3_description">Натисніть та тримайте символ, щоб вибрати його варіацію.</string>
+
+    <string name="tip_4_title">Видалення Слів</string>
+    <string name="tip_4_description">Натисніть та тримайте пропозицію, щоб видалити її з вашого словника.</string>
+
+    <string name="tip_5_title">Менеджер Буфера Обміну</string>
+    <string name="tip_5_description">Натисніть та тримайте клавішу символів, щоб відкрити Менеджер Буфера Обміну.</string>
+
+    <!-- Clipboard Panel -->
+    <string name="clipboard_panel_title">Буфер Обміну</string>
+    <string name="clipboard_panel_pinned">Закріплені</string>
+    <string name="clipboard_panel_recent">Нещодавні</string>
+    <string name="clipboard_panel_empty">Історія буфера обміну порожня</string>
+    <string name="clipboard_panel_delete_all">Видалити Все</string>
+    <string name="clipboard_panel_delete_all_confirm">Видалити всі незакріплені елементи буфера обміну?</string>
+    <string name="clipboard_consent_message">Urik може читати та зберігати вміст буфера обміну необмежений час. Якщо ви цього не бажаєте, перейдіть у налаштування та вимкніть історію буфера обміну.</string>
+
+    <!-- Clipboard Accessibility -->
+    <string name="clipboard_item_description">Елемент буфера обміну: %1$s</string>
+    <string name="clipboard_item_pin">Закріпити елемент буфера обміну</string>
+    <string name="clipboard_item_unpin">Відкріпити елемент буфера обміну</string>
+    <string name="clipboard_item_delete">Видалити елемент буфера обміну</string>
+    
+</resources>
