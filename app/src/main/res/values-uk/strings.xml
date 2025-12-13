@@ -71,9 +71,9 @@
     <string name="autocorrect_settings_suggestions_on">Пропозиції відображаються</string>
     <string name="autocorrect_settings_suggestions_off">Пропозиції приховані</string>
     <string name="autocorrect_settings_suggestion_count">Кількість Пропозицій</string>
-    <string name="autocorrect_settings_learn_new_words">Запам'ятовувати Нові Слова</string>
-    <string name="autocorrect_settings_learn_new_words_on">Запам'ятовування увімкнено</string>
-    <string name="autocorrect_settings_learn_new_words_off">Запам'ятовування вимкнено</string>
+    <string name="autocorrect_settings_learn_new_words">Запам\'ятовувати Нові Слова</string>
+    <string name="autocorrect_settings_learn_new_words_on">Запам\'ятовування увімкнено</string>
+    <string name="autocorrect_settings_learn_new_words_off">Запам\'ятовування вимкнено</string>
 
     <!-- Language Settings -->
 
@@ -119,7 +119,7 @@
     <string name="error_update_spell_check">Не вдалося оновити перевірку орфографії</string>
     <string name="error_update_suggestions">Не вдалося оновити налаштування пропозицій</string>
     <string name="error_update_suggestion_count">Не вдалося оновити кількість пропозицій</string>
-    <string name="error_update_word_learning">Не вдалося оновити запам'ятовування слів</string>
+    <string name="error_update_word_learning">Не вдалося оновити запам\'ятовування слів</string>
     <string name="error_update_clipboard">Не вдалося оновити налаштування буфера обміну</string>
     <string name="error_update_language">Не вдалося оновити налаштування мови</string>
     <string name="error_update_haptic_feedback">Не вдалося оновити тактильну віддачу</string>
@@ -133,7 +133,7 @@
     <string name="error_reset_to_defaults">Не вдалося скинути налаштування</string>
 
     <!-- Success Messages -->
-    <string name="success_learned_words_cleared">Запам'ятовані слова видалені</string>
+    <string name="success_learned_words_cleared">Запам\'ятовані слова видалені</string>
     <string name="success_settings_reset">Налаштування скинуто до стандартних</string>
 
     <!-- Keyboard descriptions -->
