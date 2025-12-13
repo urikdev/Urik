@@ -32,7 +32,7 @@
 
     <!-- Settings Enums -->
     <!-- Key Size -->
-    <string name="test_field_hint">Тестовые изменения</string>
+    <string name="test_field_hint">Протестировать изменения</string>
     <string name="key_size_small">Маленький</string>
     <string name="key_size_medium">Средний</string>
     <string name="key_size_large">Большой</string>

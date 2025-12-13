@@ -32,7 +32,7 @@
 
     <!-- Settings Enums -->
     <!-- Key Size -->
-    <string name="test_field_hint">Зміни в тестах</string>
+    <string name="test_field_hint">Протестувати Зміни</string>
     <string name="key_size_small">Малий</string>
     <string name="key_size_medium">Середній</string>
     <string name="key_size_large">Великий</string>
