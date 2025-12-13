@@ -88,6 +88,12 @@ class WordLearningEngine
 
         private var currentSettings = KeyboardSettings()
 
+        @Volatile
+        private var swipeWordsCache = emptyList<Pair<String, Int>>()
+
+        @Volatile
+        private var swipeWordsCacheLanguage = ""
+
         private val engineJob = SupervisorJob()
         private val engineScope = CoroutineScope(engineJob + mainDispatcher)
 
@@ -221,6 +227,11 @@ class WordLearningEngine
                                     ?: ConcurrentHashMap.newKeySet()
                             cacheSet.add(normalized)
                             learnedWordsCache.put(currentLanguage, cacheSet)
+
+                            if (currentLanguage == swipeWordsCacheLanguage) {
+                                swipeWordsCache = emptyList()
+                                swipeWordsCacheLanguage = ""
+                            }
                         }
                     }
 
@@ -487,6 +498,11 @@ class WordLearningEngine
 
                         if (removed > 0) {
                             learnedWordsCache.getIfPresent(currentLanguage)?.remove(normalized)
+
+                            if (currentLanguage == swipeWordsCacheLanguage) {
+                                swipeWordsCache = emptyList()
+                                swipeWordsCacheLanguage = ""
+                            }
 
                             consecutiveErrors.set(0)
 
@@ -803,5 +819,62 @@ class WordLearningEngine
         fun clearCurrentLanguageCache() {
             val currentLanguage = languageManager.currentLanguage.value
             learnedWordsCache.invalidate(currentLanguage)
+
+            if (currentLanguage == swipeWordsCacheLanguage) {
+                swipeWordsCache = emptyList()
+                swipeWordsCacheLanguage = ""
+            }
         }
+
+        /**
+         * Gets learned words for the current language for swipe matching.
+         *
+         * Returns words in same format as SpellCheckManager.getCommonWords().
+         * Filters by length range to match swipe path constraints.
+         *
+         * @param minLength Minimum word length (from swipe path)
+         * @param maxLength Maximum word length (from swipe path)
+         * @return List of (word, frequency) pairs, frequency-sorted descending
+         */
+        suspend fun getLearnedWordsForSwipe(
+            minLength: Int,
+            maxLength: Int,
+        ): List<Pair<String, Int>> =
+            withContext(ioDispatcher) {
+                try {
+                    if (isInErrorCooldown()) {
+                        return@withContext emptyList()
+                    }
+
+                    val currentLanguage = languageManager.currentLanguage.value
+
+                    if (currentLanguage == swipeWordsCacheLanguage && swipeWordsCache.isNotEmpty()) {
+                        return@withContext swipeWordsCache.filter { it.first.length in minLength..maxLength }
+                    }
+
+                    val allWords = learnedWordDao.getAllLearnedWordsForLanguage(currentLanguage)
+
+                    val allLearnedWords =
+                        allWords
+                            .filter { it.frequency >= 1 }
+                            .map { it.word.lowercase() to it.frequency }
+                            .sortedByDescending { it.second }
+
+                    swipeWordsCache = allLearnedWords
+                    swipeWordsCacheLanguage = currentLanguage
+
+                    val filtered = allLearnedWords.filter { it.first.length in minLength..maxLength }
+
+                    onSuccessfulOperation()
+                    return@withContext filtered
+                } catch (_: SQLiteDatabaseCorruptException) {
+                    handleDatabaseError()
+                    emptyList()
+                } catch (_: SQLiteException) {
+                    handleDatabaseError()
+                    emptyList()
+                } catch (_: Exception) {
+                    emptyList()
+                }
+            }
     }

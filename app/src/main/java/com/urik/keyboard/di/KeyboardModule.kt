@@ -78,7 +78,10 @@ object KeyboardModule {
 
     @Provides
     @Singleton
-    fun provideSwipeDetector(spellCheckManager: SpellCheckManager): SwipeDetector = SwipeDetector(spellCheckManager)
+    fun provideSwipeDetector(
+        spellCheckManager: SpellCheckManager,
+        wordLearningEngine: WordLearningEngine,
+    ): SwipeDetector = SwipeDetector(spellCheckManager, wordLearningEngine)
 
     @Provides
     @Singleton

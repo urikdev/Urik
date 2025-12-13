@@ -128,7 +128,7 @@ class SwipeInputIntegrationTest {
                     settingsRepository,
                 )
 
-            swipeDetector = SwipeDetector(spellCheckManager)
+            swipeDetector = SwipeDetector(spellCheckManager, wordLearningEngine)
         }
 
     @After
