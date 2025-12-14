@@ -23,26 +23,30 @@ sealed interface KeyboardTheme {
                 Neon.id -> Neon
                 Ember.id -> Ember
                 Steel.id -> Steel
+                MaterialYou.Default.id -> Default
                 else -> Default
             }
 
         fun all(): List<KeyboardTheme> =
-            listOf(
-                Default,
-                Light,
-                Abyss,
-                Crimson,
-                Forest,
-                Sunset,
-                Ocean,
-                Lavender,
-                Mocha,
-                Slate,
-                Peach,
-                Mint,
-                Neon,
-                Ember,
-                Steel,
-            )
+            buildList {
+                add(Default)
+                add(Light)
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+                    add(MaterialYou.Default)
+                }
+                add(Abyss)
+                add(Crimson)
+                add(Forest)
+                add(Sunset)
+                add(Ocean)
+                add(Lavender)
+                add(Mocha)
+                add(Slate)
+                add(Peach)
+                add(Mint)
+                add(Neon)
+                add(Ember)
+                add(Steel)
+            }
     }
 }
