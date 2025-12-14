@@ -109,8 +109,6 @@ object KeyboardConstants {
         const val TWO_SIGMA_50_SQ = 4000f
         const val EXP_THRESHOLD_60 = 12100f
         const val TWO_SIGMA_60_SQ = 4000f
-        const val BASE_PENALTY_SHORT_WORD = 50f
-        const val BASE_PENALTY_LONG_WORD = 0f
         const val SPATIAL_SCORE_WEIGHT = 0.50f
         const val FREQUENCY_SCORE_WEIGHT = 0.50f
     }

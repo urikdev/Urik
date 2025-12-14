@@ -176,6 +176,7 @@ class SwipeDetector
                         startTime = System.currentTimeMillis()
                         return false
                     }
+
                     MotionEvent.ACTION_UP -> {
                         val duration = System.currentTimeMillis() - startTime
                         if (duration > 0 && duration <= SwipeDetectionConstants.TAP_DURATION_THRESHOLD_MS) {
@@ -189,7 +190,10 @@ class SwipeDetector
                         reset()
                         return false
                     }
-                    else -> return false
+
+                    else -> {
+                        return false
+                    }
                 }
             }
 
@@ -428,17 +432,6 @@ class SwipeDetector
                         return@withContext emptyList()
                     }
 
-                    val velocities = swipePath.map { it.velocity }
-                    val avgVelocity = if (velocities.isNotEmpty()) velocities.average() else 0.0
-                    val maxVelocity = velocities.maxOrNull() ?: 0f
-
-                    val durationMs =
-                        if (swipePath.size >= 2) {
-                            swipePath.last().timestamp - swipePath.first().timestamp
-                        } else {
-                            0L
-                        }
-
                     val dictionaryByFirstChar =
                         rawWords
                             .filter { (word, _) -> word.length in minLength..maxLength }
@@ -474,7 +467,7 @@ class SwipeDetector
                                         val dx = pos.x - firstPoint.x
                                         val dy = pos.y - firstPoint.y
                                         val distSq = dx * dx + dy * dy
-                                        Triple(char, distSq, kotlin.math.sqrt(distSq).toInt())
+                                        Triple(char, distSq, sqrt(distSq).toInt())
                                     }.sortedBy { it.second }
                                     .take(8)
                                     .filter { it.second < SwipeDetectionConstants.CLOSE_KEY_DISTANCE_THRESHOLD_SQ }
