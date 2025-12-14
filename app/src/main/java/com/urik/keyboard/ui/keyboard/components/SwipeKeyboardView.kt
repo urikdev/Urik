@@ -57,6 +57,8 @@ class SwipeKeyboardView
         private var onSuggestionLongPressListener: ((String) -> Unit)? = null
         private var onEmojiSelected: ((String) -> Unit)? = null
         private var onBackspacePressed: (() -> Unit)? = null
+        private var onSpacebarCursorMove: ((Int) -> Unit)? = null
+        private var onBackspaceSwipeDelete: (() -> Unit)? = null
         private val keyViews = mutableListOf<Button>()
         private val keyPositions = mutableMapOf<Button, Rect>()
         private val keyMapping = mutableMapOf<Button, KeyboardKey>()
@@ -76,6 +78,13 @@ class SwipeKeyboardView
         private var isSwipeActive = false
         private var touchStartPoint: PointF? = null
         private var touchStartTime: Long? = null
+
+        private var isGestureActive = false
+        private var gestureKey: KeyboardKey.Action? = null
+        private var gestureStartX = 0f
+        private var gestureStartY = 0f
+        private var gestureLastProcessedX = 0f
+        private var gestureDensity = 1f
 
         private var confirmationOverlay: FrameLayout? = null
         private var pendingRemovalSuggestion: String? = null
@@ -138,6 +147,7 @@ class SwipeKeyboardView
                     LayoutParams.MATCH_PARENT,
                 ),
             )
+            gestureDensity = context.resources.displayMetrics.density
         }
 
         private fun setupSwipeOverlay() {
@@ -427,6 +437,18 @@ class SwipeKeyboardView
         fun setOnBackspacePressedListener(listener: () -> Unit) {
             if (!isDestroyed) {
                 this.onBackspacePressed = listener
+            }
+        }
+
+        fun setOnSpacebarCursorMoveListener(listener: (Int) -> Unit) {
+            if (!isDestroyed) {
+                this.onSpacebarCursorMove = listener
+            }
+        }
+
+        fun setOnBackspaceSwipeDeleteListener(listener: () -> Unit) {
+            if (!isDestroyed) {
+                this.onBackspaceSwipeDelete = listener
             }
         }
 
@@ -1008,6 +1030,55 @@ class SwipeKeyboardView
             return index
         }
 
+        private fun processGestureMovement(
+            x: Float,
+            y: Float,
+        ) {
+            if (isDestroyed) return
+
+            val key = gestureKey ?: return
+
+            when (key.action) {
+                KeyboardKey.ActionType.SPACE -> {
+                    val sensitivity = com.urik.keyboard.KeyboardConstants.GestureConstants.SPACEBAR_CURSOR_SENSITIVITY_PX
+                    val totalDx = x - gestureStartX
+
+                    val positionsToMove = (totalDx / sensitivity).toInt()
+                    val lastPositionsMoved = ((gestureLastProcessedX - gestureStartX) / sensitivity).toInt()
+                    val deltaPositions = positionsToMove - lastPositionsMoved
+
+                    if (deltaPositions != 0) {
+                        onSpacebarCursorMove?.invoke(deltaPositions)
+                        gestureLastProcessedX = gestureStartX + (positionsToMove * sensitivity)
+                    }
+                }
+                else -> { }
+            }
+        }
+
+        private fun finalizeGesture(
+            x: Float,
+            y: Float,
+            key: KeyboardKey.Action?,
+        ) {
+            if (isDestroyed || key == null) return
+
+            when (key.action) {
+                KeyboardKey.ActionType.BACKSPACE -> {
+                    val dx = x - gestureStartX
+                    val dy = y - gestureStartY
+                    val absDx = kotlin.math.abs(dx)
+                    val absDy = kotlin.math.abs(dy)
+                    val minDistance = com.urik.keyboard.KeyboardConstants.GestureConstants.BACKSPACE_SWIPE_MIN_DISTANCE_DP * gestureDensity
+
+                    if (dx < 0 && absDx > absDy && absDx > minDistance) {
+                        onBackspaceSwipeDelete?.invoke()
+                    }
+                }
+                else -> { }
+            }
+        }
+
         override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
             if (isDestroyed) return false
 
@@ -1024,12 +1095,45 @@ class SwipeKeyboardView
                     touchStartPoint = PointF(ev.x, ev.y)
                     touchStartTime = System.currentTimeMillis()
                     isSwipeActive = false
+                    isGestureActive = false
+                    gestureKey = null
+
+                    val key = findKeyAt(ev.x, ev.y)
+                    if (key is KeyboardKey.Action &&
+                        (key.action == KeyboardKey.ActionType.SPACE || key.action == KeyboardKey.ActionType.BACKSPACE)
+                    ) {
+                        gestureKey = key
+                        gestureStartX = ev.x
+                        gestureStartY = ev.y
+                        gestureLastProcessedX = ev.x
+                    }
 
                     swipeDetector?.handleTouchEvent(ev) { x, y -> findKeyAt(x, y) }
                     return false
                 }
 
                 MotionEvent.ACTION_MOVE -> {
+                    if (gestureKey != null && !isGestureActive) {
+                        val dx = ev.x - gestureStartX
+                        val dy = ev.y - gestureStartY
+                        val distance = kotlin.math.sqrt(dx * dx + dy * dy)
+                        val gestureThreshold =
+                            com.urik.keyboard.KeyboardConstants.GestureConstants.GESTURE_START_DISTANCE_DP * gestureDensity
+
+                        if (distance > gestureThreshold) {
+                            isGestureActive = true
+                            keyboardLayoutManager?.cancelAllPendingCallbacks()
+                            keyboardLayoutManager?.dismissVariationPopup()
+                            keyboardLayoutManager?.triggerHapticFeedback()
+                            return true
+                        }
+                    }
+
+                    if (isGestureActive) {
+                        processGestureMovement(ev.x, ev.y)
+                        return true
+                    }
+
                     val isSwipe = swipeDetector?.handleTouchEvent(ev) { x, y -> findKeyAt(x, y) } ?: false
 
                     if (isSwipe && !isSwipeActive) {
@@ -1041,12 +1145,15 @@ class SwipeKeyboardView
                 }
 
                 MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                    val wasGesture = isGestureActive
                     val wasSwipe = isSwipeActive
 
+                    isGestureActive = false
+                    gestureKey = null
                     isSwipeActive = false
                     touchStartPoint = null
                     touchStartTime = null
-                    return wasSwipe
+                    return wasGesture || wasSwipe
                 }
             }
 
@@ -1078,6 +1185,11 @@ class SwipeKeyboardView
                 }
 
                 MotionEvent.ACTION_MOVE -> {
+                    if (isGestureActive) {
+                        processGestureMovement(event.x, event.y)
+                        return true
+                    }
+
                     if (isSwipeActive) {
                         swipeDetector?.handleTouchEvent(event) { x, y -> findKeyAt(x, y) }
                         return true
@@ -1094,8 +1206,19 @@ class SwipeKeyboardView
 
                 MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                     val startPoint = touchStartPoint
+                    val wasGesture = isGestureActive
+                    val currentGestureKey = gestureKey
+
                     touchStartPoint = null
                     touchStartTime = null
+                    isGestureActive = false
+                    gestureKey = null
+
+                    if (wasGesture) {
+                        finalizeGesture(event.x, event.y, currentGestureKey)
+                        performClick()
+                        return true
+                    }
 
                     if (isSwipeActive) {
                         isSwipeActive = false
@@ -1318,6 +1441,8 @@ class SwipeKeyboardView
             onSuggestionLongPressListener = null
             onEmojiSelected = null
             onBackspacePressed = null
+            onSpacebarCursorMove = null
+            onBackspaceSwipeDelete = null
 
             spellCheckManager = null
             keyboardLayoutManager = null

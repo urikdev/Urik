@@ -91,6 +91,7 @@ class KeyboardLayoutManager(
     private var currentKeySize = KeySize.MEDIUM
     private var currentSpaceBarSize = SpaceBarSize.STANDARD
     private var currentKeyLabelSize = KeyLabelSize.MEDIUM
+    private var spacebarLongPressPunctuationEnabled = true
 
     private val backgroundJob = SupervisorJob()
     private val backgroundScope = CoroutineScope(Dispatchers.IO + backgroundJob)
@@ -178,7 +179,7 @@ class KeyboardLayoutManager(
                             handleSpaceLongPress(view)
                         }
                     buttonPendingCallbacks[view as Button] = PendingCallbacks(handler, runnable)
-                    handler.postDelayed(runnable, currentLongPressDuration.durationMs)
+                    handler.postDelayed(runnable, com.urik.keyboard.KeyboardConstants.GestureConstants.SPACEBAR_PUNCTUATION_DELAY_MS)
                     false
                 }
                 MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
@@ -262,8 +263,24 @@ class KeyboardLayoutManager(
         performContextualHaptic(null)
     }
 
+    fun cancelAllPendingCallbacks() {
+        buttonPendingCallbacks.values.forEach { pending ->
+            pending.handler.removeCallbacks(pending.runnable)
+        }
+        buttonPendingCallbacks.clear()
+    }
+
+    fun dismissVariationPopup() {
+        variationPopup?.dismiss()
+        variationPopup = null
+    }
+
     fun updateLongPressDuration(duration: LongPressDuration) {
         currentLongPressDuration = duration
+    }
+
+    fun updateSpacebarLongPressPunctuation(enabled: Boolean) {
+        spacebarLongPressPunctuationEnabled = enabled
     }
 
     fun updateKeySize(keySize: KeySize) {
@@ -697,6 +714,10 @@ class KeyboardLayoutManager(
         }
 
     private fun handleSpaceLongPress(view: View) {
+        if (!spacebarLongPressPunctuationEnabled) {
+            return
+        }
+
         performContextualHaptic(KeyboardKey.Action(KeyboardKey.ActionType.SPACE))
 
         val currentLanguage = languageManager.currentLanguage.value
