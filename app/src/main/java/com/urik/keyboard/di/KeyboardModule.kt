@@ -109,7 +109,10 @@ object KeyboardModule {
 
     @Provides
     @Singleton
-    fun provideThemeManager(settingsRepository: SettingsRepository): com.urik.keyboard.theme.ThemeManager =
+    fun provideThemeManager(
+        @ApplicationContext context: Context,
+        settingsRepository: SettingsRepository,
+    ): com.urik.keyboard.theme.ThemeManager =
         com.urik.keyboard.theme
-            .ThemeManager(settingsRepository)
+            .ThemeManager(context, settingsRepository)
 }

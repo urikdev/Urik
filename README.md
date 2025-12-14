@@ -18,7 +18,7 @@ Privacy-first keyboard for Android with on-device processing and encrypted stora
 - On-device spell checking using SymSpell algorithm
 - Smart autocorrect (skips URLs/emails, handles punctuation context)
 - Word learning with encrypted SQLCipher database
-- 16 themes with favorites
+- Multiple themes with favorites
 - Multilingual support with per-language character variations
 - Accessibility features (WCAG AA contrast, TalkBack support)
 - Configurable key sizes, haptic feedback, typing behavior

@@ -1,5 +1,6 @@
 package com.urik.keyboard.theme
 
+import android.content.Context
 import com.urik.keyboard.settings.KeyLabelSize
 import com.urik.keyboard.settings.KeySize
 import com.urik.keyboard.settings.KeyboardSettings
@@ -29,6 +30,9 @@ class ThemeManagerTest {
     private val testDispatcher = UnconfinedTestDispatcher()
 
     @Mock
+    private lateinit var context: Context
+
+    @Mock
     private lateinit var settingsRepository: SettingsRepository
 
     private lateinit var themeManager: ThemeManager
@@ -43,7 +47,7 @@ class ThemeManagerTest {
         settingsFlow = MutableStateFlow(createDefaultSettings())
         whenever(settingsRepository.settings).thenReturn(settingsFlow)
 
-        themeManager = ThemeManager(settingsRepository)
+        themeManager = ThemeManager(context, settingsRepository)
     }
 
     @After
