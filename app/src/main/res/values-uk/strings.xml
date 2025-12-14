@@ -90,6 +90,7 @@
     <string name="typing_settings_swipe_enabled">Безперервний Ввід</string>
     <string name="typing_settings_swipe_on">Безперервний Ввід увімкнено</string>
     <string name="typing_settings_swipe_off">Безперервний Ввід вимкнено</string>
+    <string name="typing_settings_spacebar_long_press_off">Довге натискання клавіші пробілу вимкнено</string>
     <string name="typing_settings_long_press_duration">Тривалість Довгого Натискання</string>
 
     <!-- Layout & Input Settings -->
@@ -126,6 +127,7 @@
     <string name="error_update_vibration_strength">Не вдалося оновити рівень вібрації</string>
     <string name="error_update_double_space_period">Не вдалося оновити крапку при подвійному пробілі</string>
     <string name="error_update_swipe">Не вдалося оновити безперервний ввід</string>
+    <string name="error_update_spacebar_long_press">Не вдалося оновити розділові знаки за допомогою тривалого натискання клавіші пробілу</string>
     <string name="error_update_long_press_duration">Не вдалося оновити тривалість довгого натискання</string>
     <string name="error_update_number_row">Не вдалося оновити ряд цифр</string>
     <string name="error_update_space_bar_size">Не вдалося оновити розмір клавіші пробілу</string>
@@ -213,5 +215,15 @@
     <string name="clipboard_item_pin">Закріпити елемент буфера обміну</string>
     <string name="clipboard_item_unpin">Відкріпити елемент буфера обміну</string>
     <string name="clipboard_item_delete">Видалити елемент буфера обміну</string>
-    
+    <string name="typing_settings_spacebar_cursor">Керування курсором за допомогою клавіші пробіл</string>
+    <string name="typing_settings_spacebar_cursor_on">Проведіть пальцем по клавіші пробіл, щоб перемістити курсор</string>
+    <string name="typing_settings_spacebar_cursor_off">Керування курсором за допомогою клавіші пробіл вимкнено</string>
+    <string name="typing_settings_backspace_swipe">Backspace Проведіть пальцем Видалити</string>
+    <string name="typing_settings_backspace_swipe_on">Проведіть пальцем ліворуч при натисканні клавіші Backspace, щоб видалити слово</string>
+    <string name="typing_settings_backspace_swipe_off">Видалення пальцем за допомогою клавіші Backspace вимкнено</string>
+    <string name="typing_settings_spacebar_long_press">Довге натискання клавіші пробілу для розділових знаків</string>
+    <string name="typing_settings_spacebar_long_press_on">Довге натискання клавіші пробілу для розділових знаків</string>
+    <string name="error_update_spacebar_cursor">Не вдалося оновити керування курсором за допомогою клавіші пробілу</string>
+    <string name="error_update_backspace_swipe">Не вдалося оновити функцію Backspace (видалити пробілом)</string>
+
 </resources>

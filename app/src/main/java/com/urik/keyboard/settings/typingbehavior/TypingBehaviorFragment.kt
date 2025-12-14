@@ -30,6 +30,9 @@ class TypingBehaviorFragment : PreferenceFragmentCompat() {
 
     private lateinit var doubleSpacePref: SwitchPreferenceCompat
     private lateinit var swipePref: SwitchPreferenceCompat
+    private lateinit var spacebarCursorPref: SwitchPreferenceCompat
+    private lateinit var backspaceSwipePref: SwitchPreferenceCompat
+    private lateinit var spacebarLongPressPref: SwitchPreferenceCompat
     private lateinit var longPressPref: ListPreference
     private var testField: EditText? = null
 
@@ -78,6 +81,33 @@ class TypingBehaviorFragment : PreferenceFragmentCompat() {
             }
         screen.addPreference(swipePref)
 
+        spacebarCursorPref =
+            SwitchPreferenceCompat(context).apply {
+                key = "spacebar_cursor_control"
+                title = resources.getString(R.string.typing_settings_spacebar_cursor)
+                summaryOn = resources.getString(R.string.typing_settings_spacebar_cursor_on)
+                summaryOff = resources.getString(R.string.typing_settings_spacebar_cursor_off)
+            }
+        screen.addPreference(spacebarCursorPref)
+
+        backspaceSwipePref =
+            SwitchPreferenceCompat(context).apply {
+                key = "backspace_swipe_delete"
+                title = resources.getString(R.string.typing_settings_backspace_swipe)
+                summaryOn = resources.getString(R.string.typing_settings_backspace_swipe_on)
+                summaryOff = resources.getString(R.string.typing_settings_backspace_swipe_off)
+            }
+        screen.addPreference(backspaceSwipePref)
+
+        spacebarLongPressPref =
+            SwitchPreferenceCompat(context).apply {
+                key = "spacebar_long_press_punctuation"
+                title = resources.getString(R.string.typing_settings_spacebar_long_press)
+                summaryOn = resources.getString(R.string.typing_settings_spacebar_long_press_on)
+                summaryOff = resources.getString(R.string.typing_settings_spacebar_long_press_off)
+            }
+        screen.addPreference(spacebarLongPressPref)
+
         longPressPref =
             ListPreference(context).apply {
                 key = "long_press_duration"
@@ -107,6 +137,21 @@ class TypingBehaviorFragment : PreferenceFragmentCompat() {
             true
         }
 
+        spacebarCursorPref.setOnPreferenceChangeListener { _, newValue ->
+            viewModel.updateSpacebarCursorControl(newValue as Boolean)
+            true
+        }
+
+        backspaceSwipePref.setOnPreferenceChangeListener { _, newValue ->
+            viewModel.updateBackspaceSwipeDelete(newValue as Boolean)
+            true
+        }
+
+        spacebarLongPressPref.setOnPreferenceChangeListener { _, newValue ->
+            viewModel.updateSpacebarLongPressPunctuation(newValue as Boolean)
+            true
+        }
+
         longPressPref.setOnPreferenceChangeListener { _, newValue ->
             viewModel.updateLongPressDuration(LongPressDuration.valueOf(newValue as String))
             true
@@ -118,6 +163,9 @@ class TypingBehaviorFragment : PreferenceFragmentCompat() {
                     viewModel.uiState.collect { state ->
                         doubleSpacePref.isChecked = state.doubleSpacePeriod
                         swipePref.isChecked = state.swipeEnabled
+                        spacebarCursorPref.isChecked = state.spacebarCursorControl
+                        backspaceSwipePref.isChecked = state.backspaceSwipeDelete
+                        spacebarLongPressPref.isChecked = state.spacebarLongPressPunctuation
                         longPressPref.value = state.longPressDuration.name
                     }
                 }

@@ -32,6 +32,12 @@ sealed interface SettingsEvent {
 
         data object SwipeToggleFailed : Error
 
+        data object SpacebarCursorToggleFailed : Error
+
+        data object BackspaceSwipeToggleFailed : Error
+
+        data object SpacebarLongPressPunctuationToggleFailed : Error
+
         data object LongPressDurationUpdateFailed : Error
 
         data object NumberRowToggleFailed : Error

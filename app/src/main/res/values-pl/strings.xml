@@ -90,6 +90,7 @@
     <string name="typing_settings_swipe_enabled">Pisanie Gestem</string>
     <string name="typing_settings_swipe_on">Pisanie gestem włączone</string>
     <string name="typing_settings_swipe_off">Pisanie gestem wyłączone</string>
+    <string name="typing_settings_spacebar_long_press_off">Długie naciśnięcie spacji wyłączone</string>
     <string name="typing_settings_long_press_duration">Czas trwania długiego naciśnięcia</string>
 
     <!-- Layout & Input Settings -->
@@ -126,6 +127,7 @@
     <string name="error_update_vibration_strength">Nie udało się zaktualizować siły wibracji</string>
     <string name="error_update_double_space_period">Nie udało się zaktualizować podwójnej spacji na kropkę</string>
     <string name="error_update_swipe">Nie udało się zaktualizować funkcji pisania gestami</string>
+    <string name="error_update_spacebar_long_press">Nie udało się zaktualizować interpunkcji po długim naciśnięciu spacji</string>
     <string name="error_update_long_press_duration">Nie udało się zaktualizować czasu długiego naciśnięcia</string>
     <string name="error_update_number_row">Nie udało się zaktualizować wiersza liczb</string>
     <string name="error_update_space_bar_size">Nie udało się zaktualizować rozmiaru klawisza spacji</string>
@@ -213,5 +215,15 @@
     <string name="clipboard_item_pin">Przypnij element schowka</string>
     <string name="clipboard_item_unpin">Odepnij element schowka</string>
     <string name="clipboard_item_delete">Usuń element schowka</string>
+    <string name="typing_settings_spacebar_cursor">Sterowanie kursorem spacją</string>
+    <string name="typing_settings_spacebar_cursor_on">Przesuń spację, aby przesunąć kursor</string>
+    <string name="typing_settings_spacebar_cursor_off">Sterowanie kursorem spacją wyłączone</string>
+    <string name="typing_settings_backspace_swipe">Backspace - przesunięcie Delete</string>
+    <string name="typing_settings_backspace_swipe_on">Przesuń w lewo na klawiszu Backspace, aby usunąć słowo</string>
+    <string name="typing_settings_backspace_swipe_off">Backspace - przesunięcie Delete wyłączone</string>
+    <string name="typing_settings_spacebar_long_press">Długie naciśnięcie spacji – interpunkcja</string>
+    <string name="typing_settings_spacebar_long_press_on">Długie naciśnięcie spacji – interpunkcja</string>
+    <string name="error_update_spacebar_cursor">Nie udało się zaktualizować sterowania kursorem spacji</string>
+    <string name="error_update_backspace_swipe">Nie udało się zaktualizować funkcji usuwania za pomocą przesunięcia Backspace</string>
 
 </resources>

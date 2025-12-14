@@ -54,6 +54,9 @@ class SettingsRepository
             val VIBRATION_STRENGTH = stringPreferencesKey("vibration_strength")
             val DOUBLE_SPACE_PERIOD = booleanPreferencesKey("double_space_period")
             val SWIPE_ENABLED = booleanPreferencesKey("swipe_enabled")
+            val SPACEBAR_CURSOR_CONTROL = booleanPreferencesKey("spacebar_cursor_control")
+            val BACKSPACE_SWIPE_DELETE = booleanPreferencesKey("backspace_swipe_delete")
+            val SPACEBAR_LONG_PRESS_PUNCTUATION = booleanPreferencesKey("spacebar_long_press_punctuation")
             val LONG_PRESS_DURATION = stringPreferencesKey("long_press_duration")
             val SHOW_NUMBER_ROW = booleanPreferencesKey("show_number_row")
             val SPACE_BAR_SIZE = stringPreferencesKey("space_bar_size")
@@ -92,6 +95,9 @@ class SettingsRepository
                             } ?: VibrationStrength.MEDIUM,
                         doubleSpacePeriod = preferences[PreferenceKeys.DOUBLE_SPACE_PERIOD] ?: true,
                         swipeEnabled = preferences[PreferenceKeys.SWIPE_ENABLED] ?: true,
+                        spacebarCursorControl = preferences[PreferenceKeys.SPACEBAR_CURSOR_CONTROL] ?: true,
+                        backspaceSwipeDelete = preferences[PreferenceKeys.BACKSPACE_SWIPE_DELETE] ?: true,
+                        spacebarLongPressPunctuation = preferences[PreferenceKeys.SPACEBAR_LONG_PRESS_PUNCTUATION] ?: true,
                         longPressDuration =
                             preferences[PreferenceKeys.LONG_PRESS_DURATION]?.let {
                                 try {
@@ -276,6 +282,39 @@ class SettingsRepository
         suspend fun updateSwipeEnabled(enabled: Boolean): Result<Unit> =
             try {
                 dataStore.edit { it[PreferenceKeys.SWIPE_ENABLED] = enabled }
+                Result.success(Unit)
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+
+        /**
+         * Updates spacebar cursor control toggle.
+         */
+        suspend fun updateSpacebarCursorControl(enabled: Boolean): Result<Unit> =
+            try {
+                dataStore.edit { it[PreferenceKeys.SPACEBAR_CURSOR_CONTROL] = enabled }
+                Result.success(Unit)
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+
+        /**
+         * Updates backspace swipe delete toggle.
+         */
+        suspend fun updateBackspaceSwipeDelete(enabled: Boolean): Result<Unit> =
+            try {
+                dataStore.edit { it[PreferenceKeys.BACKSPACE_SWIPE_DELETE] = enabled }
+                Result.success(Unit)
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+
+        /**
+         * Updates spacebar long press punctuation toggle.
+         */
+        suspend fun updateSpacebarLongPressPunctuation(enabled: Boolean): Result<Unit> =
+            try {
+                dataStore.edit { it[PreferenceKeys.SPACEBAR_LONG_PRESS_PUNCTUATION] = enabled }
                 Result.success(Unit)
             } catch (e: Exception) {
                 Result.failure(e)
