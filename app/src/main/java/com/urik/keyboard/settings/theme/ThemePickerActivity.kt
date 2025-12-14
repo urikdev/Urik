@@ -128,7 +128,7 @@ class ThemePickerActivity : AppCompatActivity() {
 
     private fun setupRecyclerView(recyclerView: RecyclerView) {
         val currentTheme = themeManager.currentTheme.value
-        val allThemes = KeyboardTheme.all()
+        val allThemes = themeManager.getAllThemes()
 
         adapter =
             ThemePickerAdapter(
