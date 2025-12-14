@@ -652,6 +652,8 @@ class UrikInputMethodService :
                         ViewGroup.LayoutParams.WRAP_CONTENT,
                     )
 
+                setBackgroundColor(themeManager.currentTheme.value.colors.keyboardBackground)
+
                 ViewCompat.setOnApplyWindowInsetsListener(this) { _, insets ->
                     val navBarInsets = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
                     (keyboardView.layoutParams as? ViewGroup.MarginLayoutParams)?.apply {
@@ -1009,7 +1011,9 @@ class UrikInputMethodService :
                             layout.copy(rows = listOf(numberRow) + layout.rows)
                         }
 
-                        else -> layout
+                        else -> {
+                            layout
+                        }
                     }
 
                 swipeKeyboardView?.updateKeyboard(filteredLayout, state)
@@ -2299,7 +2303,7 @@ class UrikInputMethodService :
             val trailingPunctuationCount = textBeforeCursor.length - idx
 
             if (idx > 0 && !Character.isWhitespace(textBeforeCursor[idx - 1])) {
-                val textBeforePunctuation = textBeforeCursor.substring(0, idx)
+                val textBeforePunctuation = textBeforeCursor.take(idx)
                 val wordInfo = BackspaceUtils.extractWordBeforeCursor(textBeforePunctuation)
                 if (wordInfo != null) {
                     val (word, _) = wordInfo
