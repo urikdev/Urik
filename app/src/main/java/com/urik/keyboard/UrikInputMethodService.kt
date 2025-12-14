@@ -708,6 +708,12 @@ class UrikInputMethodService :
                     setOnBackspacePressedListener {
                         handleBackspace()
                     }
+                    setOnSpacebarCursorMoveListener { distance ->
+                        handleSpacebarCursorMove(distance)
+                    }
+                    setOnBackspaceSwipeDeleteListener {
+                        handleBackspaceSwipeDelete()
+                    }
                 }
 
             swipeKeyboardView = swipeView
@@ -903,6 +909,7 @@ class UrikInputMethodService :
                     swipeDetector.setSwipeEnabled(newSettings.swipeEnabled)
 
                     layoutManager.updateLongPressDuration(newSettings.longPressDuration)
+                    layoutManager.updateSpacebarLongPressPunctuation(newSettings.spacebarLongPressPunctuation)
 
                     layoutManager.updateKeySize(newSettings.keySize)
                     layoutManager.updateSpaceBarSize(newSettings.spaceBarSize)
@@ -1016,6 +1023,7 @@ class UrikInputMethodService :
         restarting: Boolean,
     ) {
         layoutManager.updateLongPressDuration(currentSettings.longPressDuration)
+        layoutManager.updateSpacebarLongPressPunctuation(currentSettings.spacebarLongPressPunctuation)
         layoutManager.updateKeySize(currentSettings.keySize)
         layoutManager.updateSpaceBarSize(currentSettings.spaceBarSize)
         layoutManager.updateKeyLabelSize(currentSettings.keyLabelSize)
@@ -2233,6 +2241,77 @@ class UrikInputMethodService :
                     currentInputConnection?.endBatchEdit()
                 }
             }
+        }
+    }
+
+    private fun handleSpacebarCursorMove(distance: Int) {
+        if (isSecureField || !currentSettings.spacebarCursorControl) {
+            return
+        }
+
+        try {
+            val currentSelection =
+                currentInputConnection
+                    ?.getTextBeforeCursor(
+                        KeyboardConstants.TextProcessingConstants.MAX_CURSOR_POSITION_CHARS,
+                        0,
+                    )?.length ?: 0
+
+            val newPosition = (currentSelection + distance).coerceAtLeast(0)
+            currentInputConnection?.setSelection(newPosition, newPosition)
+        } catch (_: Exception) {
+        }
+    }
+
+    private fun handleBackspaceSwipeDelete() {
+        if (isSecureField || !currentSettings.backspaceSwipeDelete) {
+            return
+        }
+
+        try {
+            val textBeforeCursor = safeGetTextBeforeCursor(50)
+            if (textBeforeCursor.isEmpty()) {
+                return
+            }
+
+            val lastChar = textBeforeCursor.last()
+
+            if (Character.isWhitespace(lastChar)) {
+                currentInputConnection?.deleteSurroundingText(1, 0)
+                coordinateStateClear()
+                return
+            }
+
+            if (Character.isLetterOrDigit(lastChar)) {
+                val wordInfo = BackspaceUtils.extractWordBeforeCursor(textBeforeCursor)
+                if (wordInfo != null) {
+                    val (word, _) = wordInfo
+                    currentInputConnection?.deleteSurroundingText(word.length, 0)
+                    coordinateStateClear()
+                }
+                return
+            }
+
+            var idx = textBeforeCursor.length
+            while (idx > 0 && !Character.isLetterOrDigit(textBeforeCursor[idx - 1]) && !Character.isWhitespace(textBeforeCursor[idx - 1])) {
+                idx--
+            }
+            val trailingPunctuationCount = textBeforeCursor.length - idx
+
+            if (idx > 0 && !Character.isWhitespace(textBeforeCursor[idx - 1])) {
+                val textBeforePunctuation = textBeforeCursor.substring(0, idx)
+                val wordInfo = BackspaceUtils.extractWordBeforeCursor(textBeforePunctuation)
+                if (wordInfo != null) {
+                    val (word, _) = wordInfo
+                    currentInputConnection?.deleteSurroundingText(word.length + trailingPunctuationCount, 0)
+                    coordinateStateClear()
+                    return
+                }
+            }
+
+            currentInputConnection?.deleteSurroundingText(trailingPunctuationCount, 0)
+            coordinateStateClear()
+        } catch (_: Exception) {
         }
     }
 

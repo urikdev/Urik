@@ -91,6 +91,15 @@
     <string name="typing_settings_swipe_enabled">Swipe Typing</string>
     <string name="typing_settings_swipe_on">Swipe to type enabled</string>
     <string name="typing_settings_swipe_off">Swipe to type disabled</string>
+    <string name="typing_settings_spacebar_cursor">Spacebar Cursor Control</string>
+    <string name="typing_settings_spacebar_cursor_on">Swipe spacebar to move cursor</string>
+    <string name="typing_settings_spacebar_cursor_off">Spacebar cursor control disabled</string>
+    <string name="typing_settings_backspace_swipe">Backspace Swipe Delete</string>
+    <string name="typing_settings_backspace_swipe_on">Swipe left on backspace to delete word</string>
+    <string name="typing_settings_backspace_swipe_off">Backspace swipe delete disabled</string>
+    <string name="typing_settings_spacebar_long_press">Spacebar Long Press Punctuation</string>
+    <string name="typing_settings_spacebar_long_press_on">Long press spacebar for punctuation</string>
+    <string name="typing_settings_spacebar_long_press_off">Spacebar long press disabled</string>
     <string name="typing_settings_long_press_duration">Long Press Duration</string>
 
     <!-- Layout & Input Settings -->
@@ -127,6 +136,9 @@
     <string name="error_update_vibration_strength">Failed to update vibration strength</string>
     <string name="error_update_double_space_period">Failed to update double-space period</string>
     <string name="error_update_swipe">Failed to update swipe typing</string>
+    <string name="error_update_spacebar_cursor">Failed to update spacebar cursor control</string>
+    <string name="error_update_backspace_swipe">Failed to update backspace swipe delete</string>
+    <string name="error_update_spacebar_long_press">Failed to update spacebar long press punctuation</string>
     <string name="error_update_long_press_duration">Failed to update long press duration</string>
     <string name="error_update_number_row">Failed to update number row</string>
     <string name="error_update_space_bar_size">Failed to update space bar size</string>
