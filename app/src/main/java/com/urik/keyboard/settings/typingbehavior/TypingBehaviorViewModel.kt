@@ -34,6 +34,9 @@ class TypingBehaviorViewModel
                     TypingBehaviorUiState(
                         doubleSpacePeriod = settings.doubleSpacePeriod,
                         swipeEnabled = settings.swipeEnabled,
+                        spacebarCursorControl = settings.spacebarCursorControl,
+                        backspaceSwipeDelete = settings.backspaceSwipeDelete,
+                        spacebarLongPressPunctuation = settings.spacebarLongPressPunctuation,
                         longPressDuration = settings.longPressDuration,
                     )
                 }.stateIn(
@@ -58,6 +61,30 @@ class TypingBehaviorViewModel
             }
         }
 
+        fun updateSpacebarCursorControl(enabled: Boolean) {
+            viewModelScope.launch {
+                settingsRepository
+                    .updateSpacebarCursorControl(enabled)
+                    .onFailure { _events.emit(SettingsEvent.Error.SpacebarCursorToggleFailed) }
+            }
+        }
+
+        fun updateBackspaceSwipeDelete(enabled: Boolean) {
+            viewModelScope.launch {
+                settingsRepository
+                    .updateBackspaceSwipeDelete(enabled)
+                    .onFailure { _events.emit(SettingsEvent.Error.BackspaceSwipeToggleFailed) }
+            }
+        }
+
+        fun updateSpacebarLongPressPunctuation(enabled: Boolean) {
+            viewModelScope.launch {
+                settingsRepository
+                    .updateSpacebarLongPressPunctuation(enabled)
+                    .onFailure { _events.emit(SettingsEvent.Error.SpacebarLongPressPunctuationToggleFailed) }
+            }
+        }
+
         fun updateLongPressDuration(duration: LongPressDuration) {
             viewModelScope.launch {
                 settingsRepository
@@ -77,5 +104,8 @@ class TypingBehaviorViewModel
 data class TypingBehaviorUiState(
     val doubleSpacePeriod: Boolean = true,
     val swipeEnabled: Boolean = true,
+    val spacebarCursorControl: Boolean = true,
+    val backspaceSwipeDelete: Boolean = true,
+    val spacebarLongPressPunctuation: Boolean = true,
     val longPressDuration: LongPressDuration = LongPressDuration.MEDIUM,
 )

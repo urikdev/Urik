@@ -128,6 +128,13 @@ object KeyboardConstants {
         const val DOUBLE_SHIFT_THRESHOLD_MS = 400L
     }
 
+    object GestureConstants {
+        const val GESTURE_START_DISTANCE_DP = 20f
+        const val SPACEBAR_CURSOR_SENSITIVITY_PX = 30f
+        const val BACKSPACE_SWIPE_MIN_DISTANCE_DP = 30f
+        const val SPACEBAR_PUNCTUATION_DELAY_MS = 600L
+    }
+
     object MemoryConstants {
         const val LOW_MEMORY_THRESHOLD_MB = 50L
         const val CRITICAL_MEMORY_THRESHOLD_MB = 20L

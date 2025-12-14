@@ -90,7 +90,9 @@
     <string name="typing_settings_swipe_enabled">Непрерывный Ввод</string>
     <string name="typing_settings_swipe_on">Непрерывный ввод включен</string>
     <string name="typing_settings_swipe_off">Непрерывный ввод отключен</string>
-    <string name="typing_settings_long_press_duration">Длительность Долгого Нажатия</string>
+   
+    <string name="typing_settings_spacebar_long_press_off">Длительное нажатие пробела отключено</string>
+    <string name="typing_settings_long_press_duration">Длительность Долгого Нажатия</string>
 
     <!-- Layout & Input Settings -->
     <string name="layout_settings_show_number_row">Показывать Ряд Цифр</string>
@@ -126,7 +128,9 @@
     <string name="error_update_vibration_strength">Не удалось обновить уровень вибрации</string>
     <string name="error_update_double_space_period">Не удалось обновить точку при двойном пробеле</string>
     <string name="error_update_swipe">Не удалось обновить непрерывный ввод</string>
-    <string name="error_update_long_press_duration">Не удалось обновить длительность долгого нажатия</string>
+   
+    <string name="error_update_spacebar_long_press">Не удалось обновить управление знаками препинания при длительном нажатии на пробел</string>
+    <string name="error_update_long_press_duration">Не удалось обновить длительность долгого нажатия</string>
     <string name="error_update_number_row">Не удалось обновить ряд цифр</string>
     <string name="error_update_space_bar_size">Не удалось обновить размер пробела</string>
     <string name="error_clear_learned_words">Не удалось удалить изученные слова</string>
@@ -213,5 +217,15 @@
     <string name="clipboard_item_pin">Закрепить элемент буфера обмена</string>
     <string name="clipboard_item_unpin">Открепить элемент буфера обмена</string>
     <string name="clipboard_item_delete">Удалить элемент буфера обмена</string>
+    <string name="typing_settings_spacebar_cursor">Управление курсором с помощью пробела</string>
+    <string name="typing_settings_spacebar_cursor_on">Проведите пальцем по пробелу, чтобы переместить курсор</string>
+    <string name="typing_settings_spacebar_cursor_off">Управление курсором с помощью пробела отключено</string>
+    <string name="typing_settings_backspace_swipe">Удаление с помощью клавиши Backspace</string>
+    <string name="typing_settings_backspace_swipe_on">Проведите пальцем влево по клавише Backspace, чтобы удалить слово</string>
+    <string name="typing_settings_backspace_swipe_off">Удаление с помощью клавиши Backspace отключено</string>
+    <string name="typing_settings_spacebar_long_press">Длительное нажатие пробела для расстановки знаков препинания</string>
+    <string name="typing_settings_spacebar_long_press_on">Длительное нажатие пробела для расстановки знаков препинания</string>
+    <string name="error_update_spacebar_cursor">Не удалось обновить управление курсором с помощью пробела</string>
+    <string name="error_update_backspace_swipe">Не удалось обновить управление клавишей Backspace (пролистывание)</string>
 
 </resources>
