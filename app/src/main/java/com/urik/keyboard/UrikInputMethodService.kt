@@ -121,6 +121,7 @@ class UrikInputMethodService :
 
     private var swipeKeyboardView: SwipeKeyboardView? = null
     private var lastDisplayDensity: Float = 0f
+    private var lastKeyboardConfig: Int = android.content.res.Configuration.KEYBOARD_UNDEFINED
 
     private var lastSpaceTime: Long = 0
     private var doubleTapSpaceThreshold: Long = InputTimingConstants.DOUBLE_TAP_SPACE_THRESHOLD_MS
@@ -679,6 +680,21 @@ class UrikInputMethodService :
                 context = mapOf("phase" to "onCreateInputView"),
             )
             return null
+        }
+    }
+
+    override fun onEvaluateInputViewShown(): Boolean {
+        val config = resources.configuration
+        return when (config.keyboard) {
+            android.content.res.Configuration.KEYBOARD_NOKEYS,
+            android.content.res.Configuration.KEYBOARD_UNDEFINED,
+            -> super.onEvaluateInputViewShown()
+
+            android.content.res.Configuration.KEYBOARD_QWERTY,
+            android.content.res.Configuration.KEYBOARD_12KEY,
+            -> false
+
+            else -> super.onEvaluateInputViewShown()
         }
     }
 
@@ -2526,6 +2542,14 @@ class UrikInputMethodService :
         }
 
         lastDisplayDensity = currentDensity
+
+        val currentKeyboard = newConfig.keyboard
+        if (lastKeyboardConfig != android.content.res.Configuration.KEYBOARD_UNDEFINED &&
+            lastKeyboardConfig != currentKeyboard
+        ) {
+            updateInputViewShown()
+        }
+        lastKeyboardConfig = currentKeyboard
     }
 
     override fun onDestroy() {
