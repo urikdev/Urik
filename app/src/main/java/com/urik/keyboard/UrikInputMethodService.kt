@@ -2289,6 +2289,7 @@ class UrikInputMethodService :
         }
 
         try {
+            isActivelyEditing = true
             val textBeforeCursor = safeGetTextBeforeCursor(50)
             if (textBeforeCursor.isEmpty()) {
                 return
@@ -2485,6 +2486,11 @@ class UrikInputMethodService :
                 newSelEnd >= candidatesStart &&
                 newSelEnd <= candidatesEnd
 
+        if (isActivelyEditing) {
+            isActivelyEditing = false
+            return
+        }
+
         if (hasComposingText && !cursorInComposingRegion) {
             coordinateStateClear()
             return
@@ -2492,11 +2498,6 @@ class UrikInputMethodService :
 
         if (!hasComposingText && (wordState.hasContent || displayBuffer.isNotEmpty())) {
             coordinateStateClear()
-            return
-        }
-
-        if (isActivelyEditing) {
-            isActivelyEditing = false
             return
         }
 

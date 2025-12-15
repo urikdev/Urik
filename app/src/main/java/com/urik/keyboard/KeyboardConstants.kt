@@ -94,7 +94,7 @@ object KeyboardConstants {
         const val MIN_EXCELLENT_CANDIDATES = 3
 
         const val SWIPE_TIME_THRESHOLD_MS = 150L
-        const val SWIPE_START_DISTANCE_DP = 20f
+        const val SWIPE_START_DISTANCE_DP = 30f
         const val MIN_SWIPE_POINTS_FOR_SAMPLING = 3
         const val SLOW_MOVEMENT_VELOCITY_THRESHOLD = 0.5f
         const val UI_UPDATE_INTERVAL_MS = 16
@@ -128,8 +128,9 @@ object KeyboardConstants {
 
     object GestureConstants {
         const val GESTURE_START_DISTANCE_DP = 20f
-        const val SPACEBAR_CURSOR_SENSITIVITY_PX = 30f
+        const val SPACEBAR_CURSOR_SENSITIVITY_DP = 15f
         const val BACKSPACE_SWIPE_MIN_DISTANCE_DP = 30f
+        const val BACKSPACE_INITIAL_DELAY_MS = 50L
         const val SPACEBAR_PUNCTUATION_DELAY_MS = 600L
     }
 
