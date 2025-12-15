@@ -1040,7 +1040,7 @@ class SwipeKeyboardView
 
             when (key.action) {
                 KeyboardKey.ActionType.SPACE -> {
-                    val sensitivity = com.urik.keyboard.KeyboardConstants.GestureConstants.SPACEBAR_CURSOR_SENSITIVITY_PX
+                    val sensitivity = com.urik.keyboard.KeyboardConstants.GestureConstants.SPACEBAR_CURSOR_SENSITIVITY_DP * gestureDensity
                     val totalDx = x - gestureStartX
 
                     val positionsToMove = (totalDx / sensitivity).toInt()

@@ -623,6 +623,7 @@ class KeyboardLayoutManager(
             if (key is KeyboardKey.Action && key.action == KeyboardKey.ActionType.BACKSPACE) {
                 setOnLongClickListener(backspaceLongClickListener)
                 setOnTouchListener(backspaceTouchListener)
+                isHapticFeedbackEnabled = false
             }
         }
     }
@@ -741,6 +742,10 @@ class KeyboardLayoutManager(
         anchorView: View,
         punctuationList: List<String>,
     ) {
+        if (!anchorView.isAttachedToWindow || anchorView.windowToken == null) {
+            return
+        }
+
         variationPopup?.dismiss()
 
         anchorView.isPressed = false
@@ -919,6 +924,10 @@ class KeyboardLayoutManager(
         anchorView: View,
         variations: List<String>,
     ) {
+        if (!anchorView.isAttachedToWindow || anchorView.windowToken == null) {
+            return
+        }
+
         variationPopup?.dismiss()
         performContextualHaptic(key)
 
@@ -952,7 +961,7 @@ class KeyboardLayoutManager(
                 }
             }
 
-        backspaceHandler?.postDelayed(backspaceRunnable!!, currentLongPressDuration.durationMs)
+        backspaceHandler?.postDelayed(backspaceRunnable!!, com.urik.keyboard.KeyboardConstants.GestureConstants.BACKSPACE_INITIAL_DELAY_MS)
     }
 
     private fun stopAcceleratedBackspace() {
@@ -969,6 +978,8 @@ class KeyboardLayoutManager(
 
     private fun startBackspaceSpinUp() {
         stopBackspaceSpinUp()
+
+        if (!hapticEnabled || hapticAmplitude == 0) return
 
         backspaceVibrationJob =
             backgroundScope.launch {
