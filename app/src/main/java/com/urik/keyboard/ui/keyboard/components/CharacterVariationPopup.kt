@@ -46,8 +46,9 @@ class CharacterVariationPopup(
         scrollView.addView(variationContainer)
         contentView = scrollView
         isOutsideTouchable = true
-        isFocusable = true
+        isFocusable = false
         setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
+        inputMethodMode = INPUT_METHOD_NOT_NEEDED
 
         setOnDismissListener {
             onVariationSelected = null
