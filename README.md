@@ -6,6 +6,12 @@
 
 Privacy-first keyboard for Android with on-device processing and encrypted storage. 100% community-funded, completely open-source.
 
+<p float="left" align="middle">
+  <img src="https://urik.io/screenshots/main.jpg" width="220">
+  <img src="https://urik.io/screenshots/swipe.jpg" width="220">
+  <img src="https://urik.io/screenshots/symbol.jpg" width="220">
+</p>
+
 ## Status
 
 **Beta Software** - In open beta testing. Join the Google Play open beta today!
@@ -23,10 +29,6 @@ Privacy-first keyboard for Android with on-device processing and encrypted stora
 - Accessibility features (WCAG AA contrast, TalkBack support)
 - Configurable key sizes, haptic feedback, typing behavior
 - No telemetry, analytics, or network permissions
-
-## Architecture
-
-Debounced async text processing with optimistic UI updates. State management prevents stale updates during rapid typing. All spell checking and suggestions run on-device with 10ms debounce.
 
 ## Privacy
 
