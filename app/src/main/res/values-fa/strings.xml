@@ -1,0 +1,230 @@
+<resources>
+    <string name="app_name" translatable="false">Urik</string>
+    <string name="ime_name">کیبورد Urik</string>
+    <string name="ime_label">کیبورد Urik</string>
+    <string name="ime_description">تایپ با کشیدن دست (سوایپ)، بررسی املا، و پشتیبانی چندزبانه بدون به خطر انداختن حریم خصوصی شما. بدون ثبت داده. بدون جمع‌آوری اطلاعات. همه چیز روی دستگاه شما باقی می‌ماند.</string>
+
+    <!-- Settings -->
+    <string name="enable_keyboard_title">فعال‌سازی</string>
+    <string name="open_settings">باز کردن تنظیمات</string>
+    <string name="error_opening_settings">امکان باز کردن تنظیمات وجود ندارد</string>
+
+    <!-- Settings Activity -->
+    <string name="settings_title">تنظیمات کیبورد</string>
+    <string name="autocorrect_settings_title">تنظیمات تصحیح خودکار</string>
+    <string name="autocorrect_settings_description">املاء و پیشنهادات</string>
+    <string name="language_settings_title">تنظیمات زبان</string>
+    <string name="language_settings_description">زبان‌های کیبورد خود را انتخاب کنید</string>
+    <string name="feedback_settings_title">تنظیمات صدا و بازخورد</string>
+    <string name="feedback_settings_description">صدای کلیدها و لرزش</string>
+    <string name="typing_settings_title">تنظیمات رفتار تایپ</string>
+    <string name="typing_settings_description">نقطه‌گذاری و موارد دیگر</string>
+    <string name="layout_settings_title">چیدمان و ورودی</string>
+    <string name="layout_settings_description">ردیف اعداد، اندازه نوار فاصله</string>
+    <string name="appearance_settings_title">ظاهر</string>
+    <string name="appearance_settings_description">تم، اندازه</string>
+    <string name="privacy_settings_title">حریم خصوصی و داده</string>
+    <string name="privacy_settings_description">پاک کردن داده‌ها، بازنشانی تنظیمات</string>
+    <string name="licenses_title">مجوزهای متن‌باز</string>
+    <string name="licenses_description">مشاهده مجوزهای کتابخانه‌های شخص ثالث</string>
+    <string name="dictionary_attribution_title">داده‌های لغت‌نامه</string>
+    <string name="theme_picker_title">تم کیبورد</string>
+    <string name="dictionary_attribution_summary">مجوز و منبع FrequencyWords</string>
+    <string name="test_field_hint">آزمایش تغییرات</string>
+
+    <!-- Settings Enums -->
+    <!-- Key Size -->
+    <string name="key_size_small">کوچک</string>
+    <string name="key_size_medium">متوسط</string>
+    <string name="key_size_large">بزرگ</string>
+    <string name="key_size_extra_large">خیلی بزرگ</string>
+
+    <!-- Vibration Strength -->
+    <string name="vibration_strength_light">کم</string>
+    <string name="vibration_strength_medium">متوسط</string>
+    <string name="vibration_strength_strong">زیاد</string>
+
+    <!-- Long Press Duration -->
+    <string name="long_press_duration_short">کوتاه</string>
+    <string name="long_press_duration_medium">متوسط</string>
+    <string name="long_press_duration_long">طولانی</string>
+
+    <!-- Space Bar Size -->
+    <string name="space_bar_size_compact">جمع‌وجور</string>
+    <string name="space_bar_size_standard">استاندارد</string>
+    <string name="space_bar_size_wide">عریض</string>
+
+    <!-- Key Label Size -->
+    <string name="key_label_size_small">کوچک</string>
+    <string name="key_label_size_medium">متوسط</string>
+    <string name="key_label_size_large">بزرگ</string>
+
+    <!-- Appearance Settings -->
+    <string name="appearance_settings_theme">تم</string>
+    <string name="appearance_settings_key_size">اندازه کلیدها</string>
+    <string name="appearance_settings_key_label_size">اندازه نوشته کلیدها</string>
+
+    <!-- Auto-Correct Settings -->
+    <string name="autocorrect_settings_spell_check">بررسی املا</string>
+    <string name="autocorrect_settings_spell_check_on">بررسی املا فعال است</string>
+    <string name="autocorrect_settings_spell_check_off">بررسی املا غیرفعال است</string>
+    <string name="autocorrect_settings_show_suggestions">نمایش پیشنهادات</string>
+    <string name="autocorrect_settings_suggestions_on">پیشنهادات نمایش داده می‌شوند</string>
+    <string name="autocorrect_settings_suggestions_off">پیشنهادات پنهان هستند</string>
+    <string name="autocorrect_settings_suggestion_count">تعداد پیشنهادات</string>
+    <string name="autocorrect_settings_learn_new_words">یادگیری واژه‌های جدید</string>
+    <string name="autocorrect_settings_learn_new_words_on">یادگیری فعال است</string>
+    <string name="autocorrect_settings_learn_new_words_off">یادگیری غیرفعال است</string>
+
+    <!-- Language Settings -->
+
+    <!-- Sound & Feedback Settings -->
+    <string name="feedback_settings_haptic_feedback">بازخورد لمسی (هاپتیک)</string>
+    <string name="feedback_settings_haptic_on">بازخورد لمسی فعال است</string>
+    <string name="feedback_settings_haptic_off">بازخورد لمسی غیرفعال است</string>
+    <string name="feedback_settings_vibration_strength">شدت لرزش</string>
+
+    <!-- Typing Behavior Settings -->
+    <string name="typing_settings_double_space_period">درج نقطه با دو بار فاصله</string>
+    <string name="typing_settings_double_space_on">دو بار فاصله، نقطه درج می‌کند</string>
+    <string name="typing_settings_double_space_off">دو بار فاصله، فاصله وارد می‌کند</string>
+    <string name="typing_settings_swipe_enabled">تایپ سوایپ (کشیدن)</string>
+    <string name="typing_settings_swipe_on">تایپ با کشیدن فعال است</string>
+    <string name="typing_settings_swipe_off">تایپ با کشیدن غیرفعال است</string>
+    <string name="typing_settings_spacebar_cursor">کنترل مکان‌نما با نوار فاصله</string>
+    <string name="typing_settings_spacebar_cursor_on">کشیدن روی نوار فاصله برای جابجایی مکان‌نما</string>
+    <string name="typing_settings_spacebar_cursor_off">کنترل مکان‌نما با نوار فاصله غیرفعال است</string>
+    <string name="typing_settings_backspace_swipe">حذف با کشیدن روی Backspace</string>
+    <string name="typing_settings_backspace_swipe_on">کشیدن به چپ روی Backspace برای حذف کلمه</string>
+    <string name="typing_settings_backspace_swipe_off">حذف با کشیدن روی Backspace غیرفعال است</string>
+    <string name="typing_settings_spacebar_long_press">نقطه‌گذاری با نگه داشتن نوار فاصله</string>
+    <string name="typing_settings_spacebar_long_press_on">نگه داشتن نوار فاصله برای نقطه‌گذاری</string>
+    <string name="typing_settings_spacebar_long_press_off">نگه داشتن نوار فاصله غیرفعال است</string>
+    <string name="typing_settings_long_press_duration">مدت زمان نگه داشتن طولانی</string>
+
+    <!-- Layout & Input Settings -->
+    <string name="layout_settings_show_number_row">نمایش ردیف اعداد</string>
+    <string name="layout_settings_number_row_on">ردیف اعداد نمایش داده می‌شود</string>
+    <string name="layout_settings_number_row_off">ردیف اعداد پنهان است</string>
+    <string name="layout_settings_space_bar_size">اندازه نوار فاصله</string>
+
+    <!-- Privacy & Data Settings -->
+    <string name="privacy_settings_clipboard_history">تاریخچه کلیپ‌بورد</string>
+    <string name="privacy_settings_clipboard_history_on">تاریخچه کلیپ‌بورد فعال است</string>
+    <string name="privacy_settings_clipboard_history_off">تاریخچه کلیپ‌بورد غیرفعال است</string>
+    <string name="privacy_settings_clear_learned_words">پاک کردن واژه‌های آموخته‌شده</string>
+    <string name="privacy_settings_clear_learned_words_summary">حذف تمام واژگان آموخته‌شده</string>
+    <string name="privacy_settings_clear_learned_words_confirm">تمام واژه‌های آموخته‌شده پاک شوند؟ این عمل قابل بازگشت نیست.</string>
+    <string name="privacy_settings_reset_to_defaults">بازنشانی به پیش‌فرض</string>
+    <string name="privacy_settings_reset_to_defaults_confirm">تمام تنظیمات به حالت پیش‌فرض بازنشانی شوند؟</string>
+    <string name="privacy_settings_export_error_log">استخراج گزارش خطا</string>
+    <string name="privacy_settings_export_error_log_summary">به اشتراک گذاشتن گزارش‌های تشخیصی برای اشکال‌زدایی</string>
+    <string name="privacy_settings_export_error_log_failed">استخراج گزارش خطا ناموفق بود</string>
+
+    <!-- Error Messages -->
+    <string name="error_title">خطا</string>
+    <string name="error_update_theme">به‌روزرسانی تم ناموفق بود</string>
+    <string name="error_update_key_size">به‌روزرسانی اندازه کلید ناموفق بود</string>
+    <string name="error_update_key_label_size">به‌روزرسانی اندازه برچسب ناموفق بود</string>
+    <string name="error_update_spell_check">به‌روزرسانی بررسی املا ناموفق بود</string>
+    <string name="error_update_suggestions">به‌روزرسانی تنظیمات پیشنهادات ناموفق بود</string>
+    <string name="error_update_suggestion_count">به‌روزرسانی تعداد پیشنهادات ناموفق بود</string>
+    <string name="error_update_word_learning">به‌روزرسانی یادگیری کلمه ناموفق بود</string>
+    <string name="error_update_clipboard">به‌روزرسانی تنظیمات کلیپ‌بورد ناموفق بود</string>
+    <string name="error_update_language">به‌روزرسانی تنظیمات زبان ناموفق بود</string>
+    <string name="error_update_haptic_feedback">به‌روزرسانی بازخورد لمسی ناموفق بود</string>
+    <string name="error_update_vibration_strength">به‌روزرسانی شدت لرزش ناموفق بود</string>
+    <string name="error_update_double_space_period">به‌روزرسانی نقطه با دو بار فاصله ناموفق بود</string>
+    <string name="error_update_swipe">به‌روزرسانی تایپ سوایپ ناموفق بود</string>
+    <string name="error_update_spacebar_cursor">به‌روزرسانی کنترل مکان‌نما با نوار فاصله ناموفق بود</string>
+    <string name="error_update_backspace_swipe">به‌روزرسانی حذف با کشیدن روی Backspace ناموفق بود</string>
+    <string name="error_update_spacebar_long_press">به‌روزرسانی نگه داشتن نوار فاصله برای نقطه‌گذاری ناموفق بود</string>
+    <string name="error_update_long_press_duration">به‌روزرسانی مدت زمان نگه داشتن طولانی ناموفق بود</string>
+    <string name="error_update_number_row">به‌روزرسانی ردیف اعداد ناموفق بود</string>
+    <string name="error_update_space_bar_size">به‌روزرسانی اندازه نوار فاصله ناموفق بود</string>
+    <string name="error_clear_learned_words">پاک کردن واژه‌های آموخته‌شده ناموفق بود</string>
+    <string name="error_reset_to_defaults">بازنشانی تنظیمات ناموفق بود</string>
+
+    <!-- Success Messages -->
+    <string name="success_learned_words_cleared">واژه‌های آموخته‌شده پاک شدند</string>
+    <string name="success_settings_reset">تنظیمات به حالت پیش‌فرض بازنشانی شدند</string>
+
+    <!-- Keyboard descriptions -->
+    <string name="keyboard_description">کیبورد مجازی</string>
+
+    <!-- Default key labels -->
+    <string name="letters_mode_label">الفبا</string>
+    <string name="numbers_mode_label">اعداد</string>
+    <string name="symbols_mode_label">نمادها</string>
+
+    <!-- Accessibility descriptions -->
+    <string name="key_character_description">تایپ %1$s</string>
+
+    <string name="shift_key_description">کلید شیفت، لمس برای بزرگ کردن حرف بعدی</string>
+    <string name="shift_active_description">شیفت فعال است، لمس برای غیرفعال کردن</string>
+    <string name="caps_lock_description">قفل حروف بزرگ (Caps lock)</string>
+    <string name="caps_lock_on_description">قفل حروف بزرگ فعال است، لمس برای خاموش کردن</string>
+    <string name="backspace_key_description">حذف کاراکتر قبلی</string>
+    <string name="space_key_description">نوار فاصله</string>
+    <string name="letters_mode_description">تغییر به کیبورد حروف</string>
+    <string name="numbers_mode_description">تغییر به کیبورد اعداد</string>
+    <string name="symbols_mode_description">تغییر به کیبورد نمادها</string>
+    <string name="ime_prediction_description">پیشنهاد: %1$s</string>
+
+    <!-- Action button accessibility descriptions -->
+    <string name="action_enter_description">فشردن Enter</string>
+    <string name="action_send_description">ارسال پیام</string>
+    <string name="action_search_description">جستجو</string>
+    <string name="action_done_description">اتمام ویرایش</string>
+    <string name="action_go_description">رفتن به مقصد</string>
+    <string name="action_next_description">انتقال به فیلد بعدی</string>
+    <string name="action_previous_description">انتقال به فیلد قبلی</string>
+
+    <string name="action_emoji">ایموجی</string>
+
+    <!-- Theme Picker Accessibility -->
+    <string name="theme_description">تم %1$s</string>
+    <string name="theme_description_selected">تم %1$s، در حال حاضر انتخاب شده است</string>
+    <string name="theme_add_favorite">افزودن %1$s به علاقه‌مندی‌ها</string>
+    <string name="theme_remove_favorite">حذف %1$s از علاقه‌مندی‌ها</string>
+
+    <!-- Character Variation Accessibility -->
+    <string name="character_variation_position">تنوع کاراکتر %1$d از %2$d: %3$s</string>
+
+    <!-- Blacklisting Words -->
+    <string name="remove_suggestion">%1$s از پیشنهادات حذف شود؟</string>
+    <string name="remove_cancel">لغو</string>
+    <string name="remove_confirm">حذف</string>
+
+    <!-- Tips -->
+    <string name="tip_1_title">یادگیری واژه‌ها</string>
+    <string name="tip_1_description">پس از یک اشتباه املایی برجسته، فاصله را بزنید تا کلمه به لغت‌نامه شما اضافه شود.</string>
+
+    <string name="tip_2_title">منوی سریع نقطه‌گذاری</string>
+    <string name="tip_2_description">نوار فاصله را نگه دارید تا منوی سریع نقطه‌گذاری باز شود.</string>
+
+    <string name="tip_3_title">تنوع کاراکترها</string>
+    <string name="tip_3_description">برای انتخاب تنوع یک کاراکتر، آن را نگه دارید.</string>
+
+    <string name="tip_4_title">حذف واژه‌ها</string>
+    <string name="tip_4_description">برای حذف یک پیشنهاد از لغت‌نامه خود، آن را نگه دارید.</string>
+
+    <string name="tip_5_title">مدیریت کلیپ‌بورد</string>
+    <string name="tip_5_description">کلید نماد را نگه دارید تا مدیر کلیپ‌بورد باز شود.</string>
+
+    <!-- Clipboard Panel -->
+    <string name="clipboard_panel_title">کلیپ‌بورد</string>
+    <string name="clipboard_panel_pinned">سنجاق‌شده</string>
+    <string name="clipboard_panel_recent">اخیر</string>
+    <string name="clipboard_panel_empty">تاریخچه کلیپ‌بورد خالی است</string>
+    <string name="clipboard_panel_delete_all">حذف همه</string>
+    <string name="clipboard_panel_delete_all_confirm">همه موارد سنجاق‌نشده کلیپ‌بورد حذف شوند؟</string>
+    <string name="clipboard_consent_message">Urikمی‌تواند محتوای کلیپ‌بورد را بخواند و به طور نامحدود ذخیره کند. اگر این را نمی‌خواهید، به تنظیمات بروید و تاریخچه کلیپ‌بورد را خاموش کنید.</string>
+
+    <!-- Clipboard Accessibility -->
+    <string name="clipboard_item_description">مورد کلیپ‌بورد: %1$s</string>
+    <string name="clipboard_item_pin">سنجاق کردن</string>
+    <string name="clipboard_item_unpin">برداشتن سنجاق</string>
+    <string name="clipboard_item_delete">حذف</string>
+
+</resources>
