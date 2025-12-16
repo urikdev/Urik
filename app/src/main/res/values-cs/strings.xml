@@ -50,7 +50,7 @@
 
     <!-- Space Bar Size -->
     <string name="space_bar_size_compact">Kompaktní</string>
-    <string name="space_bar_size_standard">Standartní</string>
+    <string name="space_bar_size_standard">standardní</string>
     <string name="space_bar_size_wide">Široký</string>
 
     <!-- Key Label Size -->
@@ -84,7 +84,7 @@
     <string name="feedback_settings_vibration_strength">Síla vibrací</string>
 
     <!-- Typing Behavior Settings -->
-    <string name="typing_settings_double_space_period">Tečka po dvojté mezeře</string>
+    <string name="typing_settings_double_space_period">Tečka po dvojité mezeře</string>
     <string name="typing_settings_double_space_on">Dvojtá mezera vloží tečku</string>
     <string name="typing_settings_double_space_off">Dvojtá mezera vloží mezeru</string>
     <string name="typing_settings_swipe_on">Psaní přejetím prstem povoleno</string>
@@ -124,18 +124,18 @@
     <string name="error_update_language">Nepodařilo se aktualizovat nastavení jazyka</string>
     <string name="error_update_haptic_feedback">Nepodařilo se aktualizovat haptiku</string>
     <string name="error_update_vibration_strength">Nepodařilo se aktualizovat sílu vibrací</string>
-    <string name="error_update_double_space_period">Nepodařilo se aktualizovat dvojmezeru tečka</string>
-    <string name="error_update_swipe">Aktualizace psaní přejetím se nezdařilo</string>
+    <string name="error_update_double_space_period">Nepodařilo se aktualizovat funkci tečka po dvojité mezeře</string>
+    <string name="error_update_swipe">Nepodařilo se aktualizovat psaní přejetím</string>
     <string name="error_update_spacebar_long_press">Nepodařilo se aktualizovat interpunkci dlouhým stisknutím klávesy Mezerník</string>
-    <string name="error_update_long_press_duration">Nepodařilo se aktualizovat dobu dlouhého stistknutí</string>
+    <string name="error_update_long_press_duration">Nepodařilo se aktualizovat dobu dlouhého stisknutí</string>
     <string name="error_update_number_row">Nepodařilo se aktualizovat číselnou řadu</string>
-    <string name="error_update_space_bar_size">Nepodařilo se aktualizovat veliost mezerníku</string>
+    <string name="error_update_space_bar_size">Nepodařilo se aktualizovat velikost mezerníku</string>
     <string name="error_clear_learned_words">Nepodařilo se smazat naučená slova</string>
     <string name="error_reset_to_defaults">Nepodařilo se obnovit nastavení</string>
 
     <!-- Success Messages -->
     <string name="success_learned_words_cleared">Naučená slova smazána</string>
-    <string name="success_settings_reset">Obnoveno výchozí nasstavení</string>
+    <string name="success_settings_reset">Obnoveno výchozí nastavení</string>
 
     <!-- Keyboard descriptions -->
     <string name="keyboard_description">Virtuální klávesnice</string>
@@ -151,10 +151,10 @@
     <string name="shift_key_description">Klávesa shift, stiskněte pro zvětšení dalšího písmene</string>
     <string name="shift_active_description">Shift je aktivní, stiskněte pro deaktivaci</string>
     <string name="caps_lock_description">Caps lock</string>
-    <string name="caps_lock_on_description">Caps lock je zapnutý, stiskněěte pro vypnutí</string>
+    <string name="caps_lock_on_description">Caps lock je zapnutý, stiskněte pro vypnutí</string>
     <string name="backspace_key_description">Smazat předchozí znak</string>
     <string name="space_key_description">Mezerník</string>
-    <string name="letters_mode_description">Přepnout na písmenou klávesnici</string>
+    <string name="letters_mode_description">Přepnout na písmennou klávesnici</string>
     <string name="numbers_mode_description">Přepnout na číselnou klávesnici</string>
     <string name="symbols_mode_description">Přepnout na symbolovou klávesnici</string>
     <string name="ime_prediction_description">Předpověď: %1$s</string>
@@ -188,7 +188,7 @@
     <string name="tip_1_title">Učení slov</string>
     <string name="tip_1_description">Stiskněte mezerník pro přidání zvýrazněného překlepu do vašeho slovníku</string>
 
-    <string name="tip_2_title">Ryhclé menu interpunkce</string>
+    <string name="tip_2_title">Rychlé menu interpunkce</string>
     <string name="tip_2_description">Dlouze stiskněte mezerník pro otevření rychlého menu interpunkce.</string>
 
     <string name="tip_3_title">Variace znaků</string>
@@ -207,17 +207,17 @@
     <string name="clipboard_panel_delete_all_confirm">Smazat všechny nepřipnuté položky schránky?</string>
 
     <!-- Clipboard Accessibility -->
-    <string name="clipboard_consent_message">Urik může číst a ukládat obsah schránky donekonečna. Pokud si to nepřejete, přejděte do nastavení a vypněte historii schránky.</string>
+    <string name="clipboard_consent_message">Urik může číst a ukládat obsah schránky do nekonečna. Pokud si to nepřejete, přejděte do nastavení a vypněte historii schránky.</string>
     <string name="clipboard_item_description">Položka schránky: %1$s</string>
     <string name="clipboard_item_pin">Připnout položku schránky</string>
     <string name="clipboard_item_unpin">Odepnout položku schránky</string>
     <string name="clipboard_item_delete">Smazat položku schránky</string>
     <string name="tip_5_title">Správce schránky</string>
-    <string name="typing_settings_swipe_enabled">Swipe Taip</string>
+    <string name="typing_settings_swipe_enabled">Psaní tahem</string>
     <string name="typing_settings_spacebar_cursor">Ovládání kurzoru mezerníkem</string>
     <string name="typing_settings_spacebar_cursor_on">Přejetím mezerníku posouváte kurzor</string>
     <string name="typing_settings_spacebar_cursor_off">Ovládání kurzoru mezerníkem je zakázáno</string>
-    <string name="typing_settings_backspace_swipe">Backspace Přejetím prstem Smazat</string>
+    <string name="typing_settings_backspace_swipe">Backspace přejetím prstem smazat</string>
     <string name="typing_settings_backspace_swipe_on">Přejetím prstem doleva při stisknutí klávesy Backspace smažete slovo</string>
     <string name="typing_settings_backspace_swipe_off">Přejetím prstem smazat zakázáno</string>
     <string name="typing_settings_spacebar_long_press">Dlouhé stisknutí mezerníku pro interpunkci</string>
