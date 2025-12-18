@@ -310,6 +310,45 @@ class UrikInputMethodService :
     }
 
     /**
+     * Auto-capitalizes "I" for English.
+     *
+     * Converts lowercase "i" and common contractions (i'm, i'll, i've, i'd)
+     * to properly capitalized forms before word completion.
+     */
+    private fun autoCapitalizePronounI() {
+        try {
+            val currentLanguage =
+                languageManager.currentLanguage.value
+                    .split("-")
+                    .first()
+            if (currentLanguage != "en") {
+                return
+            }
+
+            if (displayBuffer.isEmpty()) {
+                return
+            }
+
+            val lowercaseBuffer = displayBuffer.lowercase()
+            val capitalizedVersion =
+                when (lowercaseBuffer) {
+                    "i" -> "I"
+                    "i'm" -> "I'm"
+                    "i'll" -> "I'll"
+                    "i've" -> "I've"
+                    "i'd" -> "I'd"
+                    else -> null
+                }
+
+            if (capitalizedVersion != null && capitalizedVersion != displayBuffer) {
+                displayBuffer = capitalizedVersion
+                currentInputConnection?.setComposingText(capitalizedVersion, 1)
+            }
+        } catch (_: Exception) {
+        }
+    }
+
+    /**
      * Learns word and invalidates relevant caches.
      *
      * @param word Word to learn
@@ -356,6 +395,8 @@ class UrikInputMethodService :
 
             currentInputConnection?.beginBatchEdit()
             try {
+                autoCapitalizePronounI()
+
                 if (wordToLearn != null) {
                     learnWordAndInvalidateCache(
                         wordToLearn,
@@ -378,6 +419,7 @@ class UrikInputMethodService :
                 currentInputConnection?.setSelection(cursorPos, cursorPos)
                 coordinateStateClear()
             } catch (_: Exception) {
+                autoCapitalizePronounI()
                 coordinateWordCompletion()
                 currentInputConnection?.commitText(" ", 1)
                 val cursorPos =
@@ -1394,6 +1436,7 @@ class UrikInputMethodService :
                                 if (isPunctuation) {
                                     currentInputConnection?.beginBatchEdit()
                                     try {
+                                        autoCapitalizePronounI()
                                         learnWordAndInvalidateCache(
                                             wordState.normalizedBuffer,
                                             InputMethod.TYPED,
@@ -1443,6 +1486,7 @@ class UrikInputMethodService :
 
                 currentInputConnection?.beginBatchEdit()
                 try {
+                    autoCapitalizePronounI()
                     coordinateWordCompletion()
                     currentInputConnection?.commitText(char, 1)
                     val cursorPos =
@@ -1468,6 +1512,7 @@ class UrikInputMethodService :
             } catch (_: Exception) {
                 currentInputConnection?.beginBatchEdit()
                 try {
+                    autoCapitalizePronounI()
                     coordinateWordCompletion()
                     currentInputConnection?.commitText(char, 1)
                     val cursorPos =
@@ -1500,6 +1545,7 @@ class UrikInputMethodService :
             if (displayBuffer.isNotEmpty()) {
                 currentInputConnection?.beginBatchEdit()
                 try {
+                    autoCapitalizePronounI()
                     currentInputConnection?.commitText("$displayBuffer ", 1)
                     val cursorPos =
                         currentInputConnection
@@ -1527,8 +1573,32 @@ class UrikInputMethodService :
 
             val shouldCapitalize =
                 viewModel.state.value.isShiftPressed || viewModel.state.value.isCapsLockOn
+
+            val currentLanguage =
+                languageManager.currentLanguage.value
+                    .split("-")
+                    .first()
+            val isEnglishPronounI =
+                currentLanguage == "en" &&
+                    (
+                        validatedWord.lowercase() == "i" ||
+                            validatedWord.lowercase() == "i'm" ||
+                            validatedWord.lowercase() == "i'll" ||
+                            validatedWord.lowercase() == "i've" ||
+                            validatedWord.lowercase() == "i'd"
+                    )
+
             val displayWord =
-                if (shouldCapitalize) {
+                if (isEnglishPronounI) {
+                    when (validatedWord.lowercase()) {
+                        "i" -> "I"
+                        "i'm" -> "I'm"
+                        "i'll" -> "I'll"
+                        "i've" -> "I've"
+                        "i'd" -> "I'd"
+                        else -> validatedWord
+                    }
+                } else if (shouldCapitalize) {
                     validatedWord.replaceFirstChar { it.uppercase() }
                 } else {
                     validatedWord
@@ -2186,6 +2256,7 @@ class UrikInputMethodService :
                             if (isValid) {
                                 currentInputConnection?.beginBatchEdit()
                                 try {
+                                    autoCapitalizePronounI()
                                     coordinateStateClear()
                                     currentInputConnection?.commitText(" ", 1)
                                     val cursorPos =
@@ -2229,6 +2300,7 @@ class UrikInputMethodService :
 
                 currentInputConnection?.beginBatchEdit()
                 try {
+                    autoCapitalizePronounI()
                     coordinateWordCompletion()
                     currentInputConnection?.commitText(" ", 1)
                     val cursorPos =
@@ -2248,6 +2320,7 @@ class UrikInputMethodService :
             } catch (_: Exception) {
                 currentInputConnection?.beginBatchEdit()
                 try {
+                    autoCapitalizePronounI()
                     coordinateWordCompletion()
                     currentInputConnection?.commitText(" ", 1)
                     val cursorPos =
