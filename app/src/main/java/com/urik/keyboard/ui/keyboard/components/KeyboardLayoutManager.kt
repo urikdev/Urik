@@ -996,7 +996,18 @@ class KeyboardLayoutManager(
                                     vibrator?.cancel()
                                 }
                             }
-                            delay(50)
+
+                            val phaseProgress = elapsed / 500f
+                            val intervalMs = (80 - phaseProgress * 20).toLong().coerceAtLeast(60)
+                            val intensity = 0.4f + phaseProgress * 0.3f
+                            val amplitude = (hapticAmplitude * intensity).toInt().coerceIn(1, 255)
+
+                            withContext(Dispatchers.Main) {
+                                vibrator?.vibrate(
+                                    android.os.VibrationEffect.createOneShot(intervalMs / 2, amplitude),
+                                )
+                            }
+                            delay(intervalMs)
                         }
 
                         elapsed < 1500 -> {
