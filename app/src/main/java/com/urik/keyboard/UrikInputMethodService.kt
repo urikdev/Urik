@@ -655,12 +655,14 @@ class UrikInputMethodService :
 
                 setBackgroundColor(themeManager.currentTheme.value.colors.keyboardBackground)
 
-                ViewCompat.setOnApplyWindowInsetsListener(this) { _, insets ->
-                    val navBarInsets = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
-                    (keyboardView.layoutParams as? ViewGroup.MarginLayoutParams)?.apply {
-                        bottomMargin = navBarInsets.bottom
-                    }
-                    keyboardView.requestLayout()
+                ViewCompat.setOnApplyWindowInsetsListener(this) { view, insets ->
+                    val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+                    view.setPadding(
+                        systemBars.left,
+                        0,
+                        systemBars.right,
+                        systemBars.bottom,
+                    )
                     WindowInsetsCompat.CONSUMED
                 }
 
@@ -671,6 +673,8 @@ class UrikInputMethodService :
                         LinearLayout.LayoutParams.WRAP_CONTENT,
                     ),
                 )
+
+                ViewCompat.requestApplyInsets(this)
             }
         } catch (e: Exception) {
             ErrorLogger.logException(
