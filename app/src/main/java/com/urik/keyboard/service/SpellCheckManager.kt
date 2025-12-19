@@ -94,6 +94,12 @@ class SpellCheckManager
         @Volatile
         private var isInitialized = false
 
+        @Volatile
+        private var cachedKeyPositions = emptyMap<Char, android.graphics.PointF>()
+
+        @Volatile
+        private var cachedAverageKeySpacing = 0.0
+
         init {
             initializationJob =
                 initScope.launch {
@@ -123,6 +129,18 @@ class SpellCheckManager
                             preloadLanguage(languageCode)
                         }
                     }
+                }
+            }
+
+            initScope.launch {
+                languageManager.keyPositions.collect { positions ->
+                    cachedKeyPositions = positions
+                    cachedAverageKeySpacing =
+                        if (positions.size >= 2) {
+                            calculateAverageKeySpacing(positions)
+                        } else {
+                            0.0
+                        }
                 }
             }
         }
@@ -651,6 +669,14 @@ class SpellCheckManager
                                                 if (normalizedWord.length > 1 && normalizedWord.lastOrNull() == result.term.lastOrNull()) {
                                                     baseConfidence += SpellCheckConstants.SAME_LAST_LETTER_BONUS
                                                 }
+
+                                                for (i in normalizedWord.indices) {
+                                                    if (normalizedWord[i] != result.term[i]) {
+                                                        val proximityBonus = calculateProximityBonus(normalizedWord[i], result.term[i])
+                                                        baseConfidence += proximityBonus
+                                                        break
+                                                    }
+                                                }
                                             }
 
                                             val strippedResult =
@@ -951,4 +977,50 @@ class SpellCheckManager
                     return@withContext emptyList()
                 }
             }
+
+        private fun calculateProximityBonus(
+            char1: Char,
+            char2: Char,
+        ): Double {
+            if (char1 == char2) return 0.0
+
+            val keyPositions = cachedKeyPositions
+            if (keyPositions.isEmpty()) return 0.0
+
+            val avgKeySpacing = cachedAverageKeySpacing
+            if (avgKeySpacing <= 0.0) return 0.0
+
+            val pos1 = keyPositions[char1.lowercaseChar()] ?: return 0.0
+            val pos2 = keyPositions[char2.lowercaseChar()] ?: return 0.0
+
+            val dx = pos1.x - pos2.x
+            val dy = pos1.y - pos2.y
+            val distanceSquared = dx * dx + dy * dy
+
+            val sigma = avgKeySpacing * SpellCheckConstants.PROXIMITY_SIGMA_MULTIPLIER
+            val proximityScore = kotlin.math.exp(-distanceSquared / (2 * sigma * sigma))
+
+            return proximityScore * SpellCheckConstants.PROXIMITY_MAX_BONUS
+        }
+
+        private fun calculateAverageKeySpacing(keyPositions: Map<Char, android.graphics.PointF>): Double {
+            if (keyPositions.size < 2) return 0.0
+
+            val positions = keyPositions.values
+            var totalDistanceSquared = 0.0
+            var count = 0
+
+            val posArray = positions.toTypedArray()
+            for (i in posArray.indices) {
+                val end = minOf(i + 4, posArray.size)
+                for (j in i + 1 until end) {
+                    val dx = posArray[i].x - posArray[j].x
+                    val dy = posArray[i].y - posArray[j].y
+                    totalDistanceSquared += (dx * dx + dy * dy).toDouble()
+                    count++
+                }
+            }
+
+            return if (count > 0) kotlin.math.sqrt(totalDistanceSquared / count) else 0.0
+        }
     }

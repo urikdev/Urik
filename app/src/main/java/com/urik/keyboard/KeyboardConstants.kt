@@ -76,6 +76,9 @@ object KeyboardConstants {
         const val SAME_FIRST_LETTER_BONUS = 0.15
         const val SAME_LAST_LETTER_BONUS = 0.10
 
+        const val PROXIMITY_MAX_BONUS = 0.20
+        const val PROXIMITY_SIGMA_MULTIPLIER = 2.0
+
         const val MAX_PREFIX_COMPLETION_RESULTS = 10
         const val MAX_INPUT_CODEPOINTS = 100
 
