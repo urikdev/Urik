@@ -1,6 +1,11 @@
 package com.urik.keyboard.settings.hapticfeedback
 
+import android.content.Context
+import android.os.Build
 import android.os.Bundle
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.os.VibratorManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,12 +14,11 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.preference.ListPreference
 import androidx.preference.PreferenceFragmentCompat
+import androidx.preference.SeekBarPreference
 import androidx.preference.SwitchPreferenceCompat
 import com.urik.keyboard.R
 import com.urik.keyboard.settings.SettingsEventHandler
-import com.urik.keyboard.settings.VibrationStrength
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -24,8 +28,17 @@ class HapticFeedbackFragment : PreferenceFragmentCompat() {
     private lateinit var eventHandler: SettingsEventHandler
 
     private lateinit var hapticPref: SwitchPreferenceCompat
-    private lateinit var vibrationPref: ListPreference
+    private lateinit var vibrationPref: SeekBarPreference
     private var testField: EditText? = null
+
+    private val vibrator: Vibrator? by lazy {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            requireContext().getSystemService(VibratorManager::class.java)?.defaultVibrator
+        } else {
+            @Suppress("DEPRECATION")
+            requireContext().getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,12 +77,14 @@ class HapticFeedbackFragment : PreferenceFragmentCompat() {
         screen.addPreference(hapticPref)
 
         vibrationPref =
-            ListPreference(context).apply {
+            SeekBarPreference(context).apply {
                 key = "vibration_strength"
                 title = resources.getString(R.string.feedback_settings_vibration_strength)
-                entries = VibrationStrength.entries.map { resources.getString(it.displayNameRes) }.toTypedArray()
-                entryValues = VibrationStrength.entries.map { it.name }.toTypedArray()
-                summaryProvider = ListPreference.SimpleSummaryProvider.getInstance()
+                min = 1
+                max = 255
+                showSeekBarValue = true
+                isAdjustable = true
+                updatesContinuously = true
             }
         screen.addPreference(vibrationPref)
 
@@ -88,7 +103,9 @@ class HapticFeedbackFragment : PreferenceFragmentCompat() {
         }
 
         vibrationPref.setOnPreferenceChangeListener { _, newValue ->
-            viewModel.updateVibrationStrength(VibrationStrength.valueOf(newValue as String))
+            val strength = newValue as Int
+            viewModel.updateVibrationStrength(strength)
+            previewHaptic(strength)
             true
         }
 
@@ -97,7 +114,7 @@ class HapticFeedbackFragment : PreferenceFragmentCompat() {
                 launch {
                     viewModel.uiState.collect { state ->
                         hapticPref.isChecked = state.hapticFeedback
-                        vibrationPref.value = state.vibrationStrength.name
+                        vibrationPref.value = state.vibrationStrength
                     }
                 }
 
@@ -113,5 +130,12 @@ class HapticFeedbackFragment : PreferenceFragmentCompat() {
     override fun onDestroyView() {
         super.onDestroyView()
         testField = null
+    }
+
+    private fun previewHaptic(amplitude: Int) {
+        vibrator?.let {
+            val effect = VibrationEffect.createOneShot(25L, amplitude.coerceIn(1, 255))
+            it.vibrate(effect)
+        }
     }
 }

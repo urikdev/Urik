@@ -998,7 +998,7 @@ class UrikInputMethodService :
 
                     layoutManager.updateHapticSettings(
                         newSettings.hapticFeedback,
-                        newSettings.vibrationStrength.amplitude,
+                        newSettings.vibrationStrength,
                     )
 
                     layoutManager.updateClipboardEnabled(newSettings.clipboardEnabled)
@@ -1113,7 +1113,7 @@ class UrikInputMethodService :
 
         layoutManager.updateHapticSettings(
             currentSettings.hapticFeedback,
-            currentSettings.vibrationStrength.amplitude,
+            currentSettings.vibrationStrength,
         )
 
         layoutManager.updateClipboardEnabled(currentSettings.clipboardEnabled)

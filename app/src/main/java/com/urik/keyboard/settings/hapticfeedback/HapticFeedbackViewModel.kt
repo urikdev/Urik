@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.urik.keyboard.settings.SettingsEvent
 import com.urik.keyboard.settings.SettingsRepository
-import com.urik.keyboard.settings.VibrationStrength
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -46,7 +45,7 @@ class HapticFeedbackViewModel
             }
         }
 
-        fun updateVibrationStrength(strength: VibrationStrength) {
+        fun updateVibrationStrength(strength: Int) {
             viewModelScope.launch {
                 settingsRepository
                     .updateVibrationStrength(strength)
@@ -61,5 +60,5 @@ class HapticFeedbackViewModel
 
 data class HapticFeedbackUiState(
     val hapticFeedback: Boolean = true,
-    val vibrationStrength: VibrationStrength = VibrationStrength.MEDIUM,
+    val vibrationStrength: Int = 128,
 )

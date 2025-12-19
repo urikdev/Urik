@@ -51,7 +51,7 @@ class SettingsRepository
             val ACTIVE_LANGUAGES = stringSetPreferencesKey("active_languages")
             val PRIMARY_LANGUAGE = stringPreferencesKey("primary_language")
             val HAPTIC_FEEDBACK = booleanPreferencesKey("haptic_feedback")
-            val VIBRATION_STRENGTH = stringPreferencesKey("vibration_strength")
+            val VIBRATION_STRENGTH = intPreferencesKey("vibration_strength")
             val DOUBLE_SPACE_PERIOD = booleanPreferencesKey("double_space_period")
             val SWIPE_ENABLED = booleanPreferencesKey("swipe_enabled")
             val SPACEBAR_CURSOR_CONTROL = booleanPreferencesKey("spacebar_cursor_control")
@@ -85,14 +85,7 @@ class SettingsRepository
                         activeLanguages = preferences[PreferenceKeys.ACTIVE_LANGUAGES] ?: setOf(KeyboardSettings.DEFAULT_LANGUAGE),
                         primaryLanguage = preferences[PreferenceKeys.PRIMARY_LANGUAGE] ?: KeyboardSettings.DEFAULT_LANGUAGE,
                         hapticFeedback = preferences[PreferenceKeys.HAPTIC_FEEDBACK] ?: true,
-                        vibrationStrength =
-                            preferences[PreferenceKeys.VIBRATION_STRENGTH]?.let {
-                                try {
-                                    VibrationStrength.valueOf(it)
-                                } catch (_: IllegalArgumentException) {
-                                    VibrationStrength.MEDIUM
-                                }
-                            } ?: VibrationStrength.MEDIUM,
+                        vibrationStrength = preferences[PreferenceKeys.VIBRATION_STRENGTH] ?: 128,
                         doubleSpacePeriod = preferences[PreferenceKeys.DOUBLE_SPACE_PERIOD] ?: true,
                         swipeEnabled = preferences[PreferenceKeys.SWIPE_ENABLED] ?: true,
                         spacebarCursorControl = preferences[PreferenceKeys.SPACEBAR_CURSOR_CONTROL] ?: true,
@@ -257,9 +250,11 @@ class SettingsRepository
         /**
          * Updates vibration strength level.
          */
-        suspend fun updateVibrationStrength(strength: VibrationStrength): Result<Unit> =
+        suspend fun updateVibrationStrength(strength: Int): Result<Unit> =
             try {
-                dataStore.edit { it[PreferenceKeys.VIBRATION_STRENGTH] = strength.name }
+                dataStore.edit {
+                    it[PreferenceKeys.VIBRATION_STRENGTH] = strength.coerceIn(1, 255)
+                }
                 Result.success(Unit)
             } catch (e: Exception) {
                 Result.failure(e)
