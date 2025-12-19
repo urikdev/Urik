@@ -533,6 +533,13 @@ class SwipeKeyboardView
                         .currentTheme.value.colors.suggestionText,
                 )
 
+                btn.textDirection =
+                    if (currentLayout?.isRTL == true) {
+                        View.TEXT_DIRECTION_RTL
+                    } else {
+                        View.TEXT_DIRECTION_LTR
+                    }
+
                 btn.maxLines = 1
                 btn.ellipsize = android.text.TextUtils.TruncateAt.MIDDLE
 

@@ -203,6 +203,9 @@ class KeyboardRepository
                 throw IllegalStateException("Layout data missing 'modes' section")
             }
 
+            val isRTL = layoutData.optBoolean("isRTL", false)
+            val script = layoutData.optString("script", "Latn")
+
             val modes = layoutData.getJSONObject("modes")
             val modeKey = mode.name.lowercase()
 
@@ -228,7 +231,12 @@ class KeyboardRepository
                 rows.add(row)
             }
 
-            return KeyboardLayout(mode = mode, rows = rows)
+            return KeyboardLayout(
+                mode = mode,
+                rows = rows,
+                isRTL = isRTL,
+                script = script,
+            )
         }
 
         private fun parseKeyFromJson(

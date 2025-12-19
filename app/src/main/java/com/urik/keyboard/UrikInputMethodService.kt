@@ -120,6 +120,7 @@ class UrikInputMethodService :
     private val observerJobs = mutableListOf<Job>()
 
     private var swipeKeyboardView: SwipeKeyboardView? = null
+    private var keyboardRootContainer: LinearLayout? = null
     private var lastDisplayDensity: Float = 0f
     private var lastKeyboardConfig: Int = android.content.res.Configuration.KEYBOARD_UNDEFINED
 
@@ -258,9 +259,21 @@ class UrikInputMethodService :
      * @param locale Locale to derive script from
      */
     private fun updateScriptContext(locale: ULocale) {
+        val currentLayout = viewModel.layout.value
+        val isRTL = currentLayout?.isRTL ?: false
+        val scriptCode =
+            currentLayout?.script?.let { scriptStr ->
+                when (scriptStr) {
+                    "Arab" -> UScript.ARABIC
+                    "Cyrl" -> UScript.CYRILLIC
+                    "Latn" -> UScript.LATIN
+                    else -> UScript.LATIN
+                }
+            } ?: UScript.LATIN
+
         layoutManager.updateScriptContext()
-        swipeDetector.updateScriptContext(locale)
-        textInputProcessor.updateScriptContext(locale, UScript.LATIN)
+        swipeDetector.updateScriptContext(locale, isRTL, scriptCode)
+        textInputProcessor.updateScriptContext(locale, scriptCode)
         spellCheckManager.clearCaches()
     }
 
@@ -687,37 +700,41 @@ class UrikInputMethodService :
 
             val keyboardView = createSwipeKeyboardView() ?: return null
 
-            return LinearLayout(this).apply {
-                orientation = LinearLayout.VERTICAL
-                layoutParams =
-                    ViewGroup.LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT,
+            val rootContainer =
+                LinearLayout(this).apply {
+                    orientation = LinearLayout.VERTICAL
+                    layoutParams =
+                        ViewGroup.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                            ViewGroup.LayoutParams.WRAP_CONTENT,
+                        )
+
+                    setBackgroundColor(themeManager.currentTheme.value.colors.keyboardBackground)
+
+                    ViewCompat.setOnApplyWindowInsetsListener(this) { view, insets ->
+                        val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+                        view.setPadding(
+                            systemBars.left,
+                            0,
+                            systemBars.right,
+                            systemBars.bottom,
+                        )
+                        WindowInsetsCompat.CONSUMED
+                    }
+
+                    addView(
+                        keyboardView,
+                        LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT,
+                            LinearLayout.LayoutParams.WRAP_CONTENT,
+                        ),
                     )
 
-                setBackgroundColor(themeManager.currentTheme.value.colors.keyboardBackground)
-
-                ViewCompat.setOnApplyWindowInsetsListener(this) { view, insets ->
-                    val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-                    view.setPadding(
-                        systemBars.left,
-                        0,
-                        systemBars.right,
-                        systemBars.bottom,
-                    )
-                    WindowInsetsCompat.CONSUMED
+                    ViewCompat.requestApplyInsets(this)
                 }
 
-                addView(
-                    keyboardView,
-                    LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT,
-                    ),
-                )
-
-                ViewCompat.requestApplyInsets(this)
-            }
+            keyboardRootContainer = rootContainer
+            return rootContainer
         } catch (e: Exception) {
             ErrorLogger.logException(
                 component = "UrikInputMethodService",
