@@ -21,6 +21,7 @@ import com.urik.keyboard.R
 import com.urik.keyboard.model.KeyboardKey
 import com.urik.keyboard.model.KeyboardLayout
 import com.urik.keyboard.model.KeyboardState
+import com.urik.keyboard.service.LanguageManager
 import com.urik.keyboard.service.SpellCheckManager
 import com.urik.keyboard.service.WordLearningEngine
 import com.urik.keyboard.theme.ThemeManager
@@ -50,6 +51,7 @@ class SwipeKeyboardView
         private var keyboardLayoutManager: KeyboardLayoutManager? = null
         private var swipeDetector: SwipeDetector? = null
         private var themeManager: ThemeManager? = null
+        private var languageManager: LanguageManager? = null
 
         private var onKeyClickListener: ((KeyboardKey) -> Unit)? = null
         private var onSwipeWordListener: ((String) -> Unit)? = null
@@ -391,6 +393,7 @@ class SwipeKeyboardView
             spellCheckManager: SpellCheckManager,
             wordLearningEngine: WordLearningEngine,
             themeManager: ThemeManager,
+            languageManager: LanguageManager,
         ) {
             if (isDestroyed) return
 
@@ -399,6 +402,7 @@ class SwipeKeyboardView
             this.spellCheckManager = spellCheckManager
             this.wordLearningEngine = wordLearningEngine
             this.themeManager = themeManager
+            this.languageManager = languageManager
 
             detector.setSwipeListener(this)
             setupSwipeOverlay()
@@ -983,6 +987,14 @@ class SwipeKeyboardView
             expandEdgeKeyHitAreas()
 
             swipeDetector?.updateKeyPositions(keyCharacterPositions)
+
+            val charToPosition = mutableMapOf<Char, PointF>()
+            keyCharacterPositions.forEach { (key, pos) ->
+                if (key.value.isNotEmpty()) {
+                    charToPosition[key.value.first()] = pos
+                }
+            }
+            languageManager?.updateKeyPositions(charToPosition)
         }
 
         private fun expandEdgeKeyHitAreas() {

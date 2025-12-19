@@ -774,7 +774,7 @@ class UrikInputMethodService :
 
             val swipeView =
                 SwipeKeyboardView(this).apply {
-                    initialize(layoutManager, swipeDetector, spellCheckManager, wordLearningEngine, themeManager)
+                    initialize(layoutManager, swipeDetector, spellCheckManager, wordLearningEngine, themeManager, languageManager)
                     setOnKeyClickListener { key -> handleKeyPress(key) }
                     setOnSwipeWordListener { validatedWord -> handleSwipeWord(validatedWord) }
                     setOnSuggestionClickListener { suggestion -> handleSuggestionSelected(suggestion) }

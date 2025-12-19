@@ -430,22 +430,26 @@ class SwipeDetector
                     val dictionaryWords = spellCheckManager.getCommonWords()
                     val learnedWords = wordLearningEngine.getLearnedWordsForSwipe(minLength, maxLength)
 
-                    val rawWords =
+                    val wordFrequencyMap =
                         if (learnedWords.isNotEmpty()) {
-                            val combined = (dictionaryWords + learnedWords).groupBy { it.first }
-                            combined.map { (word, entries) ->
-                                word to entries.maxOf { it.second }
+                            val map = HashMap<String, Int>(dictionaryWords.size + learnedWords.size)
+                            dictionaryWords.forEach { (word, freq) -> map[word] = freq }
+                            learnedWords.forEach { (word, freq) ->
+                                map[word] = maxOf(map[word] ?: 0, freq)
                             }
+                            map
                         } else {
-                            dictionaryWords
+                            val map = HashMap<String, Int>(dictionaryWords.size)
+                            dictionaryWords.forEach { (word, freq) -> map[word] = freq }
+                            map
                         }
 
-                    if (keyPositionsSnapshot.isEmpty() || rawWords.isEmpty()) {
+                    if (keyPositionsSnapshot.isEmpty() || wordFrequencyMap.isEmpty()) {
                         return@withContext emptyList()
                     }
 
                     val dictionaryByFirstChar =
-                        rawWords
+                        wordFrequencyMap.entries
                             .filter { (word, _) -> word.length in minLength..maxLength }
                             .map { (word, frequency) ->
                                 DictionaryEntry(
@@ -501,6 +505,9 @@ class SwipeDetector
 
                     val wordsToCheck = dictionarySnapshot.size
 
+                    val reuseLetterPathIndices = ArrayList<Int>(20)
+                    val reuseLetterScores = ArrayList<Pair<Char, Float>>(20)
+
                     for (i in 0 until wordsToCheck) {
                         if (i % 50 == 0) {
                             yield()
@@ -517,6 +524,8 @@ class SwipeDetector
                                 swipePath,
                                 keyPositionsSnapshot,
                                 entry.uniqueLetterCount,
+                                reuseLetterPathIndices,
+                                reuseLetterScores,
                             )
 
                         val pointsPerLetter = swipePath.size.toFloat() / entry.word.length.toFloat()
@@ -579,8 +588,13 @@ class SwipeDetector
             swipePath: List<SwipePoint>,
             keyPositions: Map<Char, PointF>,
             uniqueLetterCount: Int,
+            letterPathIndices: ArrayList<Int>,
+            letterScores: ArrayList<Pair<Char, Float>>,
         ): Float {
             if (swipePath.isEmpty()) return 0f
+
+            letterPathIndices.clear()
+            letterScores.clear()
 
             var totalScore = 0f
 
@@ -589,9 +603,6 @@ class SwipeDetector
 
             val expThresh60 = SwipeDetectionConstants.EXP_THRESHOLD_60
             val twoSigma60Sq = SwipeDetectionConstants.TWO_SIGMA_60_SQ
-
-            val letterPathIndices = mutableListOf<Int>()
-            val letterScores = mutableListOf<Pair<Char, Float>>()
 
             word.forEachIndexed { letterIndex, char ->
                 val keyPos = keyPositions[char.lowercaseChar()] ?: return 0f
@@ -608,21 +619,41 @@ class SwipeDetector
                         else -> swipePath.size
                     }
 
+                var minTotalDistance = Float.MAX_VALUE
                 var minDistanceSquared = Float.MAX_VALUE
                 var closestPointIndex = -1
 
                 val searchStart = if (isLastLetter) swipePath.size - searchRange else 0
                 val searchEnd = if (isFirstLetter) searchRange else swipePath.size
 
-                swipePath.subList(searchStart, searchEnd).forEachIndexed { relativeIndex, point ->
+                val expectedPathProgress =
+                    if (word.length > 1) {
+                        letterIndex.toFloat() / (word.length - 1).toFloat()
+                    } else {
+                        0.5f
+                    }
+                val expectedPathIndex = (expectedPathProgress * (swipePath.size - 1)).toInt()
+
+                for (relativeIndex in 0 until (searchEnd - searchStart)) {
                     val pointIndex = searchStart + relativeIndex
+                    val point = swipePath[pointIndex]
                     val dx = keyPos.x - point.x
                     val dy = keyPos.y - point.y
                     val spatialDistanceSquared = dx * dx + dy * dy
 
-                    if (spatialDistanceSquared < minDistanceSquared) {
+                    val positionDeviation = kotlin.math.abs(pointIndex - expectedPathIndex).toFloat()
+                    val positionPenalty = positionDeviation * 50f
+
+                    val totalDistance = spatialDistanceSquared + positionPenalty
+
+                    if (totalDistance < minTotalDistance) {
+                        minTotalDistance = totalDistance
                         minDistanceSquared = spatialDistanceSquared
                         closestPointIndex = pointIndex
+
+                        if (spatialDistanceSquared < 100f && positionDeviation < 2f) {
+                            break
+                        }
                     }
                 }
 
