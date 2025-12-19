@@ -1,5 +1,6 @@
 package com.urik.keyboard.service
 
+import android.graphics.PointF
 import com.urik.keyboard.settings.SettingsRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -28,6 +29,9 @@ class LanguageManager
         private val _currentLanguage = MutableStateFlow("en")
         val currentLanguage: StateFlow<String> = _currentLanguage.asStateFlow()
 
+        private val _keyPositions = MutableStateFlow<Map<Char, PointF>>(emptyMap())
+        val keyPositions: StateFlow<Map<Char, PointF>> = _keyPositions.asStateFlow()
+
         suspend fun initialize(): Result<Unit> =
             withContext(Dispatchers.IO) {
                 return@withContext try {
@@ -43,6 +47,10 @@ class LanguageManager
                     Result.failure(e)
                 }
             }
+
+        fun updateKeyPositions(positions: Map<Char, PointF>) {
+            _keyPositions.value = positions
+        }
 
         fun cleanup() {
             scope.cancel()

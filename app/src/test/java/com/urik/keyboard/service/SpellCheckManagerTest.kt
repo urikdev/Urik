@@ -135,6 +135,9 @@ class SpellCheckManagerTest {
         currentLanguageFlow = MutableStateFlow("en")
         whenever(languageManager.currentLanguage).thenReturn(currentLanguageFlow)
 
+        val keyPositionsFlow = MutableStateFlow<Map<Char, android.graphics.PointF>>(emptyMap())
+        whenever(languageManager.keyPositions).thenReturn(keyPositionsFlow)
+
         whenever(context.assets).thenReturn(assetManager)
 
         whenever(assetManager.open("dictionaries/en_symspell.txt"))
