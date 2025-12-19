@@ -98,6 +98,12 @@ class SwipeDetector
         private var currentLocale: ULocale? = null
 
         @Volatile
+        private var currentIsRTL = false
+
+        @Volatile
+        private var currentScriptCode = UScript.LATIN
+
+        @Volatile
         private var swipeEnabled = true
 
         @Volatile
@@ -134,10 +140,16 @@ class SwipeDetector
         }
 
         /**
-         * Updates script context when language changes.
+         * Updates script context when language or layout changes.
          */
-        fun updateScriptContext(locale: ULocale) {
+        fun updateScriptContext(
+            locale: ULocale,
+            isRTL: Boolean = false,
+            scriptCode: Int = UScript.LATIN,
+        ) {
             currentLocale = locale
+            currentIsRTL = isRTL
+            currentScriptCode = scriptCode
         }
 
         /**
@@ -336,8 +348,8 @@ class SwipeDetector
                     SwipePath(
                         points = swipePoints.toList(),
                         keysTraversed = emptyList(),
-                        scriptCode = UScript.LATIN,
-                        isRtl = false,
+                        scriptCode = currentScriptCode,
+                        isRtl = currentIsRTL,
                         topCandidates = emptyList(),
                     )
 
@@ -364,8 +376,8 @@ class SwipeDetector
                     SwipePath(
                         points = swipePoints.toList(),
                         keysTraversed = emptyList(),
-                        scriptCode = UScript.LATIN,
-                        isRtl = false,
+                        scriptCode = currentScriptCode,
+                        isRtl = currentIsRTL,
                         topCandidates = emptyList(),
                     )
 

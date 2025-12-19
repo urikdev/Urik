@@ -422,6 +422,8 @@ class KeyboardLayoutManager(
         keys: List<KeyboardKey>,
         state: KeyboardState,
     ): LinearLayout {
+        val is9LetterRow = is9CharacterLetterRow(keys)
+
         val rowLayout =
             LinearLayout(context).apply {
                 orientation = LinearLayout.HORIZONTAL
@@ -434,9 +436,10 @@ class KeyboardLayoutManager(
                             val verticalMargin = context.resources.getDimensionPixelSize(R.dimen.key_margin_vertical)
                             setMargins(0, 0, 0, verticalMargin)
                         }
-            }
 
-        val is9LetterRow = is9CharacterLetterRow(keys)
+                // Disable baseline alignment to prevent extra spacing with Arabic/Persian glyphs
+                setBaselineAligned(false)
+            }
 
         if (is9LetterRow) {
             val spacer =

@@ -579,6 +579,27 @@ class KeyboardViewModelTest {
             verify(repository, never()).getLayoutForMode(any(), any(), any())
         }
 
+    @Test
+    fun `layout contains RTL and script information for Arabic script`() {
+        val rtlLayout =
+            KeyboardLayout(
+                mode = KeyboardMode.LETTERS,
+                rows = emptyList(),
+                isRTL = true,
+                script = "Arab",
+            )
+
+        runTest {
+            whenever(repository.getLayoutForMode(any(), any(), any())).thenReturn(Result.success(rtlLayout))
+        }
+
+        languageFlow.value = "fa"
+
+        val layout = viewModel.layout.value
+        assertEquals(true, layout?.isRTL)
+        assertEquals("Arab", layout?.script)
+    }
+
     private fun createMockLayout(mode: KeyboardMode): KeyboardLayout =
         KeyboardLayout(
             mode = mode,
