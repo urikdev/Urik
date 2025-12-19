@@ -626,11 +626,12 @@ class SwipeDetector
                 val searchStart = if (isLastLetter) swipePath.size - searchRange else 0
                 val searchEnd = if (isFirstLetter) searchRange else swipePath.size
 
-                val expectedPathProgress = if (word.length > 1) {
-                    letterIndex.toFloat() / (word.length - 1).toFloat()
-                } else {
-                    0.5f
-                }
+                val expectedPathProgress =
+                    if (word.length > 1) {
+                        letterIndex.toFloat() / (word.length - 1).toFloat()
+                    } else {
+                        0.5f
+                    }
                 val expectedPathIndex = (expectedPathProgress * (swipePath.size - 1)).toInt()
 
                 for (relativeIndex in 0 until (searchEnd - searchStart)) {
