@@ -7,7 +7,6 @@ import com.urik.keyboard.settings.KeyboardSettings
 import com.urik.keyboard.settings.LongPressDuration
 import com.urik.keyboard.settings.SettingsRepository
 import com.urik.keyboard.settings.SpaceBarSize
-import com.urik.keyboard.settings.VibrationStrength
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -230,7 +229,7 @@ class ThemeManagerTest {
             activeLanguages = setOf("en"),
             primaryLanguage = "en",
             hapticFeedback = true,
-            vibrationStrength = VibrationStrength.MEDIUM,
+            vibrationStrength = 128,
             doubleSpacePeriod = true,
             longPressDuration = LongPressDuration.MEDIUM,
             showNumberRow = true,

@@ -38,11 +38,6 @@
     <string name="key_size_large">Velká</string>
     <string name="key_size_extra_large">Extra velká</string>
 
-    <!-- Vibration Strength -->
-    <string name="vibration_strength_light">Lehká</string>
-    <string name="vibration_strength_medium">Střední</string>
-    <string name="vibration_strength_strong">Silná</string>
-
     <!-- Long Press Duration -->
     <string name="long_press_duration_short">Krátká</string>
     <string name="long_press_duration_medium">Střední</string>

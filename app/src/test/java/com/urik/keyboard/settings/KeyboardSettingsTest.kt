@@ -196,7 +196,7 @@ class KeyboardSettingsTest {
         val settings =
             KeyboardSettings(
                 hapticFeedback = true,
-                vibrationStrength = VibrationStrength.STRONG,
+                vibrationStrength = 255,
             )
 
         assertEquals(255, settings.effectiveVibrationAmplitude)
@@ -207,7 +207,7 @@ class KeyboardSettingsTest {
         val settings =
             KeyboardSettings(
                 hapticFeedback = false,
-                vibrationStrength = VibrationStrength.STRONG,
+                vibrationStrength = 255,
             )
 
         assertEquals(0, settings.effectiveVibrationAmplitude)
