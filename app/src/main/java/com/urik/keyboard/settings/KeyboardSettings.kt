@@ -18,18 +18,6 @@ enum class KeySize(
 }
 
 /**
- * Vibration amplitude levels.
- */
-enum class VibrationStrength(
-    val displayNameRes: Int,
-    val amplitude: Int,
-) {
-    LIGHT(R.string.vibration_strength_light, 140),
-    MEDIUM(R.string.vibration_strength_medium, 210),
-    STRONG(R.string.vibration_strength_strong, 255),
-}
-
-/**
  * Long press activation timing in milliseconds.
  */
 enum class LongPressDuration(
@@ -81,7 +69,7 @@ data class KeyboardSettings(
     val activeLanguages: Set<String> = setOf(DEFAULT_LANGUAGE),
     val primaryLanguage: String = DEFAULT_LANGUAGE,
     val hapticFeedback: Boolean = true,
-    val vibrationStrength: VibrationStrength = VibrationStrength.MEDIUM,
+    val vibrationStrength: Int = 128,
     val doubleSpacePeriod: Boolean = true,
     val swipeEnabled: Boolean = true,
     val spacebarCursorControl: Boolean = true,
@@ -139,7 +127,7 @@ data class KeyboardSettings(
      * Returns 0 if haptic feedback is disabled.
      */
     val effectiveVibrationAmplitude: Int
-        get() = if (hapticFeedback) vibrationStrength.amplitude else 0
+        get() = if (hapticFeedback) vibrationStrength else 0
 
     companion object {
         const val MIN_SUGGESTION_COUNT = 1

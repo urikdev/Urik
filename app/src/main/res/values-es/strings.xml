@@ -38,11 +38,6 @@
     <string name="key_size_large">Grande</string>
     <string name="key_size_extra_large">Extra grande</string>
 
-    <!-- Vibration Strength -->
-    <string name="vibration_strength_light">Bajo</string>
-    <string name="vibration_strength_medium">Medio</string>
-    <string name="vibration_strength_strong">Fuerte</string>
-
     <!-- Long Press Duration -->
     <string name="long_press_duration_short">Corto</string>
     <string name="long_press_duration_medium">Medio</string>

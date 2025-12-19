@@ -39,11 +39,6 @@
     <string name="key_size_large">بزرگ</string>
     <string name="key_size_extra_large">خیلی بزرگ</string>
 
-    <!-- Vibration Strength -->
-    <string name="vibration_strength_light">کم</string>
-    <string name="vibration_strength_medium">متوسط</string>
-    <string name="vibration_strength_strong">زیاد</string>
-
     <!-- Long Press Duration -->
     <string name="long_press_duration_short">کوتاه</string>
     <string name="long_press_duration_medium">متوسط</string>
