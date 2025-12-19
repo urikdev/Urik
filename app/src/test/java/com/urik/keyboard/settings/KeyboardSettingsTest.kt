@@ -307,6 +307,28 @@ class KeyboardSettingsTest {
     }
 
     @Test
+    fun `defaultForLocale supports farsi`() {
+        val settings = KeyboardSettings.defaultForLocale("fa")
+
+        assertEquals(setOf("fa"), settings.activeLanguages)
+        assertEquals("fa", settings.primaryLanguage)
+    }
+
+    @Test
+    fun `validated preserves farsi as supported language`() {
+        val settings =
+            KeyboardSettings(
+                activeLanguages = setOf("fa", "en", "fr"),
+                primaryLanguage = "fa",
+            )
+
+        val validated = settings.validated()
+
+        assertEquals(setOf("fa", "en"), validated.activeLanguages)
+        assertEquals("fa", validated.primaryLanguage)
+    }
+
+    @Test
     fun `validated preserves polish as supported language`() {
         val settings =
             KeyboardSettings(

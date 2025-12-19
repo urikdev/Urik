@@ -25,11 +25,13 @@ data class KeyboardState(
 /**
  * Layout structure for a specific keyboard mode.
  *
- * Each row contains keys rendered left-to-right.
+ * Each row contains keys rendered left-to-right or right-to-left based on isRTL.
  */
 data class KeyboardLayout(
     val mode: KeyboardMode,
     val rows: List<List<KeyboardKey>>,
+    val isRTL: Boolean = false,
+    val script: String = "Latn",
 )
 
 /**
