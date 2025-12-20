@@ -271,6 +271,10 @@ class SwipeDetector
                         reset()
                         return false
                     }
+                    if (touchedKey.value.isEmpty() || !touchedKey.value.first().isLetter()) {
+                        reset()
+                        return false
+                    }
                     startSwipeDetection(event, touchedKey)
                     return true
                 }
