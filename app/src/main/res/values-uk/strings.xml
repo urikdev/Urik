@@ -73,7 +73,7 @@
     <!-- Language Settings -->
 
     <!-- Sound & Feedback Settings -->
-    <string name="primary_layout_language">Поточний макет</string>
+    <string name="primary_layout_language">Основна розкладка</string>
     <string name="feedback_settings_haptic_feedback">Тактильна Віддача</string>
     <string name="feedback_settings_haptic_on">Тактильна віддача увімкнена</string>
     <string name="feedback_settings_haptic_off">Тактильна віддача вимкнена</string>
@@ -221,6 +221,6 @@
     <string name="typing_settings_spacebar_long_press_on">Довге натискання клавіші пробілу для розділових знаків</string>
     <string name="error_update_spacebar_cursor">Не вдалося оновити керування курсором за допомогою клавіші пробілу</string>
     <string name="error_update_backspace_swipe">Не вдалося оновити функцію Backspace (видалити пробілом)</string>
-    <string name="max_languages_reached">Дозволено максимум 3 мови</string>
+    <string name="max_languages_reached">Можна додати до 3 мов.</string>
 
 </resources>
