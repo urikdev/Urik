@@ -610,6 +610,7 @@ class UrikInputMethodService :
                     onKeyClick = { key -> handleKeyPress(key) },
                     onAcceleratedDeletionChanged = { active -> setAcceleratedDeletion(active) },
                     onSymbolsLongPress = { handleClipboardButtonClick() },
+                    onLanguageSwitch = { languageCode -> handleLanguageSwitch(languageCode) },
                     characterVariationService = characterVariationService,
                     languageManager = languageManager,
                     themeManager = themeManager,
@@ -670,7 +671,8 @@ class UrikInputMethodService :
                 )
             }
 
-            val locale = ULocale.forLanguageTag(currentLanguage)
+            val currentLayoutLanguage = languageManager.currentLayoutLanguage.value
+            val locale = ULocale.forLanguageTag(currentLayoutLanguage)
             updateScriptContext(locale)
 
             try {
@@ -911,6 +913,29 @@ class UrikInputMethodService :
         }
     }
 
+    private fun handleLanguageSwitch(languageCode: String) {
+        serviceScope.launch {
+            try {
+                coordinateStateClear()
+                viewModel.clearShiftAndCapsState()
+
+                languageManager.switchLayoutLanguage(languageCode)
+
+                val locale =
+                    com.ibm.icu.util.ULocale
+                        .forLanguageTag(languageCode)
+                updateScriptContext(locale)
+            } catch (e: Exception) {
+                ErrorLogger.logException(
+                    component = "UrikInputMethodService",
+                    severity = ErrorLogger.Severity.HIGH,
+                    exception = e,
+                    context = mapOf("operation" to "handleLanguageSwitch"),
+                )
+            }
+        }
+    }
+
     private fun handleClipboardItemPaste(content: String) {
         serviceScope.launch {
             try {
@@ -1036,9 +1061,19 @@ class UrikInputMethodService :
 
         observerJobs.add(
             serviceScope.launch {
-                languageManager.currentLanguage.collect { detectedLanguage ->
+                languageManager.currentLayoutLanguage.collect { detectedLanguage ->
                     val locale = ULocale.forLanguageTag(detectedLanguage)
                     updateScriptContext(locale)
+                }
+            },
+        )
+
+        observerJobs.add(
+            serviceScope.launch {
+                languageManager.activeLanguages.collect { languages ->
+                    layoutManager.updateActiveLanguages(languages)
+                    swipeDetector.updateActiveLanguages(languages)
+                    updateSwipeKeyboard()
                 }
             },
         )

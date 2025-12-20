@@ -73,6 +73,7 @@
     <!-- Language Settings -->
 
     <!-- Sound & Feedback Settings -->
+    <string name="primary_layout_language">Aktualny układ</string>
     <string name="feedback_settings_haptic_feedback">Wibracje haptyczne</string>
     <string name="feedback_settings_haptic_on">Wibracje haptyczne włączone</string>
     <string name="feedback_settings_haptic_off">Wibracje haptyczne wyłączone</string>
@@ -220,5 +221,6 @@
     <string name="typing_settings_spacebar_long_press_on">Długie naciśnięcie spacji – interpunkcja</string>
     <string name="error_update_spacebar_cursor">Nie udało się zaktualizować sterowania kursorem spacji</string>
     <string name="error_update_backspace_swipe">Nie udało się zaktualizować funkcji usuwania za pomocą przesunięcia Backspace</string>
+    <string name="max_languages_reached">Maksymalnie 3 języki dozwolone</string>
 
 </resources>

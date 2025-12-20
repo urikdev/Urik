@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -32,7 +33,9 @@ class LanguagesViewModel
             settingsRepository.settings
                 .map { settings ->
                     LanguagesUiState(
+                        activeLanguages = settings.activeLanguages,
                         primaryLanguage = settings.primaryLanguage,
+                        primaryLayoutLanguage = settings.primaryLayoutLanguage,
                     )
                 }.stateIn(
                     scope = viewModelScope,
@@ -40,12 +43,29 @@ class LanguagesViewModel
                     initialValue = LanguagesUiState(),
                 )
 
-        fun selectLanguage(languageTag: String) {
+        fun toggleLanguage(languageTag: String) {
             viewModelScope.launch {
+                val currentSettings = settingsRepository.settings.first()
+                val currentActiveLanguages = currentSettings.activeLanguages.toMutableList()
+
+                if (languageTag in currentActiveLanguages) {
+                    if (currentActiveLanguages.size > 1) {
+                        currentActiveLanguages.remove(languageTag)
+                    }
+                } else {
+                    if (currentActiveLanguages.size < KeyboardSettings.MAX_ACTIVE_LANGUAGES) {
+                        currentActiveLanguages.add(languageTag)
+                    }
+                }
+
+                val newPrimaryLayoutLanguage =
+                    currentActiveLanguages.firstOrNull()
+                        ?: KeyboardSettings.DEFAULT_LANGUAGE
+
                 settingsRepository
-                    .updateLanguageSettings(
-                        activeLanguages = setOf(languageTag),
-                        primaryLanguage = languageTag,
+                    .updateActiveLanguages(
+                        activeLanguages = currentActiveLanguages,
+                        primaryLayoutLanguage = newPrimaryLayoutLanguage,
                     ).onFailure { _events.emit(SettingsEvent.Error.LanguageUpdateFailed) }
             }
         }
@@ -59,5 +79,7 @@ class LanguagesViewModel
  * UI state for language settings.
  */
 data class LanguagesUiState(
+    val activeLanguages: List<String> = listOf(KeyboardSettings.DEFAULT_LANGUAGE),
     val primaryLanguage: String = KeyboardSettings.DEFAULT_LANGUAGE,
+    val primaryLayoutLanguage: String = KeyboardSettings.DEFAULT_LANGUAGE,
 )

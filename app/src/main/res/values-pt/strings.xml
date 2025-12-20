@@ -73,6 +73,7 @@
     <!-- Language Settings -->
 
     <!-- Sound & Feedback Settings -->
+    <string name="primary_layout_language">Layout atual</string>
     <string name="feedback_settings_haptic_feedback">Feedback por vibração</string>
     <string name="feedback_settings_haptic_on">Vibração ativada</string>
     <string name="feedback_settings_haptic_off">Vibração desativada</string>
@@ -219,5 +220,6 @@
     <string name="typing_settings_spacebar_long_press_on">Pressionar e manter pressionada a barra de espaço para pontuação</string>
     <string name="error_update_spacebar_cursor">Falha ao atualizar o controlo do cursor da barra de espaço</string>
     <string name="error_update_backspace_swipe">Falha ao atualizar a eliminação por gesto de deslizar a tecla Backspace</string>
+    <string name="max_languages_reached">Máximo de 3 idiomas permitidos</string>
 
 </resources>

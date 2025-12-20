@@ -19,6 +19,9 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.sync.Mutex
@@ -327,11 +330,10 @@ class WordLearningEngine
          */
         suspend fun getSimilarLearnedWordsWithFrequency(
             word: String,
+            languageCode: String,
             maxResults: Int = 3,
         ): List<Pair<String, Int>> =
             withContext(ioDispatcher) {
-                val currentLanguage = languageManager.currentLanguage.value
-
                 return@withContext try {
                     val cleanWord = word.trim()
                     if (cleanWord.isBlank() || cleanWord.length > WordLearningConstants.MAX_SIMILAR_WORD_LENGTH) {
@@ -355,7 +357,7 @@ class WordLearningEngine
                     try {
                         val exactMatch =
                             learnedWordDao.findExactWord(
-                                languageTag = currentLanguage,
+                                languageTag = languageCode,
                                 normalizedWord = normalized,
                             )
                         if (exactMatch != null) {
@@ -368,7 +370,7 @@ class WordLearningEngine
                         try {
                             val prefixMatches =
                                 learnedWordDao.findWordsWithPrefix(
-                                    languageTag = currentLanguage,
+                                    languageTag = languageCode,
                                     prefix = normalized,
                                     limit = maxResults - results.size,
                                 )
@@ -392,7 +394,7 @@ class WordLearningEngine
 
                             val frequentWords =
                                 learnedWordDao.getMostFrequentWords(
-                                    languageTag = currentLanguage,
+                                    languageTag = languageCode,
                                     limit = searchLimit,
                                 )
                             frequentWords
@@ -425,7 +427,7 @@ class WordLearningEngine
                         try {
                             val candidates =
                                 learnedWordDao.getMostFrequentWords(
-                                    languageTag = currentLanguage,
+                                    languageTag = languageCode,
                                     limit = WordLearningConstants.FUZZY_SEARCH_CANDIDATE_LIMIT,
                                 )
 
@@ -455,6 +457,74 @@ class WordLearningEngine
                     onSuccessfulOperation()
 
                     results.toList().sortedByDescending { it.second }.take(maxResults)
+                } catch (_: SQLiteDatabaseCorruptException) {
+                    handleDatabaseError()
+                    emptyList()
+                } catch (_: SQLiteException) {
+                    handleDatabaseError()
+                    emptyList()
+                } catch (_: Exception) {
+                    emptyList()
+                }
+            }
+
+        suspend fun getSimilarLearnedWordsForAllLanguages(
+            word: String,
+            activeLanguages: List<String>,
+            maxResults: Int = 5,
+        ): List<Pair<String, Int>> =
+            withContext(ioDispatcher) {
+                return@withContext try {
+                    val cleanWord = word.trim()
+                    if (cleanWord.isBlank() || cleanWord.length > WordLearningConstants.MAX_SIMILAR_WORD_LENGTH) {
+                        return@withContext emptyList()
+                    }
+
+                    if (activeLanguages.isEmpty()) {
+                        return@withContext emptyList()
+                    }
+
+                    val allResults = mutableMapOf<String, Int>()
+
+                    activeLanguages.forEach { languageTag ->
+                        try {
+                            val normalized = normalizeWord(cleanWord)
+                            if (normalized.length > WordLearningConstants.MAX_NORMALIZED_WORD_LENGTH) {
+                                return@forEach
+                            }
+
+                            val exactMatch =
+                                learnedWordDao.findExactWord(
+                                    languageTag = languageTag,
+                                    normalizedWord = normalized,
+                                )
+                            if (exactMatch != null) {
+                                val currentFreq = allResults[exactMatch.word] ?: 0
+                                allResults[exactMatch.word] = maxOf(currentFreq, exactMatch.frequency)
+                            }
+
+                            if (normalized.length >= WordLearningConstants.MIN_PREFIX_MATCH_LENGTH) {
+                                val prefixMatches =
+                                    learnedWordDao.findWordsWithPrefix(
+                                        languageTag = languageTag,
+                                        prefix = normalized,
+                                        limit = maxResults,
+                                    )
+                                prefixMatches.forEach { learnedWord ->
+                                    val currentFreq = allResults[learnedWord.word] ?: 0
+                                    allResults[learnedWord.word] = maxOf(currentFreq, learnedWord.frequency)
+                                }
+                            }
+                        } catch (_: Exception) {
+                        }
+                    }
+
+                    onSuccessfulOperation()
+
+                    allResults
+                        .toList()
+                        .sortedByDescending { it.second }
+                        .take(maxResults)
                 } catch (_: SQLiteDatabaseCorruptException) {
                     handleDatabaseError()
                     emptyList()
@@ -875,6 +945,56 @@ class WordLearningEngine
                     emptyList()
                 } catch (_: Exception) {
                     emptyList()
+                }
+            }
+
+        suspend fun getLearnedWordsForSwipeAllLanguages(
+            languages: List<String>,
+            minLength: Int,
+            maxLength: Int,
+        ): Map<String, Int> =
+            withContext(ioDispatcher) {
+                try {
+                    if (isInErrorCooldown() || languages.isEmpty()) {
+                        return@withContext emptyMap()
+                    }
+
+                    val mergedWords = mutableMapOf<String, Int>()
+
+                    coroutineScope {
+                        val allLanguageWords =
+                            languages
+                                .map { lang ->
+                                    async {
+                                        try {
+                                            learnedWordDao.getAllLearnedWordsForLanguage(lang)
+                                        } catch (_: Exception) {
+                                            emptyList()
+                                        }
+                                    }
+                                }.awaitAll()
+
+                        allLanguageWords.forEach { words ->
+                            words
+                                .filter { it.frequency >= 1 && it.word.length in minLength..maxLength }
+                                .forEach { learnedWord ->
+                                    val word = learnedWord.word.lowercase()
+                                    val currentFreq = mergedWords[word] ?: 0
+                                    mergedWords[word] = maxOf(currentFreq, learnedWord.frequency)
+                                }
+                        }
+                    }
+
+                    onSuccessfulOperation()
+                    return@withContext mergedWords
+                } catch (_: SQLiteDatabaseCorruptException) {
+                    handleDatabaseError()
+                    emptyMap()
+                } catch (_: SQLiteException) {
+                    handleDatabaseError()
+                    emptyMap()
+                } catch (_: Exception) {
+                    emptyMap()
                 }
             }
     }
