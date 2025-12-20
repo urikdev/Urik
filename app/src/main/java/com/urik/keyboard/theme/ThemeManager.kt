@@ -105,7 +105,7 @@ class ThemeManager(
 
     fun getAllThemes(): List<KeyboardTheme> =
         buildList {
-            add(com.urik.keyboard.theme.Default)
+            add(Default)
             add(Light)
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
                 add(generateMaterialYouTheme())

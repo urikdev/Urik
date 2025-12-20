@@ -241,17 +241,22 @@ class SwipeKeyboardView
                     )
                 }
 
+            val emojiTextSize = calculateResponsiveSuggestionTextSize()
             val closeButtonBar =
                 LinearLayout(baseContext).apply {
                     orientation = LinearLayout.HORIZONTAL
-                    gravity = Gravity.END
+                    gravity = Gravity.CENTER_VERTICAL or Gravity.END
                     setBackgroundColor(
                         themeManager!!
                             .currentTheme.value.colors.suggestionBarBackground,
                     )
 
-                    val padding = baseContext.resources.getDimensionPixelSize(R.dimen.key_margin_horizontal)
-                    setPadding(padding, padding / 2, padding, padding / 2)
+                    val basePadding = baseContext.resources.getDimensionPixelSize(R.dimen.key_margin_horizontal)
+                    val verticalPadding = (basePadding * 0.3f).toInt()
+                    setPadding(basePadding, verticalPadding, 0, verticalPadding)
+
+                    val minTouchTarget = baseContext.resources.getDimensionPixelSize(R.dimen.minimum_touch_target)
+                    minimumHeight = minTouchTarget
                 }
 
             val backspaceButton =
@@ -262,9 +267,11 @@ class SwipeKeyboardView
                         themeManager!!
                             .currentTheme.value.colors.suggestionText,
                     )
+                    gravity = Gravity.CENTER
 
+                    val minTouchTarget = baseContext.resources.getDimensionPixelSize(R.dimen.minimum_touch_target)
                     val buttonPadding = (18f * baseContext.resources.displayMetrics.density).toInt()
-                    setPadding(buttonPadding, buttonPadding / 2, buttonPadding, buttonPadding / 2)
+                    setPadding(buttonPadding, 0, buttonPadding, 0)
 
                     setBackgroundColor(
                         themeManager!!
@@ -280,9 +287,10 @@ class SwipeKeyboardView
                         LinearLayout
                             .LayoutParams(
                                 LinearLayout.LayoutParams.WRAP_CONTENT,
-                                LinearLayout.LayoutParams.WRAP_CONTENT,
+                                minTouchTarget,
                             ).apply {
-                                marginEnd = (8f * baseContext.resources.displayMetrics.density).toInt()
+                                val basePadding = baseContext.resources.getDimensionPixelSize(R.dimen.key_margin_horizontal)
+                                marginEnd = basePadding
                             }
                     layoutParams = marginParams
                 }
@@ -290,15 +298,14 @@ class SwipeKeyboardView
             val closeButton =
                 TextView(baseContext).apply {
                     text = "✕"
-                    setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
+                    setTextSize(TypedValue.COMPLEX_UNIT_SP, emojiTextSize)
                     setTextColor(
                         themeManager!!
-                            .currentTheme.value.colors.suggestionText,
+                            .currentTheme.value.colors.keyTextAction,
                     )
+                    gravity = Gravity.CENTER
 
-                    val buttonPadding = (18f * baseContext.resources.displayMetrics.density).toInt()
-                    setPadding(buttonPadding, buttonPadding / 2, buttonPadding, buttonPadding / 2)
-
+                    val minTouchTarget = baseContext.resources.getDimensionPixelSize(R.dimen.minimum_touch_target)
                     setBackgroundColor(
                         themeManager!!
                             .currentTheme.value.colors.keyBackgroundAction,
@@ -308,6 +315,13 @@ class SwipeKeyboardView
                     setOnClickListener {
                         hideEmojiPicker()
                     }
+
+                    layoutParams =
+                        LinearLayout
+                            .LayoutParams(
+                                minTouchTarget,
+                                minTouchTarget,
+                            )
                 }
 
             closeButtonBar.addView(backspaceButton)
@@ -539,9 +553,9 @@ class SwipeKeyboardView
 
                 btn.textDirection =
                     if (currentLayout?.isRTL == true) {
-                        View.TEXT_DIRECTION_RTL
+                        TEXT_DIRECTION_RTL
                     } else {
-                        View.TEXT_DIRECTION_LTR
+                        TEXT_DIRECTION_LTR
                     }
 
                 btn.maxLines = 1
@@ -842,7 +856,7 @@ class SwipeKeyboardView
 
                         val basePadding = context.resources.getDimensionPixelSize(R.dimen.key_margin_horizontal)
                         val verticalPadding = (basePadding * 0.3f).toInt()
-                        setPadding(basePadding, verticalPadding, basePadding, verticalPadding)
+                        setPadding(basePadding, verticalPadding, 0, verticalPadding)
 
                         val minTouchTarget = context.resources.getDimensionPixelSize(R.dimen.minimum_touch_target)
                         minimumHeight = minTouchTarget
@@ -1071,6 +1085,7 @@ class SwipeKeyboardView
                         gestureLastProcessedX = gestureStartX + (positionsToMove * sensitivity)
                     }
                 }
+
                 else -> { }
             }
         }
@@ -1094,6 +1109,7 @@ class SwipeKeyboardView
                         onBackspaceSwipeDelete?.invoke()
                     }
                 }
+
                 else -> { }
             }
         }

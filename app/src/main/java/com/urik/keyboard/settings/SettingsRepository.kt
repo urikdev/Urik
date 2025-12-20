@@ -219,41 +219,6 @@ class SettingsRepository
             }
 
         /**
-         * Updates active languages and primary language with validation.
-         *
-         * Filters to supported languages only, limits to max 3. Primary must be in active set.
-         * Falls back to default language if validation fails.
-         */
-        suspend fun updateLanguageSettings(
-            activeLanguages: Set<String>,
-            primaryLanguage: String,
-        ): Result<Unit> =
-            try {
-                val validatedActiveLanguages =
-                    activeLanguages
-                        .intersect(
-                            KeyboardSettings.SUPPORTED_LANGUAGES,
-                        ).take(KeyboardSettings.MAX_ACTIVE_LANGUAGES)
-                        .ifEmpty { setOf(KeyboardSettings.DEFAULT_LANGUAGE) }
-
-                val validatedPrimaryLanguage =
-                    if (validatedActiveLanguages.contains(primaryLanguage)) {
-                        primaryLanguage
-                    } else {
-                        validatedActiveLanguages.first()
-                    }
-
-                dataStore.edit { preferences ->
-                    preferences[PreferenceKeys.ACTIVE_LANGUAGES_LIST] = validatedActiveLanguages.joinToString(",")
-                    preferences[PreferenceKeys.PRIMARY_LANGUAGE] = validatedPrimaryLanguage
-                    preferences[PreferenceKeys.PRIMARY_LAYOUT_LANGUAGE] = validatedPrimaryLanguage
-                }
-                Result.success(Unit)
-            } catch (e: Exception) {
-                Result.failure(e)
-            }
-
-        /**
          * Updates active languages list and primary layout language with validation.
          *
          * Filters to supported languages only, limits to max 3, maintains order.

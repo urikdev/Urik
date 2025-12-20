@@ -161,13 +161,17 @@ class KeyboardLayoutManager(
                     handler.postDelayed(runnable, currentLongPressDuration.durationMs)
                     false
                 }
+
                 MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                     buttonPendingCallbacks.remove(view as Button)?.let { pending ->
                         pending.handler.removeCallbacks(pending.runnable)
                     }
                     false
                 }
-                else -> false
+
+                else -> {
+                    false
+                }
             }
         }
 
@@ -186,13 +190,17 @@ class KeyboardLayoutManager(
                     handler.postDelayed(runnable, com.urik.keyboard.KeyboardConstants.GestureConstants.SPACEBAR_PUNCTUATION_DELAY_MS)
                     false
                 }
+
                 MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                     buttonPendingCallbacks.remove(view as Button)?.let { pending ->
                         pending.handler.removeCallbacks(pending.runnable)
                     }
                     false
                 }
-                else -> false
+
+                else -> {
+                    false
+                }
             }
         }
 
@@ -213,6 +221,7 @@ class KeyboardLayoutManager(
                     handler.postDelayed(runnable, currentLongPressDuration.durationMs)
                     false
                 }
+
                 MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                     buttonPendingCallbacks.remove(view as Button)?.let { pending ->
                         pending.handler.removeCallbacks(pending.runnable)
@@ -221,7 +230,10 @@ class KeyboardLayoutManager(
                     shiftLongPressFired = false
                     shouldConsume
                 }
-                else -> false
+
+                else -> {
+                    false
+                }
             }
         }
 
@@ -244,6 +256,7 @@ class KeyboardLayoutManager(
                     handler.postDelayed(runnable, currentLongPressDuration.durationMs)
                     false
                 }
+
                 MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                     val button = view as Button
                     buttonPendingCallbacks.remove(button)?.let { pending ->
@@ -252,7 +265,10 @@ class KeyboardLayoutManager(
                     val longPressFired = symbolsLongPressFired.remove(button)
                     longPressFired
                 }
-                else -> false
+
+                else -> {
+                    false
+                }
             }
         }
 
@@ -271,7 +287,10 @@ class KeyboardLayoutManager(
                     stopAcceleratedBackspace()
                     false
                 }
-                else -> false
+
+                else -> {
+                    false
+                }
             }
         }
 
@@ -360,14 +379,16 @@ class KeyboardLayoutManager(
         try {
             val signature =
                 when (key) {
-                    is KeyboardKey.Character ->
+                    is KeyboardKey.Character -> {
                         when (key.type) {
                             KeyboardKey.KeyType.LETTER -> HapticSignature.LetterClick
                             KeyboardKey.KeyType.PUNCTUATION -> HapticSignature.PunctuationTick
                             KeyboardKey.KeyType.NUMBER -> HapticSignature.NumberClick
                             KeyboardKey.KeyType.SYMBOL -> HapticSignature.PunctuationTick
                         }
-                    is KeyboardKey.Action ->
+                    }
+
+                    is KeyboardKey.Action -> {
                         when (key.action) {
                             KeyboardKey.ActionType.SPACE -> HapticSignature.SpaceThump
                             KeyboardKey.ActionType.BACKSPACE -> HapticSignature.BackspaceChirp
@@ -375,7 +396,11 @@ class KeyboardLayoutManager(
                             KeyboardKey.ActionType.ENTER -> HapticSignature.EnterCompletion
                             else -> HapticSignature.LetterClick
                         }
-                    null -> HapticSignature.LetterClick
+                    }
+
+                    null -> {
+                        HapticSignature.LetterClick
+                    }
                 }
 
             val effect = signature.createEffect(hapticAmplitude)
@@ -475,7 +500,7 @@ class KeyboardLayoutManager(
                         }
 
                 // Disable baseline alignment to prevent extra spacing with Arabic/Persian glyphs
-                setBaselineAligned(false)
+                isBaselineAligned = false
             }
 
         if (is9LetterRow) {
@@ -733,6 +758,7 @@ class KeyboardLayoutManager(
                     else -> key.value
                 }
             }
+
             is KeyboardKey.Action -> {
                 when (key.action) {
                     KeyboardKey.ActionType.MODE_SWITCH_LETTERS -> context.getString(R.string.letters_mode_label)
@@ -756,7 +782,8 @@ class KeyboardLayoutManager(
                     }
                 context.getString(R.string.key_character_description, char)
             }
-            is KeyboardKey.Action ->
+
+            is KeyboardKey.Action -> {
                 when (key.action) {
                     KeyboardKey.ActionType.SHIFT -> {
                         when {
@@ -765,20 +792,60 @@ class KeyboardLayoutManager(
                             else -> context.getString(R.string.shift_key_description)
                         }
                     }
-                    KeyboardKey.ActionType.BACKSPACE -> context.getString(R.string.backspace_key_description)
-                    KeyboardKey.ActionType.SPACE -> context.getString(R.string.space_key_description)
-                    KeyboardKey.ActionType.ENTER -> context.getString(R.string.action_enter_description)
-                    KeyboardKey.ActionType.SEARCH -> context.getString(R.string.action_search_description)
-                    KeyboardKey.ActionType.SEND -> context.getString(R.string.action_send_description)
-                    KeyboardKey.ActionType.DONE -> context.getString(R.string.action_done_description)
-                    KeyboardKey.ActionType.GO -> context.getString(R.string.action_go_description)
-                    KeyboardKey.ActionType.NEXT -> context.getString(R.string.action_next_description)
-                    KeyboardKey.ActionType.PREVIOUS -> context.getString(R.string.action_previous_description)
-                    KeyboardKey.ActionType.MODE_SWITCH_LETTERS -> context.getString(R.string.letters_mode_description)
-                    KeyboardKey.ActionType.MODE_SWITCH_NUMBERS -> context.getString(R.string.numbers_mode_description)
-                    KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS -> context.getString(R.string.symbols_mode_description)
-                    KeyboardKey.ActionType.CAPS_LOCK -> context.getString(R.string.caps_lock_description)
+
+                    KeyboardKey.ActionType.BACKSPACE -> {
+                        context.getString(R.string.backspace_key_description)
+                    }
+
+                    KeyboardKey.ActionType.SPACE -> {
+                        context.getString(R.string.space_key_description)
+                    }
+
+                    KeyboardKey.ActionType.ENTER -> {
+                        context.getString(R.string.action_enter_description)
+                    }
+
+                    KeyboardKey.ActionType.SEARCH -> {
+                        context.getString(R.string.action_search_description)
+                    }
+
+                    KeyboardKey.ActionType.SEND -> {
+                        context.getString(R.string.action_send_description)
+                    }
+
+                    KeyboardKey.ActionType.DONE -> {
+                        context.getString(R.string.action_done_description)
+                    }
+
+                    KeyboardKey.ActionType.GO -> {
+                        context.getString(R.string.action_go_description)
+                    }
+
+                    KeyboardKey.ActionType.NEXT -> {
+                        context.getString(R.string.action_next_description)
+                    }
+
+                    KeyboardKey.ActionType.PREVIOUS -> {
+                        context.getString(R.string.action_previous_description)
+                    }
+
+                    KeyboardKey.ActionType.MODE_SWITCH_LETTERS -> {
+                        context.getString(R.string.letters_mode_description)
+                    }
+
+                    KeyboardKey.ActionType.MODE_SWITCH_NUMBERS -> {
+                        context.getString(R.string.numbers_mode_description)
+                    }
+
+                    KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS -> {
+                        context.getString(R.string.symbols_mode_description)
+                    }
+
+                    KeyboardKey.ActionType.CAPS_LOCK -> {
+                        context.getString(R.string.caps_lock_description)
+                    }
                 }
+            }
         }
 
     private fun handleSpaceLongPress(view: View) {
@@ -829,11 +896,6 @@ class KeyboardLayoutManager(
         )
         popup.showAboveAnchor(anchorView)
         languagePickerPopup = popup
-    }
-
-    fun dismissLanguagePickerPopup() {
-        languagePickerPopup?.dismiss()
-        languagePickerPopup = null
     }
 
     private fun showPunctuationPopup(
@@ -981,7 +1043,10 @@ class KeyboardLayoutManager(
                     DEFAULT_PUNCTUATION
                 }
             }
-            else -> DEFAULT_PUNCTUATION
+
+            else -> {
+                DEFAULT_PUNCTUATION
+            }
         }
 
     private fun shouldSkipPunctuationLoading(languageCode: String): Boolean {
@@ -1211,18 +1276,21 @@ class KeyboardLayoutManager(
                 STANDARD_KEY_WEIGHT
             } else {
                 when (key) {
-                    is KeyboardKey.Character ->
+                    is KeyboardKey.Character -> {
                         when (key.type) {
                             KeyboardKey.KeyType.PUNCTUATION -> 0.7f
                             else -> STANDARD_KEY_WEIGHT
                         }
-                    is KeyboardKey.Action ->
+                    }
+
+                    is KeyboardKey.Action -> {
                         when (key.action) {
                             KeyboardKey.ActionType.SPACE -> return currentSpaceBarSize.widthMultiplier
                             KeyboardKey.ActionType.SHIFT -> SHIFT_KEY_WEIGHT
                             KeyboardKey.ActionType.BACKSPACE -> BACKSPACE_KEY_WEIGHT
                             else -> STANDARD_KEY_WEIGHT
                         }
+                    }
                 }
             }
 
@@ -1247,25 +1315,33 @@ class KeyboardLayoutManager(
         state: KeyboardState,
     ): Boolean =
         when (key) {
-            is KeyboardKey.Action ->
+            is KeyboardKey.Action -> {
                 when (key.action) {
                     KeyboardKey.ActionType.SHIFT -> state.isShiftPressed && !state.isCapsLockOn
                     KeyboardKey.ActionType.CAPS_LOCK -> state.isCapsLockOn
                     else -> false
                 }
-            else -> false
+            }
+
+            else -> {
+                false
+            }
         }
 
     private fun getKeyBackground(key: KeyboardKey): Drawable {
         val theme = themeManager.currentTheme.value
         val backgroundColor =
             when (key) {
-                is KeyboardKey.Character -> theme.colors.keyBackgroundCharacter
-                is KeyboardKey.Action ->
+                is KeyboardKey.Character -> {
+                    theme.colors.keyBackgroundCharacter
+                }
+
+                is KeyboardKey.Action -> {
                     when (key.action) {
                         KeyboardKey.ActionType.SPACE -> theme.colors.keyBackgroundSpace
                         else -> theme.colors.keyBackgroundAction
                     }
+                }
             }
 
         val cornerRadius = 8f * context.resources.displayMetrics.density
