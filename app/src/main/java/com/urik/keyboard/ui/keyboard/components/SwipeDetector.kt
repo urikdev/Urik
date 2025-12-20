@@ -608,6 +608,11 @@ class SwipeDetector
                         if (!couldMatchPath(entry.word, charsInBounds)) {
                             continue
                         }
+
+                        val pointsPerLetter = swipePath.size.toFloat() / entry.word.length.toFloat()
+                        val optimalRatio = if (entry.word.length <= 3) 3.0f else 4.0f
+                        val ratioQuality = pointsPerLetter / optimalRatio
+
                         val spatialScore =
                             calculateSpatialScore(
                                 entry.word,
@@ -616,14 +621,15 @@ class SwipeDetector
                                 entry.uniqueLetterCount,
                                 reuseLetterPathIndices,
                                 reuseLetterScores,
+                                ratioQuality,
                             )
 
-                        val pointsPerLetter = swipePath.size.toFloat() / entry.word.length.toFloat()
-                        val optimalRatio = if (entry.word.length <= 3) 3.0f else 4.0f
                         val ratioPenalty =
                             when {
-                                pointsPerLetter < optimalRatio * 0.70f -> 0.75f
-                                pointsPerLetter < optimalRatio * 0.75f -> 0.85f
+                                pointsPerLetter < optimalRatio * 0.50f -> 0.50f
+                                pointsPerLetter < optimalRatio * 0.65f -> 0.60f
+                                pointsPerLetter < optimalRatio * 0.75f -> 0.75f
+                                pointsPerLetter < optimalRatio * 0.85f -> 0.90f
                                 pointsPerLetter > optimalRatio * 2.00f -> 0.60f
                                 pointsPerLetter > optimalRatio * 1.60f -> 0.75f
                                 pointsPerLetter > optimalRatio * 1.40f -> 0.85f
@@ -680,6 +686,7 @@ class SwipeDetector
             uniqueLetterCount: Int,
             letterPathIndices: ArrayList<Int>,
             letterScores: ArrayList<Pair<Char, Float>>,
+            ratioQuality: Float = 1.0f,
         ): Float {
             if (swipePath.isEmpty()) return 0f
 
@@ -732,7 +739,7 @@ class SwipeDetector
                     val spatialDistanceSquared = dx * dx + dy * dy
 
                     val positionDeviation = kotlin.math.abs(pointIndex - expectedPathIndex).toFloat()
-                    val positionPenalty = positionDeviation * 50f
+                    val positionPenalty = positionDeviation * 150f
 
                     val totalDistance = spatialDistanceSquared + positionPenalty
 
@@ -765,10 +772,10 @@ class SwipeDetector
                 val previousIndex = letterPathIndices[i - 1]
 
                 val isRepeatedLetter = i < word.length && word[i] == word[i - 1]
-                val indexDiff = previousIndex - currentIndex
+                val indexAdvancement = currentIndex - previousIndex
 
                 if (isRepeatedLetter) {
-                    if (indexDiff > 5) {
+                    if (indexAdvancement > SwipeDetectionConstants.REPEATED_LETTER_MAX_INDEX_GAP || indexAdvancement < 1) {
                         sequenceViolations++
                     }
                 } else {
@@ -782,11 +789,12 @@ class SwipeDetector
                 when {
                     word.length <= 4 -> 0
                     word.length <= 6 -> 1
-                    else -> 2
+                    else -> 1
                 }
 
             val repetitionCount = word.length - uniqueLetterCount
-            val maxTolerableViolations = baseTolerableViolations + repetitionCount
+            val repetitionPenaltyFactor = if (word.length >= 6) 0 else 1
+            val maxTolerableViolations = baseTolerableViolations + (repetitionCount * repetitionPenaltyFactor)
 
             val sequencePenalty =
                 when {
@@ -798,25 +806,59 @@ class SwipeDetector
 
             val baseSpatialScore = totalScore / word.length.toFloat()
 
-            val hasBadLetter = letterScores.any { it.second < 0.30f }
+            val badLetterCount = letterScores.count { it.second < 0.30f }
+            val veryBadLetterCount = letterScores.count { it.second < 0.15f }
             val wrongLetterPenalty =
                 when {
-                    hasBadLetter && word.length == 2 -> 0.50f
-                    hasBadLetter && word.length == 3 -> 0.65f
-                    hasBadLetter && word.length >= 4 -> 0.85f
+                    veryBadLetterCount > 0 -> 0.40f
+                    badLetterCount >= 2 && word.length <= 4 -> 0.45f
+                    badLetterCount >= 1 && word.length == 2 -> 0.35f
+                    badLetterCount >= 1 && word.length == 3 -> 0.50f
+                    badLetterCount >= 1 && word.length >= 4 -> 0.70f
                     else -> 1.0f
+                }
+
+            val pathExhaustionPenalty =
+                if (word.length >= SwipeDetectionConstants.PATH_EXHAUSTION_MIN_WORD_LENGTH && letterPathIndices.isNotEmpty()) {
+                    val lastQuartileThreshold = (swipePath.size * SwipeDetectionConstants.PATH_EXHAUSTION_QUARTILE_THRESHOLD).toInt()
+                    val tailLetterCount =
+                        (word.length * SwipeDetectionConstants.PATH_EXHAUSTION_TAIL_RATIO).toInt().coerceAtLeast(
+                            SwipeDetectionConstants.PATH_EXHAUSTION_MIN_LETTERS_CHECK,
+                        )
+                    val startIndex = letterPathIndices.size - tailLetterCount
+                    var lettersInLastQuartile = 0
+                    for (i in startIndex until letterPathIndices.size) {
+                        if (letterPathIndices[i] >= lastQuartileThreshold) {
+                            lettersInLastQuartile++
+                        }
+                    }
+                    when {
+                        lettersInLastQuartile >= 3 -> 0.60f
+                        lettersInLastQuartile == 2 -> 0.80f
+                        else -> 1.0f
+                    }
+                } else {
+                    1.0f
                 }
 
             val lengthBonus =
-                when {
-                    word.length >= 8 -> 1.25f
-                    word.length == 7 -> 1.18f
-                    word.length == 6 -> 1.12f
-                    word.length == 5 -> 1.06f
-                    else -> 1.0f
+                if (ratioQuality >= SwipeDetectionConstants.LENGTH_BONUS_MIN_RATIO_QUALITY) {
+                    when {
+                        word.length >= 8 -> 1.25f
+                        word.length == 7 -> 1.18f
+                        word.length == 6 -> 1.12f
+                        word.length == 5 -> 1.06f
+                        else -> 1.0f
+                    }
+                } else {
+                    1.0f
                 }
 
-            val spatialWithBonuses = (baseSpatialScore * sequencePenalty * lengthBonus * wrongLetterPenalty).coerceAtMost(1.0f)
+            val spatialWithBonuses =
+                (baseSpatialScore * sequencePenalty * lengthBonus * wrongLetterPenalty * pathExhaustionPenalty)
+                    .coerceAtMost(
+                        1.0f,
+                    )
 
             val repetitionRatio = repetitionCount.toFloat() / word.length.toFloat()
             val repetitionPenalty =
