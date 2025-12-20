@@ -34,6 +34,7 @@
     <string name="autocorrect_settings_learn_new_words">Lär dig nya ord</string>
     <string name="autocorrect_settings_learn_new_words_on">Lärande aktiverat</string>
     <string name="autocorrect_settings_learn_new_words_off">Lärande funktionshindrade</string>
+    <string name="primary_layout_language">Nuvarande layout</string>
     <string name="feedback_settings_haptic_feedback">Haptisk återkoppling</string>
     <string name="feedback_settings_haptic_on">Haptisk aktiverad</string>
     <string name="feedback_settings_haptic_off">Haptisk inaktiverad</string>
@@ -164,4 +165,5 @@
     <string name="typing_settings_spacebar_long_press_on">Lång tryckning på mellanslagstangenten för interpunktion</string>
     <string name="error_update_spacebar_cursor">Misslyckades med att uppdatera markörkontrollen för mellanslagstangenten</string>
     <string name="error_update_backspace_swipe">Misslyckades med att uppdatera backstegssvep och borttagning</string>
+    <string name="max_languages_reached">Max 3 språk tillåtna</string>
 </resources>

@@ -74,6 +74,7 @@
     <!-- Language Settings -->
 
     <!-- Sound & Feedback Settings -->
+    <string name="primary_layout_language">طرح فعلی</string>
     <string name="feedback_settings_haptic_feedback">بازخورد لمسی (هاپتیک)</string>
     <string name="feedback_settings_haptic_on">بازخورد لمسی فعال است</string>
     <string name="feedback_settings_haptic_off">بازخورد لمسی غیرفعال است</string>
@@ -221,5 +222,6 @@
     <string name="clipboard_item_pin">سنجاق کردن</string>
     <string name="clipboard_item_unpin">برداشتن سنجاق</string>
     <string name="clipboard_item_delete">حذف</string>
+    <string name="max_languages_reached">حداکثر ۳ زبان مجاز</string>
 
 </resources>

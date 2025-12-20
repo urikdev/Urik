@@ -2,12 +2,14 @@ package com.urik.keyboard.settings.languages
 
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.preference.CheckBoxPreference
 import androidx.preference.PreferenceFragmentCompat
+import com.urik.keyboard.R
 import com.urik.keyboard.settings.KeyboardSettings
 import com.urik.keyboard.settings.SettingsEventHandler
 import dagger.hilt.android.AndroidEntryPoint
@@ -61,16 +63,24 @@ class LanguagesFragment : PreferenceFragmentCompat() {
     ) {
         super.onViewCreated(view, savedInstanceState)
 
-        languageRadioButtons.forEach { (languageTag, radioButton) ->
-            radioButton.setOnPreferenceChangeListener { _, newValue ->
+        languageRadioButtons.forEach { (languageTag, checkbox) ->
+            checkbox.setOnPreferenceChangeListener { _, newValue ->
                 if (newValue == true) {
-                    languageRadioButtons.values.forEach { otherButton ->
-                        if (otherButton != radioButton) {
-                            otherButton.isChecked = false
-                        }
+                    val currentCheckedCount =
+                        languageRadioButtons.values.count { it.isChecked }
+
+                    if (currentCheckedCount >= KeyboardSettings.MAX_ACTIVE_LANGUAGES) {
+                        Toast
+                            .makeText(
+                                requireContext(),
+                                R.string.max_languages_reached,
+                                Toast.LENGTH_SHORT,
+                            ).show()
+                        return@setOnPreferenceChangeListener false
                     }
-                    viewModel.selectLanguage(languageTag)
                 }
+
+                viewModel.toggleLanguage(languageTag)
                 true
             }
         }
@@ -79,8 +89,14 @@ class LanguagesFragment : PreferenceFragmentCompat() {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
                     viewModel.uiState.collect { state ->
-                        languageRadioButtons.forEach { (languageTag, radioButton) ->
-                            radioButton.isChecked = (languageTag == state.primaryLanguage)
+                        languageRadioButtons.forEach { (languageTag, checkbox) ->
+                            checkbox.isChecked = (languageTag in state.activeLanguages)
+
+                            if (languageTag == state.primaryLayoutLanguage) {
+                                checkbox.summary = getString(R.string.primary_layout_language)
+                            } else {
+                                checkbox.summary = null
+                            }
                         }
                     }
                 }

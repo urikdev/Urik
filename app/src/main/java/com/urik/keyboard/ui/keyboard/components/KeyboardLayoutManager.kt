@@ -57,12 +57,14 @@ class KeyboardLayoutManager(
     private val onKeyClick: (KeyboardKey) -> Unit,
     private val onAcceleratedDeletionChanged: (Boolean) -> Unit,
     private val onSymbolsLongPress: () -> Unit,
+    private val onLanguageSwitch: (String) -> Unit = {},
     private val characterVariationService: CharacterVariationService,
     private val languageManager: LanguageManager,
     private val themeManager: ThemeManager,
     cacheMemoryManager: CacheMemoryManager,
 ) {
     private var clipboardEnabled = false
+    private var activeLanguages: List<String> = emptyList()
 
     companion object {
         private const val STANDARD_KEY_WEIGHT = 1f
@@ -84,6 +86,7 @@ class KeyboardLayoutManager(
         }
     private var hapticEnabled = true
     private var hapticAmplitude = 170
+    private var shiftLongPressFired = false
 
     private val accessibilityManager = context.getSystemService(Context.ACCESSIBILITY_SERVICE) as AccessibilityManager
 
@@ -113,6 +116,7 @@ class KeyboardLayoutManager(
 
     private var variationPopup: CharacterVariationPopup? = null
     private var currentVariationKeyType: KeyboardKey.KeyType? = null
+    private var languagePickerPopup: LanguagePickerPopup? = null
 
     private val characterVariationCallback: (String) -> Unit = { selectedChar ->
         val keyType = currentVariationKeyType ?: KeyboardKey.KeyType.LETTER
@@ -187,6 +191,35 @@ class KeyboardLayoutManager(
                         pending.handler.removeCallbacks(pending.runnable)
                     }
                     false
+                }
+                else -> false
+            }
+        }
+
+    @SuppressLint("ClickableViewAccessibility")
+    private val shiftLongPressTouchListener =
+        View.OnTouchListener { view, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    shiftLongPressFired = false
+                    val handler = Handler(Looper.getMainLooper())
+                    val runnable =
+                        Runnable {
+                            shiftLongPressFired = true
+                            performContextualHaptic(KeyboardKey.Action(KeyboardKey.ActionType.SHIFT))
+                            handleShiftLongPress(view)
+                        }
+                    buttonPendingCallbacks[view as Button] = PendingCallbacks(handler, runnable)
+                    handler.postDelayed(runnable, currentLongPressDuration.durationMs)
+                    false
+                }
+                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                    buttonPendingCallbacks.remove(view as Button)?.let { pending ->
+                        pending.handler.removeCallbacks(pending.runnable)
+                    }
+                    val shouldConsume = shiftLongPressFired
+                    shiftLongPressFired = false
+                    shouldConsume
                 }
                 else -> false
             }
@@ -315,6 +348,10 @@ class KeyboardLayoutManager(
 
     fun updateClipboardEnabled(enabled: Boolean) {
         clipboardEnabled = enabled
+    }
+
+    fun updateActiveLanguages(languages: List<String>) {
+        activeLanguages = languages
     }
 
     private fun performContextualHaptic(key: KeyboardKey?) {
@@ -480,7 +517,9 @@ class KeyboardLayoutManager(
     ): Button {
         val button =
             if (buttonPool.isNotEmpty()) {
-                buttonPool.removeAt(buttonPool.size - 1)
+                buttonPool.removeAt(buttonPool.size - 1).apply {
+                    isPressed = false
+                }
             } else {
                 Button(context)
             }
@@ -580,12 +619,31 @@ class KeyboardLayoutManager(
 
                     iconDrawable?.setTint(getKeyTextColor(key))
 
-                    val layerDrawable = LayerDrawable(arrayOf(keyBackground, iconDrawable))
-                    layerDrawable.setLayerInset(1, 12, 12, 12, 12)
-                    layerDrawable.setLayerGravity(1, Gravity.CENTER)
+                    if (key is KeyboardKey.Action && key.action == KeyboardKey.ActionType.SHIFT && activeLanguages.size >= 2) {
+                        val globeIcon = ContextCompat.getDrawable(context, R.drawable.ic_globe)
+                        globeIcon?.setTint(getKeyTextColor(key))
 
-                    background = layerDrawable
-                    text = ""
+                        val iconSize = (10 * context.resources.displayMetrics.density).toInt()
+                        val leftInset = (5 * context.resources.displayMetrics.density).toInt()
+                        val topInset = (4 * context.resources.displayMetrics.density).toInt()
+
+                        val layerDrawable = LayerDrawable(arrayOf(keyBackground, iconDrawable, globeIcon))
+                        layerDrawable.setLayerInset(1, 12, 12, 12, 12)
+                        layerDrawable.setLayerGravity(1, Gravity.CENTER)
+                        layerDrawable.setLayerSize(2, iconSize, iconSize)
+                        layerDrawable.setLayerInset(2, leftInset, topInset, 0, 0)
+                        layerDrawable.setLayerGravity(2, Gravity.TOP or Gravity.START)
+
+                        background = layerDrawable
+                        text = ""
+                    } else {
+                        val layerDrawable = LayerDrawable(arrayOf(keyBackground, iconDrawable))
+                        layerDrawable.setLayerInset(1, 12, 12, 12, 12)
+                        layerDrawable.setLayerGravity(1, Gravity.CENTER)
+
+                        background = layerDrawable
+                        text = ""
+                    }
                 } else if (key.action == KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS && clipboardEnabled) {
                     val keyBackground = getKeyBackground(key)
                     val clipboardIcon = ContextCompat.getDrawable(context, R.drawable.ic_clipboard)
@@ -619,6 +677,10 @@ class KeyboardLayoutManager(
                 setOnTouchListener(spaceLongPressTouchListener)
             }
 
+            if (key is KeyboardKey.Action && key.action == KeyboardKey.ActionType.SHIFT) {
+                setOnTouchListener(shiftLongPressTouchListener)
+            }
+
             if (key is KeyboardKey.Action && key.action == KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS) {
                 setOnTouchListener(symbolsLongPressTouchListener)
             }
@@ -638,6 +700,7 @@ class KeyboardLayoutManager(
         }
         symbolsLongPressFired.remove(button)
 
+        button.isPressed = false
         button.setOnClickListener(null)
         button.setOnLongClickListener(null)
         button.setOnTouchListener(null)
@@ -647,6 +710,7 @@ class KeyboardLayoutManager(
 
     private fun returnActiveButtonsToPool() {
         variationPopup?.dismiss()
+        languagePickerPopup?.dismiss()
 
         activeButtons.forEach { button ->
             cleanupButton(button)
@@ -741,6 +805,37 @@ class KeyboardLayoutManager(
         }
     }
 
+    private fun handleShiftLongPress(view: View) {
+        if (activeLanguages.size <= 1) {
+            return
+        }
+        showLanguagePickerPopup(view, activeLanguages)
+    }
+
+    private fun showLanguagePickerPopup(
+        anchorView: View,
+        languages: List<String>,
+    ) {
+        languagePickerPopup?.dismiss()
+
+        val popup = LanguagePickerPopup(context, themeManager)
+        popup.setLanguages(
+            languages = languages,
+            currentLanguage = languageManager.currentLayoutLanguage.value,
+            onSelected = { selectedLang ->
+                popup.dismiss()
+                onLanguageSwitch(selectedLang)
+            },
+        )
+        popup.showAboveAnchor(anchorView)
+        languagePickerPopup = popup
+    }
+
+    fun dismissLanguagePickerPopup() {
+        languagePickerPopup?.dismiss()
+        languagePickerPopup = null
+    }
+
     private fun showPunctuationPopup(
         anchorView: View,
         punctuationList: List<String>,
@@ -750,6 +845,7 @@ class KeyboardLayoutManager(
         }
 
         variationPopup?.dismiss()
+        languagePickerPopup?.dismiss()
 
         anchorView.isPressed = false
 
@@ -932,6 +1028,7 @@ class KeyboardLayoutManager(
         }
 
         variationPopup?.dismiss()
+        languagePickerPopup?.dismiss()
         performContextualHaptic(key)
 
         anchorView.isPressed = false
@@ -1234,6 +1331,8 @@ class KeyboardLayoutManager(
         stopAcceleratedBackspace()
         variationPopup?.dismiss()
         variationPopup = null
+        languagePickerPopup?.dismiss()
+        languagePickerPopup = null
         punctuationCache.invalidateAll()
     }
 }

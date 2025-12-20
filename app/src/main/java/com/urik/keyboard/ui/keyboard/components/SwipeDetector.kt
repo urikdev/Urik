@@ -104,6 +104,9 @@ class SwipeDetector
         private var currentScriptCode = UScript.LATIN
 
         @Volatile
+        private var activeLanguages = listOf("en")
+
+        @Volatile
         private var swipeEnabled = true
 
         @Volatile
@@ -111,6 +114,15 @@ class SwipeDetector
 
         @Volatile
         private var keyCharacterPositions = emptyMap<Char, PointF>()
+
+        @Volatile
+        private var cachedSwipeDictionary = emptyMap<String, Int>()
+
+        @Volatile
+        private var cachedLanguageCombination = emptyList<String>()
+
+        @Volatile
+        private var cachedScriptCode = UScript.LATIN
 
         private val scopeJob = SupervisorJob()
         private val scope = CoroutineScope(Dispatchers.Default + scopeJob)
@@ -151,6 +163,41 @@ class SwipeDetector
             currentIsRTL = isRTL
             currentScriptCode = scriptCode
         }
+
+        fun updateActiveLanguages(languages: List<String>) {
+            activeLanguages = languages
+        }
+
+        private fun getScriptCodeForLanguage(languageCode: String): Int =
+            when (languageCode) {
+                "en", "es", "pl", "pt", "de", "cs", "sv" -> UScript.LATIN
+                "ru", "uk" -> UScript.CYRILLIC
+                "fa" -> UScript.ARABIC
+                else -> UScript.LATIN
+            }
+
+        private fun areLayoutsCompatible(
+            script1: Int,
+            script2: Int,
+        ): Boolean {
+            val latinLikeScripts = setOf(UScript.LATIN, UScript.CYRILLIC)
+            val arabicScripts = setOf(UScript.ARABIC)
+
+            return when {
+                script1 in latinLikeScripts && script2 in latinLikeScripts -> true
+                script1 in arabicScripts && script2 in arabicScripts -> true
+                else -> false
+            }
+        }
+
+        private fun getCompatibleLanguagesForSwipe(
+            activeLanguages: List<String>,
+            currentScriptCode: Int,
+        ): List<String> =
+            activeLanguages.filter { lang ->
+                val layoutScript = getScriptCodeForLanguage(lang)
+                areLayoutsCompatible(currentScriptCode, layoutScript)
+            }
 
         /**
          * Enables or disables swipe typing.
@@ -427,21 +474,34 @@ class SwipeDetector
                     val minLength = (swipePath.size / 7).coerceAtLeast(2)
                     val maxLength = (swipePath.size).coerceAtMost(20)
 
-                    val dictionaryWords = spellCheckManager.getCommonWords()
-                    val learnedWords = wordLearningEngine.getLearnedWordsForSwipe(minLength, maxLength)
+                    val compatibleLanguages = getCompatibleLanguagesForSwipe(activeLanguages, currentScriptCode)
 
                     val wordFrequencyMap =
-                        if (learnedWords.isNotEmpty()) {
-                            val map = HashMap<String, Int>(dictionaryWords.size + learnedWords.size)
-                            dictionaryWords.forEach { (word, freq) -> map[word] = freq }
-                            learnedWords.forEach { (word, freq) ->
-                                map[word] = maxOf(map[word] ?: 0, freq)
-                            }
-                            map
+                        if (compatibleLanguages == cachedLanguageCombination &&
+                            currentScriptCode == cachedScriptCode &&
+                            cachedSwipeDictionary.isNotEmpty()
+                        ) {
+                            cachedSwipeDictionary
                         } else {
-                            val map = HashMap<String, Int>(dictionaryWords.size)
-                            dictionaryWords.forEach { (word, freq) -> map[word] = freq }
-                            map
+                            val dictionaryWordsMap = spellCheckManager.getCommonWordsForLanguages(compatibleLanguages)
+                            val learnedWordsMap =
+                                wordLearningEngine.getLearnedWordsForSwipeAllLanguages(
+                                    compatibleLanguages,
+                                    minLength,
+                                    maxLength,
+                                )
+
+                            val mergedMap = HashMap<String, Int>(dictionaryWordsMap.size + learnedWordsMap.size)
+                            dictionaryWordsMap.forEach { (word, freq) -> mergedMap[word] = freq }
+                            learnedWordsMap.forEach { (word, freq) ->
+                                mergedMap[word] = maxOf(mergedMap[word] ?: 0, freq)
+                            }
+
+                            cachedSwipeDictionary = mergedMap
+                            cachedLanguageCombination = compatibleLanguages
+                            cachedScriptCode = currentScriptCode
+
+                            mergedMap
                         }
 
                     if (keyPositionsSnapshot.isEmpty() || wordFrequencyMap.isEmpty()) {

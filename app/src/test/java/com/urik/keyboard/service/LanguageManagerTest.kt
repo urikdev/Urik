@@ -37,7 +37,7 @@ class LanguageManagerTest {
         settingsFlow =
             MutableStateFlow(
                 KeyboardSettings(
-                    activeLanguages = setOf("en"),
+                    activeLanguages = listOf("en"),
                     primaryLanguage = "en",
                 ),
             )
@@ -78,7 +78,7 @@ class LanguageManagerTest {
 
             settingsFlow.value =
                 KeyboardSettings(
-                    activeLanguages = setOf("sv"),
+                    activeLanguages = listOf("sv"),
                     primaryLanguage = "sv",
                 )
 
@@ -94,7 +94,7 @@ class LanguageManagerTest {
 
             settingsFlow.value =
                 KeyboardSettings(
-                    activeLanguages = setOf("sv"),
+                    activeLanguages = listOf("sv"),
                     primaryLanguage = "sv",
                 )
 
@@ -110,5 +110,82 @@ class LanguageManagerTest {
             languageManager.cleanup()
 
             assertNotNull(languageManager.currentLanguage.value)
+        }
+
+    @Test
+    fun `switchLayoutLanguage succeeds with valid language`() =
+        runTest {
+            settingsFlow.value =
+                KeyboardSettings(
+                    activeLanguages = listOf("en", "es"),
+                    primaryLanguage = "en",
+                    primaryLayoutLanguage = "en",
+                )
+            languageManager.initialize()
+
+            val result = languageManager.switchLayoutLanguage("es")
+
+            assertTrue(result.isSuccess)
+        }
+
+    @Test
+    fun `switchLayoutLanguage fails with invalid language`() =
+        runTest {
+            settingsFlow.value =
+                KeyboardSettings(
+                    activeLanguages = listOf("en", "es"),
+                    primaryLanguage = "en",
+                    primaryLayoutLanguage = "en",
+                )
+            languageManager.initialize()
+
+            val result = languageManager.switchLayoutLanguage("de")
+
+            assertTrue(result.isFailure)
+        }
+
+    @Test
+    fun `getNextLayoutLanguage cycles between two languages`() =
+        runTest {
+            settingsFlow.value =
+                KeyboardSettings(
+                    activeLanguages = listOf("en", "es"),
+                    primaryLanguage = "en",
+                    primaryLayoutLanguage = "en",
+                )
+            languageManager.initialize()
+
+            val next1 = languageManager.getNextLayoutLanguage()
+            assertEquals("es", next1)
+        }
+
+    @Test
+    fun `getNextLayoutLanguage cycles through three languages`() =
+        runTest {
+            settingsFlow.value =
+                KeyboardSettings(
+                    activeLanguages = listOf("en", "es", "de"),
+                    primaryLanguage = "en",
+                    primaryLayoutLanguage = "en",
+                )
+            languageManager.initialize()
+
+            val next1 = languageManager.getNextLayoutLanguage()
+            assertEquals("es", next1)
+        }
+
+    @Test
+    fun `getNextLayoutLanguage returns same for single language`() =
+        runTest {
+            settingsFlow.value =
+                KeyboardSettings(
+                    activeLanguages = listOf("en"),
+                    primaryLanguage = "en",
+                    primaryLayoutLanguage = "en",
+                )
+            languageManager.initialize()
+
+            val next = languageManager.getNextLayoutLanguage()
+            assertEquals("en", next)
         }
 }

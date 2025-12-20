@@ -73,6 +73,7 @@
     <!-- Language Settings -->
 
     <!-- Sound & Feedback Settings -->
+    <string name="primary_layout_language">Aktuelles Layout</string>
     <string name="feedback_settings_haptic_feedback">Haptisches Feedback</string>
     <string name="feedback_settings_haptic_on">Haptisches Feedback ist an</string>
     <string name="feedback_settings_haptic_off">Haptisches Feedback ist aus</string>
@@ -219,5 +220,6 @@
     <string name="typing_settings_spacebar_long_press_on">Leertaste gedrückt halten für Satzzeichen</string>
     <string name="error_update_spacebar_cursor">Fehler beim Aktualisieren der Cursorsteuerung mit der Leertaste</string>
     <string name="error_update_backspace_swipe">Fehler beim Aktualisieren der Wischgeste zum Löschen mit der Rücktaste</string>
+    <string name="max_languages_reached">Maximal 3 Sprachen erlaubt</string>
 
 </resources>

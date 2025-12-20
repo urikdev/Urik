@@ -45,6 +45,7 @@ class KeyboardViewModelTest {
     private lateinit var viewModel: KeyboardViewModel
     private val testDispatcher = UnconfinedTestDispatcher()
     private lateinit var languageFlow: MutableStateFlow<String>
+    private lateinit var layoutLanguageFlow: MutableStateFlow<String>
 
     @Before
     fun setup() {
@@ -55,6 +56,12 @@ class KeyboardViewModelTest {
 
         languageFlow = MutableStateFlow("en")
         whenever(languageManager.currentLanguage).thenReturn(languageFlow)
+
+        layoutLanguageFlow = MutableStateFlow("en")
+        whenever(languageManager.currentLayoutLanguage).thenReturn(layoutLanguageFlow)
+
+        val activeLanguagesFlow = MutableStateFlow(listOf("en"))
+        whenever(languageManager.activeLanguages).thenReturn(activeLanguagesFlow)
 
         val themeFlow = MutableStateFlow<com.urik.keyboard.theme.KeyboardTheme>(com.urik.keyboard.theme.Default)
         whenever(themeManager.currentTheme).thenReturn(themeFlow)
@@ -497,7 +504,7 @@ class KeyboardViewModelTest {
     @Test
     fun `layout loading uses current locale`() =
         runTest {
-            languageFlow.value = "sv"
+            layoutLanguageFlow.value = "sv"
             whenever(repository.getLayoutForMode(any(), any(), any()))
                 .thenReturn(Result.success(createMockLayout(KeyboardMode.LETTERS)))
 
@@ -527,7 +534,7 @@ class KeyboardViewModelTest {
     @Test
     fun `getCurrentLocale extracts language from sv-SE`() =
         runTest {
-            languageFlow.value = "sv-SE"
+            layoutLanguageFlow.value = "sv-SE"
             whenever(repository.getLayoutForMode(any(), any(), any()))
                 .thenReturn(Result.success(createMockLayout(KeyboardMode.LETTERS)))
 
@@ -593,7 +600,7 @@ class KeyboardViewModelTest {
             whenever(repository.getLayoutForMode(any(), any(), any())).thenReturn(Result.success(rtlLayout))
         }
 
-        languageFlow.value = "fa"
+        layoutLanguageFlow.value = "fa"
 
         val layout = viewModel.layout.value
         assertEquals(true, layout?.isRTL)

@@ -49,6 +49,7 @@ class SpellCheckManagerTest {
     private lateinit var dictionaryCache: ManagedCache<String, Boolean>
 
     private lateinit var currentLanguageFlow: MutableStateFlow<String>
+    private lateinit var activeLanguagesFlow: MutableStateFlow<List<String>>
 
     private lateinit var spellCheckManager: SpellCheckManager
 
@@ -99,7 +100,7 @@ class SpellCheckManagerTest {
             mock {
                 onBlocking { isWordLearned(any()) } doReturn false
                 onBlocking { areWordsLearned(any()) } doReturn emptyMap()
-                onBlocking { getSimilarLearnedWordsWithFrequency(any(), any()) } doReturn emptyList()
+                onBlocking { getSimilarLearnedWordsWithFrequency(any(), any(), any()) } doReturn emptyList()
             }
 
         suggestionCache =
@@ -134,6 +135,9 @@ class SpellCheckManagerTest {
 
         currentLanguageFlow = MutableStateFlow("en")
         whenever(languageManager.currentLanguage).thenReturn(currentLanguageFlow)
+
+        activeLanguagesFlow = MutableStateFlow(listOf("en"))
+        whenever(languageManager.activeLanguages).thenReturn(activeLanguagesFlow)
 
         val keyPositionsFlow = MutableStateFlow<Map<Char, android.graphics.PointF>>(emptyMap())
         whenever(languageManager.keyPositions).thenReturn(keyPositionsFlow)
@@ -171,7 +175,7 @@ class SpellCheckManagerTest {
             whenever(assetManager.open("dictionaries/sv_symspell.txt"))
                 .thenThrow(java.io.FileNotFoundException())
 
-            currentLanguageFlow.emit("sv")
+            activeLanguagesFlow.emit(listOf("sv"))
 
             val result = spellCheckManager.isWordInDictionary("test")
             assertFalse(result)
@@ -359,7 +363,7 @@ class SpellCheckManagerTest {
     @Test
     fun `generateSuggestions returns learned words with high confidence`() =
         runTest {
-            whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency("helo", 5))
+            whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency("helo", "en", 5))
                 .thenReturn(listOf("hello" to 100, "help" to 50))
 
             val suggestions = spellCheckManager.generateSuggestions("helo", 3)
@@ -371,7 +375,7 @@ class SpellCheckManagerTest {
     @Test
     fun `generateSuggestions prioritizes by frequency`() =
         runTest {
-            whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency("tes", 5))
+            whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency("tes", "en", 5))
                 .thenReturn(
                     listOf(
                         "testing" to 1000,
@@ -389,7 +393,7 @@ class SpellCheckManagerTest {
     @Test
     fun `generateSuggestions respects max limit`() =
         runTest {
-            whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency("test", 5))
+            whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency("test", "en", 5))
                 .thenReturn(
                     listOf(
                         "test1" to 10,
@@ -408,7 +412,7 @@ class SpellCheckManagerTest {
     @Test
     fun `getSpellingSuggestionsWithConfidence includes metadata`() =
         runTest {
-            whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency("helo", 5))
+            whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency("helo", "en", 5))
                 .thenReturn(listOf("hello" to 100))
 
             val suggestions = spellCheckManager.getSpellingSuggestionsWithConfidence("helo")
@@ -422,7 +426,7 @@ class SpellCheckManagerTest {
     @Test
     fun `getSpellingSuggestionsWithConfidence boosts high frequency words`() =
         runTest {
-            whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency("test", 5))
+            whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency("test", "en", 5))
                 .thenReturn(
                     listOf(
                         "common" to 10000,
@@ -440,7 +444,7 @@ class SpellCheckManagerTest {
     @Test
     fun `generateSuggestions caches results`() =
         runTest {
-            whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency("test", 5))
+            whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency("test", "en", 5))
                 .thenReturn(listOf("testing" to 10))
 
             spellCheckManager.generateSuggestions("test", 3)
@@ -452,7 +456,7 @@ class SpellCheckManagerTest {
     @Test
     fun `invalidateWordCache removes from suggestion cache`() =
         runTest {
-            whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency("word", 5))
+            whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency("word", "en", 5))
                 .thenReturn(listOf("words" to 10))
             spellCheckManager.generateSuggestions("word", 3)
             assertTrue(suggestionCache.getIfPresent("en_word") != null)
@@ -465,7 +469,7 @@ class SpellCheckManagerTest {
     @Test
     fun `clearCaches removes all suggestions`() =
         runTest {
-            whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency(any(), any()))
+            whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency(any(), any(), any()))
                 .thenReturn(listOf("word" to 10))
             spellCheckManager.generateSuggestions("test1", 3)
             spellCheckManager.generateSuggestions("test2", 3)
@@ -479,7 +483,7 @@ class SpellCheckManagerTest {
     @Test
     fun `blacklistSuggestion filters word from suggestions`() =
         runTest {
-            whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency("bad", 5))
+            whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency("bad", "en", 5))
                 .thenReturn(listOf("badword" to 100, "badge" to 50))
 
             spellCheckManager.blacklistSuggestion("badword")
@@ -493,7 +497,7 @@ class SpellCheckManagerTest {
     @Test
     fun `blacklistSuggestion normalizes word`() =
         runTest {
-            whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency("bad", 5))
+            whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency("bad", "en", 5))
                 .thenReturn(listOf("badword" to 100))
 
             spellCheckManager.blacklistSuggestion("BadWord")
@@ -517,7 +521,7 @@ class SpellCheckManagerTest {
     @Test
     fun `removeFromBlacklist allows word in suggestions again`() =
         runTest {
-            whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency("word", 5))
+            whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency("word", "en", 5))
                 .thenReturn(listOf("word" to 100))
 
             spellCheckManager.blacklistSuggestion("word")
@@ -545,7 +549,7 @@ class SpellCheckManagerTest {
         runTest {
             spellCheckManager.blacklistSuggestion("offensive")
 
-            whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency("off", 5))
+            whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency("off", "en", 5))
                 .thenReturn(listOf("offensive" to 100, "offer" to 50))
 
             val suggestions = spellCheckManager.generateSuggestions("off", 3)
@@ -559,16 +563,16 @@ class SpellCheckManagerTest {
         runTest {
             whenever(wordLearningEngine.isWordLearned(any())).thenReturn(false)
 
-            spellCheckManager.isWordInDictionary("hello")
-            assertTrue(dictionaryCache.getIfPresent("en_hello") != null)
-
             val swedishDictionary = "hej 1000\nvärld 800"
             whenever(assetManager.open("dictionaries/sv_symspell.txt"))
                 .thenReturn(ByteArrayInputStream(swedishDictionary.toByteArray()))
-            currentLanguageFlow.emit("sv")
+
+            activeLanguagesFlow.value = listOf("en", "sv")
+
+            spellCheckManager.isWordInDictionary("hello")
+            assertTrue(dictionaryCache.getIfPresent("en_hello") != null)
 
             spellCheckManager.isWordInDictionary("hej")
-
             assertTrue(dictionaryCache.getIfPresent("en_hello") != null)
             assertTrue(dictionaryCache.getIfPresent("sv_hej") != null)
         }
@@ -642,7 +646,7 @@ class SpellCheckManagerTest {
     @Test
     fun `generateSuggestions falls back to dictionary when learned words fail`() =
         runTest {
-            whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency(any(), any()))
+            whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency(any(), any(), any()))
                 .thenThrow(RuntimeException("Error"))
 
             val suggestions = spellCheckManager.generateSuggestions("test", 3)
@@ -676,7 +680,7 @@ class SpellCheckManagerTest {
     @Test
     fun `blacklistSuggestion removes word from cached suggestion lists`() =
         runTest {
-            whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency("te", 5))
+            whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency("te", "en", 5))
                 .thenReturn(listOf("test" to 100, "team" to 80, "text" to 60))
 
             val suggestions1 = spellCheckManager.getSpellingSuggestionsWithConfidence("te")
@@ -692,7 +696,7 @@ class SpellCheckManagerTest {
     @Test
     fun `removeFromBlacklist includes word in cached suggestion lists`() =
         runTest {
-            whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency("te", 5))
+            whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency("te", "en", 5))
                 .thenReturn(listOf("test" to 100, "team" to 80))
 
             spellCheckManager.blacklistSuggestion("test")
@@ -709,7 +713,7 @@ class SpellCheckManagerTest {
     @Test
     fun `corrections from symspell have varied confidence based on frequency`() =
         runTest {
-            whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency(any(), any()))
+            whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency(any(), any(), any()))
                 .thenReturn(emptyList())
 
             val suggestions = spellCheckManager.getSpellingSuggestionsWithConfidence("helo")
@@ -727,7 +731,7 @@ class SpellCheckManagerTest {
     @Test
     fun `learned word contraction gets guaranteed confidence`() =
         runTest {
-            whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency("dont", 5))
+            whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency("dont", "en", 5))
                 .thenReturn(listOf("don't" to 5))
 
             val suggestions = spellCheckManager.getSpellingSuggestionsWithConfidence("dont")
@@ -745,7 +749,7 @@ class SpellCheckManagerTest {
     @Test
     fun `prefix completion contraction gets guaranteed confidence`() =
         runTest {
-            whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency(any(), any()))
+            whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency(any(), any(), any()))
                 .thenReturn(emptyList())
 
             val suggestions = spellCheckManager.getSpellingSuggestionsWithConfidence("dont")
@@ -763,7 +767,7 @@ class SpellCheckManagerTest {
     @Test
     fun `symspell contraction gets guaranteed confidence`() =
         runTest {
-            whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency(any(), any()))
+            whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency(any(), any(), any()))
                 .thenReturn(emptyList())
 
             val suggestions = spellCheckManager.getSpellingSuggestionsWithConfidence("havent")
@@ -781,7 +785,7 @@ class SpellCheckManagerTest {
     @Test
     fun `contraction ranks higher than high frequency learned words`() =
         runTest {
-            whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency("dont", 5))
+            whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency("dont", "en", 5))
                 .thenReturn(
                     listOf(
                         "donate" to 100,
@@ -806,7 +810,7 @@ class SpellCheckManagerTest {
     @Test
     fun `contraction appears when many high confidence suggestions exist`() =
         runTest {
-            whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency("cant", 5))
+            whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency("cant", "en", 5))
                 .thenReturn(
                     listOf(
                         "canteen" to 100,
@@ -831,7 +835,7 @@ class SpellCheckManagerTest {
     @Test
     fun `contraction not boosted when user types with apostrophe`() =
         runTest {
-            whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency(any(), any()))
+            whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency(any(), any(), any()))
                 .thenReturn(emptyList())
 
             val suggestions = spellCheckManager.getSpellingSuggestionsWithConfidence("don't")
@@ -850,7 +854,7 @@ class SpellCheckManagerTest {
     @Test
     fun `reverse direction contraction not boosted`() =
         runTest {
-            whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency("don't", 5))
+            whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency("don't", "en", 5))
                 .thenReturn(listOf("dont" to 10))
 
             val suggestions = spellCheckManager.getSpellingSuggestionsWithConfidence("don't")
@@ -869,7 +873,7 @@ class SpellCheckManagerTest {
     @Test
     fun `multiple contractions can coexist with correct ranking`() =
         runTest {
-            whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency(any(), any()))
+            whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency(any(), any(), any()))
                 .thenReturn(emptyList())
 
             val suggestions = spellCheckManager.getSpellingSuggestionsWithConfidence("youre")
@@ -887,7 +891,7 @@ class SpellCheckManagerTest {
     @Test
     fun `i18n French contraction l'homme gets guaranteed confidence`() =
         runTest {
-            whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency("lhomme", 5))
+            whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency("lhomme", "en", 5))
                 .thenReturn(listOf("l'homme" to 10))
 
             val suggestions = spellCheckManager.getSpellingSuggestionsWithConfidence("lhomme")
@@ -905,7 +909,7 @@ class SpellCheckManagerTest {
     @Test
     fun `i18n German hyphenated compound gets guaranteed confidence`() =
         runTest {
-            whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency("coworker", 5))
+            whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency("coworker", "en", 5))
                 .thenReturn(listOf("co-worker" to 10))
 
             val suggestions = spellCheckManager.getSpellingSuggestionsWithConfidence("coworker")
@@ -918,5 +922,52 @@ class SpellCheckManagerTest {
                 hyphenatedSuggestion!!.confidence,
                 0.001,
             )
+        }
+
+    @Test
+    fun `getCommonWordsForLanguages merges multiple dictionaries`() =
+        runTest {
+            val spanishDictionary =
+                """
+                hola 2000
+                mundo 1500
+                prueba 800
+                """.trimIndent()
+
+            whenever(assetManager.open("dictionaries/es_symspell.txt"))
+                .thenReturn(ByteArrayInputStream(spanishDictionary.toByteArray()))
+
+            val words = spellCheckManager.getCommonWordsForLanguages(listOf("en", "es"))
+
+            assertTrue(words.containsKey("hello"))
+            assertTrue(words.containsKey("hola"))
+            assertEquals(1000, words["hello"])
+            assertEquals(2000, words["hola"])
+        }
+
+    @Test
+    fun `getCommonWordsForLanguages keeps highest frequency for duplicate words`() =
+        runTest {
+            val spanishDictionary =
+                """
+                test 1200
+                unique 500
+                """.trimIndent()
+
+            whenever(assetManager.open("dictionaries/es_symspell.txt"))
+                .thenReturn(ByteArrayInputStream(spanishDictionary.toByteArray()))
+
+            val words = spellCheckManager.getCommonWordsForLanguages(listOf("en", "es"))
+
+            assertEquals(1200, words["test"])
+        }
+
+    @Test
+    fun `getCommonWordsForLanguages skips invalid language gracefully`() =
+        runTest {
+            val words = spellCheckManager.getCommonWordsForLanguages(listOf("en", "fr"))
+
+            assertTrue(words.containsKey("hello"))
+            assertFalse(words.isEmpty())
         }
 }
