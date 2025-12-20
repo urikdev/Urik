@@ -94,6 +94,10 @@ class SwipeDetector
         private var startTime = 0L
         private var pointCounter = 0
         private var firstPoint: SwipePoint? = null
+        private var startingKey: KeyboardKey? = null
+        private var lastDeltaX = 0f
+        private var directionReversals = 0
+        private var lastCheckX = 0f
 
         private var currentLocale: ULocale? = null
 
@@ -267,7 +271,7 @@ class SwipeDetector
                         reset()
                         return false
                     }
-                    startSwipeDetection(event)
+                    startSwipeDetection(event, touchedKey)
                     return true
                 }
 
@@ -276,7 +280,7 @@ class SwipeDetector
                         updateSwipePath(event)
                         return true
                     } else {
-                        checkForSwipeStart(event)
+                        trackSwipeGesture(event, keyAt)
                         return isSwiping
                     }
                 }
@@ -293,11 +297,15 @@ class SwipeDetector
             return false
         }
 
-        private fun startSwipeDetection(event: MotionEvent) {
+        private fun startSwipeDetection(
+            event: MotionEvent,
+            key: KeyboardKey,
+        ) {
             scoringJob?.cancel()
             reset()
             startTime = System.currentTimeMillis()
             pointCounter = 0
+            startingKey = key
 
             val point =
                 SwipePoint(
@@ -309,12 +317,34 @@ class SwipeDetector
                 )
             firstPoint = point
             swipePoints.add(point)
+            lastCheckX = event.x
         }
 
-        private fun checkForSwipeStart(event: MotionEvent) {
+        private fun trackSwipeGesture(
+            event: MotionEvent,
+            keyAt: (Float, Float) -> KeyboardKey?,
+        ) {
             firstPoint?.let { start ->
-                val timeSinceDown = System.currentTimeMillis() - startTime
+                val now = System.currentTimeMillis()
+                val timeSinceDown = now - startTime
+
+                if (lastCheckX != 0f) {
+                    val deltaX = event.x - lastCheckX
+                    if (lastDeltaX != 0f && deltaX != 0f) {
+                        if ((lastDeltaX > 0) != (deltaX > 0)) {
+                            directionReversals++
+                        }
+                    }
+                    lastDeltaX = deltaX
+                }
+                lastCheckX = event.x
+
                 if (timeSinceDown < SwipeDetectionConstants.SWIPE_TIME_THRESHOLD_MS) {
+                    return
+                }
+
+                if (directionReversals >= 3) {
+                    reset()
                     return
                 }
 
@@ -864,6 +894,10 @@ class SwipeDetector
             startTime = 0L
             pointCounter = 0
             firstPoint = null
+            startingKey = null
+            lastDeltaX = 0f
+            directionReversals = 0
+            lastCheckX = 0f
             lastUpdateTime = 0L
         }
 
