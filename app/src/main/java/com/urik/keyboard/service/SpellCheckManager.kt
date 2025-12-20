@@ -20,6 +20,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
@@ -122,12 +124,16 @@ class SpellCheckManager
                 }
 
             initScope.launch {
-                languageManager.currentLanguage.collect { newLanguage ->
-                    val languageCode = newLanguage.split("-").first()
-                    if (languageCode != currentLanguage && isInitialized) {
-                        withContext(ioDispatcher) {
-                            preloadLanguage(languageCode)
+                languageManager.activeLanguages.collect { newLanguages ->
+                    if (isInitialized) {
+                        newLanguages.forEach { languageCode ->
+                            withContext(ioDispatcher) {
+                                preloadLanguage(languageCode)
+                            }
                         }
+
+                        suggestionCache.invalidateAll()
+                        dictionaryCache.invalidateAll()
                     }
                 }
             }
@@ -366,12 +372,17 @@ class SpellCheckManager
                         return@withContext false
                     }
 
-                    val currentLang = getCurrentLanguage()
+                    val activeLanguages = languageManager.activeLanguages.value
                     val locale = getLocaleForLanguage()
                     val normalizedWord = word.lowercase(locale).trim()
 
-                    val result = isWordInDictionary(normalizedWord, currentLang)
-                    return@withContext result
+                    for (lang in activeLanguages) {
+                        if (isWordInDictionary(normalizedWord, lang)) {
+                            return@withContext true
+                        }
+                    }
+
+                    return@withContext false
                 } catch (_: Exception) {
                     return@withContext false
                 }
@@ -518,11 +529,11 @@ class SpellCheckManager
                         return@withContext emptyList()
                     }
 
-                    val currentLang = getCurrentLanguage()
+                    val activeLanguages = languageManager.activeLanguages.value
                     val locale = getLocaleForLanguage()
                     val normalizedWord = word.lowercase(locale).trim()
 
-                    return@withContext getSpellingSuggestions(normalizedWord, currentLang)
+                    return@withContext getSpellingSuggestions(normalizedWord, activeLanguages)
                 } catch (_: Exception) {
                     return@withContext emptyList()
                 }
@@ -530,15 +541,15 @@ class SpellCheckManager
 
         private suspend fun getSpellingSuggestions(
             normalizedWord: String,
-            languageCode: String,
+            activeLanguages: List<String>,
         ): List<SpellingSuggestion> {
-            val cacheKey = buildCacheKey(normalizedWord, languageCode)
+            val cacheKey = buildCacheKey(normalizedWord, activeLanguages.sorted().joinToString(","))
 
             suggestionCache.getIfPresent(cacheKey)?.let { cached ->
                 return cached
             }
 
-            val allSuggestions = requestCombinedSuggestions(normalizedWord, languageCode)
+            val allSuggestions = requestCombinedSuggestions(normalizedWord, activeLanguages)
 
             if (allSuggestions.isNotEmpty()) {
                 suggestionCache.put(cacheKey, allSuggestions)
@@ -549,6 +560,27 @@ class SpellCheckManager
 
         private suspend fun requestCombinedSuggestions(
             normalizedWord: String,
+            activeLanguages: List<String>,
+        ): List<SpellingSuggestion> =
+            coroutineScope {
+                try {
+                    val allLanguageSuggestions =
+                        activeLanguages
+                            .map { lang ->
+                                async(ioDispatcher) {
+                                    querySingleLanguage(normalizedWord, lang)
+                                }
+                            }.awaitAll()
+                            .flatten()
+
+                    mergeAndRankSuggestions(allLanguageSuggestions, SpellCheckConstants.MAX_SUGGESTIONS)
+                } catch (_: Exception) {
+                    emptyList()
+                }
+            }
+
+        private suspend fun querySingleLanguage(
+            normalizedWord: String,
             languageCode: String,
         ): List<SpellingSuggestion> {
             try {
@@ -556,7 +588,12 @@ class SpellCheckManager
                 val seenWords = mutableSetOf<String>()
 
                 try {
-                    val learnedSuggestions = wordLearningEngine.getSimilarLearnedWordsWithFrequency(normalizedWord, maxResults = 5)
+                    val learnedSuggestions =
+                        wordLearningEngine.getSimilarLearnedWordsWithFrequency(
+                            normalizedWord,
+                            languageCode,
+                            maxResults = 5,
+                        )
 
                     learnedSuggestions
                         .filter { (word, _) -> !isWordBlacklisted(word) }
@@ -717,13 +754,24 @@ class SpellCheckManager
             }
         }
 
+        private fun mergeAndRankSuggestions(
+            suggestions: List<SpellingSuggestion>,
+            maxResults: Int,
+        ): List<SpellingSuggestion> =
+            suggestions
+                .groupBy { it.word }
+                .mapValues { (_, dupes) -> dupes.maxBy { it.confidence } }
+                .values
+                .sortedByDescending { it.confidence }
+                .take(maxResults)
+
         private suspend fun getCompletionsForPrefix(
             prefix: String,
             languageCode: String,
         ): List<Pair<String, Int>> {
             if (languageCode != commonWordsCacheLanguage || commonWordsCacheStripped.isEmpty()) {
                 try {
-                    getCommonWords()
+                    getCommonWords(languageCode)
                 } catch (_: Exception) {
                     return emptyList()
                 }
@@ -894,23 +942,23 @@ class SpellCheckManager
          * Used for swipe word candidate generation and prefix completions.
          * @return List of (word, frequency) pairs
          */
-        suspend fun getCommonWords(): List<Pair<String, Int>> =
+        suspend fun getCommonWords(languageCode: String? = null): List<Pair<String, Int>> =
             withContext(ioDispatcher) {
                 try {
                     if (!ensureInitialized()) {
                         return@withContext emptyList()
                     }
 
-                    val currentLang = getCurrentLanguage()
-                    if (currentLang !in KeyboardSettings.SUPPORTED_LANGUAGES) {
+                    val targetLang = languageCode ?: getCurrentLanguage()
+                    if (targetLang !in KeyboardSettings.SUPPORTED_LANGUAGES) {
                         return@withContext emptyList()
                     }
 
-                    if (currentLang == commonWordsCacheLanguage && commonWordsCache.isNotEmpty()) {
+                    if (targetLang == commonWordsCacheLanguage && commonWordsCache.isNotEmpty()) {
                         return@withContext commonWordsCache
                     }
 
-                    val dictionaryFile = "dictionaries/${currentLang}_symspell.txt"
+                    val dictionaryFile = "dictionaries/${targetLang}_symspell.txt"
                     val wordFrequencies = mutableListOf<Pair<String, Int>>()
 
                     try {
@@ -970,11 +1018,78 @@ class SpellCheckManager
 
                     commonWordsCache = sortedWords
                     commonWordsCacheStripped = sortedWordsWithStripped
-                    commonWordsCacheLanguage = currentLang
+                    commonWordsCacheLanguage = targetLang
 
                     return@withContext sortedWords
                 } catch (_: Exception) {
                     return@withContext emptyList()
+                }
+            }
+
+        suspend fun getCommonWordsForLanguages(languages: List<String>): Map<String, Int> =
+            withContext(ioDispatcher) {
+                try {
+                    if (!ensureInitialized() || languages.isEmpty()) {
+                        return@withContext emptyMap()
+                    }
+
+                    val mergedWords = mutableMapOf<String, Int>()
+
+                    languages.forEach { lang ->
+                        if (lang !in KeyboardSettings.SUPPORTED_LANGUAGES) {
+                            return@forEach
+                        }
+
+                        val dictionaryFile = "dictionaries/${lang}_symspell.txt"
+
+                        try {
+                            context.assets.open(dictionaryFile).bufferedReader().use { reader ->
+                                reader.forEachLine { line ->
+                                    if (line.isNotBlank()) {
+                                        val parts = line.trim().split(" ", limit = 2)
+                                        if (parts.size >= 2) {
+                                            val word = parts[0].lowercase().trim()
+                                            val frequency = parts[1].toIntOrNull() ?: 1
+
+                                            if (word.length in
+                                                SpellCheckConstants.COMMON_WORD_MIN_LENGTH..SpellCheckConstants.COMMON_WORD_MAX_LENGTH &&
+                                                word.all {
+                                                    Character.isLetter(it.code) ||
+                                                        Character.getType(it.code) == Character.OTHER_LETTER.toInt() ||
+                                                        com.urik.keyboard.utils.TextMatchingUtils
+                                                            .isValidWordPunctuation(it)
+                                                } &&
+                                                !isWordBlacklisted(word)
+                                            ) {
+                                                val currentFreq = mergedWords[word] ?: 0
+                                                mergedWords[word] = maxOf(currentFreq, frequency)
+                                            }
+                                        } else if (parts.size == 1) {
+                                            val word = parts[0].lowercase().trim()
+                                            if (word.length in
+                                                SpellCheckConstants.COMMON_WORD_MIN_LENGTH..SpellCheckConstants.COMMON_WORD_MAX_LENGTH &&
+                                                word.all {
+                                                    Character.isLetter(it.code) ||
+                                                        Character.getType(it.code) == Character.OTHER_LETTER.toInt() ||
+                                                        com.urik.keyboard.utils.TextMatchingUtils
+                                                            .isValidWordPunctuation(it)
+                                                } &&
+                                                !isWordBlacklisted(word)
+                                            ) {
+                                                val currentFreq = mergedWords[word] ?: 0
+                                                mergedWords[word] = maxOf(currentFreq, 1)
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        } catch (_: IOException) {
+                        }
+                    }
+
+                    return@withContext mergedWords
+                } catch (_: Exception) {
+                    return@withContext emptyMap()
                 }
             }
 

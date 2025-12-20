@@ -73,6 +73,7 @@
     <!-- Language Settings -->
 
     <!-- Sound & Feedback Settings -->
+    <string name="primary_layout_language">Aktuální rozvržení</string>
     <string name="feedback_settings_haptic_feedback">Haptická odezva</string>
     <string name="feedback_settings_haptic_on">Haptika zapnuta</string>
     <string name="feedback_settings_haptic_off">Haptika vypnuta</string>
@@ -219,5 +220,6 @@
     <string name="typing_settings_spacebar_long_press_on">Dlouhé stisknutí mezerníku pro interpunkci</string>
     <string name="error_update_spacebar_cursor">Nepodařilo se aktualizovat ovládání kurzoru mezerníkem</string>
     <string name="error_update_backspace_swipe">Nepodařilo se aktualizovat klávesu Backspace a klávesu Smazat přejetím</string>
+    <string name="max_languages_reached">Povoleny maximálně 3 jazyky</string>
 
 </resources>

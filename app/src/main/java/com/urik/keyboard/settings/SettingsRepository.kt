@@ -48,8 +48,10 @@ class SettingsRepository
             val LEARN_NEW_WORDS = booleanPreferencesKey("learn_new_words")
             val CLIPBOARD_ENABLED = booleanPreferencesKey("clipboard_enabled")
             val CLIPBOARD_CONSENT_SHOWN = booleanPreferencesKey("clipboard_consent_shown")
+            val ACTIVE_LANGUAGES_LIST = stringPreferencesKey("active_languages_list")
             val ACTIVE_LANGUAGES = stringSetPreferencesKey("active_languages")
             val PRIMARY_LANGUAGE = stringPreferencesKey("primary_language")
+            val PRIMARY_LAYOUT_LANGUAGE = stringPreferencesKey("primary_layout_language")
             val HAPTIC_FEEDBACK = booleanPreferencesKey("haptic_feedback")
             val VIBRATION_STRENGTH = intPreferencesKey("vibration_strength")
             val DOUBLE_SPACE_PERIOD = booleanPreferencesKey("double_space_period")
@@ -75,6 +77,18 @@ class SettingsRepository
         val settings: Flow<KeyboardSettings> =
             dataStore.data
                 .map { preferences ->
+                    val activeLanguages =
+                        preferences[PreferenceKeys.ACTIVE_LANGUAGES_LIST]?.let {
+                            if (it.isNotEmpty()) it.split(",").map { lang -> lang.trim() } else null
+                        } ?: preferences[PreferenceKeys.ACTIVE_LANGUAGES]?.toList()
+                            ?: listOf(preferences[PreferenceKeys.PRIMARY_LANGUAGE] ?: KeyboardSettings.DEFAULT_LANGUAGE)
+
+                    val primaryLanguage = preferences[PreferenceKeys.PRIMARY_LANGUAGE] ?: KeyboardSettings.DEFAULT_LANGUAGE
+
+                    val primaryLayoutLanguage =
+                        preferences[PreferenceKeys.PRIMARY_LAYOUT_LANGUAGE]
+                            ?: primaryLanguage
+
                     KeyboardSettings(
                         spellCheckEnabled = preferences[PreferenceKeys.SPELL_CHECK_ENABLED] ?: true,
                         showSuggestions = preferences[PreferenceKeys.SHOW_SUGGESTIONS] ?: true,
@@ -82,8 +96,9 @@ class SettingsRepository
                         learnNewWords = preferences[PreferenceKeys.LEARN_NEW_WORDS] ?: true,
                         clipboardEnabled = preferences[PreferenceKeys.CLIPBOARD_ENABLED] ?: true,
                         clipboardConsentShown = preferences[PreferenceKeys.CLIPBOARD_CONSENT_SHOWN] ?: false,
-                        activeLanguages = preferences[PreferenceKeys.ACTIVE_LANGUAGES] ?: setOf(KeyboardSettings.DEFAULT_LANGUAGE),
-                        primaryLanguage = preferences[PreferenceKeys.PRIMARY_LANGUAGE] ?: KeyboardSettings.DEFAULT_LANGUAGE,
+                        activeLanguages = activeLanguages,
+                        primaryLanguage = primaryLanguage,
+                        primaryLayoutLanguage = primaryLayoutLanguage,
                         hapticFeedback = preferences[PreferenceKeys.HAPTIC_FEEDBACK] ?: true,
                         vibrationStrength = preferences[PreferenceKeys.VIBRATION_STRENGTH] ?: 128,
                         doubleSpacePeriod = preferences[PreferenceKeys.DOUBLE_SPACE_PERIOD] ?: true,
@@ -206,7 +221,7 @@ class SettingsRepository
         /**
          * Updates active languages and primary language with validation.
          *
-         * Filters to supported languages only. Primary must be in active set.
+         * Filters to supported languages only, limits to max 3. Primary must be in active set.
          * Falls back to default language if validation fails.
          */
         suspend fun updateLanguageSettings(
@@ -218,7 +233,8 @@ class SettingsRepository
                     activeLanguages
                         .intersect(
                             KeyboardSettings.SUPPORTED_LANGUAGES,
-                        ).ifEmpty { setOf(KeyboardSettings.DEFAULT_LANGUAGE) }
+                        ).take(KeyboardSettings.MAX_ACTIVE_LANGUAGES)
+                        .ifEmpty { setOf(KeyboardSettings.DEFAULT_LANGUAGE) }
 
                 val validatedPrimaryLanguage =
                     if (validatedActiveLanguages.contains(primaryLanguage)) {
@@ -228,8 +244,77 @@ class SettingsRepository
                     }
 
                 dataStore.edit { preferences ->
-                    preferences[PreferenceKeys.ACTIVE_LANGUAGES] = validatedActiveLanguages
+                    preferences[PreferenceKeys.ACTIVE_LANGUAGES_LIST] = validatedActiveLanguages.joinToString(",")
                     preferences[PreferenceKeys.PRIMARY_LANGUAGE] = validatedPrimaryLanguage
+                    preferences[PreferenceKeys.PRIMARY_LAYOUT_LANGUAGE] = validatedPrimaryLanguage
+                }
+                Result.success(Unit)
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+
+        /**
+         * Updates active languages list and primary layout language with validation.
+         *
+         * Filters to supported languages only, limits to max 3, maintains order.
+         * Primary layout language must be in active set. Falls back to default if validation fails.
+         */
+        suspend fun updateActiveLanguages(
+            activeLanguages: List<String>,
+            primaryLayoutLanguage: String,
+        ): Result<Unit> =
+            try {
+                val validatedActiveLanguages =
+                    activeLanguages
+                        .filter { it in KeyboardSettings.SUPPORTED_LANGUAGES }
+                        .distinct()
+                        .take(KeyboardSettings.MAX_ACTIVE_LANGUAGES)
+                        .ifEmpty { listOf(KeyboardSettings.DEFAULT_LANGUAGE) }
+
+                val validatedPrimaryLayoutLanguage =
+                    if (validatedActiveLanguages.contains(primaryLayoutLanguage)) {
+                        primaryLayoutLanguage
+                    } else {
+                        validatedActiveLanguages.first()
+                    }
+
+                val validatedPrimaryLanguage =
+                    if (validatedActiveLanguages.contains(validatedPrimaryLayoutLanguage)) {
+                        validatedPrimaryLayoutLanguage
+                    } else {
+                        validatedActiveLanguages.first()
+                    }
+
+                dataStore.edit { preferences ->
+                    preferences[PreferenceKeys.ACTIVE_LANGUAGES_LIST] = validatedActiveLanguages.joinToString(",")
+                    preferences[PreferenceKeys.PRIMARY_LANGUAGE] = validatedPrimaryLanguage
+                    preferences[PreferenceKeys.PRIMARY_LAYOUT_LANGUAGE] = validatedPrimaryLayoutLanguage
+                }
+                Result.success(Unit)
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+
+        /**
+         * Switches primary layout language without changing active languages set.
+         * Layout language must be in active languages. Falls back to first active if invalid.
+         */
+        suspend fun updatePrimaryLayoutLanguage(primaryLayoutLanguage: String): Result<Unit> =
+            try {
+                dataStore.edit { preferences ->
+                    val activeLanguagesStr = preferences[PreferenceKeys.ACTIVE_LANGUAGES_LIST]
+                    val activeLanguages =
+                        activeLanguagesStr?.split(",")?.map { it.trim() }
+                            ?: listOf(KeyboardSettings.DEFAULT_LANGUAGE)
+
+                    val validatedPrimaryLayoutLanguage =
+                        if (activeLanguages.contains(primaryLayoutLanguage)) {
+                            primaryLayoutLanguage
+                        } else {
+                            activeLanguages.first()
+                        }
+
+                    preferences[PreferenceKeys.PRIMARY_LAYOUT_LANGUAGE] = validatedPrimaryLayoutLanguage
                 }
                 Result.success(Unit)
             } catch (e: Exception) {

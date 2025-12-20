@@ -226,7 +226,7 @@ class ThemeManagerTest {
             showSuggestions = true,
             suggestionCount = 3,
             learnNewWords = true,
-            activeLanguages = setOf("en"),
+            activeLanguages = listOf("en"),
             primaryLanguage = "en",
             hapticFeedback = true,
             vibrationStrength = 128,

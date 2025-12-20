@@ -73,7 +73,7 @@ class KeyboardViewModel
             }
 
             viewModelScope.launch {
-                languageManager.currentLanguage
+                languageManager.currentLayoutLanguage
                     .drop(1)
                     .collect { language ->
                         startLoadLayout(_state.value.currentMode)
@@ -168,6 +168,10 @@ class KeyboardViewModel
             if (_state.value.isCapsLockOn) {
                 updateState { it.copy(isCapsLockOn = false, isShiftPressed = true) }
             }
+        }
+
+        fun clearShiftAndCapsState() {
+            updateState { it.copy(isShiftPressed = false, isCapsLockOn = false) }
         }
 
         private fun handleEvent(event: KeyboardEvent) {
@@ -310,8 +314,8 @@ class KeyboardViewModel
         }
 
         private fun getCurrentLocale(): ULocale {
-            val currentLanguage = languageManager.currentLanguage.value
-            val languageOnly = currentLanguage.split("-").first()
+            val currentLayoutLang = languageManager.currentLayoutLanguage.value
+            val languageOnly = currentLayoutLang.split("-").first()
             return ULocale.forLanguageTag(languageOnly)
         }
 

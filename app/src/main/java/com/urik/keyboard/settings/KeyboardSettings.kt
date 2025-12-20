@@ -66,8 +66,9 @@ data class KeyboardSettings(
     val learnNewWords: Boolean = true,
     val clipboardEnabled: Boolean = true,
     val clipboardConsentShown: Boolean = false,
-    val activeLanguages: Set<String> = setOf(DEFAULT_LANGUAGE),
+    val activeLanguages: List<String> = listOf(DEFAULT_LANGUAGE),
     val primaryLanguage: String = DEFAULT_LANGUAGE,
+    val primaryLayoutLanguage: String = DEFAULT_LANGUAGE,
     val hapticFeedback: Boolean = true,
     val vibrationStrength: Int = 128,
     val doubleSpacePeriod: Boolean = true,
@@ -86,14 +87,17 @@ data class KeyboardSettings(
     /**
      * Returns validated copy with constraints enforced.
      *
-     * Filters languages to supported set, clamps suggestion count, ensures primary
-     * language is active. Falls back to [DEFAULT_LANGUAGE] if validation fails.
+     * Filters languages to supported set, limits to max 3, clamps suggestion count,
+     * ensures primary language and layout language are active. Falls back to
+     * [DEFAULT_LANGUAGE] if validation fails.
      */
     fun validated(): KeyboardSettings {
         val validActiveLanguages =
             activeLanguages
-                .intersect(SUPPORTED_LANGUAGES)
-                .ifEmpty { setOf(DEFAULT_LANGUAGE) }
+                .filter { it in SUPPORTED_LANGUAGES }
+                .distinct()
+                .take(MAX_ACTIVE_LANGUAGES)
+                .ifEmpty { listOf(DEFAULT_LANGUAGE) }
 
         val validPrimaryLanguage =
             if (validActiveLanguages.contains(primaryLanguage)) {
@@ -102,10 +106,18 @@ data class KeyboardSettings(
                 validActiveLanguages.first()
             }
 
+        val validPrimaryLayoutLanguage =
+            if (validActiveLanguages.contains(primaryLayoutLanguage)) {
+                primaryLayoutLanguage
+            } else {
+                validActiveLanguages.first()
+            }
+
         return copy(
             suggestionCount = suggestionCount.coerceIn(MIN_SUGGESTION_COUNT, MAX_SUGGESTION_COUNT),
             activeLanguages = validActiveLanguages,
             primaryLanguage = validPrimaryLanguage,
+            primaryLayoutLanguage = validPrimaryLayoutLanguage,
         )
     }
 
@@ -132,6 +144,7 @@ data class KeyboardSettings(
     companion object {
         const val MIN_SUGGESTION_COUNT = 1
         const val MAX_SUGGESTION_COUNT = 3
+        const val MAX_ACTIVE_LANGUAGES = 3
 
         /**
          * Default language used as fallback when user locale is unsupported.
@@ -172,16 +185,12 @@ data class KeyboardSettings(
          * Falls back to [DEFAULT_LANGUAGE] for unsupported locales.
          */
         fun defaultForLocale(languageCode: String): KeyboardSettings {
-            val primaryLanguage =
-                if (SUPPORTED_LANGUAGES.contains(languageCode)) {
-                    languageCode
-                } else {
-                    DEFAULT_LANGUAGE
-                }
+            val lang = if (languageCode in SUPPORTED_LANGUAGES) languageCode else DEFAULT_LANGUAGE
 
             return KeyboardSettings(
-                activeLanguages = setOf(primaryLanguage),
-                primaryLanguage = primaryLanguage,
+                activeLanguages = listOf(lang),
+                primaryLanguage = lang,
+                primaryLayoutLanguage = lang,
             )
         }
     }

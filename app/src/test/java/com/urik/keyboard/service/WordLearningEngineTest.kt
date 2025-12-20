@@ -316,7 +316,7 @@ class WordLearningEngineTest {
                 )
             whenever(learnedWordDao.findExactWord("en", "test")).thenReturn(exact)
 
-            val results = wordLearningEngine.getSimilarLearnedWordsWithFrequency("test", 3)
+            val results = wordLearningEngine.getSimilarLearnedWordsWithFrequency("test", "en", 3)
 
             assertEquals(1, results.size)
             assertEquals("test" to 10, results[0])
@@ -344,7 +344,7 @@ class WordLearningEngineTest {
             whenever(learnedWordDao.findWordsWithPrefix("en", "test", 3))
                 .thenReturn(listOf(prefix1, prefix2))
 
-            val results = wordLearningEngine.getSimilarLearnedWordsWithFrequency("test", 3)
+            val results = wordLearningEngine.getSimilarLearnedWordsWithFrequency("test", "en", 3)
 
             assertEquals(2, results.size)
             assertTrue(results.any { it.first == "testing" })
@@ -373,7 +373,7 @@ class WordLearningEngineTest {
             whenever(learnedWordDao.findWordsWithPrefix("en", "test", 3))
                 .thenReturn(listOf(low, high))
 
-            val results = wordLearningEngine.getSimilarLearnedWordsWithFrequency("test", 3)
+            val results = wordLearningEngine.getSimilarLearnedWordsWithFrequency("test", "en", 3)
 
             assertEquals("testb", results[0].first)
             assertEquals("testa", results[1].first)
@@ -395,7 +395,7 @@ class WordLearningEngineTest {
             whenever(learnedWordDao.findWordsWithPrefix("en", "test", 2))
                 .thenReturn(words)
 
-            val results = wordLearningEngine.getSimilarLearnedWordsWithFrequency("test", 2)
+            val results = wordLearningEngine.getSimilarLearnedWordsWithFrequency("test", "en", 2)
 
             assertEquals(2, results.size)
         }
@@ -403,9 +403,9 @@ class WordLearningEngineTest {
     @Test
     fun `getSimilarLearnedWordsWithFrequency rejects invalid input`() =
         runTest {
-            val empty = wordLearningEngine.getSimilarLearnedWordsWithFrequency("", 3)
-            val blank = wordLearningEngine.getSimilarLearnedWordsWithFrequency("   ", 3)
-            val tooLong = wordLearningEngine.getSimilarLearnedWordsWithFrequency("a".repeat(51), 3)
+            val empty = wordLearningEngine.getSimilarLearnedWordsWithFrequency("", "en", 3)
+            val blank = wordLearningEngine.getSimilarLearnedWordsWithFrequency("   ", "en", 3)
+            val tooLong = wordLearningEngine.getSimilarLearnedWordsWithFrequency("a".repeat(51), "en", 3)
 
             assertTrue(empty.isEmpty())
             assertTrue(blank.isEmpty())
@@ -429,7 +429,7 @@ class WordLearningEngineTest {
             whenever(learnedWordDao.findWordsWithPrefix("en", "test", 3))
                 .thenReturn(listOf(prefix))
 
-            val results = wordLearningEngine.getSimilarLearnedWordsWithFrequency("test", 3)
+            val results = wordLearningEngine.getSimilarLearnedWordsWithFrequency("test", "en", 3)
 
             assertEquals(1, results.size)
             assertEquals("testing", results[0].first)
@@ -609,7 +609,7 @@ class WordLearningEngineTest {
                 wordLearningEngine.isWordLearned("trigger$it")
             }
 
-            val results = wordLearningEngine.getSimilarLearnedWordsWithFrequency("test", 3)
+            val results = wordLearningEngine.getSimilarLearnedWordsWithFrequency("test", "en", 3)
 
             assertTrue(results.isEmpty())
         }
@@ -629,7 +629,7 @@ class WordLearningEngineTest {
 
             wordLearningEngine.isWordLearned("success")
 
-            val result = wordLearningEngine.getSimilarLearnedWordsWithFrequency("test", 3)
+            val result = wordLearningEngine.getSimilarLearnedWordsWithFrequency("test", "en", 3)
             assertNotNull(result)
         }
 
@@ -685,7 +685,7 @@ class WordLearningEngineTest {
             whenever(learnedWordDao.getMostFrequentWords("en", 100))
                 .thenReturn(listOf(contractionWord))
 
-            val results = wordLearningEngine.getSimilarLearnedWordsWithFrequency("dont", 5)
+            val results = wordLearningEngine.getSimilarLearnedWordsWithFrequency("dont", "en", 5)
 
             assertTrue("Should find don't when searching for dont", results.any { it.first == "don't" })
         }
@@ -713,7 +713,7 @@ class WordLearningEngineTest {
             whenever(learnedWordDao.getMostFrequentWords("en", 100))
                 .thenReturn(listOf(contractionWord, plainWord))
 
-            val results = wordLearningEngine.getSimilarLearnedWordsWithFrequency("dont", 5)
+            val results = wordLearningEngine.getSimilarLearnedWordsWithFrequency("dont", "en", 5)
 
             val strippedResults =
                 results.filter { (word, _) ->
@@ -745,7 +745,7 @@ class WordLearningEngineTest {
 
             whenever(languageManager.currentLanguage).thenReturn(MutableStateFlow("fr"))
 
-            val results = wordLearningEngine.getSimilarLearnedWordsWithFrequency("lhomme", 5)
+            val results = wordLearningEngine.getSimilarLearnedWordsWithFrequency("lhomme", "fr", 5)
 
             assertTrue("Should find l'homme when searching for lhomme", results.any { it.first == "l'homme" })
         }
@@ -766,7 +766,7 @@ class WordLearningEngineTest {
             whenever(learnedWordDao.getMostFrequentWords("en", 100))
                 .thenReturn(listOf(hyphenatedWord))
 
-            val results = wordLearningEngine.getSimilarLearnedWordsWithFrequency("coworker", 5)
+            val results = wordLearningEngine.getSimilarLearnedWordsWithFrequency("coworker", "en", 5)
 
             assertTrue("Should find co-worker when searching for coworker", results.any { it.first == "co-worker" })
         }
@@ -787,7 +787,7 @@ class WordLearningEngineTest {
             whenever(learnedWordDao.getMostFrequentWords("en", 200))
                 .thenReturn(contractions)
 
-            val results = wordLearningEngine.getSimilarLearnedWordsWithFrequency("ont", maxResults = 2)
+            val results = wordLearningEngine.getSimilarLearnedWordsWithFrequency("ont", "en", maxResults = 2)
 
             assertTrue("Should respect maxResults limit", results.size <= 2)
         }
@@ -795,7 +795,7 @@ class WordLearningEngineTest {
     @Test
     fun `stripped prefix search returns empty when input too short`() =
         runTest {
-            val results = wordLearningEngine.getSimilarLearnedWordsWithFrequency("a", 5)
+            val results = wordLearningEngine.getSimilarLearnedWordsWithFrequency("a", "en", 5)
 
             assertTrue("Should return empty for single character input", results.isEmpty())
         }
@@ -815,9 +815,73 @@ class WordLearningEngineTest {
             whenever(learnedWordDao.getMostFrequentWords("en", 200))
                 .thenReturn(contractions)
 
-            val results = wordLearningEngine.getSimilarLearnedWordsWithFrequency("ont", 5)
+            val results = wordLearningEngine.getSimilarLearnedWordsWithFrequency("ont", "en", 5)
 
             val frequencies = results.map { it.second }
             assertEquals("Should be sorted by frequency descending", frequencies, frequencies.sortedDescending())
+        }
+
+    @Test
+    fun `getLearnedWordsForSwipeAllLanguages merges multiple languages`() =
+        runTest {
+            val englishWords =
+                listOf(
+                    LearnedWord.create("hello", "hello", "en", frequency = 100),
+                    LearnedWord.create("test", "test", "en", frequency = 50),
+                )
+            val spanishWords =
+                listOf(
+                    LearnedWord.create("hola", "hola", "es", frequency = 80),
+                    LearnedWord.create("prueba", "prueba", "es", frequency = 40),
+                )
+
+            whenever(learnedWordDao.getAllLearnedWordsForLanguage("en")).thenReturn(englishWords)
+            whenever(learnedWordDao.getAllLearnedWordsForLanguage("es")).thenReturn(spanishWords)
+
+            val words = wordLearningEngine.getLearnedWordsForSwipeAllLanguages(listOf("en", "es"), 2, 10)
+
+            assertTrue(words.containsKey("hello"))
+            assertTrue(words.containsKey("hola"))
+            assertEquals(100, words["hello"])
+            assertEquals(80, words["hola"])
+        }
+
+    @Test
+    fun `getLearnedWordsForSwipeAllLanguages keeps highest frequency for duplicate words`() =
+        runTest {
+            val englishWords =
+                listOf(
+                    LearnedWord.create("test", "test", "en", frequency = 50),
+                )
+            val spanishWords =
+                listOf(
+                    LearnedWord.create("test", "test", "es", frequency = 120),
+                )
+
+            whenever(learnedWordDao.getAllLearnedWordsForLanguage("en")).thenReturn(englishWords)
+            whenever(learnedWordDao.getAllLearnedWordsForLanguage("es")).thenReturn(spanishWords)
+
+            val words = wordLearningEngine.getLearnedWordsForSwipeAllLanguages(listOf("en", "es"), 2, 10)
+
+            assertEquals(120, words["test"])
+        }
+
+    @Test
+    fun `getLearnedWordsForSwipeAllLanguages filters by length`() =
+        runTest {
+            val englishWords =
+                listOf(
+                    LearnedWord.create("a", "a", "en", frequency = 100),
+                    LearnedWord.create("test", "test", "en", frequency = 50),
+                    LearnedWord.create("verylongword", "verylongword", "en", frequency = 30),
+                )
+
+            whenever(learnedWordDao.getAllLearnedWordsForLanguage("en")).thenReturn(englishWords)
+
+            val words = wordLearningEngine.getLearnedWordsForSwipeAllLanguages(listOf("en"), 2, 6)
+
+            assertFalse(words.containsKey("a"))
+            assertTrue(words.containsKey("test"))
+            assertFalse(words.containsKey("verylongword"))
         }
 }

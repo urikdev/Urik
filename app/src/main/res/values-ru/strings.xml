@@ -73,6 +73,7 @@
     <!-- Language Settings -->
 
     <!-- Sound & Feedback Settings -->
+    <string name="primary_layout_language">Текущая компоновка</string>
     <string name="feedback_settings_haptic_feedback">Тактильная Отдача</string>
     <string name="feedback_settings_haptic_on">Тактильная отдача включена</string>
     <string name="feedback_settings_haptic_off">Тактильная отдача отключена</string>
@@ -222,5 +223,6 @@
     <string name="typing_settings_spacebar_long_press_on">Длительное нажатие пробела для расстановки знаков препинания</string>
     <string name="error_update_spacebar_cursor">Не удалось обновить управление курсором с помощью пробела</string>
     <string name="error_update_backspace_swipe">Не удалось обновить управление клавишей Backspace (пролистывание)</string>
+    <string name="max_languages_reached">Допускается использование максимум 3 языков.</string>
 
 </resources>

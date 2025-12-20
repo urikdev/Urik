@@ -72,6 +72,8 @@
     <string name="autocorrect_settings_learn_new_words_off">Learning disabled</string>
 
     <!-- Language Settings -->
+    <string name="max_languages_reached">Maximum 3 languages allowed</string>
+    <string name="primary_layout_language">Current layout</string>
 
     <!-- Sound & Feedback Settings -->
     <string name="feedback_settings_haptic_feedback">Haptic Feedback</string>
