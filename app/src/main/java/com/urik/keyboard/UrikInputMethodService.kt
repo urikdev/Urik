@@ -1252,6 +1252,8 @@ class UrikInputMethodService :
      */
     private fun handleLetterInput(char: String) {
         try {
+            lastSpaceTime = 0
+
             if (isSecureField) {
                 currentInputConnection?.commitText(char, 1)
                 val cursorPos =
@@ -1420,6 +1422,8 @@ class UrikInputMethodService :
     private fun handleNonLetterInput(char: String) {
         serviceScope.launch {
             try {
+                lastSpaceTime = 0
+
                 if (isSecureField) {
                     currentInputConnection?.commitText(char, 1)
                     val cursorPos =
