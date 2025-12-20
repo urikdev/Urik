@@ -187,9 +187,9 @@ class SwipeDetector
             val latinLikeScripts = setOf(UScript.LATIN, UScript.CYRILLIC)
             val arabicScripts = setOf(UScript.ARABIC)
 
-            return when {
-                script1 in latinLikeScripts && script2 in latinLikeScripts -> true
-                script1 in arabicScripts && script2 in arabicScripts -> true
+            return when (script1) {
+                in latinLikeScripts if script2 in latinLikeScripts -> true
+                in arabicScripts if script2 in arabicScripts -> true
                 else -> false
             }
         }

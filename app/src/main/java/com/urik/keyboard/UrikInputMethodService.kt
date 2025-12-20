@@ -922,7 +922,7 @@ class UrikInputMethodService :
                 languageManager.switchLayoutLanguage(languageCode)
 
                 val locale =
-                    com.ibm.icu.util.ULocale
+                    ULocale
                         .forLanguageTag(languageCode)
                 updateScriptContext(locale)
             } catch (e: Exception) {

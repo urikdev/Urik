@@ -468,74 +468,6 @@ class WordLearningEngine
                 }
             }
 
-        suspend fun getSimilarLearnedWordsForAllLanguages(
-            word: String,
-            activeLanguages: List<String>,
-            maxResults: Int = 5,
-        ): List<Pair<String, Int>> =
-            withContext(ioDispatcher) {
-                return@withContext try {
-                    val cleanWord = word.trim()
-                    if (cleanWord.isBlank() || cleanWord.length > WordLearningConstants.MAX_SIMILAR_WORD_LENGTH) {
-                        return@withContext emptyList()
-                    }
-
-                    if (activeLanguages.isEmpty()) {
-                        return@withContext emptyList()
-                    }
-
-                    val allResults = mutableMapOf<String, Int>()
-
-                    activeLanguages.forEach { languageTag ->
-                        try {
-                            val normalized = normalizeWord(cleanWord)
-                            if (normalized.length > WordLearningConstants.MAX_NORMALIZED_WORD_LENGTH) {
-                                return@forEach
-                            }
-
-                            val exactMatch =
-                                learnedWordDao.findExactWord(
-                                    languageTag = languageTag,
-                                    normalizedWord = normalized,
-                                )
-                            if (exactMatch != null) {
-                                val currentFreq = allResults[exactMatch.word] ?: 0
-                                allResults[exactMatch.word] = maxOf(currentFreq, exactMatch.frequency)
-                            }
-
-                            if (normalized.length >= WordLearningConstants.MIN_PREFIX_MATCH_LENGTH) {
-                                val prefixMatches =
-                                    learnedWordDao.findWordsWithPrefix(
-                                        languageTag = languageTag,
-                                        prefix = normalized,
-                                        limit = maxResults,
-                                    )
-                                prefixMatches.forEach { learnedWord ->
-                                    val currentFreq = allResults[learnedWord.word] ?: 0
-                                    allResults[learnedWord.word] = maxOf(currentFreq, learnedWord.frequency)
-                                }
-                            }
-                        } catch (_: Exception) {
-                        }
-                    }
-
-                    onSuccessfulOperation()
-
-                    allResults
-                        .toList()
-                        .sortedByDescending { it.second }
-                        .take(maxResults)
-                } catch (_: SQLiteDatabaseCorruptException) {
-                    handleDatabaseError()
-                    emptyList()
-                } catch (_: SQLiteException) {
-                    handleDatabaseError()
-                    emptyList()
-                } catch (_: Exception) {
-                    emptyList()
-                }
-            }
-
         /**
          * Removes learned word from database and cache.
          *
@@ -895,58 +827,6 @@ class WordLearningEngine
                 swipeWordsCacheLanguage = ""
             }
         }
-
-        /**
-         * Gets learned words for the current language for swipe matching.
-         *
-         * Returns words in same format as SpellCheckManager.getCommonWords().
-         * Filters by length range to match swipe path constraints.
-         *
-         * @param minLength Minimum word length (from swipe path)
-         * @param maxLength Maximum word length (from swipe path)
-         * @return List of (word, frequency) pairs, frequency-sorted descending
-         */
-        suspend fun getLearnedWordsForSwipe(
-            minLength: Int,
-            maxLength: Int,
-        ): List<Pair<String, Int>> =
-            withContext(ioDispatcher) {
-                try {
-                    if (isInErrorCooldown()) {
-                        return@withContext emptyList()
-                    }
-
-                    val currentLanguage = languageManager.currentLanguage.value
-
-                    if (currentLanguage == swipeWordsCacheLanguage && swipeWordsCache.isNotEmpty()) {
-                        return@withContext swipeWordsCache.filter { it.first.length in minLength..maxLength }
-                    }
-
-                    val allWords = learnedWordDao.getAllLearnedWordsForLanguage(currentLanguage)
-
-                    val allLearnedWords =
-                        allWords
-                            .filter { it.frequency >= 1 }
-                            .map { it.word.lowercase() to it.frequency }
-                            .sortedByDescending { it.second }
-
-                    swipeWordsCache = allLearnedWords
-                    swipeWordsCacheLanguage = currentLanguage
-
-                    val filtered = allLearnedWords.filter { it.first.length in minLength..maxLength }
-
-                    onSuccessfulOperation()
-                    return@withContext filtered
-                } catch (_: SQLiteDatabaseCorruptException) {
-                    handleDatabaseError()
-                    emptyList()
-                } catch (_: SQLiteException) {
-                    handleDatabaseError()
-                    emptyList()
-                } catch (_: Exception) {
-                    emptyList()
-                }
-            }
 
         suspend fun getLearnedWordsForSwipeAllLanguages(
             languages: List<String>,
