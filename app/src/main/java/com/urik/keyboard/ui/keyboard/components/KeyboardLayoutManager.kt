@@ -315,6 +315,10 @@ class KeyboardLayoutManager(
         performContextualHaptic(null)
     }
 
+    fun forceStopAcceleratedBackspace() {
+        stopAcceleratedBackspace()
+    }
+
     fun cancelAllPendingCallbacks() {
         buttonPendingCallbacks.values.forEach { pending ->
             pending.handler.removeCallbacks(pending.runnable)

@@ -1923,6 +1923,16 @@ class UrikInputMethodService :
                 return
             }
 
+            if (displayBuffer.isEmpty()) {
+                val textBeforeCursor = safeGetTextBeforeCursor(1)
+                if (textBeforeCursor.isEmpty()) {
+                    if (isAcceleratedDeletion) {
+                        layoutManager.forceStopAcceleratedBackspace()
+                    }
+                    return
+                }
+            }
+
             if (displayBuffer.isNotEmpty() && wordState.isFromSwipe) {
                 currentInputConnection?.setComposingText("", 1)
                 coordinateStateClear()
