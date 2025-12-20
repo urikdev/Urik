@@ -1080,7 +1080,8 @@ class UrikInputMethodService :
 
         observerJobs.add(
             serviceScope.launch {
-                themeManager.currentTheme.collect {
+                themeManager.currentTheme.collect { theme ->
+                    keyboardRootContainer?.setBackgroundColor(theme.colors.keyboardBackground)
                     updateSwipeKeyboard()
                 }
             },
