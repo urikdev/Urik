@@ -38,7 +38,8 @@
           {"type": "character", "char": "h", "keyType": "letter"},
           {"type": "character", "char": "j", "keyType": "letter"},
           {"type": "character", "char": "k", "keyType": "letter"},
-          {"type": "character", "char": "l", "keyType": "letter"}
+          {"type": "character", "char": "l", "keyType": "letter"},
+          {"type": "character", "char": "ç", "keyType": "letter"}
         ],
         [
           {"type": "action", "action": "shift"},

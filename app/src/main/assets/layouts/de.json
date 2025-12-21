@@ -27,7 +27,8 @@
           {"type": "character", "char": "u", "keyType": "letter"},
           {"type": "character", "char": "i", "keyType": "letter"},
           {"type": "character", "char": "o", "keyType": "letter"},
-          {"type": "character", "char": "p", "keyType": "letter"}
+          {"type": "character", "char": "p", "keyType": "letter"},
+          {"type": "character", "char": "ü", "keyType": "letter"}
         ],
         [
           {"type": "character", "char": "a", "keyType": "letter"},
@@ -38,7 +39,9 @@
           {"type": "character", "char": "h", "keyType": "letter"},
           {"type": "character", "char": "j", "keyType": "letter"},
           {"type": "character", "char": "k", "keyType": "letter"},
-          {"type": "character", "char": "l", "keyType": "letter"}
+          {"type": "character", "char": "l", "keyType": "letter"},
+          {"type": "character", "char": "ö", "keyType": "letter"},
+          {"type": "character", "char": "ä", "keyType": "letter"}
         ],
         [
           {"type": "action", "action": "shift"},
@@ -49,6 +52,7 @@
           {"type": "character", "char": "b", "keyType": "letter"},
           {"type": "character", "char": "n", "keyType": "letter"},
           {"type": "character", "char": "m", "keyType": "letter"},
+          {"type": "character", "char": "ß", "keyType": "letter"},
           {"type": "action", "action": "backspace"}
         ],
         [
