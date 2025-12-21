@@ -27,7 +27,9 @@
           {"type": "character", "char": "u", "keyType": "letter"},
           {"type": "character", "char": "i", "keyType": "letter"},
           {"type": "character", "char": "o", "keyType": "letter"},
-          {"type": "character", "char": "p", "keyType": "letter"}
+          {"type": "character", "char": "p", "keyType": "letter"},
+          {"type": "character", "char": "ú", "keyType": "letter"},
+          {"type": "character", "char": "ý", "keyType": "letter"}
         ],
         [
           {"type": "character", "char": "a", "keyType": "letter"},
@@ -38,7 +40,9 @@
           {"type": "character", "char": "h", "keyType": "letter"},
           {"type": "character", "char": "j", "keyType": "letter"},
           {"type": "character", "char": "k", "keyType": "letter"},
-          {"type": "character", "char": "l", "keyType": "letter"}
+          {"type": "character", "char": "l", "keyType": "letter"},
+          {"type": "character", "char": "ů", "keyType": "letter"},
+          {"type": "character", "char": "ě", "keyType": "letter"}
         ],
         [
           {"type": "action", "action": "shift"},
@@ -49,6 +53,10 @@
           {"type": "character", "char": "b", "keyType": "letter"},
           {"type": "character", "char": "n", "keyType": "letter"},
           {"type": "character", "char": "m", "keyType": "letter"},
+          {"type": "character", "char": "š", "keyType": "letter"},
+          {"type": "character", "char": "č", "keyType": "letter"},
+          {"type": "character", "char": "ř", "keyType": "letter"},
+          {"type": "character", "char": "ž", "keyType": "letter"},
           {"type": "action", "action": "backspace"}
         ],
         [
