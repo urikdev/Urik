@@ -2,6 +2,7 @@ package com.urik.keyboard.settings.typingbehavior
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.urik.keyboard.settings.CursorSpeed
 import com.urik.keyboard.settings.LongPressDuration
 import com.urik.keyboard.settings.SettingsEvent
 import com.urik.keyboard.settings.SettingsRepository
@@ -35,6 +36,7 @@ class TypingBehaviorViewModel
                         doubleSpacePeriod = settings.doubleSpacePeriod,
                         swipeEnabled = settings.swipeEnabled,
                         spacebarCursorControl = settings.spacebarCursorControl,
+                        cursorSpeed = settings.cursorSpeed,
                         backspaceSwipeDelete = settings.backspaceSwipeDelete,
                         spacebarLongPressPunctuation = settings.spacebarLongPressPunctuation,
                         longPressDuration = settings.longPressDuration,
@@ -66,6 +68,14 @@ class TypingBehaviorViewModel
                 settingsRepository
                     .updateSpacebarCursorControl(enabled)
                     .onFailure { _events.emit(SettingsEvent.Error.SpacebarCursorToggleFailed) }
+            }
+        }
+
+        fun updateCursorSpeed(speed: CursorSpeed) {
+            viewModelScope.launch {
+                settingsRepository
+                    .updateCursorSpeed(speed)
+                    .onFailure { _events.emit(SettingsEvent.Error.CursorSpeedUpdateFailed) }
             }
         }
 
@@ -105,6 +115,7 @@ data class TypingBehaviorUiState(
     val doubleSpacePeriod: Boolean = true,
     val swipeEnabled: Boolean = true,
     val spacebarCursorControl: Boolean = true,
+    val cursorSpeed: CursorSpeed = CursorSpeed.MEDIUM,
     val backspaceSwipeDelete: Boolean = true,
     val spacebarLongPressPunctuation: Boolean = true,
     val longPressDuration: LongPressDuration = LongPressDuration.MEDIUM,

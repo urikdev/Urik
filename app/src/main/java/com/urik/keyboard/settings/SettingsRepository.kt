@@ -65,6 +65,7 @@ class SettingsRepository
             val KEYBOARD_THEME = stringPreferencesKey("keyboard_theme")
             val KEY_SIZE = stringPreferencesKey("key_size")
             val KEY_LABEL_SIZE = stringPreferencesKey("key_label_size")
+            val CURSOR_SPEED = stringPreferencesKey("cursor_speed")
             val FAVORITE_THEMES = stringSetPreferencesKey("favorite_themes")
         }
 
@@ -139,6 +140,14 @@ class SettingsRepository
                                     KeyLabelSize.MEDIUM
                                 }
                             } ?: KeyLabelSize.MEDIUM,
+                        cursorSpeed =
+                            preferences[PreferenceKeys.CURSOR_SPEED]?.let {
+                                try {
+                                    CursorSpeed.valueOf(it)
+                                } catch (_: IllegalArgumentException) {
+                                    CursorSpeed.MEDIUM
+                                }
+                            } ?: CursorSpeed.MEDIUM,
                         keyboardTheme = preferences[PreferenceKeys.KEYBOARD_THEME] ?: "default",
                         favoriteThemes = preferences[PreferenceKeys.FAVORITE_THEMES] ?: emptySet(),
                     ).validated()
@@ -338,6 +347,17 @@ class SettingsRepository
         suspend fun updateSpacebarCursorControl(enabled: Boolean): Result<Unit> =
             try {
                 dataStore.edit { it[PreferenceKeys.SPACEBAR_CURSOR_CONTROL] = enabled }
+                Result.success(Unit)
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+
+        /**
+         * Updates cursor movement speed.
+         */
+        suspend fun updateCursorSpeed(speed: CursorSpeed): Result<Unit> =
+            try {
+                dataStore.edit { it[PreferenceKeys.CURSOR_SPEED] = speed.name }
                 Result.success(Unit)
             } catch (e: Exception) {
                 Result.failure(e)

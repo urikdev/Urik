@@ -42,6 +42,9 @@
     <string name="long_press_duration_short">Curto</string>
     <string name="long_press_duration_medium">Médio</string>
     <string name="long_press_duration_long">Longo</string>
+    <string name="cursor_speed_slow">Lenta</string>
+    <string name="cursor_speed_medium">Média</string>
+    <string name="cursor_speed_fast">Rápida</string>
 
     <!-- Space Bar Size -->
     <string name="space_bar_size_compact">Compacta</string>
@@ -213,12 +216,14 @@
     <string name="typing_settings_spacebar_cursor">Controlo do cursor pela barra de espaço</string>
     <string name="typing_settings_spacebar_cursor_on">Deslize a barra de espaço para mover o cursor</string>
     <string name="typing_settings_spacebar_cursor_off">Controlo do cursor pela barra de espaço desativado</string>
+    <string name="typing_settings_cursor_speed">Velocidade do cursor</string>
     <string name="typing_settings_backspace_swipe">Deslizar para eliminar com a tecla Backspace</string>
     <string name="typing_settings_backspace_swipe_on">Deslizar para a esquerda na tecla Backspace para eliminar uma palavra</string>
     <string name="typing_settings_backspace_swipe_off">Deslizar para eliminar com a tecla Backspace desativada</string>
     <string name="typing_settings_spacebar_long_press">Pressionar e manter pressionada a barra de espaço para pontuação</string>
     <string name="typing_settings_spacebar_long_press_on">Pressionar e manter pressionada a barra de espaço para pontuação</string>
     <string name="error_update_spacebar_cursor">Falha ao atualizar o controlo do cursor da barra de espaço</string>
+    <string name="error_update_cursor_speed">Falha ao atualizar a velocidade do cursor</string>
     <string name="error_update_backspace_swipe">Falha ao atualizar a eliminação por gesto de deslizar a tecla Backspace</string>
     <string name="max_languages_reached">Máximo de 3 idiomas permitidos</string>
 

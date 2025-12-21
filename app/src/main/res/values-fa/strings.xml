@@ -43,6 +43,9 @@
     <string name="long_press_duration_short">کوتاه</string>
     <string name="long_press_duration_medium">متوسط</string>
     <string name="long_press_duration_long">طولانی</string>
+    <string name="cursor_speed_slow">کند</string>
+    <string name="cursor_speed_medium">متوسط</string>
+    <string name="cursor_speed_fast">سریع</string>
 
     <!-- Space Bar Size -->
     <string name="space_bar_size_compact">جمع‌وجور</string>
@@ -90,6 +93,7 @@
     <string name="typing_settings_spacebar_cursor">کنترل مکان‌نما با نوار فاصله</string>
     <string name="typing_settings_spacebar_cursor_on">کشیدن روی نوار فاصله برای جابجایی مکان‌نما</string>
     <string name="typing_settings_spacebar_cursor_off">کنترل مکان‌نما با نوار فاصله غیرفعال است</string>
+    <string name="typing_settings_cursor_speed">سرعت مکان‌نما</string>
     <string name="typing_settings_backspace_swipe">حذف با کشیدن روی Backspace</string>
     <string name="typing_settings_backspace_swipe_on">کشیدن به چپ روی Backspace برای حذف کلمه</string>
     <string name="typing_settings_backspace_swipe_off">حذف با کشیدن روی Backspace غیرفعال است</string>
@@ -133,6 +137,7 @@
     <string name="error_update_double_space_period">به‌روزرسانی نقطه با دو بار فاصله ناموفق بود</string>
     <string name="error_update_swipe">به‌روزرسانی تایپ سوایپ ناموفق بود</string>
     <string name="error_update_spacebar_cursor">به‌روزرسانی کنترل مکان‌نما با نوار فاصله ناموفق بود</string>
+    <string name="error_update_cursor_speed">به‌روزرسانی سرعت مکان‌نما ناموفق بود</string>
     <string name="error_update_backspace_swipe">به‌روزرسانی حذف با کشیدن روی Backspace ناموفق بود</string>
     <string name="error_update_spacebar_long_press">به‌روزرسانی نگه داشتن نوار فاصله برای نقطه‌گذاری ناموفق بود</string>
     <string name="error_update_long_press_duration">به‌روزرسانی مدت زمان نگه داشتن طولانی ناموفق بود</string>

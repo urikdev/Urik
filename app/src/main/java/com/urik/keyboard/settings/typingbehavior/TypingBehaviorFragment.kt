@@ -13,6 +13,7 @@ import androidx.preference.ListPreference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreferenceCompat
 import com.urik.keyboard.R
+import com.urik.keyboard.settings.CursorSpeed
 import com.urik.keyboard.settings.LongPressDuration
 import com.urik.keyboard.settings.SettingsEventHandler
 import dagger.hilt.android.AndroidEntryPoint
@@ -31,6 +32,7 @@ class TypingBehaviorFragment : PreferenceFragmentCompat() {
     private lateinit var doubleSpacePref: SwitchPreferenceCompat
     private lateinit var swipePref: SwitchPreferenceCompat
     private lateinit var spacebarCursorPref: SwitchPreferenceCompat
+    private lateinit var cursorSpeedPref: ListPreference
     private lateinit var backspaceSwipePref: SwitchPreferenceCompat
     private lateinit var spacebarLongPressPref: SwitchPreferenceCompat
     private lateinit var longPressPref: ListPreference
@@ -90,6 +92,16 @@ class TypingBehaviorFragment : PreferenceFragmentCompat() {
             }
         screen.addPreference(spacebarCursorPref)
 
+        cursorSpeedPref =
+            ListPreference(context).apply {
+                key = "cursor_speed"
+                title = resources.getString(R.string.typing_settings_cursor_speed)
+                entries = CursorSpeed.entries.map { resources.getString(it.displayNameRes) }.toTypedArray()
+                entryValues = CursorSpeed.entries.map { it.name }.toTypedArray()
+                summaryProvider = ListPreference.SimpleSummaryProvider.getInstance()
+            }
+        screen.addPreference(cursorSpeedPref)
+
         backspaceSwipePref =
             SwitchPreferenceCompat(context).apply {
                 key = "backspace_swipe_delete"
@@ -142,6 +154,11 @@ class TypingBehaviorFragment : PreferenceFragmentCompat() {
             true
         }
 
+        cursorSpeedPref.setOnPreferenceChangeListener { _, newValue ->
+            viewModel.updateCursorSpeed(CursorSpeed.valueOf(newValue as String))
+            true
+        }
+
         backspaceSwipePref.setOnPreferenceChangeListener { _, newValue ->
             viewModel.updateBackspaceSwipeDelete(newValue as Boolean)
             true
@@ -164,6 +181,8 @@ class TypingBehaviorFragment : PreferenceFragmentCompat() {
                         doubleSpacePref.isChecked = state.doubleSpacePeriod
                         swipePref.isChecked = state.swipeEnabled
                         spacebarCursorPref.isChecked = state.spacebarCursorControl
+                        cursorSpeedPref.value = state.cursorSpeed.name
+                        cursorSpeedPref.isVisible = state.spacebarCursorControl
                         backspaceSwipePref.isChecked = state.backspaceSwipeDelete
                         spacebarLongPressPref.isChecked = state.spacebarLongPressPunctuation
                         longPressPref.value = state.longPressDuration.name
