@@ -42,6 +42,9 @@
     <string name="long_press_duration_short">Krótki</string>
     <string name="long_press_duration_medium">Średni</string>
     <string name="long_press_duration_long">Długi</string>
+    <string name="cursor_speed_slow">Wolna</string>
+    <string name="cursor_speed_medium">Średnia</string>
+    <string name="cursor_speed_fast">Szybka</string>
 
     <!-- Space Bar Size -->
     <string name="space_bar_size_compact">Kompaktowy</string>
@@ -214,12 +217,14 @@
     <string name="typing_settings_spacebar_cursor">Sterowanie kursorem spacją</string>
     <string name="typing_settings_spacebar_cursor_on">Przesuń spację, aby przesunąć kursor</string>
     <string name="typing_settings_spacebar_cursor_off">Sterowanie kursorem spacją wyłączone</string>
+    <string name="typing_settings_cursor_speed">Prędkość kursora</string>
     <string name="typing_settings_backspace_swipe">Backspace - przesunięcie Delete</string>
     <string name="typing_settings_backspace_swipe_on">Przesuń w lewo na klawiszu Backspace, aby usunąć słowo</string>
     <string name="typing_settings_backspace_swipe_off">Backspace - przesunięcie Delete wyłączone</string>
     <string name="typing_settings_spacebar_long_press">Długie naciśnięcie spacji – interpunkcja</string>
     <string name="typing_settings_spacebar_long_press_on">Długie naciśnięcie spacji – interpunkcja</string>
     <string name="error_update_spacebar_cursor">Nie udało się zaktualizować sterowania kursorem spacji</string>
+    <string name="error_update_cursor_speed">Nie udało się zaktualizować prędkości kursora</string>
     <string name="error_update_backspace_swipe">Nie udało się zaktualizować funkcji usuwania za pomocą przesunięcia Backspace</string>
     <string name="max_languages_reached">Maksymalnie 3 języki dozwolone</string>
 

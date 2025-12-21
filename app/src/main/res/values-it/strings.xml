@@ -43,6 +43,9 @@
     <string name="long_press_duration_short">Breve</string>
     <string name="long_press_duration_medium">Media</string>
     <string name="long_press_duration_long">Lunga</string>
+    <string name="cursor_speed_slow">Lenta</string>
+    <string name="cursor_speed_medium">Media</string>
+    <string name="cursor_speed_fast">Veloce</string>
 
     <!-- Space Bar Size -->
     <string name="space_bar_size_compact">Compatta</string>
@@ -91,6 +94,7 @@
     <string name="typing_settings_spacebar_cursor">Controllo cursore con barra spaziatrice</string>
     <string name="typing_settings_spacebar_cursor_on">Scorri sulla barra spaziatrice per muovere il cursore</string>
     <string name="typing_settings_spacebar_cursor_off">Controllo cursore con barra spaziatrice disattivato</string>
+    <string name="typing_settings_cursor_speed">Velocità cursore</string>
     <string name="typing_settings_backspace_swipe">Cancellazione con scorrimento su backspace</string>
     <string name="typing_settings_backspace_swipe_on">Scorri a sinistra su backspace per cancellare la parola</string>
     <string name="typing_settings_backspace_swipe_off">Cancellazione con scorrimento su backspace disattivata</string>
@@ -134,6 +138,7 @@
     <string name="error_update_double_space_period">Aggiornamento punto con doppio spazio non riuscito</string>
     <string name="error_update_swipe">Aggiornamento digitazione a scorrimento non riuscito</string>
     <string name="error_update_spacebar_cursor">Aggiornamento controllo cursore con barra spaziatrice non riuscito</string>
+    <string name="error_update_cursor_speed">Aggiornamento velocità cursore non riuscito</string>
     <string name="error_update_backspace_swipe">Aggiornamento cancellazione con scorrimento su backspace non riuscito</string>
     <string name="error_update_spacebar_long_press">Aggiornamento punteggiatura con pressione lunga su barra spaziatrice non riuscito</string>
     <string name="error_update_long_press_duration">Aggiornamento durata pressione lunga non riuscito</string>

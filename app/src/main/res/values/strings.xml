@@ -43,6 +43,9 @@
     <string name="long_press_duration_short">Short</string>
     <string name="long_press_duration_medium">Medium</string>
     <string name="long_press_duration_long">Long</string>
+    <string name="cursor_speed_slow">Slow</string>
+    <string name="cursor_speed_medium">Medium</string>
+    <string name="cursor_speed_fast">Fast</string>
 
     <!-- Space Bar Size -->
     <string name="space_bar_size_compact">Compact</string>
@@ -91,6 +94,7 @@
     <string name="typing_settings_spacebar_cursor">Spacebar Cursor Control</string>
     <string name="typing_settings_spacebar_cursor_on">Swipe spacebar to move cursor</string>
     <string name="typing_settings_spacebar_cursor_off">Spacebar cursor control disabled</string>
+    <string name="typing_settings_cursor_speed">Cursor Speed</string>
     <string name="typing_settings_backspace_swipe">Backspace Swipe Delete</string>
     <string name="typing_settings_backspace_swipe_on">Swipe left on backspace to delete word</string>
     <string name="typing_settings_backspace_swipe_off">Backspace swipe delete disabled</string>
@@ -134,6 +138,7 @@
     <string name="error_update_double_space_period">Failed to update double-space period</string>
     <string name="error_update_swipe">Failed to update swipe typing</string>
     <string name="error_update_spacebar_cursor">Failed to update spacebar cursor control</string>
+    <string name="error_update_cursor_speed">Failed to update cursor speed</string>
     <string name="error_update_backspace_swipe">Failed to update backspace swipe delete</string>
     <string name="error_update_spacebar_long_press">Failed to update spacebar long press punctuation</string>
     <string name="error_update_long_press_duration">Failed to update long press duration</string>
