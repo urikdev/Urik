@@ -87,6 +87,7 @@ class SwipeKeyboardView
         private var gestureStartY = 0f
         private var gestureLastProcessedX = 0f
         private var gestureDensity = 1f
+        private var cursorSensitivity = com.urik.keyboard.KeyboardConstants.GestureConstants.SPACEBAR_CURSOR_SENSITIVITY_DP
 
         private var confirmationOverlay: FrameLayout? = null
         private var pendingRemovalSuggestion: String? = null
@@ -150,6 +151,7 @@ class SwipeKeyboardView
                 ),
             )
             gestureDensity = context.resources.displayMetrics.density
+            cursorSensitivity *= gestureDensity
         }
 
         private fun setupSwipeOverlay() {
@@ -467,6 +469,12 @@ class SwipeKeyboardView
         fun setOnBackspaceSwipeDeleteListener(listener: () -> Unit) {
             if (!isDestroyed) {
                 this.onBackspaceSwipeDelete = listener
+            }
+        }
+
+        fun setCursorSpeed(speed: com.urik.keyboard.settings.CursorSpeed) {
+            if (!isDestroyed) {
+                this.cursorSensitivity = speed.sensitivityDp * gestureDensity
             }
         }
 
@@ -1073,16 +1081,15 @@ class SwipeKeyboardView
 
             when (key.action) {
                 KeyboardKey.ActionType.SPACE -> {
-                    val sensitivity = com.urik.keyboard.KeyboardConstants.GestureConstants.SPACEBAR_CURSOR_SENSITIVITY_DP * gestureDensity
                     val totalDx = x - gestureStartX
 
-                    val positionsToMove = (totalDx / sensitivity).toInt()
-                    val lastPositionsMoved = ((gestureLastProcessedX - gestureStartX) / sensitivity).toInt()
+                    val positionsToMove = (totalDx / cursorSensitivity).toInt()
+                    val lastPositionsMoved = ((gestureLastProcessedX - gestureStartX) / cursorSensitivity).toInt()
                     val deltaPositions = positionsToMove - lastPositionsMoved
 
                     if (deltaPositions != 0) {
                         onSpacebarCursorMove?.invoke(deltaPositions)
-                        gestureLastProcessedX = gestureStartX + (positionsToMove * sensitivity)
+                        gestureLastProcessedX = gestureStartX + (positionsToMove * cursorSensitivity)
                     }
                 }
 

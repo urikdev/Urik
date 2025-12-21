@@ -42,6 +42,9 @@
     <string name="long_press_duration_short">Corto</string>
     <string name="long_press_duration_medium">Medio</string>
     <string name="long_press_duration_long">Largo</string>
+    <string name="cursor_speed_slow">Lenta</string>
+    <string name="cursor_speed_medium">Media</string>
+    <string name="cursor_speed_fast">Rápida</string>
 
     <!-- Space Bar Size -->
     <string name="space_bar_size_compact">Compacta</string>
@@ -213,12 +216,14 @@
     <string name="typing_settings_spacebar_cursor">Control del cursor con la barra espaciadora</string>
     <string name="typing_settings_spacebar_cursor_on">Deslice la barra espaciadora para mover el cursor</string>
     <string name="typing_settings_spacebar_cursor_off">Control del cursor con la barra espaciadora deshabilitado</string>
+    <string name="typing_settings_cursor_speed">Velocidad del cursor</string>
     <string name="typing_settings_backspace_swipe">Retroceso Deslizar Eliminar</string>
     <string name="typing_settings_backspace_swipe_on">Deslice hacia la izquierda al presionar la tecla de retroceso para eliminar una palabra</string>
     <string name="typing_settings_backspace_swipe_off">Retroceso Deslizar Eliminar deshabilitado</string>
     <string name="typing_settings_spacebar_long_press">Pulsación prolongada de la barra espaciadora para puntuación</string>
     <string name="typing_settings_spacebar_long_press_on">Pulsación prolongada de la barra espaciadora para puntuación</string>
     <string name="error_update_spacebar_cursor">No se pudo actualizar el control del cursor de la barra espaciadora.</string>
+    <string name="error_update_cursor_speed">Error al actualizar la velocidad del cursor</string>
     <string name="error_update_backspace_swipe">No se pudo actualizar la función de retroceso/deslizar/eliminar.</string>
     <string name="max_languages_reached">Se permiten máximo 3 idiomas</string>
 

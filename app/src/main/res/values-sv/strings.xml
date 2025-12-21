@@ -120,6 +120,9 @@
     <string name="long_press_duration_short">Kort</string>
     <string name="long_press_duration_medium">Medium</string>
     <string name="long_press_duration_long">Lång</string>
+    <string name="cursor_speed_slow">Långsam</string>
+    <string name="cursor_speed_medium">Medium</string>
+    <string name="cursor_speed_fast">Snabb</string>
     <string name="space_bar_size_compact">Kompakt</string>
     <string name="space_bar_size_standard">Standard</string>
     <string name="space_bar_size_wide">Bred</string>
@@ -158,12 +161,14 @@
     <string name="typing_settings_spacebar_cursor">Mellanslagsmarkörkontroll</string>
     <string name="typing_settings_spacebar_cursor_on">Drej mellanslagstangenten för att flytta markören</string>
     <string name="typing_settings_spacebar_cursor_off">Mellanslagsmarkörkontroll inaktiverad</string>
+    <string name="typing_settings_cursor_speed">Markörhastighet</string>
     <string name="typing_settings_backspace_swipe">Backstegssvep och radera</string>
     <string name="typing_settings_backspace_swipe_on">Drej åt vänster på backstegstangenten för att radera ord</string>
     <string name="typing_settings_backspace_swipe_off">Backstegssvep och radera inaktiverad</string>
     <string name="typing_settings_spacebar_long_press">Lång tryckning på mellanslagstangenten för interpunktion</string>
     <string name="typing_settings_spacebar_long_press_on">Lång tryckning på mellanslagstangenten för interpunktion</string>
     <string name="error_update_spacebar_cursor">Misslyckades med att uppdatera markörkontrollen för mellanslagstangenten</string>
+    <string name="error_update_cursor_speed">Misslyckades med att uppdatera markörhastighet</string>
     <string name="error_update_backspace_swipe">Misslyckades med att uppdatera backstegssvep och borttagning</string>
     <string name="max_languages_reached">Max 3 språk tillåtna</string>
 </resources>

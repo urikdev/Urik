@@ -54,6 +54,18 @@ enum class KeyLabelSize(
 }
 
 /**
+ * Cursor movement speed for spacebar swipe gesture.
+ */
+enum class CursorSpeed(
+    val displayNameRes: Int,
+    val sensitivityDp: Float,
+) {
+    SLOW(R.string.cursor_speed_slow, 40f),
+    MEDIUM(R.string.cursor_speed_medium, 25f),
+    FAST(R.string.cursor_speed_fast, 15f),
+}
+
+/**
  * Keyboard configuration and user preferences.
  *
  * Direct construction bypasses validation. SettingsRepository enforces validation
@@ -81,6 +93,7 @@ data class KeyboardSettings(
     val spaceBarSize: SpaceBarSize = SpaceBarSize.STANDARD,
     val keySize: KeySize = KeySize.MEDIUM,
     val keyLabelSize: KeyLabelSize = KeyLabelSize.MEDIUM,
+    val cursorSpeed: CursorSpeed = CursorSpeed.MEDIUM,
     val keyboardTheme: String = "default",
     val favoriteThemes: Set<String> = emptySet(),
 ) {

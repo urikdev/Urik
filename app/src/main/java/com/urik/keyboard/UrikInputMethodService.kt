@@ -1023,6 +1023,8 @@ class UrikInputMethodService :
                     layoutManager.updateSpaceBarSize(newSettings.spaceBarSize)
                     layoutManager.updateKeyLabelSize(newSettings.keyLabelSize)
 
+                    swipeKeyboardView?.setCursorSpeed(newSettings.cursorSpeed)
+
                     layoutManager.updateHapticSettings(
                         newSettings.hapticFeedback,
                         newSettings.vibrationStrength,
