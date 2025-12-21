@@ -691,7 +691,9 @@ class UrikInputMethodService :
 
     override fun onCreateInputView(): View? {
         try {
-            lifecycleRegistry.currentState = Lifecycle.State.RESUMED
+            if (lifecycle.currentState != Lifecycle.State.DESTROYED) {
+                lifecycleRegistry.currentState = Lifecycle.State.RESUMED
+            }
 
             val actualWindow = window?.window
             if (actualWindow != null) {
@@ -1095,6 +1097,10 @@ class UrikInputMethodService :
      */
     private fun updateSwipeKeyboard() {
         try {
+            if (!lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
+                return
+            }
+
             val state = viewModel.state.value
             val layout = viewModel.layout.value
 
@@ -1157,15 +1163,17 @@ class UrikInputMethodService :
         if (serviceJob.isCancelled) {
             serviceJob = SupervisorJob()
             serviceScope = CoroutineScope(Dispatchers.Main + serviceJob)
+        }
 
-            observerJobs.forEach { it.cancel() }
-            observerJobs.clear()
-
+        if (observerJobs.isEmpty()) {
             observeViewModel()
         }
 
         super.onStartInputView(info, restarting)
-        lifecycleRegistry.currentState = Lifecycle.State.RESUMED
+
+        if (lifecycle.currentState != Lifecycle.State.DESTROYED) {
+            lifecycleRegistry.currentState = Lifecycle.State.RESUMED
+        }
 
         isSecureField = SecureFieldDetector.isSecure(info)
         currentInputAction = ActionDetector.detectAction(info)
@@ -2483,8 +2491,15 @@ class UrikInputMethodService :
     override fun onFinishInputView(finishingInput: Boolean) {
         super.onFinishInputView(finishingInput)
 
+        observerJobs.forEach { it.cancel() }
+        observerJobs.clear()
+
         suggestionDebounceJob?.cancel()
         swipeKeyboardView?.hideEmojiPicker()
+
+        if (lifecycle.currentState != Lifecycle.State.DESTROYED) {
+            lifecycleRegistry.currentState = Lifecycle.State.STARTED
+        }
 
         if (displayBuffer.isNotEmpty() && !isSecureField) {
             val actualTextBefore = safeGetTextBeforeCursor(1)
@@ -2512,8 +2527,6 @@ class UrikInputMethodService :
         } catch (_: Exception) {
             coordinateStateClear()
         }
-
-        lifecycleRegistry.currentState = Lifecycle.State.STARTED
     }
 
     override fun onStartInput(
@@ -2577,7 +2590,9 @@ class UrikInputMethodService :
 
         coordinateStateClear()
 
-        lifecycleRegistry.currentState = Lifecycle.State.CREATED
+        if (lifecycle.currentState != Lifecycle.State.DESTROYED) {
+            lifecycleRegistry.currentState = Lifecycle.State.CREATED
+        }
     }
 
     override fun onUpdateSelection(
