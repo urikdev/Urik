@@ -422,27 +422,11 @@ class UrikInputMethodService :
                 }
 
                 currentInputConnection?.commitText(" ", 1)
-                val cursorPos =
-                    currentInputConnection
-                        ?.getTextBeforeCursor(
-                            KeyboardConstants.TextProcessingConstants.MAX_CURSOR_POSITION_CHARS,
-                            0,
-                        )?.length
-                        ?: 0
-                currentInputConnection?.setSelection(cursorPos, cursorPos)
                 coordinateStateClear()
             } catch (_: Exception) {
                 autoCapitalizePronounI()
                 coordinateWordCompletion()
                 currentInputConnection?.commitText(" ", 1)
-                val cursorPos =
-                    currentInputConnection
-                        ?.getTextBeforeCursor(
-                            KeyboardConstants.TextProcessingConstants.MAX_CURSOR_POSITION_CHARS,
-                            0,
-                        )?.length
-                        ?: 0
-                currentInputConnection?.setSelection(cursorPos, cursorPos)
                 coordinateStateClear()
             } finally {
                 currentInputConnection?.endBatchEdit()
@@ -2333,19 +2317,13 @@ class UrikInputMethodService :
                         if (!isUrlOrEmail) {
                             val isValid = textInputProcessor.validateWord(wordState.normalizedBuffer)
                             if (isValid) {
+                                isActivelyEditing = true
                                 currentInputConnection?.beginBatchEdit()
                                 try {
                                     autoCapitalizePronounI()
+                                    currentInputConnection?.finishComposingText()
                                     coordinateStateClear()
                                     currentInputConnection?.commitText(" ", 1)
-                                    val cursorPos =
-                                        currentInputConnection
-                                            ?.getTextBeforeCursor(
-                                                KeyboardConstants.TextProcessingConstants.MAX_CURSOR_POSITION_CHARS,
-                                                0,
-                                            )?.length
-                                            ?: 0
-                                    currentInputConnection?.setSelection(cursorPos, cursorPos)
 
                                     val textBefore =
                                         safeGetTextBeforeCursor(50)
@@ -2382,14 +2360,6 @@ class UrikInputMethodService :
                     autoCapitalizePronounI()
                     coordinateWordCompletion()
                     currentInputConnection?.commitText(" ", 1)
-                    val cursorPos =
-                        currentInputConnection
-                            ?.getTextBeforeCursor(
-                                KeyboardConstants.TextProcessingConstants.MAX_CURSOR_POSITION_CHARS,
-                                0,
-                            )?.length
-                            ?: 0
-                    currentInputConnection?.setSelection(cursorPos, cursorPos)
 
                     val textBefore = safeGetTextBeforeCursor(50)
                     viewModel.checkAndApplyAutoCapitalization(textBefore)
@@ -2402,14 +2372,6 @@ class UrikInputMethodService :
                     autoCapitalizePronounI()
                     coordinateWordCompletion()
                     currentInputConnection?.commitText(" ", 1)
-                    val cursorPos =
-                        currentInputConnection
-                            ?.getTextBeforeCursor(
-                                KeyboardConstants.TextProcessingConstants.MAX_CURSOR_POSITION_CHARS,
-                                0,
-                            )?.length
-                            ?: 0
-                    currentInputConnection?.setSelection(cursorPos, cursorPos)
 
                     val textBefore = safeGetTextBeforeCursor(50)
                     viewModel.checkAndApplyAutoCapitalization(textBefore)
@@ -2667,6 +2629,10 @@ class UrikInputMethodService :
         if (!hasComposingText && !isActivelyEditing && newSelStart == newSelEnd) {
             val textBefore = safeGetTextBeforeCursor(50)
             val textAfter = safeGetTextAfterCursor(50)
+
+            if (textBefore.isNotEmpty() && textBefore.last().isWhitespace()) {
+                return
+            }
 
             val wordBeforeInfo = if (textBefore.isNotEmpty()) extractWordBeforeCursor(textBefore) else null
 
