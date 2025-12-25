@@ -758,7 +758,13 @@ class KeyboardLayoutManager(
         when (key) {
             is KeyboardKey.Character -> {
                 when {
-                    key.type == KeyboardKey.KeyType.LETTER && shouldCapitalize(state) -> key.value.uppercase()
+                    key.type == KeyboardKey.KeyType.LETTER && shouldCapitalize(state) -> {
+                        if (key.value == "ß") {
+                            "ß"
+                        } else {
+                            key.value.uppercase()
+                        }
+                    }
                     else -> key.value
                 }
             }
@@ -781,7 +787,13 @@ class KeyboardLayoutManager(
             is KeyboardKey.Character -> {
                 val char =
                     when {
-                        key.type == KeyboardKey.KeyType.LETTER && shouldCapitalize(state) -> key.value.uppercase()
+                        key.type == KeyboardKey.KeyType.LETTER && shouldCapitalize(state) -> {
+                            if (key.value == "ß") {
+                                "ß"
+                            } else {
+                                key.value.uppercase()
+                            }
+                        }
                         else -> key.value
                     }
                 context.getString(R.string.key_character_description, char)
