@@ -70,6 +70,7 @@ class HapticFeedbackFragment : PreferenceFragmentCompat() {
         hapticPref =
             SwitchPreferenceCompat(context).apply {
                 key = "haptic_feedback"
+                isPersistent = false
                 title = resources.getString(R.string.feedback_settings_haptic_feedback)
                 summaryOn = resources.getString(R.string.feedback_settings_haptic_on)
                 summaryOff = resources.getString(R.string.feedback_settings_haptic_off)
@@ -79,6 +80,7 @@ class HapticFeedbackFragment : PreferenceFragmentCompat() {
         vibrationPref =
             SeekBarPreference(context).apply {
                 key = "vibration_strength"
+                isPersistent = false
                 title = resources.getString(R.string.feedback_settings_vibration_strength)
                 min = 1
                 max = 255

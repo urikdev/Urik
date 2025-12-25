@@ -63,6 +63,7 @@ class AutoCorrectionFragment : PreferenceFragmentCompat() {
         spellCheckPref =
             SwitchPreferenceCompat(context).apply {
                 key = "spell_check_enabled"
+                isPersistent = false
                 title = resources.getString(R.string.autocorrect_settings_spell_check)
                 summaryOn = resources.getString(R.string.autocorrect_settings_spell_check_on)
                 summaryOff = resources.getString(R.string.autocorrect_settings_spell_check_off)
@@ -72,6 +73,7 @@ class AutoCorrectionFragment : PreferenceFragmentCompat() {
         suggestionsPref =
             SwitchPreferenceCompat(context).apply {
                 key = "show_suggestions"
+                isPersistent = false
                 title = resources.getString(R.string.autocorrect_settings_show_suggestions)
                 summaryOn = resources.getString(R.string.autocorrect_settings_suggestions_on)
                 summaryOff = resources.getString(R.string.autocorrect_settings_suggestions_off)
@@ -81,6 +83,7 @@ class AutoCorrectionFragment : PreferenceFragmentCompat() {
         countPref =
             ListPreference(context).apply {
                 key = "suggestion_count"
+                isPersistent = false
                 title = resources.getString(R.string.autocorrect_settings_suggestion_count)
                 entries = arrayOf("1", "2", "3")
                 entryValues = arrayOf("1", "2", "3")
@@ -91,6 +94,7 @@ class AutoCorrectionFragment : PreferenceFragmentCompat() {
         learnPref =
             SwitchPreferenceCompat(context).apply {
                 key = "learn_new_words"
+                isPersistent = false
                 title = resources.getString(R.string.autocorrect_settings_learn_new_words)
                 summaryOn = resources.getString(R.string.autocorrect_settings_learn_new_words_on)
                 summaryOff = resources.getString(R.string.autocorrect_settings_learn_new_words_off)

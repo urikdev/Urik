@@ -111,7 +111,13 @@ class SettingsRepository
                             preferences[PreferenceKeys.LONG_PRESS_DURATION]?.let {
                                 try {
                                     LongPressDuration.valueOf(it)
-                                } catch (_: IllegalArgumentException) {
+                                } catch (e: IllegalArgumentException) {
+                                    ErrorLogger.logException(
+                                        component = "SettingsRepository",
+                                        severity = ErrorLogger.Severity.HIGH,
+                                        exception = e,
+                                        context = mapOf("key" to "LONG_PRESS_DURATION", "value" to it),
+                                    )
                                     LongPressDuration.MEDIUM
                                 }
                             } ?: LongPressDuration.MEDIUM,
@@ -120,7 +126,13 @@ class SettingsRepository
                             preferences[PreferenceKeys.SPACE_BAR_SIZE]?.let {
                                 try {
                                     SpaceBarSize.valueOf(it)
-                                } catch (_: IllegalArgumentException) {
+                                } catch (e: IllegalArgumentException) {
+                                    ErrorLogger.logException(
+                                        component = "SettingsRepository",
+                                        severity = ErrorLogger.Severity.HIGH,
+                                        exception = e,
+                                        context = mapOf("key" to "SPACE_BAR_SIZE", "value" to it),
+                                    )
                                     SpaceBarSize.STANDARD
                                 }
                             } ?: SpaceBarSize.STANDARD,
@@ -128,7 +140,13 @@ class SettingsRepository
                             preferences[PreferenceKeys.KEY_SIZE]?.let {
                                 try {
                                     KeySize.valueOf(it)
-                                } catch (_: IllegalArgumentException) {
+                                } catch (e: IllegalArgumentException) {
+                                    ErrorLogger.logException(
+                                        component = "SettingsRepository",
+                                        severity = ErrorLogger.Severity.HIGH,
+                                        exception = e,
+                                        context = mapOf("key" to "KEY_SIZE", "value" to it),
+                                    )
                                     KeySize.MEDIUM
                                 }
                             } ?: KeySize.MEDIUM,
@@ -136,7 +154,13 @@ class SettingsRepository
                             preferences[PreferenceKeys.KEY_LABEL_SIZE]?.let {
                                 try {
                                     KeyLabelSize.valueOf(it)
-                                } catch (_: IllegalArgumentException) {
+                                } catch (e: IllegalArgumentException) {
+                                    ErrorLogger.logException(
+                                        component = "SettingsRepository",
+                                        severity = ErrorLogger.Severity.HIGH,
+                                        exception = e,
+                                        context = mapOf("key" to "KEY_LABEL_SIZE", "value" to it),
+                                    )
                                     KeyLabelSize.MEDIUM
                                 }
                             } ?: KeyLabelSize.MEDIUM,
@@ -144,14 +168,26 @@ class SettingsRepository
                             preferences[PreferenceKeys.CURSOR_SPEED]?.let {
                                 try {
                                     CursorSpeed.valueOf(it)
-                                } catch (_: IllegalArgumentException) {
+                                } catch (e: IllegalArgumentException) {
+                                    ErrorLogger.logException(
+                                        component = "SettingsRepository",
+                                        severity = ErrorLogger.Severity.HIGH,
+                                        exception = e,
+                                        context = mapOf("key" to "CURSOR_SPEED", "value" to it),
+                                    )
                                     CursorSpeed.MEDIUM
                                 }
                             } ?: CursorSpeed.MEDIUM,
                         keyboardTheme = preferences[PreferenceKeys.KEYBOARD_THEME] ?: "default",
                         favoriteThemes = preferences[PreferenceKeys.FAVORITE_THEMES] ?: emptySet(),
                     ).validated()
-                }.catch { _ ->
+                }.catch { e ->
+                    ErrorLogger.logException(
+                        component = "SettingsRepository",
+                        severity = ErrorLogger.Severity.HIGH,
+                        exception = e,
+                        context = mapOf("operation" to "loadSettings"),
+                    )
                     emit(getDefaultSettings())
                 }
 

@@ -68,6 +68,7 @@ class TypingBehaviorFragment : PreferenceFragmentCompat() {
         doubleSpacePref =
             SwitchPreferenceCompat(context).apply {
                 key = "double_space_period"
+                isPersistent = false
                 title = resources.getString(R.string.typing_settings_double_space_period)
                 summaryOn = resources.getString(R.string.typing_settings_double_space_on)
                 summaryOff = resources.getString(R.string.typing_settings_double_space_off)
@@ -77,6 +78,7 @@ class TypingBehaviorFragment : PreferenceFragmentCompat() {
         swipePref =
             SwitchPreferenceCompat(context).apply {
                 key = "swipe_enabled"
+                isPersistent = false
                 title = resources.getString(R.string.typing_settings_swipe_enabled)
                 summaryOn = resources.getString(R.string.typing_settings_swipe_on)
                 summaryOff = resources.getString(R.string.typing_settings_swipe_off)
@@ -86,6 +88,7 @@ class TypingBehaviorFragment : PreferenceFragmentCompat() {
         spacebarCursorPref =
             SwitchPreferenceCompat(context).apply {
                 key = "spacebar_cursor_control"
+                isPersistent = false
                 title = resources.getString(R.string.typing_settings_spacebar_cursor)
                 summaryOn = resources.getString(R.string.typing_settings_spacebar_cursor_on)
                 summaryOff = resources.getString(R.string.typing_settings_spacebar_cursor_off)
@@ -95,6 +98,7 @@ class TypingBehaviorFragment : PreferenceFragmentCompat() {
         cursorSpeedPref =
             ListPreference(context).apply {
                 key = "cursor_speed"
+                isPersistent = false
                 title = resources.getString(R.string.typing_settings_cursor_speed)
                 entries = CursorSpeed.entries.map { resources.getString(it.displayNameRes) }.toTypedArray()
                 entryValues = CursorSpeed.entries.map { it.name }.toTypedArray()
@@ -105,6 +109,7 @@ class TypingBehaviorFragment : PreferenceFragmentCompat() {
         backspaceSwipePref =
             SwitchPreferenceCompat(context).apply {
                 key = "backspace_swipe_delete"
+                isPersistent = false
                 title = resources.getString(R.string.typing_settings_backspace_swipe)
                 summaryOn = resources.getString(R.string.typing_settings_backspace_swipe_on)
                 summaryOff = resources.getString(R.string.typing_settings_backspace_swipe_off)
@@ -114,6 +119,7 @@ class TypingBehaviorFragment : PreferenceFragmentCompat() {
         spacebarLongPressPref =
             SwitchPreferenceCompat(context).apply {
                 key = "spacebar_long_press_punctuation"
+                isPersistent = false
                 title = resources.getString(R.string.typing_settings_spacebar_long_press)
                 summaryOn = resources.getString(R.string.typing_settings_spacebar_long_press_on)
                 summaryOff = resources.getString(R.string.typing_settings_spacebar_long_press_off)
@@ -123,6 +129,7 @@ class TypingBehaviorFragment : PreferenceFragmentCompat() {
         longPressPref =
             ListPreference(context).apply {
                 key = "long_press_duration"
+                isPersistent = false
                 title = resources.getString(R.string.typing_settings_long_press_duration)
                 entries = LongPressDuration.entries.map { resources.getString(it.displayNameRes) }.toTypedArray()
                 entryValues = LongPressDuration.entries.map { it.name }.toTypedArray()
