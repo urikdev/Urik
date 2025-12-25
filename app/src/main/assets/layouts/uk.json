@@ -46,7 +46,6 @@
         ],
         [
           {"type": "action", "action": "shift"},
-          {"type": "character", "char": "ґ", "keyType": "letter"},
           {"type": "character", "char": "я", "keyType": "letter"},
           {"type": "character", "char": "ч", "keyType": "letter"},
           {"type": "character", "char": "с", "keyType": "letter"},
