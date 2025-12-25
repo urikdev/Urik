@@ -700,6 +700,7 @@ class UrikInputMethodService :
                 val layoutParams = actualWindow.attributes
                 layoutParams.gravity = Gravity.BOTTOM
                 actualWindow.attributes = layoutParams
+                actualWindow.navigationBarColor = themeManager.currentTheme.value.colors.keyboardBackground
             }
 
             val keyboardView = createSwipeKeyboardView() ?: return null
@@ -1086,6 +1087,7 @@ class UrikInputMethodService :
             serviceScope.launch {
                 themeManager.currentTheme.collect { theme ->
                     keyboardRootContainer?.setBackgroundColor(theme.colors.keyboardBackground)
+                    window?.window?.navigationBarColor = theme.colors.keyboardBackground
                     updateSwipeKeyboard()
                 }
             },
