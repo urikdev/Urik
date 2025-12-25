@@ -48,6 +48,7 @@ class PrivacyDataFragment : PreferenceFragmentCompat() {
         clipboardPref =
             SwitchPreferenceCompat(context).apply {
                 key = "clipboard_enabled"
+                isPersistent = false
                 title = resources.getString(R.string.privacy_settings_clipboard_history)
                 summaryOn = resources.getString(R.string.privacy_settings_clipboard_history_on)
                 summaryOff = resources.getString(R.string.privacy_settings_clipboard_history_off)

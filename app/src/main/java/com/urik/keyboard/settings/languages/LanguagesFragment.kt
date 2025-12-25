@@ -47,6 +47,7 @@ class LanguagesFragment : PreferenceFragmentCompat() {
             val radioButton =
                 CheckBoxPreference(context).apply {
                     key = "language_$languageTag"
+                    isPersistent = false
                     title = languageDisplayNames[languageTag]
                 }
             radioButtons[languageTag] = radioButton

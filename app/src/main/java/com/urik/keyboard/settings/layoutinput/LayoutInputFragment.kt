@@ -62,6 +62,7 @@ class LayoutInputFragment : PreferenceFragmentCompat() {
         numberRowPref =
             SwitchPreferenceCompat(context).apply {
                 key = "show_number_row"
+                isPersistent = false
                 title = resources.getString(R.string.layout_settings_show_number_row)
                 summaryOn = resources.getString(R.string.layout_settings_number_row_on)
                 summaryOff = resources.getString(R.string.layout_settings_number_row_off)
@@ -71,6 +72,7 @@ class LayoutInputFragment : PreferenceFragmentCompat() {
         spaceBarPref =
             ListPreference(context).apply {
                 key = "space_bar_size"
+                isPersistent = false
                 title = resources.getString(R.string.layout_settings_space_bar_size)
                 entries = SpaceBarSize.entries.map { resources.getString(it.displayNameRes) }.toTypedArray()
                 entryValues = SpaceBarSize.entries.map { it.name }.toTypedArray()
