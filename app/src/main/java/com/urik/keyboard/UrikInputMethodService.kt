@@ -1,16 +1,26 @@
 package com.urik.keyboard
 
+import android.annotation.SuppressLint
 import android.graphics.Color
 import android.inputmethodservice.InputMethodService
+import android.os.Build
 import android.text.SpannableString
 import android.text.Spanned
 import android.text.style.BackgroundColorSpan
 import android.text.style.ForegroundColorSpan
+import android.util.Size
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InlineSuggestionsRequest
+import android.view.inputmethod.InlineSuggestionsResponse
 import android.widget.LinearLayout
+import android.widget.inline.InlinePresentationSpec
+import androidx.autofill.inline.UiVersions
+import androidx.autofill.inline.common.TextViewStyle
+import androidx.autofill.inline.common.ViewStyle
+import androidx.autofill.inline.v1.InlineSuggestionUi
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.Lifecycle
@@ -2681,6 +2691,120 @@ class UrikInputMethodService :
             updateInputViewShown()
         }
         lastKeyboardConfig = currentKeyboard
+    }
+
+    /**
+     * Creates inline autofill suggestion request for password managers (Android 11+).
+     *
+     * Called by Android when autofill service needs to display suggestions inline.
+     * Returns specs defining visual constraints for autofill chips.
+     *
+     * @param uiExtras Bundle with UI extras from system
+     * @return InlineSuggestionsRequest with styling specs, or null if SDK < R
+     */
+    @Suppress("NewApi")
+    @SuppressLint("RestrictedApi")
+    override fun onCreateInlineSuggestionsRequest(uiExtras: android.os.Bundle): InlineSuggestionsRequest? {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) return null
+
+        val theme = themeManager.currentTheme.value
+        val density = resources.displayMetrics.density
+
+        val keyHeight = resources.getDimensionPixelSize(R.dimen.key_height)
+        val suggestionTextSize = (keyHeight * 0.30f / density).coerceIn(13f, 16f)
+
+        val chipPadding = (8 * density).toInt()
+
+        val stylesBuilder = UiVersions.newStylesBuilder()
+        val style =
+            InlineSuggestionUi
+                .newStyleBuilder()
+                .setSingleIconChipStyle(
+                    ViewStyle
+                        .Builder()
+                        .setBackgroundColor(theme.colors.suggestionBarBackground)
+                        .setPadding(0, 0, 0, 0)
+                        .build(),
+                ).setChipStyle(
+                    ViewStyle
+                        .Builder()
+                        .setBackgroundColor(theme.colors.suggestionBarBackground)
+                        .setPadding(chipPadding, 0, chipPadding, 0)
+                        .build(),
+                ).setTitleStyle(
+                    TextViewStyle
+                        .Builder()
+                        .setTextColor(theme.colors.suggestionText)
+                        .setTextSize(suggestionTextSize)
+                        .build(),
+                ).setSubtitleStyle(
+                    TextViewStyle
+                        .Builder()
+                        .setTextColor(theme.colors.suggestionText)
+                        .setTextSize(suggestionTextSize * 0.9f)
+                        .build(),
+                ).build()
+
+        stylesBuilder.addStyle(style)
+        val stylesBundle = stylesBuilder.build()
+
+        val specs = mutableListOf<InlinePresentationSpec>()
+        for (i in 0 until 3) {
+            val minSize = Size((80 * density).toInt(), (40 * density).toInt())
+            val maxSize = Size((400 * density).toInt(), (40 * density).toInt())
+
+            val spec =
+                InlinePresentationSpec
+                    .Builder(minSize, maxSize)
+                    .setStyle(stylesBundle)
+                    .build()
+            specs.add(spec)
+        }
+
+        return InlineSuggestionsRequest
+            .Builder(specs)
+            .setMaxSuggestionCount(3)
+            .build()
+    }
+
+    /**
+     * Receives inline autofill suggestions from password managers (Android 11+).
+     *
+     * Called when autofill service has suggestions ready. Inflates suggestion views
+     * and displays them in suggestion bar, replacing spell check suggestions.
+     *
+     * @param response InlineSuggestionsResponse containing autofill suggestions
+     * @return true if handled, false otherwise
+     */
+    @Suppress("NewApi")
+    override fun onInlineSuggestionsResponse(response: InlineSuggestionsResponse): Boolean {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) return false
+
+        val suggestions = response.inlineSuggestions
+
+        if (suggestions.isEmpty()) {
+            serviceScope.launch(Dispatchers.Main) {
+                swipeKeyboardView?.clearSuggestions()
+            }
+            return true
+        }
+
+        val views = mutableListOf<View>()
+        val density = resources.displayMetrics.density
+        val size = Size((150 * density).toInt(), (40 * density).toInt())
+
+        suggestions.take(3).forEach { suggestion ->
+            suggestion.inflate(this, size, mainExecutor) { view ->
+                view?.let { views.add(it) }
+
+                if (views.size == minOf(suggestions.size, 3)) {
+                    serviceScope.launch(Dispatchers.Main) {
+                        swipeKeyboardView?.updateInlineAutofillSuggestions(views, true)
+                    }
+                }
+            }
+        }
+        return true
     }
 
     override fun onDestroy() {

@@ -183,6 +183,7 @@
     <string name="action_previous_description">انتقال به فیلد قبلی</string>
 
     <string name="action_emoji">ایموجی</string>
+    <string name="autofill_indicator_description">پیشنهادات مدیر رمز عبور در دسترس است</string>
 
     <!-- Theme Picker Accessibility -->
     <string name="theme_description">تم %1$s</string>
