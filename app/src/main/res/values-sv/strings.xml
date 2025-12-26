@@ -7,6 +7,16 @@
     <string name="open_settings">Öppna inställningar</string>
     <string name="error_opening_settings">Det går inte att öppna inställningarna</string>
     <string name="settings_title">Tangentbordsinställningar</string>
+    <string name="about_title">Om</string>
+    <string name="about_button">Om</string>
+    <string name="about_version">Version</string>
+    <string name="about_copyright">Copyright © 2025 Urik Development</string>
+    <string name="about_license">Licens: GNU GPL v3.0</string>
+    <string name="about_source_code">Källkod</string>
+    <string name="about_release_notes">Versionsanteckningar</string>
+    <string name="about_report_bug">Rapportera ett fel</string>
+    <string name="about_privacy_policy">Integritetspolicy</string>
+    <string name="about_support">Stöd utvecklingen</string>
     <string name="autocorrect_settings_title">Inställningar för automatisk korrigering</string>
     <string name="autocorrect_settings_description">Stavning och förslag</string>
     <string name="language_settings_title">Språkinställningar</string>

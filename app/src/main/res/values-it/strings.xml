@@ -11,6 +11,16 @@
 
     <!-- Settings Activity -->
     <string name="settings_title">Impostazioni tastiera</string>
+    <string name="about_title">Informazioni</string>
+    <string name="about_button">Informazioni</string>
+    <string name="about_version">Versione</string>
+    <string name="about_copyright">Copyright © 2025 Urik Development</string>
+    <string name="about_license">Licenza: GNU GPL v3.0</string>
+    <string name="about_source_code">Codice sorgente</string>
+    <string name="about_release_notes">Note di rilascio</string>
+    <string name="about_report_bug">Segnala un bug</string>
+    <string name="about_privacy_policy">Informativa sulla privacy</string>
+    <string name="about_support">Supporta lo sviluppo</string>
     <string name="autocorrect_settings_title">Impostazioni correzione automatica</string>
     <string name="autocorrect_settings_description">Ortografia e suggerimenti</string>
     <string name="language_settings_title">Impostazioni lingua</string>

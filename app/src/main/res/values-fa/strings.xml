@@ -11,6 +11,16 @@
 
     <!-- Settings Activity -->
     <string name="settings_title">تنظیمات کیبورد</string>
+    <string name="about_title">درباره</string>
+    <string name="about_button">درباره</string>
+    <string name="about_version">نسخه</string>
+    <string name="about_copyright">حق نسخه‌برداری © 2025 Urik Development</string>
+    <string name="about_license">مجوز: GNU GPL v3.0</string>
+    <string name="about_source_code">کد منبع</string>
+    <string name="about_release_notes">یادداشت‌های انتشار</string>
+    <string name="about_report_bug">گزارش اشکال</string>
+    <string name="about_privacy_policy">سیاست حفظ حریم خصوصی</string>
+    <string name="about_support">حمایت از توسعه</string>
     <string name="autocorrect_settings_title">تنظیمات تصحیح خودکار</string>
     <string name="autocorrect_settings_description">املاء و پیشنهادات</string>
     <string name="language_settings_title">تنظیمات زبان</string>
