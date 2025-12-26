@@ -167,6 +167,7 @@
     <string name="action_previous_description">Перейти до попереднього поля</string>
 
     <string name="action_emoji">Емодзі</string>
+    <string name="autofill_indicator_description">Доступні пропозиції менеджера паролів</string>
 
     <!-- Theme Picker Accessibility -->
     <string name="theme_description">Тема %1$s</string>

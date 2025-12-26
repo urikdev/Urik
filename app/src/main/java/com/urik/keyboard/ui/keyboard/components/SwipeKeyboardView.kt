@@ -96,6 +96,9 @@ class SwipeKeyboardView
         private var emojiPickerContainer: LinearLayout? = null
         private var isShowingEmojiPicker = false
 
+        private var autofillIndicatorIcon: TextView? = null
+        private var isShowingAutofillSuggestions = false
+
         private var cachedLocationArray = IntArray(2)
         private var cachedParentLocationArray = IntArray(2)
 
@@ -498,13 +501,14 @@ class SwipeKeyboardView
                 (bar.parent as? ViewGroup)?.removeView(bar)
             }
 
+            val suggestionBarHeight = context.resources.getDimensionPixelSize(R.dimen.minimum_touch_target)
             keyboardView.addView(
                 suggestionBar,
                 0,
                 LinearLayout
                     .LayoutParams(
                         LinearLayout.LayoutParams.MATCH_PARENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                        suggestionBarHeight,
                     ).apply {
                         setMargins(0, 0, 0, 8)
                     },
@@ -525,6 +529,8 @@ class SwipeKeyboardView
 
         private fun updateSuggestionBarContent(suggestions: List<String> = emptyList()) {
             if (isDestroyed) return
+
+            if (isShowingAutofillSuggestions) return
 
             suggestionBar?.let { bar ->
                 val emojiBtn = emojiButton
@@ -786,8 +792,120 @@ class SwipeKeyboardView
          */
         fun clearSuggestions() {
             if (isDestroyed) return
+            isShowingAutofillSuggestions = false
+            autofillIndicatorIcon?.visibility = View.GONE
+            emojiButton?.visibility = View.VISIBLE
             updateSuggestionBarContent(emptyList())
             safeMappingPost()
+        }
+
+        fun updateInlineAutofillSuggestions(
+            views: List<View>,
+            showIndicator: Boolean,
+        ) {
+            if (isDestroyed) return
+
+            suggestionBar?.let { bar ->
+                returnSuggestionViewsToPool()
+                bar.removeAllViews()
+
+                if (views.isEmpty()) {
+                    isShowingAutofillSuggestions = false
+                    autofillIndicatorIcon?.visibility = View.GONE
+                    emojiButton?.visibility = View.VISIBLE
+                    updateSuggestionBarContent(emptyList())
+                    return
+                }
+
+                isShowingAutofillSuggestions = true
+
+                emojiButton?.visibility = View.GONE
+
+                val indicator = getOrCreateAutofillIndicator()
+                indicator.visibility = if (showIndicator) View.VISIBLE else View.GONE
+                bar.addView(indicator)
+
+                for (i in views.indices) {
+                    val view = views[i]
+                    val layoutParams =
+                        LinearLayout.LayoutParams(
+                            0,
+                            LinearLayout.LayoutParams.MATCH_PARENT,
+                            1f,
+                        )
+
+                    bar.addView(view, layoutParams)
+
+                    if (i < views.size - 1) {
+                        val divider = getOrCreateDividerView()
+                        divider.setBackgroundColor(
+                            themeManager!!
+                                .currentTheme.value.colors.keyBorder,
+                        )
+
+                        val dividerParams =
+                            LinearLayout
+                                .LayoutParams(
+                                    (1 * context.resources.displayMetrics.density).toInt(),
+                                    LinearLayout.LayoutParams.MATCH_PARENT,
+                                ).apply {
+                                    val margin = context.resources.getDimensionPixelSize(R.dimen.key_margin_horizontal) / 2
+                                    marginStart = margin
+                                    marginEnd = margin
+                                }
+
+                        activeDividerViews.add(divider)
+                        bar.addView(divider, dividerParams)
+                    }
+                }
+
+                emojiButton?.let { btn ->
+                    if (btn.parent != null) {
+                        (btn.parent as? ViewGroup)?.removeView(btn)
+                    }
+                    bar.addView(btn)
+                }
+
+                bar.alpha = 0f
+                bar
+                    .animate()
+                    .alpha(1f)
+                    .setDuration(150)
+                    .start()
+            }
+        }
+
+        private fun getOrCreateAutofillIndicator(): TextView {
+            autofillIndicatorIcon?.let { return it }
+
+            return TextView(context).apply {
+                val keyDrawable = ContextCompat.getDrawable(context, R.drawable.ic_key)
+                keyDrawable?.setTint(
+                    themeManager!!
+                        .currentTheme.value.colors.keyTextAction,
+                )
+
+                setCompoundDrawablesRelativeWithIntrinsicBounds(keyDrawable, null, null, null)
+
+                val suggestionTextSize = calculateResponsiveSuggestionTextSize()
+                val padding = (suggestionTextSize * context.resources.displayMetrics.density * 0.6f).toInt()
+                setPadding(padding, padding, padding, padding)
+
+                contentDescription = context.getString(R.string.autofill_indicator_description)
+
+                layoutParams =
+                    LinearLayout
+                        .LayoutParams(
+                            LinearLayout.LayoutParams.WRAP_CONTENT,
+                            LinearLayout.LayoutParams.WRAP_CONTENT,
+                            0f,
+                        ).apply {
+                            gravity = Gravity.CENTER_VERTICAL
+                            marginEnd = (4 * context.resources.displayMetrics.density).toInt()
+                        }
+
+                autofillIndicatorIcon = this
+            }
         }
 
         private fun findKeyboardView(): ViewGroup? {

@@ -166,6 +166,7 @@
     <string name="action_previous_description">Přesunout do předchozího pole</string>
 
     <string name="action_emoji">Emoji</string>
+    <string name="autofill_indicator_description">Dostupné návrhy správce hesel</string>
 
     <!-- Theme Picker Accessibility -->
     <string name="theme_description">%1$s téma</string>
