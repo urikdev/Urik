@@ -41,6 +41,12 @@
             android:label="@string/licenses_title" />
 
         <activity
+            android:name=".settings.AboutActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Urik.NoActionBar"
+            android:label="@string/about_title" />
+
+        <activity
             android:name=".settings.theme.ThemePickerActivity"
             android:exported="false"
             android:theme="@style/Theme.Urik.NoActionBar"

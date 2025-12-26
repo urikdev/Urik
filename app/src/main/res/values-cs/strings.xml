@@ -10,6 +10,16 @@
 
     <!-- Settings Activity -->
     <string name="settings_title">Nastavení klávesnice</string>
+    <string name="about_title">O aplikaci</string>
+    <string name="about_button">O aplikaci</string>
+    <string name="about_version">Verze</string>
+    <string name="about_copyright">Copyright © 2025 Urik Development</string>
+    <string name="about_license">Licence: GNU GPL v3.0</string>
+    <string name="about_source_code">Zdrojový kód</string>
+    <string name="about_release_notes">Poznámky k vydání</string>
+    <string name="about_report_bug">Nahlásit chybu</string>
+    <string name="about_privacy_policy">Zásady ochrany osobních údajů</string>
+    <string name="about_support">Podpořit vývoj</string>
     <string name="autocorrect_settings_title">Nastavení autokorekce</string>
     <string name="autocorrect_settings_description">Kontrola pravopisu a návrhy</string>
     <string name="language_settings_title">Nastavení jazyka</string>
