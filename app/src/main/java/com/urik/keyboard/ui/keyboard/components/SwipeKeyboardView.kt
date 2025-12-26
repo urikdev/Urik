@@ -88,6 +88,7 @@ class SwipeKeyboardView
         private var gestureLastProcessedX = 0f
         private var gestureDensity = 1f
         private var cursorSensitivity = com.urik.keyboard.KeyboardConstants.GestureConstants.SPACEBAR_CURSOR_SENSITIVITY_DP
+        private var currentCursorSpeed: com.urik.keyboard.settings.CursorSpeed = com.urik.keyboard.settings.CursorSpeed.MEDIUM
 
         private var confirmationOverlay: FrameLayout? = null
         private var pendingRemovalSuggestion: String? = null
@@ -150,8 +151,12 @@ class SwipeKeyboardView
                     LayoutParams.MATCH_PARENT,
                 ),
             )
-            gestureDensity = context.resources.displayMetrics.density
-            cursorSensitivity *= gestureDensity
+        }
+
+        override fun onAttachedToWindow() {
+            super.onAttachedToWindow()
+            gestureDensity = resources.displayMetrics.density
+            cursorSensitivity = currentCursorSpeed.sensitivityDp * gestureDensity
         }
 
         private fun setupSwipeOverlay() {
@@ -474,8 +479,14 @@ class SwipeKeyboardView
 
         fun setCursorSpeed(speed: com.urik.keyboard.settings.CursorSpeed) {
             if (!isDestroyed) {
-                this.cursorSensitivity = speed.sensitivityDp * gestureDensity
+                currentCursorSpeed = speed
+                cursorSensitivity = speed.sensitivityDp * gestureDensity
             }
+        }
+
+        fun updateDensity() {
+            gestureDensity = resources.displayMetrics.density
+            cursorSensitivity = currentCursorSpeed.sensitivityDp * gestureDensity
         }
 
         private fun insertSuggestionBar() {
