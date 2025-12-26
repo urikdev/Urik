@@ -2665,6 +2665,7 @@ class UrikInputMethodService :
             layoutManager.onDensityChanged()
             swipeDetector.updateDisplayMetrics(currentDensity)
             swipeKeyboardView?.let { view ->
+                view.updateDensity()
                 if (view.currentLayout != null && view.currentState != null) {
                     view.updateKeyboard(view.currentLayout!!, view.currentState!!)
                 }
