@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.urik.keyboard.settings.CursorSpeed
 import com.urik.keyboard.settings.LongPressDuration
+import com.urik.keyboard.settings.LongPressPunctuationMode
 import com.urik.keyboard.settings.SettingsEvent
 import com.urik.keyboard.settings.SettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -38,7 +39,7 @@ class TypingBehaviorViewModel
                         spacebarCursorControl = settings.spacebarCursorControl,
                         cursorSpeed = settings.cursorSpeed,
                         backspaceSwipeDelete = settings.backspaceSwipeDelete,
-                        spacebarLongPressPunctuation = settings.spacebarLongPressPunctuation,
+                        longPressPunctuationMode = settings.longPressPunctuationMode,
                         longPressDuration = settings.longPressDuration,
                     )
                 }.stateIn(
@@ -87,11 +88,11 @@ class TypingBehaviorViewModel
             }
         }
 
-        fun updateSpacebarLongPressPunctuation(enabled: Boolean) {
+        fun updateLongPressPunctuationMode(mode: LongPressPunctuationMode) {
             viewModelScope.launch {
                 settingsRepository
-                    .updateSpacebarLongPressPunctuation(enabled)
-                    .onFailure { _events.emit(SettingsEvent.Error.SpacebarLongPressPunctuationToggleFailed) }
+                    .updateLongPressPunctuationMode(mode)
+                    .onFailure { _events.emit(SettingsEvent.Error.LongPressPunctuationModeUpdateFailed) }
             }
         }
 
@@ -117,6 +118,6 @@ data class TypingBehaviorUiState(
     val spacebarCursorControl: Boolean = true,
     val cursorSpeed: CursorSpeed = CursorSpeed.MEDIUM,
     val backspaceSwipeDelete: Boolean = true,
-    val spacebarLongPressPunctuation: Boolean = true,
+    val longPressPunctuationMode: LongPressPunctuationMode = LongPressPunctuationMode.SPACEBAR,
     val longPressDuration: LongPressDuration = LongPressDuration.MEDIUM,
 )

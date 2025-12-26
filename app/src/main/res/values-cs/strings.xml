@@ -88,7 +88,6 @@
     <string name="typing_settings_double_space_off">Dvojtá mezera vloží mezeru</string>
     <string name="typing_settings_swipe_on">Psaní přejetím prstem povoleno</string>
     <string name="typing_settings_swipe_off">Psaní přejetím prstem zakázáno</string>
-    <string name="typing_settings_spacebar_long_press_off">Dlouhé stisknutí mezerníku zakázáno</string>
     <string name="typing_settings_long_press_duration">Délka dlouhého stisku</string>
 
     <!-- Layout & Input Settings -->
@@ -125,7 +124,6 @@
     <string name="error_update_vibration_strength">Nepodařilo se aktualizovat sílu vibrací</string>
     <string name="error_update_double_space_period">Nepodařilo se aktualizovat funkci tečka po dvojité mezeře</string>
     <string name="error_update_swipe">Nepodařilo se aktualizovat psaní přejetím</string>
-    <string name="error_update_spacebar_long_press">Nepodařilo se aktualizovat interpunkci dlouhým stisknutím klávesy Mezerník</string>
     <string name="error_update_long_press_duration">Nepodařilo se aktualizovat dobu dlouhého stisknutí</string>
     <string name="error_update_number_row">Nepodařilo se aktualizovat číselnou řadu</string>
     <string name="error_update_space_bar_size">Nepodařilo se aktualizovat velikost mezerníku</string>
@@ -220,11 +218,14 @@
     <string name="typing_settings_backspace_swipe">Backspace přejetím prstem smazat</string>
     <string name="typing_settings_backspace_swipe_on">Přejetím prstem doleva při stisknutí klávesy Backspace smažete slovo</string>
     <string name="typing_settings_backspace_swipe_off">Přejetím prstem smazat zakázáno</string>
-    <string name="typing_settings_spacebar_long_press">Dlouhé stisknutí mezerníku pro interpunkci</string>
-    <string name="typing_settings_spacebar_long_press_on">Dlouhé stisknutí mezerníku pro interpunkci</string>
+    <string name="typing_settings_long_press_punctuation">Interpunkce dlouhého stisku</string>
+    <string name="long_press_punctuation_off">Vypnuto</string>
+    <string name="long_press_punctuation_spacebar">Mezerník</string>
+    <string name="long_press_punctuation_period">Klávesa tečky</string>
     <string name="error_update_spacebar_cursor">Nepodařilo se aktualizovat ovládání kurzoru mezerníkem</string>
     <string name="error_update_cursor_speed">Nepodařilo se aktualizovat rychlost kurzoru</string>
     <string name="error_update_backspace_swipe">Nepodařilo se aktualizovat klávesu Backspace a klávesu Smazat přejetím</string>
+    <string name="error_update_long_press_punctuation">Nepodařilo se aktualizovat interpunkci dlouhého stisku</string>
     <string name="max_languages_reached">Povoleny maximálně 3 jazyky</string>
 
 </resources>

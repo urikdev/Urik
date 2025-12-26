@@ -15,6 +15,7 @@ import androidx.preference.SwitchPreferenceCompat
 import com.urik.keyboard.R
 import com.urik.keyboard.settings.CursorSpeed
 import com.urik.keyboard.settings.LongPressDuration
+import com.urik.keyboard.settings.LongPressPunctuationMode
 import com.urik.keyboard.settings.SettingsEventHandler
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -34,7 +35,7 @@ class TypingBehaviorFragment : PreferenceFragmentCompat() {
     private lateinit var spacebarCursorPref: SwitchPreferenceCompat
     private lateinit var cursorSpeedPref: ListPreference
     private lateinit var backspaceSwipePref: SwitchPreferenceCompat
-    private lateinit var spacebarLongPressPref: SwitchPreferenceCompat
+    private lateinit var longPressPunctuationPref: ListPreference
     private lateinit var longPressPref: ListPreference
     private var testField: EditText? = null
 
@@ -116,15 +117,16 @@ class TypingBehaviorFragment : PreferenceFragmentCompat() {
             }
         screen.addPreference(backspaceSwipePref)
 
-        spacebarLongPressPref =
-            SwitchPreferenceCompat(context).apply {
-                key = "spacebar_long_press_punctuation"
+        longPressPunctuationPref =
+            ListPreference(context).apply {
+                key = "long_press_punctuation_mode"
                 isPersistent = false
-                title = resources.getString(R.string.typing_settings_spacebar_long_press)
-                summaryOn = resources.getString(R.string.typing_settings_spacebar_long_press_on)
-                summaryOff = resources.getString(R.string.typing_settings_spacebar_long_press_off)
+                title = resources.getString(R.string.typing_settings_long_press_punctuation)
+                entries = LongPressPunctuationMode.entries.map { resources.getString(it.displayNameRes) }.toTypedArray()
+                entryValues = LongPressPunctuationMode.entries.map { it.name }.toTypedArray()
+                summaryProvider = ListPreference.SimpleSummaryProvider.getInstance()
             }
-        screen.addPreference(spacebarLongPressPref)
+        screen.addPreference(longPressPunctuationPref)
 
         longPressPref =
             ListPreference(context).apply {
@@ -171,8 +173,8 @@ class TypingBehaviorFragment : PreferenceFragmentCompat() {
             true
         }
 
-        spacebarLongPressPref.setOnPreferenceChangeListener { _, newValue ->
-            viewModel.updateSpacebarLongPressPunctuation(newValue as Boolean)
+        longPressPunctuationPref.setOnPreferenceChangeListener { _, newValue ->
+            viewModel.updateLongPressPunctuationMode(LongPressPunctuationMode.valueOf(newValue as String))
             true
         }
 
@@ -191,7 +193,7 @@ class TypingBehaviorFragment : PreferenceFragmentCompat() {
                         cursorSpeedPref.value = state.cursorSpeed.name
                         cursorSpeedPref.isVisible = state.spacebarCursorControl
                         backspaceSwipePref.isChecked = state.backspaceSwipeDelete
-                        spacebarLongPressPref.isChecked = state.spacebarLongPressPunctuation
+                        longPressPunctuationPref.value = state.longPressPunctuationMode.name
                         longPressPref.value = state.longPressDuration.name
                     }
                 }

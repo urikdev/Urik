@@ -44,7 +44,6 @@
     <string name="typing_settings_double_space_off">Dubbelt mellanslag infogar mellanslag</string>
     <string name="typing_settings_swipe_on">Svep för att skriva aktiverat</string>
     <string name="typing_settings_swipe_off">Svep för att skriva inaktiverat</string>
-    <string name="typing_settings_spacebar_long_press_off">Lång tryckning på mellanslagstangenten inaktiverad</string>
     <string name="typing_settings_long_press_duration">Lång tryckningstid</string>
     <string name="layout_settings_show_number_row">Visa nummerrad</string>
     <string name="layout_settings_number_row_on">Nummerrad visas</string>
@@ -72,7 +71,6 @@
     <string name="error_update_vibration_strength">Misslyckades med att uppdatera vibrationsstyrkan</string>
     <string name="error_update_double_space_period">Misslyckades med att uppdatera dubbelt mellanslag</string>
     <string name="error_update_swipe">Misslyckades med att uppdatera svepningsinmatningen</string>
-    <string name="error_update_spacebar_long_press">Misslyckades med att uppdatera lång tryckning på mellanslagstangenten</string>
     <string name="error_update_long_press_duration">Misslyckades med att uppdatera lång trycktid</string>
     <string name="error_update_number_row">Misslyckades med att uppdatera nummerraden</string>
     <string name="error_update_space_bar_size">Misslyckades med att uppdatera mellanslagstangentens storlek</string>
@@ -165,10 +163,13 @@
     <string name="typing_settings_backspace_swipe">Backstegssvep och radera</string>
     <string name="typing_settings_backspace_swipe_on">Drej åt vänster på backstegstangenten för att radera ord</string>
     <string name="typing_settings_backspace_swipe_off">Backstegssvep och radera inaktiverad</string>
-    <string name="typing_settings_spacebar_long_press">Lång tryckning på mellanslagstangenten för interpunktion</string>
-    <string name="typing_settings_spacebar_long_press_on">Lång tryckning på mellanslagstangenten för interpunktion</string>
+    <string name="typing_settings_long_press_punctuation">Långtryckstecken</string>
+    <string name="long_press_punctuation_off">Av</string>
+    <string name="long_press_punctuation_spacebar">Mellanslagstangent</string>
+    <string name="long_press_punctuation_period">Punkttangent</string>
     <string name="error_update_spacebar_cursor">Misslyckades med att uppdatera markörkontrollen för mellanslagstangenten</string>
     <string name="error_update_cursor_speed">Misslyckades med att uppdatera markörhastighet</string>
     <string name="error_update_backspace_swipe">Misslyckades med att uppdatera backstegssvep och borttagning</string>
+    <string name="error_update_long_press_punctuation">Det gick inte att uppdatera långtryckstecken</string>
     <string name="max_languages_reached">Max 3 språk tillåtna</string>
 </resources>
