@@ -1,5 +1,6 @@
 package com.urik.keyboard
 
+import android.annotation.SuppressLint
 import android.graphics.Color
 import android.inputmethodservice.InputMethodService
 import android.os.Build
@@ -2702,6 +2703,7 @@ class UrikInputMethodService :
      * @return InlineSuggestionsRequest with styling specs, or null if SDK < R
      */
     @Suppress("NewApi")
+    @SuppressLint("RestrictedApi")
     override fun onCreateInlineSuggestionsRequest(uiExtras: android.os.Bundle): InlineSuggestionsRequest? {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) return null
 
