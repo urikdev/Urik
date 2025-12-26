@@ -88,7 +88,6 @@
     <string name="typing_settings_double_space_off">Doppel-Leerzeichen fügt ein Leerzeichen ein</string>
     <string name="typing_settings_swipe_on">Wischen zum Tippen aktiviert</string>
     <string name="typing_settings_swipe_off">Wischen zum Tippen deaktiviert</string>
-    <string name="typing_settings_spacebar_long_press_off">Langes Drücken der Leertaste deaktiviert</string>
     <string name="typing_settings_long_press_duration">Lagzeit-Druck-Dauer</string>
 
     <!-- Layout & Input Settings -->
@@ -125,7 +124,6 @@
     <string name="error_update_vibration_strength">Vibrationsstärke konnte nicht geändert werden</string>
     <string name="error_update_double_space_period">Doppel-Leerzeichen-Dauer konnte nicht geändert werden</string>
     <string name="error_update_swipe">Fehler beim Aktualisieren der Wischgesten-Eingabe</string>
-    <string name="error_update_spacebar_long_press">Fehler beim Aktualisieren der Satzzeichenfunktion beim langen Drücken der Leertaste</string>
     <string name="error_update_long_press_duration">Langzeit-Druck-Dauer konnte nicht geändert werden</string>
     <string name="error_update_number_row">Zahlenreihe konnte nicht geändert werden</string>
     <string name="error_update_space_bar_size">Leertasten-Breite konnte nicht geändert werden</string>
@@ -224,8 +222,6 @@
     <string name="long_press_punctuation_off">Aus</string>
     <string name="long_press_punctuation_spacebar">Leertaste</string>
     <string name="long_press_punctuation_period">Punkttaste</string>
-    <string name="typing_settings_spacebar_long_press">Satzzeichen durch langes Drücken der Leertaste</string>
-    <string name="typing_settings_spacebar_long_press_on">Leertaste gedrückt halten für Satzzeichen</string>
     <string name="error_update_spacebar_cursor">Fehler beim Aktualisieren der Cursorsteuerung mit der Leertaste</string>
     <string name="error_update_cursor_speed">Fehler beim Aktualisieren der Cursorgeschwindigkeit</string>
     <string name="error_update_backspace_swipe">Fehler beim Aktualisieren der Wischgeste zum Löschen mit der Rücktaste</string>

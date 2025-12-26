@@ -89,7 +89,6 @@
     <string name="typing_settings_swipe_enabled">Pisanie Gestem</string>
     <string name="typing_settings_swipe_on">Pisanie gestem włączone</string>
     <string name="typing_settings_swipe_off">Pisanie gestem wyłączone</string>
-    <string name="typing_settings_spacebar_long_press_off">Długie naciśnięcie spacji wyłączone</string>
     <string name="typing_settings_long_press_duration">Czas trwania długiego naciśnięcia</string>
 
     <!-- Layout & Input Settings -->
@@ -126,7 +125,6 @@
     <string name="error_update_vibration_strength">Nie udało się zaktualizować siły wibracji</string>
     <string name="error_update_double_space_period">Nie udało się zaktualizować podwójnej spacji na kropkę</string>
     <string name="error_update_swipe">Nie udało się zaktualizować funkcji pisania gestami</string>
-    <string name="error_update_spacebar_long_press">Nie udało się zaktualizować interpunkcji po długim naciśnięciu spacji</string>
     <string name="error_update_long_press_duration">Nie udało się zaktualizować czasu długiego naciśnięcia</string>
     <string name="error_update_number_row">Nie udało się zaktualizować wiersza liczb</string>
     <string name="error_update_space_bar_size">Nie udało się zaktualizować rozmiaru klawisza spacji</string>
@@ -225,8 +223,6 @@
     <string name="long_press_punctuation_off">Wyłączone</string>
     <string name="long_press_punctuation_spacebar">Spacja</string>
     <string name="long_press_punctuation_period">Klawisz kropki</string>
-    <string name="typing_settings_spacebar_long_press">Długie naciśnięcie spacji – interpunkcja</string>
-    <string name="typing_settings_spacebar_long_press_on">Długie naciśnięcie spacji – interpunkcja</string>
     <string name="error_update_spacebar_cursor">Nie udało się zaktualizować sterowania kursorem spacji</string>
     <string name="error_update_cursor_speed">Nie udało się zaktualizować prędkości kursora</string>
     <string name="error_update_backspace_swipe">Nie udało się zaktualizować funkcji usuwania za pomocą przesunięcia Backspace</string>

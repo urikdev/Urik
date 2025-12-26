@@ -90,7 +90,6 @@
     <string name="typing_settings_swipe_on">Непрерывный ввод включен</string>
     <string name="typing_settings_swipe_off">Непрерывный ввод отключен</string>
    
-    <string name="typing_settings_spacebar_long_press_off">Длительное нажатие пробела отключено</string>
     <string name="typing_settings_long_press_duration">Длительность Долгого Нажатия</string>
 
     <!-- Layout & Input Settings -->
@@ -128,7 +127,6 @@
     <string name="error_update_double_space_period">Не удалось обновить точку при двойном пробеле</string>
     <string name="error_update_swipe">Не удалось обновить непрерывный ввод</string>
    
-    <string name="error_update_spacebar_long_press">Не удалось обновить управление знаками препинания при длительном нажатии на пробел</string>
     <string name="error_update_long_press_duration">Не удалось обновить длительность долгого нажатия</string>
     <string name="error_update_number_row">Не удалось обновить ряд цифр</string>
     <string name="error_update_space_bar_size">Не удалось обновить размер пробела</string>
@@ -227,8 +225,6 @@
     <string name="long_press_punctuation_off">Выключено</string>
     <string name="long_press_punctuation_spacebar">Пробел</string>
     <string name="long_press_punctuation_period">Клавиша точки</string>
-    <string name="typing_settings_spacebar_long_press">Длительное нажатие пробела для расстановки знаков препинания</string>
-    <string name="typing_settings_spacebar_long_press_on">Длительное нажатие пробела для расстановки знаков препинания</string>
     <string name="error_update_spacebar_cursor">Не удалось обновить управление курсором с помощью пробела</string>
     <string name="error_update_cursor_speed">Не удалось обновить скорость курсора</string>
     <string name="error_update_backspace_swipe">Не удалось обновить управление клавишей Backspace (пролистывание)</string>

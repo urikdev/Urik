@@ -102,9 +102,6 @@
     <string name="long_press_punctuation_off">Disattivato</string>
     <string name="long_press_punctuation_spacebar">Barra spaziatrice</string>
     <string name="long_press_punctuation_period">Tasto punto</string>
-    <string name="typing_settings_spacebar_long_press">Punteggiatura con pressione lunga sulla barra spaziatrice</string>
-    <string name="typing_settings_spacebar_long_press_on">Pressione lunga su barra spaziatrice per punteggiatura</string>
-    <string name="typing_settings_spacebar_long_press_off">Pressione lunga su barra spaziatrice disattivata</string>
     <string name="typing_settings_long_press_duration">Durata pressione lunga</string>
 
     <!-- Layout & Input Settings -->
@@ -145,7 +142,6 @@
     <string name="error_update_cursor_speed">Aggiornamento velocità cursore non riuscito</string>
     <string name="error_update_backspace_swipe">Aggiornamento cancellazione con scorrimento su backspace non riuscito</string>
     <string name="error_update_long_press_punctuation">Impossibile aggiornare la punteggiatura a pressione prolungata</string>
-    <string name="error_update_spacebar_long_press">Aggiornamento punteggiatura con pressione lunga su barra spaziatrice non riuscito</string>
     <string name="error_update_long_press_duration">Aggiornamento durata pressione lunga non riuscito</string>
     <string name="error_update_number_row">Aggiornamento riga numerica non riuscito</string>
     <string name="error_update_space_bar_size">Aggiornamento dimensione barra spaziatrice non riuscito</string>
