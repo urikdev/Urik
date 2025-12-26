@@ -101,6 +101,9 @@
     <string name="action_next_description">Gå till nästa fält</string>
     <string name="action_previous_description">Flytta till föregående fält</string>
     <string name="action_emoji">Emoji</string>
+    <string name="autofill_indicator_description">Lösenordshanterarens förslag tillgängliga</string>
+
+    <!-- Theme Picker Accessibility -->
     <string name="theme_description">%1$s tema</string>
     <string name="theme_description_selected">%1$s tema, för närvarande valt</string>
     <string name="theme_add_favorite">Lägg till %1$s i favoriter</string>

@@ -184,6 +184,7 @@
     <string name="action_previous_description">Passa al campo precedente</string>
 
     <string name="action_emoji">Emoji</string>
+    <string name="autofill_indicator_description">Suggerimenti del gestore password disponibili</string>
 
     <!-- Theme Picker Accessibility -->
     <string name="theme_description">Tema %1$s</string>

@@ -1,6 +1,7 @@
 [versions]
 androidDatabaseSqlcipher = "4.12.0"
 appcompat = "1.7.1"
+autofill = "1.3.0"
 coreTesting = "2.2.0"
 datastorePreferences = "1.2.0"
 emoji2Emojipicker = "1.6.0"
@@ -28,6 +29,7 @@ coreKtxVersion = "1.7.0"
 [libraries]
 android-database-sqlcipher = { module = "net.zetetic:sqlcipher-android", version.ref = "androidDatabaseSqlcipher" }
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
+androidx-autofill = { module = "androidx.autofill:autofill", version.ref = "autofill" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-core-testing = { module = "androidx.arch.core:core-testing", version.ref = "coreTesting" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }

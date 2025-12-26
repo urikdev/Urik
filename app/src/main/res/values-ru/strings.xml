@@ -80,140 +80,141 @@
     <string name="feedback_settings_haptic_feedback">Тактильная Отдача</string>
     <string name="feedback_settings_haptic_on">Тактильная отдача включена</string>
     <string name="feedback_settings_haptic_off">Тактильная отдача отключена</string>
-    <string name="feedback_settings_vibration_strength">Уровень Вибрации</string>
+    <string name="feedback_settings_vibration_strength">Уровень Вибрации</string>
 
     <!-- Typing Behavior Settings -->
-    <string name="typing_settings_double_space_period">Точка при двойном пробеле</string>
-    <string name="typing_settings_double_space_on">Двойной пробел вставляет точку</string>
-    <string name="typing_settings_double_space_off">Двойной пробел вставляет пробел</string>
-    <string name="typing_settings_swipe_enabled">Непрерывный Ввод</string>
-    <string name="typing_settings_swipe_on">Непрерывный ввод включен</string>
-    <string name="typing_settings_swipe_off">Непрерывный ввод отключен</string>
-   
+    <string name="typing_settings_double_space_period">Точка при двойном пробеле</string>
+    <string name="typing_settings_double_space_on">Двойной пробел вставляет точку</string>
+    <string name="typing_settings_double_space_off">Двойной пробел вставляет пробел</string>
+    <string name="typing_settings_swipe_enabled">Непрерывный Ввод</string>
+    <string name="typing_settings_swipe_on">Непрерывный ввод включен</string>
+    <string name="typing_settings_swipe_off">Непрерывный ввод отключен</string>
+
     <string name="typing_settings_long_press_duration">Длительность Долгого Нажатия</string>
 
     <!-- Layout & Input Settings -->
-    <string name="layout_settings_show_number_row">Показывать Ряд Цифр</string>
-    <string name="layout_settings_number_row_on">Ряд цифр показывается</string>
-    <string name="layout_settings_number_row_off">Ряд цифр скрывается</string>
-    <string name="layout_settings_space_bar_size">Размер Пробела</string>
+    <string name="layout_settings_show_number_row">Показывать Ряд Цифр</string>
+    <string name="layout_settings_number_row_on">Ряд цифр показывается</string>
+    <string name="layout_settings_number_row_off">Ряд цифр скрывается</string>
+    <string name="layout_settings_space_bar_size">Размер Пробела</string>
 
     <!-- Privacy & Data Settings -->
-    <string name="privacy_settings_clipboard_history">История Буфера Обмена</string>
-    <string name="privacy_settings_clipboard_history_on">История буфера обмена включена</string>
-    <string name="privacy_settings_clipboard_history_off">История буфера обмена отключена</string>
-    <string name="privacy_settings_clear_learned_words">Удалить Изученные Слова</string>
-    <string name="privacy_settings_clear_learned_words_summary">Очистить весь изученный словарный запас</string>
-    <string name="privacy_settings_clear_learned_words_confirm">Удалить все изученные слова? Это действие нельзя отменить.</string>
-    <string name="privacy_settings_reset_to_defaults">Сбросить Настройки</string>
-    <string name="privacy_settings_reset_to_defaults_confirm">Сбросить все настройки до значений по умолчанию?</string>
-    <string name="privacy_settings_export_error_log">Экспорт Журнала Ошибок</string>
-    <string name="privacy_settings_export_error_log_summary">Поделиться диагностическими журналами для отладки</string>
-    <string name="privacy_settings_export_error_log_failed">Не удалось экспортировать журнал ошибок</string>
+    <string name="privacy_settings_clipboard_history">История Буфера Обмена</string>
+    <string name="privacy_settings_clipboard_history_on">История буфера обмена включена</string>
+    <string name="privacy_settings_clipboard_history_off">История буфера обмена отключена</string>
+    <string name="privacy_settings_clear_learned_words">Удалить Изученные Слова</string>
+    <string name="privacy_settings_clear_learned_words_summary">Очистить весь изученный словарный запас</string>
+    <string name="privacy_settings_clear_learned_words_confirm">Удалить все изученные слова? Это действие нельзя отменить.</string>
+    <string name="privacy_settings_reset_to_defaults">Сбросить Настройки</string>
+    <string name="privacy_settings_reset_to_defaults_confirm">Сбросить все настройки до значений по умолчанию?</string>
+    <string name="privacy_settings_export_error_log">Экспорт Журнала Ошибок</string>
+    <string name="privacy_settings_export_error_log_summary">Поделиться диагностическими журналами для отладки</string>
+    <string name="privacy_settings_export_error_log_failed">Не удалось экспортировать журнал ошибок</string>
 
     <!-- Error Messages -->
-    <string name="error_title">Ошибка</string>
-    <string name="error_update_theme">Не удалось обновить тему</string>
-    <string name="error_update_key_size">Не удалось обновить размер клавиш</string>
-    <string name="error_update_key_label_size">Не удалось обновить размер подписей</string>
-    <string name="error_update_spell_check">Не удалось обновить проверку орфографии</string>
-    <string name="error_update_suggestions">Не удалось обновить настройки предложений</string>
-    <string name="error_update_suggestion_count">Не удалось обновить количество предложений</string>
-    <string name="error_update_word_learning">Не удалось обновить запоминание слов</string>
-    <string name="error_update_clipboard">Не удалось обновить настройки буфера обмена</string>
-    <string name="error_update_language">Не удалось обновить настройки языка</string>
-    <string name="error_update_haptic_feedback">Не удалось обновить тактильную отдачу</string>
-    <string name="error_update_vibration_strength">Не удалось обновить уровень вибрации</string>
-    <string name="error_update_double_space_period">Не удалось обновить точку при двойном пробеле</string>
-    <string name="error_update_swipe">Не удалось обновить непрерывный ввод</string>
-   
+    <string name="error_title">Ошибка</string>
+    <string name="error_update_theme">Не удалось обновить тему</string>
+    <string name="error_update_key_size">Не удалось обновить размер клавиш</string>
+    <string name="error_update_key_label_size">Не удалось обновить размер подписей</string>
+    <string name="error_update_spell_check">Не удалось обновить проверку орфографии</string>
+    <string name="error_update_suggestions">Не удалось обновить настройки предложений</string>
+    <string name="error_update_suggestion_count">Не удалось обновить количество предложений</string>
+    <string name="error_update_word_learning">Не удалось обновить запоминание слов</string>
+    <string name="error_update_clipboard">Не удалось обновить настройки буфера обмена</string>
+    <string name="error_update_language">Не удалось обновить настройки языка</string>
+    <string name="error_update_haptic_feedback">Не удалось обновить тактильную отдачу</string>
+    <string name="error_update_vibration_strength">Не удалось обновить уровень вибрации</string>
+    <string name="error_update_double_space_period">Не удалось обновить точку при двойном пробеле</string>
+    <string name="error_update_swipe">Не удалось обновить непрерывный ввод</string>
+
     <string name="error_update_long_press_duration">Не удалось обновить длительность долгого нажатия</string>
-    <string name="error_update_number_row">Не удалось обновить ряд цифр</string>
-    <string name="error_update_space_bar_size">Не удалось обновить размер пробела</string>
-    <string name="error_clear_learned_words">Не удалось удалить изученные слова</string>
-    <string name="error_reset_to_defaults">Не удалось сбросить настройки</string>
+    <string name="error_update_number_row">Не удалось обновить ряд цифр</string>
+    <string name="error_update_space_bar_size">Не удалось обновить размер пробела</string>
+    <string name="error_clear_learned_words">Не удалось удалить изученные слова</string>
+    <string name="error_reset_to_defaults">Не удалось сбросить настройки</string>
 
     <!-- Success Messages -->
-    <string name="success_learned_words_cleared">Запомненные слова удалены</string>
-    <string name="success_settings_reset">Настройки сброшены до значений по умолчанию</string>
+    <string name="success_learned_words_cleared">Запомненные слова удалены</string>
+    <string name="success_settings_reset">Настройки сброшены до значений по умолчанию</string>
 
     <!-- Keyboard descriptions -->
-    <string name="keyboard_description">Виртуальная клавиатура</string>
+    <string name="keyboard_description">Виртуальная клавиатура</string>
 
     <!-- Default key labels -->
-    <string name="letters_mode_label">АБВ</string>
-    <string name="numbers_mode_label">123</string>
-    <string name="symbols_mode_label">+=&lt;</string>
+    <string name="letters_mode_label">АБВ</string>
+    <string name="numbers_mode_label">123</string>
+    <string name="symbols_mode_label">+=&lt;</string>
 
     <!-- Accessibility descriptions -->
-    <string name="key_character_description">Ввести %1$s</string>
+    <string name="key_character_description">Ввести %1$s</string>
 
-    <string name="shift_key_description">Клавиша Shift, нажмите чтоб сделать следующую букву заглавной</string>
-    <string name="shift_active_description">Shift активен, нажмите для деактивации</string>
-    <string name="caps_lock_description">Caps Lock</string>
-    <string name="caps_lock_on_description">Caps Lock включен, нажмите для выключения</string>
-    <string name="backspace_key_description">Удалить предыдущий символ</string>
-    <string name="space_key_description">Пробел</string>
-    <string name="letters_mode_description">Переключиться на клавиатуру с буквами</string>
-    <string name="numbers_mode_description">Переключиться на клавиатуру с цифрами</string>
-    <string name="symbols_mode_description">Переключиться на клавиатуру с символами</string>
-    <string name="ime_prediction_description">Предложение: %1$s</string>
+    <string name="shift_key_description">Клавиша Shift, нажмите чтоб сделать следующую букву заглавной</string>
+    <string name="shift_active_description">Shift активен, нажмите для деактивации</string>
+    <string name="caps_lock_description">Caps Lock</string>
+    <string name="caps_lock_on_description">Caps Lock включен, нажмите для выключения</string>
+    <string name="backspace_key_description">Удалить предыдущий символ</string>
+    <string name="space_key_description">Пробел</string>
+    <string name="letters_mode_description">Переключиться на клавиатуру с буквами</string>
+    <string name="numbers_mode_description">Переключиться на клавиатуру с цифрами</string>
+    <string name="symbols_mode_description">Переключиться на клавиатуру с символами</string>
+    <string name="ime_prediction_description">Предложение: %1$s</string>
 
     <!-- Action button accessibility descriptions -->
-    <string name="action_enter_description">Нажать Enter</string>
-    <string name="action_send_description">Отправить сообщение</string>
-    <string name="action_search_description">Поиск</string>
-    <string name="action_done_description">Готово</string>
-    <string name="action_go_description">Перейти</string>
-    <string name="action_next_description">Перейти к следующему полю</string>
-    <string name="action_previous_description">Перейти к предыдущему полю</string>
+    <string name="action_enter_description">Нажать Enter</string>
+    <string name="action_send_description">Отправить сообщение</string>
+    <string name="action_search_description">Поиск</string>
+    <string name="action_done_description">Готово</string>
+    <string name="action_go_description">Перейти</string>
+    <string name="action_next_description">Перейти к следующему полю</string>
+    <string name="action_previous_description">Перейти к предыдущему полю</string>
 
-    <string name="action_emoji">Эмодзи</string>
+    <string name="action_emoji">Эмодзи</string>
+    <string name="autofill_indicator_description">Доступны предложения менеджера паролей</string>
 
     <!-- Theme Picker Accessibility -->
-    <string name="theme_description">Тема %1$s</string>
-    <string name="theme_description_selected">Тема %1$s, активная в данный момент</string>
-    <string name="theme_add_favorite">Добавить %1$s в избранное</string>
-    <string name="theme_remove_favorite">Удалить %1$s из избранного</string>
+    <string name="theme_description">Тема %1$s</string>
+    <string name="theme_description_selected">Тема %1$s, активная в данный момент</string>
+    <string name="theme_add_favorite">Добавить %1$s в избранное</string>
+    <string name="theme_remove_favorite">Удалить %1$s из избранного</string>
 
     <!-- Character Variation Accessibility -->
-    <string name="character_variation_position">Вариант символа %1$d из %2$d: %3$s</string>
+    <string name="character_variation_position">Вариант символа %1$d из %2$d: %3$s</string>
 
     <!-- Blacklisting Words -->
-    <string name="remove_suggestion">Удалить %1$s из предложений?</string>
-    <string name="remove_cancel">Отмена</string>
-    <string name="remove_confirm">Удалить</string>
+    <string name="remove_suggestion">Удалить %1$s из предложений?</string>
+    <string name="remove_cancel">Отмена</string>
+    <string name="remove_confirm">Удалить</string>
 
     <!-- Tips -->
-    <string name="tip_1_title">Изучение Слов</string>
-    <string name="tip_1_description">Нажмите пробел после выделенной опечатки, чтобы добавить слово в словарь.</string>
+    <string name="tip_1_title">Изучение Слов</string>
+    <string name="tip_1_description">Нажмите пробел после выделенной опечатки, чтобы добавить слово в словарь.</string>
 
-    <string name="tip_2_title">Быстрое Меню Пунктуации</string>
-    <string name="tip_2_description">Нажмите и удерживайте пробел, чтобы открыть быстрое меню пунктуации.</string>
+    <string name="tip_2_title">Быстрое Меню Пунктуации</string>
+    <string name="tip_2_description">Нажмите и удерживайте пробел, чтобы открыть быстрое меню пунктуации.</string>
 
-    <string name="tip_3_title">Варианты Символов</string>
-    <string name="tip_3_description">Нажмите и удерживайте символ, чтобы выбрать его вариант.</string>
+    <string name="tip_3_title">Варианты Символов</string>
+    <string name="tip_3_description">Нажмите и удерживайте символ, чтобы выбрать его вариант.</string>
 
-    <string name="tip_4_title">Удаление Слов</string>
-    <string name="tip_4_description">Нажмите и удерживайте предложение, чтобы удалить его из словаря.</string>
+    <string name="tip_4_title">Удаление Слов</string>
+    <string name="tip_4_description">Нажмите и удерживайте предложение, чтобы удалить его из словаря.</string>
 
-    <string name="tip_5_title">Менеджер Буфера Обмена</string>
-    <string name="tip_5_description">Нажмите и удерживайте клавишу символов, чтобы открыть Менеджер Буфера Обмена.</string>
+    <string name="tip_5_title">Менеджер Буфера Обмена</string>
+    <string name="tip_5_description">Нажмите и удерживайте клавишу символов, чтобы открыть Менеджер Буфера Обмена.</string>
 
     <!-- Clipboard Panel -->
-    <string name="clipboard_panel_title">Буфер Обмена</string>
-    <string name="clipboard_panel_pinned">Закрепленные</string>
-    <string name="clipboard_panel_recent">Недавние</string>
-    <string name="clipboard_panel_empty">История буфера обмена пустая</string>
-    <string name="clipboard_panel_delete_all">Удалить Все</string>
-    <string name="clipboard_panel_delete_all_confirm">Удалить все незакрепленные элементы буфера обмена?</string>
-    <string name="clipboard_consent_message">Urik может читать и хранить содержимое буфера обмена неограниченное время. Если вы не хотите этого, перейдите в настройки и отключите историю буфера обмена.</string>
+    <string name="clipboard_panel_title">Буфер Обмена</string>
+    <string name="clipboard_panel_pinned">Закрепленные</string>
+    <string name="clipboard_panel_recent">Недавние</string>
+    <string name="clipboard_panel_empty">История буфера обмена пустая</string>
+    <string name="clipboard_panel_delete_all">Удалить Все</string>
+    <string name="clipboard_panel_delete_all_confirm">Удалить все незакрепленные элементы буфера обмена?</string>
+    <string name="clipboard_consent_message">Urik может читать и хранить содержимое буфера обмена неограниченное время. Если вы не хотите этого, перейдите в настройки и отключите историю буфера обмена.</string>
 
     <!-- Clipboard Accessibility -->
-    <string name="clipboard_item_description">Элемент буфера обмена: %1$s</string>
-    <string name="clipboard_item_pin">Закрепить элемент буфера обмена</string>
-    <string name="clipboard_item_unpin">Открепить элемент буфера обмена</string>
-    <string name="clipboard_item_delete">Удалить элемент буфера обмена</string>
+    <string name="clipboard_item_description">Элемент буфера обмена: %1$s</string>
+    <string name="clipboard_item_pin">Закрепить элемент буфера обмена</string>
+    <string name="clipboard_item_unpin">Открепить элемент буфера обмена</string>
+    <string name="clipboard_item_delete">Удалить элемент буфера обмена</string>
     <string name="typing_settings_spacebar_cursor">Управление курсором с помощью пробела</string>
     <string name="typing_settings_spacebar_cursor_on">Проведите пальцем по пробелу, чтобы переместить курсор</string>
     <string name="typing_settings_spacebar_cursor_off">Управление курсором с помощью пробела отключено</string>
