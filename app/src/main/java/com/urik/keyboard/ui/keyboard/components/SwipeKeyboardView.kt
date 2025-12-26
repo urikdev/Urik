@@ -793,8 +793,8 @@ class SwipeKeyboardView
         fun clearSuggestions() {
             if (isDestroyed) return
             isShowingAutofillSuggestions = false
-            autofillIndicatorIcon?.visibility = View.GONE
-            emojiButton?.visibility = View.VISIBLE
+            autofillIndicatorIcon?.visibility = GONE
+            emojiButton?.visibility = VISIBLE
             updateSuggestionBarContent(emptyList())
             safeMappingPost()
         }
@@ -811,18 +811,18 @@ class SwipeKeyboardView
 
                 if (views.isEmpty()) {
                     isShowingAutofillSuggestions = false
-                    autofillIndicatorIcon?.visibility = View.GONE
-                    emojiButton?.visibility = View.VISIBLE
+                    autofillIndicatorIcon?.visibility = GONE
+                    emojiButton?.visibility = VISIBLE
                     updateSuggestionBarContent(emptyList())
                     return
                 }
 
                 isShowingAutofillSuggestions = true
 
-                emojiButton?.visibility = View.GONE
+                emojiButton?.visibility = GONE
 
                 val indicator = getOrCreateAutofillIndicator()
-                indicator.visibility = if (showIndicator) View.VISIBLE else View.GONE
+                indicator.visibility = if (showIndicator) VISIBLE else GONE
                 bar.addView(indicator)
 
                 for (i in views.indices) {
