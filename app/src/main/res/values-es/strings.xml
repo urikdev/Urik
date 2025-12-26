@@ -220,11 +220,16 @@
     <string name="typing_settings_backspace_swipe">Retroceso Deslizar Eliminar</string>
     <string name="typing_settings_backspace_swipe_on">Deslice hacia la izquierda al presionar la tecla de retroceso para eliminar una palabra</string>
     <string name="typing_settings_backspace_swipe_off">Retroceso Deslizar Eliminar deshabilitado</string>
+    <string name="typing_settings_long_press_punctuation">Puntuación de pulsación larga</string>
+    <string name="long_press_punctuation_off">Desactivado</string>
+    <string name="long_press_punctuation_spacebar">Barra espaciadora</string>
+    <string name="long_press_punctuation_period">Tecla de punto</string>
     <string name="typing_settings_spacebar_long_press">Pulsación prolongada de la barra espaciadora para puntuación</string>
     <string name="typing_settings_spacebar_long_press_on">Pulsación prolongada de la barra espaciadora para puntuación</string>
     <string name="error_update_spacebar_cursor">No se pudo actualizar el control del cursor de la barra espaciadora.</string>
     <string name="error_update_cursor_speed">Error al actualizar la velocidad del cursor</string>
     <string name="error_update_backspace_swipe">No se pudo actualizar la función de retroceso/deslizar/eliminar.</string>
+    <string name="error_update_long_press_punctuation">Error al actualizar la puntuación de pulsación larga</string>
     <string name="max_languages_reached">Se permiten máximo 3 idiomas</string>
 
 </resources>

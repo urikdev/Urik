@@ -165,10 +165,15 @@
     <string name="typing_settings_backspace_swipe">Backstegssvep och radera</string>
     <string name="typing_settings_backspace_swipe_on">Drej åt vänster på backstegstangenten för att radera ord</string>
     <string name="typing_settings_backspace_swipe_off">Backstegssvep och radera inaktiverad</string>
+    <string name="typing_settings_long_press_punctuation">Långtryckstecken</string>
+    <string name="long_press_punctuation_off">Av</string>
+    <string name="long_press_punctuation_spacebar">Mellanslagstangent</string>
+    <string name="long_press_punctuation_period">Punkttangent</string>
     <string name="typing_settings_spacebar_long_press">Lång tryckning på mellanslagstangenten för interpunktion</string>
     <string name="typing_settings_spacebar_long_press_on">Lång tryckning på mellanslagstangenten för interpunktion</string>
     <string name="error_update_spacebar_cursor">Misslyckades med att uppdatera markörkontrollen för mellanslagstangenten</string>
     <string name="error_update_cursor_speed">Misslyckades med att uppdatera markörhastighet</string>
     <string name="error_update_backspace_swipe">Misslyckades med att uppdatera backstegssvep och borttagning</string>
+    <string name="error_update_long_press_punctuation">Det gick inte att uppdatera långtryckstecken</string>
     <string name="max_languages_reached">Max 3 språk tillåtna</string>
 </resources>

@@ -221,11 +221,16 @@
     <string name="typing_settings_backspace_swipe">Backspace Проведіть пальцем Видалити</string>
     <string name="typing_settings_backspace_swipe_on">Проведіть пальцем ліворуч при натисканні клавіші Backspace, щоб видалити слово</string>
     <string name="typing_settings_backspace_swipe_off">Видалення пальцем за допомогою клавіші Backspace вимкнено</string>
+    <string name="typing_settings_long_press_punctuation">Пунктуація довгого натискання</string>
+    <string name="long_press_punctuation_off">Вимкнено</string>
+    <string name="long_press_punctuation_spacebar">Клавіша пробілу</string>
+    <string name="long_press_punctuation_period">Клавіша крапки</string>
     <string name="typing_settings_spacebar_long_press">Довге натискання клавіші пробілу для розділових знаків</string>
     <string name="typing_settings_spacebar_long_press_on">Довге натискання клавіші пробілу для розділових знаків</string>
     <string name="error_update_spacebar_cursor">Не вдалося оновити керування курсором за допомогою клавіші пробілу</string>
     <string name="error_update_cursor_speed">Не вдалося оновити швидкість курсора</string>
     <string name="error_update_backspace_swipe">Не вдалося оновити функцію Backspace (видалити пробілом)</string>
+    <string name="error_update_long_press_punctuation">Не вдалося оновити пунктуацію довгого натискання</string>
     <string name="max_languages_reached">Можна додати до 3 мов.</string>
 
 </resources>

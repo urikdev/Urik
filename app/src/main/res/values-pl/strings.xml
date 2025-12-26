@@ -221,11 +221,16 @@
     <string name="typing_settings_backspace_swipe">Backspace - przesunięcie Delete</string>
     <string name="typing_settings_backspace_swipe_on">Przesuń w lewo na klawiszu Backspace, aby usunąć słowo</string>
     <string name="typing_settings_backspace_swipe_off">Backspace - przesunięcie Delete wyłączone</string>
+    <string name="typing_settings_long_press_punctuation">Interpunkcja długiego naciśnięcia</string>
+    <string name="long_press_punctuation_off">Wyłączone</string>
+    <string name="long_press_punctuation_spacebar">Spacja</string>
+    <string name="long_press_punctuation_period">Klawisz kropki</string>
     <string name="typing_settings_spacebar_long_press">Długie naciśnięcie spacji – interpunkcja</string>
     <string name="typing_settings_spacebar_long_press_on">Długie naciśnięcie spacji – interpunkcja</string>
     <string name="error_update_spacebar_cursor">Nie udało się zaktualizować sterowania kursorem spacji</string>
     <string name="error_update_cursor_speed">Nie udało się zaktualizować prędkości kursora</string>
     <string name="error_update_backspace_swipe">Nie udało się zaktualizować funkcji usuwania za pomocą przesunięcia Backspace</string>
+    <string name="error_update_long_press_punctuation">Nie udało się zaktualizować interpunkcji długiego naciśnięcia</string>
     <string name="max_languages_reached">Maksymalnie 3 języki dozwolone</string>
 
 </resources>

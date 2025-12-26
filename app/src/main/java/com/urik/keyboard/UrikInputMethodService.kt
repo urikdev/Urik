@@ -1002,7 +1002,7 @@ class UrikInputMethodService :
                     swipeDetector.setSwipeEnabled(newSettings.swipeEnabled)
 
                     layoutManager.updateLongPressDuration(newSettings.longPressDuration)
-                    layoutManager.updateSpacebarLongPressPunctuation(newSettings.spacebarLongPressPunctuation)
+                    layoutManager.updateLongPressPunctuationMode(newSettings.longPressPunctuationMode)
 
                     layoutManager.updateKeySize(newSettings.keySize)
                     layoutManager.updateSpaceBarSize(newSettings.spaceBarSize)
@@ -1136,7 +1136,7 @@ class UrikInputMethodService :
         restarting: Boolean,
     ) {
         layoutManager.updateLongPressDuration(currentSettings.longPressDuration)
-        layoutManager.updateSpacebarLongPressPunctuation(currentSettings.spacebarLongPressPunctuation)
+        layoutManager.updateLongPressPunctuationMode(currentSettings.longPressPunctuationMode)
         layoutManager.updateKeySize(currentSettings.keySize)
         layoutManager.updateSpaceBarSize(currentSettings.spaceBarSize)
         layoutManager.updateKeyLabelSize(currentSettings.keyLabelSize)

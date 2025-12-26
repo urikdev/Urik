@@ -38,7 +38,7 @@ sealed interface SettingsEvent {
 
         data object BackspaceSwipeToggleFailed : Error
 
-        data object SpacebarLongPressPunctuationToggleFailed : Error
+        data object LongPressPunctuationModeUpdateFailed : Error
 
         data object LongPressDurationUpdateFailed : Error
 

@@ -223,11 +223,16 @@
     <string name="typing_settings_backspace_swipe">Удаление с помощью клавиши Backspace</string>
     <string name="typing_settings_backspace_swipe_on">Проведите пальцем влево по клавише Backspace, чтобы удалить слово</string>
     <string name="typing_settings_backspace_swipe_off">Удаление с помощью клавиши Backspace отключено</string>
+    <string name="typing_settings_long_press_punctuation">Пунктуация долгого нажатия</string>
+    <string name="long_press_punctuation_off">Выключено</string>
+    <string name="long_press_punctuation_spacebar">Пробел</string>
+    <string name="long_press_punctuation_period">Клавиша точки</string>
     <string name="typing_settings_spacebar_long_press">Длительное нажатие пробела для расстановки знаков препинания</string>
     <string name="typing_settings_spacebar_long_press_on">Длительное нажатие пробела для расстановки знаков препинания</string>
     <string name="error_update_spacebar_cursor">Не удалось обновить управление курсором с помощью пробела</string>
     <string name="error_update_cursor_speed">Не удалось обновить скорость курсора</string>
     <string name="error_update_backspace_swipe">Не удалось обновить управление клавишей Backspace (пролистывание)</string>
+    <string name="error_update_long_press_punctuation">Не удалось обновить пунктуацию долгого нажатия</string>
     <string name="max_languages_reached">Можно добавить до 3 языков.</string>
 
 </resources>

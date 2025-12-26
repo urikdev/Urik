@@ -220,11 +220,16 @@
     <string name="typing_settings_backspace_swipe">Deslizar para eliminar com a tecla Backspace</string>
     <string name="typing_settings_backspace_swipe_on">Deslizar para a esquerda na tecla Backspace para eliminar uma palavra</string>
     <string name="typing_settings_backspace_swipe_off">Deslizar para eliminar com a tecla Backspace desativada</string>
+    <string name="typing_settings_long_press_punctuation">Pontuação de pressão longa</string>
+    <string name="long_press_punctuation_off">Desativado</string>
+    <string name="long_press_punctuation_spacebar">Barra de espaço</string>
+    <string name="long_press_punctuation_period">Tecla de ponto</string>
     <string name="typing_settings_spacebar_long_press">Pressionar e manter pressionada a barra de espaço para pontuação</string>
     <string name="typing_settings_spacebar_long_press_on">Pressionar e manter pressionada a barra de espaço para pontuação</string>
     <string name="error_update_spacebar_cursor">Falha ao atualizar o controlo do cursor da barra de espaço</string>
     <string name="error_update_cursor_speed">Falha ao atualizar a velocidade do cursor</string>
     <string name="error_update_backspace_swipe">Falha ao atualizar a eliminação por gesto de deslizar a tecla Backspace</string>
+    <string name="error_update_long_press_punctuation">Falha ao atualizar pontuação de pressão longa</string>
     <string name="max_languages_reached">Máximo de 3 idiomas permitidos</string>
 
 </resources>

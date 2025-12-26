@@ -220,11 +220,16 @@
     <string name="typing_settings_backspace_swipe">Löschen mit der Rücktaste</string>
     <string name="typing_settings_backspace_swipe_on">Nach links wischen, um ein Wort zu löschen</string>
     <string name="typing_settings_backspace_swipe_off">Löschen mit der Rücktaste deaktiviert</string>
+    <string name="typing_settings_long_press_punctuation">Lange-Druck-Interpunktion</string>
+    <string name="long_press_punctuation_off">Aus</string>
+    <string name="long_press_punctuation_spacebar">Leertaste</string>
+    <string name="long_press_punctuation_period">Punkttaste</string>
     <string name="typing_settings_spacebar_long_press">Satzzeichen durch langes Drücken der Leertaste</string>
     <string name="typing_settings_spacebar_long_press_on">Leertaste gedrückt halten für Satzzeichen</string>
     <string name="error_update_spacebar_cursor">Fehler beim Aktualisieren der Cursorsteuerung mit der Leertaste</string>
     <string name="error_update_cursor_speed">Fehler beim Aktualisieren der Cursorgeschwindigkeit</string>
     <string name="error_update_backspace_swipe">Fehler beim Aktualisieren der Wischgeste zum Löschen mit der Rücktaste</string>
+    <string name="error_update_long_press_punctuation">Lange-Druck-Interpunktion konnte nicht geändert werden</string>
     <string name="max_languages_reached">Maximal 3 Sprachen erlaubt</string>
 
 </resources>

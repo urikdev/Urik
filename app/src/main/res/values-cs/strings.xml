@@ -220,11 +220,16 @@
     <string name="typing_settings_backspace_swipe">Backspace přejetím prstem smazat</string>
     <string name="typing_settings_backspace_swipe_on">Přejetím prstem doleva při stisknutí klávesy Backspace smažete slovo</string>
     <string name="typing_settings_backspace_swipe_off">Přejetím prstem smazat zakázáno</string>
+    <string name="typing_settings_long_press_punctuation">Interpunkce dlouhého stisku</string>
+    <string name="long_press_punctuation_off">Vypnuto</string>
+    <string name="long_press_punctuation_spacebar">Mezerník</string>
+    <string name="long_press_punctuation_period">Klávesa tečky</string>
     <string name="typing_settings_spacebar_long_press">Dlouhé stisknutí mezerníku pro interpunkci</string>
     <string name="typing_settings_spacebar_long_press_on">Dlouhé stisknutí mezerníku pro interpunkci</string>
     <string name="error_update_spacebar_cursor">Nepodařilo se aktualizovat ovládání kurzoru mezerníkem</string>
     <string name="error_update_cursor_speed">Nepodařilo se aktualizovat rychlost kurzoru</string>
     <string name="error_update_backspace_swipe">Nepodařilo se aktualizovat klávesu Backspace a klávesu Smazat přejetím</string>
+    <string name="error_update_long_press_punctuation">Nepodařilo se aktualizovat interpunkci dlouhého stisku</string>
     <string name="max_languages_reached">Povoleny maximálně 3 jazyky</string>
 
 </resources>
