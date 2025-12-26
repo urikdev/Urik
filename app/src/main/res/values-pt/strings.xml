@@ -10,6 +10,16 @@
 
     <!-- Settings Activity -->
     <string name="settings_title">Configurações do teclado</string>
+    <string name="about_title">Sobre</string>
+    <string name="about_button">Sobre</string>
+    <string name="about_version">Versão</string>
+    <string name="about_copyright">Copyright © 2025 Urik Development</string>
+    <string name="about_license">Licença: GNU GPL v3.0</string>
+    <string name="about_source_code">Código fonte</string>
+    <string name="about_release_notes">Notas de lançamento</string>
+    <string name="about_report_bug">Relatar um bug</string>
+    <string name="about_privacy_policy">Política de privacidade</string>
+    <string name="about_support">Apoiar o desenvolvimento</string>
     <string name="autocorrect_settings_title">Ajustes de autocorreção</string>
     <string name="autocorrect_settings_description">Ortografia e sugestões</string>
     <string name="language_settings_title">Configurações de idioma</string>

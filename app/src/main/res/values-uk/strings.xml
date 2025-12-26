@@ -10,6 +10,16 @@
 
     <!-- Settings Activity -->
     <string name="settings_title">Налаштування Клавіатури</string>
+    <string name="about_title">Про програму</string>
+    <string name="about_button">Про програму</string>
+    <string name="about_version">Версія</string>
+    <string name="about_copyright">Copyright © 2025 Urik Development</string>
+    <string name="about_license">Ліцензія: GNU GPL v3.0</string>
+    <string name="about_source_code">Вихідний код</string>
+    <string name="about_release_notes">Примітки до випуску</string>
+    <string name="about_report_bug">Повідомити про помилку</string>
+    <string name="about_privacy_policy">Політика конфіденційності</string>
+    <string name="about_support">Підтримати розробку</string>
     <string name="autocorrect_settings_title">Налаштування Автокорегування</string>
     <string name="autocorrect_settings_description">Правопис та пропозиції</string>
     <string name="language_settings_title">Налаштування Мови</string>

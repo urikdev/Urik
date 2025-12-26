@@ -267,6 +267,21 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
 
+            val aboutButton =
+                MaterialButton(context).apply {
+                    text = context.getString(R.string.about_button)
+                    val buttonPadding = dpToPx(16)
+                    setPadding(buttonPadding, buttonPadding, buttonPadding, buttonPadding)
+
+                    setBackgroundColor(ContextCompat.getColor(context, R.color.key_background_character))
+                    setTextColor(ContextCompat.getColor(context, R.color.content_primary))
+
+                    setOnClickListener {
+                        val intent = Intent(context, com.urik.keyboard.settings.AboutActivity::class.java)
+                        startActivity(intent)
+                    }
+                }
+
             val enableButtonParams =
                 LinearLayout
                     .LayoutParams(
@@ -278,6 +293,16 @@ class MainActivity : AppCompatActivity() {
                     }
 
             val settingsButtonParams =
+                LinearLayout
+                    .LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                    ).apply {
+                        val margin = dpToPx(8)
+                        setMargins(0, 0, 0, margin)
+                    }
+
+            val aboutButtonParams =
                 LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.MATCH_PARENT,
                     LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -285,6 +310,7 @@ class MainActivity : AppCompatActivity() {
 
             addView(enableButton, enableButtonParams)
             addView(settingsButton, settingsButtonParams)
+            addView(aboutButton, aboutButtonParams)
         }
 
     private fun showFeaturesBottomSheet() {
