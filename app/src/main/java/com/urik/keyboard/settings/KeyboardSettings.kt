@@ -66,6 +66,17 @@ enum class CursorSpeed(
 }
 
 /**
+ * Long press punctuation menu activation mode.
+ */
+enum class LongPressPunctuationMode(
+    val displayNameRes: Int,
+) {
+    OFF(R.string.long_press_punctuation_off),
+    SPACEBAR(R.string.long_press_punctuation_spacebar),
+    PERIOD(R.string.long_press_punctuation_period),
+}
+
+/**
  * Keyboard configuration and user preferences.
  *
  * Direct construction bypasses validation. SettingsRepository enforces validation
@@ -87,7 +98,7 @@ data class KeyboardSettings(
     val swipeEnabled: Boolean = true,
     val spacebarCursorControl: Boolean = true,
     val backspaceSwipeDelete: Boolean = true,
-    val spacebarLongPressPunctuation: Boolean = true,
+    val longPressPunctuationMode: LongPressPunctuationMode = LongPressPunctuationMode.SPACEBAR,
     val longPressDuration: LongPressDuration = LongPressDuration.MEDIUM,
     val showNumberRow: Boolean = true,
     val spaceBarSize: SpaceBarSize = SpaceBarSize.STANDARD,

@@ -58,7 +58,7 @@ class SettingsRepository
             val SWIPE_ENABLED = booleanPreferencesKey("swipe_enabled")
             val SPACEBAR_CURSOR_CONTROL = booleanPreferencesKey("spacebar_cursor_control")
             val BACKSPACE_SWIPE_DELETE = booleanPreferencesKey("backspace_swipe_delete")
-            val SPACEBAR_LONG_PRESS_PUNCTUATION = booleanPreferencesKey("spacebar_long_press_punctuation")
+            val LONG_PRESS_PUNCTUATION_MODE = stringPreferencesKey("long_press_punctuation_mode")
             val LONG_PRESS_DURATION = stringPreferencesKey("long_press_duration")
             val SHOW_NUMBER_ROW = booleanPreferencesKey("show_number_row")
             val SPACE_BAR_SIZE = stringPreferencesKey("space_bar_size")
@@ -106,7 +106,20 @@ class SettingsRepository
                         swipeEnabled = preferences[PreferenceKeys.SWIPE_ENABLED] ?: true,
                         spacebarCursorControl = preferences[PreferenceKeys.SPACEBAR_CURSOR_CONTROL] ?: true,
                         backspaceSwipeDelete = preferences[PreferenceKeys.BACKSPACE_SWIPE_DELETE] ?: true,
-                        spacebarLongPressPunctuation = preferences[PreferenceKeys.SPACEBAR_LONG_PRESS_PUNCTUATION] ?: true,
+                        longPressPunctuationMode =
+                            preferences[PreferenceKeys.LONG_PRESS_PUNCTUATION_MODE]?.let {
+                                try {
+                                    LongPressPunctuationMode.valueOf(it)
+                                } catch (e: IllegalArgumentException) {
+                                    ErrorLogger.logException(
+                                        component = "SettingsRepository",
+                                        severity = ErrorLogger.Severity.HIGH,
+                                        exception = e,
+                                        context = mapOf("key" to "LONG_PRESS_PUNCTUATION_MODE", "value" to it),
+                                    )
+                                    LongPressPunctuationMode.SPACEBAR
+                                }
+                            } ?: LongPressPunctuationMode.SPACEBAR,
                         longPressDuration =
                             preferences[PreferenceKeys.LONG_PRESS_DURATION]?.let {
                                 try {
@@ -411,11 +424,11 @@ class SettingsRepository
             }
 
         /**
-         * Updates spacebar long press punctuation toggle.
+         * Updates long press punctuation menu mode.
          */
-        suspend fun updateSpacebarLongPressPunctuation(enabled: Boolean): Result<Unit> =
+        suspend fun updateLongPressPunctuationMode(mode: LongPressPunctuationMode): Result<Unit> =
             try {
-                dataStore.edit { it[PreferenceKeys.SPACEBAR_LONG_PRESS_PUNCTUATION] = enabled }
+                dataStore.edit { it[PreferenceKeys.LONG_PRESS_PUNCTUATION_MODE] = mode.name }
                 Result.success(Unit)
             } catch (e: Exception) {
                 Result.failure(e)

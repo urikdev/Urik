@@ -97,9 +97,10 @@
     <string name="typing_settings_backspace_swipe">حذف با کشیدن روی Backspace</string>
     <string name="typing_settings_backspace_swipe_on">کشیدن به چپ روی Backspace برای حذف کلمه</string>
     <string name="typing_settings_backspace_swipe_off">حذف با کشیدن روی Backspace غیرفعال است</string>
-    <string name="typing_settings_spacebar_long_press">نقطه‌گذاری با نگه داشتن نوار فاصله</string>
-    <string name="typing_settings_spacebar_long_press_on">نگه داشتن نوار فاصله برای نقطه‌گذاری</string>
-    <string name="typing_settings_spacebar_long_press_off">نگه داشتن نوار فاصله غیرفعال است</string>
+    <string name="typing_settings_long_press_punctuation">نقطه‌گذاری فشار طولانی</string>
+    <string name="long_press_punctuation_off">خاموش</string>
+    <string name="long_press_punctuation_spacebar">نوار فاصله</string>
+    <string name="long_press_punctuation_period">کلید نقطه</string>
     <string name="typing_settings_long_press_duration">مدت زمان نگه داشتن طولانی</string>
 
     <!-- Layout & Input Settings -->
@@ -139,7 +140,7 @@
     <string name="error_update_spacebar_cursor">به‌روزرسانی کنترل مکان‌نما با نوار فاصله ناموفق بود</string>
     <string name="error_update_cursor_speed">به‌روزرسانی سرعت مکان‌نما ناموفق بود</string>
     <string name="error_update_backspace_swipe">به‌روزرسانی حذف با کشیدن روی Backspace ناموفق بود</string>
-    <string name="error_update_spacebar_long_press">به‌روزرسانی نگه داشتن نوار فاصله برای نقطه‌گذاری ناموفق بود</string>
+    <string name="error_update_long_press_punctuation">بروزرسانی نقطه‌گذاری فشار طولانی ناموفق بود</string>
     <string name="error_update_long_press_duration">به‌روزرسانی مدت زمان نگه داشتن طولانی ناموفق بود</string>
     <string name="error_update_number_row">به‌روزرسانی ردیف اعداد ناموفق بود</string>
     <string name="error_update_space_bar_size">به‌روزرسانی اندازه نوار فاصله ناموفق بود</string>

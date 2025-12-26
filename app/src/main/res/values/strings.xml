@@ -98,9 +98,10 @@
     <string name="typing_settings_backspace_swipe">Backspace Swipe Delete</string>
     <string name="typing_settings_backspace_swipe_on">Swipe left on backspace to delete word</string>
     <string name="typing_settings_backspace_swipe_off">Backspace swipe delete disabled</string>
-    <string name="typing_settings_spacebar_long_press">Spacebar Long Press Punctuation</string>
-    <string name="typing_settings_spacebar_long_press_on">Long press spacebar for punctuation</string>
-    <string name="typing_settings_spacebar_long_press_off">Spacebar long press disabled</string>
+    <string name="typing_settings_long_press_punctuation">Long Press Punctuation</string>
+    <string name="long_press_punctuation_off">Off</string>
+    <string name="long_press_punctuation_spacebar">Spacebar</string>
+    <string name="long_press_punctuation_period">Period Key</string>
     <string name="typing_settings_long_press_duration">Long Press Duration</string>
 
     <!-- Layout & Input Settings -->
@@ -140,7 +141,7 @@
     <string name="error_update_spacebar_cursor">Failed to update spacebar cursor control</string>
     <string name="error_update_cursor_speed">Failed to update cursor speed</string>
     <string name="error_update_backspace_swipe">Failed to update backspace swipe delete</string>
-    <string name="error_update_spacebar_long_press">Failed to update spacebar long press punctuation</string>
+    <string name="error_update_long_press_punctuation">Failed to update long press punctuation</string>
     <string name="error_update_long_press_duration">Failed to update long press duration</string>
     <string name="error_update_number_row">Failed to update number row</string>
     <string name="error_update_space_bar_size">Failed to update space bar size</string>

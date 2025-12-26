@@ -88,7 +88,6 @@
     <string name="typing_settings_double_space_off">Espacio de inserción doble</string>
     <string name="typing_settings_swipe_on">Deslizar para escribir habilitado</string>
     <string name="typing_settings_swipe_off">Deslizar para escribir deshabilitado</string>
-    <string name="typing_settings_spacebar_long_press_off">Pulsación prolongada de la barra espaciadora deshabilitada</string>
     <string name="typing_settings_long_press_duration">Duración de pulsación larga</string>
 
     <!-- Layout & Input Settings -->
@@ -125,7 +124,6 @@
     <string name="error_update_vibration_strength">No se pudo actualizar la intensidad de la vibración.</string>
     <string name="error_update_double_space_period">No se pudo actualizar el punto de doble espacio</string>
     <string name="error_update_swipe">No se pudo actualizar la escritura deslizando</string>
-    <string name="error_update_spacebar_long_press">No se pudo actualizar la puntuación de la pulsación prolongada de la barra espaciadora.</string>
     <string name="error_update_long_press_duration">No se pudo actualizar la duración de la pulsación larga.</string>
     <string name="error_update_number_row">Error al actualizar la fila de números</string>
     <string name="error_update_space_bar_size">No se pudo actualizar el tamaño de la barra espaciadora.</string>
@@ -220,11 +218,14 @@
     <string name="typing_settings_backspace_swipe">Retroceso Deslizar Eliminar</string>
     <string name="typing_settings_backspace_swipe_on">Deslice hacia la izquierda al presionar la tecla de retroceso para eliminar una palabra</string>
     <string name="typing_settings_backspace_swipe_off">Retroceso Deslizar Eliminar deshabilitado</string>
-    <string name="typing_settings_spacebar_long_press">Pulsación prolongada de la barra espaciadora para puntuación</string>
-    <string name="typing_settings_spacebar_long_press_on">Pulsación prolongada de la barra espaciadora para puntuación</string>
+    <string name="typing_settings_long_press_punctuation">Puntuación de pulsación larga</string>
+    <string name="long_press_punctuation_off">Desactivado</string>
+    <string name="long_press_punctuation_spacebar">Barra espaciadora</string>
+    <string name="long_press_punctuation_period">Tecla de punto</string>
     <string name="error_update_spacebar_cursor">No se pudo actualizar el control del cursor de la barra espaciadora.</string>
     <string name="error_update_cursor_speed">Error al actualizar la velocidad del cursor</string>
     <string name="error_update_backspace_swipe">No se pudo actualizar la función de retroceso/deslizar/eliminar.</string>
+    <string name="error_update_long_press_punctuation">Error al actualizar la puntuación de pulsación larga</string>
     <string name="max_languages_reached">Se permiten máximo 3 idiomas</string>
 
 </resources>

@@ -31,6 +31,7 @@ import com.urik.keyboard.service.LanguageManager
 import com.urik.keyboard.settings.KeyLabelSize
 import com.urik.keyboard.settings.KeySize
 import com.urik.keyboard.settings.LongPressDuration
+import com.urik.keyboard.settings.LongPressPunctuationMode
 import com.urik.keyboard.settings.SpaceBarSize
 import com.urik.keyboard.theme.ThemeManager
 import com.urik.keyboard.utils.CacheMemoryManager
@@ -94,7 +95,7 @@ class KeyboardLayoutManager(
     private var currentKeySize = KeySize.MEDIUM
     private var currentSpaceBarSize = SpaceBarSize.STANDARD
     private var currentKeyLabelSize = KeyLabelSize.MEDIUM
-    private var spacebarLongPressPunctuationEnabled = true
+    private var longPressPunctuationMode = LongPressPunctuationMode.SPACEBAR
 
     private val backgroundJob = SupervisorJob()
     private val backgroundScope = CoroutineScope(Dispatchers.IO + backgroundJob)
@@ -188,6 +189,36 @@ class KeyboardLayoutManager(
                         }
                     buttonPendingCallbacks[view as Button] = PendingCallbacks(handler, runnable)
                     handler.postDelayed(runnable, com.urik.keyboard.KeyboardConstants.GestureConstants.SPACEBAR_PUNCTUATION_DELAY_MS)
+                    false
+                }
+
+                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                    buttonPendingCallbacks.remove(view as Button)?.let { pending ->
+                        pending.handler.removeCallbacks(pending.runnable)
+                    }
+                    false
+                }
+
+                else -> {
+                    false
+                }
+            }
+        }
+
+    @SuppressLint("ClickableViewAccessibility")
+    private val punctuationLongPressTouchListener =
+        View.OnTouchListener { view, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    val key = view.getTag(R.id.key_data) as? KeyboardKey.Character ?: return@OnTouchListener false
+                    val handler = Handler(Looper.getMainLooper())
+                    val runnable =
+                        Runnable {
+                            performContextualHaptic(key)
+                            handlePunctuationLongPress(key, view)
+                        }
+                    buttonPendingCallbacks[view as Button] = PendingCallbacks(handler, runnable)
+                    handler.postDelayed(runnable, currentLongPressDuration.durationMs)
                     false
                 }
 
@@ -335,8 +366,8 @@ class KeyboardLayoutManager(
         currentLongPressDuration = duration
     }
 
-    fun updateSpacebarLongPressPunctuation(enabled: Boolean) {
-        spacebarLongPressPunctuationEnabled = enabled
+    fun updateLongPressPunctuationMode(mode: LongPressPunctuationMode) {
+        longPressPunctuationMode = mode
     }
 
     fun updateKeySize(keySize: KeySize) {
@@ -702,6 +733,12 @@ class KeyboardLayoutManager(
                 setOnTouchListener(characterLongPressTouchListener)
             }
 
+            if (key is KeyboardKey.Character && key.type == KeyboardKey.KeyType.PUNCTUATION) {
+                if (longPressPunctuationMode == LongPressPunctuationMode.PERIOD && key.value == ".") {
+                    setOnTouchListener(punctuationLongPressTouchListener)
+                }
+            }
+
             if (key is KeyboardKey.Action && key.action == KeyboardKey.ActionType.SPACE) {
                 setOnTouchListener(spaceLongPressTouchListener)
             }
@@ -865,11 +902,34 @@ class KeyboardLayoutManager(
         }
 
     private fun handleSpaceLongPress(view: View) {
-        if (!spacebarLongPressPunctuationEnabled) {
+        if (longPressPunctuationMode != LongPressPunctuationMode.SPACEBAR) {
             return
         }
 
         performContextualHaptic(KeyboardKey.Action(KeyboardKey.ActionType.SPACE))
+
+        val currentLanguage = languageManager.currentLanguage.value
+        val languageCode = currentLanguage.split("-").first()
+
+        backgroundScope.launch {
+            try {
+                val punctuation = loadPunctuationWithErrorHandling(languageCode)
+                withContext(Dispatchers.Main) {
+                    showPunctuationPopup(view, punctuation)
+                }
+            } catch (_: Exception) {
+                withContext(Dispatchers.Main) {
+                    showPunctuationPopup(view, DEFAULT_PUNCTUATION)
+                }
+            }
+        }
+    }
+
+    private fun handlePunctuationLongPress(
+        key: KeyboardKey.Character,
+        view: View,
+    ) {
+        performContextualHaptic(key)
 
         val currentLanguage = languageManager.currentLanguage.value
         val languageCode = currentLanguage.split("-").first()

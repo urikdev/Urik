@@ -30,7 +30,7 @@ class SettingsEventHandler(
                 is SettingsEvent.Error.SpacebarCursorToggleFailed -> R.string.error_update_spacebar_cursor
                 is SettingsEvent.Error.CursorSpeedUpdateFailed -> R.string.error_update_cursor_speed
                 is SettingsEvent.Error.BackspaceSwipeToggleFailed -> R.string.error_update_backspace_swipe
-                is SettingsEvent.Error.SpacebarLongPressPunctuationToggleFailed -> R.string.error_update_spacebar_long_press
+                is SettingsEvent.Error.LongPressPunctuationModeUpdateFailed -> R.string.error_update_long_press_punctuation
                 is SettingsEvent.Error.LongPressDurationUpdateFailed -> R.string.error_update_long_press_duration
                 is SettingsEvent.Error.NumberRowToggleFailed -> R.string.error_update_number_row
                 is SettingsEvent.Error.SpaceBarSizeUpdateFailed -> R.string.error_update_space_bar_size
