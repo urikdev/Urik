@@ -53,10 +53,6 @@
           {"type": "character", "char": "b", "keyType": "letter"},
           {"type": "character", "char": "n", "keyType": "letter"},
           {"type": "character", "char": "m", "keyType": "letter"},
-          {"type": "character", "char": "š", "keyType": "letter"},
-          {"type": "character", "char": "č", "keyType": "letter"},
-          {"type": "character", "char": "ř", "keyType": "letter"},
-          {"type": "character", "char": "ž", "keyType": "letter"},
           {"type": "action", "action": "backspace"}
         ],
         [

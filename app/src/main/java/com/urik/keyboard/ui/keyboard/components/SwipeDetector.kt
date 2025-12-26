@@ -354,6 +354,11 @@ class SwipeDetector
 
                 val distance = calculateDistance(start.x, start.y, event.x, event.y)
                 if (distance > swipeStartDistancePx) {
+                    val currentKey = keyAt(event.x, event.y)
+                    if (currentKey == startingKey) {
+                        return
+                    }
+
                     isSwiping = true
                     swipeListener?.onSwipeStart(PointF(start.x, start.y))
                     updateSwipePath(event)
@@ -557,6 +562,7 @@ class SwipeDetector
 
                     val candidatesMap = mutableMapOf<String, WordCandidate>()
                     val pathBounds = calculatePathBounds(swipePath)
+                    var maxFrequencySeen = 0
 
                     val margin = SwipeDetectionConstants.PATH_BOUNDS_MARGIN_PX
                     val charsInBounds =
@@ -651,11 +657,24 @@ class SwipeDetector
                             }
                         val boostedFrequencyScore = entry.frequencyScore * frequencyBoost
 
-                        val (spatialWeight, frequencyWeight) =
-                            if (entry.word.length == 2 && adjustedSpatialScore > 0.75f) {
-                                0.85f to 0.15f
+                        if (entry.rawFrequency > maxFrequencySeen) {
+                            maxFrequencySeen = entry.rawFrequency.toInt()
+                        }
+
+                        val frequencyRatio =
+                            if (maxFrequencySeen > 0) {
+                                entry.rawFrequency.toFloat() / maxFrequencySeen.toFloat()
                             } else {
-                                SwipeDetectionConstants.SPATIAL_SCORE_WEIGHT to SwipeDetectionConstants.FREQUENCY_SCORE_WEIGHT
+                                1.0f
+                            }
+
+                        val (spatialWeight, frequencyWeight) =
+                            when {
+                                entry.word.length == 2 && adjustedSpatialScore > 0.75f -> 0.85f to 0.15f
+                                frequencyRatio >= 10.0f -> 0.45f to 0.55f
+                                frequencyRatio >= 5.0f -> 0.50f to 0.50f
+                                frequencyRatio >= 3.0f -> 0.55f to 0.45f
+                                else -> SwipeDetectionConstants.SPATIAL_SCORE_WEIGHT to SwipeDetectionConstants.FREQUENCY_SCORE_WEIGHT
                             }
 
                         val combinedScore = adjustedSpatialScore * spatialWeight + boostedFrequencyScore * frequencyWeight

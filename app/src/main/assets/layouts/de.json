@@ -52,7 +52,6 @@
           {"type": "character", "char": "b", "keyType": "letter"},
           {"type": "character", "char": "n", "keyType": "letter"},
           {"type": "character", "char": "m", "keyType": "letter"},
-          {"type": "character", "char": "ß", "keyType": "letter"},
           {"type": "action", "action": "backspace"}
         ],
         [
