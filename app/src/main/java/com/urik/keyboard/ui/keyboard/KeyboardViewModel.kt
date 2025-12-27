@@ -108,8 +108,11 @@ class KeyboardViewModel
             val shouldCap = shouldCapitalize()
             return when {
                 key.type == KeyboardKey.KeyType.LETTER && shouldCap -> {
-                    val result = key.value.uppercase()
-                    result
+                    if (key.value == "ß") {
+                        "ẞ"
+                    } else {
+                        key.value.uppercase()
+                    }
                 }
                 else -> {
                     key.value

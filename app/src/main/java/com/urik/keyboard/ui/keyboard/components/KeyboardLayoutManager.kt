@@ -797,7 +797,7 @@ class KeyboardLayoutManager(
                 when {
                     key.type == KeyboardKey.KeyType.LETTER && shouldCapitalize(state) -> {
                         if (key.value == "ß") {
-                            "ß"
+                            "ẞ"
                         } else {
                             key.value.uppercase()
                         }
@@ -826,7 +826,7 @@ class KeyboardLayoutManager(
                     when {
                         key.type == KeyboardKey.KeyType.LETTER && shouldCapitalize(state) -> {
                             if (key.value == "ß") {
-                                "ß"
+                                "ẞ"
                             } else {
                                 key.value.uppercase()
                             }
@@ -908,8 +908,8 @@ class KeyboardLayoutManager(
 
         performContextualHaptic(KeyboardKey.Action(KeyboardKey.ActionType.SPACE))
 
-        val currentLanguage = languageManager.currentLanguage.value
-        val languageCode = currentLanguage.split("-").first()
+        val currentLayoutLang = languageManager.currentLayoutLanguage.value
+        val languageCode = currentLayoutLang.split("-").first()
 
         backgroundScope.launch {
             try {
@@ -931,8 +931,8 @@ class KeyboardLayoutManager(
     ) {
         performContextualHaptic(key)
 
-        val currentLanguage = languageManager.currentLanguage.value
-        val languageCode = currentLanguage.split("-").first()
+        val currentLayoutLang = languageManager.currentLayoutLanguage.value
+        val languageCode = currentLayoutLang.split("-").first()
 
         backgroundScope.launch {
             try {
@@ -1137,11 +1137,11 @@ class KeyboardLayoutManager(
         key: KeyboardKey.Character,
         view: View,
     ) {
-        val currentLanguage = languageManager.currentLanguage.value
+        val currentLayoutLang = languageManager.currentLayoutLanguage.value
 
         backgroundScope.launch {
             try {
-                val variations = characterVariationService.getVariations(key.value, currentLanguage)
+                val variations = characterVariationService.getVariations(key.value, currentLayoutLang)
                 if (variations.isNotEmpty()) {
                     withContext(Dispatchers.Main) {
                         showCharacterVariationPopup(key, view, variations)
