@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name" translatable="false">Urik</string>
     <string name="ime_name">Urik 输入法</string>
     <string name="ime_label">Urik 输入法</string>
@@ -174,6 +174,7 @@
     <string name="action_previous_description">移动到前一字段</string>
 
     <string name="action_emoji">表情符号</string>
+    <string name="emoji_search_hint" tools:ignore="TypographyEllipsis">搜索表情符号...</string>
     <string name="autofill_indicator_description">密码管理器建议可用</string>
 
     <string name="theme_description">%1$s 主题</string>

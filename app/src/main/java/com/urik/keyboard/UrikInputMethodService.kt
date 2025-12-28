@@ -36,6 +36,7 @@ import com.urik.keyboard.model.KeyboardEvent
 import com.urik.keyboard.model.KeyboardKey
 import com.urik.keyboard.model.KeyboardMode
 import com.urik.keyboard.service.CharacterVariationService
+import com.urik.keyboard.service.EmojiSearchManager
 import com.urik.keyboard.service.InputMethod
 import com.urik.keyboard.service.LanguageManager
 import com.urik.keyboard.service.ProcessingResult
@@ -120,6 +121,12 @@ class UrikInputMethodService :
 
     @Inject
     lateinit var clipboardRepository: com.urik.keyboard.data.ClipboardRepository
+
+    @Inject
+    lateinit var emojiSearchManager: EmojiSearchManager
+
+    @Inject
+    lateinit var recentEmojiProvider: com.urik.keyboard.service.RecentEmojiProvider
 
     private lateinit var viewModel: KeyboardViewModel
     private lateinit var layoutManager: KeyboardLayoutManager
@@ -776,7 +783,16 @@ class UrikInputMethodService :
 
             val swipeView =
                 SwipeKeyboardView(this).apply {
-                    initialize(layoutManager, swipeDetector, spellCheckManager, wordLearningEngine, themeManager, languageManager)
+                    initialize(
+                        layoutManager,
+                        swipeDetector,
+                        spellCheckManager,
+                        wordLearningEngine,
+                        themeManager,
+                        languageManager,
+                        emojiSearchManager,
+                        recentEmojiProvider,
+                    )
                     setOnKeyClickListener { key -> handleKeyPress(key) }
                     setOnSwipeWordListener { validatedWord -> handleSwipeWord(validatedWord) }
                     setOnSuggestionClickListener { suggestion -> handleSuggestionSelected(suggestion) }
@@ -1217,6 +1233,10 @@ class UrikInputMethodService :
      */
     private fun handleKeyPress(key: KeyboardKey) {
         try {
+            if (swipeKeyboardView?.handleSearchInput(key) == true) {
+                return
+            }
+
             when (key) {
                 is KeyboardKey.Character -> {
                     val char = viewModel.getCharacterForInput(key)

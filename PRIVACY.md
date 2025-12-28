@@ -1,7 +1,7 @@
 # Privacy Policy
 
 **Effective Date:** October 18, 2025
-**Last Updated:** December 4, 2025
+**Last Updated:** December 28, 2025
 
 ## Introduction
 
@@ -97,7 +97,31 @@ For privacy inquiries, contact us at the email above.
 
 **Important:** Clipboard monitoring captures text from all apps, including sensitive data if you copy passwords, credit card numbers, or private messages. While stored encrypted, consider disabling the feature if you frequently copy sensitive information. The keyboard cannot distinguish between sensitive and non-sensitive clipboard content.
 
-### 3. Keyboard Settings (Not Encrypted)
+### 3. Recent Emoji Selections (Not Encrypted)
+
+**What:** Your recently selected emojis from the emoji picker.
+
+**Purpose:** To provide quick access to frequently used emojis.
+
+**Storage:** Local SharedPreferences on your device (Android Preferences API).
+
+**Details Stored:**
+- Up to 50 most recently selected emoji characters
+- Ordered by recency (most recent first)
+
+**What We Don't Store:**
+- When you selected each emoji
+- Which app you used the emoji in
+- Context or surrounding text
+
+**Encryption:** Not encrypted (stored as plain text preferences).
+
+**User Control:**
+- Data automatically limited to 50 emojis (oldest removed when exceeded)
+- Cleared when you uninstall the app
+- Cannot be manually cleared without uninstalling
+
+### 4. Keyboard Settings (Not Encrypted)
 
 **What:** Your keyboard preferences and configuration.
 
@@ -112,7 +136,7 @@ For privacy inquiries, contact us at the email above.
 
 **Purpose:** To remember your keyboard customization choices.
 
-### 4. Error Logs (Local Only)
+### 5. Error Logs (Local Only)
 
 **What:** Technical error information when the keyboard encounters critical failures.
 
@@ -133,7 +157,7 @@ For privacy inquiries, contact us at the email above.
 
 **Sharing:** Error logs are never transmitted automatically. You can manually export and share them via the settings menu if you choose to report a bug.
 
-### 5. Temporary In-Memory Data
+### 6. Temporary In-Memory Data
 
 **What:** Recent words and processing data held briefly in RAM for performance.
 
@@ -156,6 +180,7 @@ All data processing occurs locally on your device:
 
 - **Learned Words:** Generate personalized suggestions and autocorrect
 - **Clipboard History:** Quick access to recently copied text for re-use
+- **Recent Emoji Selections:** Display frequently used emojis first in emoji picker
 - **Settings:** Apply your keyboard preferences
 - **Error Logs:** Debug issues (only if you share them)
 - **Temporary Caches:** Improve typing performance and responsiveness
@@ -207,6 +232,12 @@ The keyboard automatically detects password fields, credit card inputs, email ad
     - Clear all clipboard data: Settings → Privacy & Data → Clear All Data
     - Uninstall app: Automatically deletes all data
 
+### Recent Emoji Selections
+- **Retention:** Indefinite, until you uninstall the app (automatically limited to 50 most recent)
+- **Deletion Options:**
+    - Uninstall app: Automatically deletes all data
+    - No in-app option to clear recent emoji selections
+
 ### Settings
 - **Retention:** Until you reset to defaults or uninstall the app
 
@@ -221,6 +252,7 @@ The keyboard automatically detects password fields, credit card inputs, email ad
 When you uninstall Urik, Android automatically deletes:
 - All learned words (encrypted database)
 - All clipboard history (encrypted database)
+- All recent emoji selections
 - All settings
 - All error logs
 - All cached data
@@ -287,6 +319,16 @@ The keyboard uses word frequency lists derived from the **FrequencyWords** proje
 - **Original Data:** OpenSubtitles corpus
 - **Modifications:** Sorted by frequency, filtered for relevance
 - **Privacy:** Dictionary data is bundled in the app. No external requests are made.
+
+### Emoji Annotations
+
+The keyboard uses multilingual emoji keyword annotations from the **Unicode CLDR** (Common Locale Data Repository) for emoji search functionality.
+
+- **Source:** [Unicode CLDR](https://github.com/unicode-org/cldr-json)
+- **License:** Unicode License V3
+- **Original Data:** Multilingual Unicode Consortium emoji annotations
+- **Modifications:** Extracted emoji annotations, converted to searchable JSON format
+- **Privacy:** Emoji annotation data is bundled in the app. No external requests are made.
 
 ### No Other Third Parties
 

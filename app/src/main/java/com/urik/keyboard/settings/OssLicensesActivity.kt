@@ -173,6 +173,13 @@ class OssLicensesActivity : AppCompatActivity() {
             "Unicode License",
         )
 
+        addLicense(
+            builder,
+            "Unicode CLDR Emoji Annotations",
+            "https://github.com/unicode-org/cldr-json",
+            "Unicode License",
+        )
+
         builder.append("\n\n─────────────────────────────────────\n\n")
         builder.append("Apache License 2.0\n\n")
         builder.append(APACHE_2_LICENSE_SUMMARY)

@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="ime_name">Клавиатура Urik</string>
     <string name="ime_label">Клавиатура Urik</string>
     <string name="ime_description">Непрерывный ввод, проверка орфографии и поддержка нескольких языков без вреда для вашей конфиденциальности. Без телеметрии. Без сбора данных. Всё остается на вашем устройстве.</string>
@@ -179,6 +179,7 @@
     <string name="action_previous_description">Перейти к предыдущему полю</string>
 
     <string name="action_emoji">Эмодзи</string>
+    <string name="emoji_search_hint" tools:ignore="TypographyEllipsis">Поиск эмодзи...</string>
     <string name="autofill_indicator_description">Доступны предложения менеджера паролей</string>
 
     <!-- Theme Picker Accessibility -->
