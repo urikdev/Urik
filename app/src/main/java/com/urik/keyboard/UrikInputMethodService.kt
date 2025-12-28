@@ -1969,7 +1969,7 @@ class UrikInputMethodService :
                             }
                         }
 
-                        if (!isAcceleratedDeletion) {
+                        if (!isAcceleratedDeletion && !isUrlOrEmailField) {
                             val (currentSequence, bufferSnapshot) =
                                 synchronized(processingLock) {
                                     ++processingSequence to displayBuffer
@@ -2073,7 +2073,7 @@ class UrikInputMethodService :
                         }
                     }
 
-                    if (!isAcceleratedDeletion) {
+                    if (!isAcceleratedDeletion && !isUrlOrEmailField) {
                         val remainingText = textBeforeCursor.dropLast(1)
                         val wordInfo = extractWordBeforeCursor(remainingText)
 
