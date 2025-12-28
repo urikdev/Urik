@@ -475,6 +475,7 @@ class UrikInputMethodService :
 
         suggestionDebounceJob?.cancel()
 
+        isActivelyEditing = true
         displayBuffer = ""
         wordState = WordState()
         pendingSuggestions = emptyList()
