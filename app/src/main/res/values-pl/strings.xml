@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="ime_name">Klawiatura Urik</string>
     <string name="ime_label">Klawiatura Urik</string>
     <string name="ime_description">Pisanie gestami, sprawdzanie pisowni i obsługa wielu języków bez naruszania prywatności. Bez telemetrii. Bez gromadzenia danych. Wszystko pozostaje na twoim urządzeniu.</string>
@@ -177,6 +177,7 @@
     <string name="action_previous_description">Przejdź do poprzedniego pola</string>
 
     <string name="action_emoji">Emoji</string>
+    <string name="emoji_search_hint" tools:ignore="TypographyEllipsis">Szukaj emoji...</string>
     <string name="autofill_indicator_description">Dostępne sugestie menedżera haseł</string>
 
     <!-- Theme Picker Accessibility -->

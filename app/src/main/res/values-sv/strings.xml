@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="ime_name">Urik Tangentbord</string>
     <string name="ime_label">Urik Tangentbord</string>
     <string name="ime_description">Svepskrivning, stavningskontroll och flerspråkigt stöd utan att kompromissa med din integritet. Ingen telemetri. Ingen datainsamling. Allt finns kvar på din enhet.</string>
@@ -111,6 +111,7 @@
     <string name="action_next_description">Gå till nästa fält</string>
     <string name="action_previous_description">Flytta till föregående fält</string>
     <string name="action_emoji">Emoji</string>
+    <string name="emoji_search_hint" tools:ignore="TypographyEllipsis">Sök emoji...</string>
     <string name="autofill_indicator_description">Lösenordshanterarens förslag tillgängliga</string>
 
     <!-- Theme Picker Accessibility -->

@@ -65,6 +65,13 @@ Spell checking uses word frequency lists from [FrequencyWords](https://github.co
 - License: CC-BY-SA-4.0
 - Modifications: Sorted by frequency, filtered for keyboard use
 
+## Emoji Annotations
+
+Emoji search uses multilingual keyword annotations from [Unicode CLDR](https://github.com/unicode-org/cldr-json) (Common Locale Data Repository).
+
+- License: Unicode License V3
+- Modifications: Extracted emoji annotations, converted to searchable JSON format
+
 ## License
 
 GNU General Public License v3.0

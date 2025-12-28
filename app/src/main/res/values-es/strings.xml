@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="ime_name" translatable="false">Teclado Urik</string>
     <string name="ime_label">Teclado Urik</string>
     <string name="ime_description">Escritura deslizando el dedo, corrector ortográfico y compatibilidad multilingüe sin comprometer tu privacidad. Sin telemetría. Sin recopilación de datos. Todo permanece en tu dispositivo.</string>
@@ -176,6 +176,7 @@
     <string name="action_previous_description">Pasar al campo anterior</string>
 
     <string name="action_emoji">Emoji</string>
+    <string name="emoji_search_hint" tools:ignore="TypographyEllipsis">Buscar emojis...</string>
     <string name="autofill_indicator_description">Sugerencias del gestor de contraseñas disponibles</string>
 
     <!-- Theme Picker Accessibility -->
