@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name" translatable="false">Urik</string>
     <string name="ime_name">Urik Keyboard</string>
     <string name="ime_label">Urik Keyboard</string>
@@ -194,6 +194,7 @@
     <string name="action_previous_description">Move to previous field</string>
 
     <string name="action_emoji">Emoji</string>
+    <string name="emoji_search_hint" tools:ignore="TypographyEllipsis">Search emojis...</string>
     <string name="autofill_indicator_description">Password manager suggestions available</string>
 
     <!-- Theme Picker Accessibility -->

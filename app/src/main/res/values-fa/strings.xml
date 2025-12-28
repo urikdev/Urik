@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name" translatable="false">Urik</string>
     <string name="ime_name">کیبورد Urik</string>
     <string name="ime_label">کیبورد Urik</string>
@@ -193,6 +193,7 @@
     <string name="action_previous_description">انتقال به فیلد قبلی</string>
 
     <string name="action_emoji">ایموجی</string>
+    <string name="emoji_search_hint" tools:ignore="TypographyEllipsis">جستجوی ایموجی...</string>
     <string name="autofill_indicator_description">پیشنهادات مدیر رمز عبور در دسترس است</string>
 
     <!-- Theme Picker Accessibility -->

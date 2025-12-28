@@ -3,6 +3,8 @@ package com.urik.keyboard.ui.keyboard.components
 import android.content.Context
 import android.graphics.PointF
 import android.graphics.Rect
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.Gravity
@@ -11,7 +13,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import android.widget.Button
+import android.widget.EditText
 import android.widget.FrameLayout
+import android.widget.GridLayout
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
@@ -21,6 +26,7 @@ import com.urik.keyboard.R
 import com.urik.keyboard.model.KeyboardKey
 import com.urik.keyboard.model.KeyboardLayout
 import com.urik.keyboard.model.KeyboardState
+import com.urik.keyboard.service.EmojiSearchManager
 import com.urik.keyboard.service.LanguageManager
 import com.urik.keyboard.service.SpellCheckManager
 import com.urik.keyboard.service.WordLearningEngine
@@ -52,6 +58,8 @@ class SwipeKeyboardView
         private var swipeDetector: SwipeDetector? = null
         private var themeManager: ThemeManager? = null
         private var languageManager: LanguageManager? = null
+        private var emojiSearchManager: EmojiSearchManager? = null
+        private var recentEmojiProvider: com.urik.keyboard.service.RecentEmojiProvider? = null
 
         private var onKeyClickListener: ((KeyboardKey) -> Unit)? = null
         private var onSwipeWordListener: ((String) -> Unit)? = null
@@ -95,6 +103,27 @@ class SwipeKeyboardView
 
         private var emojiPickerContainer: LinearLayout? = null
         private var isShowingEmojiPicker = false
+        private var emojiSearchInputContainer: LinearLayout? = null
+        private var emojiSearchInput: EditText? = null
+        private var emojiSearchResultsContainer: View? = null
+        private var emojiSearchContainer: LinearLayout? = null
+        private var isEmojiSearchActive = false
+        private var searchDebounceJob: kotlinx.coroutines.Job? = null
+        private val emojiViewPool = mutableListOf<TextView>()
+        private val activeEmojiViews = mutableListOf<TextView>()
+
+        private var emojiPickerView: EmojiPickerView? = null
+        private var searchCloseButton: TextView? = null
+        private var closeButtonBar: LinearLayout? = null
+        private var searchButton: ImageView? = null
+        private var backspaceButton: TextView? = null
+        private var closeButton: TextView? = null
+        private var searchResultsGrid: GridLayout? = null
+        private var searchScopeJob: kotlinx.coroutines.Job? = null
+        private var searchScope: CoroutineScope? = null
+
+        private var suggestionBarHeightPx = -1
+        private var searchOverlapOffsetPx = -1
 
         private var autofillIndicatorIcon: TextView? = null
         private var isShowingAutofillSuggestions = false
@@ -126,14 +155,88 @@ class SwipeKeyboardView
         private val emojiButtonClickListener =
             OnClickListener {
                 if (isDestroyed) return@OnClickListener
-                showEmojiPicker(
-                    onEmojiSelected = { selectedEmoji ->
-                        onEmojiSelected?.invoke(selectedEmoji)
-                    },
-                    onBackspace = {
-                        onBackspacePressed?.invoke()
-                    },
-                )
+                showEmojiPicker()
+            }
+
+        private val emojiPickedListener =
+            androidx.core.util.Consumer<androidx.emoji2.emojipicker.EmojiViewItem> { emojiViewItem ->
+                if (isDestroyed) return@Consumer
+                onEmojiSelected?.invoke(emojiViewItem.emoji)
+            }
+
+        private val backspaceClickListener =
+            OnClickListener {
+                if (isDestroyed) return@OnClickListener
+                onBackspacePressed?.invoke()
+            }
+
+        private val searchActivateClickListener =
+            OnClickListener {
+                if (isDestroyed) return@OnClickListener
+                emojiPickerContainer?.visibility = GONE
+                isEmojiSearchActive = true
+
+                emojiSearchContainer?.let { searchContainer ->
+                    addView(
+                        searchContainer,
+                        LayoutParams(
+                            LayoutParams.MATCH_PARENT,
+                            LayoutParams.WRAP_CONTENT,
+                        ).apply {
+                            gravity = Gravity.TOP
+                        },
+                    )
+                }
+
+                emojiSearchInputContainer?.visibility = VISIBLE
+
+                findKeyboardView()?.let { keyboardView ->
+                    keyboardView.visibility = VISIBLE
+                    (keyboardView.layoutParams as? LayoutParams)?.let { params ->
+                        params.gravity = Gravity.BOTTOM
+                        keyboardView.requestLayout()
+                    }
+                }
+
+                requestLayout()
+
+                emojiSearchInput?.post {
+                    emojiSearchInput?.requestFocus()
+                    emojiSearchInput?.text?.length?.let { emojiSearchInput?.setSelection(it) }
+                }
+            }
+
+        private val searchCloseClickListener =
+            OnClickListener {
+                if (isDestroyed) return@OnClickListener
+                emojiSearchContainer?.let { removeView(it) }
+                emojiSearchResultsContainer?.visibility = GONE
+                searchResultsGrid?.removeAllViews()
+                emojiPickerContainer?.visibility = VISIBLE
+                isEmojiSearchActive = false
+                emojiSearchInput?.text?.clear()
+
+                findKeyboardView()?.let { keyboardView ->
+                    keyboardView.visibility = GONE
+                    (keyboardView.layoutParams as? LayoutParams)?.let { params ->
+                        params.gravity = Gravity.NO_GRAVITY
+                        keyboardView.requestLayout()
+                    }
+                }
+            }
+
+        private val emojiPickerCloseClickListener =
+            OnClickListener {
+                if (isDestroyed) return@OnClickListener
+                hideEmojiPicker()
+            }
+
+        private val searchResultEmojiClickListener =
+            OnClickListener { view ->
+                if (isDestroyed) return@OnClickListener
+                val emoji = view.getTag(R.id.suggestion_text) as? String ?: return@OnClickListener
+                recentEmojiProvider?.recordSelection(emoji)
+                onEmojiSelected?.invoke(emoji)
             }
 
         private val globalLayoutListener =
@@ -169,6 +272,7 @@ class SwipeKeyboardView
                 viewScope.launch {
                     manager.currentTheme.collect {
                         swipeOverlay.resetColors()
+                        updateEmojiPickerColors()
                     }
                 }
             }
@@ -214,153 +318,345 @@ class SwipeKeyboardView
             return barRect.contains(x.toInt(), y.toInt())
         }
 
-        /**
-         * Shows full-screen emoji picker overlay.
-         *
-         * Hides keyboard view, shows emoji grid with backspace and close buttons.
-         * Auto-hidden on keyboard layout change.
-         */
-        fun showEmojiPicker(
-            onEmojiSelected: (String) -> Unit,
-            onBackspace: () -> Unit,
-        ) {
-            if (isDestroyed || isShowingEmojiPicker) return
-
-            isShowingEmojiPicker = true
-            findKeyboardView()?.visibility = GONE
+        private fun setupEmojiPickerViews() {
+            if (emojiPickerView != null) return
 
             val baseContext = context
-
             val themedContext =
                 androidx.appcompat.view.ContextThemeWrapper(
                     baseContext,
                     R.style.Theme_Urik,
                 )
 
-            val container =
-                LinearLayout(baseContext).apply {
-                    orientation = LinearLayout.VERTICAL
-                    layoutParams =
-                        LayoutParams(
-                            LayoutParams.MATCH_PARENT,
-                            LayoutParams.MATCH_PARENT,
-                        )
-                    setBackgroundColor(
-                        themeManager!!
-                            .currentTheme.value.colors.keyboardBackground,
-                    )
-                }
-
             val emojiTextSize = calculateResponsiveSuggestionTextSize()
-            val closeButtonBar =
-                LinearLayout(baseContext).apply {
-                    orientation = LinearLayout.HORIZONTAL
-                    gravity = Gravity.CENTER_VERTICAL or Gravity.END
-                    setBackgroundColor(
-                        themeManager!!
-                            .currentTheme.value.colors.suggestionBarBackground,
-                    )
+            val minTouchTarget = baseContext.resources.getDimensionPixelSize(R.dimen.minimum_touch_target)
+            val basePadding = baseContext.resources.getDimensionPixelSize(R.dimen.key_margin_horizontal)
 
-                    val basePadding = baseContext.resources.getDimensionPixelSize(R.dimen.key_margin_horizontal)
-                    val verticalPadding = (basePadding * 0.3f).toInt()
-                    setPadding(basePadding, verticalPadding, 0, verticalPadding)
+            searchScopeJob = SupervisorJob()
+            searchScope = CoroutineScope(Dispatchers.Main + searchScopeJob!!)
 
-                    val minTouchTarget = baseContext.resources.getDimensionPixelSize(R.dimen.minimum_touch_target)
-                    minimumHeight = minTouchTarget
+            val searchResultsGrid =
+                GridLayout(baseContext).apply {
+                    rowCount = 2
+                    columnCount = GridLayout.UNDEFINED
+                    orientation = GridLayout.HORIZONTAL
+                    val gridPadding = (basePadding * 0.5f).toInt()
+                    setPadding(0, gridPadding, 0, gridPadding)
                 }
+            this.searchResultsGrid = searchResultsGrid
 
-            val backspaceButton =
-                TextView(baseContext).apply {
-                    text = "⌫"
-                    setTextSize(TypedValue.COMPLEX_UNIT_SP, 20f)
-                    setTextColor(
-                        themeManager!!
-                            .currentTheme.value.colors.suggestionText,
-                    )
-                    gravity = Gravity.CENTER
+            val searchInput =
+                EditText(baseContext).apply {
+                    hint = baseContext.getString(R.string.emoji_search_hint)
+                    background = null
+                    setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
+                    isFocusable = true
+                    isFocusableInTouchMode = true
+                    isCursorVisible = true
+                    showSoftInputOnFocus = false
+                    layoutParams =
+                        LinearLayout.LayoutParams(
+                            0,
+                            LinearLayout.LayoutParams.WRAP_CONTENT,
+                            1f,
+                        )
 
-                    val minTouchTarget = baseContext.resources.getDimensionPixelSize(R.dimen.minimum_touch_target)
-                    val buttonPadding = (18f * baseContext.resources.displayMetrics.density).toInt()
-                    setPadding(buttonPadding, 0, buttonPadding, 0)
+                    addTextChangedListener(
+                        object : TextWatcher {
+                            override fun beforeTextChanged(
+                                s: CharSequence?,
+                                start: Int,
+                                count: Int,
+                                after: Int,
+                            ) {}
 
-                    setBackgroundColor(
-                        themeManager!!
-                            .currentTheme.value.colors.keyBackgroundAction,
-                    )
-                    contentDescription = "Backspace"
+                            override fun onTextChanged(
+                                s: CharSequence?,
+                                start: Int,
+                                before: Int,
+                                count: Int,
+                            ) {}
 
-                    setOnClickListener {
-                        onBackspace()
-                    }
+                            override fun afterTextChanged(s: Editable?) {
+                                searchDebounceJob?.cancel()
 
-                    val marginParams =
-                        LinearLayout
-                            .LayoutParams(
-                                LinearLayout.LayoutParams.WRAP_CONTENT,
-                                minTouchTarget,
-                            ).apply {
-                                val basePadding = baseContext.resources.getDimensionPixelSize(R.dimen.key_margin_horizontal)
-                                marginEnd = basePadding
+                                val query = s?.toString() ?: ""
+                                if (query.isBlank()) {
+                                    emojiSearchResultsContainer?.visibility = GONE
+                                    searchResultsGrid?.removeAllViews()
+                                    return
+                                }
+
+                                searchDebounceJob =
+                                    searchScope?.launch {
+                                        kotlinx.coroutines.delay(SEARCH_DEBOUNCE_MS)
+
+                                        val results = emojiSearchManager?.search(query) ?: emptyList()
+                                        withContext(Dispatchers.Main) {
+                                            returnEmojiViewsToPool()
+                                            searchResultsGrid?.removeAllViews()
+
+                                            if (results.isEmpty()) {
+                                                emojiSearchResultsContainer?.visibility = GONE
+                                            } else {
+                                                emojiSearchResultsContainer?.visibility = VISIBLE
+                                                results.forEach { emoji ->
+                                                    val emojiView = getOrCreateEmojiView(emoji)
+                                                    searchResultsGrid?.addView(emojiView)
+                                                    activeEmojiViews.add(emojiView)
+                                                }
+                                            }
+                                        }
+                                    }
                             }
-                    layoutParams = marginParams
+                        },
+                    )
                 }
+            emojiSearchInput = searchInput
 
-            val closeButton =
+            val searchCloseBtn =
                 TextView(baseContext).apply {
                     text = "✕"
                     setTextSize(TypedValue.COMPLEX_UNIT_SP, emojiTextSize)
-                    setTextColor(
-                        themeManager!!
-                            .currentTheme.value.colors.keyTextAction,
-                    )
                     gravity = Gravity.CENTER
+                    contentDescription = "Close search"
+                    layoutParams =
+                        LinearLayout.LayoutParams(
+                            minTouchTarget,
+                            minTouchTarget,
+                        )
+                }
+            this.searchCloseButton = searchCloseBtn
 
-                    val minTouchTarget = baseContext.resources.getDimensionPixelSize(R.dimen.minimum_touch_target)
-                    setBackgroundColor(
-                        themeManager!!
-                            .currentTheme.value.colors.keyBackgroundAction,
-                    )
+            val searchInputContainer =
+                LinearLayout(baseContext).apply {
+                    orientation = LinearLayout.HORIZONTAL
+                    gravity = Gravity.CENTER_VERTICAL
+                    val horizontalPadding = (basePadding * 0.8f).toInt()
+                    val verticalPadding = (basePadding * 0.3f).toInt()
+                    setPadding(horizontalPadding, verticalPadding, 0, verticalPadding)
+                    minimumHeight = minTouchTarget
+                    visibility = GONE
+                    addView(searchInput)
+                    addView(searchCloseBtn)
+                }
+            emojiSearchInputContainer = searchInputContainer
+
+            val searchResultsContainer =
+                android.widget.HorizontalScrollView(baseContext).apply {
+                    visibility = GONE
+                    isFillViewport = true
+                    clipChildren = true
+                    clipToPadding = true
+                    val horizontalPadding = (basePadding * 0.8f).toInt()
+                    setPadding(horizontalPadding, 0, 0, 0)
+                    addView(searchResultsGrid)
+                }
+            emojiSearchResultsContainer = searchResultsContainer
+
+            val searchBtn =
+                ImageView(baseContext).apply {
+                    setImageResource(R.drawable.search_48px)
+                    scaleType = ImageView.ScaleType.CENTER_INSIDE
+                    val buttonPadding = (12f * baseContext.resources.displayMetrics.density).toInt()
+                    setPadding(buttonPadding, buttonPadding, buttonPadding, buttonPadding)
+                    contentDescription = "Search emojis"
+                    isClickable = true
+                    isFocusable = true
+                    layoutParams =
+                        LinearLayout.LayoutParams(
+                            minTouchTarget,
+                            minTouchTarget,
+                        )
+                }
+            this.searchButton = searchBtn
+
+            val backspaceBtn =
+                TextView(baseContext).apply {
+                    text = "⌫"
+                    setTextSize(TypedValue.COMPLEX_UNIT_SP, 20f)
+                    gravity = Gravity.CENTER
+                    val buttonPadding = (18f * baseContext.resources.displayMetrics.density).toInt()
+                    setPadding(buttonPadding, 0, buttonPadding, 0)
+                    contentDescription = "Backspace"
+                    layoutParams =
+                        LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.WRAP_CONTENT,
+                            minTouchTarget,
+                        )
+                }
+            this.backspaceButton = backspaceBtn
+
+            val closeBtn =
+                TextView(baseContext).apply {
+                    text = "✕"
+                    setTextSize(TypedValue.COMPLEX_UNIT_SP, emojiTextSize)
+                    gravity = Gravity.CENTER
                     contentDescription = "Close emoji picker"
-
-                    setOnClickListener {
-                        hideEmojiPicker()
-                    }
-
                     layoutParams =
-                        LinearLayout
-                            .LayoutParams(
-                                minTouchTarget,
-                                minTouchTarget,
-                            )
+                        LinearLayout.LayoutParams(
+                            minTouchTarget,
+                            minTouchTarget,
+                        )
                 }
+            this.closeButton = closeBtn
 
-            closeButtonBar.addView(backspaceButton)
-            closeButtonBar.addView(closeButton)
-            container.addView(
-                closeButtonBar,
-                LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT,
-                ),
-            )
+            val btnBar =
+                LinearLayout(baseContext).apply {
+                    orientation = LinearLayout.HORIZONTAL
+                    gravity = Gravity.CENTER_VERTICAL
+                    val verticalPadding = (basePadding * 0.3f).toInt()
+                    setPadding(basePadding, verticalPadding, 0, verticalPadding)
+                    minimumHeight = minTouchTarget
 
-            val emojiPickerView =
+                    val spacer =
+                        View(baseContext).apply {
+                            layoutParams =
+                                LinearLayout.LayoutParams(
+                                    0,
+                                    0,
+                                    1f,
+                                )
+                        }
+                    addView(spacer)
+                    addView(searchBtn)
+                    addView(backspaceBtn)
+                    addView(closeBtn)
+                }
+            this.closeButtonBar = btnBar
+
+            val pickerView =
                 EmojiPickerView(themedContext).apply {
-                    setOnEmojiPickedListener { emojiViewItem ->
-                        onEmojiSelected(emojiViewItem.emoji)
-                    }
                     layoutParams =
-                        LinearLayout
-                            .LayoutParams(
-                                LinearLayout.LayoutParams.MATCH_PARENT,
-                                0,
-                                1f,
-                            )
+                        LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT,
+                            0,
+                            1f,
+                        )
                 }
+            this.emojiPickerView = pickerView
 
-            container.addView(emojiPickerView)
+            val searchContainer =
+                LinearLayout(baseContext).apply {
+                    orientation = LinearLayout.VERTICAL
+                    val horizontalPadding = baseContext.resources.getDimensionPixelSize(R.dimen.keyboard_padding)
+                    val verticalPadding = baseContext.resources.getDimensionPixelSize(R.dimen.keyboard_padding_vertical)
+                    setPadding(horizontalPadding, verticalPadding, horizontalPadding, 0)
+                    addView(
+                        searchResultsContainer,
+                        LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT,
+                            LinearLayout.LayoutParams.WRAP_CONTENT,
+                        ),
+                    )
+                    addView(
+                        searchInputContainer,
+                        LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT,
+                            minTouchTarget,
+                        ),
+                    )
+                }
+            emojiSearchContainer = searchContainer
+
+            val container =
+                LinearLayout(baseContext).apply {
+                    orientation = LinearLayout.VERTICAL
+                    val horizontalPadding = baseContext.resources.getDimensionPixelSize(R.dimen.keyboard_padding)
+                    val verticalPadding = baseContext.resources.getDimensionPixelSize(R.dimen.keyboard_padding_vertical)
+                    setPadding(horizontalPadding, verticalPadding, horizontalPadding, verticalPadding)
+                    clipChildren = false
+                    clipToPadding = false
+                    addView(
+                        btnBar,
+                        LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT,
+                            minTouchTarget,
+                        ),
+                    )
+                    addView(pickerView)
+                }
             emojiPickerContainer = container
-            addView(container)
+
+            searchCloseBtn.setOnClickListener(searchCloseClickListener)
+            searchBtn.setOnClickListener(searchActivateClickListener)
+            backspaceBtn.setOnClickListener(backspaceClickListener)
+            closeBtn.setOnClickListener(emojiPickerCloseClickListener)
+            pickerView.setOnEmojiPickedListener(emojiPickedListener)
+
+            updateEmojiPickerColors()
+        }
+
+        private fun updateEmojiPickerColors() {
+            val theme = themeManager?.currentTheme?.value ?: return
+
+            emojiPickerContainer?.setBackgroundColor(theme.colors.keyboardBackground)
+            emojiSearchContainer?.setBackgroundColor(theme.colors.keyboardBackground)
+            emojiSearchInputContainer?.setBackgroundColor(theme.colors.suggestionBarBackground)
+            emojiSearchResultsContainer?.setBackgroundColor(theme.colors.suggestionBarBackground)
+            closeButtonBar?.setBackgroundColor(theme.colors.suggestionBarBackground)
+
+            emojiSearchInput?.setTextColor(theme.colors.suggestionText)
+            emojiSearchInput?.setHintTextColor(theme.colors.suggestionText and 0x60FFFFFF)
+
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+                emojiSearchInput?.textCursorDrawable =
+                    android.graphics.drawable.GradientDrawable().apply {
+                        shape = android.graphics.drawable.GradientDrawable.RECTANGLE
+                        setSize(
+                            (2 * context.resources.displayMetrics.density).toInt(),
+                            ((emojiSearchInput?.textSize ?: 16f) * 1.2f).toInt(),
+                        )
+                        setColor(theme.colors.keyTextCharacter)
+                    }
+            }
+
+            searchCloseButton?.setTextColor(theme.colors.keyTextAction)
+            searchCloseButton?.setBackgroundColor(theme.colors.keyBackgroundAction)
+
+            searchButton?.setColorFilter(theme.colors.keyTextAction)
+            searchButton?.setBackgroundColor(theme.colors.keyBackgroundAction)
+
+            backspaceButton?.setTextColor(theme.colors.keyTextAction)
+            backspaceButton?.setBackgroundColor(theme.colors.keyBackgroundAction)
+
+            closeButton?.setTextColor(theme.colors.keyTextAction)
+            closeButton?.setBackgroundColor(theme.colors.keyBackgroundAction)
+        }
+
+        /**
+         * Shows full-screen emoji picker overlay.
+         *
+         * Hides keyboard view, shows emoji grid with backspace and close buttons.
+         * Auto-hidden on keyboard layout change.
+         */
+        fun showEmojiPicker() {
+            if (isDestroyed || isShowingEmojiPicker) return
+
+            setupEmojiPickerViews()
+
+            isShowingEmojiPicker = true
+            findKeyboardView()?.visibility = GONE
+
+            searchScope?.launch {
+                emojiSearchManager?.ensureLoaded()
+            }
+
+            emojiPickerView?.let { picker ->
+                recentEmojiProvider?.let { provider ->
+                    picker.setRecentEmojiProvider(provider)
+                }
+            }
+
+            emojiPickerContainer?.let { container ->
+                addView(
+                    container,
+                    LayoutParams(
+                        LayoutParams.MATCH_PARENT,
+                        LayoutParams.MATCH_PARENT,
+                    ),
+                )
+            }
         }
 
         /**
@@ -370,14 +666,27 @@ class SwipeKeyboardView
             if (isDestroyed || !isShowingEmojiPicker) return
 
             isShowingEmojiPicker = false
+            isEmojiSearchActive = false
 
             emojiPickerContainer?.let { container ->
                 removeView(container)
             }
-            emojiPickerContainer = null
+
+            emojiSearchContainer?.let { searchContainer ->
+                removeView(searchContainer)
+            }
+
+            emojiSearchInput?.text?.clear()
+            emojiSearchResultsContainer?.visibility = GONE
+            searchResultsGrid?.removeAllViews()
+            emojiSearchInputContainer?.visibility = GONE
 
             findKeyboardView()?.let { keyboardView ->
                 keyboardView.visibility = VISIBLE
+                (keyboardView.layoutParams as? LayoutParams)?.let { params ->
+                    params.gravity = Gravity.NO_GRAVITY
+                    keyboardView.requestLayout()
+                }
                 suggestionBar?.let { bar ->
                     val minTouchTarget = context.resources.getDimensionPixelSize(R.dimen.minimum_touch_target)
                     bar.minimumHeight = minTouchTarget
@@ -398,7 +707,25 @@ class SwipeKeyboardView
                 keyboardView.measure(widthMeasureSpec, MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED))
                 val keyboardHeight = keyboardView.measuredHeight
 
-                val constrainedHeight = MeasureSpec.makeMeasureSpec(keyboardHeight, MeasureSpec.EXACTLY)
+                val totalHeight =
+                    if (isEmojiSearchActive && emojiSearchContainer != null) {
+                        emojiSearchContainer!!.measure(widthMeasureSpec, MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED))
+                        val searchHeight = emojiSearchContainer!!.measuredHeight
+
+                        if (suggestionBarHeightPx == -1) {
+                            suggestionBarHeightPx = context.resources.getDimensionPixelSize(R.dimen.minimum_touch_target)
+                        }
+                        if (searchOverlapOffsetPx == -1) {
+                            searchOverlapOffsetPx = (4 * context.resources.displayMetrics.density).toInt()
+                        }
+
+                        val calculatedHeight = searchHeight + keyboardHeight - suggestionBarHeightPx - searchOverlapOffsetPx
+                        maxOf(calculatedHeight, keyboardHeight)
+                    } else {
+                        keyboardHeight
+                    }
+
+                val constrainedHeight = MeasureSpec.makeMeasureSpec(totalHeight, MeasureSpec.EXACTLY)
                 super.onMeasure(widthMeasureSpec, constrainedHeight)
             } else {
                 super.onMeasure(widthMeasureSpec, heightMeasureSpec)
@@ -418,6 +745,8 @@ class SwipeKeyboardView
             wordLearningEngine: WordLearningEngine,
             themeManager: ThemeManager,
             languageManager: LanguageManager,
+            emojiSearchManager: EmojiSearchManager,
+            recentEmojiProvider: com.urik.keyboard.service.RecentEmojiProvider,
         ) {
             if (isDestroyed) return
 
@@ -427,6 +756,8 @@ class SwipeKeyboardView
             this.wordLearningEngine = wordLearningEngine
             this.themeManager = themeManager
             this.languageManager = languageManager
+            this.emojiSearchManager = emojiSearchManager
+            this.recentEmojiProvider = recentEmojiProvider
 
             detector.setSwipeListener(this)
             setupSwipeOverlay()
@@ -471,6 +802,41 @@ class SwipeKeyboardView
         fun setOnSpacebarCursorMoveListener(listener: (Int) -> Unit) {
             if (!isDestroyed) {
                 this.onSpacebarCursorMove = listener
+            }
+        }
+
+        /**
+         * Attempts to handle key input for emoji search if search is active.
+         * Returns true if the input was consumed by search, false otherwise.
+         */
+        fun handleSearchInput(key: KeyboardKey): Boolean {
+            if (!isEmojiSearchActive) return false
+
+            val searchInput = emojiSearchInput ?: return false
+            val editable = searchInput.text ?: return false
+
+            when (key) {
+                is KeyboardKey.Character -> {
+                    editable.append(key.value)
+                    searchInput.setSelection(editable.length)
+                    return true
+                }
+
+                is KeyboardKey.Action -> {
+                    when (key.action) {
+                        KeyboardKey.ActionType.BACKSPACE -> {
+                            if (editable.isNotEmpty()) {
+                                editable.delete(editable.length - 1, editable.length)
+                                searchInput.setSelection(editable.length)
+                            }
+                            return true
+                        }
+
+                        else -> {
+                            return false
+                        }
+                    }
+                }
             }
         }
 
@@ -913,7 +1279,12 @@ class SwipeKeyboardView
 
             for (i in 0 until childCount) {
                 val child = getChildAt(i)
-                if (child != swipeOverlay && child != suggestionBar && child != emojiPickerContainer && child is ViewGroup) {
+                if (child != swipeOverlay &&
+                    child != suggestionBar &&
+                    child != emojiPickerContainer &&
+                    child != emojiSearchContainer &&
+                    child is ViewGroup
+                ) {
                     return child
                 }
             }
@@ -1563,6 +1934,7 @@ class SwipeKeyboardView
         override fun onTap(key: KeyboardKey) {
             if (isDestroyed) return
             keyboardLayoutManager?.triggerHapticFeedback()
+
             onKeyClickListener?.invoke(key)
         }
 
@@ -1597,12 +1969,31 @@ class SwipeKeyboardView
             suggestionViewPool.clear()
             dividerViewPool.clear()
 
+            returnEmojiViewsToPool()
+            emojiViewPool.clear()
+
             suggestionBar?.let { bar ->
                 bar.removeAllViews()
                 (bar.parent as? ViewGroup)?.removeView(bar)
             }
             suggestionBar = null
             emojiButton = null
+            emojiSearchInput = null
+
+            searchScopeJob?.cancel()
+            searchScopeJob = null
+            searchScope = null
+            emojiPickerView = null
+            searchCloseButton = null
+            closeButtonBar = null
+            searchButton = null
+            backspaceButton = null
+            closeButton = null
+            searchResultsGrid = null
+            emojiSearchInputContainer = null
+            emojiSearchResultsContainer = null
+            emojiSearchContainer = null
+            emojiPickerContainer = null
 
             swipeOverlay.visibility = GONE
 
@@ -1637,5 +2028,39 @@ class SwipeKeyboardView
         override fun onDetachedFromWindow() {
             cleanup()
             super.onDetachedFromWindow()
+        }
+
+        private fun getOrCreateEmojiView(emoji: String): TextView {
+            val view =
+                if (emojiViewPool.isNotEmpty()) {
+                    emojiViewPool.removeAt(emojiViewPool.lastIndex)
+                } else {
+                    val minTouchTarget = context.resources.getDimensionPixelSize(R.dimen.minimum_touch_target)
+                    val basePadding = context.resources.getDimensionPixelSize(R.dimen.keyboard_padding)
+
+                    TextView(context).apply {
+                        setTextSize(TypedValue.COMPLEX_UNIT_SP, 30f)
+                        gravity = Gravity.CENTER
+                        val emojiPadding = (basePadding * 0.3f).toInt()
+                        setPadding(0, emojiPadding, emojiPadding, emojiPadding)
+                        minWidth = minTouchTarget
+                        minHeight = (minTouchTarget * 0.8f).toInt()
+                        setOnClickListener(searchResultEmojiClickListener)
+                    }
+                }
+
+            view.text = emoji
+            view.setTag(R.id.suggestion_text, emoji)
+
+            return view
+        }
+
+        private fun returnEmojiViewsToPool() {
+            emojiViewPool.addAll(activeEmojiViews)
+            activeEmojiViews.clear()
+        }
+
+        companion object {
+            private const val SEARCH_DEBOUNCE_MS = 300L
         }
     }

@@ -5,6 +5,7 @@ import com.urik.keyboard.data.KeyboardRepository
 import com.urik.keyboard.data.database.KeyboardDatabase
 import com.urik.keyboard.data.database.LearnedWordDao
 import com.urik.keyboard.service.CharacterVariationService
+import com.urik.keyboard.service.EmojiSearchManager
 import com.urik.keyboard.service.LanguageManager
 import com.urik.keyboard.service.SpellCheckManager
 import com.urik.keyboard.service.TextInputProcessor
@@ -115,4 +116,20 @@ object KeyboardModule {
     ): com.urik.keyboard.theme.ThemeManager =
         com.urik.keyboard.theme
             .ThemeManager(context, settingsRepository)
+
+    @Provides
+    @Singleton
+    fun provideEmojiSearchManager(
+        @ApplicationContext context: Context,
+        languageManager: LanguageManager,
+    ): EmojiSearchManager = EmojiSearchManager(context, languageManager)
+
+    @Provides
+    @Singleton
+    fun provideRecentEmojiProvider(
+        @ApplicationContext context: Context,
+        @ApplicationScope scope: CoroutineScope,
+    ): com.urik.keyboard.service.RecentEmojiProvider =
+        com.urik.keyboard.service
+            .RecentEmojiProvider(context, scope)
 }
