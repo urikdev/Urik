@@ -3,7 +3,7 @@
 [![CI](https://github.com/urikdev/Urik/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/urikdev/Urik/actions/workflows/ci.yml)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Release](https://img.shields.io/github/v/release/urikdev/Urik?include_prereleases)](https://github.com/urikdev/Urik/releases)
-![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/urikdev/Urik/total)
+[![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/urikdev/Urik/total)](https://github.com/urikdev/Urik/releases)
 
 Privacy-first keyboard for Android with on-device processing and encrypted storage. 100% community-funded, completely open-source.
 
@@ -21,15 +21,33 @@ Privacy-first keyboard for Android with on-device processing and encrypted stora
 
 ## Features
 
-- Swipe and tap input with gesture detection
+**Input**
+- Swipe and tap typing with adaptive gesture detection
+- Long-press for character variations
+- Spacebar swipe for cursor control
+- Hardware keyboard detection (automatically hides when connected)
+
+**Intelligence**
 - On-device spell checking using SymSpell algorithm
 - Smart autocorrect (skips URLs/emails, handles punctuation context)
 - Word learning with encrypted SQLCipher database
-- Multiple themes with favorites
-- Multilingual support with per-language character variations
-- Accessibility features (WCAG AA contrast, TalkBack support)
+- Multilingual support, simultaneous spell checking
+- Emoji search with keyword support
+
+**Integration**
+- Inline autofill support for password managers (Android 11+)
+- Clipboard history with encrypted storage
+- Material You dynamic theming (Android 12+)
+
+**Customization**
+- Multiple themes (light, dark, custom color schemes)
 - Configurable key sizes, haptic feedback, typing behavior
+- Accessibility features (WCAG AA contrast, TalkBack support)
+
+**Privacy**
 - No telemetry, analytics, or network permissions
+- All processing happens on-device
+- Encrypted local storage for user data
 
 ## Privacy
 
