@@ -138,7 +138,6 @@ object KeyboardConstants {
 
     object GestureConstants {
         const val GESTURE_START_DISTANCE_DP = 20f
-        const val SPACEBAR_CURSOR_SENSITIVITY_DP = 25f
         const val BACKSPACE_SWIPE_MIN_DISTANCE_DP = 30f
         const val BACKSPACE_INITIAL_DELAY_MS = 50L
         const val SPACEBAR_PUNCTUATION_DELAY_MS = 600L

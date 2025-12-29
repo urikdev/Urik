@@ -95,7 +95,6 @@ class SwipeKeyboardView
         private var gestureStartY = 0f
         private var gestureLastProcessedX = 0f
         private var gestureDensity = 1f
-        private var cursorSensitivity = com.urik.keyboard.KeyboardConstants.GestureConstants.SPACEBAR_CURSOR_SENSITIVITY_DP
         private var currentCursorSpeed: com.urik.keyboard.settings.CursorSpeed = com.urik.keyboard.settings.CursorSpeed.MEDIUM
 
         private var confirmationOverlay: FrameLayout? = null
@@ -261,8 +260,7 @@ class SwipeKeyboardView
 
         override fun onAttachedToWindow() {
             super.onAttachedToWindow()
-            gestureDensity = resources.displayMetrics.density
-            cursorSensitivity = currentCursorSpeed.sensitivityDp * gestureDensity
+            updateDensity()
         }
 
         private fun setupSwipeOverlay() {
@@ -849,13 +847,11 @@ class SwipeKeyboardView
         fun setCursorSpeed(speed: com.urik.keyboard.settings.CursorSpeed) {
             if (!isDestroyed) {
                 currentCursorSpeed = speed
-                cursorSensitivity = speed.sensitivityDp * gestureDensity
             }
         }
 
         fun updateDensity() {
             gestureDensity = resources.displayMetrics.density
-            cursorSensitivity = currentCursorSpeed.sensitivityDp * gestureDensity
         }
 
         private fun insertSuggestionBar() {
@@ -1582,14 +1578,15 @@ class SwipeKeyboardView
             when (key.action) {
                 KeyboardKey.ActionType.SPACE -> {
                     val totalDx = x - gestureStartX
+                    val sensitivity = currentCursorSpeed.sensitivityDp * gestureDensity
 
-                    val positionsToMove = (totalDx / cursorSensitivity).toInt()
-                    val lastPositionsMoved = ((gestureLastProcessedX - gestureStartX) / cursorSensitivity).toInt()
+                    val positionsToMove = (totalDx / sensitivity).toInt()
+                    val lastPositionsMoved = ((gestureLastProcessedX - gestureStartX) / sensitivity).toInt()
                     val deltaPositions = positionsToMove - lastPositionsMoved
 
                     if (deltaPositions != 0) {
                         onSpacebarCursorMove?.invoke(deltaPositions)
-                        gestureLastProcessedX = gestureStartX + (positionsToMove * cursorSensitivity)
+                        gestureLastProcessedX = gestureStartX + (positionsToMove * sensitivity)
                     }
                 }
 
