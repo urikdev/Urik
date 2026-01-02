@@ -1240,6 +1240,10 @@ class UrikInputMethodService :
 
             when (key) {
                 is KeyboardKey.Character -> {
+                    if (swipeKeyboardView?.clearAutofillIfShowing() == true) {
+                        userDismissedAutofill = true
+                    }
+
                     val char = viewModel.getCharacterForInput(key)
                     viewModel.clearShiftAfterCharacter(key)
 
@@ -2403,6 +2407,7 @@ class UrikInputMethodService :
     ) {
         super.onStartInput(attribute, restarting)
 
+        userDismissedAutofill = false
         coordinateStateClear()
 
         lastSpaceTime = 0
@@ -2665,9 +2670,10 @@ class UrikInputMethodService :
      * Called when autofill service has suggestions ready. Inflates suggestion views
      * and displays them in suggestion bar, replacing spell check suggestions.
      *
-     * @param response InlineSuggestionsResponse containing autofill suggestions
      * @return true if handled, false otherwise
      */
+    private var userDismissedAutofill = false
+
     @Suppress("NewApi")
     override fun onInlineSuggestionsResponse(response: InlineSuggestionsResponse): Boolean {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) return false
@@ -2678,6 +2684,10 @@ class UrikInputMethodService :
             serviceScope.launch(Dispatchers.Main) {
                 swipeKeyboardView?.clearSuggestions()
             }
+            return false
+        }
+
+        if (userDismissedAutofill) {
             return true
         }
 
@@ -2685,7 +2695,7 @@ class UrikInputMethodService :
         val density = resources.displayMetrics.density
         val size = Size((150 * density).toInt(), (40 * density).toInt())
 
-        suggestions.take(3).forEach { suggestion ->
+        suggestions.take(3).forEachIndexed { _, suggestion ->
             suggestion.inflate(this, size, mainExecutor) { view ->
                 view?.let { views.add(it) }
 
