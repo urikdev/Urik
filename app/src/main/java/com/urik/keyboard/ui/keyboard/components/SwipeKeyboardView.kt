@@ -74,6 +74,8 @@ class SwipeKeyboardView
         private val keyMapping = mutableMapOf<Button, KeyboardKey>()
         private val keyCharacterPositions = mutableMapOf<KeyboardKey.Character, PointF>()
 
+        private var punctuationPopupActive = false
+
         internal var currentLayout: KeyboardLayout? = null
         internal var currentState: KeyboardState? = null
 
@@ -842,6 +844,10 @@ class SwipeKeyboardView
             if (!isDestroyed) {
                 this.onBackspaceSwipeDelete = listener
             }
+        }
+
+        fun setPunctuationPopupActive(active: Boolean) {
+            punctuationPopupActive = active
         }
 
         fun setCursorSpeed(speed: com.urik.keyboard.settings.CursorSpeed) {
@@ -1661,7 +1667,7 @@ class SwipeKeyboardView
                 }
 
                 MotionEvent.ACTION_MOVE -> {
-                    if (gestureKey != null && !isGestureActive) {
+                    if (gestureKey != null && !isGestureActive && !punctuationPopupActive) {
                         val dx = ev.x - gestureStartX
                         val dy = ev.y - gestureStartY
                         val distance = kotlin.math.sqrt(dx * dx + dy * dy)

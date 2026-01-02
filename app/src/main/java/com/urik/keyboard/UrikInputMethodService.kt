@@ -817,6 +817,7 @@ class UrikInputMethodService :
                 }
 
             swipeKeyboardView = swipeView
+            layoutManager.setSwipeKeyboardView(swipeView)
             updateSwipeKeyboard()
             observeViewModel()
 
@@ -1004,13 +1005,6 @@ class UrikInputMethodService :
                         return@collect
                     }
 
-                    val needsLayoutRebuild =
-                        currentSettings.keySize != newSettings.keySize ||
-                            currentSettings.spaceBarSize != newSettings.spaceBarSize ||
-                            currentSettings.keyLabelSize != newSettings.keyLabelSize ||
-                            currentSettings.showNumberRow != newSettings.showNumberRow ||
-                            currentSettings.clipboardEnabled != newSettings.clipboardEnabled
-
                     currentSettings = newSettings
 
                     swipeDetector.setSwipeEnabled(newSettings.swipeEnabled)
@@ -1031,10 +1025,8 @@ class UrikInputMethodService :
 
                     layoutManager.updateClipboardEnabled(newSettings.clipboardEnabled)
 
-                    if (needsLayoutRebuild) {
-                        withContext(Dispatchers.Main) {
-                            updateSwipeKeyboard()
-                        }
+                    withContext(Dispatchers.Main) {
+                        updateSwipeKeyboard()
                     }
                 }
             },
