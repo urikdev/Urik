@@ -1161,6 +1161,12 @@ class SwipeKeyboardView
             safeMappingPost()
         }
 
+        fun clearAutofillIfShowing(): Boolean {
+            if (isDestroyed || !isShowingAutofillSuggestions) return false
+            clearSuggestions()
+            return true
+        }
+
         fun updateInlineAutofillSuggestions(
             views: List<View>,
             showIndicator: Boolean,
@@ -1185,6 +1191,7 @@ class SwipeKeyboardView
 
                 val indicator = getOrCreateAutofillIndicator()
                 indicator.visibility = if (showIndicator) VISIBLE else GONE
+                (indicator.parent as? ViewGroup)?.removeView(indicator)
                 bar.addView(indicator)
 
                 for (i in views.indices) {
@@ -1196,6 +1203,7 @@ class SwipeKeyboardView
                             1f,
                         )
 
+                    (view.parent as? ViewGroup)?.removeView(view)
                     bar.addView(view, layoutParams)
 
                     if (i < views.size - 1) {
@@ -1217,6 +1225,7 @@ class SwipeKeyboardView
                                 }
 
                         activeDividerViews.add(divider)
+                        (divider.parent as? ViewGroup)?.removeView(divider)
                         bar.addView(divider, dividerParams)
                     }
                 }
