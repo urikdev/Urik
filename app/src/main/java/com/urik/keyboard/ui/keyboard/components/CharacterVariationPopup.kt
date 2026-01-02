@@ -22,6 +22,8 @@ class CharacterVariationPopup(
     private val themeManager: ThemeManager,
 ) : PopupWindow() {
     private var onVariationSelected: ((String) -> Unit)? = null
+    private val characterButtons = mutableListOf<Button>()
+    private var highlightedButton: Button? = null
 
     private val scrollView: HorizontalScrollView =
         HorizontalScrollView(context).apply {
@@ -71,6 +73,8 @@ class CharacterVariationPopup(
         this.onVariationSelected = onSelected
 
         variationContainer.removeAllViews()
+        characterButtons.clear()
+        highlightedButton = null
 
         val totalCount = variations.size + if (baseChar.isNotEmpty()) 1 else 0
 
@@ -167,6 +171,7 @@ class CharacterVariationPopup(
                     )
             }
 
+        characterButtons.add(button)
         variationContainer.addView(button)
     }
 
@@ -235,4 +240,81 @@ class CharacterVariationPopup(
             dismiss()
         }
     }
+
+    fun getCharacterAt(
+        rawX: Float,
+        rawY: Float,
+    ): String? {
+        if (!isShowing) {
+            return null
+        }
+
+        val location = IntArray(2)
+        contentView.getLocationOnScreen(location)
+        val localX = rawX - location[0]
+        val localY = rawY - location[1]
+
+        for (button in characterButtons) {
+            val buttonLeft = button.left
+            val buttonTop = button.top
+            val buttonRight = button.right
+            val buttonBottom = button.bottom
+
+            val inHorizontalRange = localX >= buttonLeft && localX <= buttonRight
+            val inVerticalRange = localY >= buttonTop && localY <= buttonBottom
+
+            if (inHorizontalRange && inVerticalRange) {
+                return button.text.toString()
+            }
+        }
+
+        return null
+    }
+
+    fun setHighlighted(char: String?) {
+        val theme = themeManager.currentTheme.value
+        val density = context.resources.displayMetrics.density
+
+        highlightedButton?.let { button ->
+            val isBase = button == characterButtons.firstOrNull()
+            val backgroundColor =
+                if (isBase) {
+                    theme.colors.keyBackgroundAction
+                } else {
+                    theme.colors.keyBackgroundCharacter
+                }
+
+            val cornerRadius = 8f * density
+            button.background =
+                GradientDrawable().apply {
+                    setColor(backgroundColor)
+                    this.cornerRadius = cornerRadius
+                    setStroke(
+                        (1 * density).toInt(),
+                        theme.colors.keyBorder,
+                    )
+                }
+        }
+
+        highlightedButton = null
+
+        if (char != null) {
+            val button = characterButtons.find { it.text == char }
+            if (button != null) {
+                highlightedButton = button
+                val cornerRadius = 8f * density
+                button.background =
+                    GradientDrawable().apply {
+                        setColor(theme.colors.statePressed)
+                        this.cornerRadius = cornerRadius
+                        setStroke(
+                            (1 * density).toInt(),
+                            theme.colors.keyBorder,
+                        )
+                    }
+            }
+        }
+    }
+
+    fun getHighlightedCharacter(): String? = highlightedButton?.text?.toString()
 }

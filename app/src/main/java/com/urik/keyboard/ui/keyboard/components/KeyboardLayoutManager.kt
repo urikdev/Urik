@@ -97,6 +97,10 @@ class KeyboardLayoutManager(
     private var currentKeyLabelSize = KeyLabelSize.MEDIUM
     private var longPressPunctuationMode = LongPressPunctuationMode.SPACEBAR
 
+    private var activePunctuationPopup: CharacterVariationPopup? = null
+    private var popupSelectionMode = false
+    private var swipeKeyboardView: SwipeKeyboardView? = null
+
     private val backgroundJob = SupervisorJob()
     private val backgroundScope = CoroutineScope(Dispatchers.IO + backgroundJob)
 
@@ -127,6 +131,10 @@ class KeyboardLayoutManager(
     }
 
     private val punctuationVariationCallback: (String) -> Unit = { selectedPunctuation ->
+        activePunctuationPopup = null
+        popupSelectionMode = false
+        swipeKeyboardView?.setPunctuationPopupActive(false)
+
         val punctuationKey = KeyboardKey.Character(selectedPunctuation, KeyboardKey.KeyType.PUNCTUATION)
         performContextualHaptic(punctuationKey)
         onKeyClick(punctuationKey)
@@ -181,6 +189,7 @@ class KeyboardLayoutManager(
         View.OnTouchListener { view, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
+                    popupSelectionMode = false
                     val handler = Handler(Looper.getMainLooper())
                     val runnable =
                         Runnable {
@@ -188,11 +197,57 @@ class KeyboardLayoutManager(
                             handleSpaceLongPress(view)
                         }
                     buttonPendingCallbacks[view as Button] = PendingCallbacks(handler, runnable)
-                    handler.postDelayed(runnable, com.urik.keyboard.KeyboardConstants.GestureConstants.SPACEBAR_PUNCTUATION_DELAY_MS)
+                    handler.postDelayed(runnable, currentLongPressDuration.durationMs)
                     false
                 }
 
-                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                MotionEvent.ACTION_MOVE -> {
+                    if (popupSelectionMode && activePunctuationPopup != null) {
+                        val char = activePunctuationPopup?.getCharacterAt(event.rawX, event.rawY)
+                        activePunctuationPopup?.setHighlighted(char)
+                        return@OnTouchListener true
+                    }
+                    false
+                }
+
+                MotionEvent.ACTION_UP -> {
+                    if (popupSelectionMode && activePunctuationPopup != null) {
+                        val selectedChar = activePunctuationPopup?.getHighlightedCharacter()
+
+                        buttonPendingCallbacks.remove(view as Button)?.let { pending ->
+                            pending.handler.removeCallbacks(pending.runnable)
+                        }
+
+                        if (selectedChar != null) {
+                            activePunctuationPopup?.dismiss()
+                            activePunctuationPopup = null
+                            popupSelectionMode = false
+                            swipeKeyboardView?.setPunctuationPopupActive(false)
+
+                            val punctuationKey = KeyboardKey.Character(selectedChar, KeyboardKey.KeyType.PUNCTUATION)
+                            performContextualHaptic(punctuationKey)
+                            onKeyClick(punctuationKey)
+                        } else {
+                            activePunctuationPopup?.setHighlighted(null)
+                        }
+
+                        return@OnTouchListener true
+                    }
+
+                    buttonPendingCallbacks.remove(view as Button)?.let { pending ->
+                        pending.handler.removeCallbacks(pending.runnable)
+                    }
+                    false
+                }
+
+                MotionEvent.ACTION_CANCEL -> {
+                    if (popupSelectionMode && activePunctuationPopup != null) {
+                        activePunctuationPopup?.dismiss()
+                        activePunctuationPopup = null
+                        popupSelectionMode = false
+                        swipeKeyboardView?.setPunctuationPopupActive(false)
+                    }
+
                     buttonPendingCallbacks.remove(view as Button)?.let { pending ->
                         pending.handler.removeCallbacks(pending.runnable)
                     }
@@ -210,6 +265,7 @@ class KeyboardLayoutManager(
         View.OnTouchListener { view, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
+                    popupSelectionMode = false
                     val key = view.getTag(R.id.key_data) as? KeyboardKey.Character ?: return@OnTouchListener false
                     val handler = Handler(Looper.getMainLooper())
                     val runnable =
@@ -222,7 +278,53 @@ class KeyboardLayoutManager(
                     false
                 }
 
-                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                MotionEvent.ACTION_MOVE -> {
+                    if (popupSelectionMode && activePunctuationPopup != null) {
+                        val char = activePunctuationPopup?.getCharacterAt(event.rawX, event.rawY)
+                        activePunctuationPopup?.setHighlighted(char)
+                        return@OnTouchListener true
+                    }
+                    false
+                }
+
+                MotionEvent.ACTION_UP -> {
+                    if (popupSelectionMode && activePunctuationPopup != null) {
+                        val selectedChar = activePunctuationPopup?.getHighlightedCharacter()
+
+                        buttonPendingCallbacks.remove(view as Button)?.let { pending ->
+                            pending.handler.removeCallbacks(pending.runnable)
+                        }
+
+                        if (selectedChar != null) {
+                            activePunctuationPopup?.dismiss()
+                            activePunctuationPopup = null
+                            popupSelectionMode = false
+                            swipeKeyboardView?.setPunctuationPopupActive(false)
+
+                            val punctuationKey = KeyboardKey.Character(selectedChar, KeyboardKey.KeyType.PUNCTUATION)
+                            performContextualHaptic(punctuationKey)
+                            onKeyClick(punctuationKey)
+                        } else {
+                            activePunctuationPopup?.setHighlighted(null)
+                        }
+
+                        return@OnTouchListener true
+                    }
+
+                    buttonPendingCallbacks.remove(view as Button)?.let { pending ->
+                        pending.handler.removeCallbacks(pending.runnable)
+                    }
+                    false
+                }
+
+                MotionEvent.ACTION_CANCEL -> {
+                    if (popupSelectionMode && activePunctuationPopup != null) {
+                        activePunctuationPopup?.dismiss()
+                        activePunctuationPopup = null
+                        popupSelectionMode = false
+                        swipeKeyboardView?.setPunctuationPopupActive(false)
+                    }
+
                     buttonPendingCallbacks.remove(view as Button)?.let { pending ->
                         pending.handler.removeCallbacks(pending.runnable)
                     }
@@ -368,6 +470,10 @@ class KeyboardLayoutManager(
 
     fun updateLongPressPunctuationMode(mode: LongPressPunctuationMode) {
         longPressPunctuationMode = mode
+    }
+
+    fun setSwipeKeyboardView(view: SwipeKeyboardView) {
+        swipeKeyboardView = view
     }
 
     fun updateKeySize(keySize: KeySize) {
@@ -987,11 +1093,16 @@ class KeyboardLayoutManager(
 
         anchorView.isPressed = false
 
-        variationPopup =
+        val popup =
             CharacterVariationPopup(context, themeManager).apply {
                 setCharacterVariations("", punctuationList, punctuationVariationCallback)
                 showAboveAnchor(anchorView)
             }
+
+        variationPopup = popup
+        activePunctuationPopup = popup
+        popupSelectionMode = true
+        swipeKeyboardView?.setPunctuationPopupActive(true)
     }
 
     private fun loadPunctuationWithErrorHandling(languageCode: String): List<String> {
