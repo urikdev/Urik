@@ -351,6 +351,28 @@ class KeyboardSettingsTest {
     }
 
     @Test
+    fun `defaultForLocale supports dutch`() {
+        val settings = KeyboardSettings.defaultForLocale("nl")
+
+        assertEquals(listOf("nl"), settings.activeLanguages)
+        assertEquals("nl", settings.primaryLanguage)
+    }
+
+    @Test
+    fun `validated preserves dutch as supported language`() {
+        val settings =
+            KeyboardSettings(
+                activeLanguages = listOf("nl", "en", "fr"),
+                primaryLanguage = "nl",
+            )
+
+        val validated = settings.validated()
+
+        assertEquals(listOf("nl", "en"), validated.activeLanguages)
+        assertEquals("nl", validated.primaryLanguage)
+    }
+
+    @Test
     fun `validated preserves polish as supported language`() {
         val settings =
             KeyboardSettings(
