@@ -1,0 +1,244 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="ime_name" translatable="false">Urik Toetsenbord</string>
+    <string name="ime_label">Urik Toetsenbord</string>
+    <string name="ime_description">Swipen typen, spellingscontrole en meertalige ondersteuning zonder je privacy in gevaar te brengen. Geen telemetrie. Geen gegevensverzameling. Alles blijft op je apparaat.</string>
+
+    <!-- Settings -->
+    <string name="enable_keyboard_title">Inschakelen</string>
+    <string name="open_settings">Instellingen openen</string>
+    <string name="error_opening_settings">Kan instellingen niet openen</string>
+
+    <!-- Settings Activity -->
+    <string name="settings_title">Toetsenbordinstellingen</string>
+    <string name="about_title">Over</string>
+    <string name="about_button">Over</string>
+    <string name="about_version">Versie</string>
+    <string name="about_copyright">Copyright © 2025 Urik Development</string>
+    <string name="about_license">Licentie: GNU GPL v3.0</string>
+    <string name="about_source_code">Broncode</string>
+    <string name="about_release_notes">Uitgavenotities</string>
+    <string name="about_report_bug">Meld een bug</string>
+    <string name="about_privacy_policy">Privacybeleid</string>
+    <string name="about_support">Ondersteuning</string>
+    <string name="autocorrect_settings_title">Instellingen voor autocorrectie</string>
+    <string name="autocorrect_settings_description">Spelling en suggesties</string>
+    <string name="language_settings_title">Taalinstellingen</string>
+    <string name="language_settings_description">Kies je toetsenbordtalen</string>
+    <string name="feedback_settings_title">Geluid &amp; Feedback</string>
+    <string name="feedback_settings_description">Toetsgeluiden en trillingen</string>
+    <string name="typing_settings_title">Typgedrag</string>
+    <string name="typing_settings_description">Leestekens e.d.</string>
+    <string name="layout_settings_title">Indeling &amp; Invoer</string>
+    <string name="layout_settings_description">Cijferrij, spatiebalkgrootte</string>
+    <string name="appearance_settings_title">Weergave</string>
+    <string name="appearance_settings_description">Thema, grootte</string>
+    <string name="privacy_settings_title">Privacy &amp; Gegevens</string>
+    <string name="privacy_settings_description">Gegevens wissen, instellingen resetten</string>
+    <string name="licenses_title">Open Source Licenties</string>
+    <string name="licenses_description">Licenties van derden bekijken</string>
+    <string name="dictionary_attribution_title">Woordenboekgegevens</string>
+    <string name="theme_picker_title">Toetsenbordthema</string>
+    <string name="dictionary_attribution_summary">FrequencyWords licentie en toeschrijving</string>
+    <string name="test_field_hint">Wijzigingen testen</string>
+
+    <!-- Settings Enums -->
+    <!-- Key Size -->
+    <string name="key_size_small">Klein</string>
+    <string name="key_size_medium">Gemiddeld</string>
+    <string name="key_size_large">Groot</string>
+    <string name="key_size_extra_large">Extra groot</string>
+
+    <!-- Long Press Duration -->
+    <string name="long_press_duration_short">Kort</string>
+    <string name="long_press_duration_medium">Gemiddeld</string>
+    <string name="long_press_duration_long">Lang</string>
+    <string name="cursor_speed_slow">Traag</string>
+    <string name="cursor_speed_medium">Gemiddeld</string>
+    <string name="cursor_speed_fast">Snel</string>
+
+    <!-- Space Bar Size -->
+    <string name="space_bar_size_compact">Compact</string>
+    <string name="space_bar_size_standard">Standaard</string>
+    <string name="space_bar_size_wide">Breed</string>
+
+    <!-- Key Label Size -->
+    <string name="key_label_size_small">Klein</string>
+    <string name="key_label_size_medium">Gemiddeld</string>
+    <string name="key_label_size_large">Groot</string>
+
+    <!-- Appearance Settings -->
+    <string name="appearance_settings_theme">Thema</string>
+    <string name="appearance_settings_key_size">Toetsgrootte</string>
+    <string name="appearance_settings_key_label_size">Toetslabelgrootte</string>
+
+    <!-- Auto-Correct Settings -->
+    <string name="autocorrect_settings_spell_check">Spellingscontrole</string>
+    <string name="autocorrect_settings_spell_check_on">Spellingscontrole ingeschakeld</string>
+    <string name="autocorrect_settings_spell_check_off">Spellingscontrole uitgeschakeld</string>
+    <string name="autocorrect_settings_show_suggestions">Suggesties weergeven</string>
+    <string name="autocorrect_settings_suggestions_on">Suggesties worden weergegeven</string>
+    <string name="autocorrect_settings_suggestions_off">Suggesties worden verborgen</string>
+    <string name="autocorrect_settings_suggestion_count">Aantal suggesties</string>
+    <string name="autocorrect_settings_learn_new_words">Nieuwe woorden leren</string>
+    <string name="autocorrect_settings_learn_new_words_on">Leren ingeschakeld</string>
+    <string name="autocorrect_settings_learn_new_words_off">Leren uitgeschakeld</string>
+
+    <!-- Language Settings -->
+    <string name="max_languages_reached">Maximaal 3 talen toegestaan</string>
+    <string name="primary_layout_language">Huidige indeling</string>
+
+    <!-- Sound & Feedback Settings -->
+    <string name="feedback_settings_haptic_feedback">Haptische feedback</string>
+    <string name="feedback_settings_haptic_on">Haptisch ingeschakeld</string>
+    <string name="feedback_settings_haptic_off">Haptisch uitgeschakeld</string>
+    <string name="feedback_settings_vibration_strength">Trillingssterkte</string>
+
+    <!-- Typing Behavior Settings -->
+    <string name="typing_settings_double_space_period">Dubbele spatie punt</string>
+    <string name="typing_settings_double_space_on">Dubbele spatie voegt punt in</string>
+    <string name="typing_settings_double_space_off">Dubbele spatie voegt spatie in</string>
+    <string name="typing_settings_swipe_enabled">Swipen typen</string>
+    <string name="typing_settings_swipe_on">Swipen om te typen ingeschakeld</string>
+    <string name="typing_settings_swipe_off">Swipen om te typen uitgeschakeld</string>
+    <string name="typing_settings_spacebar_cursor">Cursurbesturing spatiebalk</string>
+    <string name="typing_settings_spacebar_cursor_on">Swipe over spatiebalk om cursor te verplaatsen</string>
+    <string name="typing_settings_spacebar_cursor_off">Cursurbesturing spatiebalk uitgeschakeld</string>
+    <string name="typing_settings_cursor_speed">Cursorsnelheid</string>
+    <string name="typing_settings_backspace_swipe">Backspace wissen</string>
+    <string name="typing_settings_backspace_swipe_on">Swipe naar links op backspace om woord te wissen</string>
+    <string name="typing_settings_backspace_swipe_off">Backspace wissen uitgeschakeld</string>
+    <string name="typing_settings_long_press_punctuation">Lang indrukken leestekens</string>
+    <string name="long_press_punctuation_off">Uit</string>
+    <string name="long_press_punctuation_spacebar">Spatiebalk</string>
+    <string name="long_press_punctuation_period">Punttoets</string>
+    <string name="typing_settings_long_press_duration">Duur lang indrukken</string>
+
+    <!-- Layout & Input Settings -->
+    <string name="layout_settings_show_number_row">Cijferrij weergeven</string>
+    <string name="layout_settings_number_row_on">Cijferrij weergegeven</string>
+    <string name="layout_settings_number_row_off">Cijferrij verborgen</string>
+    <string name="layout_settings_space_bar_size">Spatiebalkgrootte</string>
+
+    <!-- Privacy & Data Settings -->
+    <string name="privacy_settings_clipboard_history">Klembordgeschiedenis</string>
+    <string name="privacy_settings_clipboard_history_on">Klembordgeschiedenis ingeschakeld</string>
+    <string name="privacy_settings_clipboard_history_off">Klembordgeschiedenis uitgeschakeld</string>
+    <string name="privacy_settings_clear_learned_words">Gewilde woorden wissen</string>
+    <string name="privacy_settings_clear_learned_words_summary">Alle geleerde vocabulaire verwijderen</string>
+    <string name="privacy_settings_clear_learned_words_confirm">Alle geleerde woorden wissen? Dit kan niet ongedaan worden gemaakt.</string>
+    <string name="privacy_settings_reset_to_defaults">Terugzetten naar standaardwaarden</string>
+    <string name="privacy_settings_reset_to_defaults_confirm">Alle instellingen terugzetten naar standaardwaarden?</string>
+    <string name="privacy_settings_export_error_log">Foutenlogboek exporteren</string>
+    <string name="privacy_settings_export_error_log_summary">Diagnostische logboeken delen voor debugging</string>
+    <string name="privacy_settings_export_error_log_failed">Fout bij exporteren van foutenlogboek</string>
+
+    <!-- Error Messages -->
+    <string name="error_title">Fout</string>
+    <string name="error_update_theme">Thema bijwerken mislukt</string>
+    <string name="error_update_key_size">Toetsgrootte bijwerken mislukt</string>
+    <string name="error_update_key_label_size">Labelgrootte bijwerken mislukt</string>
+    <string name="error_update_spell_check">Spellingscontrole bijwerken mislukt</string>
+    <string name="error_update_suggestions">Suggestie-instellingen bijwerken mislukt</string>
+    <string name="error_update_suggestion_count">Aantal suggesties bijwerken mislukt</string>
+    <string name="error_update_word_learning">Woordleren bijwerken mislukt</string>
+    <string name="error_update_clipboard">Klembordinstellingen bijwerken mislukt</string>
+    <string name="error_update_language">Taalinstellingen bijwerken mislukt</string>
+    <string name="error_update_haptic_feedback">Haptische feedback bijwerken mislukt</string>
+    <string name="error_update_vibration_strength">Trillingssterkte bijwerken mislukt</string>
+    <string name="error_update_double_space_period">Dubbele spatie punt bijwerken mislukt</string>
+    <string name="error_update_swipe">Swipe typen bijwerken mislukt</string>
+    <string name="error_update_spacebar_cursor">Spatiebalkcursurbesturing bijwerken mislukt</string>
+    <string name="error_update_cursor_speed">Cursorsnelheid bijwerken mislukt</string>
+    <string name="error_update_backspace_swipe">Backspace wissen bijwerken mislukt</string>
+    <string name="error_update_long_press_punctuation">Lang indrukken leestekens bijwerken mislukt</string>
+    <string name="error_update_long_press_duration">Duur lang indrukken bijwerken mislukt</string>
+    <string name="error_update_number_row">Cijferrij bijwerken mislukt</string>
+    <string name="error_update_space_bar_size">Spatiebalkgrootte bijwerken mislukt</string>
+    <string name="error_clear_learned_words">Gewilde woorden wissen mislukt</string>
+    <string name="error_reset_to_defaults">Terugzetten naar standaardwaarden mislukt</string>
+
+    <!-- Success Messages -->
+    <string name="success_learned_words_cleared">Gewilde woorden gewist</string>
+    <string name="success_settings_reset">Instellingen teruggezet naar standaardwaarden</string>
+
+    <!-- Keyboard descriptions -->
+    <string name="keyboard_description">Virtueel toetsenbord</string>
+
+    <!-- Default key labels -->
+    <string name="letters_mode_label">ABC</string>
+    <string name="numbers_mode_label">123</string>
+    <string name="symbols_mode_label">+=&lt;</string>
+
+    <!-- Accessibility descriptions -->
+    <string name="key_character_description">Typ %1$s</string>
+
+    <string name="shift_key_description">Shift-toets, tik om volgende letter hoofdletter te maken</string>
+    <string name="shift_active_description">Shift is actief, tik om te deactiveren</string>
+    <string name="caps_lock_description">Caps Lock</string>
+    <string name="caps_lock_on_description">Caps Lock staat aan, tik om uit te schakelen</string>
+    <string name="backspace_key_description">Vorig teken verwijderen</string>
+    <string name="space_key_description">Spatiebalk</string>
+    <string name="letters_mode_description">Schakel naar lettertoetsenbord</string>
+    <string name="numbers_mode_description">Schakel naar cijfertoetsenbord</string>
+    <string name="symbols_mode_description">Schakel naar symbooltoetsenbord</string>
+    <string name="ime_prediction_description">Voorspelling: %1$s</string>
+
+    <!-- Action button accessibility descriptions -->
+    <string name="action_enter_description">Enter indrukken</string>
+    <string name="action_send_description">Bericht verzenden</string>
+    <string name="action_search_description">Zoeken</string>
+    <string name="action_done_description">Klaar met bewerken</string>
+    <string name="action_go_description">Ga naar bestemming</string>
+    <string name="action_next_description">Ga naar volgende veld</string>
+    <string name="action_previous_description">Ga naar vorige veld</string>
+
+    <string name="action_emoji">Emoji</string>
+    <string name="emoji_search_hint" tools:ignore="TypographyEllipsis">Emoji\'s zoeken...</string>
+    <string name="autofill_indicator_description">Wachtwoordbeheerder-suggesties beschikbaar</string>
+
+    <!-- Theme Picker Accessibility -->
+    <string name="theme_description">%1$s thema</string>
+    <string name="theme_description_selected">%1$s thema, momenteel geselecteerd</string>
+    <string name="theme_add_favorite">Voeg %1$s toe aan favorieten</string>
+    <string name="theme_remove_favorite">Verwijder %1$s uit favorieten</string>
+
+    <!-- Character Variation Accessibility -->
+    <string name="character_variation_position">Tekenvariatie %1$d van %2$d: %3$s</string>
+
+    <!-- Blacklisting Words -->
+    <string name="remove_suggestion">%1$s uit suggesties verwijderen?</string>
+    <string name="remove_cancel">Annuleren</string>
+    <string name="remove_confirm">Verwijderen</string>
+
+    <!-- Tips -->
+    <string name="tip_1_title">Woorden leren</string>
+    <string name="tip_1_description">Druk op spatie na een gemarkeerde spelfout om het woord aan je woordenboek toe te voegen.</string>
+
+    <string name="tip_2_title">Leestekenmenu</string>
+    <string name="tip_2_description">Druk lang op de spatiebalk om het menu voor leestekens te openen.</string>
+
+    <string name="tip_3_title">Tekenvariaties</string>
+    <string name="tip_3_description">Druk lang op een teken om een variatie voor dat teken te selecteren.</string>
+
+    <string name="tip_4_title">Woorden verwijderen</string>
+    <string name="tip_4_description">Druk lang op een suggestie om deze uit je woordenboek te verwijderen.</string>
+
+    <string name="tip_5_title">Klembordbeheerder</string>
+    <string name="tip_5_description">Druk lang op de symbooltoets om de Klembordbeheerder te openen.</string>
+
+    <!-- Clipboard Panel -->
+    <string name="clipboard_panel_title">Klembord</string>
+    <string name="clipboard_panel_pinned">Vastgezet</string>
+    <string name="clipboard_panel_recent">Recent</string>
+    <string name="clipboard_panel_empty">Geen klembordgeschiedenis</string>
+    <string name="clipboard_panel_delete_all">Alles verwijderen</string>
+    <string name="clipboard_panel_delete_all_confirm">Alle niet-vastgezette klemborditems verwijderen?</string>
+    <string name="clipboard_consent_message">Urik kan klembordinhoud onbeperkt lezen en opslaan. Als je dit niet wilt, ga dan naar instellingen en schakel de klembordgeschiedenis uit.</string>
+
+    <!-- Clipboard Accessibility -->
+    <string name="clipboard_item_description">Klemborditem: %1$s</string>
+    <string name="clipboard_item_pin">Klemborditem vastzetten</string>
+    <string name="clipboard_item_unpin">Klemborditem losmaken</string>
+    <string name="clipboard_item_delete">Klemborditem verwijderen</string>
+
+</resources>
