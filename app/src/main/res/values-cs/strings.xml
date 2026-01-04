@@ -24,10 +24,8 @@
     <string name="autocorrect_settings_description">Kontrola pravopisu a návrhy</string>
     <string name="language_settings_title">Nastavení jazyka</string>
     <string name="language_settings_description">Zvolte jazyky klávesnice</string>
-    <string name="feedback_settings_title">Zvuk &amp; Nastavení zpětné vazby</string>
-    <string name="feedback_settings_description">Zvuky a vibrace při stisku</string>
     <string name="typing_settings_title">Nastavení chování při psaní</string>
-    <string name="typing_settings_description">Interpunkce atd.</string>
+    <string name="typing_settings_description">Interpunkce, haptická zpětná vazba atd.</string>
     <string name="layout_settings_title">Rozložení &amp; Vstup</string>
     <string name="layout_settings_description">Řádek čísel, velikost mezerníku</string>
     <string name="appearance_settings_title">Vzhled</string>
@@ -101,10 +99,15 @@
     <string name="typing_settings_long_press_duration">Délka dlouhého stisku</string>
 
     <!-- Layout & Input Settings -->
+    <string name="layout_settings_alternative_layout">Rozložení klávesnice</string>
     <string name="layout_settings_show_number_row">Zobrazit číselnou řadu</string>
     <string name="layout_settings_number_row_on">Číselná řada zobrazena</string>
     <string name="layout_settings_number_row_off">Číselná řada skryta</string>
     <string name="layout_settings_space_bar_size">Velikost mezerníku</string>
+    <string name="alternative_layout_default">Výchozí (Jazykové rozložení)</string>
+    <string name="alternative_layout_dvorak">Dvorak</string>
+    <string name="alternative_layout_colemak">Colemak</string>
+    <string name="alternative_layout_workman">Workman</string>
 
     <!-- Privacy & Data Settings -->
     <string name="privacy_settings_clipboard_history">Historie schránky</string>
@@ -137,6 +140,7 @@
     <string name="error_update_long_press_duration">Nepodařilo se aktualizovat dobu dlouhého stisknutí</string>
     <string name="error_update_number_row">Nepodařilo se aktualizovat číselnou řadu</string>
     <string name="error_update_space_bar_size">Nepodařilo se aktualizovat velikost mezerníku</string>
+    <string name="error_update_alternative_layout">Nepodařilo se aktualizovat rozložení klávesnice</string>
     <string name="error_clear_learned_words">Nepodařilo se smazat naučená slova</string>
     <string name="error_reset_to_defaults">Nepodařilo se obnovit nastavení</string>
 

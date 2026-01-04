@@ -24,10 +24,8 @@
     <string name="autocorrect_settings_description">Правопис та пропозиції</string>
     <string name="language_settings_title">Налаштування Мови</string>
     <string name="language_settings_description">Оберіть мови вашої клавіатури</string>
-    <string name="feedback_settings_title">Налаштування Звуку та Вібровідгуку</string>
-    <string name="feedback_settings_description">Звуки та вібрація клавіш</string>
     <string name="typing_settings_title">Налаштування Поведінки Вводу</string>
-    <string name="typing_settings_description">Пунктуація тощо</string>
+    <string name="typing_settings_description">Пунктуація, тактильний відгук тощо</string>
     <string name="layout_settings_title">Розкладка та Ввід</string>
     <string name="layout_settings_description">Ряд цифр, розмір пробілу</string>
     <string name="appearance_settings_title">Зовнішній Вигляд</string>
@@ -102,10 +100,15 @@
     <string name="typing_settings_long_press_duration">Тривалість Довгого Натискання</string>
 
     <!-- Layout & Input Settings -->
+    <string name="layout_settings_alternative_layout">Розкладка Клавіатури</string>
     <string name="layout_settings_show_number_row">Показувати Ряд Цифр</string>
     <string name="layout_settings_number_row_on">Ряд цифр відображається</string>
     <string name="layout_settings_number_row_off">Ряд цифр приховується</string>
     <string name="layout_settings_space_bar_size">Розмір Клавіші Пробілу</string>
+    <string name="alternative_layout_default">За замовчуванням (Мовна розкладка)</string>
+    <string name="alternative_layout_dvorak">Dvorak</string>
+    <string name="alternative_layout_colemak">Colemak</string>
+    <string name="alternative_layout_workman">Workman</string>
 
     <!-- Privacy & Data Settings -->
     <string name="privacy_settings_clipboard_history">Історія Буфера Обміну</string>
@@ -138,6 +141,7 @@
     <string name="error_update_long_press_duration">Не вдалося оновити тривалість довгого натискання</string>
     <string name="error_update_number_row">Не вдалося оновити ряд цифр</string>
     <string name="error_update_space_bar_size">Не вдалося оновити розмір клавіші пробілу</string>
+    <string name="error_update_alternative_layout">Не вдалося оновити розкладку клавіатури</string>
     <string name="error_clear_learned_words">Не вдалося видалити вивчені слова</string>
     <string name="error_reset_to_defaults">Не вдалося скинути налаштування</string>
 

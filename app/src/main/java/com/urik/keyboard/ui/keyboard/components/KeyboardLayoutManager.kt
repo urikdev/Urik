@@ -539,6 +539,8 @@ class KeyboardLayoutManager(
                         }
                     }
 
+                    KeyboardKey.Spacer -> return
+
                     null -> {
                         HapticSignature.LetterClick
                     }
@@ -653,8 +655,16 @@ class KeyboardLayoutManager(
         }
 
         keys.forEach { key ->
-            val keyButton = getOrCreateKeyButton(key, state, keys)
-            rowLayout.addView(keyButton)
+            if (key is KeyboardKey.Spacer) {
+                val spacer =
+                    View(context).apply {
+                        layoutParams = LinearLayout.LayoutParams(0, 0, STANDARD_KEY_WEIGHT)
+                    }
+                rowLayout.addView(spacer)
+            } else {
+                val keyButton = getOrCreateKeyButton(key, state, keys)
+                rowLayout.addView(keyButton)
+            }
         }
 
         if (is9LetterRow) {
@@ -669,9 +679,10 @@ class KeyboardLayoutManager(
     }
 
     private fun is9CharacterLetterRow(rowKeys: List<KeyboardKey>): Boolean {
-        if (rowKeys.size != 9) return false
+        val nonSpacerKeys = rowKeys.filter { it !is KeyboardKey.Spacer }
+        if (nonSpacerKeys.size != 9) return false
 
-        return rowKeys.all { key ->
+        return nonSpacerKeys.all { key ->
             key is KeyboardKey.Character && key.type == KeyboardKey.KeyType.LETTER
         }
     }
@@ -920,6 +931,8 @@ class KeyboardLayoutManager(
                     else -> "?"
                 }
             }
+
+            KeyboardKey.Spacer -> ""
         }
 
     private fun getKeyContentDescription(
@@ -1005,6 +1018,8 @@ class KeyboardLayoutManager(
                     }
                 }
             }
+
+            KeyboardKey.Spacer -> ""
         }
 
     private fun handleSpaceLongPress(view: View) {
@@ -1457,27 +1472,29 @@ class KeyboardLayoutManager(
         rowKeys: List<KeyboardKey>,
     ): Float {
         val isNumberModeRow = isNumberModeRow(rowKeys)
+        val characterKeyCount = rowKeys.count { it is KeyboardKey.Character }
 
         val baseWeight =
             if (isNumberModeRow) {
                 STANDARD_KEY_WEIGHT
             } else {
                 when (key) {
-                    is KeyboardKey.Character -> {
-                        when (key.type) {
-                            KeyboardKey.KeyType.PUNCTUATION -> 0.7f
-                            else -> STANDARD_KEY_WEIGHT
-                        }
-                    }
+                    is KeyboardKey.Character -> STANDARD_KEY_WEIGHT
 
                     is KeyboardKey.Action -> {
                         when (key.action) {
                             KeyboardKey.ActionType.SPACE -> return currentSpaceBarSize.widthMultiplier
-                            KeyboardKey.ActionType.SHIFT -> SHIFT_KEY_WEIGHT
-                            KeyboardKey.ActionType.BACKSPACE -> BACKSPACE_KEY_WEIGHT
+                            KeyboardKey.ActionType.SHIFT -> {
+                                if (characterKeyCount >= 10) STANDARD_KEY_WEIGHT else SHIFT_KEY_WEIGHT
+                            }
+                            KeyboardKey.ActionType.BACKSPACE -> {
+                                if (characterKeyCount >= 10) STANDARD_KEY_WEIGHT else BACKSPACE_KEY_WEIGHT
+                            }
                             else -> STANDARD_KEY_WEIGHT
                         }
                     }
+
+                    KeyboardKey.Spacer -> STANDARD_KEY_WEIGHT
                 }
             }
 
@@ -1491,6 +1508,7 @@ class KeyboardLayoutManager(
             when (key) {
                 is KeyboardKey.Character -> key.type == KeyboardKey.KeyType.NUMBER || key.type == KeyboardKey.KeyType.PUNCTUATION
                 is KeyboardKey.Action -> key.action == KeyboardKey.ActionType.BACKSPACE
+                KeyboardKey.Spacer -> false
             }
         }
     }
@@ -1529,6 +1547,8 @@ class KeyboardLayoutManager(
                         else -> theme.colors.keyBackgroundAction
                     }
                 }
+
+                KeyboardKey.Spacer -> android.graphics.Color.TRANSPARENT
             }
 
         val cornerRadius = 8f * context.resources.displayMetrics.density
@@ -1581,6 +1601,7 @@ class KeyboardLayoutManager(
         when (key) {
             is KeyboardKey.Character -> themeManager.currentTheme.value.colors.keyTextCharacter
             is KeyboardKey.Action -> themeManager.currentTheme.value.colors.keyTextAction
+            KeyboardKey.Spacer -> android.graphics.Color.TRANSPARENT
         }
 
     fun cleanup() {

@@ -48,7 +48,8 @@ object KeyboardModule {
     fun provideKeyboardRepository(
         @ApplicationContext context: Context,
         cacheMemoryManager: CacheMemoryManager,
-    ): KeyboardRepository = KeyboardRepository(context, cacheMemoryManager)
+        settingsRepository: SettingsRepository,
+    ): KeyboardRepository = KeyboardRepository(context, cacheMemoryManager, settingsRepository)
 
     @Provides
     @Singleton

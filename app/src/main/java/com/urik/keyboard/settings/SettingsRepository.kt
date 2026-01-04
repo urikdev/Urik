@@ -67,6 +67,7 @@ class SettingsRepository
             val KEY_LABEL_SIZE = stringPreferencesKey("key_label_size")
             val CURSOR_SPEED = stringPreferencesKey("cursor_speed")
             val FAVORITE_THEMES = stringSetPreferencesKey("favorite_themes")
+            val ALTERNATIVE_KEYBOARD_LAYOUT = stringPreferencesKey("alternative_keyboard_layout")
         }
 
         /**
@@ -193,6 +194,20 @@ class SettingsRepository
                             } ?: CursorSpeed.MEDIUM,
                         keyboardTheme = preferences[PreferenceKeys.KEYBOARD_THEME] ?: "default",
                         favoriteThemes = preferences[PreferenceKeys.FAVORITE_THEMES] ?: emptySet(),
+                        alternativeKeyboardLayout =
+                            preferences[PreferenceKeys.ALTERNATIVE_KEYBOARD_LAYOUT]?.let {
+                                try {
+                                    AlternativeKeyboardLayout.valueOf(it)
+                                } catch (e: IllegalArgumentException) {
+                                    ErrorLogger.logException(
+                                        component = "SettingsRepository",
+                                        severity = ErrorLogger.Severity.HIGH,
+                                        exception = e,
+                                        context = mapOf("key" to "ALTERNATIVE_KEYBOARD_LAYOUT", "value" to it),
+                                    )
+                                    AlternativeKeyboardLayout.DEFAULT
+                                }
+                            } ?: AlternativeKeyboardLayout.DEFAULT,
                     ).validated()
                 }.catch { e ->
                     ErrorLogger.logException(
@@ -503,6 +518,17 @@ class SettingsRepository
         suspend fun updateFavoriteThemes(favorites: Set<String>): Result<Unit> =
             try {
                 dataStore.edit { it[PreferenceKeys.FAVORITE_THEMES] = favorites }
+                Result.success(Unit)
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+
+        /**
+         * Updates alternative keyboard layout.
+         */
+        suspend fun updateAlternativeKeyboardLayout(layout: AlternativeKeyboardLayout): Result<Unit> =
+            try {
+                dataStore.edit { it[PreferenceKeys.ALTERNATIVE_KEYBOARD_LAYOUT] = layout.name }
                 Result.success(Unit)
             } catch (e: Exception) {
                 Result.failure(e)

@@ -97,7 +97,7 @@ object KeyboardConstants {
         const val MIN_EXCELLENT_CANDIDATES = 3
 
         const val SWIPE_TIME_THRESHOLD_MS = 150L
-        const val SWIPE_START_DISTANCE_DP = 85f
+        const val SWIPE_START_DISTANCE_DP = 50f
         const val MIN_SWIPE_POINTS_FOR_SAMPLING = 3
         const val SLOW_MOVEMENT_VELOCITY_THRESHOLD = 0.5f
         const val UI_UPDATE_INTERVAL_MS = 16

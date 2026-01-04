@@ -1005,6 +1005,8 @@ class UrikInputMethodService :
                         return@collect
                     }
 
+                    val layoutChanged = currentSettings.alternativeKeyboardLayout != newSettings.alternativeKeyboardLayout
+
                     currentSettings = newSettings
 
                     swipeDetector.setSwipeEnabled(newSettings.swipeEnabled)
@@ -1024,6 +1026,11 @@ class UrikInputMethodService :
                     )
 
                     layoutManager.updateClipboardEnabled(newSettings.clipboardEnabled)
+
+                    if (layoutChanged) {
+                        repository.cleanup()
+                        viewModel.reloadLayout()
+                    }
 
                     withContext(Dispatchers.Main) {
                         updateSwipeKeyboard()
@@ -1251,6 +1258,8 @@ class UrikInputMethodService :
                 is KeyboardKey.Action -> {
                     handleActionKey(key)
                 }
+
+                KeyboardKey.Spacer -> {}
             }
         } catch (_: Exception) {
         }

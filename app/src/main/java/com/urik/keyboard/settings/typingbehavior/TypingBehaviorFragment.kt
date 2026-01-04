@@ -1,6 +1,11 @@
 package com.urik.keyboard.settings.typingbehavior
 
+import android.content.Context
+import android.os.Build
 import android.os.Bundle
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.os.VibratorManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,6 +16,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.preference.ListPreference
 import androidx.preference.PreferenceFragmentCompat
+import androidx.preference.SeekBarPreference
 import androidx.preference.SwitchPreferenceCompat
 import com.urik.keyboard.R
 import com.urik.keyboard.settings.CursorSpeed
@@ -37,7 +43,18 @@ class TypingBehaviorFragment : PreferenceFragmentCompat() {
     private lateinit var backspaceSwipePref: SwitchPreferenceCompat
     private lateinit var longPressPunctuationPref: ListPreference
     private lateinit var longPressPref: ListPreference
+    private lateinit var hapticPref: SwitchPreferenceCompat
+    private lateinit var vibrationPref: SeekBarPreference
     private var testField: EditText? = null
+
+    private val vibrator: Vibrator? by lazy {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            requireContext().getSystemService(VibratorManager::class.java)?.defaultVibrator
+        } else {
+            @Suppress("DEPRECATION")
+            requireContext().getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -139,6 +156,29 @@ class TypingBehaviorFragment : PreferenceFragmentCompat() {
             }
         screen.addPreference(longPressPref)
 
+        hapticPref =
+            SwitchPreferenceCompat(context).apply {
+                key = "haptic_feedback"
+                isPersistent = false
+                title = resources.getString(R.string.feedback_settings_haptic_feedback)
+                summaryOn = resources.getString(R.string.feedback_settings_haptic_on)
+                summaryOff = resources.getString(R.string.feedback_settings_haptic_off)
+            }
+        screen.addPreference(hapticPref)
+
+        vibrationPref =
+            SeekBarPreference(context).apply {
+                key = "vibration_strength"
+                isPersistent = false
+                title = resources.getString(R.string.feedback_settings_vibration_strength)
+                min = 1
+                max = 255
+                showSeekBarValue = true
+                isAdjustable = true
+                updatesContinuously = true
+            }
+        screen.addPreference(vibrationPref)
+
         preferenceScreen = screen
     }
 
@@ -183,6 +223,18 @@ class TypingBehaviorFragment : PreferenceFragmentCompat() {
             true
         }
 
+        hapticPref.setOnPreferenceChangeListener { _, newValue ->
+            viewModel.updateHapticFeedback(newValue as Boolean)
+            true
+        }
+
+        vibrationPref.setOnPreferenceChangeListener { _, newValue ->
+            val strength = newValue as Int
+            viewModel.updateVibrationStrength(strength)
+            previewHaptic(strength)
+            true
+        }
+
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
@@ -195,6 +247,8 @@ class TypingBehaviorFragment : PreferenceFragmentCompat() {
                         backspaceSwipePref.isChecked = state.backspaceSwipeDelete
                         longPressPunctuationPref.value = state.longPressPunctuationMode.name
                         longPressPref.value = state.longPressDuration.name
+                        hapticPref.isChecked = state.hapticFeedback
+                        vibrationPref.value = state.vibrationStrength
                     }
                 }
 
@@ -210,5 +264,12 @@ class TypingBehaviorFragment : PreferenceFragmentCompat() {
     override fun onDestroyView() {
         super.onDestroyView()
         testField = null
+    }
+
+    private fun previewHaptic(amplitude: Int) {
+        vibrator?.let {
+            val effect = VibrationEffect.createOneShot(25L, amplitude.coerceIn(1, 255))
+            it.vibrate(effect)
+        }
     }
 }

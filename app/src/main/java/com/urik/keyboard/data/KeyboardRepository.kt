@@ -11,6 +11,7 @@ import com.urik.keyboard.utils.CacheMemoryManager
 import com.urik.keyboard.utils.ManagedCache
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.io.FileNotFoundException
@@ -79,6 +80,7 @@ class KeyboardRepository
     constructor(
         @ApplicationContext private val context: Context,
         cacheMemoryManager: CacheMemoryManager,
+        private val settingsRepository: com.urik.keyboard.settings.SettingsRepository,
     ) {
         private val layoutCache: ManagedCache<String, KeyboardLayout> =
             cacheMemoryManager.createCache(
@@ -133,14 +135,25 @@ class KeyboardRepository
             currentAction: KeyboardKey.ActionType = KeyboardKey.ActionType.ENTER,
         ): Result<KeyboardLayout> =
             withContext(Dispatchers.IO) {
-                val cacheKey = "${locale.toLanguageTag()}_${mode.name}_${currentAction.name}"
+                val settings = settingsRepository.settings.first()
+                val alternativeLayout = settings.alternativeKeyboardLayout
+
+                val layoutIdentifier =
+                    when (alternativeLayout) {
+                        com.urik.keyboard.settings.AlternativeKeyboardLayout.DEFAULT -> locale.toLanguageTag()
+                        com.urik.keyboard.settings.AlternativeKeyboardLayout.DVORAK -> "dvorak"
+                        com.urik.keyboard.settings.AlternativeKeyboardLayout.COLEMAK -> "colemak"
+                        com.urik.keyboard.settings.AlternativeKeyboardLayout.WORKMAN -> "workman"
+                    }
+
+                val cacheKey = "${layoutIdentifier}_${mode.name}_${currentAction.name}"
 
                 layoutCache.getIfPresent(cacheKey)?.let { cachedLayout ->
                     return@withContext Result.success(cachedLayout)
                 }
 
                 return@withContext try {
-                    val layout = loadLayoutFromAssets(mode, locale, currentAction)
+                    val layout = loadLayoutFromAssets(mode, layoutIdentifier, currentAction, locale)
                     layoutCache.put(cacheKey, layout)
                     Result.success(layout)
                 } catch (e: Exception) {
@@ -150,29 +163,32 @@ class KeyboardRepository
 
         private suspend fun loadLayoutFromAssets(
             mode: KeyboardMode,
-            locale: ULocale,
+            layoutIdentifier: String,
             currentAction: KeyboardKey.ActionType,
+            originalLocale: ULocale,
         ): KeyboardLayout =
             withContext(Dispatchers.IO) {
-                val localeTag = locale.toLanguageTag()
-
                 cleanupExpiredErrors()
 
-                if (shouldSkipLocale(localeTag)) {
+                if (shouldSkipLocale(layoutIdentifier)) {
                     return@withContext getFallbackLayout(mode, currentAction)
                 }
 
                 return@withContext try {
-                    val layoutData = loadLayoutDataFromAssets(context, localeTag)
+                    val layoutData = loadLayoutDataFromAssets(context, layoutIdentifier)
                     parseLayoutForMode(layoutData, mode, currentAction).also {
-                        errorTracker.remove(localeTag)
-                        failedLocales.remove(localeTag)
+                        errorTracker.remove(layoutIdentifier)
+                        failedLocales.remove(layoutIdentifier)
                     }
                 } catch (_: FileNotFoundException) {
-                    handleAssetError(localeTag)
-                    tryLanguageFallback(context, locale, mode, currentAction)
+                    handleAssetError(layoutIdentifier)
+                    if (layoutIdentifier in setOf("dvorak", "colemak", "workman")) {
+                        tryLoadFallback(context, "en", mode, currentAction)
+                    } else {
+                        tryLanguageFallback(context, originalLocale, mode, currentAction)
+                    }
                 } catch (_: Exception) {
-                    handleAssetError(localeTag)
+                    handleAssetError(layoutIdentifier)
                     getFallbackLayout(mode, currentAction)
                 }
             }
@@ -274,6 +290,8 @@ class KeyboardRepository
                     KeyboardKey.Action(actionType)
                 }
 
+                "spacer" -> KeyboardKey.Spacer
+
                 else -> throw IllegalArgumentException("Unknown key type: $type")
             }
 
@@ -297,6 +315,21 @@ class KeyboardRepository
                 }
 
                 return@withContext getFallbackLayout(mode, currentAction)
+            }
+
+        private suspend fun tryLoadFallback(
+            context: Context,
+            fallbackIdentifier: String,
+            mode: KeyboardMode,
+            currentAction: KeyboardKey.ActionType,
+        ): KeyboardLayout =
+            withContext(Dispatchers.IO) {
+                return@withContext try {
+                    val layoutData = loadLayoutDataFromAssets(context, fallbackIdentifier)
+                    parseLayoutForMode(layoutData, mode, currentAction)
+                } catch (_: Exception) {
+                    getFallbackLayout(mode, currentAction)
+                }
             }
 
         private fun getFallbackLayout(

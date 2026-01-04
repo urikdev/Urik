@@ -2,6 +2,7 @@ package com.urik.keyboard.settings.layoutinput
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.urik.keyboard.settings.AlternativeKeyboardLayout
 import com.urik.keyboard.settings.SettingsEvent
 import com.urik.keyboard.settings.SettingsRepository
 import com.urik.keyboard.settings.SpaceBarSize
@@ -34,6 +35,7 @@ class LayoutInputViewModel
                     LayoutInputUiState(
                         showNumberRow = settings.showNumberRow,
                         spaceBarSize = settings.spaceBarSize,
+                        alternativeKeyboardLayout = settings.alternativeKeyboardLayout,
                     )
                 }.stateIn(
                     scope = viewModelScope,
@@ -57,6 +59,14 @@ class LayoutInputViewModel
             }
         }
 
+        fun updateAlternativeKeyboardLayout(layout: AlternativeKeyboardLayout) {
+            viewModelScope.launch {
+                settingsRepository
+                    .updateAlternativeKeyboardLayout(layout)
+                    .onFailure { _events.emit(SettingsEvent.Error.AlternativeLayoutUpdateFailed) }
+            }
+        }
+
         private companion object {
             const val STOP_TIMEOUT_MILLIS = 5000L
         }
@@ -68,4 +78,5 @@ class LayoutInputViewModel
 data class LayoutInputUiState(
     val showNumberRow: Boolean = true,
     val spaceBarSize: SpaceBarSize = SpaceBarSize.STANDARD,
+    val alternativeKeyboardLayout: AlternativeKeyboardLayout = AlternativeKeyboardLayout.DEFAULT,
 )

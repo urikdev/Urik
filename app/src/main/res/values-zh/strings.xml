@@ -23,10 +23,8 @@
     <string name="autocorrect_settings_description">拼写检查与建议</string>
     <string name="language_settings_title">语言设置</string>
     <string name="language_settings_description">选择您的键盘语言</string>
-    <string name="feedback_settings_title">声音与反馈设置</string>
-    <string name="feedback_settings_description">按键音与震动</string>
     <string name="typing_settings_title">输入行为设置</string>
-    <string name="typing_settings_description">标点符号等</string>
+    <string name="typing_settings_description">标点符号、触觉反馈等</string>
     <string name="layout_settings_title">布局与输入</string>
     <string name="layout_settings_description">数字行、空格键大小</string>
     <string name="appearance_settings_title">外观</string>
@@ -102,11 +100,18 @@
     <string name="long_press_punctuation_period">句号键</string>
     <string name="typing_settings_long_press_duration">长按时长</string>
 
+    <!-- Layout & Input Settings -->
+    <string name="layout_settings_alternative_layout">键盘布局</string>
     <string name="layout_settings_show_number_row">显示数字行</string>
     <string name="layout_settings_number_row_on">数字行已显示</string>
     <string name="layout_settings_number_row_off">数字行已隐藏</string>
     <string name="layout_settings_space_bar_size">空格键大小</string>
+    <string name="alternative_layout_default">默认（语言布局）</string>
+    <string name="alternative_layout_dvorak">Dvorak</string>
+    <string name="alternative_layout_colemak">Colemak</string>
+    <string name="alternative_layout_workman">Workman</string>
 
+    <!-- Privacy & Data Settings -->
     <string name="privacy_settings_clipboard_history">剪贴板历史</string>
     <string name="privacy_settings_clipboard_history_on">剪贴板历史已启用</string>
     <string name="privacy_settings_clipboard_history_off">剪贴板历史已禁用</string>
@@ -140,6 +145,7 @@
     <string name="error_update_long_press_duration">更新长按时长失败</string>
     <string name="error_update_number_row">更新数字行失败</string>
     <string name="error_update_space_bar_size">更新空格键大小失败</string>
+    <string name="error_update_alternative_layout">更新键盘布局失败</string>
     <string name="error_clear_learned_words">清除已学词汇失败</string>
     <string name="error_reset_to_defaults">重置设置失败</string>
 

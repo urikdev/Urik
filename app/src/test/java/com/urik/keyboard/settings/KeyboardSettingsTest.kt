@@ -527,4 +527,23 @@ class KeyboardSettingsTest {
         assertEquals("en", validated.primaryLanguage)
         assertEquals("en", validated.primaryLayoutLanguage)
     }
+
+    @Test
+    fun `alternativeKeyboardLayout should default to DEFAULT`() {
+        val settings = KeyboardSettings()
+
+        assertEquals(AlternativeKeyboardLayout.DEFAULT, settings.alternativeKeyboardLayout)
+    }
+
+    @Test
+    fun `validated should preserve alternativeKeyboardLayout`() {
+        val settings =
+            KeyboardSettings(
+                alternativeKeyboardLayout = AlternativeKeyboardLayout.DVORAK,
+            )
+
+        val validated = settings.validated()
+
+        assertEquals(AlternativeKeyboardLayout.DVORAK, validated.alternativeKeyboardLayout)
+    }
 }
