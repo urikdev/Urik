@@ -1,0 +1,30 @@
+Klawiatura skupiona na prywatności dla Androida z przetwarzaniem na urządzeniu i zaszyfrowanym przechowywaniem.
+
+**Wprowadzanie**
+- Pisanie przesuwaniem i dotykaniem z adaptacyjnym wykrywaniem gestów
+- Długie naciśnięcie dla wariantów znaków
+- Przesuwanie po spacji do sterowania kursorem
+- Alternatywne układy klawiatury (Dvorak, Colemak, Workman)
+- Wykrywanie klawiatury sprzętowej (automatycznie ukrywa się po podłączeniu)
+
+**Inteligencja**
+- Sprawdzanie pisowni na urządzeniu przy użyciu algorytmu SymSpell
+- Inteligentna autokorekta (pomija adresy URL/e-maile, obsługuje kontekst interpunkcji)
+- Uczenie się słów z zaszyfrowaną bazą danych SQLCipher
+- Wsparcie wielojęzyczne, jednoczesne sprawdzanie pisowni
+- Wyszukiwanie emoji z obsługą słów kluczowych
+
+**Integracja**
+- Obsługa wbudowanego autouzupełniania dla menedżerów haseł (Android 11+)
+- Historia schowka z zaszyfrowanym przechowywaniem
+- Dynamiczne motywy Material You (Android 12+)
+
+**Dostosowanie**
+- Wiele motywów (jasne, ciemne, niestandardowe schematy kolorów)
+- Konfigurowalne rozmiary klawiszy, wibracje dotykowe, zachowanie pisania
+- Funkcje dostępności (kontrast WCAG AA, obsługa TalkBack)
+
+**Prywatność**
+- Brak telemetrii, analityki ani uprawnień sieciowych
+- Całe przetwarzanie odbywa się na urządzeniu
+- Zaszyfrowane lokalne przechowywanie danych użytkownika

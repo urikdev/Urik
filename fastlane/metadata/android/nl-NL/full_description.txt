@@ -1,0 +1,30 @@
+Privacy-eerste toetsenbord voor Android met verwerking op het apparaat en versleutelde opslag.
+
+**Invoer**
+- Vegen en tikken met adaptieve bewegingsdetectie
+- Lang indrukken voor tekenvariaties
+- Vegen over spatiebalk voor cursorbesturing
+- Alternatieve toetsenbordindelingen (Dvorak, Colemak, Workman)
+- Hardware toetsenborddetectie (verbergt zich automatisch bij verbinding)
+
+**Intelligentie**
+- Spellingcontrole op het apparaat met SymSpell-algoritme
+- Slimme autocorrectie (slaat URL's/e-mails over, verwerkt interpunctiecontext)
+- Woord leren met versleutelde SQLCipher-database
+- Meertalige ondersteuning, gelijktijdige spellingcontrole
+- Emoji-zoekopdracht met trefwoordondersteuning
+
+**Integratie**
+- Inline autofill-ondersteuning voor wachtwoordbeheerders (Android 11+)
+- Klembordgeschiedenis met versleutelde opslag
+- Material You dynamische thema's (Android 12+)
+
+**Aanpassing**
+- Meerdere thema's (licht, donker, aangepaste kleurenschema's)
+- Configureerbare toetsgroottes, haptische feedback, typgedrag
+- Toegankelijkheidsfuncties (WCAG AA-contrast, TalkBack-ondersteuning)
+
+**Privacy**
+- Geen telemetrie, analyses of netwerkmachtigingen
+- Alle verwerking gebeurt op het apparaat
+- Versleutelde lokale opslag voor gebruikersgegevens

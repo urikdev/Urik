@@ -1,0 +1,30 @@
+Teclado focado na privacidade para Android com processamento no dispositivo e armazenamento encriptado.
+
+**Entrada**
+- Digitação por deslize e toque com deteção adaptativa de gestos
+- Pressão longa para variações de caracteres
+- Deslize na barra de espaço para controlo do cursor
+- Layouts de teclado alternativos (Dvorak, Colemak, Workman)
+- Deteção de teclado físico (oculta-se automaticamente quando conectado)
+
+**Inteligência**
+- Verificação ortográfica no dispositivo usando algoritmo SymSpell
+- Correção automática inteligente (ignora URLs/emails, lida com contexto de pontuação)
+- Aprendizagem de palavras com base de dados SQLCipher encriptada
+- Suporte multilíngue, verificação ortográfica simultânea
+- Pesquisa de emoji com suporte de palavras-chave
+
+**Integração**
+- Suporte de preenchimento automático inline para gestores de palavras-passe (Android 11+)
+- Histórico da área de transferência com armazenamento encriptado
+- Temas dinâmicos Material You (Android 12+)
+
+**Personalização**
+- Múltiplos temas (claro, escuro, esquemas de cores personalizados)
+- Tamanhos de teclas configuráveis, feedback háptico, comportamento de digitação
+- Recursos de acessibilidade (contraste WCAG AA, suporte TalkBack)
+
+**Privacidade**
+- Sem telemetria, análises ou permissões de rede
+- Todo o processamento ocorre no dispositivo
+- Armazenamento local encriptado para dados do utilizador
