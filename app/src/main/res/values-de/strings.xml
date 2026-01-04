@@ -140,6 +140,7 @@
     <string name="error_update_long_press_duration">Langzeit-Druck-Dauer konnte nicht geändert werden</string>
     <string name="error_update_number_row">Zahlenreihe konnte nicht geändert werden</string>
     <string name="error_update_space_bar_size">Leertasten-Breite konnte nicht geändert werden</string>
+    <string name="error_update_alternative_layout">Tastaturlayout konnte nicht geändert werden</string>
     <string name="error_clear_learned_words">Wörterbuch konnte nicht geleert werden</string>
     <string name="error_reset_to_defaults">Einstellungen konnten nicht zurückgesetzt werden</string>
 

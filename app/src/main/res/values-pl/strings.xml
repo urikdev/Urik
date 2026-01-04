@@ -141,6 +141,7 @@
     <string name="error_update_long_press_duration">Nie udało się zaktualizować czasu długiego naciśnięcia</string>
     <string name="error_update_number_row">Nie udało się zaktualizować wiersza liczb</string>
     <string name="error_update_space_bar_size">Nie udało się zaktualizować rozmiaru klawisza spacji</string>
+    <string name="error_update_alternative_layout">Nie udało się zaktualizować układu klawiatury</string>
     <string name="error_clear_learned_words">Nie udało się wyczyścić nabytych słów</string>
     <string name="error_reset_to_defaults">Nie udało się przywrócić ustawień do domyślnych</string>
 

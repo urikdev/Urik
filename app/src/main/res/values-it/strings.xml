@@ -158,6 +158,7 @@
     <string name="error_update_long_press_duration">Aggiornamento durata pressione lunga non riuscito</string>
     <string name="error_update_number_row">Aggiornamento riga numerica non riuscito</string>
     <string name="error_update_space_bar_size">Aggiornamento dimensione barra spaziatrice non riuscito</string>
+    <string name="error_update_alternative_layout">Aggiornamento layout tastiera non riuscito</string>
     <string name="error_clear_learned_words">Cancellazione parole apprese non riuscita</string>
     <string name="error_reset_to_defaults">Ripristino impostazioni non riuscito</string>
 

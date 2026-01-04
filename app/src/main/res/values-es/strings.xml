@@ -140,6 +140,7 @@
     <string name="error_update_long_press_duration">No se pudo actualizar la duración de la pulsación larga.</string>
     <string name="error_update_number_row">Error al actualizar la fila de números</string>
     <string name="error_update_space_bar_size">No se pudo actualizar el tamaño de la barra espaciadora.</string>
+    <string name="error_update_alternative_layout">No se pudo actualizar el diseño de teclado</string>
     <string name="error_clear_learned_words">No se pudo borrar las palabras aprendidas</string>
     <string name="error_reset_to_defaults">No se pudo restablecer la configuración</string>
 

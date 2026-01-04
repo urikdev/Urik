@@ -87,6 +87,7 @@
     <string name="error_update_long_press_duration">Misslyckades med att uppdatera lång trycktid</string>
     <string name="error_update_number_row">Misslyckades med att uppdatera nummerraden</string>
     <string name="error_update_space_bar_size">Misslyckades med att uppdatera mellanslagstangentens storlek</string>
+    <string name="error_update_alternative_layout">Misslyckades med att uppdatera tangentbordslayout</string>
     <string name="error_clear_learned_words">Misslyckades med att rensa inlärda ord</string>
     <string name="error_reset_to_defaults">Misslyckades med att återställa inställningarna</string>
     <string name="success_learned_words_cleared">Inlärda ord rensade</string>

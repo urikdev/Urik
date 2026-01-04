@@ -143,6 +143,7 @@
     <string name="error_update_long_press_duration">Не удалось обновить длительность долгого нажатия</string>
     <string name="error_update_number_row">Не удалось обновить ряд цифр</string>
     <string name="error_update_space_bar_size">Не удалось обновить размер пробела</string>
+    <string name="error_update_alternative_layout">Не удалось обновить раскладку клавиатуры</string>
     <string name="error_clear_learned_words">Не удалось удалить изученные слова</string>
     <string name="error_reset_to_defaults">Не удалось сбросить настройки</string>
 

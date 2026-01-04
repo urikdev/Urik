@@ -157,6 +157,7 @@
     <string name="error_update_long_press_duration">Duur lang indrukken bijwerken mislukt</string>
     <string name="error_update_number_row">Cijferrij bijwerken mislukt</string>
     <string name="error_update_space_bar_size">Spatiebalkgrootte bijwerken mislukt</string>
+    <string name="error_update_alternative_layout">Toetsenbordindeling bijwerken mislukt</string>
     <string name="error_clear_learned_words">Gewilde woorden wissen mislukt</string>
     <string name="error_reset_to_defaults">Terugzetten naar standaardwaarden mislukt</string>
 

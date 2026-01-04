@@ -140,6 +140,7 @@
     <string name="error_update_long_press_duration">Nepodařilo se aktualizovat dobu dlouhého stisknutí</string>
     <string name="error_update_number_row">Nepodařilo se aktualizovat číselnou řadu</string>
     <string name="error_update_space_bar_size">Nepodařilo se aktualizovat velikost mezerníku</string>
+    <string name="error_update_alternative_layout">Nepodařilo se aktualizovat rozložení klávesnice</string>
     <string name="error_clear_learned_words">Nepodařilo se smazat naučená slova</string>
     <string name="error_reset_to_defaults">Nepodařilo se obnovit nastavení</string>
 

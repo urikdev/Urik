@@ -145,6 +145,7 @@
     <string name="error_update_long_press_duration">更新长按时长失败</string>
     <string name="error_update_number_row">更新数字行失败</string>
     <string name="error_update_space_bar_size">更新空格键大小失败</string>
+    <string name="error_update_alternative_layout">更新键盘布局失败</string>
     <string name="error_clear_learned_words">清除已学词汇失败</string>
     <string name="error_reset_to_defaults">重置设置失败</string>
 

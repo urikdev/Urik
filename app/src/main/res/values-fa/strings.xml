@@ -157,6 +157,7 @@
     <string name="error_update_long_press_duration">به‌روزرسانی مدت زمان نگه داشتن طولانی ناموفق بود</string>
     <string name="error_update_number_row">به‌روزرسانی ردیف اعداد ناموفق بود</string>
     <string name="error_update_space_bar_size">به‌روزرسانی اندازه نوار فاصله ناموفق بود</string>
+    <string name="error_update_alternative_layout">به‌روزرسانی چیدمان صفحه‌کلید ناموفق بود</string>
     <string name="error_clear_learned_words">پاک کردن واژه‌های آموخته‌شده ناموفق بود</string>
     <string name="error_reset_to_defaults">بازنشانی تنظیمات ناموفق بود</string>
 

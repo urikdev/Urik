@@ -140,6 +140,7 @@
     <string name="error_update_long_press_duration">Não foi possível atualizar a duração do toque prolongado</string>
     <string name="error_update_number_row">Erro ao atualizar a linha de números</string>
     <string name="error_update_space_bar_size">Não foi possível atualizar o tamanho da barra de espaço</string>
+    <string name="error_update_alternative_layout">Não foi possível atualizar o layout do teclado</string>
     <string name="error_clear_learned_words">Não foi possível apagar as palavras aprendidas</string>
     <string name="error_reset_to_defaults">Não foi possível restaurar as configurações</string>
 
