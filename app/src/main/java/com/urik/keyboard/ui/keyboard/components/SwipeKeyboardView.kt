@@ -319,7 +319,7 @@ class SwipeKeyboardView
         }
 
         private fun setupEmojiPickerViews() {
-            if (emojiPickerView != null) return
+            if (searchButton != null) return
 
             val baseContext = context
             val themedContext =
@@ -525,17 +525,6 @@ class SwipeKeyboardView
                 }
             this.closeButtonBar = btnBar
 
-            val pickerView =
-                EmojiPickerView(themedContext).apply {
-                    layoutParams =
-                        LinearLayout.LayoutParams(
-                            LinearLayout.LayoutParams.MATCH_PARENT,
-                            0,
-                            1f,
-                        )
-                }
-            this.emojiPickerView = pickerView
-
             val searchContainer =
                 LinearLayout(baseContext).apply {
                     orientation = LinearLayout.VERTICAL
@@ -559,32 +548,10 @@ class SwipeKeyboardView
                 }
             emojiSearchContainer = searchContainer
 
-            val container =
-                LinearLayout(baseContext).apply {
-                    orientation = LinearLayout.VERTICAL
-                    val horizontalPadding = baseContext.resources.getDimensionPixelSize(R.dimen.keyboard_padding)
-                    val verticalPadding = baseContext.resources.getDimensionPixelSize(R.dimen.keyboard_padding_vertical)
-                    setPadding(horizontalPadding, verticalPadding, horizontalPadding, verticalPadding)
-                    clipChildren = false
-                    clipToPadding = false
-                    addView(
-                        btnBar,
-                        LinearLayout.LayoutParams(
-                            LinearLayout.LayoutParams.MATCH_PARENT,
-                            minTouchTarget,
-                        ),
-                    )
-                    addView(pickerView)
-                }
-            emojiPickerContainer = container
-
             searchCloseBtn.setOnClickListener(searchCloseClickListener)
             searchBtn.setOnClickListener(searchActivateClickListener)
             backspaceBtn.setOnClickListener(backspaceClickListener)
             closeBtn.setOnClickListener(emojiPickerCloseClickListener)
-            pickerView.setOnEmojiPickedListener(emojiPickedListener)
-
-            updateEmojiPickerColors()
         }
 
         private fun updateEmojiPickerColors() {
@@ -635,6 +602,51 @@ class SwipeKeyboardView
 
             setupEmojiPickerViews()
 
+            val baseContext = context
+            val themedContext =
+                androidx.appcompat.view.ContextThemeWrapper(
+                    baseContext,
+                    R.style.Theme_Urik,
+                )
+            val minTouchTarget = baseContext.resources.getDimensionPixelSize(R.dimen.minimum_touch_target)
+
+            val pickerView =
+                EmojiPickerView(themedContext).apply {
+                    layoutParams =
+                        LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT,
+                            0,
+                            1f,
+                        )
+                    setOnEmojiPickedListener(emojiPickedListener)
+                    recentEmojiProvider?.let { provider ->
+                        setRecentEmojiProvider(provider)
+                    }
+                }
+            emojiPickerView = pickerView
+
+            val horizontalPadding = baseContext.resources.getDimensionPixelSize(R.dimen.keyboard_padding)
+            val verticalPadding = baseContext.resources.getDimensionPixelSize(R.dimen.keyboard_padding_vertical)
+
+            (closeButtonBar?.parent as? ViewGroup)?.removeView(closeButtonBar)
+
+            val container =
+                LinearLayout(baseContext).apply {
+                    orientation = LinearLayout.VERTICAL
+                    setPadding(horizontalPadding, verticalPadding, horizontalPadding, verticalPadding)
+                    clipChildren = false
+                    clipToPadding = false
+                    addView(
+                        closeButtonBar,
+                        LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT,
+                            minTouchTarget,
+                        ),
+                    )
+                    addView(pickerView)
+                }
+            emojiPickerContainer = container
+
             isShowingEmojiPicker = true
             findKeyboardView()?.visibility = GONE
 
@@ -642,21 +654,15 @@ class SwipeKeyboardView
                 emojiSearchManager?.ensureLoaded()
             }
 
-            emojiPickerView?.let { picker ->
-                recentEmojiProvider?.let { provider ->
-                    picker.setRecentEmojiProvider(provider)
-                }
-            }
+            updateEmojiPickerColors()
 
-            emojiPickerContainer?.let { container ->
-                addView(
-                    container,
-                    LayoutParams(
-                        LayoutParams.MATCH_PARENT,
-                        LayoutParams.MATCH_PARENT,
-                    ),
-                )
-            }
+            addView(
+                container,
+                LayoutParams(
+                    LayoutParams.MATCH_PARENT,
+                    LayoutParams.MATCH_PARENT,
+                ),
+            )
         }
 
         /**
@@ -675,6 +681,9 @@ class SwipeKeyboardView
             emojiSearchContainer?.let { searchContainer ->
                 removeView(searchContainer)
             }
+
+            emojiPickerView = null
+            emojiPickerContainer = null
 
             emojiSearchInput?.text?.clear()
             emojiSearchResultsContainer?.visibility = GONE
