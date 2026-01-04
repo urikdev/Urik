@@ -355,5 +355,7 @@ class KeyboardPreviewRenderer(
                     KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS -> context.getString(R.string.symbols_mode_label)
                     else -> ""
                 }
+
+            KeyboardKey.Spacer -> ""
         }
 }

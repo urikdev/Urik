@@ -24,10 +24,8 @@
     <string name="autocorrect_settings_description">Pisownia i sugestie</string>
     <string name="language_settings_title">Ustawienia językowe</string>
     <string name="language_settings_description">Wybierz język klawiatury</string>
-    <string name="feedback_settings_title">Ustawienia dźwięku i opinii</string>
-    <string name="feedback_settings_description">Dźwięki klawiszy i wibracje</string>
     <string name="typing_settings_title">Ustawienia zachowania podczas pisania</string>
-    <string name="typing_settings_description">Interpunkcja itp.</string>
+    <string name="typing_settings_description">Interpunkcja, wibracje dotykowe itp.</string>
     <string name="layout_settings_title">Układ i Wprowadzanie</string>
     <string name="layout_settings_description">Numer wiersza, rozmiar spacji</string>
     <string name="appearance_settings_title">Wygląd</string>
@@ -102,10 +100,15 @@
     <string name="typing_settings_long_press_duration">Czas trwania długiego naciśnięcia</string>
 
     <!-- Layout & Input Settings -->
+    <string name="layout_settings_alternative_layout">Układ klawiatury</string>
     <string name="layout_settings_show_number_row">Pokaż numer wiersza</string>
     <string name="layout_settings_number_row_on">Wyświetlana liczba wierszy</string>
     <string name="layout_settings_number_row_off">Ukryj wiersz z numerami</string>
     <string name="layout_settings_space_bar_size">Rozmiar spacji</string>
+    <string name="alternative_layout_default">Domyślny (Układ językowy)</string>
+    <string name="alternative_layout_dvorak">Dvorak</string>
+    <string name="alternative_layout_colemak">Colemak</string>
+    <string name="alternative_layout_workman">Workman</string>
 
     <!-- Privacy & Data Settings -->
     <string name="privacy_settings_clipboard_history">Historia Schowka</string>

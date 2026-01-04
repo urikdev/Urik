@@ -41,6 +41,8 @@ class TypingBehaviorViewModel
                         backspaceSwipeDelete = settings.backspaceSwipeDelete,
                         longPressPunctuationMode = settings.longPressPunctuationMode,
                         longPressDuration = settings.longPressDuration,
+                        hapticFeedback = settings.hapticFeedback,
+                        vibrationStrength = settings.vibrationStrength,
                     )
                 }.stateIn(
                     scope = viewModelScope,
@@ -104,6 +106,22 @@ class TypingBehaviorViewModel
             }
         }
 
+        fun updateHapticFeedback(enabled: Boolean) {
+            viewModelScope.launch {
+                settingsRepository
+                    .updateHapticFeedback(enabled)
+                    .onFailure { _events.emit(SettingsEvent.Error.HapticFeedbackToggleFailed) }
+            }
+        }
+
+        fun updateVibrationStrength(strength: Int) {
+            viewModelScope.launch {
+                settingsRepository
+                    .updateVibrationStrength(strength)
+                    .onFailure { _events.emit(SettingsEvent.Error.VibrationStrengthUpdateFailed) }
+            }
+        }
+
         private companion object {
             const val STOP_TIMEOUT_MILLIS = 5000L
         }
@@ -120,4 +138,6 @@ data class TypingBehaviorUiState(
     val backspaceSwipeDelete: Boolean = true,
     val longPressPunctuationMode: LongPressPunctuationMode = LongPressPunctuationMode.SPACEBAR,
     val longPressDuration: LongPressDuration = LongPressDuration.MEDIUM,
+    val hapticFeedback: Boolean = true,
+    val vibrationStrength: Int = 128,
 )

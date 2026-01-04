@@ -24,10 +24,8 @@
     <string name="autocorrect_settings_description">Ortografia e sugestões</string>
     <string name="language_settings_title">Configurações de idioma</string>
     <string name="language_settings_description">Escolha os idiomas do teclado</string>
-    <string name="feedback_settings_title">Configurações de som e retorno</string>
-    <string name="feedback_settings_description">Sons e vibrações das teclas</string>
     <string name="typing_settings_title">Configurações do comportamento de escrita</string>
-    <string name="typing_settings_description">Pontuação, etc.</string>
+    <string name="typing_settings_description">Pontuação, feedback háptico, etc.</string>
     <string name="layout_settings_title">Layout e entrada</string>
     <string name="layout_settings_description">Linha numérica, tamanho da barra de espaço</string>
     <string name="appearance_settings_title">Aparência</string>
@@ -101,10 +99,15 @@
     <string name="typing_settings_long_press_duration">Duração do toque prolongado</string>
 
     <!-- Layout & Input Settings -->
+    <string name="layout_settings_alternative_layout">Layout do teclado</string>
     <string name="layout_settings_show_number_row">Mostrar linha de números</string>
     <string name="layout_settings_number_row_on">Linha de números ativada</string>
     <string name="layout_settings_number_row_off">Linha de números desativada</string>
     <string name="layout_settings_space_bar_size">Tamanho da barra de espaço</string>
+    <string name="alternative_layout_default">Padrão (Layout do idioma)</string>
+    <string name="alternative_layout_dvorak">Dvorak</string>
+    <string name="alternative_layout_colemak">Colemak</string>
+    <string name="alternative_layout_workman">Workman</string>
 
     <!-- Privacy & Data Settings -->
     <string name="privacy_settings_clipboard_history">Histórico da área de transferência</string>

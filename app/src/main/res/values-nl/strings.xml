@@ -24,10 +24,8 @@
     <string name="autocorrect_settings_description">Spelling en suggesties</string>
     <string name="language_settings_title">Taalinstellingen</string>
     <string name="language_settings_description">Kies je toetsenbordtalen</string>
-    <string name="feedback_settings_title">Geluid &amp; Feedback</string>
-    <string name="feedback_settings_description">Toetsgeluiden en trillingen</string>
     <string name="typing_settings_title">Typgedrag</string>
-    <string name="typing_settings_description">Leestekens e.d.</string>
+    <string name="typing_settings_description">Leestekens, haptische feedback e.d.</string>
     <string name="layout_settings_title">Indeling &amp; Invoer</string>
     <string name="layout_settings_description">Cijferrij, spatiebalkgrootte</string>
     <string name="appearance_settings_title">Weergave</string>
@@ -114,10 +112,15 @@
     <string name="typing_settings_long_press_duration">Duur lang indrukken</string>
 
     <!-- Layout & Input Settings -->
+    <string name="layout_settings_alternative_layout">Toetsenbordindeling</string>
     <string name="layout_settings_show_number_row">Cijferrij weergeven</string>
     <string name="layout_settings_number_row_on">Cijferrij weergegeven</string>
     <string name="layout_settings_number_row_off">Cijferrij verborgen</string>
     <string name="layout_settings_space_bar_size">Spatiebalkgrootte</string>
+    <string name="alternative_layout_default">Standaard (Taalindeling)</string>
+    <string name="alternative_layout_dvorak">Dvorak</string>
+    <string name="alternative_layout_colemak">Colemak</string>
+    <string name="alternative_layout_workman">Workman</string>
 
     <!-- Privacy & Data Settings -->
     <string name="privacy_settings_clipboard_history">Klembordgeschiedenis</string>

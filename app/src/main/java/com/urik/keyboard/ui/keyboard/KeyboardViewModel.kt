@@ -61,6 +61,15 @@ class KeyboardViewModel
             }
         }
 
+        /**
+         * Reloads the current keyboard layout.
+         *
+         * Called when alternative layout setting changes.
+         */
+        fun reloadLayout() {
+            startLoadLayout(_state.value.currentMode)
+        }
+
         init {
             viewModelScope.launch {
                 loadLayout(KeyboardMode.LETTERS)
@@ -196,6 +205,8 @@ class KeyboardViewModel
                         handleActionKey(key.action)
                     }
                 }
+
+                KeyboardKey.Spacer -> {}
             }
         }
 

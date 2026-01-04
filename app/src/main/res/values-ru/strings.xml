@@ -24,10 +24,8 @@
     <string name="autocorrect_settings_description">Правописание и предложения</string>
     <string name="language_settings_title">Настройки Языка</string>
     <string name="language_settings_description">Выберите языки вашей клавиатуры</string>
-    <string name="feedback_settings_title">Настройки Звука и Виброотклика</string>
-    <string name="feedback_settings_description">Звуки клавиш и вибрация</string>
     <string name="typing_settings_title">Настройки Поведения Ввода</string>
-    <string name="typing_settings_description">Пунктуация и т.д.</string>
+    <string name="typing_settings_description">Пунктуация, тактильная обратная связь и т.д.</string>
     <string name="layout_settings_title">Раскладка и Ввод</string>
     <string name="layout_settings_description">Ряд цифр, размер пробела</string>
     <string name="appearance_settings_title">Внешний Вид</string>
@@ -103,10 +101,15 @@
     <string name="typing_settings_long_press_duration">Длительность Долгого Нажатия</string>
 
     <!-- Layout & Input Settings -->
+    <string name="layout_settings_alternative_layout">Раскладка Клавиатуры</string>
     <string name="layout_settings_show_number_row">Показывать Ряд Цифр</string>
     <string name="layout_settings_number_row_on">Ряд цифр показывается</string>
     <string name="layout_settings_number_row_off">Ряд цифр скрывается</string>
     <string name="layout_settings_space_bar_size">Размер Пробела</string>
+    <string name="alternative_layout_default">По умолчанию (Языковая раскладка)</string>
+    <string name="alternative_layout_dvorak">Dvorak</string>
+    <string name="alternative_layout_colemak">Colemak</string>
+    <string name="alternative_layout_workman">Workman</string>
 
     <!-- Privacy & Data Settings -->
     <string name="privacy_settings_clipboard_history">История Буфера Обмена</string>

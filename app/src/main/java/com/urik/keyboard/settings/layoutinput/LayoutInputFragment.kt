@@ -13,6 +13,7 @@ import androidx.preference.ListPreference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreferenceCompat
 import com.urik.keyboard.R
+import com.urik.keyboard.settings.AlternativeKeyboardLayout
 import com.urik.keyboard.settings.SettingsEventHandler
 import com.urik.keyboard.settings.SpaceBarSize
 import dagger.hilt.android.AndroidEntryPoint
@@ -28,6 +29,7 @@ class LayoutInputFragment : PreferenceFragmentCompat() {
     private lateinit var viewModel: LayoutInputViewModel
     private lateinit var eventHandler: SettingsEventHandler
 
+    private lateinit var alternativeLayoutPref: ListPreference
     private lateinit var numberRowPref: SwitchPreferenceCompat
     private lateinit var spaceBarPref: ListPreference
     private var testField: EditText? = null
@@ -59,6 +61,17 @@ class LayoutInputFragment : PreferenceFragmentCompat() {
 
         eventHandler = SettingsEventHandler(requireContext())
 
+        alternativeLayoutPref =
+            ListPreference(context).apply {
+                key = "alternative_keyboard_layout"
+                isPersistent = false
+                title = resources.getString(R.string.layout_settings_alternative_layout)
+                entries = AlternativeKeyboardLayout.entries.map { resources.getString(it.displayNameRes) }.toTypedArray()
+                entryValues = AlternativeKeyboardLayout.entries.map { it.name }.toTypedArray()
+                summaryProvider = ListPreference.SimpleSummaryProvider.getInstance()
+            }
+        screen.addPreference(alternativeLayoutPref)
+
         numberRowPref =
             SwitchPreferenceCompat(context).apply {
                 key = "show_number_row"
@@ -89,6 +102,11 @@ class LayoutInputFragment : PreferenceFragmentCompat() {
     ) {
         super.onViewCreated(view, savedInstanceState)
 
+        alternativeLayoutPref.setOnPreferenceChangeListener { _, newValue ->
+            viewModel.updateAlternativeKeyboardLayout(AlternativeKeyboardLayout.valueOf(newValue as String))
+            true
+        }
+
         numberRowPref.setOnPreferenceChangeListener { _, newValue ->
             viewModel.updateShowNumberRow(newValue as Boolean)
             true
@@ -103,6 +121,7 @@ class LayoutInputFragment : PreferenceFragmentCompat() {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
                     viewModel.uiState.collect { state ->
+                        alternativeLayoutPref.value = state.alternativeKeyboardLayout.name
                         numberRowPref.isChecked = state.showNumberRow
                         spaceBarPref.value = state.spaceBarSize.name
                     }

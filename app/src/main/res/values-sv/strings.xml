@@ -21,10 +21,8 @@
     <string name="autocorrect_settings_description">Stavning och förslag</string>
     <string name="language_settings_title">Språkinställningar</string>
     <string name="language_settings_description">Välj dina tangentbordsspråk</string>
-    <string name="feedback_settings_title">Ljud- och feedbackinställningar</string>
-    <string name="feedback_settings_description">Knappljud och vibrationer</string>
     <string name="typing_settings_title">Inställningar för skrivbeteende</string>
-    <string name="typing_settings_description">Interpunktion etc.</string>
+    <string name="typing_settings_description">Interpunktion, haptisk feedback etc.</string>
     <string name="layout_settings_title">Layout och inmatning</string>
     <string name="layout_settings_description">Sifferrad, storlek på mellanslagstangenten</string>
     <string name="appearance_settings_title">Utseende</string>
@@ -55,10 +53,15 @@
     <string name="typing_settings_swipe_on">Svep för att skriva aktiverat</string>
     <string name="typing_settings_swipe_off">Svep för att skriva inaktiverat</string>
     <string name="typing_settings_long_press_duration">Lång tryckningstid</string>
+    <string name="layout_settings_alternative_layout">Tangentbordslayout</string>
     <string name="layout_settings_show_number_row">Visa nummerrad</string>
     <string name="layout_settings_number_row_on">Nummerrad visas</string>
     <string name="layout_settings_number_row_off">Nummerrad dold</string>
     <string name="layout_settings_space_bar_size">Storlek på mellanslagstangenten</string>
+    <string name="alternative_layout_default">Standard (Språklayout)</string>
+    <string name="alternative_layout_dvorak">Dvorak</string>
+    <string name="alternative_layout_colemak">Colemak</string>
+    <string name="alternative_layout_workman">Workman</string>
     <string name="privacy_settings_clipboard_history">Urklippshistorik</string>
     <string name="privacy_settings_clipboard_history_on">Urklippshistorik aktiverad</string>
     <string name="privacy_settings_clipboard_history_off">Urklippshistorik inaktiverad</string>
