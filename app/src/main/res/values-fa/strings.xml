@@ -25,10 +25,8 @@
     <string name="autocorrect_settings_description">املاء و پیشنهادات</string>
     <string name="language_settings_title">تنظیمات زبان</string>
     <string name="language_settings_description">زبان‌های کیبورد خود را انتخاب کنید</string>
-    <string name="feedback_settings_title">تنظیمات صدا و بازخورد</string>
-    <string name="feedback_settings_description">صدای کلیدها و لرزش</string>
     <string name="typing_settings_title">تنظیمات رفتار تایپ</string>
-    <string name="typing_settings_description">نقطه‌گذاری و موارد دیگر</string>
+    <string name="typing_settings_description">نقطه‌گذاری، بازخورد لمسی و موارد دیگر</string>
     <string name="layout_settings_title">چیدمان و ورودی</string>
     <string name="layout_settings_description">ردیف اعداد، اندازه نوار فاصله</string>
     <string name="appearance_settings_title">ظاهر</string>
@@ -114,10 +112,15 @@
     <string name="typing_settings_long_press_duration">مدت زمان نگه داشتن طولانی</string>
 
     <!-- Layout & Input Settings -->
+    <string name="layout_settings_alternative_layout">چیدمان صفحه‌کلید</string>
     <string name="layout_settings_show_number_row">نمایش ردیف اعداد</string>
     <string name="layout_settings_number_row_on">ردیف اعداد نمایش داده می‌شود</string>
     <string name="layout_settings_number_row_off">ردیف اعداد پنهان است</string>
     <string name="layout_settings_space_bar_size">اندازه نوار فاصله</string>
+    <string name="alternative_layout_default">پیش‌فرض (چیدمان زبان)</string>
+    <string name="alternative_layout_dvorak">Dvorak</string>
+    <string name="alternative_layout_colemak">Colemak</string>
+    <string name="alternative_layout_workman">Workman</string>
 
     <!-- Privacy & Data Settings -->
     <string name="privacy_settings_clipboard_history">تاریخچه کلیپ‌بورد</string>
@@ -154,6 +157,7 @@
     <string name="error_update_long_press_duration">به‌روزرسانی مدت زمان نگه داشتن طولانی ناموفق بود</string>
     <string name="error_update_number_row">به‌روزرسانی ردیف اعداد ناموفق بود</string>
     <string name="error_update_space_bar_size">به‌روزرسانی اندازه نوار فاصله ناموفق بود</string>
+    <string name="error_update_alternative_layout">به‌روزرسانی چیدمان صفحه‌کلید ناموفق بود</string>
     <string name="error_clear_learned_words">پاک کردن واژه‌های آموخته‌شده ناموفق بود</string>
     <string name="error_reset_to_defaults">بازنشانی تنظیمات ناموفق بود</string>
 

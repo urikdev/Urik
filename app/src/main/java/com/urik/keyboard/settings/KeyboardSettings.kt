@@ -77,6 +77,22 @@ enum class LongPressPunctuationMode(
 }
 
 /**
+ * Alternative keyboard layout styles.
+ *
+ * Determines which physical key arrangement to use. Character variations
+ * and spell checking always use the user's selected language regardless
+ * of layout choice.
+ */
+enum class AlternativeKeyboardLayout(
+    val displayNameRes: Int,
+) {
+    DEFAULT(R.string.alternative_layout_default),
+    DVORAK(R.string.alternative_layout_dvorak),
+    COLEMAK(R.string.alternative_layout_colemak),
+    WORKMAN(R.string.alternative_layout_workman),
+}
+
+/**
  * Keyboard configuration and user preferences.
  *
  * Direct construction bypasses validation. SettingsRepository enforces validation
@@ -107,6 +123,7 @@ data class KeyboardSettings(
     val cursorSpeed: CursorSpeed = CursorSpeed.MEDIUM,
     val keyboardTheme: String = "default",
     val favoriteThemes: Set<String> = emptySet(),
+    val alternativeKeyboardLayout: AlternativeKeyboardLayout = AlternativeKeyboardLayout.DEFAULT,
 ) {
     /**
      * Returns validated copy with constraints enforced.

@@ -60,6 +60,11 @@ sealed class KeyboardKey {
         val action: ActionType,
     ) : KeyboardKey()
 
+    /**
+     * Empty spacer for layout alignment.
+     */
+    data object Spacer : KeyboardKey()
+
     enum class KeyType {
         LETTER,
         NUMBER,

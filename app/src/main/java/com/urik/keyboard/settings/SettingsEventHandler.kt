@@ -34,6 +34,7 @@ class SettingsEventHandler(
                 is SettingsEvent.Error.LongPressDurationUpdateFailed -> R.string.error_update_long_press_duration
                 is SettingsEvent.Error.NumberRowToggleFailed -> R.string.error_update_number_row
                 is SettingsEvent.Error.SpaceBarSizeUpdateFailed -> R.string.error_update_space_bar_size
+                is SettingsEvent.Error.AlternativeLayoutUpdateFailed -> R.string.error_update_alternative_layout
                 is SettingsEvent.Error.ClearLearnedWordsFailed -> R.string.error_clear_learned_words
                 is SettingsEvent.Error.ResetToDefaultsFailed -> R.string.error_reset_to_defaults
                 is SettingsEvent.Success.LearnedWordsCleared -> R.string.success_learned_words_cleared

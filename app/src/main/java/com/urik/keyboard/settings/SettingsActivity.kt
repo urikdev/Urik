@@ -15,7 +15,6 @@ import com.google.android.material.appbar.MaterialToolbar
 import com.urik.keyboard.R
 import com.urik.keyboard.settings.appearance.AppearanceFragment
 import com.urik.keyboard.settings.autocorrection.AutoCorrectionFragment
-import com.urik.keyboard.settings.hapticfeedback.HapticFeedbackFragment
 import com.urik.keyboard.settings.languages.LanguagesFragment
 import com.urik.keyboard.settings.layoutinput.LayoutInputFragment
 import com.urik.keyboard.settings.privacydata.PrivacyDataFragment
@@ -65,7 +64,6 @@ class SettingsActivity : AppCompatActivity() {
                 is AutoCorrectionFragment -> getString(R.string.autocorrect_settings_title)
                 is LanguagesFragment -> getString(R.string.language_settings_title)
                 is TypingBehaviorFragment -> getString(R.string.typing_settings_title)
-                is HapticFeedbackFragment -> getString(R.string.feedback_settings_title)
                 is LayoutInputFragment -> getString(R.string.layout_settings_title)
                 is AppearanceFragment -> getString(R.string.appearance_settings_title)
                 is PrivacyDataFragment -> getString(R.string.privacy_settings_title)
@@ -142,18 +140,6 @@ class MainSettingsFragment : PreferenceFragmentCompat() {
                 summary = resources.getString(R.string.typing_settings_description)
                 setOnPreferenceClickListener {
                     navigateToFragment(TypingBehaviorFragment())
-                    true
-                }
-            },
-        )
-
-        screen.addPreference(
-            Preference(context).apply {
-                key = "haptic_feedback_category"
-                title = resources.getString(R.string.feedback_settings_title)
-                summary = resources.getString(R.string.feedback_settings_description)
-                setOnPreferenceClickListener {
-                    navigateToFragment(HapticFeedbackFragment())
                     true
                 }
             },

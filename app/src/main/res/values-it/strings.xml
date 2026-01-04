@@ -25,10 +25,8 @@
     <string name="autocorrect_settings_description">Ortografia e suggerimenti</string>
     <string name="language_settings_title">Impostazioni lingua</string>
     <string name="language_settings_description">Scegli le lingue della tastiera</string>
-    <string name="feedback_settings_title">Impostazioni audio e feedback</string>
-    <string name="feedback_settings_description">Suoni dei tasti e vibrazione</string>
     <string name="typing_settings_title">Impostazioni comportamento digitazione</string>
-    <string name="typing_settings_description">Punteggiatura ecc.</string>
+    <string name="typing_settings_description">Punteggiatura, feedback aptico, ecc.</string>
     <string name="layout_settings_title">Layout e input</string>
     <string name="layout_settings_description">Riga numerica, dimensione barra spaziatrice</string>
     <string name="appearance_settings_title">Aspetto</string>
@@ -115,10 +113,15 @@
     <string name="typing_settings_long_press_duration">Durata pressione lunga</string>
 
     <!-- Layout & Input Settings -->
+    <string name="layout_settings_alternative_layout">Layout tastiera</string>
     <string name="layout_settings_show_number_row">Mostra riga numerica</string>
     <string name="layout_settings_number_row_on">Riga numerica mostrata</string>
     <string name="layout_settings_number_row_off">Riga numerica nascosta</string>
     <string name="layout_settings_space_bar_size">Dimensione barra spaziatrice</string>
+    <string name="alternative_layout_default">Predefinito (Layout lingua)</string>
+    <string name="alternative_layout_dvorak">Dvorak</string>
+    <string name="alternative_layout_colemak">Colemak</string>
+    <string name="alternative_layout_workman">Workman</string>
 
     <!-- Privacy & Data Settings -->
     <string name="privacy_settings_clipboard_history">Cronologia appunti</string>
@@ -155,6 +158,7 @@
     <string name="error_update_long_press_duration">Aggiornamento durata pressione lunga non riuscito</string>
     <string name="error_update_number_row">Aggiornamento riga numerica non riuscito</string>
     <string name="error_update_space_bar_size">Aggiornamento dimensione barra spaziatrice non riuscito</string>
+    <string name="error_update_alternative_layout">Aggiornamento layout tastiera non riuscito</string>
     <string name="error_clear_learned_words">Cancellazione parole apprese non riuscita</string>
     <string name="error_reset_to_defaults">Ripristino impostazioni non riuscito</string>
 

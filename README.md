@@ -25,6 +25,7 @@ Privacy-first keyboard for Android with on-device processing and encrypted stora
 - Swipe and tap typing with adaptive gesture detection
 - Long-press for character variations
 - Spacebar swipe for cursor control
+- Alternative keyboard layouts (Dvorak, Colemak, Workman)
 - Hardware keyboard detection (automatically hides when connected)
 
 **Intelligence**

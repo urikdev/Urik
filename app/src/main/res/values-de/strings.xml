@@ -24,10 +24,8 @@
     <string name="autocorrect_settings_description">Rechtschreibung und Verbesserungen</string>
     <string name="language_settings_title">Spracheinstellungen</string>
     <string name="language_settings_description">Wähle deine Tastatursprachen</string>
-    <string name="feedback_settings_title">Ton- &amp; Feedback-Einstellungen</string>
-    <string name="feedback_settings_description">Tastentöne und Vibration</string>
     <string name="typing_settings_title">Schreibverhalten</string>
-    <string name="typing_settings_description">Zeichensetzung</string>
+    <string name="typing_settings_description">Zeichensetzung, haptisches Feedback</string>
     <string name="layout_settings_title">Layout &amp; Input</string>
     <string name="layout_settings_description">Zahlenreihe und Leertastenbreite</string>
     <string name="appearance_settings_title">Aussehen</string>
@@ -101,10 +99,15 @@
     <string name="typing_settings_long_press_duration">Lagzeit-Druck-Dauer</string>
 
     <!-- Layout & Input Settings -->
+    <string name="layout_settings_alternative_layout">Tastaturlayout</string>
     <string name="layout_settings_show_number_row">Zahlenreihe anzeigen</string>
     <string name="layout_settings_number_row_on">Zahlenreihe wird angezeigt</string>
     <string name="layout_settings_number_row_off">Zahlenreihe wird nicht angezeigt</string>
     <string name="layout_settings_space_bar_size">Leertastenbreite</string>
+    <string name="alternative_layout_default">Standard (Sprachlayout)</string>
+    <string name="alternative_layout_dvorak">Dvorak</string>
+    <string name="alternative_layout_colemak">Colemak</string>
+    <string name="alternative_layout_workman">Workman</string>
 
     <!-- Privacy & Data Settings -->
     <string name="privacy_settings_clipboard_history">Zwischenablage-Verlauf</string>
@@ -137,6 +140,7 @@
     <string name="error_update_long_press_duration">Langzeit-Druck-Dauer konnte nicht geändert werden</string>
     <string name="error_update_number_row">Zahlenreihe konnte nicht geändert werden</string>
     <string name="error_update_space_bar_size">Leertasten-Breite konnte nicht geändert werden</string>
+    <string name="error_update_alternative_layout">Tastaturlayout konnte nicht geändert werden</string>
     <string name="error_clear_learned_words">Wörterbuch konnte nicht geleert werden</string>
     <string name="error_reset_to_defaults">Einstellungen konnten nicht zurückgesetzt werden</string>
 

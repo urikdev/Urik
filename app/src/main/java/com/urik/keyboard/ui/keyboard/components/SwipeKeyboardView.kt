@@ -837,6 +837,10 @@ class SwipeKeyboardView
                         }
                     }
                 }
+
+                KeyboardKey.Spacer -> {
+                    return false
+                }
             }
         }
 
@@ -1469,6 +1473,8 @@ class SwipeKeyboardView
             var currentIndex = 0
             layout.rows.forEach { row ->
                 row.forEach { key ->
+                    if (key is KeyboardKey.Spacer) return@forEach
+
                     if (currentIndex == buttonIndex) {
                         keyMapping[button] = key
                         return
@@ -1575,9 +1581,9 @@ class SwipeKeyboardView
             var index = 0
 
             for (r in 0 until rowIndex) {
-                index += layout.rows[r].size
+                index += layout.rows[r].count { it !is KeyboardKey.Spacer }
             }
-            index += colIndex
+            index += layout.rows[rowIndex].take(colIndex).count { it !is KeyboardKey.Spacer }
 
             return index
         }

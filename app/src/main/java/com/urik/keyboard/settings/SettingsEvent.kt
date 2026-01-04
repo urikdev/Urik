@@ -46,6 +46,8 @@ sealed interface SettingsEvent {
 
         data object SpaceBarSizeUpdateFailed : Error
 
+        data object AlternativeLayoutUpdateFailed : Error
+
         data object ClearLearnedWordsFailed : Error
 
         data object ResetToDefaultsFailed : Error

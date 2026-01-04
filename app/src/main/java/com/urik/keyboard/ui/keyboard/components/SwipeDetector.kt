@@ -360,6 +360,7 @@ class SwipeDetector
                     }
 
                     isSwiping = true
+                    pointCounter = 0
                     swipeListener?.onSwipeStart(PointF(start.x, start.y))
                     updateSwipePath(event)
                 }
