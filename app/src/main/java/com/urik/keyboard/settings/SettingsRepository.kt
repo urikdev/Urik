@@ -118,9 +118,9 @@ class SettingsRepository
                                         exception = e,
                                         context = mapOf("key" to "LONG_PRESS_PUNCTUATION_MODE", "value" to it),
                                     )
-                                    LongPressPunctuationMode.SPACEBAR
+                                    LongPressPunctuationMode.PERIOD
                                 }
-                            } ?: LongPressPunctuationMode.SPACEBAR,
+                            } ?: LongPressPunctuationMode.PERIOD,
                         longPressDuration =
                             preferences[PreferenceKeys.LONG_PRESS_DURATION]?.let {
                                 try {

@@ -136,7 +136,7 @@ data class TypingBehaviorUiState(
     val spacebarCursorControl: Boolean = true,
     val cursorSpeed: CursorSpeed = CursorSpeed.MEDIUM,
     val backspaceSwipeDelete: Boolean = true,
-    val longPressPunctuationMode: LongPressPunctuationMode = LongPressPunctuationMode.SPACEBAR,
+    val longPressPunctuationMode: LongPressPunctuationMode = LongPressPunctuationMode.PERIOD,
     val longPressDuration: LongPressDuration = LongPressDuration.MEDIUM,
     val hapticFeedback: Boolean = true,
     val vibrationStrength: Int = 128,
