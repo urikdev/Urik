@@ -100,6 +100,8 @@ class KeyboardLayoutManager(
     private var activePunctuationPopup: CharacterVariationPopup? = null
     private var popupSelectionMode = false
     private var swipeKeyboardView: SwipeKeyboardView? = null
+    private var spaceGestureStartX = 0f
+    private var spaceGestureStartY = 0f
 
     private val backgroundJob = SupervisorJob()
     private val backgroundScope = CoroutineScope(Dispatchers.IO + backgroundJob)
@@ -190,6 +192,8 @@ class KeyboardLayoutManager(
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
                     popupSelectionMode = false
+                    spaceGestureStartX = event.x
+                    spaceGestureStartY = event.y
                     val handler = Handler(Looper.getMainLooper())
                     val runnable =
                         Runnable {
@@ -206,6 +210,17 @@ class KeyboardLayoutManager(
                         val char = activePunctuationPopup?.getCharacterAt(event.rawX, event.rawY)
                         activePunctuationPopup?.setHighlighted(char)
                         return@OnTouchListener true
+                    }
+
+                    if (!popupSelectionMode) {
+                        val dx = event.x - spaceGestureStartX
+                        val dy = event.y - spaceGestureStartY
+                        val distance = kotlin.math.sqrt(dx * dx + dy * dy)
+                        if (distance > 20f) {
+                            buttonPendingCallbacks.remove(view as Button)?.let { pending ->
+                                pending.handler.removeCallbacks(pending.runnable)
+                            }
+                        }
                     }
                     false
                 }
@@ -857,7 +872,9 @@ class KeyboardLayoutManager(
             }
 
             if (key is KeyboardKey.Action && key.action == KeyboardKey.ActionType.SPACE) {
-                setOnTouchListener(spaceLongPressTouchListener)
+                if (longPressPunctuationMode == LongPressPunctuationMode.SPACEBAR) {
+                    setOnTouchListener(spaceLongPressTouchListener)
+                }
             }
 
             if (key is KeyboardKey.Action && key.action == KeyboardKey.ActionType.SHIFT) {
