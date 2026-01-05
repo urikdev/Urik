@@ -114,7 +114,7 @@ data class KeyboardSettings(
     val swipeEnabled: Boolean = true,
     val spacebarCursorControl: Boolean = true,
     val backspaceSwipeDelete: Boolean = true,
-    val longPressPunctuationMode: LongPressPunctuationMode = LongPressPunctuationMode.SPACEBAR,
+    val longPressPunctuationMode: LongPressPunctuationMode = LongPressPunctuationMode.PERIOD,
     val longPressDuration: LongPressDuration = LongPressDuration.MEDIUM,
     val showNumberRow: Boolean = true,
     val spaceBarSize: SpaceBarSize = SpaceBarSize.STANDARD,

@@ -95,7 +95,7 @@ class KeyboardLayoutManager(
     private var currentKeySize = KeySize.MEDIUM
     private var currentSpaceBarSize = SpaceBarSize.STANDARD
     private var currentKeyLabelSize = KeyLabelSize.MEDIUM
-    private var longPressPunctuationMode = LongPressPunctuationMode.SPACEBAR
+    private var longPressPunctuationMode = LongPressPunctuationMode.PERIOD
 
     private var activePunctuationPopup: CharacterVariationPopup? = null
     private var popupSelectionMode = false
@@ -554,7 +554,9 @@ class KeyboardLayoutManager(
                         }
                     }
 
-                    KeyboardKey.Spacer -> return
+                    KeyboardKey.Spacer -> {
+                        return
+                    }
 
                     null -> {
                         HapticSignature.LetterClick
@@ -936,7 +938,10 @@ class KeyboardLayoutManager(
                             key.value.uppercase()
                         }
                     }
-                    else -> key.value
+
+                    else -> {
+                        key.value
+                    }
                 }
             }
 
@@ -949,7 +954,9 @@ class KeyboardLayoutManager(
                 }
             }
 
-            KeyboardKey.Spacer -> ""
+            KeyboardKey.Spacer -> {
+                ""
+            }
         }
 
     private fun getKeyContentDescription(
@@ -967,7 +974,10 @@ class KeyboardLayoutManager(
                                 key.value.uppercase()
                             }
                         }
-                        else -> key.value
+
+                        else -> {
+                            key.value
+                        }
                     }
                 context.getString(R.string.key_character_description, char)
             }
@@ -1036,7 +1046,9 @@ class KeyboardLayoutManager(
                 }
             }
 
-            KeyboardKey.Spacer -> ""
+            KeyboardKey.Spacer -> {
+                ""
+            }
         }
 
     private fun handleSpaceLongPress(view: View) {
@@ -1496,22 +1508,33 @@ class KeyboardLayoutManager(
                 STANDARD_KEY_WEIGHT
             } else {
                 when (key) {
-                    is KeyboardKey.Character -> STANDARD_KEY_WEIGHT
+                    is KeyboardKey.Character -> {
+                        STANDARD_KEY_WEIGHT
+                    }
 
                     is KeyboardKey.Action -> {
                         when (key.action) {
-                            KeyboardKey.ActionType.SPACE -> return currentSpaceBarSize.widthMultiplier
+                            KeyboardKey.ActionType.SPACE -> {
+                                return currentSpaceBarSize.widthMultiplier
+                            }
+
                             KeyboardKey.ActionType.SHIFT -> {
                                 if (characterKeyCount >= 10) STANDARD_KEY_WEIGHT else SHIFT_KEY_WEIGHT
                             }
+
                             KeyboardKey.ActionType.BACKSPACE -> {
                                 if (characterKeyCount >= 10) STANDARD_KEY_WEIGHT else BACKSPACE_KEY_WEIGHT
                             }
-                            else -> STANDARD_KEY_WEIGHT
+
+                            else -> {
+                                STANDARD_KEY_WEIGHT
+                            }
                         }
                     }
 
-                    KeyboardKey.Spacer -> STANDARD_KEY_WEIGHT
+                    KeyboardKey.Spacer -> {
+                        STANDARD_KEY_WEIGHT
+                    }
                 }
             }
 
@@ -1565,7 +1588,9 @@ class KeyboardLayoutManager(
                     }
                 }
 
-                KeyboardKey.Spacer -> android.graphics.Color.TRANSPARENT
+                KeyboardKey.Spacer -> {
+                    android.graphics.Color.TRANSPARENT
+                }
             }
 
         val cornerRadius = 8f * context.resources.displayMetrics.density
