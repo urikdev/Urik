@@ -94,6 +94,9 @@
     <string name="typing_settings_double_space_period">Periodo de doble espacio</string>
     <string name="typing_settings_double_space_on">Inserciones a doble espacio punto</string>
     <string name="typing_settings_double_space_off">Espacio de inserción doble</string>
+    <string name="typing_settings_auto_capitalization">Mayúsculas automáticas</string>
+    <string name="typing_settings_auto_capitalization_on">Mayúscula al inicio de oración</string>
+    <string name="typing_settings_auto_capitalization_off">Sin mayúsculas automáticas</string>
     <string name="typing_settings_swipe_on">Deslizar para escribir habilitado</string>
     <string name="typing_settings_swipe_off">Deslizar para escribir deshabilitado</string>
     <string name="typing_settings_long_press_duration">Duración de pulsación larga</string>
@@ -136,6 +139,7 @@
     <string name="error_update_haptic_feedback">No se pudo actualizar la retroalimentación por vibración.</string>
     <string name="error_update_vibration_strength">No se pudo actualizar la intensidad de la vibración.</string>
     <string name="error_update_double_space_period">No se pudo actualizar el punto de doble espacio</string>
+    <string name="error_update_auto_capitalization">No se pudo actualizar las mayúsculas automáticas</string>
     <string name="error_update_swipe">No se pudo actualizar la escritura deslizando</string>
     <string name="error_update_long_press_duration">No se pudo actualizar la duración de la pulsación larga.</string>
     <string name="error_update_number_row">Error al actualizar la fila de números</string>

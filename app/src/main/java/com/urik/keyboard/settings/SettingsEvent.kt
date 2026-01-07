@@ -30,6 +30,8 @@ sealed interface SettingsEvent {
 
         data object DoubleSpacePeriodToggleFailed : Error
 
+        data object AutoCapitalizationToggleFailed : Error
+
         data object SwipeToggleFailed : Error
 
         data object SpacebarCursorToggleFailed : Error

@@ -405,6 +405,27 @@ class KeyboardViewModelTest {
         }
 
     @Test
+    fun `checkAndApplyAutoCapitalization does not enable shift when disabled`() {
+        viewModel.checkAndApplyAutoCapitalization("Hello. ", autoCapEnabled = false)
+
+        assertFalse(viewModel.state.value.isShiftPressed)
+    }
+
+    @Test
+    fun `checkAndApplyAutoCapitalization does not enable shift for empty text when disabled`() {
+        viewModel.checkAndApplyAutoCapitalization("", autoCapEnabled = false)
+
+        assertFalse(viewModel.state.value.isShiftPressed)
+    }
+
+    @Test
+    fun `checkAndApplyAutoCapitalization does not enable shift for null text when disabled`() {
+        viewModel.checkAndApplyAutoCapitalization(null, autoCapEnabled = false)
+
+        assertFalse(viewModel.state.value.isShiftPressed)
+    }
+
+    @Test
     fun `disableCapsLockAfterPunctuation turns off caps lock and enables shift`() =
         runTest {
             viewModel.onEvent(KeyboardEvent.CapsLockToggled)

@@ -95,6 +95,9 @@
     <string name="typing_settings_double_space_period">درج نقطه با دو بار فاصله</string>
     <string name="typing_settings_double_space_on">دو بار فاصله، نقطه درج می‌کند</string>
     <string name="typing_settings_double_space_off">دو بار فاصله، فاصله وارد می‌کند</string>
+    <string name="typing_settings_auto_capitalization">حروف بزرگ خودکار</string>
+    <string name="typing_settings_auto_capitalization_on">حروف بزرگ در شروع جمله</string>
+    <string name="typing_settings_auto_capitalization_off">بدون حروف بزرگ خودکار</string>
     <string name="typing_settings_swipe_enabled">تایپ سوایپ (کشیدن)</string>
     <string name="typing_settings_swipe_on">تایپ با کشیدن فعال است</string>
     <string name="typing_settings_swipe_off">تایپ با کشیدن غیرفعال است</string>
@@ -149,6 +152,7 @@
     <string name="error_update_haptic_feedback">به‌روزرسانی بازخورد لمسی ناموفق بود</string>
     <string name="error_update_vibration_strength">به‌روزرسانی شدت لرزش ناموفق بود</string>
     <string name="error_update_double_space_period">به‌روزرسانی نقطه با دو بار فاصله ناموفق بود</string>
+    <string name="error_update_auto_capitalization">به‌روزرسانی حروف بزرگ خودکار ناموفق بود</string>
     <string name="error_update_swipe">به‌روزرسانی تایپ سوایپ ناموفق بود</string>
     <string name="error_update_spacebar_cursor">به‌روزرسانی کنترل مکان‌نما با نوار فاصله ناموفق بود</string>
     <string name="error_update_cursor_speed">به‌روزرسانی سرعت مکان‌نما ناموفق بود</string>

@@ -461,7 +461,7 @@ class UrikInputMethodService :
             }
 
             val textBefore = safeGetTextBeforeCursor(50)
-            viewModel.checkAndApplyAutoCapitalization(textBefore)
+            viewModel.checkAndApplyAutoCapitalization(textBefore, currentSettings.autoCapitalizationEnabled)
         }
     }
 
@@ -545,7 +545,7 @@ class UrikInputMethodService :
                     coordinateStateClear()
 
                     val textBefore = safeGetTextBeforeCursor(50)
-                    viewModel.checkAndApplyAutoCapitalization(textBefore)
+                    viewModel.checkAndApplyAutoCapitalization(textBefore, currentSettings.autoCapitalizationEnabled)
                 } finally {
                     currentInputConnection?.endBatchEdit()
                 }
@@ -1199,7 +1199,7 @@ class UrikInputMethodService :
             }
 
             val textBefore = safeGetTextBeforeCursor(50)
-            viewModel.checkAndApplyAutoCapitalization(textBefore)
+            viewModel.checkAndApplyAutoCapitalization(textBefore, currentSettings.autoCapitalizationEnabled)
         } else {
             if (displayBuffer.isNotEmpty()) {
                 val actualTextBefore = safeGetTextBeforeCursor(1)
@@ -1287,7 +1287,7 @@ class UrikInputMethodService :
                     coordinateStateClear()
 
                     val textBefore = safeGetTextBeforeCursor(50)
-                    viewModel.checkAndApplyAutoCapitalization(textBefore)
+                    viewModel.checkAndApplyAutoCapitalization(textBefore, currentSettings.autoCapitalizationEnabled)
                 } finally {
                     currentInputConnection?.endBatchEdit()
                 }
@@ -1443,7 +1443,7 @@ class UrikInputMethodService :
                         if (isSentenceEndingPunctuation(singleChar) && !isSecureField) {
                             viewModel.disableCapsLockAfterPunctuation()
                             val textBefore = safeGetTextBeforeCursor(50)
-                            viewModel.checkAndApplyAutoCapitalization(textBefore)
+                            viewModel.checkAndApplyAutoCapitalization(textBefore, currentSettings.autoCapitalizationEnabled)
                         }
                     } finally {
                         currentInputConnection?.endBatchEdit()
@@ -1482,7 +1482,7 @@ class UrikInputMethodService :
                                         if (isSentenceEndingPunctuation(singleChar) && !isSecureField) {
                                             viewModel.disableCapsLockAfterPunctuation()
                                             val textAfter = safeGetTextBeforeCursor(50)
-                                            viewModel.checkAndApplyAutoCapitalization(textAfter)
+                                            viewModel.checkAndApplyAutoCapitalization(textAfter, currentSettings.autoCapitalizationEnabled)
                                         }
 
                                         coordinateStateClear()
@@ -1522,7 +1522,7 @@ class UrikInputMethodService :
                         viewModel.disableCapsLockAfterPunctuation()
                         val textBefore =
                             safeGetTextBeforeCursor(50)
-                        viewModel.checkAndApplyAutoCapitalization(textBefore)
+                        viewModel.checkAndApplyAutoCapitalization(textBefore, currentSettings.autoCapitalizationEnabled)
                     }
                 } finally {
                     currentInputConnection?.endBatchEdit()
@@ -1561,7 +1561,7 @@ class UrikInputMethodService :
                     coordinateStateClear()
 
                     val textBefore = safeGetTextBeforeCursor(50)
-                    viewModel.checkAndApplyAutoCapitalization(textBefore)
+                    viewModel.checkAndApplyAutoCapitalization(textBefore, currentSettings.autoCapitalizationEnabled)
                 } finally {
                     currentInputConnection?.endBatchEdit()
                 }
@@ -1841,7 +1841,7 @@ class UrikInputMethodService :
 
             if (imeAction == EditorInfo.IME_ACTION_NONE) {
                 val textBefore = safeGetTextBeforeCursor(50)
-                viewModel.checkAndApplyAutoCapitalization(textBefore)
+                viewModel.checkAndApplyAutoCapitalization(textBefore, currentSettings.autoCapitalizationEnabled)
             }
         } catch (_: Exception) {
             coordinateStateClear()
@@ -2201,7 +2201,7 @@ class UrikInputMethodService :
 
                         val textBefore =
                             safeGetTextBeforeCursor(50)
-                        viewModel.checkAndApplyAutoCapitalization(textBefore)
+                        viewModel.checkAndApplyAutoCapitalization(textBefore, currentSettings.autoCapitalizationEnabled)
                     } finally {
                         currentInputConnection?.endBatchEdit()
                     }
@@ -2240,7 +2240,7 @@ class UrikInputMethodService :
 
                                     val textBefore =
                                         safeGetTextBeforeCursor(50)
-                                    viewModel.checkAndApplyAutoCapitalization(textBefore)
+                                    viewModel.checkAndApplyAutoCapitalization(textBefore, currentSettings.autoCapitalizationEnabled)
                                 } finally {
                                     currentInputConnection?.endBatchEdit()
                                 }
@@ -2275,7 +2275,7 @@ class UrikInputMethodService :
                     currentInputConnection?.commitText(" ", 1)
 
                     val textBefore = safeGetTextBeforeCursor(50)
-                    viewModel.checkAndApplyAutoCapitalization(textBefore)
+                    viewModel.checkAndApplyAutoCapitalization(textBefore, currentSettings.autoCapitalizationEnabled)
                 } finally {
                     currentInputConnection?.endBatchEdit()
                 }
@@ -2287,7 +2287,7 @@ class UrikInputMethodService :
                     currentInputConnection?.commitText(" ", 1)
 
                     val textBefore = safeGetTextBeforeCursor(50)
-                    viewModel.checkAndApplyAutoCapitalization(textBefore)
+                    viewModel.checkAndApplyAutoCapitalization(textBefore, currentSettings.autoCapitalizationEnabled)
                 } finally {
                     currentInputConnection?.endBatchEdit()
                 }
@@ -2427,7 +2427,7 @@ class UrikInputMethodService :
             clearSecureFieldState()
         } else if (!isUrlOrEmailField) {
             val textBefore = safeGetTextBeforeCursor(50)
-            viewModel.checkAndApplyAutoCapitalization(textBefore)
+            viewModel.checkAndApplyAutoCapitalization(textBefore, currentSettings.autoCapitalizationEnabled)
         }
     }
 
@@ -2505,7 +2505,7 @@ class UrikInputMethodService :
             }
 
             if (!isUrlOrEmailField) {
-                viewModel.checkAndApplyAutoCapitalization(textBefore)
+                viewModel.checkAndApplyAutoCapitalization(textBefore, currentSettings.autoCapitalizationEnabled)
             }
         }
 

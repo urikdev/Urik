@@ -94,6 +94,9 @@
     <string name="typing_settings_double_space_period">Podwójna Spacja Kropka</string>
     <string name="typing_settings_double_space_on">Podwójna spacja wstawia kropkę</string>
     <string name="typing_settings_double_space_off">Podwójna spacja wstawia spację</string>
+    <string name="typing_settings_auto_capitalization">Automatyczne wielkie litery</string>
+    <string name="typing_settings_auto_capitalization_on">Wielka litera na początku zdania</string>
+    <string name="typing_settings_auto_capitalization_off">Brak automatycznych wielkich liter</string>
     <string name="typing_settings_swipe_enabled">Pisanie Gestem</string>
     <string name="typing_settings_swipe_on">Pisanie gestem włączone</string>
     <string name="typing_settings_swipe_off">Pisanie gestem wyłączone</string>
@@ -137,6 +140,7 @@
     <string name="error_update_haptic_feedback">Nie udało się zaktualizować wibracji haptycznych</string>
     <string name="error_update_vibration_strength">Nie udało się zaktualizować siły wibracji</string>
     <string name="error_update_double_space_period">Nie udało się zaktualizować podwójnej spacji na kropkę</string>
+    <string name="error_update_auto_capitalization">Nie udało się zaktualizować automatycznych wielkich liter</string>
     <string name="error_update_swipe">Nie udało się zaktualizować funkcji pisania gestami</string>
     <string name="error_update_long_press_duration">Nie udało się zaktualizować czasu długiego naciśnięcia</string>
     <string name="error_update_number_row">Nie udało się zaktualizować wiersza liczb</string>
