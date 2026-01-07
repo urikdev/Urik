@@ -26,6 +26,7 @@ class SettingsEventHandler(
                 is SettingsEvent.Error.HapticFeedbackToggleFailed -> R.string.error_update_haptic_feedback
                 is SettingsEvent.Error.VibrationStrengthUpdateFailed -> R.string.error_update_vibration_strength
                 is SettingsEvent.Error.DoubleSpacePeriodToggleFailed -> R.string.error_update_double_space_period
+                is SettingsEvent.Error.AutoCapitalizationToggleFailed -> R.string.error_update_auto_capitalization
                 is SettingsEvent.Error.SwipeToggleFailed -> R.string.error_update_swipe
                 is SettingsEvent.Error.SpacebarCursorToggleFailed -> R.string.error_update_spacebar_cursor
                 is SettingsEvent.Error.CursorSpeedUpdateFailed -> R.string.error_update_cursor_speed

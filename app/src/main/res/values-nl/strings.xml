@@ -95,6 +95,9 @@
     <string name="typing_settings_double_space_period">Dubbele spatie punt</string>
     <string name="typing_settings_double_space_on">Dubbele spatie voegt punt in</string>
     <string name="typing_settings_double_space_off">Dubbele spatie voegt spatie in</string>
+    <string name="typing_settings_auto_capitalization">Automatische hoofdletters</string>
+    <string name="typing_settings_auto_capitalization_on">Hoofdletter aan begin van zin</string>
+    <string name="typing_settings_auto_capitalization_off">Geen automatische hoofdletters</string>
     <string name="typing_settings_swipe_enabled">Swipen typen</string>
     <string name="typing_settings_swipe_on">Swipen om te typen ingeschakeld</string>
     <string name="typing_settings_swipe_off">Swipen om te typen uitgeschakeld</string>
@@ -149,6 +152,7 @@
     <string name="error_update_haptic_feedback">Haptische feedback bijwerken mislukt</string>
     <string name="error_update_vibration_strength">Trillingssterkte bijwerken mislukt</string>
     <string name="error_update_double_space_period">Dubbele spatie punt bijwerken mislukt</string>
+    <string name="error_update_auto_capitalization">Automatische hoofdletters bijwerken mislukt</string>
     <string name="error_update_swipe">Swipe typen bijwerken mislukt</string>
     <string name="error_update_spacebar_cursor">Spatiebalkcursurbesturing bijwerken mislukt</string>
     <string name="error_update_cursor_speed">Cursorsnelheid bijwerken mislukt</string>

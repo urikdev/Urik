@@ -94,6 +94,9 @@
     <string name="typing_settings_double_space_period">Tečka po dvojité mezeře</string>
     <string name="typing_settings_double_space_on">Dvojtá mezera vloží tečku</string>
     <string name="typing_settings_double_space_off">Dvojtá mezera vloží mezeru</string>
+    <string name="typing_settings_auto_capitalization">Automatická velká písmena</string>
+    <string name="typing_settings_auto_capitalization_on">Velká písmena na začátku věty</string>
+    <string name="typing_settings_auto_capitalization_off">Žádná automatická velká písmena</string>
     <string name="typing_settings_swipe_on">Psaní přejetím prstem povoleno</string>
     <string name="typing_settings_swipe_off">Psaní přejetím prstem zakázáno</string>
     <string name="typing_settings_long_press_duration">Délka dlouhého stisku</string>
@@ -136,6 +139,7 @@
     <string name="error_update_haptic_feedback">Nepodařilo se aktualizovat haptiku</string>
     <string name="error_update_vibration_strength">Nepodařilo se aktualizovat sílu vibrací</string>
     <string name="error_update_double_space_period">Nepodařilo se aktualizovat funkci tečka po dvojité mezeře</string>
+    <string name="error_update_auto_capitalization">Nepodařilo se aktualizovat automatická velká písmena</string>
     <string name="error_update_swipe">Nepodařilo se aktualizovat psaní přejetím</string>
     <string name="error_update_long_press_duration">Nepodařilo se aktualizovat dobu dlouhého stisknutí</string>
     <string name="error_update_number_row">Nepodařilo se aktualizovat číselnou řadu</string>

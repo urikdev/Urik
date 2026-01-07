@@ -37,6 +37,7 @@ class TypingBehaviorFragment : PreferenceFragmentCompat() {
     private lateinit var eventHandler: SettingsEventHandler
 
     private lateinit var doubleSpacePref: SwitchPreferenceCompat
+    private lateinit var autoCapitalizationPref: SwitchPreferenceCompat
     private lateinit var swipePref: SwitchPreferenceCompat
     private lateinit var spacebarCursorPref: SwitchPreferenceCompat
     private lateinit var cursorSpeedPref: ListPreference
@@ -92,6 +93,16 @@ class TypingBehaviorFragment : PreferenceFragmentCompat() {
                 summaryOff = resources.getString(R.string.typing_settings_double_space_off)
             }
         screen.addPreference(doubleSpacePref)
+
+        autoCapitalizationPref =
+            SwitchPreferenceCompat(context).apply {
+                key = "auto_capitalization_enabled"
+                isPersistent = false
+                title = resources.getString(R.string.typing_settings_auto_capitalization)
+                summaryOn = resources.getString(R.string.typing_settings_auto_capitalization_on)
+                summaryOff = resources.getString(R.string.typing_settings_auto_capitalization_off)
+            }
+        screen.addPreference(autoCapitalizationPref)
 
         swipePref =
             SwitchPreferenceCompat(context).apply {
@@ -193,6 +204,11 @@ class TypingBehaviorFragment : PreferenceFragmentCompat() {
             true
         }
 
+        autoCapitalizationPref.setOnPreferenceChangeListener { _, newValue ->
+            viewModel.updateAutoCapitalizationEnabled(newValue as Boolean)
+            true
+        }
+
         swipePref.setOnPreferenceChangeListener { _, newValue ->
             viewModel.updateSwipeEnabled(newValue as Boolean)
             true
@@ -240,6 +256,7 @@ class TypingBehaviorFragment : PreferenceFragmentCompat() {
                 launch {
                     viewModel.uiState.collect { state ->
                         doubleSpacePref.isChecked = state.doubleSpacePeriod
+                        autoCapitalizationPref.isChecked = state.autoCapitalizationEnabled
                         swipePref.isChecked = state.swipeEnabled
                         spacebarCursorPref.isChecked = state.spacebarCursorControl
                         cursorSpeedPref.value = state.cursorSpeed.name

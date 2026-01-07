@@ -546,4 +546,29 @@ class KeyboardSettingsTest {
 
         assertEquals(AlternativeKeyboardLayout.DVORAK, validated.alternativeKeyboardLayout)
     }
+
+    @Test
+    fun `autoCapitalizationEnabled defaults to true`() {
+        val settings = KeyboardSettings()
+
+        assertTrue(settings.autoCapitalizationEnabled)
+    }
+
+    @Test
+    fun `validated preserves autoCapitalizationEnabled when false`() {
+        val settings = KeyboardSettings(autoCapitalizationEnabled = false)
+
+        val validated = settings.validated()
+
+        assertFalse(validated.autoCapitalizationEnabled)
+    }
+
+    @Test
+    fun `validated preserves autoCapitalizationEnabled when true`() {
+        val settings = KeyboardSettings(autoCapitalizationEnabled = true)
+
+        val validated = settings.validated()
+
+        assertTrue(validated.autoCapitalizationEnabled)
+    }
 }

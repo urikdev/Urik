@@ -84,6 +84,9 @@
     <string name="typing_settings_double_space_period">双击空格输入句号</string>
     <string name="typing_settings_double_space_on">双击空格插入句号</string>
     <string name="typing_settings_double_space_off">双击空格插入空格</string>
+    <string name="typing_settings_auto_capitalization">自动大写</string>
+    <string name="typing_settings_auto_capitalization_on">句首自动大写</string>
+    <string name="typing_settings_auto_capitalization_off">关闭自动大写</string>
     <string name="typing_settings_swipe_enabled">滑动输入</string>
     <string name="typing_settings_swipe_on">滑动输入已启用</string>
     <string name="typing_settings_swipe_off">滑动输入已禁用</string>
@@ -137,6 +140,7 @@
     <string name="error_update_haptic_feedback">更新触感反馈失败</string>
     <string name="error_update_vibration_strength">更新震动强度失败</string>
     <string name="error_update_double_space_period">更新双击句号失败</string>
+    <string name="error_update_auto_capitalization">更新自动大写失败</string>
     <string name="error_update_swipe">更新滑动输入失败</string>
     <string name="error_update_spacebar_cursor">更新空格键光标控制失败</string>
     <string name="error_update_cursor_speed">更新光标速度失败</string>
