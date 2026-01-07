@@ -141,6 +141,9 @@ class KeyboardRepository
                 val layoutIdentifier =
                     when (alternativeLayout) {
                         com.urik.keyboard.settings.AlternativeKeyboardLayout.DEFAULT -> locale.toLanguageTag()
+                        com.urik.keyboard.settings.AlternativeKeyboardLayout.QWERTY -> "en"
+                        com.urik.keyboard.settings.AlternativeKeyboardLayout.AZERTY -> "azerty"
+                        com.urik.keyboard.settings.AlternativeKeyboardLayout.QWERTZ -> "qwertz"
                         com.urik.keyboard.settings.AlternativeKeyboardLayout.DVORAK -> "dvorak"
                         com.urik.keyboard.settings.AlternativeKeyboardLayout.COLEMAK -> "colemak"
                         com.urik.keyboard.settings.AlternativeKeyboardLayout.WORKMAN -> "workman"
