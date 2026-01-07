@@ -170,7 +170,11 @@ class KeyboardViewModel
 
         private fun isSentenceEndingPunctuation(char: Char): Boolean = UCharacter.hasBinaryProperty(char.code, UProperty.S_TERM)
 
-        fun checkAndApplyAutoCapitalization(textBeforeCursor: String?) {
+        fun checkAndApplyAutoCapitalization(
+            textBeforeCursor: String?,
+            autoCapEnabled: Boolean = true,
+        ) {
+            if (!autoCapEnabled) return
             if (shouldAutoCapitalize(textBeforeCursor) && !_state.value.isCapsLockOn) {
                 enableAutoCapitalization()
             }

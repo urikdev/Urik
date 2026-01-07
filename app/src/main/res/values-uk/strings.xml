@@ -94,6 +94,9 @@
     <string name="typing_settings_double_space_period">Крапка При Подвійному Пробілі</string>
     <string name="typing_settings_double_space_on">Подвійний пробіл вставляє крапку</string>
     <string name="typing_settings_double_space_off">Подвійний пробіл вставляє пробіл</string>
+    <string name="typing_settings_auto_capitalization">Автоматичні великі літери</string>
+    <string name="typing_settings_auto_capitalization_on">Велика літера на початку речення</string>
+    <string name="typing_settings_auto_capitalization_off">Без автоматичних великих літер</string>
     <string name="typing_settings_swipe_enabled">Безперервний Ввід</string>
     <string name="typing_settings_swipe_on">Безперервний Ввід увімкнено</string>
     <string name="typing_settings_swipe_off">Безперервний Ввід вимкнено</string>
@@ -137,6 +140,7 @@
     <string name="error_update_haptic_feedback">Не вдалося оновити тактильну віддачу</string>
     <string name="error_update_vibration_strength">Не вдалося оновити рівень вібрації</string>
     <string name="error_update_double_space_period">Не вдалося оновити крапку при подвійному пробілі</string>
+    <string name="error_update_auto_capitalization">Не вдалося оновити автоматичні великі літери</string>
     <string name="error_update_swipe">Не вдалося оновити безперервний ввід</string>
     <string name="error_update_long_press_duration">Не вдалося оновити тривалість довгого натискання</string>
     <string name="error_update_number_row">Не вдалося оновити ряд цифр</string>

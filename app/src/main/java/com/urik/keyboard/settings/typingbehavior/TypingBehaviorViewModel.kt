@@ -35,6 +35,7 @@ class TypingBehaviorViewModel
                 .map { settings ->
                     TypingBehaviorUiState(
                         doubleSpacePeriod = settings.doubleSpacePeriod,
+                        autoCapitalizationEnabled = settings.autoCapitalizationEnabled,
                         swipeEnabled = settings.swipeEnabled,
                         spacebarCursorControl = settings.spacebarCursorControl,
                         cursorSpeed = settings.cursorSpeed,
@@ -55,6 +56,14 @@ class TypingBehaviorViewModel
                 settingsRepository
                     .updateDoubleSpacePeriod(enabled)
                     .onFailure { _events.emit(SettingsEvent.Error.DoubleSpacePeriodToggleFailed) }
+            }
+        }
+
+        fun updateAutoCapitalizationEnabled(enabled: Boolean) {
+            viewModelScope.launch {
+                settingsRepository
+                    .updateAutoCapitalizationEnabled(enabled)
+                    .onFailure { _events.emit(SettingsEvent.Error.AutoCapitalizationToggleFailed) }
             }
         }
 
@@ -132,6 +141,7 @@ class TypingBehaviorViewModel
  */
 data class TypingBehaviorUiState(
     val doubleSpacePeriod: Boolean = true,
+    val autoCapitalizationEnabled: Boolean = true,
     val swipeEnabled: Boolean = true,
     val spacebarCursorControl: Boolean = true,
     val cursorSpeed: CursorSpeed = CursorSpeed.MEDIUM,

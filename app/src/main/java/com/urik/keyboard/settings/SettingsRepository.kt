@@ -55,6 +55,7 @@ class SettingsRepository
             val HAPTIC_FEEDBACK = booleanPreferencesKey("haptic_feedback")
             val VIBRATION_STRENGTH = intPreferencesKey("vibration_strength")
             val DOUBLE_SPACE_PERIOD = booleanPreferencesKey("double_space_period")
+            val AUTO_CAPITALIZATION_ENABLED = booleanPreferencesKey("auto_capitalization_enabled")
             val SWIPE_ENABLED = booleanPreferencesKey("swipe_enabled")
             val SPACEBAR_CURSOR_CONTROL = booleanPreferencesKey("spacebar_cursor_control")
             val BACKSPACE_SWIPE_DELETE = booleanPreferencesKey("backspace_swipe_delete")
@@ -104,6 +105,7 @@ class SettingsRepository
                         hapticFeedback = preferences[PreferenceKeys.HAPTIC_FEEDBACK] ?: true,
                         vibrationStrength = preferences[PreferenceKeys.VIBRATION_STRENGTH] ?: 128,
                         doubleSpacePeriod = preferences[PreferenceKeys.DOUBLE_SPACE_PERIOD] ?: true,
+                        autoCapitalizationEnabled = preferences[PreferenceKeys.AUTO_CAPITALIZATION_ENABLED] ?: true,
                         swipeEnabled = preferences[PreferenceKeys.SWIPE_ENABLED] ?: true,
                         spacebarCursorControl = preferences[PreferenceKeys.SPACEBAR_CURSOR_CONTROL] ?: true,
                         backspaceSwipeDelete = preferences[PreferenceKeys.BACKSPACE_SWIPE_DELETE] ?: true,
@@ -389,6 +391,17 @@ class SettingsRepository
         suspend fun updateDoubleSpacePeriod(enabled: Boolean): Result<Unit> =
             try {
                 dataStore.edit { it[PreferenceKeys.DOUBLE_SPACE_PERIOD] = enabled }
+                Result.success(Unit)
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+
+        /**
+         * Updates auto-capitalization toggle.
+         */
+        suspend fun updateAutoCapitalizationEnabled(enabled: Boolean): Result<Unit> =
+            try {
+                dataStore.edit { it[PreferenceKeys.AUTO_CAPITALIZATION_ENABLED] = enabled }
                 Result.success(Unit)
             } catch (e: Exception) {
                 Result.failure(e)

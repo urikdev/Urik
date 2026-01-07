@@ -96,6 +96,9 @@
     <string name="typing_settings_double_space_period">Punto con doppio spazio</string>
     <string name="typing_settings_double_space_on">Doppio spazio inserisce punto</string>
     <string name="typing_settings_double_space_off">Doppio spazio inserisce spazio</string>
+    <string name="typing_settings_auto_capitalization">Maiuscole automatiche</string>
+    <string name="typing_settings_auto_capitalization_on">Maiuscola a inizio frase</string>
+    <string name="typing_settings_auto_capitalization_off">Nessuna maiuscola automatica</string>
     <string name="typing_settings_swipe_enabled">Digitazione a scorrimento</string>
     <string name="typing_settings_swipe_on">Digitazione a scorrimento attivata</string>
     <string name="typing_settings_swipe_off">Digitazione a scorrimento disattivata</string>
@@ -150,6 +153,7 @@
     <string name="error_update_haptic_feedback">Aggiornamento feedback aptico non riuscito</string>
     <string name="error_update_vibration_strength">Aggiornamento intensità vibrazione non riuscito</string>
     <string name="error_update_double_space_period">Aggiornamento punto con doppio spazio non riuscito</string>
+    <string name="error_update_auto_capitalization">Aggiornamento maiuscole automatiche non riuscito</string>
     <string name="error_update_swipe">Aggiornamento digitazione a scorrimento non riuscito</string>
     <string name="error_update_spacebar_cursor">Aggiornamento controllo cursore con barra spaziatrice non riuscito</string>
     <string name="error_update_cursor_speed">Aggiornamento velocità cursore non riuscito</string>

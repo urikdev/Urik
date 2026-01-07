@@ -94,6 +94,9 @@
     <string name="typing_settings_double_space_period">Точка при двойном пробеле</string>
     <string name="typing_settings_double_space_on">Двойной пробел вставляет точку</string>
     <string name="typing_settings_double_space_off">Двойной пробел вставляет пробел</string>
+    <string name="typing_settings_auto_capitalization">Автоматические заглавные</string>
+    <string name="typing_settings_auto_capitalization_on">Заглавная в начале предложения</string>
+    <string name="typing_settings_auto_capitalization_off">Без автоматических заглавных</string>
     <string name="typing_settings_swipe_enabled">Непрерывный Ввод</string>
     <string name="typing_settings_swipe_on">Непрерывный ввод включен</string>
     <string name="typing_settings_swipe_off">Непрерывный ввод отключен</string>
@@ -138,6 +141,7 @@
     <string name="error_update_haptic_feedback">Не удалось обновить тактильную отдачу</string>
     <string name="error_update_vibration_strength">Не удалось обновить уровень вибрации</string>
     <string name="error_update_double_space_period">Не удалось обновить точку при двойном пробеле</string>
+    <string name="error_update_auto_capitalization">Не удалось обновить автоматические заглавные</string>
     <string name="error_update_swipe">Не удалось обновить непрерывный ввод</string>
 
     <string name="error_update_long_press_duration">Не удалось обновить длительность долгого нажатия</string>
