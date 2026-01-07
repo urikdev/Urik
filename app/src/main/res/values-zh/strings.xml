@@ -1,5 +1,4 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="app_name" translatable="false">Urik</string>
     <string name="ime_name">Urik 输入法</string>
     <string name="ime_label">Urik 输入法</string>
     <string name="ime_description">支持滑动输入、拼写检查及多语言，同时保护您的隐私。无远程测量，无数据收集，所有数据仅保存在您的设备上。</string>

@@ -87,6 +87,9 @@ enum class AlternativeKeyboardLayout(
     val displayNameRes: Int,
 ) {
     DEFAULT(R.string.alternative_layout_default),
+    QWERTY(R.string.alternative_layout_qwerty),
+    AZERTY(R.string.alternative_layout_azerty),
+    QWERTZ(R.string.alternative_layout_qwertz),
     DVORAK(R.string.alternative_layout_dvorak),
     COLEMAK(R.string.alternative_layout_colemak),
     WORKMAN(R.string.alternative_layout_workman),

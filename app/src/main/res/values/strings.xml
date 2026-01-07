@@ -122,6 +122,9 @@
     <string name="layout_settings_number_row_off">Number row hidden</string>
     <string name="layout_settings_space_bar_size">Space Bar Size</string>
     <string name="alternative_layout_default">Default (Language Layout)</string>
+    <string name="alternative_layout_qwerty" translatable="false">QWERTY</string>
+    <string name="alternative_layout_azerty" translatable="false">AZERTY</string>
+    <string name="alternative_layout_qwertz" translatable="false">QWERTZ</string>
     <string name="alternative_layout_dvorak">Dvorak</string>
     <string name="alternative_layout_colemak">Colemak</string>
     <string name="alternative_layout_workman">Workman</string>
