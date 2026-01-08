@@ -365,4 +365,90 @@ class BackspaceUtilsTest {
         val result = BackspaceUtils.deleteGraphemeClusterBeforePosition("hello world", 5)
         assertEquals("hell world", result)
     }
+
+    @Test
+    fun `calculateComposingRegionAfterDeletion returns correct region for space deletion`() {
+        val result =
+            BackspaceUtils.calculateComposingRegionAfterDeletion(
+                textBeforeCursor = "Test ",
+                graphemeLength = 1,
+                cursorPositionBeforeDeletion = 5,
+            )
+
+        assertNotNull(result)
+        assertEquals(0, result!!.first)
+        assertEquals(4, result.second)
+        assertEquals("Test", result.third)
+    }
+
+    @Test
+    fun `calculateComposingRegionAfterDeletion handles multi-word text`() {
+        val result =
+            BackspaceUtils.calculateComposingRegionAfterDeletion(
+                textBeforeCursor = "hello world ",
+                graphemeLength = 1,
+                cursorPositionBeforeDeletion = 12,
+            )
+
+        assertNotNull(result)
+        assertEquals(6, result!!.first)
+        assertEquals(11, result.second)
+        assertEquals("world", result.third)
+    }
+
+    @Test
+    fun `calculateComposingRegionAfterDeletion returns null when no word remains`() {
+        val result =
+            BackspaceUtils.calculateComposingRegionAfterDeletion(
+                textBeforeCursor = " ",
+                graphemeLength = 1,
+                cursorPositionBeforeDeletion = 1,
+            )
+
+        assertNull(result)
+    }
+
+    @Test
+    fun `calculateComposingRegionAfterDeletion handles emoji deletion`() {
+        val result =
+            BackspaceUtils.calculateComposingRegionAfterDeletion(
+                textBeforeCursor = "Test😀",
+                graphemeLength = 2,
+                cursorPositionBeforeDeletion = 6,
+            )
+
+        assertNotNull(result)
+        assertEquals(0, result!!.first)
+        assertEquals(4, result.second)
+        assertEquals("Test", result.third)
+    }
+
+    @Test
+    fun `calculateComposingRegionAfterDeletion returns null for insufficient text`() {
+        val result =
+            BackspaceUtils.calculateComposingRegionAfterDeletion(
+                textBeforeCursor = "a",
+                graphemeLength = 2,
+                cursorPositionBeforeDeletion = 1,
+            )
+
+        assertNull(result)
+    }
+
+    @Test
+    fun `calculateComposingRegionAfterDeletion regression test for TTet bug`() {
+        val result =
+            BackspaceUtils.calculateComposingRegionAfterDeletion(
+                textBeforeCursor = "Test ",
+                graphemeLength = 1,
+                cursorPositionBeforeDeletion = 5,
+            )
+
+        assertNotNull(result)
+        val (wordStart, wordEnd, word) = result!!
+        assertEquals("Test", word)
+        assertEquals(0, wordStart)
+        assertEquals(4, wordEnd)
+        assertEquals(4, wordEnd - wordStart)
+    }
 }
