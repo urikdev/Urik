@@ -94,8 +94,12 @@
     <string name="error_update_alternative_layout">Misslyckades med att uppdatera tangentbordslayout</string>
     <string name="error_clear_learned_words">Misslyckades med att rensa inlärda ord</string>
     <string name="error_reset_to_defaults">Misslyckades med att återställa inställningarna</string>
+    <string name="error_dictionary_export">Misslyckades med att exportera ordboken</string>
+    <string name="error_dictionary_import">Misslyckades med att importera ordboken</string>
     <string name="success_learned_words_cleared">Inlärda ord rensade</string>
     <string name="success_settings_reset">Inställningarna återställda till standardinställningarna</string>
+    <string name="success_dictionary_exported">%1$d ord exporterade</string>
+    <string name="success_dictionary_imported">%1$d nya ord, %2$d uppdaterade</string>
     <string name="keyboard_description">Virtuellt tangentbord</string>
     <string name="letters_mode_label">ABC</string>
     <string name="numbers_mode_label">123</string>
@@ -149,6 +153,10 @@
     <string name="key_label_size_small">Små</string>
     <string name="key_label_size_medium">Medium</string>
     <string name="key_label_size_large">Stor</string>
+    <string name="privacy_settings_export_dictionary">Exportera ordbok</string>
+    <string name="privacy_settings_export_dictionary_summary">Spara dina inlärda ord till en fil</string>
+    <string name="privacy_settings_import_dictionary">Importera ordbok</string>
+    <string name="privacy_settings_import_dictionary_summary">Läs in inlärda ord från en säkerhetskopia</string>
     <string name="privacy_settings_export_error_log">Exportera fellogg</string>
     <string name="privacy_settings_export_error_log_summary">Dela diagnostikloggar för felsökning</string>
     <string name="privacy_settings_export_error_log_failed">Misslyckades med att exportera felloggen</string>

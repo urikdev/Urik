@@ -125,6 +125,10 @@
     <string name="privacy_settings_export_error_log">Eksportuj Dziennik Błędów</string>
     <string name="privacy_settings_export_error_log_summary">Udostępnij dzienniki diagnostyczne do debugowania</string>
     <string name="privacy_settings_export_error_log_failed">Nie udało się wyeksportować dziennika błędów</string>
+    <string name="privacy_settings_export_dictionary">Eksportuj słownik</string>
+    <string name="privacy_settings_export_dictionary_summary">Zapisz nauczone słowa do pliku</string>
+    <string name="privacy_settings_import_dictionary">Importuj słownik</string>
+    <string name="privacy_settings_import_dictionary_summary">Przywróć nauczone słowa z pliku</string>
 
     <!-- Error Messages -->
     <string name="error_title">Błąd</string>
@@ -148,10 +152,14 @@
     <string name="error_update_alternative_layout">Nie udało się zaktualizować układu klawiatury</string>
     <string name="error_clear_learned_words">Nie udało się wyczyścić nabytych słów</string>
     <string name="error_reset_to_defaults">Nie udało się przywrócić ustawień do domyślnych</string>
+    <string name="error_dictionary_export">Nie udało się wyeksportować słownika</string>
+    <string name="error_dictionary_import">Nie udało się zaimportować słownika</string>
 
     <!-- Success Messages -->
     <string name="success_learned_words_cleared">Nauczone słowa wyczyszczone</string>
     <string name="success_settings_reset">Ustawienia przywrócone do domyślnych</string>
+    <string name="success_dictionary_exported">Wyeksportowano %1$d słów</string>
+    <string name="success_dictionary_imported">Dodano %1$d nowych, zaktualizowano %2$d słów</string>
 
     <!-- Keyboard descriptions -->
     <string name="keyboard_description">Klawiatura wirtualna</string>

@@ -138,6 +138,10 @@
     <string name="privacy_settings_export_error_log">Esporta registro errori</string>
     <string name="privacy_settings_export_error_log_summary">Condividi i registri diagnostici per il debug</string>
     <string name="privacy_settings_export_error_log_failed">Esportazione registro errori non riuscita</string>
+    <string name="privacy_settings_export_dictionary">Esporta dizionario</string>
+    <string name="privacy_settings_export_dictionary_summary">Salva parole apprese in un file</string>
+    <string name="privacy_settings_import_dictionary">Importa dizionario</string>
+    <string name="privacy_settings_import_dictionary_summary">Ripristina parole apprese da un file</string>
 
     <!-- Error Messages -->
     <string name="error_title">Errore</string>
@@ -165,10 +169,14 @@
     <string name="error_update_alternative_layout">Aggiornamento layout tastiera non riuscito</string>
     <string name="error_clear_learned_words">Cancellazione parole apprese non riuscita</string>
     <string name="error_reset_to_defaults">Ripristino impostazioni non riuscito</string>
+    <string name="error_dictionary_export">Esportazione dizionario non riuscita</string>
+    <string name="error_dictionary_import">Importazione dizionario non riuscita</string>
 
     <!-- Success Messages -->
     <string name="success_learned_words_cleared">Parole apprese cancellate</string>
     <string name="success_settings_reset">Impostazioni ripristinate ai valori predefiniti</string>
+    <string name="success_dictionary_exported">%1$d parole esportate</string>
+    <string name="success_dictionary_imported">%1$d nuove aggiunte, %2$d parole aggiornate</string>
 
     <!-- Keyboard descriptions -->
     <string name="keyboard_description">Tastiera virtuale</string>

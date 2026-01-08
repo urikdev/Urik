@@ -49,6 +49,7 @@ Privacy-first keyboard for Android with on-device processing and encrypted stora
 - No telemetry, analytics, or network permissions
 - All processing happens on-device
 - Encrypted local storage for user data
+- Dictionary export/import for backup and device migration
 
 ## Privacy
 

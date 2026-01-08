@@ -124,6 +124,10 @@
     <string name="privacy_settings_export_error_log">Error-Logs exportieren</string>
     <string name="privacy_settings_export_error_log_summary">Diagnostische Logs für Debuggingzwecke teilen</string>
     <string name="privacy_settings_export_error_log_failed">Error-Logs konnten nicht exportiert werden</string>
+    <string name="privacy_settings_export_dictionary">Wörterbuch exportieren</string>
+    <string name="privacy_settings_export_dictionary_summary">Erlernte Wörter in eine Datei speichern</string>
+    <string name="privacy_settings_import_dictionary">Wörterbuch importieren</string>
+    <string name="privacy_settings_import_dictionary_summary">Erlernte Wörter aus einer Datei wiederherstellen</string>
 
     <!-- Error Messages -->
     <string name="error_title">Fehler</string>
@@ -147,10 +151,14 @@
     <string name="error_update_alternative_layout">Tastaturlayout konnte nicht geändert werden</string>
     <string name="error_clear_learned_words">Wörterbuch konnte nicht geleert werden</string>
     <string name="error_reset_to_defaults">Einstellungen konnten nicht zurückgesetzt werden</string>
+    <string name="error_dictionary_export">Wörterbuch konnte nicht exportiert werden</string>
+    <string name="error_dictionary_import">Wörterbuch konnte nicht importiert werden</string>
 
     <!-- Success Messages -->
     <string name="success_learned_words_cleared">Wörterbuch wurde geleert</string>
     <string name="success_settings_reset">Einstellungen wurden zurückgesetzt</string>
+    <string name="success_dictionary_exported">%1$d Wörter exportiert</string>
+    <string name="success_dictionary_imported">%1$d neue hinzugefügt, %2$d Wörter aktualisiert</string>
 
     <!-- Keyboard descriptions -->
     <string name="keyboard_description">Virtuelle Tastatur</string>
