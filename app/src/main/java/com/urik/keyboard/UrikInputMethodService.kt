@@ -2053,11 +2053,14 @@ class UrikInputMethodService :
             val textBeforeCursor = safeGetTextBeforeCursor(50)
 
             if (textBeforeCursor.isNotEmpty()) {
+                val graphemeLength = BackspaceUtils.getLastGraphemeClusterLength(textBeforeCursor)
+                val deletedChar = textBeforeCursor.lastOrNull()
+                val cursorPositionBeforeDeletion = safeGetCursorPosition()
+
                 currentInputConnection?.beginBatchEdit()
                 try {
-                    val graphemeLength = BackspaceUtils.getLastGraphemeClusterLength(textBeforeCursor)
-                    val deletedChar = textBeforeCursor.lastOrNull()
-
+                    isActivelyEditing = true
+                    currentInputConnection?.finishComposingText()
                     currentInputConnection?.deleteSurroundingText(graphemeLength, 0)
 
                     if (deletedChar != null) {
@@ -2065,7 +2068,7 @@ class UrikInputMethodService :
                             if (isSentenceEndingPunctuation(deletedChar)) {
                                 true
                             } else if (deletedChar.isWhitespace()) {
-                                val trimmed = textBeforeCursor.dropLast(1).trimEnd()
+                                val trimmed = textBeforeCursor.dropLast(graphemeLength).trimEnd()
                                 trimmed.isNotEmpty() && isSentenceEndingPunctuation(trimmed.last())
                             } else {
                                 false
@@ -2080,18 +2083,19 @@ class UrikInputMethodService :
                     }
 
                     if (!isAcceleratedDeletion && !isUrlOrEmailField) {
-                        val remainingText = textBeforeCursor.dropLast(1)
-                        val wordInfo = extractWordBeforeCursor(remainingText)
+                        val composingRegion =
+                            BackspaceUtils.calculateComposingRegionAfterDeletion(
+                                textBeforeCursor,
+                                graphemeLength,
+                                cursorPositionBeforeDeletion,
+                            )
 
-                        if (wordInfo != null) {
-                            val (wordBeforeCursor, _) = wordInfo
+                        if (composingRegion != null) {
+                            val (wordStart, wordEnd, word) = composingRegion
 
-                            val actualCursorPos = safeGetCursorPosition()
-                            val wordStart = actualCursorPos - wordBeforeCursor.length
+                            currentInputConnection?.setComposingRegion(wordStart, wordEnd)
 
-                            currentInputConnection?.setComposingRegion(wordStart, actualCursorPos)
-
-                            displayBuffer = wordBeforeCursor
+                            displayBuffer = word
                             composingRegionStart = wordStart
 
                             val (currentSequence, bufferSnapshot) =
