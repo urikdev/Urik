@@ -2368,6 +2368,10 @@ class UrikInputMethodService :
     override fun onFinishInputView(finishingInput: Boolean) {
         super.onFinishInputView(finishingInput)
 
+        if (::layoutManager.isInitialized) {
+            layoutManager.forceStopAcceleratedBackspace()
+        }
+
         observerJobs.forEach { it.cancel() }
         observerJobs.clear()
 
@@ -2412,6 +2416,10 @@ class UrikInputMethodService :
     ) {
         super.onStartInput(attribute, restarting)
 
+        if (::layoutManager.isInitialized) {
+            layoutManager.forceStopAcceleratedBackspace()
+        }
+
         userDismissedAutofill = false
         coordinateStateClear()
 
@@ -2437,6 +2445,10 @@ class UrikInputMethodService :
 
     override fun onFinishInput() {
         super.onFinishInput()
+
+        if (::layoutManager.isInitialized) {
+            layoutManager.forceStopAcceleratedBackspace()
+        }
 
         suggestionDebounceJob?.cancel()
         swipeKeyboardView?.hideEmojiPicker()
