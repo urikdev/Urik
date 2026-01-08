@@ -124,6 +124,10 @@
     <string name="privacy_settings_export_error_log">Exportovat hlášení chyb</string>
     <string name="privacy_settings_export_error_log_summary">Sdílet diagnostické hlášení k ladění</string>
     <string name="privacy_settings_export_error_log_failed">Nepovedlo se exportovat chybová hlášení</string>
+    <string name="privacy_settings_export_dictionary">Exportovat slovník</string>
+    <string name="privacy_settings_export_dictionary_summary">Uložit naučená slova do souboru</string>
+    <string name="privacy_settings_import_dictionary">Importovat slovník</string>
+    <string name="privacy_settings_import_dictionary_summary">Obnovit naučená slova ze souboru</string>
 
     <!-- Error Messages -->
     <string name="error_title">Chyba</string>
@@ -147,10 +151,14 @@
     <string name="error_update_alternative_layout">Nepodařilo se aktualizovat rozložení klávesnice</string>
     <string name="error_clear_learned_words">Nepodařilo se smazat naučená slova</string>
     <string name="error_reset_to_defaults">Nepodařilo se obnovit nastavení</string>
+    <string name="error_dictionary_export">Nepodařilo se exportovat slovník</string>
+    <string name="error_dictionary_import">Nepodařilo se importovat slovník</string>
 
     <!-- Success Messages -->
     <string name="success_learned_words_cleared">Naučená slova smazána</string>
     <string name="success_settings_reset">Obnoveno výchozí nastavení</string>
+    <string name="success_dictionary_exported">Exportováno %1$d slov</string>
+    <string name="success_dictionary_imported">Přidáno %1$d nových, aktualizováno %2$d slov</string>
 
     <!-- Keyboard descriptions -->
     <string name="keyboard_description">Virtuální klávesnice</string>

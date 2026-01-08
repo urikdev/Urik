@@ -1,7 +1,7 @@
 # Privacy Policy
 
 **Effective Date:** October 18, 2025
-**Last Updated:** December 28, 2025
+**Last Updated:** January 7, 2026
 
 ## Introduction
 
@@ -218,7 +218,9 @@ The keyboard automatically detects password fields, credit card inputs, email ad
 
 ### Learned Words
 - **Retention:** Indefinite, until you manually delete them or uninstall the app
-- **Deletion Options:**
+- **Management Options:**
+    - Export dictionary: Settings → Privacy & Data → Export Dictionary
+    - Import dictionary: Settings → Privacy & Data → Import Dictionary
     - Clear all learned words: Settings → Privacy & Data → Clear Learned Words
     - Reset settings to defaults: Settings → Privacy & Data → Reset to Defaults
     - Uninstall app: Automatically deletes all data
@@ -282,8 +284,11 @@ You have the right to:
     - System will learn the corrected spelling
 
 4. **Data Portability**
-    - **Limitation:** While your learned words are stored locally in an SQLCipher database, there is no built-in feature to export them in a portable format
-    - **Manual Request:** If you need your data urgently, contact us at hello@urik.io with device details, and we can provide instructions for manual database extraction (requires technical knowledge)
+    - Export learned words: Settings → Privacy & Data → Export Dictionary
+    - Import learned words: Settings → Privacy & Data → Import Dictionary
+    - Export format: JSON file containing word, language, frequency, and timestamps
+    - Import behavior: Merges with existing dictionary (sums frequencies for duplicates)
+    - **Note:** Exported files are not encrypted. Store securely if they contain sensitive words.
 
 5. **Withdraw Consent**
     - Disable clipboard monitoring: Settings → Privacy & Data → Clipboard History (toggle off)

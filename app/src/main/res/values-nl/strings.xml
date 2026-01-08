@@ -137,6 +137,10 @@
     <string name="privacy_settings_export_error_log">Foutenlogboek exporteren</string>
     <string name="privacy_settings_export_error_log_summary">Diagnostische logboeken delen voor debugging</string>
     <string name="privacy_settings_export_error_log_failed">Fout bij exporteren van foutenlogboek</string>
+    <string name="privacy_settings_export_dictionary">Woordenboek exporteren</string>
+    <string name="privacy_settings_export_dictionary_summary">Geleerde woorden opslaan naar bestand</string>
+    <string name="privacy_settings_import_dictionary">Woordenboek importeren</string>
+    <string name="privacy_settings_import_dictionary_summary">Geleerde woorden herstellen uit bestand</string>
 
     <!-- Error Messages -->
     <string name="error_title">Fout</string>
@@ -164,10 +168,14 @@
     <string name="error_update_alternative_layout">Toetsenbordindeling bijwerken mislukt</string>
     <string name="error_clear_learned_words">Gewilde woorden wissen mislukt</string>
     <string name="error_reset_to_defaults">Terugzetten naar standaardwaarden mislukt</string>
+    <string name="error_dictionary_export">Woordenboek exporteren mislukt</string>
+    <string name="error_dictionary_import">Woordenboek importeren mislukt</string>
 
     <!-- Success Messages -->
     <string name="success_learned_words_cleared">Gewilde woorden gewist</string>
     <string name="success_settings_reset">Instellingen teruggezet naar standaardwaarden</string>
+    <string name="success_dictionary_exported">%1$d woorden geëxporteerd</string>
+    <string name="success_dictionary_imported">%1$d nieuwe toegevoegd, %2$d woorden bijgewerkt</string>
 
     <!-- Keyboard descriptions -->
     <string name="keyboard_description">Virtueel toetsenbord</string>

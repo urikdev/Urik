@@ -40,7 +40,7 @@ sealed interface SettingsEvent {
 
         data object BackspaceSwipeToggleFailed : Error
 
-        data object LongPressPunctuationModeUpdateFailed : Error
+        data object LongPressPunctuationUpdateFailed : Error
 
         data object LongPressDurationUpdateFailed : Error
 
@@ -53,6 +53,10 @@ sealed interface SettingsEvent {
         data object ClearLearnedWordsFailed : Error
 
         data object ResetToDefaultsFailed : Error
+
+        data object DictionaryExportFailed : Error
+
+        data object DictionaryImportFailed : Error
     }
 
     /**
@@ -62,5 +66,14 @@ sealed interface SettingsEvent {
         data object LearnedWordsCleared : Success
 
         data object SettingsReset : Success
+
+        data class DictionaryExported(
+            val wordCount: Int,
+        ) : Success
+
+        data class DictionaryImported(
+            val newWords: Int,
+            val updatedWords: Int,
+        ) : Success
     }
 }

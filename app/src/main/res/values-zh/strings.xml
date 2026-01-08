@@ -122,6 +122,10 @@
     <string name="privacy_settings_clear_learned_words_confirm">确定清除所有已学词汇？此操作无法撤销。</string>
     <string name="privacy_settings_reset_to_defaults">重置为默认值</string>
     <string name="privacy_settings_reset_to_defaults_confirm">确定将所有设置重置为默认值？</string>
+    <string name="privacy_settings_export_dictionary">导出词典</string>
+    <string name="privacy_settings_export_dictionary_summary">将已学词汇保存到文件</string>
+    <string name="privacy_settings_import_dictionary">导入词典</string>
+    <string name="privacy_settings_import_dictionary_summary">从备份文件加载已学词汇</string>
     <string name="privacy_settings_export_error_log">导出错误日志</string>
     <string name="privacy_settings_export_error_log_summary">共享诊断日志用于调试</string>
     <string name="privacy_settings_export_error_log_failed">导出错误日志失败</string>
@@ -151,9 +155,13 @@
     <string name="error_update_alternative_layout">更新键盘布局失败</string>
     <string name="error_clear_learned_words">清除已学词汇失败</string>
     <string name="error_reset_to_defaults">重置设置失败</string>
+    <string name="error_dictionary_export">导出词典失败</string>
+    <string name="error_dictionary_import">导入词典失败</string>
 
     <string name="success_learned_words_cleared">已学词汇已清除</string>
     <string name="success_settings_reset">设置已重置为默认值</string>
+    <string name="success_dictionary_exported">已导出 %1$d 个词汇</string>
+    <string name="success_dictionary_imported">%1$d 个新词汇，%2$d 个已更新</string>
 
     <string name="keyboard_description">虚拟键盘</string>
 

@@ -134,6 +134,10 @@
     <string name="privacy_settings_clear_learned_words_confirm">تمام واژه‌های آموخته‌شده پاک شوند؟ این عمل قابل بازگشت نیست.</string>
     <string name="privacy_settings_reset_to_defaults">بازنشانی به پیش‌فرض</string>
     <string name="privacy_settings_reset_to_defaults_confirm">تمام تنظیمات به حالت پیش‌فرض بازنشانی شوند؟</string>
+    <string name="privacy_settings_export_dictionary">صادر کردن فرهنگ لغت</string>
+    <string name="privacy_settings_export_dictionary_summary">ذخیره واژگان آموخته‌شده در یک فایل</string>
+    <string name="privacy_settings_import_dictionary">وارد کردن فرهنگ لغت</string>
+    <string name="privacy_settings_import_dictionary_summary">بارگذاری واژگان از فایل پشتیبان</string>
     <string name="privacy_settings_export_error_log">استخراج گزارش خطا</string>
     <string name="privacy_settings_export_error_log_summary">به اشتراک گذاشتن گزارش‌های تشخیصی برای اشکال‌زدایی</string>
     <string name="privacy_settings_export_error_log_failed">استخراج گزارش خطا ناموفق بود</string>
@@ -164,10 +168,14 @@
     <string name="error_update_alternative_layout">به‌روزرسانی چیدمان صفحه‌کلید ناموفق بود</string>
     <string name="error_clear_learned_words">پاک کردن واژه‌های آموخته‌شده ناموفق بود</string>
     <string name="error_reset_to_defaults">بازنشانی تنظیمات ناموفق بود</string>
+    <string name="error_dictionary_export">صادر کردن فرهنگ لغت ناموفق بود</string>
+    <string name="error_dictionary_import">وارد کردن فرهنگ لغت ناموفق بود</string>
 
     <!-- Success Messages -->
     <string name="success_learned_words_cleared">واژه‌های آموخته‌شده پاک شدند</string>
     <string name="success_settings_reset">تنظیمات به حالت پیش‌فرض بازنشانی شدند</string>
+    <string name="success_dictionary_exported">%1$d واژه صادر شد</string>
+    <string name="success_dictionary_imported">%1$d واژه جدید، %2$d به‌روزرسانی‌شده</string>
 
     <!-- Keyboard descriptions -->
     <string name="keyboard_description">کیبورد مجازی</string>

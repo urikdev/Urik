@@ -1,8 +1,10 @@
 package com.urik.keyboard.settings.privacydata
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.FileProvider
 import androidx.lifecycle.Lifecycle
@@ -17,6 +19,8 @@ import com.urik.keyboard.settings.SettingsEventHandler
 import com.urik.keyboard.utils.ErrorLogger
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 /**
  * Settings fragment for privacy and data management.
@@ -30,6 +34,28 @@ class PrivacyDataFragment : PreferenceFragmentCompat() {
     private lateinit var eventHandler: SettingsEventHandler
     private lateinit var clipboardPref: SwitchPreferenceCompat
     private var exportErrorLogPref: Preference? = null
+
+    private val exportLauncher =
+        registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult(),
+        ) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                result.data?.data?.let { uri ->
+                    viewModel.exportDictionary(uri)
+                }
+            }
+        }
+
+    private val importLauncher =
+        registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult(),
+        ) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                result.data?.data?.let { uri ->
+                    viewModel.importDictionary(uri)
+                }
+            }
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -71,6 +97,30 @@ class PrivacyDataFragment : PreferenceFragmentCompat() {
                 }
             }
         screen.addPreference(clearLearnedPref)
+
+        val exportDictionaryPref =
+            Preference(context).apply {
+                key = "export_dictionary"
+                title = resources.getString(R.string.privacy_settings_export_dictionary)
+                summary = resources.getString(R.string.privacy_settings_export_dictionary_summary)
+                setOnPreferenceClickListener {
+                    launchExportPicker()
+                    true
+                }
+            }
+        screen.addPreference(exportDictionaryPref)
+
+        val importDictionaryPref =
+            Preference(context).apply {
+                key = "import_dictionary"
+                title = resources.getString(R.string.privacy_settings_import_dictionary)
+                summary = resources.getString(R.string.privacy_settings_import_dictionary_summary)
+                setOnPreferenceClickListener {
+                    launchImportPicker()
+                    true
+                }
+            }
+        screen.addPreference(importDictionaryPref)
 
         val resetPref =
             Preference(context).apply {
@@ -173,5 +223,27 @@ class PrivacyDataFragment : PreferenceFragmentCompat() {
             .setPositiveButton(android.R.string.ok) { _, _ -> onConfirm() }
             .setNegativeButton(android.R.string.cancel, null)
             .show()
+    }
+
+    private fun launchExportPicker() {
+        val dateStr = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)
+        val fileName = "urik_dictionary_$dateStr.json"
+
+        val intent =
+            Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+                addCategory(Intent.CATEGORY_OPENABLE)
+                type = "application/json"
+                putExtra(Intent.EXTRA_TITLE, fileName)
+            }
+        exportLauncher.launch(intent)
+    }
+
+    private fun launchImportPicker() {
+        val intent =
+            Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                addCategory(Intent.CATEGORY_OPENABLE)
+                type = "application/json"
+            }
+        importLauncher.launch(intent)
     }
 }

@@ -889,17 +889,80 @@ class SpellCheckManagerTest {
         }
 
     @Test
-    fun `i18n French contraction l'homme gets guaranteed confidence`() =
+    fun `high frequency learned words get significant boost`() =
         runTest {
-            whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency("lhomme", "en", 5))
-                .thenReturn(listOf("l'homme" to 10))
+            whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency("test", "en", 5))
+                .thenReturn(
+                    listOf(
+                        "testing" to 15,
+                        "tester" to 2,
+                    ),
+                )
 
-            val suggestions = spellCheckManager.getSpellingSuggestionsWithConfidence("lhomme")
+            val suggestions = spellCheckManager.getSpellingSuggestionsWithConfidence("test")
 
-            val contractionSuggestion = suggestions.find { it.word == "l'homme" }
-            assertNotNull("Should find French contraction l'homme", contractionSuggestion)
+            val highFreq = suggestions.find { it.word == "testing" }!!
+            val lowFreq = suggestions.find { it.word == "tester" }!!
+            assertTrue(
+                "High frequency (15 uses) should have higher confidence than low frequency (2 uses)",
+                highFreq.confidence > lowFreq.confidence,
+            )
+        }
+
+    @Test
+    fun `medium frequency learned words get moderate boost`() =
+        runTest {
+            whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency("word", "en", 5))
+                .thenReturn(
+                    listOf(
+                        "words" to 5,
+                        "wordy" to 1,
+                    ),
+                )
+
+            val suggestions = spellCheckManager.getSpellingSuggestionsWithConfidence("word")
+
+            val mediumFreq = suggestions.find { it.word == "words" }!!
+            val singleUse = suggestions.find { it.word == "wordy" }!!
+            assertTrue(
+                "Medium frequency (5 uses) should have higher confidence than single use (1 use)",
+                mediumFreq.confidence > singleUse.confidence,
+            )
+        }
+
+    @Test
+    fun `very high frequency word wins over lower frequency despite ranking`() =
+        runTest {
+            whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency("typ", "en", 5))
+                .thenReturn(
+                    listOf(
+                        "type" to 2,
+                        "typo" to 50,
+                    ),
+                )
+
+            val suggestions = spellCheckManager.getSpellingSuggestionsWithConfidence("typ")
+
+            val typeWord = suggestions.find { it.word == "type" }!!
+            val typoWord = suggestions.find { it.word == "typo" }!!
+            assertTrue(
+                "Very high frequency (50 uses) should have higher confidence despite lower ranking",
+                typoWord.confidence > typeWord.confidence,
+            )
+        }
+
+    @Test
+    fun `contraction dont gets guaranteed confidence for don't`() =
+        runTest {
+            whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency("dont", "en", 5))
+                .thenReturn(listOf("don't" to 10))
+
+            val suggestions = spellCheckManager.getSpellingSuggestionsWithConfidence("dont")
+
+            val contractionSuggestion = suggestions.find { it.word == "don't" }
+            assertNotNull("Should find contraction don't", contractionSuggestion)
             assertEquals(
-                "French contraction should have guaranteed confidence",
+                "Contraction should have guaranteed confidence",
                 SpellCheckConstants.CONTRACTION_GUARANTEED_CONFIDENCE,
                 contractionSuggestion!!.confidence,
                 0.001,
@@ -907,7 +970,7 @@ class SpellCheckManagerTest {
         }
 
     @Test
-    fun `i18n German hyphenated compound gets guaranteed confidence`() =
+    fun `hyphenated compound coworker gets guaranteed confidence for co-worker`() =
         runTest {
             whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency("coworker", "en", 5))
                 .thenReturn(listOf("co-worker" to 10))

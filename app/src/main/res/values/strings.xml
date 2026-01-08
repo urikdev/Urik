@@ -141,6 +141,10 @@
     <string name="privacy_settings_export_error_log">Export Error Log</string>
     <string name="privacy_settings_export_error_log_summary">Share diagnostic logs for debugging</string>
     <string name="privacy_settings_export_error_log_failed">Failed to export error log</string>
+    <string name="privacy_settings_export_dictionary">Export Dictionary</string>
+    <string name="privacy_settings_export_dictionary_summary">Save learned words to a file</string>
+    <string name="privacy_settings_import_dictionary">Import Dictionary</string>
+    <string name="privacy_settings_import_dictionary_summary">Restore learned words from a file</string>
 
     <!-- Error Messages -->
     <string name="error_title">Error</string>
@@ -168,10 +172,14 @@
     <string name="error_update_alternative_layout">Failed to update keyboard layout</string>
     <string name="error_clear_learned_words">Failed to clear learned words</string>
     <string name="error_reset_to_defaults">Failed to reset settings</string>
+    <string name="error_dictionary_export">Failed to export dictionary</string>
+    <string name="error_dictionary_import">Failed to import dictionary</string>
 
     <!-- Success Messages -->
     <string name="success_learned_words_cleared">Learned words cleared</string>
     <string name="success_settings_reset">Settings reset to defaults</string>
+    <string name="success_dictionary_exported">Exported %1$d words</string>
+    <string name="success_dictionary_imported">Added %1$d new, updated %2$d words</string>
 
     <!-- Keyboard descriptions -->
     <string name="keyboard_description">Virtual keyboard</string>

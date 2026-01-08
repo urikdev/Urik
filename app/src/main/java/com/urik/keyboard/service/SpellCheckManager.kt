@@ -606,7 +606,7 @@ class SpellCheckManager
                                 if (isContraction) {
                                     SpellCheckConstants.CONTRACTION_GUARANTEED_CONFIDENCE
                                 } else {
-                                    val frequencyBoost = ln(frequency.toDouble() + 1.0) * SpellCheckConstants.FREQUENCY_BOOST_MULTIPLIER
+                                    val frequencyBoost = calculateFrequencyBoost(frequency)
                                     val baseConfidence = SpellCheckConstants.LEARNED_WORD_BASE_CONFIDENCE - (index * 0.02)
                                     (baseConfidence + frequencyBoost).coerceIn(
                                         SpellCheckConstants.LEARNED_WORD_CONFIDENCE_MIN,
@@ -1137,5 +1137,23 @@ class SpellCheckManager
             }
 
             return if (count > 0) kotlin.math.sqrt(totalDistanceSquared / count) else 0.0
+        }
+
+        private fun calculateFrequencyBoost(frequency: Int): Double {
+            if (frequency <= 0) return 0.0
+
+            return when {
+                frequency >= SpellCheckConstants.HIGH_FREQUENCY_THRESHOLD -> {
+                    ln(frequency.toDouble()) * SpellCheckConstants.HIGH_FREQUENCY_LOG_MULTIPLIER +
+                        SpellCheckConstants.HIGH_FREQUENCY_BASE_BOOST
+                }
+                frequency >= SpellCheckConstants.MEDIUM_FREQUENCY_THRESHOLD -> {
+                    ln(frequency.toDouble()) * SpellCheckConstants.MEDIUM_FREQUENCY_LOG_MULTIPLIER +
+                        SpellCheckConstants.MEDIUM_FREQUENCY_BASE_BOOST
+                }
+                else -> {
+                    ln(frequency.toDouble() + 1.0) * SpellCheckConstants.FREQUENCY_BOOST_MULTIPLIER
+                }
+            }
         }
     }
