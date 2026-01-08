@@ -5,6 +5,7 @@ import com.urik.keyboard.data.KeyboardRepository
 import com.urik.keyboard.data.database.KeyboardDatabase
 import com.urik.keyboard.data.database.LearnedWordDao
 import com.urik.keyboard.service.CharacterVariationService
+import com.urik.keyboard.service.DictionaryBackupManager
 import com.urik.keyboard.service.EmojiSearchManager
 import com.urik.keyboard.service.LanguageManager
 import com.urik.keyboard.service.SpellCheckManager
@@ -133,4 +134,13 @@ object KeyboardModule {
     ): com.urik.keyboard.service.RecentEmojiProvider =
         com.urik.keyboard.service
             .RecentEmojiProvider(context, scope)
+
+    @Provides
+    @Singleton
+    fun provideDictionaryBackupManager(
+        @ApplicationContext context: Context,
+        database: KeyboardDatabase,
+        learnedWordDao: LearnedWordDao,
+        cacheMemoryManager: CacheMemoryManager,
+    ): DictionaryBackupManager = DictionaryBackupManager(context, database, learnedWordDao, cacheMemoryManager)
 }

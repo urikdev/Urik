@@ -103,7 +103,7 @@ class TypingBehaviorViewModel
             viewModelScope.launch {
                 settingsRepository
                     .updateLongPressPunctuationMode(mode)
-                    .onFailure { _events.emit(SettingsEvent.Error.LongPressPunctuationModeUpdateFailed) }
+                    .onFailure { _events.emit(SettingsEvent.Error.LongPressPunctuationUpdateFailed) }
             }
         }
 

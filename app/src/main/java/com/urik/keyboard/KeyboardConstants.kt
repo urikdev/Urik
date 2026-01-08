@@ -84,6 +84,14 @@ object KeyboardConstants {
 
         const val COMMON_WORD_MIN_LENGTH = 2
         const val COMMON_WORD_MAX_LENGTH = 15
+
+        // Dynamic frequency weighting thresholds
+        const val HIGH_FREQUENCY_THRESHOLD = 10
+        const val MEDIUM_FREQUENCY_THRESHOLD = 3
+        const val HIGH_FREQUENCY_BASE_BOOST = 0.15
+        const val HIGH_FREQUENCY_LOG_MULTIPLIER = 0.04
+        const val MEDIUM_FREQUENCY_BASE_BOOST = 0.05
+        const val MEDIUM_FREQUENCY_LOG_MULTIPLIER = 0.03
     }
 
     object SwipeDetectionConstants {

@@ -126,6 +126,10 @@
     <string name="privacy_settings_export_error_log">Экспорт Журнала Ошибок</string>
     <string name="privacy_settings_export_error_log_summary">Поделиться диагностическими журналами для отладки</string>
     <string name="privacy_settings_export_error_log_failed">Не удалось экспортировать журнал ошибок</string>
+    <string name="privacy_settings_export_dictionary">Экспорт словаря</string>
+    <string name="privacy_settings_export_dictionary_summary">Сохранить изученные слова в файл</string>
+    <string name="privacy_settings_import_dictionary">Импорт словаря</string>
+    <string name="privacy_settings_import_dictionary_summary">Восстановить изученные слова из файла</string>
 
     <!-- Error Messages -->
     <string name="error_title">Ошибка</string>
@@ -150,10 +154,14 @@
     <string name="error_update_alternative_layout">Не удалось обновить раскладку клавиатуры</string>
     <string name="error_clear_learned_words">Не удалось удалить изученные слова</string>
     <string name="error_reset_to_defaults">Не удалось сбросить настройки</string>
+    <string name="error_dictionary_export">Не удалось экспортировать словарь</string>
+    <string name="error_dictionary_import">Не удалось импортировать словарь</string>
 
     <!-- Success Messages -->
     <string name="success_learned_words_cleared">Запомненные слова удалены</string>
     <string name="success_settings_reset">Настройки сброшены до значений по умолчанию</string>
+    <string name="success_dictionary_exported">Экспортировано %1$d слов</string>
+    <string name="success_dictionary_imported">Добавлено %1$d новых, обновлено %2$d слов</string>
 
     <!-- Keyboard descriptions -->
     <string name="keyboard_description">Виртуальная клавиатура</string>

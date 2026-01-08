@@ -266,6 +266,24 @@ interface LearnedWordDao {
 
     @Query("SELECT * FROM learned_words WHERE language_tag = :languageTag")
     suspend fun getAllLearnedWordsForLanguage(languageTag: String): List<LearnedWord>
+
+    @Query("SELECT * FROM learned_words")
+    suspend fun getAllLearnedWords(): List<LearnedWord>
+
+    @Transaction
+    suspend fun importWordWithMerge(word: LearnedWord) {
+        val existing = findExactWord(word.languageTag, word.wordNormalized)
+        if (existing != null) {
+            val merged =
+                existing.copy(
+                    frequency = existing.frequency + word.frequency,
+                    lastUsed = maxOf(existing.lastUsed, word.lastUsed),
+                )
+            updateWord(merged)
+        } else {
+            insertWord(word)
+        }
+    }
 }
 
 data class FastSuggestion(

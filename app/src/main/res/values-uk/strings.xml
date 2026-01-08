@@ -125,6 +125,10 @@
     <string name="privacy_settings_export_error_log">Експорт Журналу Помилок</string>
     <string name="privacy_settings_export_error_log_summary">Поділитися діагностичними журналами для налагодження</string>
     <string name="privacy_settings_export_error_log_failed">Не вдалося експортувати журнал помилок</string>
+    <string name="privacy_settings_export_dictionary">Експорт словника</string>
+    <string name="privacy_settings_export_dictionary_summary">Зберегти вивчені слова у файл</string>
+    <string name="privacy_settings_import_dictionary">Імпорт словника</string>
+    <string name="privacy_settings_import_dictionary_summary">Відновити вивчені слова з файлу</string>
 
     <!-- Error Messages -->
     <string name="error_title">Помилка</string>
@@ -148,10 +152,14 @@
     <string name="error_update_alternative_layout">Не вдалося оновити розкладку клавіатури</string>
     <string name="error_clear_learned_words">Не вдалося видалити вивчені слова</string>
     <string name="error_reset_to_defaults">Не вдалося скинути налаштування</string>
+    <string name="error_dictionary_export">Не вдалося експортувати словник</string>
+    <string name="error_dictionary_import">Не вдалося імпортувати словник</string>
 
     <!-- Success Messages -->
     <string name="success_learned_words_cleared">Запам\'ятовані слова видалені</string>
     <string name="success_settings_reset">Налаштування скинуто до стандартних</string>
+    <string name="success_dictionary_exported">Експортовано %1$d слів</string>
+    <string name="success_dictionary_imported">Додано %1$d нових, оновлено %2$d слів</string>
 
     <!-- Keyboard descriptions -->
     <string name="keyboard_description">Віртуальна клавіатура</string>

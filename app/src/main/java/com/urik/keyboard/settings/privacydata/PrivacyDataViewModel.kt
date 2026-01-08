@@ -1,7 +1,9 @@
 package com.urik.keyboard.settings.privacydata
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.urik.keyboard.service.DictionaryBackupManager
 import com.urik.keyboard.settings.SettingsEvent
 import com.urik.keyboard.settings.SettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -15,14 +17,12 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-/**
- * Manages privacy and data management operations.
- */
 @HiltViewModel
 class PrivacyDataViewModel
     @Inject
     constructor(
         private val settingsRepository: SettingsRepository,
+        private val dictionaryBackupManager: DictionaryBackupManager,
     ) : ViewModel() {
         private val _events = MutableSharedFlow<SettingsEvent>()
         val events: SharedFlow<SettingsEvent> = _events.asSharedFlow()
@@ -66,6 +66,31 @@ class PrivacyDataViewModel
                     .resetToDefaults()
                     .onSuccess { _events.emit(SettingsEvent.Success.SettingsReset) }
                     .onFailure { _events.emit(SettingsEvent.Error.ResetToDefaultsFailed) }
+            }
+        }
+
+        fun exportDictionary(uri: Uri) {
+            viewModelScope.launch {
+                dictionaryBackupManager
+                    .exportToUri(uri)
+                    .onSuccess { result ->
+                        _events.emit(SettingsEvent.Success.DictionaryExported(result.wordCount))
+                    }.onFailure { _events.emit(SettingsEvent.Error.DictionaryExportFailed) }
+            }
+        }
+
+        fun importDictionary(uri: Uri) {
+            viewModelScope.launch {
+                dictionaryBackupManager
+                    .importFromUri(uri)
+                    .onSuccess { result ->
+                        _events.emit(
+                            SettingsEvent.Success.DictionaryImported(
+                                result.newWords,
+                                result.updatedWords,
+                            ),
+                        )
+                    }.onFailure { _events.emit(SettingsEvent.Error.DictionaryImportFailed) }
             }
         }
     }

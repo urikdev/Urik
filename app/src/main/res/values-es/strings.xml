@@ -124,6 +124,10 @@
     <string name="privacy_settings_export_error_log">Registro de errores de exportación</string>
     <string name="privacy_settings_export_error_log_summary">Compartir registros de diagnóstico para la depuración</string>
     <string name="privacy_settings_export_error_log_failed">No se pudo exportar el registro de errores.</string>
+    <string name="privacy_settings_export_dictionary">Exportar diccionario</string>
+    <string name="privacy_settings_export_dictionary_summary">Guardar palabras aprendidas en un archivo</string>
+    <string name="privacy_settings_import_dictionary">Importar diccionario</string>
+    <string name="privacy_settings_import_dictionary_summary">Restaurar palabras aprendidas desde un archivo</string>
 
     <!-- Error Messages -->
     <string name="error_title">Error</string>
@@ -147,10 +151,14 @@
     <string name="error_update_alternative_layout">No se pudo actualizar el diseño de teclado</string>
     <string name="error_clear_learned_words">No se pudo borrar las palabras aprendidas</string>
     <string name="error_reset_to_defaults">No se pudo restablecer la configuración</string>
+    <string name="error_dictionary_export">No se pudo exportar el diccionario</string>
+    <string name="error_dictionary_import">No se pudo importar el diccionario</string>
 
     <!-- Success Messages -->
     <string name="success_learned_words_cleared">Palabras aprendidas borradas</string>
     <string name="success_settings_reset">La configuración se ha restablecido a los valores predeterminados.</string>
+    <string name="success_dictionary_exported">%1$d palabras exportadas</string>
+    <string name="success_dictionary_imported">%1$d nuevas añadidas, %2$d palabras actualizadas</string>
 
     <!-- Keyboard descriptions -->
     <string name="keyboard_description">Teclado virtual</string>
