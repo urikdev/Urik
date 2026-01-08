@@ -73,4 +73,25 @@ object BackspaceUtils {
         wordLength: Int,
         shouldDeleteSpace: Boolean,
     ): Int = if (shouldDeleteSpace) wordLength + 1 else wordLength
+
+    fun calculateComposingRegionAfterDeletion(
+        textBeforeCursor: String,
+        graphemeLength: Int,
+        cursorPositionBeforeDeletion: Int,
+    ): Triple<Int, Int, String>? {
+        if (textBeforeCursor.length < graphemeLength) return null
+
+        val remainingText = textBeforeCursor.dropLast(graphemeLength)
+        if (remainingText.isEmpty()) return null
+
+        val wordInfo = extractWordBeforeCursor(remainingText) ?: return null
+        val (word, _) = wordInfo
+
+        val newCursorPosition = cursorPositionBeforeDeletion - graphemeLength
+
+        val wordStart = newCursorPosition - word.length
+        if (wordStart < 0) return null
+
+        return Triple(wordStart, newCursorPosition, word)
+    }
 }
