@@ -343,6 +343,10 @@ class SwipeDetector
                 }
                 lastCheckX = event.x
 
+                if (timeSinceDown < SwipeDetectionConstants.MIN_SWIPE_TOUCH_DURATION_MS) {
+                    return
+                }
+
                 if (timeSinceDown < SwipeDetectionConstants.SWIPE_TIME_THRESHOLD_MS) {
                     return
                 }
@@ -356,6 +360,11 @@ class SwipeDetector
                 if (distance > swipeStartDistancePx) {
                     val currentKey = keyAt(event.x, event.y)
                     if (currentKey == startingKey) {
+                        return
+                    }
+
+                    val velocity = distance / timeSinceDown.toFloat()
+                    if (velocity < SwipeDetectionConstants.MIN_SWIPE_VELOCITY_PX_PER_MS) {
                         return
                     }
 
