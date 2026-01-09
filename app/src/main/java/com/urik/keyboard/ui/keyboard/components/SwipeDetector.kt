@@ -331,6 +331,7 @@ class SwipeDetector
             firstPoint?.let { start ->
                 val now = System.currentTimeMillis()
                 val timeSinceDown = now - startTime
+                val distance = calculateDistance(start.x, start.y, event.x, event.y)
 
                 if (lastCheckX != 0f) {
                     val deltaX = event.x - lastCheckX
@@ -352,10 +353,14 @@ class SwipeDetector
                     return
                 }
 
-                val distance = calculateDistance(start.x, start.y, event.x, event.y)
                 if (distance > swipeStartDistancePx) {
                     val currentKey = keyAt(event.x, event.y)
                     if (currentKey == startingKey) {
+                        return
+                    }
+
+                    val velocity = distance / timeSinceDown.toFloat()
+                    if (velocity > SwipeDetectionConstants.MAX_SWIPE_VELOCITY_PX_PER_MS) {
                         return
                     }
 
