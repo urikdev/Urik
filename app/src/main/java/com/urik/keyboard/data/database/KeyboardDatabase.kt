@@ -18,6 +18,7 @@ import net.zetetic.database.sqlcipher.SupportOpenHelperFactory
         LearnedWord::class,
         LearnedWordFts::class,
         ClipboardItem::class,
+        CustomKeyMapping::class,
     ],
     version = KeyboardConstants.DatabaseConstants.DATABASE_VERSION,
     exportSchema = true,
@@ -29,6 +30,8 @@ abstract class KeyboardDatabase : RoomDatabase() {
     abstract fun learnedWordDao(): LearnedWordDao
 
     abstract fun clipboardDao(): ClipboardDao
+
+    abstract fun customKeyMappingDao(): CustomKeyMappingDao
 
     companion object {
         const val DATABASE_NAME = "keyboard_database"
@@ -69,6 +72,21 @@ abstract class KeyboardDatabase : RoomDatabase() {
                 }
             }
 
+        private val MIGRATION_3_4 =
+            object : Migration(3, 4) {
+                override fun migrate(db: SupportSQLiteDatabase) {
+                    db.execSQL(
+                        """
+                        CREATE TABLE IF NOT EXISTS custom_key_mappings (
+                            base_key TEXT NOT NULL PRIMARY KEY,
+                            custom_symbol TEXT NOT NULL,
+                            created_at INTEGER NOT NULL
+                        )
+                        """,
+                    )
+                }
+            }
+
         /**
          * Returns singleton database instance.
          *
@@ -97,7 +115,7 @@ abstract class KeyboardDatabase : RoomDatabase() {
                             context.applicationContext,
                             KeyboardDatabase::class.java,
                             DATABASE_NAME,
-                        ).addMigrations(MIGRATION_1_2)
+                        ).addMigrations(MIGRATION_1_2, MIGRATION_3_4)
 
                 if (passphrase != null) {
                     builder.openHelperFactory(SupportOpenHelperFactory(passphrase))

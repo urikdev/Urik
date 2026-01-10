@@ -111,6 +111,26 @@
     <string name="alternative_layout_dvorak">Dvorak</string>
     <string name="alternative_layout_colemak">Colemak</string>
     <string name="alternative_layout_workman">Workman</string>
+    <string name="layout_settings_customize_keys">Tasten anpassen</string>
+    <string name="layout_settings_customize_keys_summary">Benutzerdefinierten Charakter für Langdruck zuweisen</string>
+
+    <!-- Layout Mapper -->
+    <string name="layout_mapper_title">Tasten anpassen</string>
+    <string name="layout_mapper_instructions">Tippe auf eine Taste, um einen benutzerdefinierten Charakter zuzuweisen. Durch Langdruck auf diese Taste auf der Tastatur wird dein Charakter eingefügt.</string>
+    <string name="layout_mapper_edit_key">Taste bearbeiten: %1$s</string>
+    <string name="layout_mapper_symbol_hint">Benutzerdefinierten Charakter</string>
+    <string name="layout_mapper_save">Speichern</string>
+    <string name="layout_mapper_remove">Entfernen</string>
+    <string name="layout_mapper_reset_all">Alle zurücksetzen</string>
+    <string name="layout_mapper_reset_title">Alle Zuordnungen zurücksetzen?</string>
+    <string name="layout_mapper_reset_message">Dadurch werden alle benutzerdefinierten Tastenzuordnungen entfernt. Dies kann nicht rückgängig gemacht werden.</string>
+    <string name="layout_mapper_reset_confirm">Zurücksetzen</string>
+    <string name="layout_mapper_saved">Zuordnung gespeichert</string>
+    <string name="layout_mapper_removed">Zuordnung entfernt</string>
+    <string name="layout_mapper_cleared">Alle Zuordnungen gelöscht</string>
+    <string name="layout_mapper_save_failed">Fehler beim Speichern der Zuordnung</string>
+    <string name="layout_mapper_remove_failed">Fehler beim Entfernen der Zuordnung</string>
+    <string name="layout_mapper_clear_failed">Fehler beim Löschen der Zuordnungen</string>
 
     <!-- Privacy & Data Settings -->
     <string name="privacy_settings_clipboard_history">Zwischenablage-Verlauf</string>

@@ -113,6 +113,26 @@
     <string name="long_press_punctuation_spacebar">Spatiebalk</string>
     <string name="long_press_punctuation_period">Punttoets</string>
     <string name="typing_settings_long_press_duration">Duur lang indrukken</string>
+    <string name="layout_settings_customize_keys">Toetsen aanpassen</string>
+    <string name="layout_settings_customize_keys_summary">Aangepast teken toewijzen aan lang indrukken</string>
+
+    <!-- Layout Mapper -->
+    <string name="layout_mapper_title">Toetsen aanpassen</string>
+    <string name="layout_mapper_instructions">Tik op een toets om een aangepast teken toe te wijzen. Als je lang op die toets op het toetsenbord drukt, wordt je teken ingevoegd.</string>
+    <string name="layout_mapper_edit_key">Toets bewerken: %1$s</string>
+    <string name="layout_mapper_symbol_hint">Aangepast teken</string>
+    <string name="layout_mapper_save">Opslaan</string>
+    <string name="layout_mapper_remove">Verwijderen</string>
+    <string name="layout_mapper_reset_all">Alles opnieuw instellen</string>
+    <string name="layout_mapper_reset_title">Alle toewijzingen opnieuw instellen?</string>
+    <string name="layout_mapper_reset_message">Dit verwijdert alle aangepaste toetszoewijzingen. Dit kan niet ongedaan gemaakt worden.</string>
+    <string name="layout_mapper_reset_confirm">Opnieuw instellen</string>
+    <string name="layout_mapper_saved">Toewijzing opgeslagen</string>
+    <string name="layout_mapper_removed">Toewijzing verwijderd</string>
+    <string name="layout_mapper_cleared">Alle toewijzingen gewist</string>
+    <string name="layout_mapper_save_failed">Fout bij opslaan van toewijzing</string>
+    <string name="layout_mapper_remove_failed">Fout bij verwijderen van toewijzing</string>
+    <string name="layout_mapper_clear_failed">Fout bij wissen van toewijzingen</string>
 
     <!-- Layout & Input Settings -->
     <string name="layout_settings_alternative_layout">Toetsenbordindeling</string>

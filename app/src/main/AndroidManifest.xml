@@ -53,6 +53,12 @@
             android:label="@string/theme_picker_title" />
 
         <activity
+            android:name=".settings.layoutmapper.LayoutMapperActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Urik.NoActionBar"
+            android:label="@string/layout_mapper_title" />
+
+        <activity
             android:name=".settings.OssLicensesActivity"
             android:exported="false"
             android:theme="@style/Theme.Urik.NoActionBar"

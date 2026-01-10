@@ -102,6 +102,26 @@
     <string name="typing_settings_swipe_off">Непрерывный ввод отключен</string>
 
     <string name="typing_settings_long_press_duration">Длительность Долгого Нажатия</string>
+    <string name="layout_settings_customize_keys">Настройка Клавиш</string>
+    <string name="layout_settings_customize_keys_summary">Назначить пользовательский символ долгому нажатию</string>
+
+    <!-- Layout Mapper -->
+    <string name="layout_mapper_title">Настройка Клавиш</string>
+    <string name="layout_mapper_instructions">Нажмите на клавишу, чтобы назначить пользовательский символ. Долгое нажатие этой клавиши на клавиатуре вставит ваш символ.</string>
+    <string name="layout_mapper_edit_key">Редактировать клавишу: %1$s</string>
+    <string name="layout_mapper_symbol_hint">Пользовательский символ</string>
+    <string name="layout_mapper_save">Сохранить</string>
+    <string name="layout_mapper_remove">Удалить</string>
+    <string name="layout_mapper_reset_all">Сбросить Все</string>
+    <string name="layout_mapper_reset_title">Сбросить все отображения?</string>
+    <string name="layout_mapper_reset_message">Это удалит все пользовательские отображения клавиш. Это нельзя отменить.</string>
+    <string name="layout_mapper_reset_confirm">Сбросить</string>
+    <string name="layout_mapper_saved">Отображение сохранено</string>
+    <string name="layout_mapper_removed">Отображение удалено</string>
+    <string name="layout_mapper_cleared">Все отображения удалены</string>
+    <string name="layout_mapper_save_failed">Ошибка при сохранении отображения</string>
+    <string name="layout_mapper_remove_failed">Ошибка при удалении отображения</string>
+    <string name="layout_mapper_clear_failed">Ошибка при удалении отображений</string>
 
     <!-- Layout & Input Settings -->
     <string name="layout_settings_alternative_layout">Раскладка Клавиатуры</string>
