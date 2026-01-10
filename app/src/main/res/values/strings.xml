@@ -128,6 +128,26 @@
     <string name="alternative_layout_dvorak">Dvorak</string>
     <string name="alternative_layout_colemak">Colemak</string>
     <string name="alternative_layout_workman">Workman</string>
+    <string name="layout_settings_customize_keys">Customize Keys</string>
+    <string name="layout_settings_customize_keys_summary">Assign custom character to long-press</string>
+
+    <!-- Layout Mapper -->
+    <string name="layout_mapper_title">Customize Keys</string>
+    <string name="layout_mapper_instructions">Tap a key to assign a custom character. Long-pressing that key on the keyboard will insert your character.</string>
+    <string name="layout_mapper_edit_key">Edit key: %1$s</string>
+    <string name="layout_mapper_symbol_hint">Custom character</string>
+    <string name="layout_mapper_save">Save</string>
+    <string name="layout_mapper_remove">Remove</string>
+    <string name="layout_mapper_reset_all">Reset All</string>
+    <string name="layout_mapper_reset_title">Reset all mappings?</string>
+    <string name="layout_mapper_reset_message">This will remove all custom key mappings. This cannot be undone.</string>
+    <string name="layout_mapper_reset_confirm">Reset</string>
+    <string name="layout_mapper_saved">Mapping saved</string>
+    <string name="layout_mapper_removed">Mapping removed</string>
+    <string name="layout_mapper_cleared">All mappings cleared</string>
+    <string name="layout_mapper_save_failed">Failed to save mapping</string>
+    <string name="layout_mapper_remove_failed">Failed to remove mapping</string>
+    <string name="layout_mapper_clear_failed">Failed to clear mappings</string>
 
     <!-- Privacy & Data Settings -->
     <string name="privacy_settings_clipboard_history">Clipboard History</string>

@@ -56,6 +56,27 @@
     <string name="typing_settings_swipe_on">Svep för att skriva aktiverat</string>
     <string name="typing_settings_swipe_off">Svep för att skriva inaktiverat</string>
     <string name="typing_settings_long_press_duration">Lång tryckningstid</string>
+    <string name="layout_settings_customize_keys">Anpassa tangenter</string>
+    <string name="layout_settings_customize_keys_summary">Tilldela anpassad karaktär till långt tryck</string>
+
+    <!-- Layout Mapper -->
+    <string name="layout_mapper_title">Anpassa tangenter</string>
+    <string name="layout_mapper_instructions">Tryck på en tangent för att tilldela en anpassad karaktär. Om du trycker länge på denna tangent på tangentbordet infogas din karaktär.</string>
+    <string name="layout_mapper_edit_key">Redigera tangent: %1$s</string>
+    <string name="layout_mapper_symbol_hint">Anpassad karaktär</string>
+    <string name="layout_mapper_save">Spara</string>
+    <string name="layout_mapper_remove">Ta bort</string>
+    <string name="layout_mapper_reset_all">Återställ alla</string>
+    <string name="layout_mapper_reset_title">Återställa alla mappningar?</string>
+    <string name="layout_mapper_reset_message">Det här tar bort alla anpassade tangentmappningar. Det kan inte ångras.</string>
+    <string name="layout_mapper_reset_confirm">Återställ</string>
+    <string name="layout_mapper_saved">Mappning sparad</string>
+    <string name="layout_mapper_removed">Mappning borttagen</string>
+    <string name="layout_mapper_cleared">Alla mappningar rensade</string>
+    <string name="layout_mapper_save_failed">Misslyckades att spara mappning</string>
+    <string name="layout_mapper_remove_failed">Misslyckades att ta bort mappning</string>
+    <string name="layout_mapper_clear_failed">Misslyckades att rensa mappningar</string>
+
     <string name="layout_settings_alternative_layout">Tangentbordslayout</string>
     <string name="layout_settings_show_number_row">Visa nummerrad</string>
     <string name="layout_settings_number_row_on">Nummerrad visas</string>

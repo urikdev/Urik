@@ -1,7 +1,7 @@
 # Privacy Policy
 
 **Effective Date:** October 18, 2025
-**Last Updated:** January 7, 2026
+**Last Updated:** January 9, 2026
 
 ## Introduction
 
@@ -136,7 +136,34 @@ For privacy inquiries, contact us at the email above.
 
 **Purpose:** To remember your keyboard customization choices.
 
-### 5. Error Logs (Local Only)
+### 5. Custom Key Mappings (Encrypted)
+
+**What:** Your custom symbol assignments for long-press actions on keyboard keys.
+
+**Purpose:** To provide personalized long-press character shortcuts.
+
+**Storage:** Encrypted local SQLCipher database on your device using hardware-backed encryption (Android Keystore).
+
+**Details Stored:**
+- Base key identifier (e.g., "a", "b")
+- Custom symbol you assigned
+- Timestamp when created
+
+**What We Don't Store:**
+- How often you use each mapping
+- Which apps you use the mapping in
+- Context or surrounding text
+
+**Encryption:** Same AES-256 encryption as learned words. The encryption key is stored in the Android Keystore and protected by your device lock screen.
+
+**User Control:**
+- **Edit mappings:** Settings → Layout & Input → Customize Keys
+- **Remove individual mappings:** Tap key → Remove
+- **Reset all mappings:** Settings → Layout & Input → Customize Keys → Reset All
+- **Clear all data:** Settings → Privacy & Data → Clear All Data
+- Uninstall app: Automatically deletes all mappings
+
+### 6. Error Logs (Local Only)
 
 **What:** Technical error information when the keyboard encounters critical failures.
 
@@ -157,7 +184,7 @@ For privacy inquiries, contact us at the email above.
 
 **Sharing:** Error logs are never transmitted automatically. You can manually export and share them via the settings menu if you choose to report a bug.
 
-### 6. Temporary In-Memory Data
+### 7. Temporary In-Memory Data
 
 **What:** Recent words and processing data held briefly in RAM for performance.
 
@@ -181,6 +208,7 @@ All data processing occurs locally on your device:
 - **Learned Words:** Generate personalized suggestions and autocorrect
 - **Clipboard History:** Quick access to recently copied text for re-use
 - **Recent Emoji Selections:** Display frequently used emojis first in emoji picker
+- **Custom Key Mappings:** Insert your assigned symbols on long-press
 - **Settings:** Apply your keyboard preferences
 - **Error Logs:** Debug issues (only if you share them)
 - **Temporary Caches:** Improve typing performance and responsiveness
@@ -243,6 +271,14 @@ The keyboard automatically detects password fields, credit card inputs, email ad
 ### Settings
 - **Retention:** Until you reset to defaults or uninstall the app
 
+### Custom Key Mappings
+- **Retention:** Indefinite, until you manually reset or uninstall the app
+- **Deletion Options:**
+    - Remove individual mappings: Settings → Layout & Input → Customize Keys → tap key → Remove
+    - Reset all mappings: Settings → Layout & Input → Customize Keys → Reset All
+    - Clear all data: Settings → Privacy & Data → Clear All Data
+    - Uninstall app: Automatically deletes all data
+
 ### Error Logs
 - **Retention:** Maximum 100 entries or 500KB, automatically rotated
 - **Export Only:** Settings → Privacy & Data → Export Error Log
@@ -254,6 +290,7 @@ The keyboard automatically detects password fields, credit card inputs, email ad
 When you uninstall Urik, Android automatically deletes:
 - All learned words (encrypted database)
 - All clipboard history (encrypted database)
+- All custom key mappings (encrypted database)
 - All recent emoji selections
 - All settings
 - All error logs
@@ -268,15 +305,17 @@ You have the right to:
 
 1. **Access Your Data**
     - View clipboard history: Long-press symbols key on keyboard
+    - View custom key mappings: Settings → Layout & Input → Customize Keys
     - View error logs: Settings → Privacy & Data → Export Error Logs
-    - Your learned words and clipboard history are stored locally on your device in an encrypted database
+    - Your learned words, clipboard history, and custom key mappings are stored locally on your device in an encrypted database
 
 2. **Delete Your Data**
     - Clear specific learned words: Long-press suggestions to remove
     - Clear specific clipboard items: Long-press symbols key → tap × button
     - Clear all clipboard unpinned items: Long-press symbols key → Recent tab → Delete All
+    - Reset custom key mappings: Settings → Layout & Input → Customize Keys → Reset All
     - Clear all learned words: Settings → Privacy & Data → Clear Learned Words
-    - Clear all data (includes clipboard): Settings → Privacy & Data → Clear All Data
+    - Clear all data (includes clipboard and mappings): Settings → Privacy & Data → Clear All Data
     - Uninstall the app to delete everything
 
 3. **Rectify Your Data**

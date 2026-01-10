@@ -128,6 +128,9 @@ class UrikInputMethodService :
     @Inject
     lateinit var recentEmojiProvider: com.urik.keyboard.service.RecentEmojiProvider
 
+    @Inject
+    lateinit var customKeyMappingService: com.urik.keyboard.service.CustomKeyMappingService
+
     private lateinit var viewModel: KeyboardViewModel
     private lateinit var layoutManager: KeyboardLayoutManager
     private lateinit var lifecycleRegistry: LifecycleRegistry
@@ -617,6 +620,7 @@ class UrikInputMethodService :
                     onSymbolsLongPress = { handleClipboardButtonClick() },
                     onLanguageSwitch = { languageCode -> handleLanguageSwitch(languageCode) },
                     characterVariationService = characterVariationService,
+                    customKeyMappingService = customKeyMappingService,
                     languageManager = languageManager,
                     themeManager = themeManager,
                     cacheMemoryManager = cacheMemoryManager,
@@ -637,6 +641,8 @@ class UrikInputMethodService :
      */
     private suspend fun initializeServices() {
         try {
+            customKeyMappingService.initialize()
+
             val result = languageManager.initialize()
             if (result.isFailure) {
                 ErrorLogger.logException(
@@ -1090,6 +1096,15 @@ class UrikInputMethodService :
             },
         )
 
+        observerJobs.add(
+            serviceScope.launch {
+                customKeyMappingService.mappings.collect { mappings ->
+                    layoutManager.updateCustomKeyMappings(mappings)
+                    updateSwipeKeyboard()
+                }
+            },
+        )
+
         observeSettings()
     }
 
@@ -1438,12 +1453,13 @@ class UrikInputMethodService :
                         confirmAndLearnWord()
                         currentInputConnection?.commitText(char, 1)
 
-                        val singleChar = char.single()
-
-                        if (isSentenceEndingPunctuation(singleChar) && !isSecureField) {
-                            viewModel.disableCapsLockAfterPunctuation()
-                            val textBefore = safeGetTextBeforeCursor(50)
-                            viewModel.checkAndApplyAutoCapitalization(textBefore, currentSettings.autoCapitalizationEnabled)
+                        if (char.length == 1) {
+                            val singleChar = char.single()
+                            if (isSentenceEndingPunctuation(singleChar) && !isSecureField) {
+                                viewModel.disableCapsLockAfterPunctuation()
+                                val textBefore = safeGetTextBeforeCursor(50)
+                                viewModel.checkAndApplyAutoCapitalization(textBefore, currentSettings.autoCapitalizationEnabled)
+                            }
                         }
                     } finally {
                         currentInputConnection?.endBatchEdit()
@@ -1516,26 +1532,18 @@ class UrikInputMethodService :
                     coordinateWordCompletion()
                     currentInputConnection?.commitText(char, 1)
 
-                    val singleChar = char.single()
-
-                    if (isSentenceEndingPunctuation(singleChar) && !isSecureField) {
-                        viewModel.disableCapsLockAfterPunctuation()
-                        val textBefore =
-                            safeGetTextBeforeCursor(50)
-                        viewModel.checkAndApplyAutoCapitalization(textBefore, currentSettings.autoCapitalizationEnabled)
+                    if (char.length == 1) {
+                        val singleChar = char.single()
+                        if (isSentenceEndingPunctuation(singleChar) && !isSecureField) {
+                            viewModel.disableCapsLockAfterPunctuation()
+                            val textBefore = safeGetTextBeforeCursor(50)
+                            viewModel.checkAndApplyAutoCapitalization(textBefore, currentSettings.autoCapitalizationEnabled)
+                        }
                     }
                 } finally {
                     currentInputConnection?.endBatchEdit()
                 }
             } catch (_: Exception) {
-                currentInputConnection?.beginBatchEdit()
-                try {
-                    autoCapitalizePronounI()
-                    coordinateWordCompletion()
-                    currentInputConnection?.commitText(char, 1)
-                } finally {
-                    currentInputConnection?.endBatchEdit()
-                }
             }
         }
     }

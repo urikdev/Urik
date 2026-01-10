@@ -41,6 +41,7 @@ Privacy-first keyboard for Android with on-device processing and encrypted stora
 - Material You dynamic theming (Android 12+)
 
 **Customization**
+- Custom long-press symbols (assign your own characters to any key)
 - Multiple themes (light, dark, custom color schemes)
 - Configurable key sizes, haptic feedback, typing behavior
 - Accessibility features (WCAG AA contrast, TalkBack support)
