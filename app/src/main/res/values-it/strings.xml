@@ -133,7 +133,7 @@
     <string name="layout_mapper_cleared">Tutti i mapping cancellati</string>
     <string name="layout_mapper_save_failed">Errore nel salvataggio del mapping</string>
     <string name="layout_mapper_remove_failed">Errore nella rimozione del mapping</string>
-    <string name="layout_mapper_clear_failed">Errore nell'eliminazione dei mapping</string>
+    <string name="layout_mapper_clear_failed">Errore nell\'eliminazione dei mapping</string>
 
     <!-- Layout & Input Settings -->
     <string name="layout_settings_alternative_layout">Layout tastiera</string>
