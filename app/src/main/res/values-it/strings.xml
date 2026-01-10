@@ -114,6 +114,26 @@
     <string name="long_press_punctuation_spacebar">Barra spaziatrice</string>
     <string name="long_press_punctuation_period">Tasto punto</string>
     <string name="typing_settings_long_press_duration">Durata pressione lunga</string>
+    <string name="layout_settings_customize_keys">Personalizza tasti</string>
+    <string name="layout_settings_customize_keys_summary">Assegna carattere personalizzato a pressione prolungata</string>
+
+    <!-- Layout Mapper -->
+    <string name="layout_mapper_title">Personalizza tasti</string>
+    <string name="layout_mapper_instructions">Tocca un tasto per assegnare un carattere personalizzato. La pressione prolungata su quel tasto sulla tastiera inserirà il tuo carattere.</string>
+    <string name="layout_mapper_edit_key">Modifica tasto: %1$s</string>
+    <string name="layout_mapper_symbol_hint">Carattere personalizzato</string>
+    <string name="layout_mapper_save">Salva</string>
+    <string name="layout_mapper_remove">Rimuovi</string>
+    <string name="layout_mapper_reset_all">Ripristina tutto</string>
+    <string name="layout_mapper_reset_title">Ripristinare tutti i mapping?</string>
+    <string name="layout_mapper_reset_message">Questo rimuoverà tutti i mapping dei tasti personalizzati. Non è possibile annullare.</string>
+    <string name="layout_mapper_reset_confirm">Ripristina</string>
+    <string name="layout_mapper_saved">Mapping salvato</string>
+    <string name="layout_mapper_removed">Mapping rimosso</string>
+    <string name="layout_mapper_cleared">Tutti i mapping cancellati</string>
+    <string name="layout_mapper_save_failed">Errore nel salvataggio del mapping</string>
+    <string name="layout_mapper_remove_failed">Errore nella rimozione del mapping</string>
+    <string name="layout_mapper_clear_failed">Errore nell\'eliminazione dei mapping</string>
 
     <!-- Layout & Input Settings -->
     <string name="layout_settings_alternative_layout">Layout tastiera</string>

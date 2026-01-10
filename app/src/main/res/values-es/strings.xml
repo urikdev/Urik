@@ -111,6 +111,26 @@
     <string name="alternative_layout_dvorak">Dvorak</string>
     <string name="alternative_layout_colemak">Colemak</string>
     <string name="alternative_layout_workman">Workman</string>
+    <string name="layout_settings_customize_keys">Personalizar teclas</string>
+    <string name="layout_settings_customize_keys_summary">Asignar carácter personalizado a pulsación larga</string>
+
+    <!-- Layout Mapper -->
+    <string name="layout_mapper_title">Personalizar teclas</string>
+    <string name="layout_mapper_instructions">Toca una tecla para asignar un carácter personalizado. Si presionas esa tecla en el teclado, se insertará tu carácter.</string>
+    <string name="layout_mapper_edit_key">Editar tecla: %1$s</string>
+    <string name="layout_mapper_symbol_hint">Carácter personalizado</string>
+    <string name="layout_mapper_save">Guardar</string>
+    <string name="layout_mapper_remove">Eliminar</string>
+    <string name="layout_mapper_reset_all">Restablecer todo</string>
+    <string name="layout_mapper_reset_title">¿Restablecer todos los asignaciones?</string>
+    <string name="layout_mapper_reset_message">Esto eliminará todos los asignaciones de teclas personalizadas. No se puede deshacer.</string>
+    <string name="layout_mapper_reset_confirm">Restablecer</string>
+    <string name="layout_mapper_saved">Asignación guardada</string>
+    <string name="layout_mapper_removed">Asignación eliminada</string>
+    <string name="layout_mapper_cleared">Todos los asignaciones borrados</string>
+    <string name="layout_mapper_save_failed">Error al guardar la asignación</string>
+    <string name="layout_mapper_remove_failed">Error al eliminar la asignación</string>
+    <string name="layout_mapper_clear_failed">Error al borrar los asignaciones</string>
 
     <!-- Privacy & Data Settings -->
     <string name="privacy_settings_clipboard_history">Historial del portapapeles</string>

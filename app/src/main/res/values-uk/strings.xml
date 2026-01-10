@@ -101,6 +101,26 @@
     <string name="typing_settings_swipe_on">Безперервний Ввід увімкнено</string>
     <string name="typing_settings_swipe_off">Безперервний Ввід вимкнено</string>
     <string name="typing_settings_long_press_duration">Тривалість Довгого Натискання</string>
+    <string name="layout_settings_customize_keys">Настройка Клавіш</string>
+    <string name="layout_settings_customize_keys_summary">Назначити власний символ довгому натисканню</string>
+
+    <!-- Layout Mapper -->
+    <string name="layout_mapper_title">Настройка Клавіш</string>
+    <string name="layout_mapper_instructions">Натисніть на клавішу, щоб призначити власний символ. Довге натискання цієї клавіші на клавіатурі вставить ваш символ.</string>
+    <string name="layout_mapper_edit_key">Редагувати клавішу: %1$s</string>
+    <string name="layout_mapper_symbol_hint">Власний символ</string>
+    <string name="layout_mapper_save">Зберегти</string>
+    <string name="layout_mapper_remove">Видалити</string>
+    <string name="layout_mapper_reset_all">Скинути Все</string>
+    <string name="layout_mapper_reset_title">Скинути всі відображення?</string>
+    <string name="layout_mapper_reset_message">Це видалить всі власні відображення клавіш. Це неможливо скасувати.</string>
+    <string name="layout_mapper_reset_confirm">Скинути</string>
+    <string name="layout_mapper_saved">Відображення збережено</string>
+    <string name="layout_mapper_removed">Відображення видалено</string>
+    <string name="layout_mapper_cleared">Всі відображення видалені</string>
+    <string name="layout_mapper_save_failed">Помилка при збереженні відображення</string>
+    <string name="layout_mapper_remove_failed">Помилка при видаленні відображення</string>
+    <string name="layout_mapper_clear_failed">Помилка при видаленні відображень</string>
 
     <!-- Layout & Input Settings -->
     <string name="layout_settings_alternative_layout">Розкладка Клавіатури</string>

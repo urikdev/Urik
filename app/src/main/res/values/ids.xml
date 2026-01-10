@@ -8,6 +8,8 @@
     <item name="oss_licenses_text" type="id" />
     <item name="theme_picker_toolbar" type="id" />
     <item name="theme_picker_recycler" type="id" />
+    <item name="layout_mapper_toolbar" type="id" />
+    <item name="layout_mapper_recycler" type="id" />
     <item name="key_data" type="id" />
     <item name="key_type" type="id" />
     <item name="suggestion_text" type="id" />

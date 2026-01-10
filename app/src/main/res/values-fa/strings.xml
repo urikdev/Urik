@@ -113,6 +113,26 @@
     <string name="long_press_punctuation_spacebar">نوار فاصله</string>
     <string name="long_press_punctuation_period">کلید نقطه</string>
     <string name="typing_settings_long_press_duration">مدت زمان نگه داشتن طولانی</string>
+    <string name="layout_settings_customize_keys">سفارشی‌سازی کلیدها</string>
+    <string name="layout_settings_customize_keys_summary">اختصاص شخصی برای فشار طولانی</string>
+
+    <!-- Layout Mapper -->
+    <string name="layout_mapper_title">سفارشی‌سازی کلیدها</string>
+    <string name="layout_mapper_instructions">روی یک کلید ضربه بزنید تا یک کاراکتر شخصی اختصاص دهید. فشار طولانی روی این کلید بر روی صفحه‌کلید کاراکتر شخصی شما را درج می‌کند.</string>
+    <string name="layout_mapper_edit_key">ویرایش کلید: %1$s</string>
+    <string name="layout_mapper_symbol_hint">کاراکتر شخصی</string>
+    <string name="layout_mapper_save">ذخیره</string>
+    <string name="layout_mapper_remove">حذف</string>
+    <string name="layout_mapper_reset_all">بازنشانی همه</string>
+    <string name="layout_mapper_reset_title">آیا همه‌ی ترسیم‌های کلید را بازنشانی کند؟</string>
+    <string name="layout_mapper_reset_message">این تمام ترسیم‌های کلید شخصی را حذف می‌کند. این قابل بازگشت نیست.</string>
+    <string name="layout_mapper_reset_confirm">بازنشانی</string>
+    <string name="layout_mapper_saved">ترسیم ذخیره شد</string>
+    <string name="layout_mapper_removed">ترسیم حذف شد</string>
+    <string name="layout_mapper_cleared">تمام ترسیم‌ها پاک شدند</string>
+    <string name="layout_mapper_save_failed">خطا در ذخیره‌ی ترسیم</string>
+    <string name="layout_mapper_remove_failed">خطا در حذف‌ی ترسیم</string>
+    <string name="layout_mapper_clear_failed">خطا در پاک کردن ترسیم‌ها</string>
 
     <!-- Layout & Input Settings -->
     <string name="layout_settings_alternative_layout">چیدمان صفحه‌کلید</string>

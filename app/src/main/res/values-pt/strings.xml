@@ -100,6 +100,26 @@
     <string name="typing_settings_swipe_on">Digitação por gestos ativada</string>
     <string name="typing_settings_swipe_off">Deslizar para digitar desativado</string>
     <string name="typing_settings_long_press_duration">Duração do toque prolongado</string>
+    <string name="layout_settings_customize_keys">Personalizar Teclas</string>
+    <string name="layout_settings_customize_keys_summary">Atribuir caractere personalizado a toque prolongado</string>
+
+    <!-- Layout Mapper -->
+    <string name="layout_mapper_title">Personalizar Teclas</string>
+    <string name="layout_mapper_instructions">Toque uma tecla para atribuir um caractere personalizado. Tocar prolongadamente essa tecla no teclado inserirá seu caractere.</string>
+    <string name="layout_mapper_edit_key">Editar tecla: %1$s</string>
+    <string name="layout_mapper_symbol_hint">Caractere personalizado</string>
+    <string name="layout_mapper_save">Guardar</string>
+    <string name="layout_mapper_remove">Remover</string>
+    <string name="layout_mapper_reset_all">Repor Tudo</string>
+    <string name="layout_mapper_reset_title">Repor todos os mapeamentos?</string>
+    <string name="layout_mapper_reset_message">Isto removerá todos os mapeamentos de teclas personalizados. Isto não pode ser desfeito.</string>
+    <string name="layout_mapper_reset_confirm">Repor</string>
+    <string name="layout_mapper_saved">Mapeamento guardado</string>
+    <string name="layout_mapper_removed">Mapeamento removido</string>
+    <string name="layout_mapper_cleared">Todos os mapeamentos apagados</string>
+    <string name="layout_mapper_save_failed">Erro ao guardar mapeamento</string>
+    <string name="layout_mapper_remove_failed">Erro ao remover mapeamento</string>
+    <string name="layout_mapper_clear_failed">Erro ao apagar mapeamentos</string>
 
     <!-- Layout & Input Settings -->
     <string name="layout_settings_alternative_layout">Layout do teclado</string>

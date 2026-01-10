@@ -111,6 +111,26 @@
     <string name="alternative_layout_dvorak">Dvorak</string>
     <string name="alternative_layout_colemak">Colemak</string>
     <string name="alternative_layout_workman">Workman</string>
+    <string name="layout_settings_customize_keys">Přizpůsobit klávesy</string>
+    <string name="layout_settings_customize_keys_summary">Přiřadit vlastní znak dlouhému stisknutí</string>
+
+    <!-- Layout Mapper -->
+    <string name="layout_mapper_title">Přizpůsobit klávesy</string>
+    <string name="layout_mapper_instructions">Klikněte na klávesu, abyste přiřadili vlastní znak. Dlouhý stisk na tuto klávesu na klávesnici vloží váš znak.</string>
+    <string name="layout_mapper_edit_key">Upravit klávesu: %1$s</string>
+    <string name="layout_mapper_symbol_hint">Vlastní znak</string>
+    <string name="layout_mapper_save">Uložit</string>
+    <string name="layout_mapper_remove">Odstranit</string>
+    <string name="layout_mapper_reset_all">Obnovit vše</string>
+    <string name="layout_mapper_reset_title">Obnovit všechna mapování?</string>
+    <string name="layout_mapper_reset_message">Tím se odstraní všechna vlastní mapování kláves. Toto nelze vrátit zpět.</string>
+    <string name="layout_mapper_reset_confirm">Obnovit</string>
+    <string name="layout_mapper_saved">Mapování uloženo</string>
+    <string name="layout_mapper_removed">Mapování odstraněno</string>
+    <string name="layout_mapper_cleared">Všechna mapování vymazána</string>
+    <string name="layout_mapper_save_failed">Nepodařilo se uložit mapování</string>
+    <string name="layout_mapper_remove_failed">Nepodařilo se odstranit mapování</string>
+    <string name="layout_mapper_clear_failed">Nepodařilo se vymazat mapování</string>
 
     <!-- Privacy & Data Settings -->
     <string name="privacy_settings_clipboard_history">Historie schránky</string>

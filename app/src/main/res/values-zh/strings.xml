@@ -101,6 +101,26 @@
     <string name="long_press_punctuation_spacebar">空格键</string>
     <string name="long_press_punctuation_period">句号键</string>
     <string name="typing_settings_long_press_duration">长按时长</string>
+    <string name="layout_settings_customize_keys">自定义按键</string>
+    <string name="layout_settings_customize_keys_summary">为长按分配自定义字符</string>
+
+    <!-- Layout Mapper -->
+    <string name="layout_mapper_title">自定义按键</string>
+    <string name="layout_mapper_instructions">点击一个按键以分配自定义字符。长按键盘上的该按键将插入您的字符。</string>
+    <string name="layout_mapper_edit_key">编辑按键：%1$s</string>
+    <string name="layout_mapper_symbol_hint">自定义字符</string>
+    <string name="layout_mapper_save">保存</string>
+    <string name="layout_mapper_remove">删除</string>
+    <string name="layout_mapper_reset_all">重置全部</string>
+    <string name="layout_mapper_reset_title">重置所有映射？</string>
+    <string name="layout_mapper_reset_message">这将删除所有自定义按键映射。此操作无法撤销。</string>
+    <string name="layout_mapper_reset_confirm">重置</string>
+    <string name="layout_mapper_saved">映射已保存</string>
+    <string name="layout_mapper_removed">映射已删除</string>
+    <string name="layout_mapper_cleared">所有映射已清除</string>
+    <string name="layout_mapper_save_failed">保存映射失败</string>
+    <string name="layout_mapper_remove_failed">删除映射失败</string>
+    <string name="layout_mapper_clear_failed">清除映射失败</string>
 
     <!-- Layout & Input Settings -->
     <string name="layout_settings_alternative_layout">键盘布局</string>

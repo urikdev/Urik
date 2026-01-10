@@ -101,6 +101,26 @@
     <string name="typing_settings_swipe_on">Pisanie gestem włączone</string>
     <string name="typing_settings_swipe_off">Pisanie gestem wyłączone</string>
     <string name="typing_settings_long_press_duration">Czas trwania długiego naciśnięcia</string>
+    <string name="layout_settings_customize_keys">Dostosuj klawisze</string>
+    <string name="layout_settings_customize_keys_summary">Przypisz niestandardowy znak do długiego naciśnięcia</string>
+
+    <!-- Layout Mapper -->
+    <string name="layout_mapper_title">Dostosuj klawisze</string>
+    <string name="layout_mapper_instructions">Stuknij klawisz, aby przypisać niestandardowy znak. Długie naciśnięcie tego klawisza na klawiaturze spowoduje wstawienie Twojego znaku.</string>
+    <string name="layout_mapper_edit_key">Edytuj klawisz: %1$s</string>
+    <string name="layout_mapper_symbol_hint">Niestandardowy znak</string>
+    <string name="layout_mapper_save">Zapisz</string>
+    <string name="layout_mapper_remove">Usuń</string>
+    <string name="layout_mapper_reset_all">Zresetuj wszystko</string>
+    <string name="layout_mapper_reset_title">Zresetować wszystkie mapowania?</string>
+    <string name="layout_mapper_reset_message">To usunie wszystkie niestandardowe mapowania klawiszy. Nie można tego cofnąć.</string>
+    <string name="layout_mapper_reset_confirm">Zresetuj</string>
+    <string name="layout_mapper_saved">Mapowanie zapisane</string>
+    <string name="layout_mapper_removed">Mapowanie usunięte</string>
+    <string name="layout_mapper_cleared">Wszystkie mapowania usunięte</string>
+    <string name="layout_mapper_save_failed">Błąd przy zapisywaniu mapowania</string>
+    <string name="layout_mapper_remove_failed">Błąd przy usuwaniu mapowania</string>
+    <string name="layout_mapper_clear_failed">Błąd przy usuwaniu mapowań</string>
 
     <!-- Layout & Input Settings -->
     <string name="layout_settings_alternative_layout">Układ klawiatury</string>

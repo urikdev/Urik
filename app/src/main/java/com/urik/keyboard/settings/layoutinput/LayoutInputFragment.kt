@@ -1,5 +1,6 @@
 package com.urik.keyboard.settings.layoutinput
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,12 +11,14 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.preference.ListPreference
+import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreferenceCompat
 import com.urik.keyboard.R
 import com.urik.keyboard.settings.AlternativeKeyboardLayout
 import com.urik.keyboard.settings.SettingsEventHandler
 import com.urik.keyboard.settings.SpaceBarSize
+import com.urik.keyboard.settings.layoutmapper.LayoutMapperActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -32,6 +35,7 @@ class LayoutInputFragment : PreferenceFragmentCompat() {
     private lateinit var alternativeLayoutPref: ListPreference
     private lateinit var numberRowPref: SwitchPreferenceCompat
     private lateinit var spaceBarPref: ListPreference
+    private lateinit var customizeKeysPref: Preference
     private var testField: EditText? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -92,6 +96,20 @@ class LayoutInputFragment : PreferenceFragmentCompat() {
                 summaryProvider = ListPreference.SimpleSummaryProvider.getInstance()
             }
         screen.addPreference(spaceBarPref)
+
+        customizeKeysPref =
+            Preference(context).apply {
+                key = "customize_keys"
+                isPersistent = false
+                title = resources.getString(R.string.layout_settings_customize_keys)
+                summary = resources.getString(R.string.layout_settings_customize_keys_summary)
+                setOnPreferenceClickListener {
+                    val intent = Intent(requireContext(), LayoutMapperActivity::class.java)
+                    startActivity(intent)
+                    true
+                }
+            }
+        screen.addPreference(customizeKeysPref)
 
         preferenceScreen = screen
     }

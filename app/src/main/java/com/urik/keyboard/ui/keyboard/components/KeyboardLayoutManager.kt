@@ -27,6 +27,7 @@ import com.urik.keyboard.model.KeyboardKey
 import com.urik.keyboard.model.KeyboardLayout
 import com.urik.keyboard.model.KeyboardState
 import com.urik.keyboard.service.CharacterVariationService
+import com.urik.keyboard.service.CustomKeyMappingService
 import com.urik.keyboard.service.LanguageManager
 import com.urik.keyboard.settings.KeyLabelSize
 import com.urik.keyboard.settings.KeySize
@@ -60,12 +61,17 @@ class KeyboardLayoutManager(
     private val onSymbolsLongPress: () -> Unit,
     private val onLanguageSwitch: (String) -> Unit = {},
     private val characterVariationService: CharacterVariationService,
+    private val customKeyMappingService: CustomKeyMappingService,
     private val languageManager: LanguageManager,
     private val themeManager: ThemeManager,
     cacheMemoryManager: CacheMemoryManager,
 ) {
     private var clipboardEnabled = false
     private var activeLanguages: List<String> = emptyList()
+
+    @Volatile
+    private var customKeyMappings: Map<String, String> = emptyMap()
+    private val keyHintRenderer = KeyHintRenderer(context)
 
     companion object {
         private const val STANDARD_KEY_WEIGHT = 1f
@@ -110,6 +116,7 @@ class KeyboardLayoutManager(
     private val activeButtons = mutableSetOf<Button>()
     private val buttonPendingCallbacks = ConcurrentHashMap<Button, PendingCallbacks>()
     private val symbolsLongPressFired = ConcurrentHashMap.newKeySet<Button>()
+    private val customMappingLongPressFired = ConcurrentHashMap.newKeySet<Button>()
 
     private val cachedTextSizes = mutableMapOf<Int, Float>()
     private val cachedDimensions = mutableMapOf<String, Int>()
@@ -162,22 +169,26 @@ class KeyboardLayoutManager(
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
                     val key = view.getTag(R.id.key_data) as? KeyboardKey.Character ?: return@OnTouchListener false
+                    val button = view as Button
+                    customMappingLongPressFired.remove(button)
                     val handler = Handler(Looper.getMainLooper())
                     val runnable =
                         Runnable {
                             performContextualHaptic(key)
-                            handleCharacterLongPress(key, view)
+                            handleCharacterLongPress(key, view, button)
                         }
-                    buttonPendingCallbacks[view as Button] = PendingCallbacks(handler, runnable)
+                    buttonPendingCallbacks[button] = PendingCallbacks(handler, runnable)
                     handler.postDelayed(runnable, currentLongPressDuration.durationMs)
                     false
                 }
 
                 MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                    buttonPendingCallbacks.remove(view as Button)?.let { pending ->
+                    val button = view as Button
+                    buttonPendingCallbacks.remove(button)?.let { pending ->
                         pending.handler.removeCallbacks(pending.runnable)
                     }
-                    false
+                    val consumed = customMappingLongPressFired.remove(button)
+                    consumed
                 }
 
                 else -> {
@@ -529,6 +540,10 @@ class KeyboardLayoutManager(
         activeLanguages = languages
     }
 
+    fun updateCustomKeyMappings(mappings: Map<String, String>) {
+        customKeyMappings = mappings
+    }
+
     private fun performContextualHaptic(key: KeyboardKey?) {
         if (!hapticEnabled || hapticAmplitude == 0) return
 
@@ -778,7 +793,25 @@ class KeyboardLayoutManager(
             val verticalPadding = cachedDimensions["verticalPadding"]!!
             setPadding(horizontalPadding, verticalPadding, horizontalPadding, verticalPadding)
 
-            background = getKeyBackground(key)
+            val keyBackground = getKeyBackground(key)
+            val supportsCustomMapping =
+                key is KeyboardKey.Character &&
+                    (key.type == KeyboardKey.KeyType.LETTER || key.type == KeyboardKey.KeyType.NUMBER)
+            background =
+                if (supportsCustomMapping) {
+                    val customSymbol = customKeyMappings[key.value.lowercase()]
+                    if (customSymbol != null) {
+                        keyHintRenderer.createKeyWithHint(
+                            keyBackground,
+                            customSymbol,
+                            themeManager.currentTheme.value.colors,
+                        )
+                    } else {
+                        keyBackground
+                    }
+                } else {
+                    keyBackground
+                }
             setTextColor(getKeyTextColor(key))
 
             isActivated = getKeyActivatedState(key, state)
@@ -859,11 +892,13 @@ class KeyboardLayoutManager(
                 }
             }
 
-            if (key is KeyboardKey.Character && key.type == KeyboardKey.KeyType.LETTER) {
-                setOnTouchListener(characterLongPressTouchListener)
-            }
-
-            if (key is KeyboardKey.Character && key.type == KeyboardKey.KeyType.SYMBOL) {
+            if (key is KeyboardKey.Character &&
+                (
+                    key.type == KeyboardKey.KeyType.LETTER ||
+                        key.type == KeyboardKey.KeyType.NUMBER ||
+                        key.type == KeyboardKey.KeyType.SYMBOL
+                )
+            ) {
                 setOnTouchListener(characterLongPressTouchListener)
             }
 
@@ -901,6 +936,7 @@ class KeyboardLayoutManager(
             pending.handler.removeCallbacks(pending.runnable)
         }
         symbolsLongPressFired.remove(button)
+        customMappingLongPressFired.remove(button)
 
         button.isPressed = false
         button.setOnClickListener(null)
@@ -1291,7 +1327,18 @@ class KeyboardLayoutManager(
     private fun handleCharacterLongPress(
         key: KeyboardKey.Character,
         view: View,
+        button: Button,
     ) {
+        val customSymbol = customKeyMappings[key.value.lowercase()]
+        if (customSymbol != null) {
+            customMappingLongPressFired.add(button)
+            view.isPressed = false
+            val customKey = KeyboardKey.Character(customSymbol, KeyboardKey.KeyType.SYMBOL)
+            performContextualHaptic(customKey)
+            onKeyClick(customKey)
+            return
+        }
+
         val currentLayoutLang = languageManager.currentLayoutLanguage.value
 
         backgroundScope.launch {
