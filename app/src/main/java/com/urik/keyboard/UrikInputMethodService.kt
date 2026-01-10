@@ -2327,6 +2327,30 @@ class UrikInputMethodService :
 
         try {
             isActivelyEditing = true
+
+            if (displayBuffer.isNotEmpty()) {
+                val currentText = safeGetTextBeforeCursor(displayBuffer.length + 10)
+                val expectedComposingText =
+                    if (currentText.length >= displayBuffer.length) {
+                        currentText.substring(maxOf(0, currentText.length - displayBuffer.length))
+                    } else {
+                        ""
+                    }
+
+                if (expectedComposingText == displayBuffer) {
+                    currentInputConnection?.beginBatchEdit()
+                    try {
+                        currentInputConnection?.setComposingText("", 1)
+                        coordinateStateClear()
+                    } finally {
+                        currentInputConnection?.endBatchEdit()
+                    }
+                    return
+                } else {
+                    coordinateStateClear()
+                }
+            }
+
             val textBeforeCursor = safeGetTextBeforeCursor(50)
             if (textBeforeCursor.isEmpty()) {
                 return
