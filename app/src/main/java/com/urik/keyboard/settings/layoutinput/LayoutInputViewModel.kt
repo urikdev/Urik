@@ -38,6 +38,7 @@ class LayoutInputViewModel
                         alternativeKeyboardLayout = settings.alternativeKeyboardLayout,
                         adaptiveKeyboardModesEnabled = settings.adaptiveKeyboardModesEnabled,
                         oneHandedModeEnabled = settings.oneHandedModeEnabled,
+                        showLanguageSwitchKey = settings.showLanguageSwitchKey,
                     )
                 }.stateIn(
                     scope = viewModelScope,
@@ -81,6 +82,12 @@ class LayoutInputViewModel
             }
         }
 
+        fun updateShowLanguageSwitchKey(enabled: Boolean) {
+            viewModelScope.launch {
+                settingsRepository.updateShowLanguageSwitchKey(enabled)
+            }
+        }
+
         private companion object {
             const val STOP_TIMEOUT_MILLIS = 5000L
         }
@@ -95,4 +102,5 @@ data class LayoutInputUiState(
     val alternativeKeyboardLayout: AlternativeKeyboardLayout = AlternativeKeyboardLayout.DEFAULT,
     val adaptiveKeyboardModesEnabled: Boolean = true,
     val oneHandedModeEnabled: Boolean = false,
+    val showLanguageSwitchKey: Boolean = false,
 )

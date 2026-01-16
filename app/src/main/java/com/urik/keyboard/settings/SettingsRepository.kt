@@ -73,6 +73,7 @@ class SettingsRepository
             val ADAPTIVE_KEYBOARD_MODES_ENABLED = booleanPreferencesKey("adaptive_keyboard_modes_enabled")
             val KEYBOARD_DISPLAY_MODE = stringPreferencesKey("keyboard_display_mode")
             val ONE_HANDED_MODE_ENABLED = booleanPreferencesKey("one_handed_mode_enabled")
+            val SHOW_LANGUAGE_SWITCH_KEY = booleanPreferencesKey("show_language_switch_key")
         }
 
         /**
@@ -224,6 +225,7 @@ class SettingsRepository
                                 }
                             },
                         oneHandedModeEnabled = preferences[PreferenceKeys.ONE_HANDED_MODE_ENABLED] ?: false,
+                        showLanguageSwitchKey = preferences[PreferenceKeys.SHOW_LANGUAGE_SWITCH_KEY] ?: false,
                     ).validated()
                 }.catch { e ->
                     ErrorLogger.logException(
@@ -595,6 +597,14 @@ class SettingsRepository
         suspend fun updateOneHandedModeEnabled(enabled: Boolean): Result<Unit> =
             try {
                 dataStore.edit { it[PreferenceKeys.ONE_HANDED_MODE_ENABLED] = enabled }
+                Result.success(Unit)
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+
+        suspend fun updateShowLanguageSwitchKey(enabled: Boolean): Result<Unit> =
+            try {
+                dataStore.edit { it[PreferenceKeys.SHOW_LANGUAGE_SWITCH_KEY] = enabled }
                 Result.success(Unit)
             } catch (e: Exception) {
                 Result.failure(e)

@@ -84,6 +84,7 @@
     <!-- Language Settings -->
     <string name="max_languages_reached">Maximaal 3 talen toegestaan</string>
     <string name="primary_layout_language">Huidige indeling</string>
+    <string name="select_active_language">Selecteer actieve taal</string>
 
     <!-- Sound & Feedback Settings -->
     <string name="feedback_settings_haptic_feedback">Haptische feedback</string>
@@ -148,6 +149,9 @@
     <string name="layout_settings_show_number_row">Cijferrij weergeven</string>
     <string name="layout_settings_number_row_on">Cijferrij weergegeven</string>
     <string name="layout_settings_number_row_off">Cijferrij verborgen</string>
+    <string name="layout_settings_show_language_switch_key">Toon taalwisseltoets</string>
+    <string name="layout_settings_language_switch_key_on">Ingeschakeld</string>
+    <string name="layout_settings_language_switch_key_off">Uitgeschakeld</string>
     <string name="layout_settings_space_bar_size">Spatiebalkgrootte</string>
     <string name="alternative_layout_default">Standaard (Taalindeling)</string>
     <string name="alternative_layout_dvorak">Dvorak</string>
@@ -226,6 +230,7 @@
     <string name="letters_mode_description">Schakel naar lettertoetsenbord</string>
     <string name="numbers_mode_description">Schakel naar cijfertoetsenbord</string>
     <string name="symbols_mode_description">Schakel naar symbooltoetsenbord</string>
+    <string name="language_switch_description">Toetsenbordtaal wisselen</string>
     <string name="ime_prediction_description">Voorspelling: %1$s</string>
 
     <!-- Action button accessibility descriptions -->

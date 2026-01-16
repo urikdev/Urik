@@ -82,6 +82,7 @@
     <string name="autocorrect_settings_learn_new_words_off">Запоминание отключено</string>
 
     <!-- Language Settings -->
+    <string name="select_active_language">Выберите активный язык</string>
 
     <!-- Sound & Feedback Settings -->
     <string name="primary_layout_language">Основная раскладка</string>
@@ -137,6 +138,9 @@
     <string name="layout_settings_show_number_row">Показывать Ряд Цифр</string>
     <string name="layout_settings_number_row_on">Ряд цифр показывается</string>
     <string name="layout_settings_number_row_off">Ряд цифр скрывается</string>
+    <string name="layout_settings_show_language_switch_key">Показывать клавишу смены языка</string>
+    <string name="layout_settings_language_switch_key_on">Включено</string>
+    <string name="layout_settings_language_switch_key_off">Выключено</string>
     <string name="layout_settings_space_bar_size">Размер Пробела</string>
     <string name="alternative_layout_default">По умолчанию (Языковая раскладка)</string>
     <string name="alternative_layout_dvorak">Dvorak</string>
@@ -212,6 +216,7 @@
     <string name="letters_mode_description">Переключиться на клавиатуру с буквами</string>
     <string name="numbers_mode_description">Переключиться на клавиатуру с цифрами</string>
     <string name="symbols_mode_description">Переключиться на клавиатуру с символами</string>
+    <string name="language_switch_description">Переключить язык клавиатуры</string>
     <string name="ime_prediction_description">Предложение: %1$s</string>
 
     <!-- Action button accessibility descriptions -->

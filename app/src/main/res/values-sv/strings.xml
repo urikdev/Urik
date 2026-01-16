@@ -21,6 +21,7 @@
     <string name="autocorrect_settings_description">Stavning och förslag</string>
     <string name="language_settings_title">Språkinställningar</string>
     <string name="language_settings_description">Välj dina tangentbordsspråk</string>
+    <string name="select_active_language">Välj aktivt språk</string>
     <string name="typing_settings_title">Inställningar för skrivbeteende</string>
     <string name="typing_settings_description">Interpunktion, haptisk feedback etc.</string>
     <string name="layout_settings_title">Layout och inmatning</string>
@@ -90,6 +91,9 @@
     <string name="layout_settings_show_number_row">Visa nummerrad</string>
     <string name="layout_settings_number_row_on">Nummerrad visas</string>
     <string name="layout_settings_number_row_off">Nummerrad dold</string>
+    <string name="layout_settings_show_language_switch_key">Visa språkbytesstangent</string>
+    <string name="layout_settings_language_switch_key_on">Aktiverad</string>
+    <string name="layout_settings_language_switch_key_off">Inaktiverad</string>
     <string name="layout_settings_space_bar_size">Storlek på mellanslagstangenten</string>
     <string name="alternative_layout_default">Standard (Språklayout)</string>
     <string name="alternative_layout_dvorak">Dvorak</string>
@@ -144,6 +148,7 @@
     <string name="letters_mode_description">Växla till bokstavstangentbord</string>
     <string name="numbers_mode_description">Växla till siffertangentbord</string>
     <string name="symbols_mode_description">Växla till symboltangentbord</string>
+    <string name="language_switch_description">Byt tangentbordsspråk</string>
     <string name="ime_prediction_description">Förutsägelse: %1$s</string>
     <string name="action_enter_description">Tryck enter</string>
     <string name="action_search_description">Söka</string>

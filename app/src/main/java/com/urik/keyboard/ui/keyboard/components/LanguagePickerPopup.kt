@@ -1,187 +1,135 @@
 package com.urik.keyboard.ui.keyboard.components
 
 import android.content.Context
-import android.graphics.Color
-import android.graphics.drawable.GradientDrawable
+import android.content.res.ColorStateList
 import android.view.Gravity
 import android.view.View
-import android.widget.Button
+import android.view.ViewGroup
+import android.view.WindowManager
+import android.widget.ArrayAdapter
+import android.widget.CheckedTextView
 import android.widget.LinearLayout
-import android.widget.PopupWindow
-import androidx.core.graphics.drawable.toDrawable
+import android.widget.ListView
+import android.widget.TextView
+import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.urik.keyboard.R
 import com.urik.keyboard.settings.KeyboardSettings
 import com.urik.keyboard.theme.ThemeManager
 
 class LanguagePickerPopup(
     private val context: Context,
     private val themeManager: ThemeManager,
-) : PopupWindow() {
-    private var onLanguageSelected: ((String) -> Unit)? = null
-
-    private val languageContainer: LinearLayout =
-        LinearLayout(context).apply {
-            orientation = LinearLayout.VERTICAL
-            gravity = Gravity.CENTER
-
-            val density = context.resources.displayMetrics.density
-            val paddingH = (8 * density).toInt()
-            val paddingV = (4 * density).toInt()
-            setPadding(paddingH, paddingV, paddingH, paddingV)
-
-            setBackgroundColor(themeManager.currentTheme.value.colors.keyBackgroundAction)
-            elevation = 8f * density
-        }
-
-    init {
-        contentView = languageContainer
-        isOutsideTouchable = true
-        isFocusable = false
-        setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
-        inputMethodMode = INPUT_METHOD_NOT_NEEDED
-
-        setOnDismissListener {
-            onLanguageSelected = null
-            languageContainer.removeAllViews()
-        }
-    }
+) {
+    private var dialog: BottomSheetDialog? = null
 
     fun setLanguages(
         languages: List<String>,
         currentLanguage: String,
+        anchorView: View,
         onSelected: (String) -> Unit,
     ) {
-        this.onLanguageSelected = onSelected
+        val displayNames = KeyboardSettings.getLanguageDisplayNames()
+        val languageLabels = languages.map { displayNames[it] ?: it }
+        val currentIndex = languages.indexOf(currentLanguage).takeIf { it >= 0 } ?: 0
 
-        languageContainer.removeAllViews()
-
-        languages.forEach { languageCode ->
-            addLanguageButton(languageCode, languageCode == currentLanguage)
-        }
-
-        val density = context.resources.displayMetrics.density
-        val buttonWidth = (120 * density).toInt()
-        val buttonHeight = (40 * density).toInt()
-        val totalHeight = (languages.size * buttonHeight) + ((languages.size - 1) * 4 * density).toInt() + (8 * density).toInt()
-
-        width = buttonWidth + (16 * density).toInt()
-        height = totalHeight
-    }
-
-    private fun addLanguageButton(
-        languageCode: String,
-        isCurrent: Boolean,
-    ) {
+        val theme = themeManager.currentTheme.value
         val density = context.resources.displayMetrics.density
 
-        val button =
-            Button(context).apply {
-                val displayName = KeyboardSettings.getLanguageDisplayNames()[languageCode] ?: languageCode
-                text = if (isCurrent) "✓ $displayName" else displayName
-
-                val buttonWidth = (120 * density).toInt()
-                val buttonHeight = (40 * density).toInt()
-                layoutParams =
-                    LinearLayout.LayoutParams(buttonWidth, buttonHeight).apply {
-                        val margin = (2 * density).toInt()
-                        setMargins(0, margin, 0, margin)
+        dialog =
+            BottomSheetDialog(context).apply {
+                val container =
+                    LinearLayout(context).apply {
+                        orientation = LinearLayout.VERTICAL
+                        setBackgroundColor(theme.colors.keyboardBackground)
+                        layoutParams =
+                            ViewGroup.LayoutParams(
+                                ViewGroup.LayoutParams.MATCH_PARENT,
+                                ViewGroup.LayoutParams.WRAP_CONTENT,
+                            )
                     }
 
-                textSize = 14f
-
-                val theme = themeManager.currentTheme.value
-                setTextColor(
-                    if (isCurrent) {
-                        theme.colors.keyTextAction
-                    } else {
-                        theme.colors.keyTextCharacter
-                    },
-                )
-
-                val backgroundColor =
-                    if (isCurrent) {
-                        theme.colors.keyBackgroundAction
-                    } else {
-                        theme.colors.keyBackgroundCharacter
-                    }
-
-                val cornerRadius = 8f * density
-                background =
-                    GradientDrawable().apply {
-                        setColor(backgroundColor)
-                        this.cornerRadius = cornerRadius
-                        setStroke(
-                            (1 * density).toInt(),
-                            theme.colors.keyBorder,
+                val titleView =
+                    TextView(context).apply {
+                        text = context.getString(R.string.select_active_language)
+                        textSize = 20f
+                        setTextColor(theme.colors.keyTextAction)
+                        gravity = Gravity.CENTER
+                        setPadding(
+                            (24 * density).toInt(),
+                            (20 * density).toInt(),
+                            (24 * density).toInt(),
+                            (16 * density).toInt(),
                         )
                     }
+                container.addView(titleView)
 
-                minHeight = 0
-                minimumHeight = 0
-                includeFontPadding = false
-                gravity = Gravity.CENTER
-                setPadding(0, 0, 0, 0)
+                val listView =
+                    ListView(context).apply {
+                        adapter =
+                            object : ArrayAdapter<String>(
+                                context,
+                                android.R.layout.select_dialog_singlechoice,
+                                languageLabels,
+                            ) {
+                                override fun getView(
+                                    position: Int,
+                                    convertView: View?,
+                                    parent: ViewGroup,
+                                ): View {
+                                    val view = super.getView(position, convertView, parent) as CheckedTextView
+                                    view.setTextColor(theme.colors.keyTextCharacter)
+                                    view.textSize = 16f
+                                    view.setPadding(
+                                        (24 * density).toInt(),
+                                        (16 * density).toInt(),
+                                        (24 * density).toInt(),
+                                        (16 * density).toInt(),
+                                    )
 
-                isClickable = true
-                isFocusable = true
+                                    view.checkMarkTintList = ColorStateList.valueOf(theme.colors.keyTextAction)
 
-                setOnClickListener {
-                    onLanguageSelected?.invoke(languageCode)
-                    dismiss()
+                                    return view
+                                }
+                            }
+                        choiceMode = ListView.CHOICE_MODE_SINGLE
+                        setItemChecked(currentIndex, true)
+                        divider = null
+                        setBackgroundColor(theme.colors.keyboardBackground)
+                        setOnItemClickListener { _, _, position, _ ->
+                            onSelected(languages[position])
+                            dismiss()
+                        }
+                        layoutParams =
+                            LinearLayout.LayoutParams(
+                                LinearLayout.LayoutParams.MATCH_PARENT,
+                                LinearLayout.LayoutParams.WRAP_CONTENT,
+                            )
+                    }
+                container.addView(listView)
+
+                setContentView(container)
+
+                window?.apply {
+                    setBackgroundDrawableResource(android.R.color.transparent)
+                    val lp = attributes
+                    lp.token = anchorView.applicationWindowToken
+                    lp.type = WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG
+                    attributes = lp
+                    addFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM)
                 }
-
-                contentDescription = displayName
             }
-
-        languageContainer.addView(button)
     }
 
     fun showAboveAnchor(anchorView: View) {
-        if (!anchorView.isAttachedToWindow || anchorView.windowToken == null) {
-            return
-        }
+        dialog?.show()
+    }
 
-        val density = context.resources.displayMetrics.density
-        val gap = (8 * density).toInt()
-
-        val displayMetrics = context.resources.displayMetrics
-        val screenWidth = displayMetrics.widthPixels
-        val screenHeight = displayMetrics.heightPixels
-
-        val anchorLocation = IntArray(2)
-        anchorView.getLocationOnScreen(anchorLocation)
-        val anchorX = anchorLocation[0]
-        val anchorY = anchorLocation[1]
-        val anchorWidth = anchorView.width
-        val anchorHeight = anchorView.height
-
-        val spaceBelow = screenHeight - (anchorY + anchorHeight)
-
-        val showAbove = anchorY >= (height + gap) || anchorY > spaceBelow
-
-        val verticalOffset =
-            if (showAbove) {
-                -(anchorHeight + height + gap)
-            } else {
-                gap
-            }
-
-        var horizontalOffset = (anchorWidth - width) / 2
-
-        val popupLeft = anchorX + horizontalOffset
-        val popupRight = popupLeft + width
-
-        if (popupLeft < 0) {
-            horizontalOffset -= popupLeft
-        } else if (popupRight > screenWidth) {
-            horizontalOffset -= (popupRight - screenWidth)
-        }
-
-        super.showAsDropDown(anchorView, horizontalOffset, verticalOffset)
+    fun dismiss() {
+        dialog?.dismiss()
+        dialog = null
     }
 
     fun cleanup() {
-        if (isShowing) {
-            dismiss()
-        }
+        dismiss()
     }
 }

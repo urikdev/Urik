@@ -82,6 +82,7 @@
     <string name="autocorrect_settings_learn_new_words_off">Aprendizagem desativada</string>
 
     <!-- Language Settings -->
+    <string name="select_active_language">Selecionar idioma ativo</string>
 
     <!-- Sound & Feedback Settings -->
     <string name="primary_layout_language">Layout atual</string>
@@ -135,6 +136,9 @@
     <string name="layout_settings_show_number_row">Mostrar linha de números</string>
     <string name="layout_settings_number_row_on">Linha de números ativada</string>
     <string name="layout_settings_number_row_off">Linha de números desativada</string>
+    <string name="layout_settings_show_language_switch_key">Mostrar tecla de mudança de idioma</string>
+    <string name="layout_settings_language_switch_key_on">Ativado</string>
+    <string name="layout_settings_language_switch_key_off">Desativado</string>
     <string name="layout_settings_space_bar_size">Tamanho da barra de espaço</string>
     <string name="alternative_layout_default">Padrão (Layout do idioma)</string>
     <string name="alternative_layout_dvorak">Dvorak</string>
@@ -209,6 +213,7 @@
     <string name="letters_mode_description">Mudar para o teclado de letras</string>
     <string name="numbers_mode_description">Mudar para o teclado numérico</string>
     <string name="symbols_mode_description">Mudar para o teclado de símbolos</string>
+    <string name="language_switch_description">Mudar idioma do teclado</string>
     <string name="ime_prediction_description">Previsão: %1$s</string>
 
     <!-- Action button accessibility descriptions -->

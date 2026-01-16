@@ -87,6 +87,7 @@ sealed class KeyboardKey {
         MODE_SWITCH_NUMBERS,
         MODE_SWITCH_SYMBOLS,
         CAPS_LOCK,
+        LANGUAGE_SWITCH,
     }
 }
 
