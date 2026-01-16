@@ -127,7 +127,7 @@
     <string name="layout_settings_adaptive_modes_on">Adapta-se automaticamente ao tipo de dispositivo e postura (tablets, dobráveis)</string>
     <string name="layout_settings_adaptive_modes_off">Sempre usar o layout padrão de largura total</string>
     <string name="layout_settings_one_handed_mode_enabled">Modo de uma mão</string>
-    <string name="layout_settings_one_handed_mode_on">O teclado encolhe para 85% de largura com controles de alternância na margem lateral</string>
+    <string name="layout_settings_one_handed_mode_on">Ativado</string>
     <string name="layout_settings_one_handed_mode_off">Teclado padrão de largura total</string>
     <string name="one_handed_mode_left">Ancorar teclado para a esquerda</string>
     <string name="one_handed_mode_right">Ancorar teclado para a direita</string>

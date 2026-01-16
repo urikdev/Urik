@@ -128,7 +128,7 @@
     <string name="layout_settings_adaptive_modes_on">Автоматично адаптується до типу пристрою та поставки (планшети, складні телефони)</string>
     <string name="layout_settings_adaptive_modes_off">Завжди використовувати стандартний макет на всю ширину</string>
     <string name="layout_settings_one_handed_mode_enabled">Однорукий режим</string>
-    <string name="layout_settings_one_handed_mode_on">Клавіатура зменшується до 85% ширини з перемикачами в бічному полі</string>
+    <string name="layout_settings_one_handed_mode_on">Увімкнено</string>
     <string name="layout_settings_one_handed_mode_off">Стандартна клавіатура на всю ширину</string>
     <string name="one_handed_mode_left">Прив\'язати клавіатуру до лівої сторони</string>
     <string name="one_handed_mode_right">Прив\'язати клавіатуру до правої сторони</string>

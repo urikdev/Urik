@@ -107,7 +107,7 @@
     <string name="layout_settings_adaptive_modes_on">Passt sich automatisch an den Gerätetyp und die Haltung an (Tablets, faltbare Geräte)</string>
     <string name="layout_settings_adaptive_modes_off">Immer das standardmäßige Vollbildlayout verwenden</string>
     <string name="layout_settings_one_handed_mode_enabled">Einhändiger Modus</string>
-    <string name="layout_settings_one_handed_mode_on">Tastatur schrumpft auf 85% Breite mit Umschaltern am seitlichen Rand</string>
+    <string name="layout_settings_one_handed_mode_on">Aktiviert</string>
     <string name="layout_settings_one_handed_mode_off">Standard-Vollbild-Tastatur</string>
     <string name="one_handed_mode_left">Tastatur nach links verankern</string>
     <string name="one_handed_mode_right">Tastatur nach rechts verankern</string>

@@ -107,7 +107,7 @@
     <string name="layout_settings_adaptive_modes_on">Se adapta automáticamente al tipo de dispositivo y postura (tabletas, plegables)</string>
     <string name="layout_settings_adaptive_modes_off">Usar siempre el diseño estándar de ancho completo</string>
     <string name="layout_settings_one_handed_mode_enabled">Modo de una mano</string>
-    <string name="layout_settings_one_handed_mode_on">El teclado se reduce al 85% de ancho con controles de alternancia en el margen lateral</string>
+    <string name="layout_settings_one_handed_mode_on">Habilitado</string>
     <string name="layout_settings_one_handed_mode_off">Teclado estándar de ancho completo</string>
     <string name="one_handed_mode_left">Anclar teclado a la izquierda</string>
     <string name="one_handed_mode_right">Anclar teclado a la derecha</string>

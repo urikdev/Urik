@@ -129,7 +129,7 @@
     <string name="layout_settings_adaptive_modes_on">Автоматически адаптируется к типу устройства и положению (планшеты, складные телефоны)</string>
     <string name="layout_settings_adaptive_modes_off">Всегда использовать стандартный макет на всю ширину</string>
     <string name="layout_settings_one_handed_mode_enabled">Одноручный режим</string>
-    <string name="layout_settings_one_handed_mode_on">Клавиатура сжимается до 85% ширины с переключателями в боковом поле</string>
+    <string name="layout_settings_one_handed_mode_on">Включено</string>
     <string name="layout_settings_one_handed_mode_off">Стандартная клавиатура на всю ширину</string>
     <string name="one_handed_mode_left">Привязать клавиатуру к левой стороне</string>
     <string name="one_handed_mode_right">Привязать клавиатуру к правой стороне</string>

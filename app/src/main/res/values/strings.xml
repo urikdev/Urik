@@ -121,7 +121,7 @@
     <string name="layout_settings_adaptive_modes_on">Automatically adapts to device type and posture (tablets, foldables)</string>
     <string name="layout_settings_adaptive_modes_off">Always use standard full-width layout</string>
     <string name="layout_settings_one_handed_mode_enabled">One-Handed Mode</string>
-    <string name="layout_settings_one_handed_mode_on">Keyboard shrinks to 85% width with toggle controls in the side margin</string>
+    <string name="layout_settings_one_handed_mode_on">Enabled</string>
     <string name="layout_settings_one_handed_mode_off">Standard full-width keyboard</string>
     <string name="one_handed_mode_left">Anchor keyboard to left</string>
     <string name="one_handed_mode_right">Anchor keyboard to right</string>

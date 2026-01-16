@@ -107,7 +107,7 @@
     <string name="layout_settings_adaptive_modes_on">Automaticky se přizpůsobuje typu zařízení a poloze (tablety, skládací telefony)</string>
     <string name="layout_settings_adaptive_modes_off">Vždy používat standardní rozložení na celou šířku</string>
     <string name="layout_settings_one_handed_mode_enabled">Režim jedné ruky</string>
-    <string name="layout_settings_one_handed_mode_on">Klávesnice se zmenší na 85% šířky s ovládacími prvky na postranním okraji</string>
+    <string name="layout_settings_one_handed_mode_on">Povoleno</string>
     <string name="layout_settings_one_handed_mode_off">Standardní klávesnice na celou šířku</string>
     <string name="one_handed_mode_left">Zakotvi klávesnici vlevo</string>
     <string name="one_handed_mode_right">Zakotvi klávesnici vpravo</string>
