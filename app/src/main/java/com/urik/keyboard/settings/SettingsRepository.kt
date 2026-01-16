@@ -11,6 +11,7 @@ import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.room.withTransaction
 import com.urik.keyboard.data.database.KeyboardDatabase
+import com.urik.keyboard.model.KeyboardDisplayMode
 import com.urik.keyboard.utils.CacheMemoryManager
 import com.urik.keyboard.utils.ErrorLogger
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -69,6 +70,9 @@ class SettingsRepository
             val CURSOR_SPEED = stringPreferencesKey("cursor_speed")
             val FAVORITE_THEMES = stringSetPreferencesKey("favorite_themes")
             val ALTERNATIVE_KEYBOARD_LAYOUT = stringPreferencesKey("alternative_keyboard_layout")
+            val ADAPTIVE_KEYBOARD_MODES_ENABLED = booleanPreferencesKey("adaptive_keyboard_modes_enabled")
+            val KEYBOARD_DISPLAY_MODE = stringPreferencesKey("keyboard_display_mode")
+            val ONE_HANDED_MODE_ENABLED = booleanPreferencesKey("one_handed_mode_enabled")
         }
 
         /**
@@ -210,6 +214,16 @@ class SettingsRepository
                                     AlternativeKeyboardLayout.DEFAULT
                                 }
                             } ?: AlternativeKeyboardLayout.DEFAULT,
+                        adaptiveKeyboardModesEnabled = preferences[PreferenceKeys.ADAPTIVE_KEYBOARD_MODES_ENABLED] ?: true,
+                        keyboardDisplayMode =
+                            preferences[PreferenceKeys.KEYBOARD_DISPLAY_MODE]?.let {
+                                try {
+                                    KeyboardDisplayMode.valueOf(it)
+                                } catch (e: IllegalArgumentException) {
+                                    null
+                                }
+                            },
+                        oneHandedModeEnabled = preferences[PreferenceKeys.ONE_HANDED_MODE_ENABLED] ?: false,
                     ).validated()
                 }.catch { e ->
                     ErrorLogger.logException(
@@ -542,6 +556,45 @@ class SettingsRepository
         suspend fun updateAlternativeKeyboardLayout(layout: AlternativeKeyboardLayout): Result<Unit> =
             try {
                 dataStore.edit { it[PreferenceKeys.ALTERNATIVE_KEYBOARD_LAYOUT] = layout.name }
+                Result.success(Unit)
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+
+        /**
+         * Updates adaptive keyboard modes toggle.
+         */
+        suspend fun updateAdaptiveKeyboardModesEnabled(enabled: Boolean): Result<Unit> =
+            try {
+                dataStore.edit { it[PreferenceKeys.ADAPTIVE_KEYBOARD_MODES_ENABLED] = enabled }
+                Result.success(Unit)
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+
+        /**
+         * Updates keyboard display mode.
+         */
+        suspend fun updateKeyboardDisplayMode(mode: KeyboardDisplayMode?): Result<Unit> =
+            try {
+                dataStore.edit {
+                    if (mode == null) {
+                        it.remove(PreferenceKeys.KEYBOARD_DISPLAY_MODE)
+                    } else {
+                        it[PreferenceKeys.KEYBOARD_DISPLAY_MODE] = mode.name
+                    }
+                }
+                Result.success(Unit)
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+
+        /**
+         * Updates one-handed mode toggle.
+         */
+        suspend fun updateOneHandedModeEnabled(enabled: Boolean): Result<Unit> =
+            try {
+                dataStore.edit { it[PreferenceKeys.ONE_HANDED_MODE_ENABLED] = enabled }
                 Result.success(Unit)
             } catch (e: Exception) {
                 Result.failure(e)

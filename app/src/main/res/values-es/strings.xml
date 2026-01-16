@@ -103,6 +103,15 @@
 
     <!-- Layout & Input Settings -->
     <string name="layout_settings_alternative_layout">Diseño de teclado</string>
+    <string name="layout_settings_adaptive_modes_enabled">Modos de teclado adaptativo</string>
+    <string name="layout_settings_adaptive_modes_on">Se adapta automáticamente al tipo de dispositivo y postura (tabletas, plegables)</string>
+    <string name="layout_settings_adaptive_modes_off">Usar siempre el diseño estándar de ancho completo</string>
+    <string name="layout_settings_one_handed_mode_enabled">Modo de una mano</string>
+    <string name="layout_settings_one_handed_mode_on">Habilitado</string>
+    <string name="layout_settings_one_handed_mode_off">Teclado estándar de ancho completo</string>
+    <string name="one_handed_mode_left">Anclar teclado a la izquierda</string>
+    <string name="one_handed_mode_right">Anclar teclado a la derecha</string>
+    <string name="one_handed_mode_full">Volver al teclado de ancho completo</string>
     <string name="layout_settings_show_number_row">Mostrar fila de números</string>
     <string name="layout_settings_number_row_on">Fila de números mostrada</string>
     <string name="layout_settings_number_row_off">Fila de números ocultada</string>

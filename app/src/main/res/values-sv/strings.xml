@@ -78,6 +78,15 @@
     <string name="layout_mapper_clear_failed">Misslyckades att rensa mappningar</string>
 
     <string name="layout_settings_alternative_layout">Tangentbordslayout</string>
+    <string name="layout_settings_adaptive_modes_enabled">Adaptiva tangentbordsmodi</string>
+    <string name="layout_settings_adaptive_modes_on">Anpassas automatiskt till enhetstyp och kroppshållning (surfplattor, vikbara enheter)</string>
+    <string name="layout_settings_adaptive_modes_off">Använd alltid standardlayout på full bredd</string>
+    <string name="layout_settings_one_handed_mode_enabled">Enhandsläge</string>
+    <string name="layout_settings_one_handed_mode_on">Aktiverat</string>
+    <string name="layout_settings_one_handed_mode_off">Standardtangentbord på full bredd</string>
+    <string name="one_handed_mode_left">Förankra tangentbordet till vänster</string>
+    <string name="one_handed_mode_right">Förankra tangentbordet till höger</string>
+    <string name="one_handed_mode_full">Återgå till tangentbord på full bredd</string>
     <string name="layout_settings_show_number_row">Visa nummerrad</string>
     <string name="layout_settings_number_row_on">Nummerrad visas</string>
     <string name="layout_settings_number_row_off">Nummerrad dold</string>
