@@ -1039,7 +1039,9 @@ class UrikInputMethodService :
                         return@collect
                     }
 
-                    val layoutChanged = currentSettings.alternativeKeyboardLayout != newSettings.alternativeKeyboardLayout
+                    val layoutChanged =
+                        currentSettings.alternativeKeyboardLayout != newSettings.alternativeKeyboardLayout ||
+                            currentSettings.showLanguageSwitchKey != newSettings.showLanguageSwitchKey
 
                     currentSettings = newSettings
 
@@ -1061,6 +1063,7 @@ class UrikInputMethodService :
                     )
 
                     layoutManager.updateClipboardEnabled(newSettings.clipboardEnabled)
+                    layoutManager.updateShowLanguageSwitchKey(newSettings.showLanguageSwitchKey)
 
                     if (layoutChanged) {
                         repository.cleanup()
@@ -1230,6 +1233,7 @@ class UrikInputMethodService :
         )
 
         layoutManager.updateClipboardEnabled(currentSettings.clipboardEnabled)
+        layoutManager.updateShowLanguageSwitchKey(currentSettings.showLanguageSwitchKey)
 
         if (serviceJob.isCancelled) {
             serviceJob = SupervisorJob()
@@ -1860,6 +1864,9 @@ class UrikInputMethodService :
 
             KeyboardKey.ActionType.CAPS_LOCK -> {
                 viewModel.onEvent(KeyboardEvent.CapsLockToggled)
+            }
+
+            KeyboardKey.ActionType.LANGUAGE_SWITCH -> {
             }
         }
     }

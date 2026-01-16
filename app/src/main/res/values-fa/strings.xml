@@ -83,6 +83,7 @@
     <string name="autocorrect_settings_learn_new_words_off">یادگیری غیرفعال است</string>
 
     <!-- Language Settings -->
+    <string name="select_active_language">انتخاب زبان فعال</string>
 
     <!-- Sound & Feedback Settings -->
     <string name="primary_layout_language">طرح فعلی</string>
@@ -148,6 +149,9 @@
     <string name="layout_settings_show_number_row">نمایش ردیف اعداد</string>
     <string name="layout_settings_number_row_on">ردیف اعداد نمایش داده می‌شود</string>
     <string name="layout_settings_number_row_off">ردیف اعداد پنهان است</string>
+    <string name="layout_settings_show_language_switch_key">نمایش کلید تغییر زبان</string>
+    <string name="layout_settings_language_switch_key_on">فعال</string>
+    <string name="layout_settings_language_switch_key_off">غیرفعال</string>
     <string name="layout_settings_space_bar_size">اندازه نوار فاصله</string>
     <string name="alternative_layout_default">پیش‌فرض (چیدمان زبان)</string>
     <string name="alternative_layout_dvorak">Dvorak</string>
@@ -226,6 +230,7 @@
     <string name="letters_mode_description">تغییر به کیبورد حروف</string>
     <string name="numbers_mode_description">تغییر به کیبورد اعداد</string>
     <string name="symbols_mode_description">تغییر به کیبورد نمادها</string>
+    <string name="language_switch_description">تغییر زبان کیبورد</string>
     <string name="ime_prediction_description">پیشنهاد: %1$s</string>
 
     <!-- Action button accessibility descriptions -->

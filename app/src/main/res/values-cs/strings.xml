@@ -82,6 +82,7 @@
     <string name="autocorrect_settings_learn_new_words_off">Učení vypnuto</string>
 
     <!-- Language Settings -->
+    <string name="select_active_language">Vyberte aktivní jazyk</string>
 
     <!-- Sound & Feedback Settings -->
     <string name="primary_layout_language">Aktuální rozvržení</string>
@@ -115,6 +116,9 @@
     <string name="layout_settings_show_number_row">Zobrazit číselnou řadu</string>
     <string name="layout_settings_number_row_on">Číselná řada zobrazena</string>
     <string name="layout_settings_number_row_off">Číselná řada skryta</string>
+    <string name="layout_settings_show_language_switch_key">Zobrazit klávesu přepínání jazyka</string>
+    <string name="layout_settings_language_switch_key_on">Povoleno</string>
+    <string name="layout_settings_language_switch_key_off">Zakázáno</string>
     <string name="layout_settings_space_bar_size">Velikost mezerníku</string>
     <string name="alternative_layout_default">Výchozí (Jazykové rozložení)</string>
     <string name="alternative_layout_dvorak">Dvorak</string>
@@ -209,6 +213,7 @@
     <string name="letters_mode_description">Přepnout na písmennou klávesnici</string>
     <string name="numbers_mode_description">Přepnout na číselnou klávesnici</string>
     <string name="symbols_mode_description">Přepnout na symbolovou klávesnici</string>
+    <string name="language_switch_description">Přepnout jazyk klávesnice</string>
     <string name="ime_prediction_description">Předpověď: %1$s</string>
 
     <!-- Action button accessibility descriptions -->

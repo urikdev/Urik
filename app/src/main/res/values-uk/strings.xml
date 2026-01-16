@@ -82,6 +82,7 @@
     <string name="autocorrect_settings_learn_new_words_off">Запам\'ятовування вимкнено</string>
 
     <!-- Language Settings -->
+    <string name="select_active_language">Оберіть активну мову</string>
 
     <!-- Sound & Feedback Settings -->
     <string name="primary_layout_language">Основна розкладка</string>
@@ -136,6 +137,9 @@
     <string name="layout_settings_show_number_row">Показувати Ряд Цифр</string>
     <string name="layout_settings_number_row_on">Ряд цифр відображається</string>
     <string name="layout_settings_number_row_off">Ряд цифр приховується</string>
+    <string name="layout_settings_show_language_switch_key">Показувати клавішу зміни мови</string>
+    <string name="layout_settings_language_switch_key_on">Увімкнено</string>
+    <string name="layout_settings_language_switch_key_off">Вимкнено</string>
     <string name="layout_settings_space_bar_size">Розмір Клавіші Пробілу</string>
     <string name="alternative_layout_default">За замовчуванням (Мовна розкладка)</string>
     <string name="alternative_layout_dvorak">Dvorak</string>
@@ -210,6 +214,7 @@
     <string name="letters_mode_description">Переключитися на клавіатуру з літерами</string>
     <string name="numbers_mode_description">Переключитися на клавіатуру з цифрами</string>
     <string name="symbols_mode_description">Переключитися на клавіатуру з символами</string>
+    <string name="language_switch_description">Переключити мову клавіатури</string>
     <string name="ime_prediction_description">Пропозиція: %1$s</string>
 
     <!-- Action button accessibility descriptions -->

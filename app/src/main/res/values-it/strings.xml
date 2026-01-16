@@ -85,6 +85,7 @@
     <!-- Language Settings -->
     <string name="max_languages_reached">Massimo 3 lingue consentite</string>
     <string name="primary_layout_language">Layout corrente</string>
+    <string name="select_active_language">Seleziona lingua attiva</string>
 
     <!-- Sound & Feedback Settings -->
     <string name="feedback_settings_haptic_feedback">Feedback aptico</string>
@@ -149,6 +150,9 @@
     <string name="layout_settings_show_number_row">Mostra riga numerica</string>
     <string name="layout_settings_number_row_on">Riga numerica mostrata</string>
     <string name="layout_settings_number_row_off">Riga numerica nascosta</string>
+    <string name="layout_settings_show_language_switch_key">Mostra tasto cambio lingua</string>
+    <string name="layout_settings_language_switch_key_on">Abilitato</string>
+    <string name="layout_settings_language_switch_key_off">Disabilitato</string>
     <string name="layout_settings_space_bar_size">Dimensione barra spaziatrice</string>
     <string name="alternative_layout_default">Predefinito (Layout lingua)</string>
     <string name="alternative_layout_dvorak">Dvorak</string>
@@ -227,6 +231,7 @@
     <string name="letters_mode_description">Passa alla tastiera alfabetica</string>
     <string name="numbers_mode_description">Passa alla tastiera numerica</string>
     <string name="symbols_mode_description">Passa alla tastiera dei simboli</string>
+    <string name="language_switch_description">Cambia lingua tastiera</string>
     <string name="ime_prediction_description">Previsione: %1$s</string>
 
     <!-- Action button accessibility descriptions -->
