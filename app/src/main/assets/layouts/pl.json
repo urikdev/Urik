@@ -27,9 +27,7 @@
           {"type": "character", "char": "u", "keyType": "letter"},
           {"type": "character", "char": "i", "keyType": "letter"},
           {"type": "character", "char": "o", "keyType": "letter"},
-          {"type": "character", "char": "p", "keyType": "letter"},
-          {"type": "character", "char": "ę", "keyType": "letter"},
-          {"type": "character", "char": "ó", "keyType": "letter"}
+          {"type": "character", "char": "p", "keyType": "letter"}
         ],
         [
           {"type": "character", "char": "a", "keyType": "letter"},
@@ -40,9 +38,7 @@
           {"type": "character", "char": "h", "keyType": "letter"},
           {"type": "character", "char": "j", "keyType": "letter"},
           {"type": "character", "char": "k", "keyType": "letter"},
-          {"type": "character", "char": "l", "keyType": "letter"},
-          {"type": "character", "char": "ł", "keyType": "letter"},
-          {"type": "character", "char": "ą", "keyType": "letter"}
+          {"type": "character", "char": "l", "keyType": "letter"}
         ],
         [
           {"type": "action", "action": "shift"},
