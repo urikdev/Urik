@@ -102,6 +102,7 @@ class KeyboardLayoutManager(
     private var currentSpaceBarSize = SpaceBarSize.STANDARD
     private var currentKeyLabelSize = KeyLabelSize.MEDIUM
     private var longPressPunctuationMode = LongPressPunctuationMode.PERIOD
+    private var splitGapPx = 0
 
     private var activePunctuationPopup: CharacterVariationPopup? = null
     private var popupSelectionMode = false
@@ -513,6 +514,10 @@ class KeyboardLayoutManager(
         currentSpaceBarSize = spaceBarSize
     }
 
+    fun updateSplitGapPx(gapPx: Int) {
+        splitGapPx = gapPx
+    }
+
     fun updateKeyLabelSize(keyLabelSize: KeyLabelSize) {
         if (currentKeyLabelSize != keyLabelSize) {
             currentKeyLabelSize = keyLabelSize
@@ -660,6 +665,7 @@ class KeyboardLayoutManager(
         state: KeyboardState,
     ): LinearLayout {
         val is9LetterRow = is9CharacterLetterRow(keys)
+        val shouldSplit = splitGapPx > 0 && !containsSpacebar(keys)
 
         val rowLayout =
             LinearLayout(context).apply {
@@ -674,41 +680,90 @@ class KeyboardLayoutManager(
                             setMargins(0, 0, 0, verticalMargin)
                         }
 
-                // Disable baseline alignment to prevent extra spacing with Arabic/Persian glyphs
                 isBaselineAligned = false
             }
 
-        if (is9LetterRow) {
-            val spacer =
-                View(context).apply {
-                    layoutParams = LinearLayout.LayoutParams(0, 0, 0.5f)
-                }
-            rowLayout.addView(spacer)
-        }
+        if (shouldSplit) {
+            val midpoint = keys.size / 2
+            val shouldDuplicateMiddle = keys.size % 2 == 1
 
-        keys.forEach { key ->
-            if (key is KeyboardKey.Spacer) {
+            val leftKeys =
+                if (shouldDuplicateMiddle) {
+                    keys.subList(0, midpoint + 1)
+                } else {
+                    keys.subList(0, midpoint)
+                }
+            val rightKeys = keys.subList(midpoint, keys.size)
+
+            val leftContainer = createHalfRowContainer(leftKeys, state)
+            val gapSpacer =
+                View(context).apply {
+                    layoutParams = LinearLayout.LayoutParams(splitGapPx, LinearLayout.LayoutParams.MATCH_PARENT)
+                }
+            val rightContainer = createHalfRowContainer(rightKeys, state)
+
+            rowLayout.addView(leftContainer)
+            rowLayout.addView(gapSpacer)
+            rowLayout.addView(rightContainer)
+        } else {
+            if (is9LetterRow && splitGapPx == 0) {
                 val spacer =
                     View(context).apply {
-                        layoutParams = LinearLayout.LayoutParams(0, 0, STANDARD_KEY_WEIGHT)
+                        layoutParams = LinearLayout.LayoutParams(0, 0, 0.5f)
                     }
                 rowLayout.addView(spacer)
-            } else {
-                val keyButton = getOrCreateKeyButton(key, state, keys)
-                rowLayout.addView(keyButton)
             }
-        }
 
-        if (is9LetterRow) {
-            val spacer =
-                View(context).apply {
-                    layoutParams = LinearLayout.LayoutParams(0, 0, 0.5f)
+            keys.forEach { key ->
+                if (key is KeyboardKey.Spacer) {
+                    val spacer =
+                        View(context).apply {
+                            layoutParams = LinearLayout.LayoutParams(0, 0, STANDARD_KEY_WEIGHT)
+                        }
+                    rowLayout.addView(spacer)
+                } else {
+                    val keyButton = getOrCreateKeyButton(key, state, keys)
+                    rowLayout.addView(keyButton)
                 }
-            rowLayout.addView(spacer)
+            }
+
+            if (is9LetterRow && splitGapPx == 0) {
+                val spacer =
+                    View(context).apply {
+                        layoutParams = LinearLayout.LayoutParams(0, 0, 0.5f)
+                    }
+                rowLayout.addView(spacer)
+            }
         }
 
         return rowLayout
     }
+
+    private fun createHalfRowContainer(
+        keys: List<KeyboardKey>,
+        state: KeyboardState,
+    ): LinearLayout =
+        LinearLayout(context).apply {
+            orientation = LinearLayout.HORIZONTAL
+            layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+            isBaselineAligned = false
+
+            keys.forEach { key ->
+                if (key is KeyboardKey.Spacer) {
+                    val spacer =
+                        View(context).apply {
+                            layoutParams = LinearLayout.LayoutParams(0, 0, STANDARD_KEY_WEIGHT)
+                        }
+                    addView(spacer)
+                } else {
+                    val keyButton = getOrCreateKeyButton(key, state, keys)
+                    addView(keyButton)
+                }
+            }
+        }
+
+    private fun containsSpacebar(keys: List<KeyboardKey>): Boolean =
+        keys.any { it is KeyboardKey.Action && it.action == KeyboardKey.ActionType.SPACE }
 
     private fun is9CharacterLetterRow(rowKeys: List<KeyboardKey>): Boolean {
         val nonSpacerKeys = rowKeys.filter { it !is KeyboardKey.Spacer }
@@ -1549,9 +1604,10 @@ class KeyboardLayoutManager(
     ): Float {
         val isNumberModeRow = isNumberModeRow(rowKeys)
         val characterKeyCount = rowKeys.count { it is KeyboardKey.Character }
+        val isSplitMode = splitGapPx > 0 && !containsSpacebar(rowKeys)
 
         val baseWeight =
-            if (isNumberModeRow) {
+            if (isNumberModeRow || isSplitMode) {
                 STANDARD_KEY_WEIGHT
             } else {
                 when (key) {

@@ -136,6 +136,15 @@
 
     <!-- Layout & Input Settings -->
     <string name="layout_settings_alternative_layout">Toetsenbordindeling</string>
+    <string name="layout_settings_adaptive_modes_enabled">Adaptieve toetsenbordmodi</string>
+    <string name="layout_settings_adaptive_modes_on">Past zich automatisch aan het apparaattype en de houding aan (tablets, opvouwbare apparaten)</string>
+    <string name="layout_settings_adaptive_modes_off">Altijd de standaard volledige breedteindeling gebruiken</string>
+    <string name="layout_settings_one_handed_mode_enabled">Eénhandige modus</string>
+    <string name="layout_settings_one_handed_mode_on">Toetsenbord verkleint tot 85% breedte met schakelknoppen in de zijmarge</string>
+    <string name="layout_settings_one_handed_mode_off">Standaard toetsenbord met volledige breedte</string>
+    <string name="one_handed_mode_left">Toetsenbord naar links verankeren</string>
+    <string name="one_handed_mode_right">Toetsenbord naar rechts verankeren</string>
+    <string name="one_handed_mode_full">Teruggaan naar toetsenbord met volledige breedte</string>
     <string name="layout_settings_show_number_row">Cijferrij weergeven</string>
     <string name="layout_settings_number_row_on">Cijferrij weergegeven</string>
     <string name="layout_settings_number_row_off">Cijferrij verborgen</string>

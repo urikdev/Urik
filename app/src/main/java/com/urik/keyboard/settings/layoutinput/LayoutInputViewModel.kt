@@ -36,6 +36,8 @@ class LayoutInputViewModel
                         showNumberRow = settings.showNumberRow,
                         spaceBarSize = settings.spaceBarSize,
                         alternativeKeyboardLayout = settings.alternativeKeyboardLayout,
+                        adaptiveKeyboardModesEnabled = settings.adaptiveKeyboardModesEnabled,
+                        oneHandedModeEnabled = settings.oneHandedModeEnabled,
                     )
                 }.stateIn(
                     scope = viewModelScope,
@@ -67,6 +69,18 @@ class LayoutInputViewModel
             }
         }
 
+        fun updateAdaptiveKeyboardModesEnabled(enabled: Boolean) {
+            viewModelScope.launch {
+                settingsRepository.updateAdaptiveKeyboardModesEnabled(enabled)
+            }
+        }
+
+        fun updateOneHandedModeEnabled(enabled: Boolean) {
+            viewModelScope.launch {
+                settingsRepository.updateOneHandedModeEnabled(enabled)
+            }
+        }
+
         private companion object {
             const val STOP_TIMEOUT_MILLIS = 5000L
         }
@@ -79,4 +93,6 @@ data class LayoutInputUiState(
     val showNumberRow: Boolean = true,
     val spaceBarSize: SpaceBarSize = SpaceBarSize.STANDARD,
     val alternativeKeyboardLayout: AlternativeKeyboardLayout = AlternativeKeyboardLayout.DEFAULT,
+    val adaptiveKeyboardModesEnabled: Boolean = true,
+    val oneHandedModeEnabled: Boolean = false,
 )

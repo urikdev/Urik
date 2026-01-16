@@ -117,6 +117,12 @@ class SwipeDetector
         private var swipeStartDistancePx = 50f
 
         @Volatile
+        private var layoutScaleFactor = 1.0f
+
+        @Volatile
+        private var layoutOffsetX = 0f
+
+        @Volatile
         private var keyCharacterPositions = emptyMap<Char, PointF>()
 
         @Volatile
@@ -141,6 +147,20 @@ class SwipeDetector
         )
 
         /**
+         * Updates layout transform for adaptive keyboard modes.
+         *
+         * @param scaleFactor Width scaling factor (e.g., 0.7 for one-handed mode)
+         * @param offsetX Horizontal offset in pixels (e.g., for right-aligned one-handed mode)
+         */
+        fun updateLayoutTransform(
+            scaleFactor: Float,
+            offsetX: Float,
+        ) {
+            layoutScaleFactor = scaleFactor
+            layoutOffsetX = offsetX
+        }
+
+        /**
          * Updates key position mapping for spatial scoring.
          *
          * Call when keyboard layout changes (mode switch, language change).
@@ -154,6 +174,15 @@ class SwipeDetector
             }
             keyCharacterPositions = newMap
         }
+
+        private fun transformTouchCoordinate(
+            x: Float,
+            y: Float,
+        ): PointF =
+            PointF(
+                (x - layoutOffsetX) / layoutScaleFactor,
+                y,
+            )
 
         /**
          * Updates script context when language or layout changes.
@@ -311,17 +340,18 @@ class SwipeDetector
             pointCounter = 0
             startingKey = key
 
+            val transformed = transformTouchCoordinate(event.x, event.y)
             val point =
                 SwipePoint(
-                    x = event.x,
-                    y = event.y,
+                    x = transformed.x,
+                    y = transformed.y,
                     timestamp = startTime,
                     pressure = event.pressure,
                     velocity = 0.0f,
                 )
             firstPoint = point
             swipePoints.add(point)
-            lastCheckX = event.x
+            lastCheckX = transformed.x
         }
 
         private fun trackSwipeGesture(
@@ -416,11 +446,12 @@ class SwipeDetector
         private fun updateSwipePath(event: MotionEvent) {
             pointCounter++
 
+            val transformed = transformTouchCoordinate(event.x, event.y)
             val velocity = calculateVelocity(event)
             val newPoint =
                 SwipePoint(
-                    x = event.x,
-                    y = event.y,
+                    x = transformed.x,
+                    y = transformed.y,
                     timestamp = System.currentTimeMillis(),
                     pressure = event.pressure,
                     velocity = velocity,
@@ -445,7 +476,7 @@ class SwipeDetector
                         topCandidates = emptyList(),
                     )
 
-                swipeListener?.onSwipeUpdate(currentPath, PointF(event.x, event.y))
+                swipeListener?.onSwipeUpdate(currentPath, transformed)
             }
         }
 
@@ -454,10 +485,11 @@ class SwipeDetector
             keyAt: (Float, Float) -> KeyboardKey?,
         ): Boolean {
             if (isSwiping) {
+                val transformed = transformTouchCoordinate(event.x, event.y)
                 val finalPoint =
                     SwipePoint(
-                        x = event.x,
-                        y = event.y,
+                        x = transformed.x,
+                        y = transformed.y,
                         timestamp = System.currentTimeMillis(),
                         pressure = event.pressure,
                         velocity = calculateVelocity(event),

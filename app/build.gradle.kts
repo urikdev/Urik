@@ -181,6 +181,8 @@ dependencies {
     implementation(libs.android.database.sqlcipher)
     implementation(libs.androidx.sqlite.ktx)
 
+    implementation(libs.androidx.window)
+
     testImplementation(libs.junit)
     testImplementation(libs.mockito.core)
     testImplementation(libs.mockito.kotlin)

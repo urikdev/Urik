@@ -124,6 +124,15 @@
 
     <!-- Layout & Input Settings -->
     <string name="layout_settings_alternative_layout">Układ klawiatury</string>
+    <string name="layout_settings_adaptive_modes_enabled">Adaptacyjne tryby klawiatury</string>
+    <string name="layout_settings_adaptive_modes_on">Automatycznie dostosowuje się do typu urządzenia i postawy (tablety, urządzenia składane)</string>
+    <string name="layout_settings_adaptive_modes_off">Zawsze używaj standardowego układu na pełną szerokość</string>
+    <string name="layout_settings_one_handed_mode_enabled">Tryb jednoręczny</string>
+    <string name="layout_settings_one_handed_mode_on">Klawiatura zmniejsza się do 85% szerokości z przyciskami przełączania na bocznym marginesie</string>
+    <string name="layout_settings_one_handed_mode_off">Standardowa klawiatura na pełną szerokość</string>
+    <string name="one_handed_mode_left">Zakotwicz klawiaturę po lewej stronie</string>
+    <string name="one_handed_mode_right">Zakotwicz klawiaturę po prawej stronie</string>
+    <string name="one_handed_mode_full">Powrót do klawiatury na pełną szerokość</string>
     <string name="layout_settings_show_number_row">Pokaż numer wiersza</string>
     <string name="layout_settings_number_row_on">Wyświetlana liczba wierszy</string>
     <string name="layout_settings_number_row_off">Ukryj wiersz z numerami</string>

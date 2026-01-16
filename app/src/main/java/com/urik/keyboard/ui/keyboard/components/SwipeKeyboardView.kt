@@ -1493,6 +1493,27 @@ class SwipeKeyboardView
             }
         }
 
+        private var lastMappedWidth = 0
+        private var lastMappedHeight = 0
+
+        override fun onSizeChanged(
+            w: Int,
+            h: Int,
+            oldw: Int,
+            oldh: Int,
+        ) {
+            super.onSizeChanged(w, h, oldw, oldh)
+            if (w > 0 && h > 0 && (w != lastMappedWidth || h != lastMappedHeight)) {
+                lastMappedWidth = w
+                lastMappedHeight = h
+                post {
+                    if (!isDestroyed && isAttachedToWindow) {
+                        mapKeyPositions()
+                    }
+                }
+            }
+        }
+
         private fun safeMappingPost() {
             if (!isDestroyed && isAttachedToWindow && viewTreeObserver.isAlive) {
                 viewTreeObserver.addOnGlobalLayoutListener(globalLayoutListener)

@@ -32,6 +32,7 @@ import com.ibm.icu.lang.UScript
 import com.ibm.icu.util.ULocale
 import com.urik.keyboard.KeyboardConstants.InputTimingConstants
 import com.urik.keyboard.data.KeyboardRepository
+import com.urik.keyboard.model.KeyboardDisplayMode
 import com.urik.keyboard.model.KeyboardEvent
 import com.urik.keyboard.model.KeyboardKey
 import com.urik.keyboard.model.KeyboardMode
@@ -131,15 +132,20 @@ class UrikInputMethodService :
     @Inject
     lateinit var customKeyMappingService: com.urik.keyboard.service.CustomKeyMappingService
 
+    @Inject
+    lateinit var keyboardModeManager: com.urik.keyboard.service.KeyboardModeManager
+
     private lateinit var viewModel: KeyboardViewModel
     private lateinit var layoutManager: KeyboardLayoutManager
     private lateinit var lifecycleRegistry: LifecycleRegistry
+    private var postureDetector: com.urik.keyboard.service.PostureDetector? = null
 
     private var serviceJob = SupervisorJob()
     private var serviceScope = CoroutineScope(Dispatchers.Main + serviceJob)
     private val observerJobs = mutableListOf<Job>()
 
     private var swipeKeyboardView: SwipeKeyboardView? = null
+    private var adaptiveContainer: com.urik.keyboard.ui.keyboard.components.AdaptiveKeyboardContainer? = null
     private var keyboardRootContainer: LinearLayout? = null
     private var lastDisplayDensity: Float = 0f
     private var lastKeyboardConfig: Int = android.content.res.Configuration.KEYBOARD_UNDEFINED
@@ -590,6 +596,12 @@ class UrikInputMethodService :
             lastDisplayDensity = resources.displayMetrics.density
             swipeDetector.updateDisplayMetrics(lastDisplayDensity)
 
+            postureDetector =
+                com.urik.keyboard.service
+                    .PostureDetector(this, serviceScope)
+            postureDetector?.start()
+            keyboardModeManager.initialize(serviceScope, postureDetector!!)
+
             initializeCoreComponents()
 
             serviceScope.launch {
@@ -714,7 +726,31 @@ class UrikInputMethodService :
                 actualWindow.navigationBarColor = themeManager.currentTheme.value.colors.keyboardBackground
             }
 
+            layoutManager.updateSplitGapPx(keyboardModeManager.currentMode.value.splitGapPx)
+
             val keyboardView = createSwipeKeyboardView() ?: return null
+
+            window?.window?.context?.let { windowContext ->
+                postureDetector?.attachToWindow(windowContext)
+            }
+
+            val adaptive =
+                com.urik.keyboard.ui.keyboard.components.AdaptiveKeyboardContainer(this).apply {
+                    setThemeManager(themeManager)
+                    setKeyboardView(keyboardView)
+                    setOnLayoutTransformListener { scaleFactor, offsetX ->
+                        swipeDetector.updateLayoutTransform(scaleFactor, offsetX)
+                    }
+                    setOnModeToggleListener { mode ->
+                        keyboardModeManager.setManualMode(mode)
+                    }
+                }
+
+            adaptiveContainer = adaptive
+
+            val currentModeConfig = keyboardModeManager.currentMode.value
+            val currentPostureInfo = postureDetector?.postureInfo?.value
+            adaptive.setModeConfig(currentModeConfig, currentPostureInfo?.hingeBounds)
 
             val rootContainer =
                 LinearLayout(this).apply {
@@ -739,7 +775,7 @@ class UrikInputMethodService :
                     }
 
                     addView(
-                        keyboardView,
+                        adaptive,
                         LinearLayout.LayoutParams(
                             LinearLayout.LayoutParams.MATCH_PARENT,
                             LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -762,20 +798,9 @@ class UrikInputMethodService :
         }
     }
 
-    override fun onEvaluateInputViewShown(): Boolean {
-        val config = resources.configuration
-        return when (config.keyboard) {
-            android.content.res.Configuration.KEYBOARD_NOKEYS,
-            android.content.res.Configuration.KEYBOARD_UNDEFINED,
-            -> super.onEvaluateInputViewShown()
+    override fun onEvaluateInputViewShown(): Boolean = true
 
-            android.content.res.Configuration.KEYBOARD_QWERTY,
-            android.content.res.Configuration.KEYBOARD_12KEY,
-            -> false
-
-            else -> super.onEvaluateInputViewShown()
-        }
-    }
+    override fun onEvaluateFullscreenMode(): Boolean = false
 
     /**
      * Creates and configures swipe keyboard view.
@@ -1015,7 +1040,8 @@ class UrikInputMethodService :
 
                     currentSettings = newSettings
 
-                    swipeDetector.setSwipeEnabled(newSettings.swipeEnabled)
+                    val currentMode = keyboardModeManager.currentMode.value.mode
+                    updateSwipeEnabledState(currentMode)
 
                     layoutManager.updateLongPressDuration(newSettings.longPressDuration)
                     layoutManager.updateLongPressPunctuationMode(newSettings.longPressPunctuationMode)
@@ -1046,9 +1072,6 @@ class UrikInputMethodService :
         )
     }
 
-    /**
-     * Observes view model state, layout, and language changes.
-     */
     private fun observeViewModel() {
         observerJobs.forEach { it.cancel() }
         observerJobs.clear()
@@ -1105,6 +1128,24 @@ class UrikInputMethodService :
             },
         )
 
+        observerJobs.add(
+            serviceScope.launch {
+                keyboardModeManager.currentMode.collect { config ->
+                    val ic = currentInputConnection
+                    ic?.beginBatchEdit()
+                    try {
+                        val postureInfo = postureDetector?.postureInfo?.value
+                        adaptiveContainer?.setModeConfig(config, postureInfo?.hingeBounds)
+                        layoutManager.updateSplitGapPx(config.splitGapPx)
+                        updateSwipeEnabledState(config.mode)
+                        updateSwipeKeyboard()
+                    } finally {
+                        ic?.endBatchEdit()
+                    }
+                }
+            },
+        )
+
         observeSettings()
     }
 
@@ -1157,6 +1198,17 @@ class UrikInputMethodService :
             }
         } catch (_: Exception) {
         }
+    }
+
+    private fun updateSwipeEnabledState(mode: KeyboardDisplayMode) {
+        if (!::swipeDetector.isInitialized) return
+
+        val userSettingEnabled = currentSettings.swipeEnabled
+        val isSplitMode = mode == KeyboardDisplayMode.SPLIT
+
+        val shouldEnableSwipe = userSettingEnabled && !isSplitMode
+
+        swipeDetector.setSwipeEnabled(shouldEnableSwipe)
     }
 
     override fun onStartInputView(
@@ -2764,8 +2816,12 @@ class UrikInputMethodService :
         observerJobs.forEach { it.cancel() }
         observerJobs.clear()
 
+        postureDetector?.stop()
+        postureDetector = null
+
         coordinateStateClear()
         swipeKeyboardView = null
+        adaptiveContainer = null
 
         if (::layoutManager.isInitialized) {
             layoutManager.cleanup()

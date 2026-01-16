@@ -103,6 +103,15 @@
 
     <!-- Layout & Input Settings -->
     <string name="layout_settings_alternative_layout">Rozložení klávesnice</string>
+    <string name="layout_settings_adaptive_modes_enabled">Adaptivní režimy klávesnice</string>
+    <string name="layout_settings_adaptive_modes_on">Automaticky se přizpůsobuje typu zařízení a poloze (tablety, skládací telefony)</string>
+    <string name="layout_settings_adaptive_modes_off">Vždy používat standardní rozložení na celou šířku</string>
+    <string name="layout_settings_one_handed_mode_enabled">Režim jedné ruky</string>
+    <string name="layout_settings_one_handed_mode_on">Klávesnice se zmenší na 85% šířky s ovládacími prvky na postranním okraji</string>
+    <string name="layout_settings_one_handed_mode_off">Standardní klávesnice na celou šířku</string>
+    <string name="one_handed_mode_left">Zakotvi klávesnici vlevo</string>
+    <string name="one_handed_mode_right">Zakotvi klávesnici vpravo</string>
+    <string name="one_handed_mode_full">Vrátit se na klávesnici na celou šířku</string>
     <string name="layout_settings_show_number_row">Zobrazit číselnou řadu</string>
     <string name="layout_settings_number_row_on">Číselná řada zobrazena</string>
     <string name="layout_settings_number_row_off">Číselná řada skryta</string>
