@@ -798,7 +798,10 @@ class UrikInputMethodService :
         }
     }
 
-    override fun onEvaluateInputViewShown(): Boolean = true
+    override fun onEvaluateInputViewShown(): Boolean {
+        super.onEvaluateInputViewShown()
+        return true
+    }
 
     override fun onEvaluateFullscreenMode(): Boolean = false
 
