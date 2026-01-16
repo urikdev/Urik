@@ -68,6 +68,7 @@ class KeyboardLayoutManager(
 ) {
     private var clipboardEnabled = false
     private var activeLanguages: List<String> = emptyList()
+    private var showLanguageSwitchKey = false
 
     @Volatile
     private var customKeyMappings: Map<String, String> = emptyMap()
@@ -545,6 +546,10 @@ class KeyboardLayoutManager(
         activeLanguages = languages
     }
 
+    fun updateShowLanguageSwitchKey(enabled: Boolean) {
+        showLanguageSwitchKey = enabled
+    }
+
     fun updateCustomKeyMappings(mappings: Map<String, String>) {
         customKeyMappings = mappings
     }
@@ -653,12 +658,32 @@ class KeyboardLayoutManager(
             }
 
         layout.rows.forEach { row ->
-            val rowView = createRowView(row, state)
+            val processedRow =
+                if (shouldInjectGlobeButton(row)) {
+                    injectGlobeButton(row)
+                } else {
+                    row
+                }
+            val rowView = createRowView(processedRow, state)
             keyboardContainer.addView(rowView)
         }
 
         return keyboardContainer
     }
+
+    private fun shouldInjectGlobeButton(row: List<KeyboardKey>): Boolean =
+        showLanguageSwitchKey &&
+            activeLanguages.size > 1 &&
+            row.any { it is KeyboardKey.Action && it.action == KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS }
+
+    private fun injectGlobeButton(row: List<KeyboardKey>): List<KeyboardKey> =
+        row.flatMap { key ->
+            if (key is KeyboardKey.Action && key.action == KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS) {
+                listOf(key, KeyboardKey.Action(KeyboardKey.ActionType.LANGUAGE_SWITCH))
+            } else {
+                listOf(key)
+            }
+        }
 
     private fun createRowView(
         keys: List<KeyboardKey>,
@@ -901,7 +926,11 @@ class KeyboardLayoutManager(
 
                     iconDrawable?.setTint(getKeyTextColor(key))
 
-                    if (key is KeyboardKey.Action && key.action == KeyboardKey.ActionType.SHIFT && activeLanguages.size >= 2) {
+                    if (key is KeyboardKey.Action &&
+                        key.action == KeyboardKey.ActionType.SHIFT &&
+                        activeLanguages.size >= 2 &&
+                        !showLanguageSwitchKey
+                    ) {
                         val globeIcon = ContextCompat.getDrawable(context, R.drawable.ic_globe)
                         globeIcon?.setTint(getKeyTextColor(key))
 
@@ -942,6 +971,18 @@ class KeyboardLayoutManager(
                     layerDrawable.setLayerGravity(1, Gravity.TOP or Gravity.START)
 
                     background = layerDrawable
+                } else if (key.action == KeyboardKey.ActionType.LANGUAGE_SWITCH) {
+                    val keyBackground = getKeyBackground(key)
+                    val globeIcon = ContextCompat.getDrawable(context, R.drawable.ic_globe)
+
+                    globeIcon?.setTint(getKeyTextColor(key))
+
+                    val layerDrawable = LayerDrawable(arrayOf(keyBackground, globeIcon))
+                    layerDrawable.setLayerInset(1, 12, 12, 12, 12)
+                    layerDrawable.setLayerGravity(1, Gravity.CENTER)
+
+                    background = layerDrawable
+                    text = ""
                 } else {
                     background = getKeyBackground(key)
                 }
@@ -970,11 +1011,34 @@ class KeyboardLayoutManager(
             }
 
             if (key is KeyboardKey.Action && key.action == KeyboardKey.ActionType.SHIFT) {
-                setOnTouchListener(shiftLongPressTouchListener)
+                if (!showLanguageSwitchKey && activeLanguages.size > 1) {
+                    setOnTouchListener(shiftLongPressTouchListener)
+                }
             }
 
             if (key is KeyboardKey.Action && key.action == KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS) {
                 setOnTouchListener(symbolsLongPressTouchListener)
+            }
+
+            if (key is KeyboardKey.Action && key.action == KeyboardKey.ActionType.LANGUAGE_SWITCH) {
+                setOnClickListener {
+                    val nextLang = languageManager.getNextLayoutLanguage()
+                    onLanguageSwitch(nextLang)
+
+                    val displayName =
+                        com.urik.keyboard.settings.KeyboardSettings
+                            .getLanguageDisplayNames()[nextLang] ?: nextLang
+                    android.widget.Toast
+                        .makeText(context, displayName, android.widget.Toast.LENGTH_SHORT)
+                        .show()
+                }
+                setOnLongClickListener {
+                    performContextualHaptic(key)
+                    if (activeLanguages.size > 1) {
+                        showLanguagePickerPopup(this, activeLanguages)
+                    }
+                    true
+                }
             }
 
             if (key is KeyboardKey.Action && key.action == KeyboardKey.ActionType.BACKSPACE) {
@@ -1041,6 +1105,7 @@ class KeyboardLayoutManager(
                     KeyboardKey.ActionType.MODE_SWITCH_LETTERS -> context.getString(R.string.letters_mode_label)
                     KeyboardKey.ActionType.MODE_SWITCH_NUMBERS -> context.getString(R.string.numbers_mode_label)
                     KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS -> context.getString(R.string.symbols_mode_label)
+                    KeyboardKey.ActionType.LANGUAGE_SWITCH -> ""
                     else -> "?"
                 }
             }
@@ -1134,6 +1199,10 @@ class KeyboardLayoutManager(
                     KeyboardKey.ActionType.CAPS_LOCK -> {
                         context.getString(R.string.caps_lock_description)
                     }
+
+                    KeyboardKey.ActionType.LANGUAGE_SWITCH -> {
+                        context.getString(R.string.language_switch_description)
+                    }
                 }
             }
 
@@ -1193,6 +1262,9 @@ class KeyboardLayoutManager(
         if (activeLanguages.size <= 1) {
             return
         }
+        if (showLanguageSwitchKey) {
+            return
+        }
         showLanguagePickerPopup(view, activeLanguages)
     }
 
@@ -1206,9 +1278,18 @@ class KeyboardLayoutManager(
         popup.setLanguages(
             languages = languages,
             currentLanguage = languageManager.currentLayoutLanguage.value,
+            anchorView = anchorView,
             onSelected = { selectedLang ->
                 popup.dismiss()
                 onLanguageSwitch(selectedLang)
+
+                val displayNames =
+                    com.urik.keyboard.settings.KeyboardSettings
+                        .getLanguageDisplayNames()
+                val displayName = displayNames[selectedLang] ?: selectedLang
+                android.widget.Toast
+                    .makeText(context, displayName, android.widget.Toast.LENGTH_SHORT)
+                    .show()
             },
         )
         popup.showAboveAnchor(anchorView)

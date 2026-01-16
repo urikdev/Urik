@@ -82,6 +82,7 @@
     <string name="autocorrect_settings_learn_new_words_off">Wörter werden nicht automatisch gelernt</string>
 
     <!-- Language Settings -->
+    <string name="select_active_language">Aktive Sprache auswählen</string>
 
     <!-- Sound & Feedback Settings -->
     <string name="primary_layout_language">Aktuelles Layout</string>
@@ -115,6 +116,9 @@
     <string name="layout_settings_show_number_row">Zahlenreihe anzeigen</string>
     <string name="layout_settings_number_row_on">Zahlenreihe wird angezeigt</string>
     <string name="layout_settings_number_row_off">Zahlenreihe wird nicht angezeigt</string>
+    <string name="layout_settings_show_language_switch_key">Sprachumschalt-Taste anzeigen</string>
+    <string name="layout_settings_language_switch_key_on">Aktiviert</string>
+    <string name="layout_settings_language_switch_key_off">Deaktiviert</string>
     <string name="layout_settings_space_bar_size">Leertastenbreite</string>
     <string name="alternative_layout_default">Standard (Sprachlayout)</string>
     <string name="alternative_layout_dvorak">Dvorak</string>
@@ -209,6 +213,7 @@
     <string name="letters_mode_description">Zur Zeicheneingabe wechseln</string>
     <string name="numbers_mode_description">Zur Zahleneingabe wechseln</string>
     <string name="symbols_mode_description">Zur Symboleingabe wechseln</string>
+    <string name="language_switch_description">Tastatursprache wechseln</string>
     <string name="ime_prediction_description">Vorhersage: %1$s</string>
 
     <!-- Action button accessibility descriptions -->

@@ -82,6 +82,7 @@
     <string name="autocorrect_settings_learn_new_words_off">Nauka wyłączona</string>
 
     <!-- Language Settings -->
+    <string name="select_active_language">Wybierz aktywny język</string>
 
     <!-- Sound & Feedback Settings -->
     <string name="primary_layout_language">Aktualny układ</string>
@@ -136,6 +137,9 @@
     <string name="layout_settings_show_number_row">Pokaż numer wiersza</string>
     <string name="layout_settings_number_row_on">Wyświetlana liczba wierszy</string>
     <string name="layout_settings_number_row_off">Ukryj wiersz z numerami</string>
+    <string name="layout_settings_show_language_switch_key">Pokaż klawisz zmiany języka</string>
+    <string name="layout_settings_language_switch_key_on">Włączone</string>
+    <string name="layout_settings_language_switch_key_off">Wyłączone</string>
     <string name="layout_settings_space_bar_size">Rozmiar spacji</string>
     <string name="alternative_layout_default">Domyślny (Układ językowy)</string>
     <string name="alternative_layout_dvorak">Dvorak</string>
@@ -210,6 +214,7 @@
    <string name="letters_mode_description">Przełącz na klawiaturę literową</string>
     <string name="numbers_mode_description">Przełącz na klawiaturę numeryczną</string>
     <string name="symbols_mode_description">Przełącz na klawiaturę symboli</string>
+    <string name="language_switch_description">Przełącz język klawiatury</string>
     <string name="ime_prediction_description">Przewidywanie: %1$s</string>
 
     <!-- Action button accessibility descriptions -->

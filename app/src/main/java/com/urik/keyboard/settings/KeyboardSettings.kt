@@ -132,6 +132,7 @@ data class KeyboardSettings(
     val adaptiveKeyboardModesEnabled: Boolean = true,
     val keyboardDisplayMode: KeyboardDisplayMode? = null,
     val oneHandedModeEnabled: Boolean = false,
+    val showLanguageSwitchKey: Boolean = false,
 ) {
     /**
      * Returns validated copy with constraints enforced.

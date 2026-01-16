@@ -36,6 +36,7 @@ class LayoutInputFragment : PreferenceFragmentCompat() {
     private lateinit var adaptiveModesEnabledPref: SwitchPreferenceCompat
     private lateinit var oneHandedModeEnabledPref: SwitchPreferenceCompat
     private lateinit var numberRowPref: SwitchPreferenceCompat
+    private lateinit var languageSwitchKeyPref: SwitchPreferenceCompat
     private lateinit var spaceBarPref: ListPreference
     private lateinit var customizeKeysPref: Preference
     private var testField: EditText? = null
@@ -108,6 +109,16 @@ class LayoutInputFragment : PreferenceFragmentCompat() {
             }
         screen.addPreference(numberRowPref)
 
+        languageSwitchKeyPref =
+            SwitchPreferenceCompat(context).apply {
+                key = "show_language_switch_key"
+                isPersistent = false
+                title = resources.getString(R.string.layout_settings_show_language_switch_key)
+                summaryOn = resources.getString(R.string.layout_settings_language_switch_key_on)
+                summaryOff = resources.getString(R.string.layout_settings_language_switch_key_off)
+            }
+        screen.addPreference(languageSwitchKeyPref)
+
         spaceBarPref =
             ListPreference(context).apply {
                 key = "space_bar_size"
@@ -162,6 +173,11 @@ class LayoutInputFragment : PreferenceFragmentCompat() {
             true
         }
 
+        languageSwitchKeyPref.setOnPreferenceChangeListener { _, newValue ->
+            viewModel.updateShowLanguageSwitchKey(newValue as Boolean)
+            true
+        }
+
         spaceBarPref.setOnPreferenceChangeListener { _, newValue ->
             viewModel.updateSpaceBarSize(SpaceBarSize.valueOf(newValue as String))
             true
@@ -175,6 +191,7 @@ class LayoutInputFragment : PreferenceFragmentCompat() {
                         adaptiveModesEnabledPref.isChecked = state.adaptiveKeyboardModesEnabled
                         oneHandedModeEnabledPref.isChecked = state.oneHandedModeEnabled
                         numberRowPref.isChecked = state.showNumberRow
+                        languageSwitchKeyPref.isChecked = state.showLanguageSwitchKey
                         spaceBarPref.value = state.spaceBarSize.name
                     }
                 }
