@@ -125,6 +125,15 @@
 
     <!-- Layout & Input Settings -->
     <string name="layout_settings_alternative_layout">Раскладка Клавиатуры</string>
+    <string name="layout_settings_adaptive_modes_enabled">Адаптивные режимы клавиатуры</string>
+    <string name="layout_settings_adaptive_modes_on">Автоматически адаптируется к типу устройства и положению (планшеты, складные телефоны)</string>
+    <string name="layout_settings_adaptive_modes_off">Всегда использовать стандартный макет на всю ширину</string>
+    <string name="layout_settings_one_handed_mode_enabled">Одноручный режим</string>
+    <string name="layout_settings_one_handed_mode_on">Включено</string>
+    <string name="layout_settings_one_handed_mode_off">Стандартная клавиатура на всю ширину</string>
+    <string name="one_handed_mode_left">Привязать клавиатуру к левой стороне</string>
+    <string name="one_handed_mode_right">Привязать клавиатуру к правой стороне</string>
+    <string name="one_handed_mode_full">Вернуться к клавиатуре на всю ширину</string>
     <string name="layout_settings_show_number_row">Показывать Ряд Цифр</string>
     <string name="layout_settings_number_row_on">Ряд цифр показывается</string>
     <string name="layout_settings_number_row_off">Ряд цифр скрывается</string>

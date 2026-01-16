@@ -117,6 +117,15 @@
 
     <!-- Layout & Input Settings -->
     <string name="layout_settings_alternative_layout">Keyboard Layout</string>
+    <string name="layout_settings_adaptive_modes_enabled">Adaptive Keyboard Modes</string>
+    <string name="layout_settings_adaptive_modes_on">Automatically adapts to device type and posture (tablets, foldables)</string>
+    <string name="layout_settings_adaptive_modes_off">Always use standard full-width layout</string>
+    <string name="layout_settings_one_handed_mode_enabled">One-Handed Mode</string>
+    <string name="layout_settings_one_handed_mode_on">Enabled</string>
+    <string name="layout_settings_one_handed_mode_off">Standard full-width keyboard</string>
+    <string name="one_handed_mode_left">Anchor keyboard to left</string>
+    <string name="one_handed_mode_right">Anchor keyboard to right</string>
+    <string name="one_handed_mode_full">Return to full-width keyboard</string>
     <string name="layout_settings_show_number_row">Show Number Row</string>
     <string name="layout_settings_number_row_on">Number row shown</string>
     <string name="layout_settings_number_row_off">Number row hidden</string>

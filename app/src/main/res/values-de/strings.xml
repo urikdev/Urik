@@ -103,6 +103,15 @@
 
     <!-- Layout & Input Settings -->
     <string name="layout_settings_alternative_layout">Tastaturlayout</string>
+    <string name="layout_settings_adaptive_modes_enabled">Adaptive Tastaturbetriebsmodi</string>
+    <string name="layout_settings_adaptive_modes_on">Passt sich automatisch an den Gerätetyp und die Haltung an (Tablets, faltbare Geräte)</string>
+    <string name="layout_settings_adaptive_modes_off">Immer das standardmäßige Vollbildlayout verwenden</string>
+    <string name="layout_settings_one_handed_mode_enabled">Einhändiger Modus</string>
+    <string name="layout_settings_one_handed_mode_on">Aktiviert</string>
+    <string name="layout_settings_one_handed_mode_off">Standard-Vollbild-Tastatur</string>
+    <string name="one_handed_mode_left">Tastatur nach links verankern</string>
+    <string name="one_handed_mode_right">Tastatur nach rechts verankern</string>
+    <string name="one_handed_mode_full">Zur Vollbild-Tastatur zurückkehren</string>
     <string name="layout_settings_show_number_row">Zahlenreihe anzeigen</string>
     <string name="layout_settings_number_row_on">Zahlenreihe wird angezeigt</string>
     <string name="layout_settings_number_row_off">Zahlenreihe wird nicht angezeigt</string>

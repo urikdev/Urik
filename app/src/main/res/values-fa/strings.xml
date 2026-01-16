@@ -136,6 +136,15 @@
 
     <!-- Layout & Input Settings -->
     <string name="layout_settings_alternative_layout">چیدمان صفحه‌کلید</string>
+    <string name="layout_settings_adaptive_modes_enabled">حالت‌های کیبورد تطبیقی</string>
+    <string name="layout_settings_adaptive_modes_on">به‌طور خودکار با نوع دستگاه و حالت بدن سازگار می‌شود (تبلت‌ها، گوشی‌های تاشو)</string>
+    <string name="layout_settings_adaptive_modes_off">همیشه از چیدمان استاندارد تمام‌عرض استفاده کنید</string>
+    <string name="layout_settings_one_handed_mode_enabled">حالت تک‌دست</string>
+    <string name="layout_settings_one_handed_mode_on">فعال</string>
+    <string name="layout_settings_one_handed_mode_off">کیبورد استاندارد تمام‌عرض</string>
+    <string name="one_handed_mode_left">کیبورد را به سمت چپ قفل کنید</string>
+    <string name="one_handed_mode_right">کیبورد را به سمت راست قفل کنید</string>
+    <string name="one_handed_mode_full">بازگشت به کیبورد تمام‌عرض</string>
     <string name="layout_settings_show_number_row">نمایش ردیف اعداد</string>
     <string name="layout_settings_number_row_on">ردیف اعداد نمایش داده می‌شود</string>
     <string name="layout_settings_number_row_off">ردیف اعداد پنهان است</string>

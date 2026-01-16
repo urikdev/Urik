@@ -33,6 +33,8 @@ class LayoutInputFragment : PreferenceFragmentCompat() {
     private lateinit var eventHandler: SettingsEventHandler
 
     private lateinit var alternativeLayoutPref: ListPreference
+    private lateinit var adaptiveModesEnabledPref: SwitchPreferenceCompat
+    private lateinit var oneHandedModeEnabledPref: SwitchPreferenceCompat
     private lateinit var numberRowPref: SwitchPreferenceCompat
     private lateinit var spaceBarPref: ListPreference
     private lateinit var customizeKeysPref: Preference
@@ -75,6 +77,26 @@ class LayoutInputFragment : PreferenceFragmentCompat() {
                 summaryProvider = ListPreference.SimpleSummaryProvider.getInstance()
             }
         screen.addPreference(alternativeLayoutPref)
+
+        adaptiveModesEnabledPref =
+            SwitchPreferenceCompat(context).apply {
+                key = "adaptive_keyboard_modes_enabled"
+                isPersistent = false
+                title = resources.getString(R.string.layout_settings_adaptive_modes_enabled)
+                summaryOn = resources.getString(R.string.layout_settings_adaptive_modes_on)
+                summaryOff = resources.getString(R.string.layout_settings_adaptive_modes_off)
+            }
+        screen.addPreference(adaptiveModesEnabledPref)
+
+        oneHandedModeEnabledPref =
+            SwitchPreferenceCompat(context).apply {
+                key = "one_handed_mode_enabled"
+                isPersistent = false
+                title = resources.getString(R.string.layout_settings_one_handed_mode_enabled)
+                summaryOn = resources.getString(R.string.layout_settings_one_handed_mode_on)
+                summaryOff = resources.getString(R.string.layout_settings_one_handed_mode_off)
+            }
+        screen.addPreference(oneHandedModeEnabledPref)
 
         numberRowPref =
             SwitchPreferenceCompat(context).apply {
@@ -125,6 +147,16 @@ class LayoutInputFragment : PreferenceFragmentCompat() {
             true
         }
 
+        adaptiveModesEnabledPref.setOnPreferenceChangeListener { _, newValue ->
+            viewModel.updateAdaptiveKeyboardModesEnabled(newValue as Boolean)
+            true
+        }
+
+        oneHandedModeEnabledPref.setOnPreferenceChangeListener { _, newValue ->
+            viewModel.updateOneHandedModeEnabled(newValue as Boolean)
+            true
+        }
+
         numberRowPref.setOnPreferenceChangeListener { _, newValue ->
             viewModel.updateShowNumberRow(newValue as Boolean)
             true
@@ -140,6 +172,8 @@ class LayoutInputFragment : PreferenceFragmentCompat() {
                 launch {
                     viewModel.uiState.collect { state ->
                         alternativeLayoutPref.value = state.alternativeKeyboardLayout.name
+                        adaptiveModesEnabledPref.isChecked = state.adaptiveKeyboardModesEnabled
+                        oneHandedModeEnabledPref.isChecked = state.oneHandedModeEnabled
                         numberRowPref.isChecked = state.showNumberRow
                         spaceBarPref.value = state.spaceBarSize.name
                     }

@@ -124,6 +124,15 @@
 
     <!-- Layout & Input Settings -->
     <string name="layout_settings_alternative_layout">Розкладка Клавіатури</string>
+    <string name="layout_settings_adaptive_modes_enabled">Адаптивні режими клавіатури</string>
+    <string name="layout_settings_adaptive_modes_on">Автоматично адаптується до типу пристрою та поставки (планшети, складні телефони)</string>
+    <string name="layout_settings_adaptive_modes_off">Завжди використовувати стандартний макет на всю ширину</string>
+    <string name="layout_settings_one_handed_mode_enabled">Однорукий режим</string>
+    <string name="layout_settings_one_handed_mode_on">Увімкнено</string>
+    <string name="layout_settings_one_handed_mode_off">Стандартна клавіатура на всю ширину</string>
+    <string name="one_handed_mode_left">Прив\'язати клавіатуру до лівої сторони</string>
+    <string name="one_handed_mode_right">Прив\'язати клавіатуру до правої сторони</string>
+    <string name="one_handed_mode_full">Повернутися до клавіатури на всю ширину</string>
     <string name="layout_settings_show_number_row">Показувати Ряд Цифр</string>
     <string name="layout_settings_number_row_on">Ряд цифр відображається</string>
     <string name="layout_settings_number_row_off">Ряд цифр приховується</string>
