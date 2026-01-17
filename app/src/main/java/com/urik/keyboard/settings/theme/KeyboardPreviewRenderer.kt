@@ -28,7 +28,6 @@ class KeyboardPreviewRenderer(
     fun createPreviewView(
         layout: KeyboardLayout,
         theme: KeyboardTheme,
-        maxHeightDp: Int,
     ): View {
         val rowsToRender = layout.rows.takeLast(2)
 
@@ -219,7 +218,7 @@ class KeyboardPreviewRenderer(
                     .LayoutParams(
                         0,
                         visualHeight,
-                        getKeyWeight(key, rowKeys),
+                        getKeyWeight(key),
                     ).apply {
                         setMargins(horizontalMargin, verticalMargin, horizontalMargin, verticalMargin)
                     }
@@ -270,20 +269,24 @@ class KeyboardPreviewRenderer(
         return button
     }
 
-    private fun getKeyWeight(
-        key: KeyboardKey,
-        rowKeys: List<KeyboardKey>,
-    ): Float =
+    private fun getKeyWeight(key: KeyboardKey): Float =
         when (key) {
             is KeyboardKey.Action -> {
                 when (key.action) {
                     KeyboardKey.ActionType.SHIFT -> 1.5f
+
                     KeyboardKey.ActionType.BACKSPACE -> 1.5f
-                    KeyboardKey.ActionType.SPACE -> 4.0f // Default SpaceBarSize.STANDARD
+
+                    KeyboardKey.ActionType.SPACE -> 4.0f
+
+                    // Default SpaceBarSize.STANDARD
                     else -> 1.5f
                 }
             }
-            else -> 1f
+
+            else -> {
+                1f
+            }
         }
 
     private fun getKeyTextColor(
@@ -301,12 +304,16 @@ class KeyboardPreviewRenderer(
     ): GradientDrawable {
         val backgroundColor =
             when (key) {
-                is KeyboardKey.Action ->
+                is KeyboardKey.Action -> {
                     when (key.action) {
                         KeyboardKey.ActionType.SPACE -> theme.colors.keyBackgroundSpace
                         else -> theme.colors.keyBackgroundAction
                     }
-                else -> theme.colors.keyBackgroundCharacter
+                }
+
+                else -> {
+                    theme.colors.keyBackgroundCharacter
+                }
             }
 
         val cornerRadius = 8f * context.resources.displayMetrics.density
@@ -343,19 +350,27 @@ class KeyboardPreviewRenderer(
         when (key) {
             is KeyboardKey.Character -> {
                 when {
-                    key.type == KeyboardKey.KeyType.LETTER && (state.isShiftPressed || state.isCapsLockOn) ->
+                    key.type == KeyboardKey.KeyType.LETTER && (state.isShiftPressed || state.isCapsLockOn) -> {
                         key.value.uppercase()
-                    else -> key.value
+                    }
+
+                    else -> {
+                        key.value
+                    }
                 }
             }
-            is KeyboardKey.Action ->
+
+            is KeyboardKey.Action -> {
                 when (key.action) {
                     KeyboardKey.ActionType.MODE_SWITCH_LETTERS -> context.getString(R.string.letters_mode_label)
                     KeyboardKey.ActionType.MODE_SWITCH_NUMBERS -> context.getString(R.string.numbers_mode_label)
                     KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS -> context.getString(R.string.symbols_mode_label)
                     else -> ""
                 }
+            }
 
-            KeyboardKey.Spacer -> ""
+            KeyboardKey.Spacer -> {
+                ""
+            }
         }
 }

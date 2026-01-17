@@ -175,7 +175,7 @@ class MainActivity : AppCompatActivity() {
             if (layout != null) {
                 val theme = themeManager.currentTheme.value
                 val renderer = KeyboardPreviewRenderer(this@MainActivity)
-                val preview = renderer.createPreviewView(layout, theme, 200)
+                val preview = renderer.createPreviewView(layout, theme)
 
                 val containerLayout = container.getChildAt(0) as? LinearLayout ?: return@launch
                 containerLayout.removeAllViews()

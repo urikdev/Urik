@@ -322,11 +322,6 @@ class SwipeKeyboardView
             if (searchButton != null) return
 
             val baseContext = context
-            val themedContext =
-                androidx.appcompat.view.ContextThemeWrapper(
-                    baseContext,
-                    R.style.Theme_Urik,
-                )
 
             val emojiTextSize = calculateResponsiveSuggestionTextSize()
             val minTouchTarget = baseContext.resources.getDimensionPixelSize(R.dimen.minimum_touch_target)

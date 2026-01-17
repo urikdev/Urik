@@ -105,24 +105,17 @@ object KeyboardConstants {
         const val MIN_EXCELLENT_CANDIDATES = 3
 
         const val SWIPE_TIME_THRESHOLD_MS = 100L
-        const val SWIPE_START_DISTANCE_DP = 50f
+        const val SWIPE_START_DISTANCE_DP = 35f
         const val MIN_SWIPE_POINTS_FOR_SAMPLING = 3
         const val SLOW_MOVEMENT_VELOCITY_THRESHOLD = 0.5f
         const val UI_UPDATE_INTERVAL_MS = 16
         const val TAP_DURATION_THRESHOLD_MS = 350L
-        const val MAX_SWIPE_VELOCITY_PX_PER_MS = 2.0f
+        const val MAX_SWIPE_VELOCITY_PX_PER_MS = 10.0f
 
         const val PATH_BOUNDS_MARGIN_PX = 50f
         const val CLOSE_KEY_DISTANCE_THRESHOLD_SQ = 7225f
         const val EXCELLENT_CANDIDATE_THRESHOLD = 0.95f
         const val REPETITION_PENALTY_FACTOR = 0.08f
-
-        const val EXP_THRESHOLD_50 = 12100f
-        const val TWO_SIGMA_50_SQ = 4000f
-        const val EXP_THRESHOLD_60 = 12100f
-        const val TWO_SIGMA_60_SQ = 4000f
-        const val SPATIAL_SCORE_WEIGHT = 0.65f
-        const val FREQUENCY_SCORE_WEIGHT = 0.35f
 
         const val PATH_EXHAUSTION_MIN_WORD_LENGTH = 5
         const val PATH_EXHAUSTION_QUARTILE_THRESHOLD = 0.75f
@@ -130,6 +123,86 @@ object KeyboardConstants {
         const val PATH_EXHAUSTION_MIN_LETTERS_CHECK = 2
         const val LENGTH_BONUS_MIN_RATIO_QUALITY = 0.85f
         const val REPEATED_LETTER_MAX_INDEX_GAP = 3
+    }
+
+    object GeometricScoringConstants {
+        const val MAX_PATH_POINTS = 100
+
+        const val TIGHT_CLUSTER_SIGMA = 35f
+        const val NORMAL_SIGMA = 42f
+        const val EDGE_KEY_SIGMA = 55f
+        const val DEFAULT_SIGMA = 45f
+
+        const val NEIGHBOR_RADIUS_SQ = 10000f
+        const val TIGHT_CLUSTER_THRESHOLD = 4
+        const val NORMAL_CLUSTER_THRESHOLD = 2
+
+        const val SLOW_VELOCITY_THRESHOLD = 0.3f
+        const val NORMAL_VELOCITY_THRESHOLD = 0.8f
+        const val SLOW_VELOCITY_BOOST = 1.35f
+        const val FAST_VELOCITY_DISCOUNT = 0.85f
+
+        const val INFLECTION_ANGLE_THRESHOLD = 0.52f
+        const val INTENTIONAL_CORNER_THRESHOLD = 0.87f
+        const val INTENTIONAL_CORNER_KEY_RADIUS = 60f
+        const val INFLECTION_BOOST_RADIUS = 50f
+        const val INFLECTION_BOOST_BASE = 1.0f
+        const val INFLECTION_BOOST_MAX = 1.30f
+        const val MAX_EXPECTED_ANGLE = 2.5f
+
+        const val KEY_TRAVERSAL_RADIUS = 58f
+        const val DWELL_DETECTION_RADIUS_SQ = 2500f
+        const val DWELL_VELOCITY_THRESHOLD = 0.25f
+        const val MAX_REPEATED_LETTER_BOOST = 1.25f
+
+        const val MAX_CLUSTERED_WORD_LENGTH = 4
+        const val CLUSTER_MAX_DISTANCE_SQ = 14400f
+
+        const val PATH_COVERAGE_RADIUS = 45f
+        const val MIN_PATH_COVERAGE_THRESHOLD = 0.60f
+
+        const val CORNER_CURVATURE_THRESHOLD = 0.70f
+        const val CURVE_CURVATURE_THRESHOLD = 0.30f
+        const val SEGMENT_KEY_PROXIMITY_SQ = 3600f
+
+        const val CONFIDENCE_INFLECTION_WEIGHT = 0.40f
+        const val CONFIDENCE_VELOCITY_WEIGHT = 0.25f
+        const val CONFIDENCE_SMOOTHNESS_WEIGHT = 0.35f
+        const val MAX_EXPECTED_CURVATURE = 1.5f
+
+        const val HIGH_CONFIDENCE_THRESHOLD = 0.80f
+        const val MEDIUM_CONFIDENCE_THRESHOLD = 0.60f
+        const val LOW_CONFIDENCE_THRESHOLD = 0.40f
+
+        const val HIGH_CONFIDENCE_SPATIAL_WEIGHT = 0.85f
+        const val HIGH_CONFIDENCE_FREQ_WEIGHT = 0.15f
+        const val MEDIUM_CONFIDENCE_SPATIAL_WEIGHT = 0.72f
+        const val MEDIUM_CONFIDENCE_FREQ_WEIGHT = 0.28f
+        const val LOW_CONFIDENCE_SPATIAL_WEIGHT = 0.60f
+        const val LOW_CONFIDENCE_FREQ_WEIGHT = 0.40f
+        const val VERY_LOW_CONFIDENCE_SPATIAL_WEIGHT = 0.52f
+        const val VERY_LOW_CONFIDENCE_FREQ_WEIGHT = 0.48f
+
+        const val CLUSTERED_WORD_SPATIAL_WEIGHT = 0.92f
+        const val CLUSTERED_WORD_FREQ_WEIGHT = 0.08f
+        const val CLUSTERED_SEQUENCE_TOLERANCE_MULTIPLIER = 0.5f
+
+        const val TRAVERSAL_FLOOR_SCORE = 0.65f
+        const val GEOMETRIC_SIMILARITY_THRESHOLD = 0.02f
+
+        const val VELOCITY_INTERPOLATION_THRESHOLD = 1.1f
+        const val MAX_INTERPOLATED_POINTS = 3
+        const val INTERPOLATION_MIN_GAP_PX = 25f
+        const val LARGE_GAP_INTERPOLATION_THRESHOLD_PX = 60f
+
+        const val WORD_LENGTH_EXCESS_PENALTY = 0.05f
+        const val WORD_LENGTH_DEFICIT_PENALTY = 0.10f
+
+        const val START_KEY_MATCH_BONUS = 1.10f
+        const val START_KEY_DISTANCE_PENALTY_FACTOR = 0.30f
+
+        const val END_KEY_MATCH_BONUS = 1.15f
+        const val END_KEY_DISTANCE_PENALTY_FACTOR = 0.25f
     }
 
     object TextProcessingConstants {
@@ -149,7 +222,6 @@ object KeyboardConstants {
         const val GESTURE_START_DISTANCE_DP = 20f
         const val BACKSPACE_SWIPE_MIN_DISTANCE_DP = 30f
         const val BACKSPACE_INITIAL_DELAY_MS = 50L
-        const val SPACEBAR_PUNCTUATION_DELAY_MS = 600L
     }
 
     object MemoryConstants {
