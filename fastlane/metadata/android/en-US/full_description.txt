@@ -1,17 +1,18 @@
-Privacy-first keyboard for Android with on-device processing and encrypted storage.
+Privacy-focused Android keyboard with swipe typing, custom layouts, and password manager support. No tracking, 100% on-device, and fully open source.
 
 **Input**
-- Swipe and tap typing with adaptive gesture detection
-- Long-press for character variations
+- Swipe typing with geometric path matching
+- One-handed and split modes
+- Long-press for character variations and custom key mapping
 - Spacebar swipe for cursor control
-- Alternative keyboard layouts (Dvorak, Colemak, Workman)
-- Hardware keyboard detection (automatically hides when connected)
+- QWERTZ, AZERTY, Dvorak, Colemak, and Workman layouts
+- Hardware keyboard detection
 
 **Intelligence**
 - On-device spell checking using SymSpell algorithm
-- Smart autocorrect (skips URLs/emails, handles punctuation context)
+- Smart autocorrect for URLs, emails, and punctuation context
 - Word learning with encrypted SQLCipher database
-- Multilingual support, simultaneous spell checking
+- Multilingual support with dedicated language toggle button
 - Emoji search with keyword support
 
 **Integration**
@@ -20,11 +21,14 @@ Privacy-first keyboard for Android with on-device processing and encrypted stora
 - Material You dynamic theming (Android 12+)
 
 **Customization**
-- Multiple themes (light, dark, custom color schemes)
-- Configurable key sizes, haptic feedback, typing behavior
-- Accessibility features (WCAG AA contrast, TalkBack support)
+- Custom long-press symbol and key assignments
+- Haptic feedback strength slider
+- Auto-capitalization toggle
+- Configurable key sizes and typing behavior
+- WCAG AA contrast and TalkBack support
 
 **Privacy**
 - No telemetry, analytics, or network permissions
-- All processing happens on-device
+- Local on-device processing
 - Encrypted local storage for user data
+- Dictionary export and import for backup or migration
