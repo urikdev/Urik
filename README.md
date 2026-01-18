@@ -5,7 +5,7 @@
 [![Release](https://img.shields.io/github/v/release/urikdev/Urik?include_prereleases)](https://github.com/urikdev/Urik/releases)
 [![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/urikdev/Urik/total)](https://github.com/urikdev/Urik/releases)
 
-Privacy-first keyboard for Android with on-device processing and encrypted storage. 100% community-funded, completely open-source.
+Privacy-focused Android keyboard with swipe typing, custom layouts, and password manager support. No tracking, 100% on-device, and fully open source.
 
 <p float="left" align="middle">
   <img src="https://urik.io/screenshots/main.jpg" width="220">
@@ -15,24 +15,26 @@ Privacy-first keyboard for Android with on-device processing and encrypted stora
 
 ## Status
 
-**Beta Software** - In open beta testing. Join the Google Play open beta today!
+**Beta Software** - In open beta testing.
 <p><a href="https://play.google.com/store/apps/details?id=com.urik.keyboard" target="_blank"><img src="https://raw.githubusercontent.com/pioug/google-play-badges/06ccd9252af1501613da2ca28eaffe31307a4e6d/svg/English.svg" alt="Google Play Open Beta"></a></p>
+<p><a href="https://f-droid.org/packages/com.urik.keyboard/" target="_blank"><img src="https://f-droid.org/badge/get-it-on.png" alt="Get it on F-Droid"></a></p>
 
 
 ## Features
 
 **Input**
-- Swipe and tap typing with adaptive gesture detection
-- Long-press for character variations
+- Swipe typing with geometric path matching
+- One-handed and split modes
+- Long-press for character variations and custom key mapping
 - Spacebar swipe for cursor control
-- Alternative keyboard layouts (Dvorak, Colemak, Workman)
-- Hardware keyboard detection (automatically hides when connected)
+- QWERTZ, AZERTY, Dvorak, Colemak, and Workman layouts
+- Hardware keyboard detection
 
 **Intelligence**
 - On-device spell checking using SymSpell algorithm
-- Smart autocorrect (skips URLs/emails, handles punctuation context)
+- Smart autocorrect for URLs, emails, and punctuation context
 - Word learning with encrypted SQLCipher database
-- Multilingual support, simultaneous spell checking
+- Multilingual support with dedicated language toggle button
 - Emoji search with keyword support
 
 **Integration**
@@ -41,16 +43,17 @@ Privacy-first keyboard for Android with on-device processing and encrypted stora
 - Material You dynamic theming (Android 12+)
 
 **Customization**
-- Custom long-press symbols (assign your own characters to any key)
-- Multiple themes (light, dark, custom color schemes)
-- Configurable key sizes, haptic feedback, typing behavior
-- Accessibility features (WCAG AA contrast, TalkBack support)
+- Custom long-press symbol and key assignments
+- Haptic feedback strength slider
+- Auto-capitalization toggle
+- Configurable key sizes and typing behavior
+- WCAG AA contrast and TalkBack support
 
 **Privacy**
 - No telemetry, analytics, or network permissions
-- All processing happens on-device
+- Local on-device processing
 - Encrypted local storage for user data
-- Dictionary export/import for backup and device migration
+- Dictionary export and import for backup or migration
 
 ## Privacy
 
