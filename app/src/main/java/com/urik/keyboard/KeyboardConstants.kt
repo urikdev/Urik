@@ -110,7 +110,7 @@ object KeyboardConstants {
         const val SLOW_MOVEMENT_VELOCITY_THRESHOLD = 0.5f
         const val UI_UPDATE_INTERVAL_MS = 16
         const val TAP_DURATION_THRESHOLD_MS = 350L
-        const val MAX_SWIPE_VELOCITY_PX_PER_MS = 10.0f
+        const val MAX_SWIPE_VELOCITY_PX_PER_MS = 3f
 
         const val PATH_BOUNDS_MARGIN_PX = 50f
         const val CLOSE_KEY_DISTANCE_THRESHOLD_SQ = 7225f
