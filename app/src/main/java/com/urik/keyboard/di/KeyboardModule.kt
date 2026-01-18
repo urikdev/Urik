@@ -12,6 +12,7 @@ import com.urik.keyboard.service.SpellCheckManager
 import com.urik.keyboard.service.TextInputProcessor
 import com.urik.keyboard.service.WordLearningEngine
 import com.urik.keyboard.settings.SettingsRepository
+import com.urik.keyboard.ui.keyboard.components.PathGeometryAnalyzer
 import com.urik.keyboard.ui.keyboard.components.SwipeDetector
 import com.urik.keyboard.utils.CacheMemoryManager
 import dagger.Module
@@ -84,7 +85,8 @@ object KeyboardModule {
     fun provideSwipeDetector(
         spellCheckManager: SpellCheckManager,
         wordLearningEngine: WordLearningEngine,
-    ): SwipeDetector = SwipeDetector(spellCheckManager, wordLearningEngine)
+        pathGeometryAnalyzer: PathGeometryAnalyzer,
+    ): SwipeDetector = SwipeDetector(spellCheckManager, wordLearningEngine, pathGeometryAnalyzer)
 
     @Provides
     @Singleton

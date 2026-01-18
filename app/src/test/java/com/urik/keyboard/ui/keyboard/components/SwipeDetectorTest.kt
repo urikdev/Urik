@@ -30,6 +30,9 @@ class SwipeDetectorTest {
     private lateinit var wordLearningEngine: WordLearningEngine
 
     @Mock
+    private lateinit var pathGeometryAnalyzer: PathGeometryAnalyzer
+
+    @Mock
     private lateinit var swipeListener: SwipeDetector.SwipeListener
 
     private lateinit var swipeDetector: SwipeDetector
@@ -38,7 +41,7 @@ class SwipeDetectorTest {
     @Before
     fun setup() {
         closeable = MockitoAnnotations.openMocks(this)
-        swipeDetector = SwipeDetector(spellCheckManager, wordLearningEngine)
+        swipeDetector = SwipeDetector(spellCheckManager, wordLearningEngine, pathGeometryAnalyzer)
         swipeDetector.setSwipeListener(swipeListener)
     }
 

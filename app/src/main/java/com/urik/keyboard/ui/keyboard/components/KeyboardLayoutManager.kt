@@ -27,7 +27,6 @@ import com.urik.keyboard.model.KeyboardKey
 import com.urik.keyboard.model.KeyboardLayout
 import com.urik.keyboard.model.KeyboardState
 import com.urik.keyboard.service.CharacterVariationService
-import com.urik.keyboard.service.CustomKeyMappingService
 import com.urik.keyboard.service.LanguageManager
 import com.urik.keyboard.settings.KeyLabelSize
 import com.urik.keyboard.settings.KeySize
@@ -61,7 +60,6 @@ class KeyboardLayoutManager(
     private val onSymbolsLongPress: () -> Unit,
     private val onLanguageSwitch: (String) -> Unit = {},
     private val characterVariationService: CharacterVariationService,
-    private val customKeyMappingService: CustomKeyMappingService,
     private val languageManager: LanguageManager,
     private val themeManager: ThemeManager,
     cacheMemoryManager: CacheMemoryManager,
@@ -165,6 +163,10 @@ class KeyboardLayoutManager(
             onKeyClick(key)
         }
 
+    private var longPressStartX = 0f
+    private var longPressStartY = 0f
+    private val longPressCancelThresholdPx = 20f
+
     @SuppressLint("ClickableViewAccessibility")
     private val characterLongPressTouchListener =
         View.OnTouchListener { view, event ->
@@ -173,6 +175,8 @@ class KeyboardLayoutManager(
                     val key = view.getTag(R.id.key_data) as? KeyboardKey.Character ?: return@OnTouchListener false
                     val button = view as Button
                     customMappingLongPressFired.remove(button)
+                    longPressStartX = event.rawX
+                    longPressStartY = event.rawY
                     val handler = Handler(Looper.getMainLooper())
                     val runnable =
                         Runnable {
@@ -181,6 +185,19 @@ class KeyboardLayoutManager(
                         }
                     buttonPendingCallbacks[button] = PendingCallbacks(handler, runnable)
                     handler.postDelayed(runnable, currentLongPressDuration.durationMs)
+                    false
+                }
+
+                MotionEvent.ACTION_MOVE -> {
+                    val button = view as Button
+                    val dx = event.rawX - longPressStartX
+                    val dy = event.rawY - longPressStartY
+                    val distance = kotlin.math.sqrt(dx * dx + dy * dy)
+                    if (distance > longPressCancelThresholdPx) {
+                        buttonPendingCallbacks.remove(button)?.let { pending ->
+                            pending.handler.removeCallbacks(pending.runnable)
+                        }
+                    }
                     false
                 }
 
@@ -1292,7 +1309,7 @@ class KeyboardLayoutManager(
                     .show()
             },
         )
-        popup.showAboveAnchor(anchorView)
+        popup.showAboveAnchor()
         languagePickerPopup = popup
     }
 

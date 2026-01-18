@@ -309,7 +309,6 @@ class DictionaryBackupManagerTest {
             whenever(learnedWordDao.findExactWord("en", "test")).thenReturn(existingWord)
             whenever(learnedWordDao.updateWord(any())).doAnswer { invocation ->
                 capturedWord = invocation.arguments[0] as LearnedWord
-                Unit
             }
 
             backupManager.importFromUri(testUri)

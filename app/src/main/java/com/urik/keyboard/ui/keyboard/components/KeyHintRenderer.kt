@@ -18,7 +18,7 @@ import com.urik.keyboard.theme.ThemeColors
  * Creates drawable overlays that display custom mapping hints.
  */
 class KeyHintRenderer(
-    private val context: Context,
+    context: Context,
 ) {
     private val density = context.resources.displayMetrics.density
 
