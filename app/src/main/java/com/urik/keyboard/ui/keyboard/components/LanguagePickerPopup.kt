@@ -120,7 +120,7 @@ class LanguagePickerPopup(
             }
     }
 
-    fun showAboveAnchor(anchorView: View) {
+    fun showAboveAnchor() {
         dialog?.show()
     }
 

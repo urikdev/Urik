@@ -14,6 +14,7 @@ import com.urik.keyboard.service.TextInputProcessor
 import com.urik.keyboard.service.WordLearningEngine
 import com.urik.keyboard.settings.KeyboardSettings
 import com.urik.keyboard.settings.SettingsRepository
+import com.urik.keyboard.ui.keyboard.components.PathGeometryAnalyzer
 import com.urik.keyboard.ui.keyboard.components.SwipeDetector
 import com.urik.keyboard.utils.CacheMemoryManager
 import kotlinx.coroutines.Dispatchers
@@ -132,7 +133,7 @@ class SwipeInputIntegrationTest {
                     settingsRepository,
                 )
 
-            swipeDetector = SwipeDetector(spellCheckManager, wordLearningEngine)
+            swipeDetector = SwipeDetector(spellCheckManager, wordLearningEngine, PathGeometryAnalyzer())
         }
 
     @After

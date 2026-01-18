@@ -105,20 +105,4 @@ class CustomKeyMappingRepository
                 )
                 Result.failure(e)
             }
-
-        /**
-         * Gets the mapping count.
-         */
-        suspend fun getMappingCount(): Int =
-            try {
-                customKeyMappingDao.getMappingCount()
-            } catch (e: Exception) {
-                ErrorLogger.logException(
-                    component = "CustomKeyMappingRepository",
-                    severity = ErrorLogger.Severity.HIGH,
-                    exception = e,
-                    context = mapOf("operation" to "getMappingCount"),
-                )
-                0
-            }
     }

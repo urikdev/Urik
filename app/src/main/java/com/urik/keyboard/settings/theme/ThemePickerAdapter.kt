@@ -164,7 +164,7 @@ class ThemePickerAdapter(
             previewContainer.removeAllViews()
 
             if (previewLayout != null && previewRenderer != null) {
-                val keyboardPreview = previewRenderer.createPreviewView(previewLayout, theme, PREVIEW_HEIGHT_DP)
+                val keyboardPreview = previewRenderer.createPreviewView(previewLayout, theme)
                 previewContainer.addView(keyboardPreview)
             } else {
                 previewContainer.setBackgroundColor(theme.colors.keyboardBackground)
@@ -205,7 +205,7 @@ class ThemePickerAdapter(
             previewContainer.removeAllViews()
 
             if (previewLayout != null && previewRenderer != null) {
-                val keyboardPreview = previewRenderer.createPreviewView(previewLayout, theme, PREVIEW_HEIGHT_DP)
+                val keyboardPreview = previewRenderer.createPreviewView(previewLayout, theme)
                 previewContainer.addView(keyboardPreview)
             } else {
                 previewContainer.setBackgroundColor(theme.colors.keyboardBackground)

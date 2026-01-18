@@ -632,7 +632,6 @@ class UrikInputMethodService :
                     onSymbolsLongPress = { handleClipboardButtonClick() },
                     onLanguageSwitch = { languageCode -> handleLanguageSwitch(languageCode) },
                     characterVariationService = characterVariationService,
-                    customKeyMappingService = customKeyMappingService,
                     languageManager = languageManager,
                     themeManager = themeManager,
                     cacheMemoryManager = cacheMemoryManager,
