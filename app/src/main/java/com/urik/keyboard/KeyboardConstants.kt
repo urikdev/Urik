@@ -101,6 +101,7 @@ object KeyboardConstants {
         const val ADAPTIVE_THRESHOLD = 40
         const val ADAPTIVE_THRESHOLD_RATIO = 0.75
         const val MIN_POINT_DISTANCE = 8f
+        const val MAX_CONSECUTIVE_GAP_PX = 45f
         const val MIN_CHARS_IN_BOUNDS_RATIO = 0.6f
         const val MIN_EXCELLENT_CANDIDATES = 3
 
