@@ -450,6 +450,19 @@ class SwipeDetector
                     )
                 }
 
+                if (swipePoints.size >= 3) {
+                    val largeGapCount =
+                        swipePoints.zipWithNext().count { (prev, curr) ->
+                            calculateDistance(prev.x, prev.y, curr.x, curr.y) > SwipeDetectionConstants.MAX_CONSECUTIVE_GAP_PX
+                        }
+
+                    val gapRatio = largeGapCount.toFloat() / (swipePoints.size - 1)
+                    if (gapRatio > 0.5f) {
+                        reset()
+                        return
+                    }
+                }
+
                 if (timeSinceDown < SwipeDetectionConstants.SWIPE_TIME_THRESHOLD_MS) {
                     return
                 }
