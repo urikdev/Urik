@@ -49,6 +49,7 @@ class SwipeKeyboardView
         defStyleAttr: Int = 0,
     ) : FrameLayout(context, attrs, defStyleAttr),
         SwipeDetector.SwipeListener {
+        private val touchCoordinateTransformer = TouchCoordinateTransformer(this)
         private val suggestionViewPool = mutableListOf<TextView>()
         private val activeSuggestionViews = mutableListOf<TextView>()
         private val dividerViewPool = mutableListOf<View>()
@@ -1326,6 +1327,8 @@ class SwipeKeyboardView
             this.currentLayout = layout
             this.currentState = state
 
+            touchCoordinateTransformer.updateRtlState(layout.isRTL)
+
             createKeyboardLayout(layout, state)
             safeMappingPost()
         }
@@ -1570,6 +1573,8 @@ class SwipeKeyboardView
 
             if (viewWidth <= 0 || viewHeight <= 0) return
 
+            val minTouchTargetPx = (48 * resources.displayMetrics.density).toInt()
+
             layout.rows.forEachIndexed { rowIndex, row ->
                 row.forEachIndexed { colIndex, key ->
                     val button = keyViews.getOrNull(getButtonIndexForKey(rowIndex, colIndex)) ?: return@forEachIndexed
@@ -1587,10 +1592,13 @@ class SwipeKeyboardView
                         expandedRect.bottom = viewHeight
                     }
                     if (isFirstCol) {
-                        expandedRect.left = 0
+                        val maxExpansion = rect.left.coerceAtMost(minTouchTargetPx / 2)
+                        expandedRect.left = (rect.left - maxExpansion).coerceAtLeast(0)
                     }
                     if (isLastCol) {
-                        expandedRect.right = viewWidth
+                        val remainingSpace = viewWidth - rect.right
+                        val maxExpansion = remainingSpace.coerceAtMost(minTouchTargetPx / 2)
+                        expandedRect.right = (rect.right + maxExpansion).coerceAtMost(viewWidth)
                     }
 
                     keyPositions[button] = expandedRect
@@ -1844,12 +1852,16 @@ class SwipeKeyboardView
         ): KeyboardKey? {
             if (isDestroyed) return null
 
+            val normalizedPoint = touchCoordinateTransformer.normalizeForHitDetection(x, y)
+            val nx = normalizedPoint.x
+            val ny = normalizedPoint.y
+
             if (keyPositions.isEmpty() && keyViews.isNotEmpty()) {
-                return findKeyAtDirect(x, y)
+                return findKeyAtDirect(nx, ny)
             }
 
             keyPositions.forEach { (button, rect) ->
-                if (rect.contains(x.toInt(), y.toInt())) {
+                if (rect.contains(nx.toInt(), ny.toInt())) {
                     return keyMapping[button]
                 }
             }
@@ -1860,7 +1872,7 @@ class SwipeKeyboardView
             keyPositions.forEach { (button, rect) ->
                 val centerX = rect.centerX().toFloat()
                 val centerY = rect.centerY().toFloat()
-                val distance = kotlin.math.sqrt((x - centerX) * (x - centerX) + (y - centerY) * (y - centerY))
+                val distance = kotlin.math.sqrt((nx - centerX) * (nx - centerX) + (ny - centerY) * (ny - centerY))
 
                 if (distance < closestDistance) {
                     closestDistance = distance
@@ -1872,8 +1884,8 @@ class SwipeKeyboardView
         }
 
         private fun findKeyAtDirect(
-            x: Float,
-            y: Float,
+            normalizedX: Float,
+            normalizedY: Float,
         ): KeyboardKey? {
             val thisLocation = IntArray(2)
             this.getLocationInWindow(thisLocation)
@@ -1887,7 +1899,7 @@ class SwipeKeyboardView
 
                 val rect = Rect(localX, localY, localX + button.width, localY + button.height)
 
-                if (rect.contains(x.toInt(), y.toInt())) {
+                if (rect.contains(normalizedX.toInt(), normalizedY.toInt())) {
                     return keyMapping[button]
                 }
             }
