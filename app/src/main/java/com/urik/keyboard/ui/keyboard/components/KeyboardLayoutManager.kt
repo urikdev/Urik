@@ -59,6 +59,7 @@ class KeyboardLayoutManager(
     private val onAcceleratedDeletionChanged: (Boolean) -> Unit,
     private val onSymbolsLongPress: () -> Unit,
     private val onLanguageSwitch: (String) -> Unit = {},
+    private val onShowInputMethodPicker: () -> Unit = {},
     private val characterVariationService: CharacterVariationService,
     private val languageManager: LanguageManager,
     private val themeManager: ThemeManager,
@@ -67,6 +68,7 @@ class KeyboardLayoutManager(
     private var clipboardEnabled = false
     private var activeLanguages: List<String> = emptyList()
     private var showLanguageSwitchKey = false
+    private var hasMultipleImes = false
 
     @Volatile
     private var customKeyMappings: Map<String, String> = emptyMap()
@@ -472,6 +474,56 @@ class KeyboardLayoutManager(
             }
         }
 
+    private var commaLongPressFired = false
+
+    @SuppressLint("ClickableViewAccessibility")
+    private val commaLongPressTouchListener =
+        View.OnTouchListener { view, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    commaLongPressFired = false
+                    longPressStartX = event.rawX
+                    longPressStartY = event.rawY
+                    val handler = Handler(Looper.getMainLooper())
+                    val runnable =
+                        Runnable {
+                            commaLongPressFired = true
+                            view.isPressed = false
+                            performContextualHaptic(KeyboardKey.Character(",", KeyboardKey.KeyType.PUNCTUATION))
+                            onShowInputMethodPicker()
+                        }
+                    buttonPendingCallbacks[view as Button] = PendingCallbacks(handler, runnable)
+                    handler.postDelayed(runnable, currentLongPressDuration.durationMs)
+                    false
+                }
+
+                MotionEvent.ACTION_MOVE -> {
+                    val dx = event.rawX - longPressStartX
+                    val dy = event.rawY - longPressStartY
+                    val distance = kotlin.math.sqrt(dx * dx + dy * dy)
+                    if (distance > longPressCancelThresholdPx) {
+                        buttonPendingCallbacks.remove(view as Button)?.let { pending ->
+                            pending.handler.removeCallbacks(pending.runnable)
+                        }
+                    }
+                    false
+                }
+
+                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                    buttonPendingCallbacks.remove(view as Button)?.let { pending ->
+                        pending.handler.removeCallbacks(pending.runnable)
+                    }
+                    val shouldConsume = commaLongPressFired
+                    commaLongPressFired = false
+                    shouldConsume
+                }
+
+                else -> {
+                    false
+                }
+            }
+        }
+
     private val punctuationCache: ManagedCache<String, List<String>> =
         cacheMemoryManager.createCache(
             name = "punctuation_cache",
@@ -557,6 +609,10 @@ class KeyboardLayoutManager(
 
     fun updateClipboardEnabled(enabled: Boolean) {
         clipboardEnabled = enabled
+    }
+
+    fun updateHasMultipleImes(hasMultiple: Boolean) {
+        hasMultipleImes = hasMultiple
     }
 
     fun updateActiveLanguages(languages: List<String>) {
@@ -894,8 +950,28 @@ class KeyboardLayoutManager(
             val supportsCustomMapping =
                 key is KeyboardKey.Character &&
                     (key.type == KeyboardKey.KeyType.LETTER || key.type == KeyboardKey.KeyType.NUMBER)
+
+            val isCommaWithMultipleImes =
+                key is KeyboardKey.Character &&
+                    key.value == "," &&
+                    hasMultipleImes
+
             background =
-                if (supportsCustomMapping) {
+                if (isCommaWithMultipleImes) {
+                    val keyboardIcon = ContextCompat.getDrawable(context, R.drawable.ic_keyboard)
+                    keyboardIcon?.setTint(getKeyTextColor(key))
+
+                    val iconSize = (10 * context.resources.displayMetrics.density).toInt()
+                    val leftInset = (5 * context.resources.displayMetrics.density).toInt()
+                    val topInset = (4 * context.resources.displayMetrics.density).toInt()
+
+                    val layerDrawable = LayerDrawable(arrayOf(keyBackground, keyboardIcon))
+                    layerDrawable.setLayerSize(1, iconSize, iconSize)
+                    layerDrawable.setLayerInset(1, leftInset, topInset, 0, 0)
+                    layerDrawable.setLayerGravity(1, Gravity.TOP or Gravity.START)
+
+                    layerDrawable
+                } else if (supportsCustomMapping) {
                     val customSymbol = customKeyMappings[key.value.lowercase()]
                     if (customSymbol != null) {
                         keyHintRenderer.createKeyWithHint(
@@ -1018,6 +1094,8 @@ class KeyboardLayoutManager(
             if (key is KeyboardKey.Character && key.type == KeyboardKey.KeyType.PUNCTUATION) {
                 if (longPressPunctuationMode == LongPressPunctuationMode.PERIOD && key.value == ".") {
                     setOnTouchListener(punctuationLongPressTouchListener)
+                } else if (key.value == ",") {
+                    setOnTouchListener(commaLongPressTouchListener)
                 }
             }
 

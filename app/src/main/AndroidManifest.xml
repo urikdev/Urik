@@ -3,6 +3,12 @@
 
     <uses-permission android:name="android.permission.VIBRATE" />
 
+    <queries>
+        <intent>
+            <action android:name="android.view.InputMethod" />
+        </intent>
+    </queries>
+
     <application
         android:name=".UrikApplication"
         android:allowBackup="false"

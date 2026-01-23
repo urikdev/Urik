@@ -1,6 +1,7 @@
 package com.urik.keyboard
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.graphics.Color
 import android.inputmethodservice.InputMethodService
 import android.os.Build
@@ -139,6 +140,10 @@ class UrikInputMethodService :
     private lateinit var layoutManager: KeyboardLayoutManager
     private lateinit var lifecycleRegistry: LifecycleRegistry
     private var postureDetector: com.urik.keyboard.service.PostureDetector? = null
+
+    private val inputMethodManager: android.view.inputmethod.InputMethodManager by lazy {
+        getSystemService(Context.INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager
+    }
 
     private var serviceJob = SupervisorJob()
     private var serviceScope = CoroutineScope(Dispatchers.Main + serviceJob)
@@ -631,6 +636,7 @@ class UrikInputMethodService :
                     onAcceleratedDeletionChanged = { active -> setAcceleratedDeletion(active) },
                     onSymbolsLongPress = { handleClipboardButtonClick() },
                     onLanguageSwitch = { languageCode -> handleLanguageSwitch(languageCode) },
+                    onShowInputMethodPicker = { showInputMethodPicker() },
                     characterVariationService = characterVariationService,
                     languageManager = languageManager,
                     themeManager = themeManager,
@@ -726,6 +732,9 @@ class UrikInputMethodService :
             }
 
             layoutManager.updateSplitGapPx(keyboardModeManager.currentMode.value.splitGapPx)
+
+            val hasMultipleImes = inputMethodManager.enabledInputMethodList.size > 1
+            layoutManager.updateHasMultipleImes(hasMultipleImes)
 
             val keyboardView = createSwipeKeyboardView() ?: return null
 
@@ -976,6 +985,13 @@ class UrikInputMethodService :
                     context = mapOf("operation" to "handleLanguageSwitch"),
                 )
             }
+        }
+    }
+
+    private fun showInputMethodPicker() {
+        try {
+            inputMethodManager.showInputMethodPicker()
+        } catch (_: Exception) {
         }
     }
 
