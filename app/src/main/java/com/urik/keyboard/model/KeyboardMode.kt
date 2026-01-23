@@ -16,7 +16,7 @@ data class KeyboardModeConfig(
     val splitGapPx: Int = 0,
 ) {
     companion object {
-        private const val ONE_HANDED_WIDTH_FACTOR = 0.85f
+        private const val ONE_HANDED_WIDTH_FACTOR = 0.90f
         private const val DEFAULT_SPLIT_GAP_DP = 120
 
         fun standard() =
