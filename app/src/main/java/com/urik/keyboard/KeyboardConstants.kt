@@ -95,7 +95,7 @@ object KeyboardConstants {
     }
 
     object SwipeDetectionConstants {
-        const val MAX_SWIPE_POINTS = 75
+        const val MAX_SWIPE_POINTS = 500
         const val MIN_SAMPLING_INTERVAL = 2
         const val MAX_SAMPLING_INTERVAL = 8
         const val ADAPTIVE_THRESHOLD = 40
@@ -127,7 +127,7 @@ object KeyboardConstants {
     }
 
     object GeometricScoringConstants {
-        const val MAX_PATH_POINTS = 100
+        const val MAX_PATH_POINTS = 500
 
         const val TIGHT_CLUSTER_SIGMA = 35f
         const val NORMAL_SIGMA = 42f

@@ -23,7 +23,7 @@ class SwipeOverlayView
         defStyleAttr: Int = 0,
     ) : View(context, attrs, defStyleAttr) {
         companion object {
-            private const val MAX_PATH_POINTS = 100
+            private const val MAX_PATH_POINTS = 500
             private const val MIN_DISTANCE_THRESHOLD_SQUARED = 25f
             private const val FADE_DURATION = 800L
         }
