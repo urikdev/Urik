@@ -93,7 +93,7 @@ class SwipeDetector
 
         private var lastUpdateTime = 0L
         private var isSwiping = false
-        private var swipePoints = mutableListOf<SwipePoint>()
+        private var swipePoints = ArrayList<SwipePoint>(SwipeDetectionConstants.MAX_SWIPE_POINTS)
         private var startTime = 0L
         private var pointCounter = 0
         private var firstPoint: SwipePoint? = null
@@ -407,7 +407,7 @@ class SwipeDetector
                             Float.MAX_VALUE
                         }
 
-                    if (swipePoints.size < SwipeDetectionConstants.MAX_SWIPE_POINTS && histDist > 4f) {
+                    if (histDist > 4f) {
                         swipePoints.add(
                             SwipePoint(
                                 x = histTransformed.x,
@@ -438,7 +438,7 @@ class SwipeDetector
                         Float.MAX_VALUE
                     }
 
-                if (swipePoints.size < SwipeDetectionConstants.MAX_SWIPE_POINTS && distFromLast > 4f) {
+                if (distFromLast > 4f) {
                     swipePoints.add(
                         SwipePoint(
                             x = transformed.x,
@@ -560,9 +560,7 @@ class SwipeDetector
                         velocity = histVelocity,
                     )
 
-                if (shouldSamplePoint(histPoint, pointCounter, histVelocity) &&
-                    swipePoints.size < SwipeDetectionConstants.MAX_SWIPE_POINTS
-                ) {
+                if (shouldSamplePoint(histPoint, pointCounter, histVelocity)) {
                     swipePoints.add(histPoint)
                 }
             }
@@ -581,7 +579,7 @@ class SwipeDetector
 
             val shouldAddPoint = shouldSamplePoint(newPoint, pointCounter, velocity)
 
-            if (shouldAddPoint && swipePoints.size < SwipeDetectionConstants.MAX_SWIPE_POINTS) {
+            if (shouldAddPoint) {
                 swipePoints.add(newPoint)
             }
 
@@ -677,7 +675,7 @@ class SwipeDetector
                     val interpolatedPath = interpolatePathForFastSegments(swipePath, keyPositionsSnapshot)
 
                     val minLength = 2
-                    val maxLength = (interpolatedPath.size / 3).coerceIn(5, 20)
+                    val maxLength = (interpolatedPath.size / 5).coerceIn(5, 20)
 
                     val compatibleLanguages = getCompatibleLanguagesForSwipe(activeLanguages, currentScriptCode)
 
@@ -818,10 +816,13 @@ class SwipeDetector
                                 interpolatedPath.size < 35 -> 3
                                 interpolatedPath.size < 50 -> 4
                                 interpolatedPath.size < 70 -> 6
-                                else -> 8
+                                interpolatedPath.size < 100 -> 8
+                                interpolatedPath.size < 150 -> 12
+                                interpolatedPath.size < 200 -> 16
+                                else -> 20
                             }
                         val inflectionBasedLength = (intentionalInflectionCount + 2).coerceIn(2, maxInflectionLength)
-                        val pathPointBasedLength = (interpolatedPath.size / 14).coerceIn(2, 7)
+                        val pathPointBasedLength = (interpolatedPath.size / 14).coerceIn(2, 20)
                         val expectedWordLength = maxOf(inflectionBasedLength, pathPointBasedLength)
 
                         val lengthExcess = maxOf(0, entry.word.length - expectedWordLength)
