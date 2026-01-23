@@ -530,7 +530,12 @@ class UrikInputMethodService :
         wordState = newWordState
 
         if (newWordState.suggestions.isNotEmpty()) {
-            val displaySuggestions = applyCapitalizationToSuggestions(newWordState.suggestions)
+            val filteredSuggestions =
+                newWordState.suggestions.filterNot { suggestion ->
+                    suggestion.equals(displayBuffer, ignoreCase = true)
+                }
+
+            val displaySuggestions = applyCapitalizationToSuggestions(filteredSuggestions)
             pendingSuggestions = displaySuggestions
             swipeKeyboardView?.updateSuggestions(displaySuggestions)
         } else {
