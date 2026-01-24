@@ -958,6 +958,8 @@ class SpellCheckManager
                 val cacheKey = buildCacheKey(normalizedWord, currentLang)
                 dictionaryCache.invalidate(cacheKey)
                 suggestionCache.invalidateAll()
+                commonWordsCache = emptyList()
+                commonWordsCacheStripped = emptyList()
             } catch (_: Exception) {
             }
         }
@@ -980,12 +982,14 @@ class SpellCheckManager
                     val cacheKey = buildCacheKey(normalizedWord, currentLang)
                     dictionaryCache.invalidate(cacheKey)
                     suggestionCache.invalidateAll()
+                    commonWordsCache = emptyList()
+                    commonWordsCacheStripped = emptyList()
                 }
             } catch (_: Exception) {
             }
         }
 
-        private fun isWordBlacklisted(word: String): Boolean =
+        fun isWordBlacklisted(word: String): Boolean =
             try {
                 val normalizedWord = word.lowercase(getLocaleForLanguage()).trim()
                 synchronized(blacklistedWords) {
