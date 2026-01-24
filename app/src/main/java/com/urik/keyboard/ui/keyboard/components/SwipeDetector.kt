@@ -874,10 +874,12 @@ class SwipeDetector
                                 else -> 0.5f
                             }
 
-                        val vertexLengthPenalty = pathGeometryAnalyzer.calculateVertexLengthPenalty(
-                            entry.word.length,
-                            vertexAnalysis,
-                        )
+                        val vertexLengthPenalty =
+                            pathGeometryAnalyzer.calculateVertexLengthPenalty(
+                                entry.word.length,
+                                vertexAnalysis,
+                            )
+
                         @Suppress("ktlint:standard:max-line-length")
                         val combinedScore =
                             (adjustedSpatialScore * spatialWeight + boostedFrequencyScore * frequencyWeight) * coverageBonus * lengthPenalty *

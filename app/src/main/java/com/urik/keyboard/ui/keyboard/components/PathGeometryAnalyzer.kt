@@ -808,7 +808,8 @@ class PathGeometryAnalyzer
             val simplifiedIndices = douglasPeuckerSimplify(path)
             val vertices = mutableListOf<PathVertex>()
 
-            simplifiedIndices.asSequence()
+            simplifiedIndices
+                .asSequence()
                 .windowed(3, 1)
                 .forEach { window ->
                     val prevIdx = window[0]
@@ -838,23 +839,25 @@ class PathGeometryAnalyzer
 
                     val velocityAtVertex = if (currIdx < velocityProfile.size) velocityProfile[currIdx] else 0f
                     val avgSurroundingVelocity = calculateSurroundingVelocity(velocityProfile, currIdx)
-                    val velocityRatio = if (avgSurroundingVelocity > 0.01f) {
-                        velocityAtVertex / avgSurroundingVelocity
-                    } else {
-                        1f
-                    }
+                    val velocityRatio =
+                        if (avgSurroundingVelocity > 0.01f) {
+                            velocityAtVertex / avgSurroundingVelocity
+                        } else {
+                            1f
+                        }
 
                     val isAngleVertex = angleChange > GeometricScoringConstants.VERTEX_ANGLE_THRESHOLD_RAD
                     val isVelocityVertex = velocityRatio < GeometricScoringConstants.VERTEX_VELOCITY_DROP_RATIO
 
                     val (nearestKey, _) = findNearestKey(curr, keyPositions)
                     val isDenseArea = isDenseKeyboardArea(curr, keyPositions)
-                    val adjustedAngleThreshold = if (isDenseArea) {
-                        GeometricScoringConstants.VERTEX_ANGLE_THRESHOLD_RAD *
-                            GeometricScoringConstants.VERTEX_DENSE_AREA_SENSITIVITY_BOOST
-                    } else {
-                        GeometricScoringConstants.VERTEX_ANGLE_THRESHOLD_RAD
-                    }
+                    val adjustedAngleThreshold =
+                        if (isDenseArea) {
+                            GeometricScoringConstants.VERTEX_ANGLE_THRESHOLD_RAD *
+                                GeometricScoringConstants.VERTEX_DENSE_AREA_SENSITIVITY_BOOST
+                        } else {
+                            GeometricScoringConstants.VERTEX_ANGLE_THRESHOLD_RAD
+                        }
                     val isDenseAreaVertex = isDenseArea && angleChange > adjustedAngleThreshold
 
                     val isSignificant = isAngleVertex || isVelocityVertex || isDenseAreaVertex
@@ -874,10 +877,11 @@ class PathGeometryAnalyzer
                 }
 
             val significantCount = vertices.count { it.isSignificant }
-            val minimumExpected = maxOf(
-                2,
-                significantCount - GeometricScoringConstants.VERTEX_TOLERANCE_CONSTANT,
-            )
+            val minimumExpected =
+                maxOf(
+                    2,
+                    significantCount - GeometricScoringConstants.VERTEX_TOLERANCE_CONSTANT,
+                )
 
             return VertexAnalysis(
                 vertices = vertices,
@@ -916,10 +920,11 @@ class PathGeometryAnalyzer
 
                 for (i in (startIdx + 1) until endIdx) {
                     val point = path[i]
-                    val dist = abs(
-                        lineDy * point.x - lineDx * point.y +
-                            endPoint.x * startPoint.y - endPoint.y * startPoint.x,
-                    ) / lineLen
+                    val dist =
+                        abs(
+                            lineDy * point.x - lineDx * point.y +
+                                endPoint.x * startPoint.y - endPoint.y * startPoint.x,
+                        ) / lineLen
 
                     if (dist > maxDist) {
                         maxDist = dist
@@ -1019,10 +1024,11 @@ class PathGeometryAnalyzer
                 velocityProfile = FloatArray(0),
                 curvatureProfile = FloatArray(0),
                 traversedKeys = emptyMap(),
-                vertexAnalysis = VertexAnalysis(
-                    vertices = emptyList(),
-                    significantVertexCount = 0,
-                    minimumExpectedLength = 2,
-                ),
+                vertexAnalysis =
+                    VertexAnalysis(
+                        vertices = emptyList(),
+                        significantVertexCount = 0,
+                        minimumExpectedLength = 2,
+                    ),
             )
     }
