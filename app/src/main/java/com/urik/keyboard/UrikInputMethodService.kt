@@ -2671,7 +2671,9 @@ class UrikInputMethodService :
                 val wordInfo = BackspaceUtils.extractWordBeforeCursor(textBeforeCursor)
                 if (wordInfo != null) {
                     val (word, _) = wordInfo
-                    currentInputConnection?.deleteSurroundingText(word.length, 0)
+                    val shouldDeleteSpace = BackspaceUtils.shouldDeleteTrailingSpace(textBeforeCursor, word.length)
+                    val deleteLength = BackspaceUtils.calculateDeleteLength(word.length, shouldDeleteSpace)
+                    currentInputConnection?.deleteSurroundingText(deleteLength, 0)
                     coordinateStateClear()
                 }
                 return
@@ -2688,7 +2690,9 @@ class UrikInputMethodService :
                 val wordInfo = BackspaceUtils.extractWordBeforeCursor(textBeforePunctuation)
                 if (wordInfo != null) {
                     val (word, _) = wordInfo
-                    currentInputConnection?.deleteSurroundingText(word.length + trailingPunctuationCount, 0)
+                    val shouldDeleteSpace = BackspaceUtils.shouldDeleteTrailingSpace(textBeforePunctuation, word.length)
+                    val deleteLength = BackspaceUtils.calculateDeleteLength(word.length, shouldDeleteSpace)
+                    currentInputConnection?.deleteSurroundingText(deleteLength + trailingPunctuationCount, 0)
                     coordinateStateClear()
                     return
                 }

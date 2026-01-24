@@ -451,4 +451,100 @@ class BackspaceUtilsTest {
         assertEquals(4, wordEnd)
         assertEquals(4, wordEnd - wordStart)
     }
+
+    @Test
+    fun `swipe delete with word and trailing punctuation`() {
+        val text = "hello world!"
+        val idx = text.indexOfLast { !Character.isLetterOrDigit(it) && !Character.isWhitespace(it) }
+        val textBeforePunctuation = text.substring(0, idx)
+
+        val wordInfo = BackspaceUtils.extractWordBeforeCursor(textBeforePunctuation)
+        assertNotNull(wordInfo)
+        val (word, _) = wordInfo!!
+        assertEquals("world", word)
+
+        val shouldDeleteSpace = BackspaceUtils.shouldDeleteTrailingSpace(textBeforePunctuation, word.length)
+        assertTrue(shouldDeleteSpace)
+
+        val deleteLength = BackspaceUtils.calculateDeleteLength(word.length, shouldDeleteSpace)
+        assertEquals(6, deleteLength)
+    }
+
+    @Test
+    fun `swipe delete does not cross paragraph boundary`() {
+        val text = "first paragraph\nsecond"
+        val wordInfo = BackspaceUtils.extractWordBeforeCursor(text)
+
+        assertNotNull(wordInfo)
+        val (word, boundary) = wordInfo!!
+        assertEquals("second", word)
+        assertEquals(15, boundary)
+
+        val shouldDeleteSpace = BackspaceUtils.shouldDeleteTrailingSpace(text, word.length)
+        assertFalse(shouldDeleteSpace)
+    }
+
+    @Test
+    fun `swipe delete with multiple spaces deletes only one`() {
+        val text = "hello  world"
+        val wordInfo = BackspaceUtils.extractWordBeforeCursor(text)
+
+        assertNotNull(wordInfo)
+        val (word, _) = wordInfo!!
+        assertEquals("world", word)
+
+        val shouldDeleteSpace = BackspaceUtils.shouldDeleteTrailingSpace(text, word.length)
+        assertTrue(shouldDeleteSpace)
+
+        val deleteLength = BackspaceUtils.calculateDeleteLength(word.length, shouldDeleteSpace)
+        assertEquals(6, deleteLength)
+    }
+
+    @Test
+    fun `swipe delete at paragraph start deletes word only`() {
+        val text = "word"
+        val wordInfo = BackspaceUtils.extractWordBeforeCursor(text)
+
+        assertNotNull(wordInfo)
+        val (word, _) = wordInfo!!
+        assertEquals("word", word)
+
+        val shouldDeleteSpace = BackspaceUtils.shouldDeleteTrailingSpace(text, word.length)
+        assertFalse(shouldDeleteSpace)
+
+        val deleteLength = BackspaceUtils.calculateDeleteLength(word.length, shouldDeleteSpace)
+        assertEquals(4, deleteLength)
+    }
+
+    @Test
+    fun `swipe delete after newline and space`() {
+        val text = "first\n word"
+        val wordInfo = BackspaceUtils.extractWordBeforeCursor(text)
+
+        assertNotNull(wordInfo)
+        val (word, _) = wordInfo!!
+        assertEquals("word", word)
+
+        val shouldDeleteSpace = BackspaceUtils.shouldDeleteTrailingSpace(text, word.length)
+        assertTrue(shouldDeleteSpace)
+
+        val deleteLength = BackspaceUtils.calculateDeleteLength(word.length, shouldDeleteSpace)
+        assertEquals(5, deleteLength)
+    }
+
+    @Test
+    fun `shouldDeleteTrailingSpace returns false for newline`() {
+        val text = "first\nsecond"
+        val shouldDelete = BackspaceUtils.shouldDeleteTrailingSpace(text, 6)
+
+        assertFalse(shouldDelete)
+    }
+
+    @Test
+    fun `shouldDeleteTrailingSpace returns true for regular space`() {
+        val text = "first second"
+        val shouldDelete = BackspaceUtils.shouldDeleteTrailingSpace(text, 6)
+
+        assertTrue(shouldDelete)
+    }
 }
