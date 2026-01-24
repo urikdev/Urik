@@ -196,4 +196,154 @@ class CursorEditingUtilsTest {
         Assert.assertFalse(CursorEditingUtils.isPunctuation('&'))
         Assert.assertFalse(CursorEditingUtils.isPunctuation('*'))
     }
+
+    @Test
+    fun `isNonSequentialCursorMovement detects large jump`() {
+        Assert.assertTrue(
+            CursorEditingUtils.isNonSequentialCursorMovement(
+                oldSelStart = 10,
+                oldSelEnd = 10,
+                newSelStart = 100,
+                newSelEnd = 100,
+                composingRegionStart = -1,
+                composingRegionEnd = -1,
+            ),
+        )
+    }
+
+    @Test
+    fun `isNonSequentialCursorMovement allows sequential movement`() {
+        Assert.assertFalse(
+            CursorEditingUtils.isNonSequentialCursorMovement(
+                oldSelStart = 10,
+                oldSelEnd = 10,
+                newSelStart = 11,
+                newSelEnd = 11,
+                composingRegionStart = -1,
+                composingRegionEnd = -1,
+            ),
+        )
+    }
+
+    @Test
+    fun `isNonSequentialCursorMovement allows movement within composing region`() {
+        Assert.assertFalse(
+            CursorEditingUtils.isNonSequentialCursorMovement(
+                oldSelStart = 12,
+                oldSelEnd = 12,
+                newSelStart = 18,
+                newSelEnd = 18,
+                composingRegionStart = 10,
+                composingRegionEnd = 20,
+            ),
+        )
+    }
+
+    @Test
+    fun `isNonSequentialCursorMovement detects selection change`() {
+        Assert.assertTrue(
+            CursorEditingUtils.isNonSequentialCursorMovement(
+                oldSelStart = 10,
+                oldSelEnd = 10,
+                newSelStart = 10,
+                newSelEnd = 20,
+                composingRegionStart = -1,
+                composingRegionEnd = -1,
+            ),
+        )
+    }
+
+    @Test
+    fun `extractWordBoundedByParagraph stops at newline`() {
+        val result = CursorEditingUtils.extractWordBoundedByParagraph("First line\nSecond")
+
+        Assert.assertNotNull(result)
+        Assert.assertEquals("Second", result!!.first)
+    }
+
+    @Test
+    fun `extractWordBoundedByParagraph extracts word within paragraph`() {
+        val result = CursorEditingUtils.extractWordBoundedByParagraph("Hello world")
+
+        Assert.assertNotNull(result)
+        Assert.assertEquals("world", result!!.first)
+    }
+
+    @Test
+    fun `extractWordBoundedByParagraph returns null for empty paragraph`() {
+        val result = CursorEditingUtils.extractWordBoundedByParagraph("First line\n")
+
+        Assert.assertNull(result)
+    }
+
+    @Test
+    fun `extractWordBoundedByParagraph returns null for whitespace only`() {
+        val result = CursorEditingUtils.extractWordBoundedByParagraph("First line\n   ")
+
+        Assert.assertNull(result)
+    }
+
+    @Test
+    fun `shouldAbortRecomposition detects cursor mismatch`() {
+        Assert.assertTrue(
+            CursorEditingUtils.shouldAbortRecomposition(
+                expectedCursorPosition = 10,
+                actualCursorPosition = 50,
+                expectedComposingStart = 5,
+                actualComposingStart = 5,
+            ),
+        )
+    }
+
+    @Test
+    fun `shouldAbortRecomposition allows minor drift within tolerance`() {
+        Assert.assertFalse(
+            CursorEditingUtils.shouldAbortRecomposition(
+                expectedCursorPosition = 10,
+                actualCursorPosition = 11,
+                expectedComposingStart = 5,
+                actualComposingStart = 5,
+            ),
+        )
+    }
+
+    @Test
+    fun `shouldAbortRecomposition detects composing region mismatch`() {
+        Assert.assertTrue(
+            CursorEditingUtils.shouldAbortRecomposition(
+                expectedCursorPosition = 10,
+                actualCursorPosition = 10,
+                expectedComposingStart = 5,
+                actualComposingStart = 20,
+            ),
+        )
+    }
+
+    @Test
+    fun `crossesParagraphBoundary detects newline in range`() {
+        val text = "Hello\nWorld"
+
+        Assert.assertTrue(
+            CursorEditingUtils.crossesParagraphBoundary(0, 8, text),
+        )
+    }
+
+    @Test
+    fun `crossesParagraphBoundary returns false for same paragraph`() {
+        val text = "Hello World"
+
+        Assert.assertFalse(
+            CursorEditingUtils.crossesParagraphBoundary(0, 5, text),
+        )
+    }
+
+    @Test
+    fun `crossesParagraphBoundary handles invalid positions`() {
+        Assert.assertFalse(
+            CursorEditingUtils.crossesParagraphBoundary(-1, 5, "Hello"),
+        )
+        Assert.assertFalse(
+            CursorEditingUtils.crossesParagraphBoundary(0, 100, "Hello"),
+        )
+    }
 }
