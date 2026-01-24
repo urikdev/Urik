@@ -19,6 +19,8 @@ import net.zetetic.database.sqlcipher.SupportOpenHelperFactory
         LearnedWordFts::class,
         ClipboardItem::class,
         CustomKeyMapping::class,
+        UserWordFrequency::class,
+        UserWordBigram::class,
     ],
     version = KeyboardConstants.DatabaseConstants.DATABASE_VERSION,
     exportSchema = true,
@@ -32,6 +34,10 @@ abstract class KeyboardDatabase : RoomDatabase() {
     abstract fun clipboardDao(): ClipboardDao
 
     abstract fun customKeyMappingDao(): CustomKeyMappingDao
+
+    abstract fun userWordFrequencyDao(): UserWordFrequencyDao
+
+    abstract fun userWordBigramDao(): UserWordBigramDao
 
     companion object {
         const val DATABASE_NAME = "keyboard_database"
@@ -87,6 +93,61 @@ abstract class KeyboardDatabase : RoomDatabase() {
                 }
             }
 
+        private val MIGRATION_4_5 =
+            object : Migration(4, 5) {
+                override fun migrate(db: SupportSQLiteDatabase) {
+                    db.execSQL(
+                        """
+                        CREATE TABLE IF NOT EXISTS user_word_frequency (
+                            id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                            language_tag TEXT NOT NULL,
+                            word_normalized TEXT NOT NULL,
+                            frequency INTEGER NOT NULL,
+                            last_used INTEGER NOT NULL
+                        )
+                        """,
+                    )
+
+                    db.execSQL(
+                        "CREATE UNIQUE INDEX IF NOT EXISTS idx_user_freq_lookup ON user_word_frequency(language_tag, word_normalized)",
+                    )
+                    db.execSQL("CREATE INDEX IF NOT EXISTS idx_user_freq_ranking ON user_word_frequency(language_tag, frequency)")
+
+                    db.execSQL(
+                        """
+                        INSERT OR IGNORE INTO user_word_frequency (language_tag, word_normalized, frequency, last_used)
+                        SELECT language_tag, word_normalized, frequency, last_used
+                        FROM learned_words
+                        """,
+                    )
+                }
+            }
+
+        private val MIGRATION_5_6 =
+            object : Migration(5, 6) {
+                override fun migrate(db: SupportSQLiteDatabase) {
+                    db.execSQL(
+                        """
+                        CREATE TABLE IF NOT EXISTS user_word_bigram (
+                            id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                            language_tag TEXT NOT NULL,
+                            word_a_normalized TEXT NOT NULL,
+                            word_b_normalized TEXT NOT NULL,
+                            frequency INTEGER NOT NULL,
+                            last_used INTEGER NOT NULL
+                        )
+                        """,
+                    )
+
+                    db.execSQL(
+                        "CREATE UNIQUE INDEX IF NOT EXISTS idx_bigram_lookup ON user_word_bigram(language_tag, word_a_normalized, word_b_normalized)",
+                    )
+                    db.execSQL(
+                        "CREATE INDEX IF NOT EXISTS idx_bigram_predictions ON user_word_bigram(language_tag, word_a_normalized, frequency)",
+                    )
+                }
+            }
+
         /**
          * Returns singleton database instance.
          *
@@ -115,7 +176,7 @@ abstract class KeyboardDatabase : RoomDatabase() {
                             context.applicationContext,
                             KeyboardDatabase::class.java,
                             DATABASE_NAME,
-                        ).addMigrations(MIGRATION_1_2, MIGRATION_3_4)
+                        ).addMigrations(MIGRATION_1_2, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
 
                 if (passphrase != null) {
                     builder.openHelperFactory(SupportOpenHelperFactory(passphrase))

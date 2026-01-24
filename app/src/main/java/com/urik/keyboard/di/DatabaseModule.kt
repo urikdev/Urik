@@ -7,6 +7,8 @@ import com.urik.keyboard.data.database.CustomKeyMappingDao
 import com.urik.keyboard.data.database.DatabaseSecurityManager
 import com.urik.keyboard.data.database.KeyboardDatabase
 import com.urik.keyboard.data.database.LearnedWordDao
+import com.urik.keyboard.data.database.UserWordBigramDao
+import com.urik.keyboard.data.database.UserWordFrequencyDao
 import com.urik.keyboard.utils.ErrorLogger
 import dagger.Module
 import dagger.Provides
@@ -139,4 +141,10 @@ object DatabaseModule {
 
     @Provides
     fun provideCustomKeyMappingDao(database: KeyboardDatabase): CustomKeyMappingDao = database.customKeyMappingDao()
+
+    @Provides
+    fun provideUserWordFrequencyDao(database: KeyboardDatabase): UserWordFrequencyDao = database.userWordFrequencyDao()
+
+    @Provides
+    fun provideUserWordBigramDao(database: KeyboardDatabase): UserWordBigramDao = database.userWordBigramDao()
 }

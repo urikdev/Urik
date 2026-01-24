@@ -58,6 +58,7 @@ class SpellCheckManager
         private val context: Context,
         private val languageManager: LanguageManager,
         private val wordLearningEngine: WordLearningEngine,
+        private val wordFrequencyRepository: com.urik.keyboard.data.WordFrequencyRepository,
         cacheMemoryManager: CacheMemoryManager,
         private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
     ) {
@@ -631,13 +632,28 @@ class SpellCheckManager
                     if (normalizedWord.length >= SpellCheckConstants.MIN_COMPLETION_LENGTH) {
                         val completions = getCompletionsForPrefix(normalizedWord, languageCode)
 
-                        completions
-                            .filter { (word, _) -> !seenWords.contains(word.lowercase()) && !isWordBlacklisted(word) }
-                            .take(SpellCheckConstants.MAX_PREFIX_COMPLETIONS)
+                        val filteredCompletions =
+                            completions
+                                .filter { (word, _) -> !seenWords.contains(word.lowercase()) && !isWordBlacklisted(word) }
+                                .take(SpellCheckConstants.MAX_PREFIX_COMPLETIONS)
+
+                        val userFrequencies =
+                            try {
+                                wordFrequencyRepository.getFrequencies(
+                                    filteredCompletions.map { it.first },
+                                    languageCode,
+                                )
+                            } catch (_: Exception) {
+                                emptyMap()
+                            }
+
+                        filteredCompletions
                             .forEachIndexed { index, (word, frequency) ->
                                 val isContraction =
                                     com.urik.keyboard.utils.TextMatchingUtils
                                         .isContractionSuggestion(normalizedWord, word)
+
+                                val userFrequency = userFrequencies[word] ?: 0
 
                                 val confidence =
                                     if (isContraction) {
@@ -645,12 +661,18 @@ class SpellCheckManager
                                     } else {
                                         val lengthRatio = normalizedWord.length.toDouble() / word.length.toDouble()
                                         val frequencyScore = ln(frequency.toDouble() + 1.0) / SpellCheckConstants.FREQUENCY_SCORE_DIVISOR
-                                        (
+                                        var baseConfidence =
                                             SpellCheckConstants.COMPLETION_LENGTH_WEIGHT * lengthRatio +
                                                 SpellCheckConstants.COMPLETION_FREQUENCY_WEIGHT * frequencyScore
-                                        ).coerceIn(
+
+                                        if (userFrequency > 0) {
+                                            val userFreqBoost = calculateFrequencyBoost(userFrequency)
+                                            baseConfidence += userFreqBoost
+                                        }
+
+                                        baseConfidence.coerceIn(
                                             SpellCheckConstants.COMPLETION_CONFIDENCE_MIN,
-                                            SpellCheckConstants.COMPLETION_CONFIDENCE_MAX,
+                                            0.99,
                                         )
                                     }
 
@@ -673,17 +695,31 @@ class SpellCheckManager
                     if (spellChecker != null) {
                         val symSpellResults = spellChecker.lookup(normalizedWord, Verbosity.All, SpellCheckConstants.MAX_EDIT_DISTANCE)
 
+                        val filteredResults =
+                            symSpellResults.filter { result ->
+                                !seenWords.contains(result.term.lowercase()) && !isWordBlacklisted(result.term)
+                            }
+
+                        val userFrequencies =
+                            try {
+                                wordFrequencyRepository.getFrequencies(
+                                    filteredResults.map { it.term },
+                                    languageCode,
+                                )
+                            } catch (_: Exception) {
+                                emptyMap()
+                            }
+
                         val scoredResults =
-                            symSpellResults
-                                .filter { result ->
-                                    !seenWords.contains(result.term.lowercase()) && !isWordBlacklisted(result.term)
-                                }.map { result ->
+                            filteredResults
+                                .map { result ->
                                     val editDistance = result.distance
                                     val isContraction =
                                         com.urik.keyboard.utils.TextMatchingUtils
                                             .isContractionSuggestion(normalizedWord, result.term)
 
                                     val frequency = wordFrequencies[result.term.lowercase()] ?: 1L
+                                    val userFrequency = userFrequencies[result.term] ?: 0
 
                                     val confidence =
                                         if (isContraction) {
@@ -723,9 +759,14 @@ class SpellCheckManager
                                                 baseConfidence += SpellCheckConstants.APOSTROPHE_BOOST
                                             }
 
+                                            if (userFrequency > 0) {
+                                                val userFreqBoost = calculateFrequencyBoost(userFrequency)
+                                                baseConfidence += userFreqBoost
+                                            }
+
                                             baseConfidence.coerceIn(
                                                 SpellCheckConstants.SYMSPELL_CONFIDENCE_MIN,
-                                                SpellCheckConstants.SYMSPELL_CONFIDENCE_MAX,
+                                                0.99,
                                             )
                                         }
 
@@ -803,6 +844,31 @@ class SpellCheckManager
 
             val codePointCount = text.codePointCount(0, text.length)
             return hasValidChars && codePointCount in 1..SpellCheckConstants.MAX_INPUT_CODEPOINTS
+        }
+
+        private fun parseDictionaryLine(line: String): Pair<String, Int>? {
+            if (line.isBlank()) return null
+
+            val parts = line.trim().split(" ", limit = 2)
+            val word = parts[0].lowercase().trim()
+            val frequency =
+                if (parts.size >= 2) {
+                    parts[1].toIntOrNull() ?: 1
+                } else {
+                    1
+                }
+
+            val isValid =
+                word.length in SpellCheckConstants.COMMON_WORD_MIN_LENGTH..SpellCheckConstants.COMMON_WORD_MAX_LENGTH &&
+                    word.all {
+                        Character.isLetter(it.code) ||
+                            Character.getType(it.code) == Character.OTHER_LETTER.toInt() ||
+                            com.urik.keyboard.utils.TextMatchingUtils
+                                .isValidWordPunctuation(it)
+                    } &&
+                    !isWordBlacklisted(word)
+
+            return if (isValid) word to frequency else null
         }
 
         private fun getCurrentLanguage(): String =
@@ -964,39 +1030,8 @@ class SpellCheckManager
                     try {
                         context.assets.open(dictionaryFile).bufferedReader().use { reader ->
                             reader.forEachLine { line ->
-                                if (line.isNotBlank()) {
-                                    val parts = line.trim().split(" ", limit = 2)
-                                    if (parts.size >= 2) {
-                                        val word = parts[0].lowercase().trim()
-                                        val frequency = parts[1].toIntOrNull() ?: 1
-
-                                        if (word.length in
-                                            SpellCheckConstants.COMMON_WORD_MIN_LENGTH..SpellCheckConstants.COMMON_WORD_MAX_LENGTH &&
-                                            word.all {
-                                                Character.isLetter(it.code) ||
-                                                    Character.getType(it.code) == Character.OTHER_LETTER.toInt() ||
-                                                    com.urik.keyboard.utils.TextMatchingUtils
-                                                        .isValidWordPunctuation(it)
-                                            } &&
-                                            !isWordBlacklisted(word)
-                                        ) {
-                                            wordFrequencies.add(word to frequency)
-                                        }
-                                    } else if (parts.size == 1) {
-                                        val word = parts[0].lowercase().trim()
-                                        if (word.length in
-                                            SpellCheckConstants.COMMON_WORD_MIN_LENGTH..SpellCheckConstants.COMMON_WORD_MAX_LENGTH &&
-                                            word.all {
-                                                Character.isLetter(it.code) ||
-                                                    Character.getType(it.code) == Character.OTHER_LETTER.toInt() ||
-                                                    com.urik.keyboard.utils.TextMatchingUtils
-                                                        .isValidWordPunctuation(it)
-                                            } &&
-                                            !isWordBlacklisted(word)
-                                        ) {
-                                            wordFrequencies.add(word to 1)
-                                        }
-                                    }
+                                parseDictionaryLine(line)?.let { wordFrequency ->
+                                    wordFrequencies.add(wordFrequency)
                                 }
                             }
                         }
@@ -1045,41 +1080,9 @@ class SpellCheckManager
                         try {
                             context.assets.open(dictionaryFile).bufferedReader().use { reader ->
                                 reader.forEachLine { line ->
-                                    if (line.isNotBlank()) {
-                                        val parts = line.trim().split(" ", limit = 2)
-                                        if (parts.size >= 2) {
-                                            val word = parts[0].lowercase().trim()
-                                            val frequency = parts[1].toIntOrNull() ?: 1
-
-                                            if (word.length in
-                                                SpellCheckConstants.COMMON_WORD_MIN_LENGTH..SpellCheckConstants.COMMON_WORD_MAX_LENGTH &&
-                                                word.all {
-                                                    Character.isLetter(it.code) ||
-                                                        Character.getType(it.code) == Character.OTHER_LETTER.toInt() ||
-                                                        com.urik.keyboard.utils.TextMatchingUtils
-                                                            .isValidWordPunctuation(it)
-                                                } &&
-                                                !isWordBlacklisted(word)
-                                            ) {
-                                                val currentFreq = mergedWords[word] ?: 0
-                                                mergedWords[word] = maxOf(currentFreq, frequency)
-                                            }
-                                        } else if (parts.size == 1) {
-                                            val word = parts[0].lowercase().trim()
-                                            if (word.length in
-                                                SpellCheckConstants.COMMON_WORD_MIN_LENGTH..SpellCheckConstants.COMMON_WORD_MAX_LENGTH &&
-                                                word.all {
-                                                    Character.isLetter(it.code) ||
-                                                        Character.getType(it.code) == Character.OTHER_LETTER.toInt() ||
-                                                        com.urik.keyboard.utils.TextMatchingUtils
-                                                            .isValidWordPunctuation(it)
-                                                } &&
-                                                !isWordBlacklisted(word)
-                                            ) {
-                                                val currentFreq = mergedWords[word] ?: 0
-                                                mergedWords[word] = maxOf(currentFreq, 1)
-                                            }
-                                        }
+                                    parseDictionaryLine(line)?.let { (word, frequency) ->
+                                        val currentFreq = mergedWords[word] ?: 0
+                                        mergedWords[word] = maxOf(currentFreq, frequency)
                                     }
                                 }
                             }

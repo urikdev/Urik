@@ -39,6 +39,7 @@ class SettingsRepository
         @param:ApplicationContext private val context: Context,
         private val database: KeyboardDatabase,
         private val cacheMemoryManager: CacheMemoryManager,
+        private val wordFrequencyRepository: com.urik.keyboard.data.WordFrequencyRepository,
     ) {
         private val dataStore = context.settingsDataStore
 
@@ -623,7 +624,9 @@ class SettingsRepository
                     supportedLanguages.forEach { languageTag ->
                         database.learnedWordDao().clearLanguage(languageTag)
                     }
+                    database.userWordFrequencyDao().clearAll()
                 }
+                wordFrequencyRepository.clearCache()
                 cacheMemoryManager.forceCleanup()
                 Result.success(Unit)
             } catch (e: Exception) {

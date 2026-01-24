@@ -104,6 +104,9 @@ class UrikInputMethodService :
     lateinit var wordLearningEngine: WordLearningEngine
 
     @Inject
+    lateinit var wordFrequencyRepository: com.urik.keyboard.data.WordFrequencyRepository
+
+    @Inject
     lateinit var cacheMemoryManager: CacheMemoryManager
 
     @Inject
@@ -192,6 +195,12 @@ class UrikInputMethodService :
 
     @Volatile
     private var currentInputAction: KeyboardKey.ActionType = KeyboardKey.ActionType.ENTER
+
+    @Volatile
+    private var lastCommittedWord: String = ""
+
+    @Volatile
+    private var isShowingBigramPredictions: Boolean = false
 
     private fun safeGetTextBeforeCursor(
         length: Int,
@@ -410,6 +419,19 @@ class UrikInputMethodService :
      * @param inputMethod Source of the word (TYPED, SWIPED, SELECTED_FROM_SUGGESTION)
      * @return True if learning succeeded or is disabled
      */
+    private suspend fun recordWordUsage(word: String) {
+        try {
+            val currentLanguage = languageManager.currentLanguage.value
+            wordFrequencyRepository.incrementFrequency(word, currentLanguage)
+
+            if (lastCommittedWord.isNotBlank()) {
+                wordFrequencyRepository.recordBigram(lastCommittedWord, word, currentLanguage)
+            }
+            lastCommittedWord = word
+        } catch (_: Exception) {
+        }
+    }
+
     private suspend fun learnWordAndInvalidateCache(
         word: String,
         inputMethod: InputMethod,
@@ -419,6 +441,8 @@ class UrikInputMethodService :
             if (!settings.isWordLearningEnabled) {
                 return true
             }
+
+            recordWordUsage(word)
 
             val isInDictionary = spellCheckManager.isWordInSymSpellDictionary(word)
             if (isInDictionary) {
@@ -465,11 +489,13 @@ class UrikInputMethodService :
 
                 currentInputConnection?.commitText(" ", 1)
                 coordinateStateClear()
+                showBigramPredictions()
             } catch (_: Exception) {
                 autoCapitalizePronounI()
                 coordinateWordCompletion()
                 currentInputConnection?.commitText(" ", 1)
                 coordinateStateClear()
+                showBigramPredictions()
             } finally {
                 currentInputConnection?.endBatchEdit()
             }
@@ -493,12 +519,51 @@ class UrikInputMethodService :
         displayBuffer = ""
         wordState = WordState()
         pendingSuggestions = emptyList()
+        isShowingBigramPredictions = false
         clearSpellConfirmationState()
         swipeKeyboardView?.clearSuggestions()
         composingRegionStart = -1
 
         if (!viewModel.state.value.isCapsLockOn) {
             viewModel.onEvent(KeyboardEvent.ShiftStateChanged(false))
+        }
+    }
+
+    private fun showBigramPredictions() {
+        if (isSecureField || !currentSettings.showSuggestions || lastCommittedWord.isBlank()) {
+            return
+        }
+
+        serviceScope.launch {
+            try {
+                val currentLanguage = languageManager.currentLanguage.value
+                val predictions =
+                    wordFrequencyRepository.getBigramPredictions(
+                        lastCommittedWord,
+                        currentLanguage,
+                        currentSettings.effectiveSuggestionCount,
+                    )
+
+                if (predictions.isNotEmpty() && displayBuffer.isEmpty()) {
+                    val displayPredictions = applyCapitalizationToSuggestions(predictions)
+                    withContext(Dispatchers.Main) {
+                        if (displayBuffer.isEmpty()) {
+                            isShowingBigramPredictions = true
+                            pendingSuggestions = displayPredictions
+                            swipeKeyboardView?.updateSuggestions(displayPredictions)
+                        }
+                    }
+                }
+            } catch (_: Exception) {
+            }
+        }
+    }
+
+    private fun clearBigramPredictions() {
+        if (isShowingBigramPredictions) {
+            isShowingBigramPredictions = false
+            pendingSuggestions = emptyList()
+            swipeKeyboardView?.clearSuggestions()
         }
     }
 
@@ -557,11 +622,14 @@ class UrikInputMethodService :
             try {
                 isActivelyEditing = true
 
+                recordWordUsage(suggestion)
+
                 currentInputConnection?.beginBatchEdit()
                 try {
                     currentInputConnection?.commitText("$suggestion ", 1)
 
                     coordinateStateClear()
+                    showBigramPredictions()
 
                     val textBefore = safeGetTextBeforeCursor(50)
                     viewModel.checkAndApplyAutoCapitalization(textBefore, currentSettings.autoCapitalizationEnabled)
@@ -1131,6 +1199,10 @@ class UrikInputMethodService :
                     layoutManager.updateActiveLanguages(languages)
                     swipeDetector.updateActiveLanguages(languages)
                     updateSwipeKeyboard()
+
+                    languages.forEach { lang ->
+                        wordFrequencyRepository.preloadTopBigrams(lang)
+                    }
                 }
             },
         )
@@ -1327,6 +1399,8 @@ class UrikInputMethodService :
      */
     private fun handleKeyPress(key: KeyboardKey) {
         try {
+            clearBigramPredictions()
+
             if (swipeKeyboardView?.handleSearchInput(key) == true) {
                 return
             }
@@ -1581,6 +1655,7 @@ class UrikInputMethodService :
                                         }
 
                                         coordinateStateClear()
+                                        showBigramPredictions()
                                     } finally {
                                         currentInputConnection?.endBatchEdit()
                                     }
@@ -1609,6 +1684,7 @@ class UrikInputMethodService :
                 try {
                     autoCapitalizePronounI()
                     coordinateWordCompletion()
+                    showBigramPredictions()
                     currentInputConnection?.commitText(char, 1)
 
                     if (char.length == 1) {
@@ -1634,6 +1710,8 @@ class UrikInputMethodService :
      */
     private fun handleSwipeWord(validatedWord: String) {
         try {
+            clearBigramPredictions()
+
             if (isSecureField) {
                 currentInputConnection?.setComposingText(validatedWord, 1)
                 return
@@ -2325,11 +2403,13 @@ class UrikInputMethodService :
                             val isValid = textInputProcessor.validateWord(wordState.normalizedBuffer)
                             if (isValid) {
                                 isActivelyEditing = true
+                                recordWordUsage(wordState.normalizedBuffer)
                                 currentInputConnection?.beginBatchEdit()
                                 try {
                                     autoCapitalizePronounI()
                                     currentInputConnection?.finishComposingText()
                                     coordinateStateClear()
+                                    showBigramPredictions()
                                     currentInputConnection?.commitText(" ", 1)
 
                                     val textBefore =
@@ -2366,6 +2446,7 @@ class UrikInputMethodService :
                 try {
                     autoCapitalizePronounI()
                     coordinateWordCompletion()
+                    showBigramPredictions()
                     currentInputConnection?.commitText(" ", 1)
 
                     val textBefore = safeGetTextBeforeCursor(50)
@@ -2378,6 +2459,7 @@ class UrikInputMethodService :
                 try {
                     autoCapitalizePronounI()
                     coordinateWordCompletion()
+                    showBigramPredictions()
                     currentInputConnection?.commitText(" ", 1)
 
                     val textBefore = safeGetTextBeforeCursor(50)
@@ -2539,6 +2621,7 @@ class UrikInputMethodService :
 
         lastSpaceTime = 0
         lastShiftTime = 0
+        lastCommittedWord = ""
 
         isSecureField = SecureFieldDetector.isSecure(attribute)
         currentInputAction = ActionDetector.detectAction(attribute)
