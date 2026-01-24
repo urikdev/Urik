@@ -66,7 +66,7 @@ object BackspaceUtils {
         if (textBeforeCursor.length <= wordLength) return false
 
         val charBeforeWord = textBeforeCursor[textBeforeCursor.length - wordLength - 1]
-        return charBeforeWord.isWhitespace()
+        return charBeforeWord.isWhitespace() && charBeforeWord != '\n'
     }
 
     fun calculateDeleteLength(
