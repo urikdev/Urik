@@ -5,6 +5,7 @@ package com.urik.keyboard.service
 import android.content.Context
 import android.content.res.AssetManager
 import com.urik.keyboard.KeyboardConstants.SpellCheckConstants
+import com.urik.keyboard.data.WordFrequencyRepository
 import com.urik.keyboard.utils.CacheMemoryManager
 import com.urik.keyboard.utils.ManagedCache
 import kotlinx.coroutines.Dispatchers
@@ -44,6 +45,7 @@ class SpellCheckManagerTest {
     private lateinit var assetManager: AssetManager
     private lateinit var languageManager: LanguageManager
     private lateinit var wordLearningEngine: WordLearningEngine
+    private lateinit var wordFrequencyRepository: WordFrequencyRepository
     private lateinit var cacheMemoryManager: CacheMemoryManager
     private lateinit var suggestionCache: ManagedCache<String, List<SpellingSuggestion>>
     private lateinit var dictionaryCache: ManagedCache<String, Boolean>
@@ -103,6 +105,12 @@ class SpellCheckManagerTest {
                 onBlocking { getSimilarLearnedWordsWithFrequency(any(), any(), any()) } doReturn emptyList()
             }
 
+        wordFrequencyRepository =
+            mock {
+                onBlocking { getFrequency(any(), any()) } doReturn 0
+                onBlocking { getFrequencies(any(), any()) } doReturn emptyMap()
+            }
+
         suggestionCache =
             ManagedCache(
                 name = "test_suggestions",
@@ -152,6 +160,7 @@ class SpellCheckManagerTest {
                 context = context,
                 languageManager = languageManager,
                 wordLearningEngine = wordLearningEngine,
+                wordFrequencyRepository = wordFrequencyRepository,
                 cacheMemoryManager = cacheMemoryManager,
                 ioDispatcher = testDispatcher,
             )
@@ -671,7 +680,8 @@ class SpellCheckManagerTest {
             whenever(assetManager.open("dictionaries/en_symspell.txt"))
                 .thenThrow(java.io.IOException("File error"))
 
-            val failingManager = SpellCheckManager(context, languageManager, wordLearningEngine, cacheMemoryManager, testDispatcher)
+            val failingManager =
+                SpellCheckManager(context, languageManager, wordLearningEngine, wordFrequencyRepository, cacheMemoryManager, testDispatcher)
             val words = failingManager.getCommonWords()
 
             assertTrue(words.isEmpty())

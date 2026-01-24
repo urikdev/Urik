@@ -87,6 +87,7 @@ class WordLearningEngineTest {
             WordLearningEngine(
                 learnedWordDao = learnedWordDao,
                 languageManager = languageManager,
+                wordNormalizer = WordNormalizer(),
                 settingsRepository = settingsRepository,
                 ioDispatcher = testDispatcher,
                 defaultDispatcher = testDispatcher,

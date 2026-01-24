@@ -2,8 +2,11 @@ package com.urik.keyboard.di
 
 import android.content.Context
 import com.urik.keyboard.data.KeyboardRepository
+import com.urik.keyboard.data.WordFrequencyRepository
 import com.urik.keyboard.data.database.KeyboardDatabase
 import com.urik.keyboard.data.database.LearnedWordDao
+import com.urik.keyboard.data.database.UserWordBigramDao
+import com.urik.keyboard.data.database.UserWordFrequencyDao
 import com.urik.keyboard.service.CharacterVariationService
 import com.urik.keyboard.service.DictionaryBackupManager
 import com.urik.keyboard.service.EmojiSearchManager
@@ -11,6 +14,7 @@ import com.urik.keyboard.service.LanguageManager
 import com.urik.keyboard.service.SpellCheckManager
 import com.urik.keyboard.service.TextInputProcessor
 import com.urik.keyboard.service.WordLearningEngine
+import com.urik.keyboard.service.WordNormalizer
 import com.urik.keyboard.settings.SettingsRepository
 import com.urik.keyboard.ui.keyboard.components.PathGeometryAnalyzer
 import com.urik.keyboard.ui.keyboard.components.SwipeDetector
@@ -67,15 +71,30 @@ object KeyboardModule {
 
     @Provides
     @Singleton
+    fun provideWordNormalizer(): WordNormalizer = WordNormalizer()
+
+    @Provides
+    @Singleton
+    fun provideWordFrequencyRepository(
+        userWordFrequencyDao: UserWordFrequencyDao,
+        userWordBigramDao: UserWordBigramDao,
+        wordNormalizer: WordNormalizer,
+        cacheMemoryManager: CacheMemoryManager,
+    ): WordFrequencyRepository = WordFrequencyRepository(userWordFrequencyDao, userWordBigramDao, wordNormalizer, cacheMemoryManager)
+
+    @Provides
+    @Singleton
     fun provideWordLearningEngine(
         learnedWordDao: LearnedWordDao,
         languageManager: LanguageManager,
+        wordNormalizer: WordNormalizer,
         settingsRepository: SettingsRepository,
         cacheMemoryManager: CacheMemoryManager,
     ): WordLearningEngine =
         WordLearningEngine(
             learnedWordDao,
             languageManager,
+            wordNormalizer,
             settingsRepository,
             cacheMemoryManager,
         )
@@ -93,9 +112,10 @@ object KeyboardModule {
     fun provideSpellCheckManager(
         @ApplicationContext context: Context,
         languageManager: LanguageManager,
-        cacheMemoryManager: CacheMemoryManager,
         wordLearningEngine: WordLearningEngine,
-    ): SpellCheckManager = SpellCheckManager(context, languageManager, wordLearningEngine, cacheMemoryManager)
+        wordFrequencyRepository: WordFrequencyRepository,
+        cacheMemoryManager: CacheMemoryManager,
+    ): SpellCheckManager = SpellCheckManager(context, languageManager, wordLearningEngine, wordFrequencyRepository, cacheMemoryManager)
 
     @Provides
     @Singleton
@@ -110,7 +130,8 @@ object KeyboardModule {
         @ApplicationContext context: Context,
         database: KeyboardDatabase,
         cacheMemoryManager: CacheMemoryManager,
-    ): SettingsRepository = SettingsRepository(context, database, cacheMemoryManager)
+        wordFrequencyRepository: WordFrequencyRepository,
+    ): SettingsRepository = SettingsRepository(context, database, cacheMemoryManager, wordFrequencyRepository)
 
     @Provides
     @Singleton

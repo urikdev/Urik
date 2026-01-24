@@ -19,6 +19,7 @@ import kotlinx.coroutines.test.setMain
 import kotlinx.serialization.json.Json
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -496,5 +497,30 @@ class DictionaryBackupManagerTest {
             val export = Json.decodeFromString<DictionaryExport>(jsonString)
 
             assertEquals(listOf("de", "en"), export.languages)
+        }
+
+    @Test
+    fun `export excludes user_word_frequency data`() =
+        runTest {
+            val outputStream = ByteArrayOutputStream()
+            whenever(learnedWordDao.getAllLearnedWords()).thenReturn(testWords)
+            whenever(contentResolver.openOutputStream(testUri)).thenReturn(outputStream)
+
+            backupManager.exportToUri(testUri)
+
+            val jsonString = outputStream.toString(Charsets.UTF_8.name())
+
+            assertFalse(jsonString.contains("user_word_frequency"))
+            assertFalse(jsonString.contains("userWordFrequency"))
+
+            val export = Json.decodeFromString<DictionaryExport>(jsonString)
+            assertEquals(3, export.words.size)
+
+            export.words.forEach { exportedWord ->
+                assertTrue(exportedWord.word.isNotEmpty())
+                assertTrue(exportedWord.wordNormalized.isNotEmpty())
+                assertTrue(exportedWord.languageTag.isNotEmpty())
+                assertTrue(exportedWord.frequency > 0)
+            }
         }
 }
