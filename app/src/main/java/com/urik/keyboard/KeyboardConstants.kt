@@ -223,6 +223,14 @@ object KeyboardConstants {
         const val MIN_SUGGESTION_QUERY_LENGTH = 1
         const val MAX_WORD_INPUT_LENGTH = 50
         const val MAX_CURSOR_POSITION_CHARS = 1000
+        const val WORD_BOUNDARY_CONTEXT_LENGTH = 64
+        const val PARAGRAPH_CONTEXT_LENGTH = 256
+    }
+
+    object SelectionTrackingConstants {
+        const val NON_SEQUENTIAL_JUMP_THRESHOLD = 5
+        const val CURSOR_VALIDATION_TOLERANCE = 1
+        const val MAX_COMPOSING_REGION_VALIDATION_DELAY_MS = 50L
     }
 
     object InputTimingConstants {

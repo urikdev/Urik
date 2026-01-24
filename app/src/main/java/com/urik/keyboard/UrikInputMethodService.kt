@@ -61,6 +61,8 @@ import com.urik.keyboard.utils.CursorEditingUtils
 import com.urik.keyboard.utils.ErrorLogger
 import com.urik.keyboard.utils.KeyboardModeUtils
 import com.urik.keyboard.utils.SecureFieldDetector
+import com.urik.keyboard.utils.SelectionChangeResult
+import com.urik.keyboard.utils.SelectionStateTracker
 import com.urik.keyboard.utils.UrlEmailDetector
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -201,6 +203,11 @@ class UrikInputMethodService :
 
     @Volatile
     private var isShowingBigramPredictions: Boolean = false
+
+    private val selectionStateTracker = SelectionStateTracker()
+
+    @Volatile
+    private var lastKnownCursorPosition: Int = -1
 
     private fun safeGetTextBeforeCursor(
         length: Int,
@@ -523,10 +530,35 @@ class UrikInputMethodService :
         clearSpellConfirmationState()
         swipeKeyboardView?.clearSuggestions()
         composingRegionStart = -1
+        lastKnownCursorPosition = -1
+
+        currentInputConnection?.finishComposingText()
 
         if (!viewModel.state.value.isCapsLockOn) {
             viewModel.onEvent(KeyboardEvent.ShiftStateChanged(false))
         }
+    }
+
+    private fun invalidateComposingStateOnCursorJump() {
+        synchronized(processingLock) {
+            processingSequence++
+        }
+
+        suggestionDebounceJob?.cancel()
+
+        isActivelyEditing = true
+
+        currentInputConnection?.finishComposingText()
+
+        displayBuffer = ""
+        wordState = WordState()
+        pendingSuggestions = emptyList()
+        isShowingBigramPredictions = false
+        clearSpellConfirmationState()
+        swipeKeyboardView?.clearSuggestions()
+        composingRegionStart = -1
+        lastKnownCursorPosition = -1
+        selectionStateTracker.clearExpectedPosition()
     }
 
     private fun showBigramPredictions() {
@@ -620,6 +652,16 @@ class UrikInputMethodService :
     private suspend fun coordinateSuggestionSelection(suggestion: String) {
         withContext(Dispatchers.Main) {
             try {
+                val actualCursorPos = safeGetCursorPosition()
+
+                if (composingRegionStart != -1 && displayBuffer.isNotEmpty()) {
+                    val expectedCursorRange = composingRegionStart..(composingRegionStart + displayBuffer.length)
+                    if (actualCursorPos !in expectedCursorRange) {
+                        invalidateComposingStateOnCursorJump()
+                        return@withContext
+                    }
+                }
+
                 isActivelyEditing = true
 
                 recordWordUsage(suggestion)
@@ -627,6 +669,15 @@ class UrikInputMethodService :
                 currentInputConnection?.beginBatchEdit()
                 try {
                     currentInputConnection?.commitText("$suggestion ", 1)
+
+                    val expectedNewPosition =
+                        if (composingRegionStart != -1) {
+                            composingRegionStart + suggestion.length + 1
+                        } else {
+                            actualCursorPos + suggestion.length + 1
+                        }
+                    selectionStateTracker.setExpectedPositionAfterOperation(expectedNewPosition)
+                    lastKnownCursorPosition = expectedNewPosition
 
                     coordinateStateClear()
                     showBigramPredictions()
@@ -2021,6 +2072,22 @@ class UrikInputMethodService :
      */
     private fun handleBackspace() {
         try {
+            val actualCursorPos = safeGetCursorPosition()
+
+            if (displayBuffer.isNotEmpty() && composingRegionStart != -1) {
+                val expectedCursorRange = composingRegionStart..(composingRegionStart + displayBuffer.length)
+                if (actualCursorPos !in expectedCursorRange) {
+                    invalidateComposingStateOnCursorJump()
+                }
+            }
+
+            if (lastKnownCursorPosition != -1 && actualCursorPos != -1) {
+                val cursorDrift = kotlin.math.abs(actualCursorPos - lastKnownCursorPosition)
+                if (cursorDrift > KeyboardConstants.SelectionTrackingConstants.NON_SEQUENTIAL_JUMP_THRESHOLD) {
+                    invalidateComposingStateOnCursorJump()
+                }
+            }
+
             val selectedText = currentInputConnection?.getSelectedText(0)
             if (!selectedText.isNullOrEmpty()) {
                 currentInputConnection?.commitText("", 1)
@@ -2044,7 +2111,7 @@ class UrikInputMethodService :
                 return
             }
 
-            val textBeforeCursor = safeGetTextBeforeCursor(50)
+            val textBeforeCursor = safeGetTextBeforeCursor(KeyboardConstants.TextProcessingConstants.WORD_BOUNDARY_CONTEXT_LENGTH)
 
             if (isSecureField) {
                 if (textBeforeCursor.isNotEmpty()) {
@@ -2218,18 +2285,35 @@ class UrikInputMethodService :
      */
     private fun handleCommittedTextBackspace() {
         try {
-            val textBeforeCursor = safeGetTextBeforeCursor(50)
+            val textBeforeCursor = safeGetTextBeforeCursor(KeyboardConstants.TextProcessingConstants.WORD_BOUNDARY_CONTEXT_LENGTH)
 
             if (textBeforeCursor.isNotEmpty()) {
                 val graphemeLength = BackspaceUtils.getLastGraphemeClusterLength(textBeforeCursor)
                 val deletedChar = textBeforeCursor.lastOrNull()
                 val cursorPositionBeforeDeletion = safeGetCursorPosition()
 
+                if (deletedChar == '\n') {
+                    currentInputConnection?.beginBatchEdit()
+                    try {
+                        isActivelyEditing = true
+                        currentInputConnection?.finishComposingText()
+                        currentInputConnection?.deleteSurroundingText(graphemeLength, 0)
+                        coordinateStateClear()
+                    } finally {
+                        currentInputConnection?.endBatchEdit()
+                    }
+                    return
+                }
+
                 currentInputConnection?.beginBatchEdit()
                 try {
                     isActivelyEditing = true
                     currentInputConnection?.finishComposingText()
                     currentInputConnection?.deleteSurroundingText(graphemeLength, 0)
+
+                    val expectedNewPosition = cursorPositionBeforeDeletion - graphemeLength
+                    selectionStateTracker.setExpectedPositionAfterOperation(expectedNewPosition)
+                    lastKnownCursorPosition = expectedNewPosition
 
                     if (deletedChar != null) {
                         val shouldResetShift =
@@ -2251,15 +2335,33 @@ class UrikInputMethodService :
                     }
 
                     if (!isAcceleratedDeletion && !isUrlOrEmailField) {
+                        val remainingText = textBeforeCursor.dropLast(graphemeLength)
+
+                        if (remainingText.isNotEmpty() && remainingText.last() == '\n') {
+                            coordinateStateClear()
+                            return
+                        }
+
                         val composingRegion =
-                            BackspaceUtils.calculateComposingRegionAfterDeletion(
-                                textBeforeCursor,
-                                graphemeLength,
-                                cursorPositionBeforeDeletion,
+                            calculateParagraphBoundedComposingRegion(
+                                remainingText,
+                                expectedNewPosition,
                             )
 
                         if (composingRegion != null) {
                             val (wordStart, wordEnd, word) = composingRegion
+
+                            val actualCursorPos = safeGetCursorPosition()
+                            if (CursorEditingUtils.shouldAbortRecomposition(
+                                    expectedCursorPosition = expectedNewPosition,
+                                    actualCursorPosition = actualCursorPos,
+                                    expectedComposingStart = wordStart,
+                                    actualComposingStart = composingRegionStart,
+                                )
+                            ) {
+                                coordinateStateClear()
+                                return
+                            }
 
                             currentInputConnection?.setComposingRegion(wordStart, wordEnd)
 
@@ -2324,6 +2426,41 @@ class UrikInputMethodService :
         } catch (_: Exception) {
             coordinateStateClear()
         }
+    }
+
+    private fun calculateParagraphBoundedComposingRegion(
+        textBeforeCursor: String,
+        cursorPosition: Int,
+    ): Triple<Int, Int, String>? {
+        if (textBeforeCursor.isEmpty()) return null
+
+        val paragraphBoundary = textBeforeCursor.lastIndexOf('\n')
+        val textInParagraph =
+            if (paragraphBoundary >= 0) {
+                textBeforeCursor.substring(paragraphBoundary + 1)
+            } else {
+                textBeforeCursor
+            }
+
+        if (textInParagraph.isEmpty()) return null
+
+        val wordInfo = BackspaceUtils.extractWordBeforeCursor(textInParagraph) ?: return null
+        val (word, _) = wordInfo
+
+        if (word.isEmpty()) return null
+
+        val wordStart = cursorPosition - word.length
+        if (wordStart < 0) return null
+
+        if (paragraphBoundary >= 0) {
+            val paragraphStartInText = textBeforeCursor.length - textInParagraph.length
+            val absoluteParagraphBoundary = cursorPosition - textInParagraph.length
+            if (wordStart < absoluteParagraphBoundary) {
+                return null
+            }
+        }
+
+        return Triple(wordStart, cursorPosition, word)
     }
 
     /**
@@ -2617,11 +2754,13 @@ class UrikInputMethodService :
         }
 
         userDismissedAutofill = false
+        selectionStateTracker.reset()
         coordinateStateClear()
 
         lastSpaceTime = 0
         lastShiftTime = 0
         lastCommittedWord = ""
+        lastKnownCursorPosition = -1
 
         isSecureField = SecureFieldDetector.isSecure(attribute)
         currentInputAction = ActionDetector.detectAction(attribute)
@@ -2701,6 +2840,14 @@ class UrikInputMethodService :
 
         if (isSecureField) return
 
+        val selectionResult =
+            selectionStateTracker.updateSelection(
+                newSelStart = newSelStart,
+                newSelEnd = newSelEnd,
+                candidatesStart = candidatesStart,
+                candidatesEnd = candidatesEnd,
+            )
+
         if (newSelStart == 0 && newSelEnd == 0) {
             val textBefore = safeGetTextBeforeCursor(50)
             val textAfter = safeGetTextAfterCursor(50)
@@ -2714,7 +2861,7 @@ class UrikInputMethodService :
                     wordState.hasContent,
                 )
             ) {
-                coordinateStateClear()
+                invalidateComposingStateOnCursorJump()
             }
 
             if (!isUrlOrEmailField) {
@@ -2723,6 +2870,14 @@ class UrikInputMethodService :
         }
 
         if (isUrlOrEmailField) return
+
+        if (selectionResult is SelectionChangeResult.NonSequentialJump) {
+            if (displayBuffer.isNotEmpty() || wordState.hasContent) {
+                invalidateComposingStateOnCursorJump()
+            }
+            lastKnownCursorPosition = newSelStart
+            return
+        }
 
         val hasComposingText = (candidatesStart != -1 && candidatesEnd != -1)
         val cursorInComposingRegion =
@@ -2734,28 +2889,48 @@ class UrikInputMethodService :
 
         if (isActivelyEditing) {
             isActivelyEditing = false
+            lastKnownCursorPosition = newSelStart
+            return
+        }
+
+        if (selectionResult.requiresStateInvalidation()) {
+            invalidateComposingStateOnCursorJump()
+            lastKnownCursorPosition = newSelStart
             return
         }
 
         if (hasComposingText && !cursorInComposingRegion) {
-            coordinateStateClear()
+            invalidateComposingStateOnCursorJump()
+            lastKnownCursorPosition = newSelStart
             return
         }
 
         if (!hasComposingText && (wordState.hasContent || displayBuffer.isNotEmpty())) {
-            coordinateStateClear()
+            invalidateComposingStateOnCursorJump()
+            lastKnownCursorPosition = newSelStart
             return
         }
 
+        lastKnownCursorPosition = newSelStart
+
         if (!hasComposingText && !isActivelyEditing && newSelStart == newSelEnd) {
-            val textBefore = safeGetTextBeforeCursor(50)
-            val textAfter = safeGetTextAfterCursor(50)
+            val textBefore = safeGetTextBeforeCursor(KeyboardConstants.TextProcessingConstants.WORD_BOUNDARY_CONTEXT_LENGTH)
+            val textAfter = safeGetTextAfterCursor(KeyboardConstants.TextProcessingConstants.WORD_BOUNDARY_CONTEXT_LENGTH)
 
             if (textBefore.isNotEmpty() && textBefore.last().isWhitespace()) {
                 return
             }
 
-            val wordBeforeInfo = if (textBefore.isNotEmpty()) extractWordBeforeCursor(textBefore) else null
+            if (textBefore.isNotEmpty() && textBefore.last() == '\n') {
+                return
+            }
+
+            val wordBeforeInfo =
+                if (textBefore.isNotEmpty()) {
+                    CursorEditingUtils.extractWordBoundedByParagraph(textBefore)
+                } else {
+                    null
+                }
 
             if (wordBeforeInfo != null && wordBeforeInfo.first.isNotEmpty()) {
                 val wordAfterStart =
@@ -2768,7 +2943,7 @@ class UrikInputMethodService :
                 val fullWord = wordBeforeInfo.first + trimmedWordAfter
                 val wordStart = newSelStart - wordBeforeInfo.first.length
 
-                if (fullWord.length >= 2) {
+                if (wordStart >= 0 && fullWord.length >= 2) {
                     currentInputConnection?.setComposingRegion(wordStart, wordStart + fullWord.length)
                     displayBuffer = fullWord
                     composingRegionStart = wordStart
