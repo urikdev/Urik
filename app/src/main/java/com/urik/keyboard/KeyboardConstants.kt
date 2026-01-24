@@ -205,6 +205,17 @@ object KeyboardConstants {
 
         const val END_KEY_MATCH_BONUS = 1.15f
         const val END_KEY_DISTANCE_PENALTY_FACTOR = 0.25f
+
+        const val VERTEX_ANGLE_THRESHOLD_RAD = 1.22f
+        const val VERTEX_VELOCITY_DROP_RATIO = 0.35f
+        const val VERTEX_MIN_SEGMENT_LENGTH_PX = 25f
+        const val VERTEX_TOLERANCE_CONSTANT = 5
+        const val VERTEX_MINIMUM_FOR_FILTER = 6
+        const val VERTEX_LENGTH_MISMATCH_PENALTY = 0.40f
+        const val VERTEX_MILD_MISMATCH_PENALTY = 0.75f
+        const val VERTEX_DENSE_AREA_SENSITIVITY_BOOST = 0.90f
+        const val VERTEX_PATH_SIMPLIFICATION_EPSILON = 15f
+        const val VERTEX_DENSE_AREA_RADIUS_PX = 55f
     }
 
     object TextProcessingConstants {
