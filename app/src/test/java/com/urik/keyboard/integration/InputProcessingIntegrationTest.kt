@@ -5,6 +5,7 @@ package com.urik.keyboard.integration
 import android.content.Context
 import android.content.res.AssetManager
 import androidx.room.Room
+import com.urik.keyboard.data.WordFrequencyRepository
 import com.urik.keyboard.data.database.KeyboardDatabase
 import com.urik.keyboard.service.InputMethod
 import com.urik.keyboard.service.LanguageManager
@@ -12,6 +13,7 @@ import com.urik.keyboard.service.ProcessingResult
 import com.urik.keyboard.service.SpellCheckManager
 import com.urik.keyboard.service.TextInputProcessor
 import com.urik.keyboard.service.WordLearningEngine
+import com.urik.keyboard.service.WordNormalizer
 import com.urik.keyboard.settings.KeyboardSettings
 import com.urik.keyboard.settings.SettingsRepository
 import com.urik.keyboard.utils.CacheMemoryManager
@@ -93,10 +95,22 @@ class InputProcessingIntegrationTest {
             languageManager = LanguageManager(settingsRepository)
             languageManager.initialize()
 
+            val wordNormalizer = WordNormalizer()
+            val wordFrequencyRepository =
+                WordFrequencyRepository(
+                    database.userWordFrequencyDao(),
+                    database.userWordBigramDao(),
+                    wordNormalizer,
+                    cacheMemoryManager,
+                    testDispatcher,
+                    testDispatcher,
+                )
+
             wordLearningEngine =
                 WordLearningEngine(
                     database.learnedWordDao(),
                     languageManager,
+                    wordNormalizer,
                     settingsRepository,
                     cacheMemoryManager,
                     testDispatcher,
@@ -109,6 +123,7 @@ class InputProcessingIntegrationTest {
                     mockContext,
                     languageManager,
                     wordLearningEngine,
+                    wordFrequencyRepository,
                     cacheMemoryManager,
                     testDispatcher,
                 )

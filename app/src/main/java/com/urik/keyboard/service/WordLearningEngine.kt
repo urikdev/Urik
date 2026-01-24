@@ -4,7 +4,6 @@ import android.database.sqlite.SQLiteDatabaseCorruptException
 import android.database.sqlite.SQLiteDatabaseLockedException
 import android.database.sqlite.SQLiteException
 import android.database.sqlite.SQLiteFullException
-import com.ibm.icu.text.Normalizer2
 import com.urik.keyboard.KeyboardConstants.CacheConstants
 import com.urik.keyboard.KeyboardConstants.WordLearningConstants
 import com.urik.keyboard.data.database.LearnedWord
@@ -66,6 +65,7 @@ class WordLearningEngine
     constructor(
         private val learnedWordDao: LearnedWordDao,
         private val languageManager: LanguageManager,
+        private val wordNormalizer: WordNormalizer,
         settingsRepository: SettingsRepository,
         cacheMemoryManager: CacheMemoryManager,
         private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
@@ -73,7 +73,6 @@ class WordLearningEngine
         mainDispatcher: CoroutineDispatcher = Dispatchers.Main,
     ) {
         private val config = LearningConfig()
-        private val normalizer = Normalizer2.getNFCInstance()
 
         private val lastDatabaseError = AtomicLong(0L)
         private val consecutiveErrors = AtomicInteger(0)
@@ -140,24 +139,15 @@ class WordLearningEngine
             }
 
         private fun normalizeWord(word: String): String {
-            val standardNormalized = normalizer.normalize(word.trim())
             val currentLanguage = languageManager.currentLanguage.value
-            val locale =
-                try {
-                    com.ibm.icu.util.ULocale
-                        .forLanguageTag(currentLanguage)
-                } catch (_: Exception) {
-                    com.ibm.icu.util.ULocale.ENGLISH
-                }
-            return com.ibm.icu.lang.UCharacter
-                .toLowerCase(locale, standardNormalized)
-                .trim()
+            return wordNormalizer.normalize(word, currentLanguage)
         }
 
         private fun isValidWordForLearning(word: String): Boolean {
             if (word.isBlank()) return false
 
-            val normalizedWord = normalizer.normalize(word)
+            val currentLanguage = languageManager.currentLanguage.value
+            val normalizedWord = wordNormalizer.normalize(word, currentLanguage)
             val graphemeCount = normalizedWord.codePointCount(0, normalizedWord.length)
 
             if (graphemeCount < config.minWordLength || graphemeCount > config.maxWordLength) {

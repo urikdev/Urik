@@ -8,6 +8,7 @@ object KeyboardConstants {
 
         const val SUGGESTION_CACHE_SIZE = 500
         const val DICTIONARY_CACHE_SIZE = 1000
+        const val USER_FREQUENCY_CACHE_SIZE = 2000
 
         const val LEARNED_WORDS_CACHE_SIZE = 100
         const val LAYOUT_CACHE_SIZE = 20
@@ -253,8 +254,13 @@ object KeyboardConstants {
     }
 
     object DatabaseConstants {
-        const val DATABASE_VERSION = 4
+        const val DATABASE_VERSION = 6
         const val MAX_CLIPBOARD_ITEMS = 100
         const val MAX_CLIPBOARD_CONTENT_LENGTH = 100_000
+    }
+
+    object BigramConstants {
+        const val BIGRAM_CACHE_SIZE = 100
+        const val MAX_BIGRAM_PREDICTIONS = 3
     }
 }
