@@ -736,12 +736,16 @@ class SwipeDetector
                     val reuseLetterScores = ArrayList<Pair<Char, Float>>(20)
                     val reusableWordLetters = HashSet<Char>(10)
 
+                    val vertexAnalysis = geometricAnalysis.vertexAnalysis
+
                     for (i in dictionarySnapshot.indices) {
                         if (i % 50 == 0) yield()
 
                         val entry = dictionarySnapshot[i]
 
                         if (!couldMatchPath(entry.word, charsInBounds)) continue
+
+                        if (pathGeometryAnalyzer.shouldPruneCandidate(entry.word.length, vertexAnalysis)) continue
 
                         val isClusteredWord = pathGeometryAnalyzer.isClusteredWord(entry.word, keyPositionsSnapshot)
 
@@ -870,13 +874,20 @@ class SwipeDetector
                                 else -> 0.5f
                             }
 
+                        val vertexLengthPenalty =
+                            pathGeometryAnalyzer.calculateVertexLengthPenalty(
+                                entry.word.length,
+                                vertexAnalysis,
+                            )
+
                         @Suppress("ktlint:standard:max-line-length")
                         val combinedScore =
                             (adjustedSpatialScore * spatialWeight + boostedFrequencyScore * frequencyWeight) * coverageBonus * lengthPenalty *
                                 startKeyBonus *
                                 endKeyBonus *
                                 traversalPenalty *
-                                orderPenalty
+                                orderPenalty *
+                                vertexLengthPenalty
 
                         val scored =
                             ScoredCandidate(
@@ -890,6 +901,7 @@ class SwipeDetector
                                 lengthPenalty = lengthPenalty,
                                 traversalPenalty = traversalPenalty,
                                 orderPenalty = orderPenalty,
+                                vertexLengthPenalty = vertexLengthPenalty,
                             )
 
                         val existing = candidatesMap[entry.word]
@@ -930,6 +942,7 @@ class SwipeDetector
             val lengthPenalty: Float = 1.0f,
             val traversalPenalty: Float = 1.0f,
             val orderPenalty: Float = 1.0f,
+            val vertexLengthPenalty: Float = 1.0f,
         )
 
         private fun interpolatePathForFastSegments(

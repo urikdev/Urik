@@ -50,6 +50,7 @@ class PathGeometryAnalyzer
             val velocityProfile: FloatArray,
             val curvatureProfile: FloatArray,
             val traversedKeys: Map<Char, KeyTraversal>,
+            val vertexAnalysis: VertexAnalysis,
         ) {
             override fun equals(other: Any?): Boolean {
                 if (this === other) return true
@@ -57,7 +58,8 @@ class PathGeometryAnalyzer
                 return inflectionPoints == other.inflectionPoints &&
                     segments == other.segments &&
                     pathConfidence == other.pathConfidence &&
-                    traversedKeys == other.traversedKeys
+                    traversedKeys == other.traversedKeys &&
+                    vertexAnalysis == other.vertexAnalysis
             }
 
             override fun hashCode(): Int {
@@ -65,6 +67,7 @@ class PathGeometryAnalyzer
                 result = 31 * result + segments.hashCode()
                 result = 31 * result + pathConfidence.hashCode()
                 result = 31 * result + traversedKeys.hashCode()
+                result = 31 * result + vertexAnalysis.hashCode()
                 return result
             }
         }
@@ -75,6 +78,21 @@ class PathGeometryAnalyzer
             val dwellTime: Float,
             val velocityAtKey: Float,
             val confidence: Float,
+        )
+
+        data class PathVertex(
+            val pathIndex: Int,
+            val position: PointF,
+            val angleChange: Float,
+            val velocityRatio: Float,
+            val nearestKey: Char?,
+            val isSignificant: Boolean,
+        )
+
+        data class VertexAnalysis(
+            val vertices: List<PathVertex>,
+            val significantVertexCount: Int,
+            val minimumExpectedLength: Int,
         )
 
         data class AdaptiveSigma(
@@ -102,6 +120,7 @@ class PathGeometryAnalyzer
             val traversedKeys = detectKeyTraversals(path, velocityProfile, keyPositions)
             val segments = classifySegments(path, curvatureProfile, velocityProfile, traversedKeys)
             val pathConfidence = calculatePathConfidence(path, inflectionPoints, velocityProfile, curvatureProfile)
+            val vertexAnalysis = detectVertices(path, velocityProfile, keyPositions)
 
             return GeometricAnalysis(
                 inflectionPoints = inflectionPoints,
@@ -110,6 +129,7 @@ class PathGeometryAnalyzer
                 velocityProfile = velocityProfile,
                 curvatureProfile = curvatureProfile,
                 traversedKeys = traversedKeys,
+                vertexAnalysis = vertexAnalysis,
             )
         }
 
@@ -772,6 +792,230 @@ class PathGeometryAnalyzer
             }
         }
 
+        private fun detectVertices(
+            path: List<SwipeDetector.SwipePoint>,
+            velocityProfile: FloatArray,
+            keyPositions: Map<Char, PointF>,
+        ): VertexAnalysis {
+            if (path.size < 5) {
+                return VertexAnalysis(
+                    vertices = emptyList(),
+                    significantVertexCount = 0,
+                    minimumExpectedLength = 2,
+                )
+            }
+
+            val simplifiedIndices = douglasPeuckerSimplify(path)
+            val vertices = mutableListOf<PathVertex>()
+
+            simplifiedIndices
+                .asSequence()
+                .windowed(3, 1)
+                .forEach { window ->
+                    val prevIdx = window[0]
+                    val currIdx = window[1]
+                    val nextIdx = window[2]
+
+                    val prev = path[prevIdx]
+                    val curr = path[currIdx]
+                    val next = path[nextIdx]
+
+                    val v1x = curr.x - prev.x
+                    val v1y = curr.y - prev.y
+                    val v2x = next.x - curr.x
+                    val v2y = next.y - curr.y
+
+                    val len1 = sqrt(v1x * v1x + v1y * v1y)
+                    val len2 = sqrt(v2x * v2x + v2y * v2y)
+
+                    if (len1 < GeometricScoringConstants.VERTEX_MIN_SEGMENT_LENGTH_PX ||
+                        len2 < GeometricScoringConstants.VERTEX_MIN_SEGMENT_LENGTH_PX
+                    ) {
+                        return@forEach
+                    }
+
+                    val dotProduct = (v1x * v2x + v1y * v2y) / (len1 * len2)
+                    val angleChange = kotlin.math.acos(dotProduct.coerceIn(-1f, 1f))
+
+                    val velocityAtVertex = if (currIdx < velocityProfile.size) velocityProfile[currIdx] else 0f
+                    val avgSurroundingVelocity = calculateSurroundingVelocity(velocityProfile, currIdx)
+                    val velocityRatio =
+                        if (avgSurroundingVelocity > 0.01f) {
+                            velocityAtVertex / avgSurroundingVelocity
+                        } else {
+                            1f
+                        }
+
+                    val isAngleVertex = angleChange > GeometricScoringConstants.VERTEX_ANGLE_THRESHOLD_RAD
+                    val isVelocityVertex = velocityRatio < GeometricScoringConstants.VERTEX_VELOCITY_DROP_RATIO
+
+                    val (nearestKey, _) = findNearestKey(curr, keyPositions)
+                    val isDenseArea = isDenseKeyboardArea(curr, keyPositions)
+                    val adjustedAngleThreshold =
+                        if (isDenseArea) {
+                            GeometricScoringConstants.VERTEX_ANGLE_THRESHOLD_RAD *
+                                GeometricScoringConstants.VERTEX_DENSE_AREA_SENSITIVITY_BOOST
+                        } else {
+                            GeometricScoringConstants.VERTEX_ANGLE_THRESHOLD_RAD
+                        }
+                    val isDenseAreaVertex = isDenseArea && angleChange > adjustedAngleThreshold
+
+                    val isSignificant = isAngleVertex || isVelocityVertex || isDenseAreaVertex
+
+                    if (isSignificant || angleChange > GeometricScoringConstants.VERTEX_ANGLE_THRESHOLD_RAD * 0.7f) {
+                        vertices.add(
+                            PathVertex(
+                                pathIndex = currIdx,
+                                position = PointF(curr.x, curr.y),
+                                angleChange = angleChange,
+                                velocityRatio = velocityRatio,
+                                nearestKey = nearestKey,
+                                isSignificant = isSignificant,
+                            ),
+                        )
+                    }
+                }
+
+            val significantCount = vertices.count { it.isSignificant }
+            val minimumExpected =
+                maxOf(
+                    2,
+                    significantCount - GeometricScoringConstants.VERTEX_TOLERANCE_CONSTANT,
+                )
+
+            return VertexAnalysis(
+                vertices = vertices,
+                significantVertexCount = significantCount,
+                minimumExpectedLength = minimumExpected,
+            )
+        }
+
+        private fun douglasPeuckerSimplify(path: List<SwipeDetector.SwipePoint>): List<Int> {
+            if (path.size <= 2) return path.indices.toList()
+
+            val epsilon = GeometricScoringConstants.VERTEX_PATH_SIMPLIFICATION_EPSILON
+            val result = mutableListOf<Int>()
+            val stack = ArrayDeque<Pair<Int, Int>>()
+            stack.addLast(0 to path.size - 1)
+
+            val keep = BooleanArray(path.size)
+            keep[0] = true
+            keep[path.size - 1] = true
+
+            while (stack.isNotEmpty()) {
+                val (startIdx, endIdx) = stack.removeLast()
+
+                if (endIdx - startIdx < 2) continue
+
+                var maxDist = 0f
+                var maxIdx = startIdx
+
+                val startPoint = path[startIdx]
+                val endPoint = path[endIdx]
+                val lineDx = endPoint.x - startPoint.x
+                val lineDy = endPoint.y - startPoint.y
+                val lineLen = sqrt(lineDx * lineDx + lineDy * lineDy)
+
+                if (lineLen < 0.001f) continue
+
+                for (i in (startIdx + 1) until endIdx) {
+                    val point = path[i]
+                    val dist =
+                        abs(
+                            lineDy * point.x - lineDx * point.y +
+                                endPoint.x * startPoint.y - endPoint.y * startPoint.x,
+                        ) / lineLen
+
+                    if (dist > maxDist) {
+                        maxDist = dist
+                        maxIdx = i
+                    }
+                }
+
+                if (maxDist > epsilon) {
+                    keep[maxIdx] = true
+                    stack.addLast(startIdx to maxIdx)
+                    stack.addLast(maxIdx to endIdx)
+                }
+            }
+
+            for (i in path.indices) {
+                if (keep[i]) result.add(i)
+            }
+
+            return result
+        }
+
+        private fun calculateSurroundingVelocity(
+            velocityProfile: FloatArray,
+            centerIndex: Int,
+        ): Float {
+            val windowSize = 3
+            var sum = 0f
+            var count = 0
+
+            for (i in (centerIndex - windowSize)..(centerIndex + windowSize)) {
+                if (i >= 0 && i < velocityProfile.size && i != centerIndex) {
+                    sum += velocityProfile[i]
+                    count++
+                }
+            }
+
+            return if (count > 0) sum / count else 0f
+        }
+
+        private fun isDenseKeyboardArea(
+            point: SwipeDetector.SwipePoint,
+            keyPositions: Map<Char, PointF>,
+        ): Boolean {
+            val thresholdSq =
+                GeometricScoringConstants.VERTEX_DENSE_AREA_RADIUS_PX *
+                    GeometricScoringConstants.VERTEX_DENSE_AREA_RADIUS_PX
+            var nearbyKeys = 0
+
+            keyPositions.values.forEach { keyPos ->
+                val dx = point.x - keyPos.x
+                val dy = point.y - keyPos.y
+                if (dx * dx + dy * dy < thresholdSq) {
+                    nearbyKeys++
+                }
+            }
+
+            return nearbyKeys >= 4
+        }
+
+        fun calculateVertexLengthPenalty(
+            wordLength: Int,
+            vertexAnalysis: VertexAnalysis,
+        ): Float {
+            if (vertexAnalysis.significantVertexCount < GeometricScoringConstants.VERTEX_MINIMUM_FOR_FILTER) {
+                return 1.0f
+            }
+
+            val minimumExpected = vertexAnalysis.minimumExpectedLength
+            val deficit = minimumExpected - wordLength
+
+            return when {
+                deficit <= 0 -> 1.0f
+                deficit == 1 -> GeometricScoringConstants.VERTEX_MILD_MISMATCH_PENALTY
+                else -> GeometricScoringConstants.VERTEX_LENGTH_MISMATCH_PENALTY
+            }
+        }
+
+        fun shouldPruneCandidate(
+            wordLength: Int,
+            vertexAnalysis: VertexAnalysis,
+        ): Boolean {
+            if (vertexAnalysis.significantVertexCount < GeometricScoringConstants.VERTEX_MINIMUM_FOR_FILTER) {
+                return false
+            }
+
+            val minimumExpected = vertexAnalysis.minimumExpectedLength
+            val deficit = minimumExpected - wordLength
+
+            return deficit >= 5
+        }
+
         private fun createEmptyAnalysis(): GeometricAnalysis =
             GeometricAnalysis(
                 inflectionPoints = emptyList(),
@@ -780,5 +1024,11 @@ class PathGeometryAnalyzer
                 velocityProfile = FloatArray(0),
                 curvatureProfile = FloatArray(0),
                 traversedKeys = emptyMap(),
+                vertexAnalysis =
+                    VertexAnalysis(
+                        vertices = emptyList(),
+                        significantVertexCount = 0,
+                        minimumExpectedLength = 2,
+                    ),
             )
     }
