@@ -392,4 +392,43 @@ class SwipeInputIntegrationTest {
                 (afterLearning as ProcessingResult.Success).shouldHighlight,
             )
         }
+
+    @Test
+    fun `blacklisted words excluded from spell check suggestions`() =
+        runTest(testDispatcher) {
+            val suggestions = spellCheckManager.generateSuggestions("helo", 5)
+            assertTrue("Should suggest 'hello' before blacklisting", suggestions.contains("hello"))
+
+            spellCheckManager.blacklistSuggestion("hello")
+
+            val filteredSuggestions = spellCheckManager.generateSuggestions("helo", 5)
+            assertFalse("Blacklisted word should not appear in suggestions", filteredSuggestions.contains("hello"))
+        }
+
+    @Test
+    fun `blacklisted words excluded from common words for swipe`() =
+        runTest(testDispatcher) {
+            val words = spellCheckManager.getCommonWords()
+            assertTrue("'world' should be in common words", words.any { it.first == "world" })
+
+            spellCheckManager.blacklistSuggestion("world")
+
+            val filteredWords = spellCheckManager.getCommonWords()
+            assertFalse("Blacklisted word should not appear in common words", filteredWords.any { it.first == "world" })
+        }
+
+    @Test
+    fun `re-learning blacklisted word removes from blacklist`() =
+        runTest(testDispatcher) {
+            spellCheckManager.blacklistSuggestion("test")
+
+            val beforeSuggestions = spellCheckManager.generateSuggestions("tes", 5)
+            assertFalse("Blacklisted word should not appear", beforeSuggestions.contains("test"))
+
+            wordLearningEngine.learnWord("test", InputMethod.TYPED)
+            spellCheckManager.removeFromBlacklist("test")
+
+            val afterSuggestions = spellCheckManager.generateSuggestions("tes", 5)
+            assertTrue("Re-learned word should appear in suggestions", afterSuggestions.contains("test"))
+        }
 }

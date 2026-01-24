@@ -1181,7 +1181,8 @@ class SwipeDetector
         ): List<WordCandidate> {
             if (candidates.isEmpty()) return emptyList()
 
-            val sorted = candidates.sortedByDescending { it.combinedScore }
+            val filtered = candidates.filter { !spellCheckManager.isWordBlacklisted(it.word) }
+            val sorted = filtered.sortedByDescending { it.combinedScore }
             val top = sorted.take(10)
 
             if (top.size < 2) {

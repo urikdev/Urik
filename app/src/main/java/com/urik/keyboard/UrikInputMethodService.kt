@@ -569,12 +569,14 @@ class UrikInputMethodService :
         serviceScope.launch {
             try {
                 val currentLanguage = languageManager.currentLanguage.value
-                val predictions =
+                val allPredictions =
                     wordFrequencyRepository.getBigramPredictions(
                         lastCommittedWord,
                         currentLanguage,
                         currentSettings.effectiveSuggestionCount,
                     )
+
+                val predictions = allPredictions.filter { !spellCheckManager.isWordBlacklisted(it) }
 
                 if (predictions.isNotEmpty() && displayBuffer.isEmpty()) {
                     val displayPredictions = applyCapitalizationToSuggestions(predictions)
