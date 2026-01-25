@@ -1,7 +1,7 @@
 # Privacy Policy
 
 **Effective Date:** October 18, 2025
-**Last Updated:** January 9, 2026
+**Last Updated:** January 25, 2026
 
 ## Introduction
 
@@ -50,6 +50,56 @@ For privacy inquiries, contact us at the email above.
 **Encryption:** Your learned words are encrypted using AES-256 encryption. The encryption key is stored in the Android Keystore, a hardware-backed secure storage system. If your device has a lock screen (PIN, pattern, or biometric), the encryption key is protected by this lock screen. Without your device unlock, your learned words cannot be decrypted.
 
 **Fallback:** If your device does not have a lock screen configured, learned words are stored without encryption, and you will see a warning about this in the app.
+
+### 1A. Word Frequency Tracking (Encrypted)
+
+**What:** Per-word usage frequency counters stored separately from learned words.
+
+**Purpose:** To rank suggestions by your actual typing patterns and boost frequently used words.
+
+**Storage:** Encrypted local SQLCipher database on your device using hardware-backed encryption (Android Keystore).
+
+**Details Stored:**
+- Word (normalized)
+- Language code
+- Frequency counter (incremented on each use)
+- Timestamp (last used)
+
+**What We Don't Store:**
+- Typed sentences or context
+- Which app you used the word in
+- Any identifying information
+
+**Data Persistence:** Word frequency data is NOT included in dictionary exports. It remains local-only and is deleted on app uninstall.
+
+**Encryption:** Same AES-256 encryption as learned words. Protected by Android Keystore and device lock screen.
+
+### 1B. Next-Word Prediction Bigrams (Encrypted)
+
+**What:** Word pairs (bigrams) that track which words you commonly type after other words.
+
+**Purpose:** To provide context-aware next-word predictions. For example, if you frequently type "thank you," the keyboard learns this pattern and suggests "you" after "thank."
+
+**Storage:** Encrypted local SQLCipher database on your device using hardware-backed encryption (Android Keystore).
+
+**Details Stored:**
+- First word (normalized)
+- Second word (normalized)
+- Language code
+- Frequency counter (how often this pair occurs)
+- Timestamp (last used)
+
+**What We Don't Store:**
+- Full sentences or paragraphs
+- Word triplets or longer sequences
+- Which app you typed the words in
+- Any identifying information
+
+**Technical Implementation:** The bigram model is local-only with no external queries. Predictions are generated using indexed database lookups ordered by frequency. Debounced batch writes (300ms) minimize database operations.
+
+**Data Isolation:** Bigram data is NOT included in dictionary exports. It remains strictly local and is deleted on app uninstall. Standard dictionary words from SymSpell corpus are not tracked in bigrams.
+
+**Encryption:** Same AES-256 encryption as learned words. Protected by Android Keystore and device lock screen.
 
 ### 2. Clipboard History (Encrypted)
 
@@ -192,20 +242,26 @@ For privacy inquiries, contact us at the email above.
 - Last ~200 typed words (automatically cleared after 5 minutes)
 - Spell check results cache
 - Dictionary lookup cache
+- User word frequency cache (LRU cache, max 1000 entries)
+- Bigram prediction cache (LRU cache, max 500 entries)
+- Preloaded top bigrams (in-memory map, cleared on language switch)
 
 **Lifecycle:** Automatically cleared when:
-- Data expires (5-minute time-to-live)
+- Data expires (5-minute time-to-live for typed words)
+- Cache size limits exceeded (LRU eviction)
 - You switch languages
 - You switch to a different app
 - The keyboard service stops
 
-**Secure Fields:** When you type in password fields or other secure inputs, all processing is bypassed. No text is cached, spell-checked, or learned.
+**Secure Fields:** When you type in password fields or other secure inputs, all processing is bypassed. No text is cached, spell-checked, or learned. Bigram predictions are not recorded.
 
 ## How We Use Your Data
 
 All data processing occurs locally on your device:
 
 - **Learned Words:** Generate personalized suggestions and autocorrect
+- **Word Frequency Tracking:** Rank suggestions by your actual usage patterns
+- **Next-Word Prediction Bigrams:** Provide context-aware predictions based on word pairs
 - **Clipboard History:** Quick access to recently copied text for re-use
 - **Recent Emoji Selections:** Display frequently used emojis first in emoji picker
 - **Custom Key Mappings:** Insert your assigned symbols on long-press
@@ -219,6 +275,7 @@ All data processing occurs locally on your device:
 - Sell or share your data with third parties
 - Build user profiles or track behavior
 - Use analytics or telemetry services
+- Track standard dictionary words in bigram or frequency tables
 
 ## Data Storage and Security
 
@@ -244,14 +301,14 @@ The keyboard automatically detects password fields, credit card inputs, email ad
 
 ## Data Retention
 
-### Learned Words
+### Learned Words, Word Frequencies, and Bigram Predictions
 - **Retention:** Indefinite, until you manually delete them or uninstall the app
 - **Management Options:**
-    - Export dictionary: Settings → Privacy & Data → Export Dictionary
+    - Export dictionary: Settings → Privacy & Data → Export Dictionary (exports `learned_words` table only; word frequencies and bigrams remain local)
     - Import dictionary: Settings → Privacy & Data → Import Dictionary
-    - Clear all learned words: Settings → Privacy & Data → Clear Learned Words
+    - Clear all learned words: Settings → Privacy & Data → Clear Learned Words (also clears frequency and bigram data)
     - Reset settings to defaults: Settings → Privacy & Data → Reset to Defaults
-    - Uninstall app: Automatically deletes all data
+    - Uninstall app: Automatically deletes all data (learned words, frequencies, and bigrams)
 
 ### Clipboard History
 - **Retention:** Indefinite for pinned items; unpinned items auto-deleted after 100 items reached (oldest first)
@@ -289,6 +346,8 @@ The keyboard automatically detects password fields, credit card inputs, email ad
 ### On Uninstall
 When you uninstall Urik, Android automatically deletes:
 - All learned words (encrypted database)
+- All word frequency data (encrypted database)
+- All bigram prediction data (encrypted database)
 - All clipboard history (encrypted database)
 - All custom key mappings (encrypted database)
 - All recent emoji selections
@@ -307,15 +366,17 @@ You have the right to:
     - View clipboard history: Long-press symbols key on keyboard
     - View custom key mappings: Settings → Layout & Input → Customize Keys
     - View error logs: Settings → Privacy & Data → Export Error Logs
-    - Your learned words, clipboard history, and custom key mappings are stored locally on your device in an encrypted database
+    - Export learned words: Settings → Privacy & Data → Export Dictionary
+    - Your learned words, word frequencies, bigram predictions, clipboard history, and custom key mappings are stored locally on your device in an encrypted database
+    - **Note:** Word frequency counters and bigram prediction data are used internally for suggestion ranking and cannot be viewed directly through the UI
 
 2. **Delete Your Data**
     - Clear specific learned words: Long-press suggestions to remove
     - Clear specific clipboard items: Long-press symbols key → tap × button
     - Clear all clipboard unpinned items: Long-press symbols key → Recent tab → Delete All
     - Reset custom key mappings: Settings → Layout & Input → Customize Keys → Reset All
-    - Clear all learned words: Settings → Privacy & Data → Clear Learned Words
-    - Clear all data (includes clipboard and mappings): Settings → Privacy & Data → Clear All Data
+    - Clear all learned words: Settings → Privacy & Data → Clear Learned Words (also clears word frequencies and bigram predictions)
+    - Clear all data (includes learned words, frequencies, bigrams, clipboard, and mappings): Settings → Privacy & Data → Clear All Data
     - Uninstall the app to delete everything
 
 3. **Rectify Your Data**
@@ -327,6 +388,7 @@ You have the right to:
     - Import learned words: Settings → Privacy & Data → Import Dictionary
     - Export format: JSON file containing word, language, frequency, and timestamps
     - Import behavior: Merges with existing dictionary (sums frequencies for duplicates)
+    - **Data Isolation:** Word frequency counters and bigram predictions are NOT exported and remain local-only.
     - **Note:** Exported files are not encrypted. Store securely if they contain sensitive words.
 
 5. **Withdraw Consent**
@@ -431,6 +493,8 @@ Under GDPR Article 6, our legal bases for processing your personal data are:
 
 1. **Consent (Article 6(1)(a)):**
     - Word learning: By using the keyboard with word learning enabled
+    - Word frequency tracking: By using the keyboard with word learning enabled
+    - Bigram prediction: By using the keyboard with word learning enabled
     - Clipboard monitoring: By continuing to use the keyboard after first install with clipboard monitoring enabled by default (opt-out consent model)
 2. **Legitimate Interest (Article 6(1)(f)):** We have a legitimate interest in processing error logs to maintain and improve the keyboard
 
