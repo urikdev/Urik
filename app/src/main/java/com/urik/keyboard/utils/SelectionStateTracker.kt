@@ -14,8 +14,6 @@ data class SelectionState(
 
     val hasComposingRegion: Boolean get() = composingStart != -1 && composingEnd != -1
 
-    val cursorPosition: Int get() = if (hasSelection) -1 else selectionStart
-
     companion object {
         val INVALID =
             SelectionState(

@@ -30,10 +30,4 @@ data class UserWordFrequency(
     val frequency: Int = 1,
     @ColumnInfo(name = "last_used")
     val lastUsed: Long = System.currentTimeMillis(),
-) {
-    fun incrementFrequency(): UserWordFrequency =
-        copy(
-            frequency = frequency + 1,
-            lastUsed = System.currentTimeMillis(),
-        )
-}
+)

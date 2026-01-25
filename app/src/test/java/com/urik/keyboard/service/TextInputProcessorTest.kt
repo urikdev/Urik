@@ -19,23 +19,28 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.RuntimeEnvironment
 
 /**
  * Tests [TextInputProcessor] character processing, spell checking, suggestions, and caching.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
+@RunWith(RobolectricTestRunner::class)
 class TextInputProcessorTest {
     private val testDispatcher = StandardTestDispatcher()
 
     private lateinit var languageManager: LanguageManager
     private lateinit var spellCheckManager: SpellCheckManager
     private lateinit var settingsRepository: SettingsRepository
+    private lateinit var cacheMemoryManager: com.urik.keyboard.utils.CacheMemoryManager
 
     private lateinit var settingsFlow: MutableStateFlow<KeyboardSettings>
 
@@ -45,9 +50,13 @@ class TextInputProcessorTest {
     fun setup() {
         Dispatchers.setMain(testDispatcher)
 
+        val context = RuntimeEnvironment.getApplication()
         languageManager = mock()
         spellCheckManager = mock()
         settingsRepository = mock()
+        cacheMemoryManager =
+            com.urik.keyboard.utils
+                .CacheMemoryManager(context)
 
         settingsFlow = MutableStateFlow(KeyboardSettings())
         whenever(settingsRepository.settings).thenReturn(settingsFlow)
@@ -56,6 +65,7 @@ class TextInputProcessorTest {
             TextInputProcessor(
                 spellCheckManager = spellCheckManager,
                 settingsRepository = settingsRepository,
+                cacheMemoryManager = cacheMemoryManager,
             )
 
         testDispatcher.scheduler.advanceUntilIdle()
@@ -65,6 +75,7 @@ class TextInputProcessorTest {
 
     @After
     fun teardown() {
+        cacheMemoryManager.cleanup()
         Dispatchers.resetMain()
     }
 

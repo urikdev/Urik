@@ -76,12 +76,9 @@ class SwipeDetector
         interface SwipeListener {
             fun onSwipeStart(startPoint: PointF)
 
-            fun onSwipeUpdate(
-                currentPath: SwipePath,
-                currentPoint: PointF,
-            )
+            fun onSwipeUpdate(currentPoint: PointF)
 
-            fun onSwipeEnd(finalPath: SwipePath)
+            fun onSwipeEnd()
 
             fun onSwipeResults(candidates: List<WordCandidate>)
 
@@ -147,6 +144,8 @@ class SwipeDetector
         private val scope = CoroutineScope(Dispatchers.Default + scopeJob)
         private var scoringJob: Job? = null
 
+        private val cachedTransformPoint = PointF()
+
         data class DictionaryEntry(
             val word: String,
             val frequencyScore: Float,
@@ -187,11 +186,13 @@ class SwipeDetector
         private fun transformTouchCoordinate(
             x: Float,
             y: Float,
-        ): PointF =
-            PointF(
+        ): PointF {
+            cachedTransformPoint.set(
                 (x - layoutOffsetX) / layoutScaleFactor,
                 y,
             )
+            return cachedTransformPoint
+        }
 
         /**
          * Updates script context when language or layout changes.
@@ -596,7 +597,7 @@ class SwipeDetector
                         topCandidates = emptyList(),
                     )
 
-                _swipeListener?.onSwipeUpdate(currentPath, transformed)
+                _swipeListener?.onSwipeUpdate(transformed)
             }
         }
 
@@ -616,18 +617,20 @@ class SwipeDetector
                     )
                 swipePoints.add(finalPoint)
 
+                val pathSnapshot = ArrayList(swipePoints)
+                val scriptSnapshot = currentScriptCode
+                val rtlSnapshot = currentIsRTL
+
                 val preliminaryPath =
                     SwipePath(
-                        points = swipePoints.toList(),
+                        points = pathSnapshot,
                         keysTraversed = emptyList(),
-                        scriptCode = currentScriptCode,
-                        isRtl = currentIsRTL,
+                        scriptCode = scriptSnapshot,
+                        isRtl = rtlSnapshot,
                         topCandidates = emptyList(),
                     )
 
-                _swipeListener?.onSwipeEnd(preliminaryPath)
-
-                val pathSnapshot = swipePoints.toList()
+                _swipeListener?.onSwipeEnd()
 
                 scoringJob =
                     scope.launch {
@@ -801,10 +804,10 @@ class SwipeDetector
                             }
                         }
                         val orderPenalty =
-                            when {
-                                orderViolations == 0 -> 1.0f
-                                orderViolations == 1 -> 0.85f
-                                orderViolations == 2 -> 0.70f
+                            when (orderViolations) {
+                                0 -> 1.0f
+                                1 -> 0.85f
+                                2 -> 0.70f
                                 else -> 0.50f
                             }
 
@@ -1220,8 +1223,8 @@ class SwipeDetector
             geometricAnalysis: PathGeometryAnalyzer.GeometricAnalysis,
             keyPositions: Map<Char, PointF>,
         ): Pair<ScoredCandidate, ScoredCandidate> {
-            val inflectionScore1 = calculateInflectionAlignment(candidate1.word, geometricAnalysis, keyPositions)
-            val inflectionScore2 = calculateInflectionAlignment(candidate2.word, geometricAnalysis, keyPositions)
+            val inflectionScore1 = calculateInflectionAlignment(candidate1.word, geometricAnalysis)
+            val inflectionScore2 = calculateInflectionAlignment(candidate2.word, geometricAnalysis)
 
             val coverageScore1 = candidate1.pathCoverage
             val coverageScore2 = candidate2.pathCoverage
@@ -1247,7 +1250,6 @@ class SwipeDetector
         private fun calculateInflectionAlignment(
             word: String,
             geometricAnalysis: PathGeometryAnalyzer.GeometricAnalysis,
-            keyPositions: Map<Char, PointF>,
         ): Float {
             if (geometricAnalysis.inflectionPoints.isEmpty()) return 0.5f
 

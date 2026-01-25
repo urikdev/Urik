@@ -168,7 +168,6 @@ class KeyboardPreviewRenderer(
             val keyButton =
                 createKeyButton(
                     key,
-                    keys,
                     theme,
                     visualHeight,
                     horizontalMargin,
@@ -200,7 +199,6 @@ class KeyboardPreviewRenderer(
 
     private fun createKeyButton(
         key: KeyboardKey,
-        rowKeys: List<KeyboardKey>,
         theme: KeyboardTheme,
         visualHeight: Int,
         horizontalMargin: Int,

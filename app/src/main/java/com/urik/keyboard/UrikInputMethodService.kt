@@ -1,7 +1,6 @@
 package com.urik.keyboard
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.graphics.Color
 import android.inputmethodservice.InputMethodService
 import android.os.Build
@@ -147,7 +146,7 @@ class UrikInputMethodService :
     private var postureDetector: com.urik.keyboard.service.PostureDetector? = null
 
     private val inputMethodManager: android.view.inputmethod.InputMethodManager by lazy {
-        getSystemService(Context.INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager
+        getSystemService(INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager
     }
 
     private var serviceJob = SupervisorJob()
@@ -423,7 +422,6 @@ class UrikInputMethodService :
      * Learns word and invalidates relevant caches.
      *
      * @param word Word to learn
-     * @param inputMethod Source of the word (TYPED, SWIPED, SELECTED_FROM_SUGGESTION)
      * @return True if learning succeeded or is disabled
      */
     private suspend fun recordWordUsage(word: String) {
@@ -2455,7 +2453,7 @@ class UrikInputMethodService :
         if (wordStart < 0) return null
 
         if (paragraphBoundary >= 0) {
-            val paragraphStartInText = textBeforeCursor.length - textInParagraph.length
+            textBeforeCursor.length - textInParagraph.length
             val absoluteParagraphBoundary = cursorPosition - textInParagraph.length
             if (wordStart < absoluteParagraphBoundary) {
                 return null
@@ -2464,15 +2462,6 @@ class UrikInputMethodService :
 
         return Triple(wordStart, cursorPosition, word)
     }
-
-    /**
-     * Extracts word before cursor using boundary detection.
-     *
-     * @param textBeforeCursor Text before cursor position
-     * @return Pair of (word, boundary index) or null if no valid word found
-     */
-    private fun extractWordBeforeCursor(textBeforeCursor: String): Pair<String, Int>? =
-        BackspaceUtils.extractWordBeforeCursor(textBeforeCursor)
 
     /**
      * Handles space key press.
@@ -3106,6 +3095,8 @@ class UrikInputMethodService :
 
     override fun onDestroy() {
         serviceJob.cancel()
+        serviceJob = SupervisorJob()
+        serviceScope = CoroutineScope(Dispatchers.Main + serviceJob)
 
         observerJobs.forEach { it.cancel() }
         observerJobs.clear()

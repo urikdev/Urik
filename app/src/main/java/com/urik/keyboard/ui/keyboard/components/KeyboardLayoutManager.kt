@@ -111,8 +111,8 @@ class KeyboardLayoutManager(
     private var spaceGestureStartX = 0f
     private var spaceGestureStartY = 0f
 
-    private val backgroundJob = SupervisorJob()
-    private val backgroundScope = CoroutineScope(Dispatchers.IO + backgroundJob)
+    private var backgroundJob = SupervisorJob()
+    private var backgroundScope = CoroutineScope(Dispatchers.IO + backgroundJob)
 
     private val buttonPool = mutableListOf<Button>()
     private val activeButtons = mutableSetOf<Button>()
@@ -1927,6 +1927,8 @@ class KeyboardLayoutManager(
 
     fun cleanup() {
         backgroundJob.cancel()
+        backgroundJob = SupervisorJob()
+        backgroundScope = CoroutineScope(Dispatchers.IO + backgroundJob)
         returnActiveButtonsToPool()
         buttonPool.clear()
         buttonPendingCallbacks.forEach { (_, pending) ->

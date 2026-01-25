@@ -122,7 +122,8 @@ object KeyboardModule {
     fun provideTextInputProcessor(
         spellCheckManager: SpellCheckManager,
         settingsRepository: SettingsRepository,
-    ): TextInputProcessor = TextInputProcessor(spellCheckManager, settingsRepository)
+        cacheMemoryManager: CacheMemoryManager,
+    ): TextInputProcessor = TextInputProcessor(spellCheckManager, settingsRepository, cacheMemoryManager)
 
     @Provides
     @Singleton

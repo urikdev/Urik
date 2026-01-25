@@ -3,7 +3,6 @@ package com.urik.keyboard
 object KeyboardConstants {
     object CacheConstants {
         const val PROCESSING_CACHE_MAX_SIZE = 200
-        const val PROCESSING_CACHE_CLEANUP_THRESHOLD = 250
         const val CACHE_TTL_MS = 300000L
 
         const val SUGGESTION_CACHE_SIZE = 500
@@ -65,12 +64,10 @@ object KeyboardConstants {
         const val COMPLETION_LENGTH_WEIGHT = 0.70
         const val COMPLETION_FREQUENCY_WEIGHT = 0.30
         const val COMPLETION_CONFIDENCE_MIN = 0.50
-        const val COMPLETION_CONFIDENCE_MAX = 0.84
 
         const val SYMSPELL_DISTANCE_WEIGHT = 0.45
         const val SYMSPELL_FREQUENCY_WEIGHT = 0.05
         const val SYMSPELL_CONFIDENCE_MIN = 0.0
-        const val SYMSPELL_CONFIDENCE_MAX = 0.70
         const val MAX_DICT_FREQUENCY = 30_000_000.0
 
         const val SAME_LENGTH_BONUS = 0.10
@@ -224,13 +221,10 @@ object KeyboardConstants {
         const val MAX_WORD_INPUT_LENGTH = 50
         const val MAX_CURSOR_POSITION_CHARS = 1000
         const val WORD_BOUNDARY_CONTEXT_LENGTH = 64
-        const val PARAGRAPH_CONTEXT_LENGTH = 256
     }
 
     object SelectionTrackingConstants {
         const val NON_SEQUENTIAL_JUMP_THRESHOLD = 5
-        const val CURSOR_VALIDATION_TOLERANCE = 1
-        const val MAX_COMPOSING_REGION_VALIDATION_DELAY_MS = 50L
     }
 
     object InputTimingConstants {

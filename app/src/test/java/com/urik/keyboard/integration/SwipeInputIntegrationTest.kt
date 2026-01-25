@@ -146,6 +146,7 @@ class SwipeInputIntegrationTest {
                 TextInputProcessor(
                     spellCheckManager,
                     settingsRepository,
+                    cacheMemoryManager,
                 )
 
             swipeDetector = SwipeDetector(spellCheckManager, wordLearningEngine, PathGeometryAnalyzer())
