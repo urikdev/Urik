@@ -6,7 +6,9 @@ import android.graphics.PointF
 import com.urik.keyboard.KeyboardConstants.GeometricScoringConstants
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.math.*
+import kotlin.math.abs
+import kotlin.math.atan2
+import kotlin.math.sqrt
 
 /**
  * Geometric analysis engine for swipe path interpretation.
@@ -102,6 +104,7 @@ class PathGeometryAnalyzer
 
         private val reusableCurvatureArray = FloatArray(GeometricScoringConstants.MAX_PATH_POINTS)
         private val reusableVelocityArray = FloatArray(GeometricScoringConstants.MAX_PATH_POINTS)
+        private val cachedIntersectionPoint = PointF()
 
         /**
          * Performs comprehensive geometric analysis on a swipe path.
@@ -465,7 +468,9 @@ class PathGeometryAnalyzer
             val keyRadius = GeometricScoringConstants.KEY_TRAVERSAL_RADIUS
             val keyRadiusSq = keyRadius * keyRadius
 
-            var bestIntersection: PointF? = null
+            var bestIntersectionX = 0f
+            var bestIntersectionY = 0f
+            var hasBestIntersection = false
             var bestConfidence = 0f
             var entryAngle = 0f
             var dwellTime = 0f
@@ -476,8 +481,7 @@ class PathGeometryAnalyzer
                 val p1 = path[i]
                 val p2 = path[i + 1]
 
-                val intersection =
-                    lineCircleIntersection(
+                if (lineCircleIntersection(
                         p1.x,
                         p1.y,
                         p2.x,
@@ -485,19 +489,28 @@ class PathGeometryAnalyzer
                         keyPos.x,
                         keyPos.y,
                         keyRadius,
+                        cachedIntersectionPoint,
                     )
-
-                if (intersection != null) {
+                ) {
                     val dx = p2.x - p1.x
                     val dy = p2.y - p1.y
                     val angle = atan2(dy, dx)
 
                     val velocity = if (i < velocityProfile.size) velocityProfile[i] else 0f
-                    val confidence = calculateTraversalConfidence(intersection, keyPos, velocity)
+                    val confidence =
+                        calculateTraversalConfidencePrimitive(
+                            cachedIntersectionPoint.x,
+                            cachedIntersectionPoint.y,
+                            keyPos.x,
+                            keyPos.y,
+                            velocity,
+                        )
 
                     if (confidence > bestConfidence) {
                         bestConfidence = confidence
-                        bestIntersection = intersection
+                        bestIntersectionX = cachedIntersectionPoint.x
+                        bestIntersectionY = cachedIntersectionPoint.y
+                        hasBestIntersection = true
                         entryAngle = angle
                         velocityAtKey = velocity
                     }
@@ -513,14 +526,16 @@ class PathGeometryAnalyzer
                 }
             }
 
-            return bestIntersection?.let {
+            return if (hasBestIntersection) {
                 KeyTraversal(
-                    intersectionPoint = it,
+                    intersectionPoint = PointF(bestIntersectionX, bestIntersectionY),
                     entryAngle = entryAngle,
                     dwellTime = dwellTime,
                     velocityAtKey = velocityAtKey,
                     confidence = bestConfidence,
                 )
+            } else {
+                null
             }
         }
 
@@ -532,7 +547,8 @@ class PathGeometryAnalyzer
             cx: Float,
             cy: Float,
             radius: Float,
-        ): PointF? {
+            outPoint: PointF,
+        ): Boolean {
             val dx = x2 - x1
             val dy = y2 - y1
             val fx = x1 - cx
@@ -544,7 +560,7 @@ class PathGeometryAnalyzer
 
             var discriminant = b * b - 4f * a * c
 
-            if (discriminant < 0 || a == 0f) return null
+            if (discriminant < 0 || a == 0f) return false
 
             discriminant = sqrt(discriminant)
             val t1 = (-b - discriminant) / (2f * a)
@@ -554,19 +570,22 @@ class PathGeometryAnalyzer
                 when {
                     t1 in 0f..1f -> t1
                     t2 in 0f..1f -> t2
-                    else -> return null
+                    else -> return false
                 }
 
-            return PointF(x1 + t * dx, y1 + t * dy)
+            outPoint.set(x1 + t * dx, y1 + t * dy)
+            return true
         }
 
-        private fun calculateTraversalConfidence(
-            intersection: PointF,
-            keyCenter: PointF,
+        private fun calculateTraversalConfidencePrimitive(
+            intersectionX: Float,
+            intersectionY: Float,
+            keyCenterX: Float,
+            keyCenterY: Float,
             velocity: Float,
         ): Float {
-            val dx = intersection.x - keyCenter.x
-            val dy = intersection.y - keyCenter.y
+            val dx = intersectionX - keyCenterX
+            val dy = intersectionY - keyCenterY
             val distFromCenter = sqrt(dx * dx + dy * dy)
 
             val proximityScore =

@@ -132,6 +132,7 @@ class InputProcessingIntegrationTest {
                 TextInputProcessor(
                     spellCheckManager,
                     settingsRepository,
+                    cacheMemoryManager,
                 )
         }
 

@@ -222,7 +222,6 @@ class ThemePickerAdapter(
             private const val VIEW_ID_THEME_NAME = 1003
             private const val VIEW_ID_SELECTED_INDICATOR = 1004
             private const val VIEW_ID_FAVORITE_INDICATOR = 1005
-            private const val PREVIEW_HEIGHT_DP = 80
             private const val CARD_MARGIN_DP = 12
 
             private val ICON_COLOR = "#d4d2a5".toColorInt()

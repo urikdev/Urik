@@ -13,7 +13,6 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.withContext
-import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -61,9 +60,18 @@ class TextInputProcessor
     constructor(
         private val spellCheckManager: SpellCheckManager,
         settingsRepository: SettingsRepository,
+        cacheMemoryManager: com.urik.keyboard.utils.CacheMemoryManager,
     ) {
-        private val processingCache = ConcurrentHashMap<String, ProcessingCache>()
-        private val suggestionCache = ConcurrentHashMap<String, SuggestionCacheEntry>()
+        private val processingCache =
+            cacheMemoryManager.createCache<String, ProcessingCache>(
+                name = "text_processing_cache",
+                maxSize = CacheConstants.PROCESSING_CACHE_MAX_SIZE,
+            )
+        private val suggestionCache =
+            cacheMemoryManager.createCache<String, SuggestionCacheEntry>(
+                name = "text_suggestion_cache",
+                maxSize = CacheConstants.PROCESSING_CACHE_MAX_SIZE,
+            )
 
         private var currentScriptCode = UScript.LATIN
         private var currentLocale: ULocale = ULocale.ENGLISH
@@ -278,11 +286,11 @@ class TextInputProcessor
             word.isNotBlank() && word.length <= TextProcessingConstants.MAX_WORD_INPUT_LENGTH
 
         private fun getCachedProcessing(word: String): ProcessingCache? {
-            val cached = processingCache[word]
-            return if (cached != null && !isCacheExpired(cached.timestamp)) {
+            val cached = processingCache.getIfPresent(word) ?: return null
+            return if (!isCacheExpired(cached.timestamp)) {
                 cached
             } else {
-                processingCache.remove(word)
+                processingCache.invalidate(word)
                 null
             }
         }
@@ -292,26 +300,22 @@ class TextInputProcessor
             normalized: String,
             graphemeCount: Int,
         ) {
-            if (processingCache.size >= CacheConstants.PROCESSING_CACHE_CLEANUP_THRESHOLD) {
-                cleanupExpiredEntries()
-            }
-
-            if (processingCache.size < CacheConstants.PROCESSING_CACHE_MAX_SIZE) {
-                processingCache[word] =
-                    ProcessingCache(
-                        normalized = normalized,
-                        graphemeCount = graphemeCount,
-                        timestamp = System.currentTimeMillis(),
-                    )
-            }
+            processingCache.put(
+                word,
+                ProcessingCache(
+                    normalized = normalized,
+                    graphemeCount = graphemeCount,
+                    timestamp = System.currentTimeMillis(),
+                ),
+            )
         }
 
         private fun getCachedSuggestions(word: String): SuggestionCacheEntry? {
-            val cached = suggestionCache[word]
-            return if (cached != null && !isCacheExpired(cached.timestamp)) {
+            val cached = suggestionCache.getIfPresent(word) ?: return null
+            return if (!isCacheExpired(cached.timestamp)) {
                 cached
             } else {
-                suggestionCache.remove(word)
+                suggestionCache.invalidate(word)
                 null
             }
         }
@@ -321,35 +325,17 @@ class TextInputProcessor
             suggestions: List<String>,
             isValid: Boolean,
         ) {
-            if (suggestionCache.size >= CacheConstants.PROCESSING_CACHE_CLEANUP_THRESHOLD) {
-                cleanupSuggestionCache()
-            }
-
-            if (suggestionCache.size < CacheConstants.PROCESSING_CACHE_MAX_SIZE) {
-                suggestionCache[word] =
-                    SuggestionCacheEntry(
-                        suggestions = suggestions,
-                        isValid = isValid,
-                        timestamp = System.currentTimeMillis(),
-                    )
-            }
+            suggestionCache.put(
+                word,
+                SuggestionCacheEntry(
+                    suggestions = suggestions,
+                    isValid = isValid,
+                    timestamp = System.currentTimeMillis(),
+                ),
+            )
         }
 
         private fun isCacheExpired(timestamp: Long): Boolean = System.currentTimeMillis() - timestamp > CacheConstants.CACHE_TTL_MS
-
-        private fun cleanupExpiredEntries() {
-            val currentTime = System.currentTimeMillis()
-            processingCache.entries.removeIf { (_, cache) ->
-                currentTime - cache.timestamp > CacheConstants.CACHE_TTL_MS
-            }
-        }
-
-        private fun cleanupSuggestionCache() {
-            val currentTime = System.currentTimeMillis()
-            suggestionCache.entries.removeIf { (_, cache) ->
-                currentTime - cache.timestamp > CacheConstants.CACHE_TTL_MS
-            }
-        }
 
         suspend fun removeSuggestion(word: String): Result<Boolean> =
             withContext(Dispatchers.Default) {
@@ -363,18 +349,18 @@ class TextInputProcessor
             }
 
         fun invalidateWord(word: String) {
-            processingCache.remove(word)
-            suggestionCache.remove(word)
+            processingCache.invalidate(word)
+            suggestionCache.invalidate(word)
             val normalized = normalizeText(word)
             if (normalized != word) {
-                processingCache.remove(normalized)
-                suggestionCache.remove(normalized)
+                processingCache.invalidate(normalized)
+                suggestionCache.invalidate(normalized)
             }
         }
 
         fun clearCaches() {
-            processingCache.clear()
-            suggestionCache.clear()
+            processingCache.invalidateAll()
+            suggestionCache.invalidateAll()
         }
 
         fun getCurrentSettings(): KeyboardSettings = currentSettings

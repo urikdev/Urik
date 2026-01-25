@@ -456,7 +456,7 @@ class BackspaceUtilsTest {
     fun `swipe delete with word and trailing punctuation`() {
         val text = "hello world!"
         val idx = text.indexOfLast { !Character.isLetterOrDigit(it) && !Character.isWhitespace(it) }
-        val textBeforePunctuation = text.substring(0, idx)
+        val textBeforePunctuation = text.take(idx)
 
         val wordInfo = BackspaceUtils.extractWordBeforeCursor(textBeforePunctuation)
         assertNotNull(wordInfo)

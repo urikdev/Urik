@@ -107,6 +107,8 @@ class PostureDetector(
         collectJob = null
         fallbackJob = null
         debounceJob = null
+        windowInfoTracker = null
+        windowContext = null
     }
 
     private fun updatePostureFromLayoutInfo(layoutInfo: androidx.window.layout.WindowLayoutInfo) {

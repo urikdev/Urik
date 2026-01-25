@@ -132,6 +132,7 @@ class SwipeKeyboardView
 
         private var cachedLocationArray = IntArray(2)
         private var cachedParentLocationArray = IntArray(2)
+        private val cachedKeyRect = Rect()
 
         private var isDestroyed = false
 
@@ -1887,19 +1888,17 @@ class SwipeKeyboardView
             normalizedX: Float,
             normalizedY: Float,
         ): KeyboardKey? {
-            val thisLocation = IntArray(2)
-            this.getLocationInWindow(thisLocation)
+            this.getLocationInWindow(cachedParentLocationArray)
 
             keyViews.forEach { button ->
-                val buttonLocation = IntArray(2)
-                button.getLocationInWindow(buttonLocation)
+                button.getLocationInWindow(cachedLocationArray)
 
-                val localX = buttonLocation[0] - thisLocation[0]
-                val localY = buttonLocation[1] - thisLocation[1]
+                val localX = cachedLocationArray[0] - cachedParentLocationArray[0]
+                val localY = cachedLocationArray[1] - cachedParentLocationArray[1]
 
-                val rect = Rect(localX, localY, localX + button.width, localY + button.height)
+                cachedKeyRect.set(localX, localY, localX + button.width, localY + button.height)
 
-                if (rect.contains(normalizedX.toInt(), normalizedY.toInt())) {
+                if (cachedKeyRect.contains(normalizedX.toInt(), normalizedY.toInt())) {
                     return keyMapping[button]
                 }
             }
@@ -1912,15 +1911,12 @@ class SwipeKeyboardView
             swipeOverlay.startSwipe(startPoint)
         }
 
-        override fun onSwipeUpdate(
-            currentPath: SwipeDetector.SwipePath,
-            currentPoint: PointF,
-        ) {
+        override fun onSwipeUpdate(currentPoint: PointF) {
             if (isDestroyed) return
             swipeOverlay.updateSwipe(currentPoint)
         }
 
-        override fun onSwipeEnd(finalPath: SwipeDetector.SwipePath) {
+        override fun onSwipeEnd() {
             if (isDestroyed) return
             keyboardLayoutManager?.triggerHapticFeedback()
             swipeOverlay.endSwipe()
