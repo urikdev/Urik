@@ -1038,7 +1038,7 @@ class SpellCheckManagerTest {
     @Test
     fun `getCommonWordsForLanguages skips invalid language gracefully`() =
         runTest {
-            val words = spellCheckManager.getCommonWordsForLanguages(listOf("en", "fr"))
+            val words = spellCheckManager.getCommonWordsForLanguages(listOf("en", "ja"))
 
             assertTrue(words.containsKey("hello"))
             assertFalse(words.isEmpty())
