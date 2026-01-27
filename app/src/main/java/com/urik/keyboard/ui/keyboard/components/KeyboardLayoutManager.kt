@@ -954,7 +954,8 @@ class KeyboardLayoutManager(
             val isCommaWithMultipleImes =
                 key is KeyboardKey.Character &&
                     key.value == "," &&
-                    hasMultipleImes
+                    hasMultipleImes &&
+                    rowKeys.any { it is KeyboardKey.Action && it.action == KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS }
 
             background =
                 if (isCommaWithMultipleImes) {
