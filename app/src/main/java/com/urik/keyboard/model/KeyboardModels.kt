@@ -18,6 +18,7 @@ data class KeyboardState(
     val currentMode: KeyboardMode = KeyboardMode.LETTERS,
     val isShiftPressed: Boolean = false,
     val isCapsLockOn: Boolean = false,
+    val isAutoShift: Boolean = false,
     val isLoading: Boolean = false,
     val error: String? = null,
 )

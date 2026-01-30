@@ -270,7 +270,7 @@ class InputProcessingIntegrationTest {
             assertFalse(success.wordState.isValid)
             assertTrue(
                 "Pipeline should surface learned word as suggestion",
-                success.wordState.suggestions.contains("correct"),
+                success.wordState.suggestions.any { it.word == "correct" },
             )
         }
 

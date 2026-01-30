@@ -204,7 +204,7 @@ class WordLearningEngine
 
                     val learnedWord =
                         LearnedWord.create(
-                            word = normalized,
+                            word = cleanWord,
                             wordNormalized = normalized,
                             languageTag = currentLanguage,
                             frequency = 1,
@@ -303,6 +303,40 @@ class WordLearningEngine
                     false
                 } catch (_: Exception) {
                     false
+                }
+            }
+
+        suspend fun getLearnedWordOriginalCase(
+            word: String,
+            languageCode: String,
+        ): String? =
+            withContext(ioDispatcher) {
+                try {
+                    val cleanWord = word.trim()
+                    if (cleanWord.isBlank()) {
+                        return@withContext null
+                    }
+
+                    val normalized = normalizeWord(cleanWord)
+
+                    val cachedWords = learnedWordsCache.getIfPresent(languageCode)
+                    if (cachedWords != null && !cachedWords.contains(normalized)) {
+                        return@withContext null
+                    }
+
+                    val learnedWord =
+                        learnedWordDao.findExactWord(
+                            languageTag = languageCode,
+                            normalizedWord = normalized,
+                        )
+
+                    onSuccessfulOperation()
+                    learnedWord?.word
+                } catch (_: SQLiteException) {
+                    handleDatabaseError()
+                    null
+                } catch (_: Exception) {
+                    null
                 }
             }
 

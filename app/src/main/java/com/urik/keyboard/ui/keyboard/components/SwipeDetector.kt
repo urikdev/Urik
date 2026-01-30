@@ -588,14 +588,13 @@ class SwipeDetector
             if (now - lastUpdateTime >= SwipeDetectionConstants.UI_UPDATE_INTERVAL_MS) {
                 lastUpdateTime = now
 
-                val currentPath =
-                    SwipePath(
-                        points = swipePoints.toList(),
-                        keysTraversed = emptyList(),
-                        scriptCode = currentScriptCode,
-                        isRtl = currentIsRTL,
-                        topCandidates = emptyList(),
-                    )
+                SwipePath(
+                    points = swipePoints.toList(),
+                    keysTraversed = emptyList(),
+                    scriptCode = currentScriptCode,
+                    isRtl = currentIsRTL,
+                    topCandidates = emptyList(),
+                )
 
                 _swipeListener?.onSwipeUpdate(transformed)
             }
@@ -621,14 +620,13 @@ class SwipeDetector
                 val scriptSnapshot = currentScriptCode
                 val rtlSnapshot = currentIsRTL
 
-                val preliminaryPath =
-                    SwipePath(
-                        points = pathSnapshot,
-                        keysTraversed = emptyList(),
-                        scriptCode = scriptSnapshot,
-                        isRtl = rtlSnapshot,
-                        topCandidates = emptyList(),
-                    )
+                SwipePath(
+                    points = pathSnapshot,
+                    keysTraversed = emptyList(),
+                    scriptCode = scriptSnapshot,
+                    isRtl = rtlSnapshot,
+                    topCandidates = emptyList(),
+                )
 
                 _swipeListener?.onSwipeEnd()
 

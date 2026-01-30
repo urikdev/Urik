@@ -194,7 +194,7 @@ class WordLearningEngineTest {
 
             verify(learnedWordDao).learnWord(
                 argThat {
-                    word == "hello" && wordNormalized == "hello"
+                    word == "HELLO" && wordNormalized == "hello"
                 },
             )
         }

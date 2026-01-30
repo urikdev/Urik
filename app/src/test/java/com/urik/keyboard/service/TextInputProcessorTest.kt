@@ -79,11 +79,23 @@ class TextInputProcessorTest {
         Dispatchers.resetMain()
     }
 
+    private fun createSuggestions(vararg words: String): List<SpellingSuggestion> =
+        words.mapIndexed { index, word ->
+            SpellingSuggestion(
+                word = word,
+                confidence = 0.9 - (index * 0.1),
+                ranking = index,
+                source = "test",
+                preserveCase = false,
+            )
+        }
+
     @Test
     fun `processCharacterInput with valid letter returns success`() =
         runTest {
             whenever(spellCheckManager.isWordInDictionary("hello")).thenReturn(true)
-            whenever(spellCheckManager.generateSuggestions("hello", maxSuggestions = 3)).thenReturn(listOf("hello", "hells"))
+            whenever(spellCheckManager.getSpellingSuggestionsWithConfidence("hello"))
+                .thenReturn(createSuggestions("hello", "hells"))
 
             val result = processor.processCharacterInput("o", "hello", InputMethod.TYPED)
 
@@ -99,8 +111,8 @@ class TextInputProcessorTest {
     fun `processCharacterInput with invalid word generates suggestions`() =
         runTest {
             whenever(spellCheckManager.isWordInDictionary("helllo")).thenReturn(false)
-            whenever(spellCheckManager.generateSuggestions("helllo", maxSuggestions = 3))
-                .thenReturn(listOf("hello", "hell", "hallo"))
+            whenever(spellCheckManager.getSpellingSuggestionsWithConfidence("helllo"))
+                .thenReturn(createSuggestions("hello", "hell", "hallo"))
 
             val result = processor.processCharacterInput("o", "helllo", InputMethod.TYPED)
 
@@ -108,7 +120,7 @@ class TextInputProcessorTest {
             val success = result as ProcessingResult.Success
             assertFalse(success.wordState.isValid)
             assertEquals(3, success.wordState.suggestions.size)
-            assertEquals("hello", success.wordState.suggestions[0])
+            assertEquals("hello", success.wordState.suggestions[0].word)
             assertTrue(success.shouldHighlight)
         }
 
@@ -132,8 +144,8 @@ class TextInputProcessorTest {
     fun `processWordInput with swipe generates suggestions even for valid words`() =
         runTest {
             whenever(spellCheckManager.isWordInDictionary("hello")).thenReturn(true)
-            whenever(spellCheckManager.generateSuggestions("hello", maxSuggestions = 3))
-                .thenReturn(listOf("hello", "hallo", "hullo"))
+            whenever(spellCheckManager.getSpellingSuggestionsWithConfidence("hello"))
+                .thenReturn(createSuggestions("hello", "hallo", "hullo"))
 
             val result = processor.processWordInput("hello", InputMethod.SWIPED)
 
@@ -166,14 +178,14 @@ class TextInputProcessorTest {
     fun `second call with same word uses cached processing`() =
         runTest {
             whenever(spellCheckManager.isWordInDictionary("test")).thenReturn(true)
-            whenever(spellCheckManager.generateSuggestions("test", maxSuggestions = 3)).thenReturn(emptyList())
+            whenever(spellCheckManager.getSpellingSuggestionsWithConfidence("test")).thenReturn(emptyList())
 
             processor.processCharacterInput("t", "test", InputMethod.TYPED)
 
             processor.processCharacterInput("t", "test", InputMethod.TYPED)
 
             verify(spellCheckManager, times(1)).isWordInDictionary("test")
-            verify(spellCheckManager, times(1)).generateSuggestions("test", maxSuggestions = 3)
+            verify(spellCheckManager).getSpellingSuggestionsWithConfidence("test")
         }
 
     @Test
@@ -231,17 +243,17 @@ class TextInputProcessorTest {
             settingsFlow.emit(settingsWithSpellCheckOff)
             testDispatcher.scheduler.advanceUntilIdle()
 
-            whenever(spellCheckManager.generateSuggestions("helllo", maxSuggestions = 3))
-                .thenReturn(listOf("hello", "hell", "hallow"))
+            whenever(spellCheckManager.getSpellingSuggestionsWithConfidence("helllo"))
+                .thenReturn(createSuggestions("hello", "hell", "hallow"))
 
             val result = processor.processCharacterInput("o", "helllo", InputMethod.TYPED)
 
             verify(spellCheckManager, never()).isWordInDictionary(any())
-            verify(spellCheckManager).generateSuggestions("helllo", maxSuggestions = 3)
+            verify(spellCheckManager).getSpellingSuggestionsWithConfidence(any())
             assertTrue(result is ProcessingResult.Success)
             val success = result as ProcessingResult.Success
             assertFalse(success.wordState.requiresSpellCheck)
-            assertEquals(listOf("hello", "hell", "hallow"), success.wordState.suggestions)
+            assertEquals(listOf("hello", "hell", "hallow"), success.wordState.suggestions.map { it.word })
         }
 
     @Test
@@ -254,7 +266,7 @@ class TextInputProcessorTest {
             whenever(spellCheckManager.isWordInDictionary("helllo")).thenReturn(false)
             val result = processor.processCharacterInput("o", "helllo", InputMethod.TYPED)
 
-            verify(spellCheckManager, never()).generateSuggestions(any(), any())
+            verify(spellCheckManager, never()).getSpellingSuggestionsWithConfidence(any())
             assertTrue(result is ProcessingResult.Success)
             val success = result as ProcessingResult.Success
             assertTrue(success.wordState.suggestions.isEmpty())
@@ -268,8 +280,8 @@ class TextInputProcessorTest {
             testDispatcher.scheduler.advanceUntilIdle()
 
             whenever(spellCheckManager.isWordInDictionary("helllo")).thenReturn(false)
-            whenever(spellCheckManager.generateSuggestions("helllo", maxSuggestions = 2))
-                .thenReturn(listOf("hello", "hell"))
+            whenever(spellCheckManager.getSpellingSuggestionsWithConfidence("helllo"))
+                .thenReturn(createSuggestions("hello", "hell"))
 
             val result = processor.processCharacterInput("o", "helllo", InputMethod.TYPED)
 
@@ -326,13 +338,13 @@ class TextInputProcessorTest {
     @Test
     fun `getSuggestions returns suggestions when enabled`() =
         runTest {
-            whenever(spellCheckManager.generateSuggestions("hel", maxSuggestions = 3))
-                .thenReturn(listOf("hello", "help", "hell"))
+            whenever(spellCheckManager.getSpellingSuggestionsWithConfidence("hel"))
+                .thenReturn(createSuggestions("hello", "help", "hell"))
 
             val suggestions = processor.getSuggestions("hel")
 
             assertEquals(3, suggestions.size)
-            assertEquals("hello", suggestions[0])
+            assertEquals("hello", suggestions[0].word)
         }
 
     @Test
@@ -344,14 +356,14 @@ class TextInputProcessorTest {
             val suggestions = processor.getSuggestions("hel")
 
             assertTrue(suggestions.isEmpty())
-            verify(spellCheckManager, never()).generateSuggestions(any(), any())
+            verify(spellCheckManager, never()).getSpellingSuggestionsWithConfidence(any())
         }
 
     @Test
     fun `getSuggestions respects min query length`() =
         runTest {
-            whenever(spellCheckManager.generateSuggestions("h", maxSuggestions = 3))
-                .thenReturn(listOf("he", "hi", "ha"))
+            whenever(spellCheckManager.getSpellingSuggestionsWithConfidence("h"))
+                .thenReturn(createSuggestions("he", "hi", "ha"))
             val suggestions = processor.getSuggestions("h")
 
             assertEquals(3, suggestions.size)
@@ -360,13 +372,13 @@ class TextInputProcessorTest {
     @Test
     fun `getSuggestions caches results`() =
         runTest {
-            whenever(spellCheckManager.generateSuggestions("hel", maxSuggestions = 3))
-                .thenReturn(listOf("hello", "help", "hell"))
+            whenever(spellCheckManager.getSpellingSuggestionsWithConfidence("hel"))
+                .thenReturn(createSuggestions("hello", "help", "hell"))
             processor.getSuggestions("hel")
 
             processor.getSuggestions("hel")
 
-            verify(spellCheckManager, times(1)).generateSuggestions("hel", maxSuggestions = 3)
+            verify(spellCheckManager).getSpellingSuggestionsWithConfidence("hel")
         }
 
     @Test
@@ -415,7 +427,7 @@ class TextInputProcessorTest {
     @Test
     fun `getSuggestions handles exception gracefully`() =
         runTest {
-            whenever(spellCheckManager.generateSuggestions(any(), any()))
+            whenever(spellCheckManager.getSpellingSuggestionsWithConfidence(any()))
                 .thenThrow(RuntimeException("Suggestion error"))
 
             val suggestions = processor.getSuggestions("hello")

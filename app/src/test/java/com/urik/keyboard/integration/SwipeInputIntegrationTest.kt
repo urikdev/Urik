@@ -202,7 +202,7 @@ class SwipeInputIntegrationTest {
             assertTrue("Invalid word should have suggestions", success.wordState.suggestions.isNotEmpty())
             assertTrue(
                 "Suggestions should include 'world'",
-                success.wordState.suggestions.contains("world"),
+                success.wordState.suggestions.any { it.word == "world" },
             )
         }
 
