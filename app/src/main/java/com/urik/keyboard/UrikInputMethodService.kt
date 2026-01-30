@@ -140,6 +140,9 @@ class UrikInputMethodService :
     @Inject
     lateinit var keyboardModeManager: com.urik.keyboard.service.KeyboardModeManager
 
+    @Inject
+    lateinit var caseTransformer: com.urik.keyboard.utils.CaseTransformer
+
     private lateinit var viewModel: KeyboardViewModel
     private lateinit var layoutManager: KeyboardLayoutManager
     private lateinit var lifecycleRegistry: LifecycleRegistry
@@ -424,7 +427,7 @@ class UrikInputMethodService :
      * @param word Word to learn
      * @return True if learning succeeded or is disabled
      */
-    private suspend fun recordWordUsage(word: String) {
+    private fun recordWordUsage(word: String) {
         try {
             val currentLanguage = languageManager.currentLanguage.value
             wordFrequencyRepository.incrementFrequency(word, currentLanguage)
@@ -577,7 +580,17 @@ class UrikInputMethodService :
                 val predictions = allPredictions.filter { !spellCheckManager.isWordBlacklisted(it) }
 
                 if (predictions.isNotEmpty() && displayBuffer.isEmpty()) {
-                    val displayPredictions = applyCapitalizationToSuggestions(predictions)
+                    val suggestionObjects =
+                        predictions.mapIndexed { index, word ->
+                            com.urik.keyboard.service.SpellingSuggestion(
+                                word = word,
+                                confidence = 0.85 - (index * 0.02),
+                                ranking = index,
+                                source = "bigram",
+                                preserveCase = false,
+                            )
+                        }
+                    val displayPredictions = applyCapitalizationToSuggestions(suggestionObjects)
                     withContext(Dispatchers.Main) {
                         if (displayBuffer.isEmpty()) {
                             isShowingBigramPredictions = true
@@ -599,21 +612,9 @@ class UrikInputMethodService :
         }
     }
 
-    private fun applyCapitalizationToSuggestions(suggestions: List<String>): List<String> {
+    private fun applyCapitalizationToSuggestions(suggestions: List<com.urik.keyboard.service.SpellingSuggestion>): List<String> {
         val state = viewModel.state.value
-        return when {
-            state.isCapsLockOn -> {
-                suggestions.map { it.uppercase() }
-            }
-
-            state.isShiftPressed || displayBuffer.firstOrNull()?.isUpperCase() == true -> {
-                suggestions.map { it.replaceFirstChar { c -> c.uppercase() } }
-            }
-
-            else -> {
-                suggestions
-            }
-        }
+        return caseTransformer.applyCasingToSuggestions(suggestions, state)
     }
 
     private fun isSentenceEndingPunctuation(char: Char): Boolean = UCharacter.hasBinaryProperty(char.code, UProperty.S_TERM)
@@ -629,7 +630,7 @@ class UrikInputMethodService :
         if (newWordState.suggestions.isNotEmpty()) {
             val filteredSuggestions =
                 newWordState.suggestions.filterNot { suggestion ->
-                    suggestion.equals(displayBuffer, ignoreCase = true)
+                    suggestion.word.equals(displayBuffer, ignoreCase = true)
                 }
 
             val displaySuggestions = applyCapitalizationToSuggestions(filteredSuggestions)
@@ -1789,45 +1790,29 @@ class UrikInputMethodService :
 
             if (validatedWord.isEmpty()) return
 
-            val shouldCapitalize =
-                viewModel.state.value.isShiftPressed || viewModel.state.value.isCapsLockOn
-
-            val currentLanguage =
-                languageManager.currentLanguage.value
-                    .split("-")
-                    .first()
-            val isEnglishPronounI =
-                currentLanguage == "en" &&
-                    (
-                        validatedWord.lowercase() == "i" ||
-                            validatedWord.lowercase() == "i'm" ||
-                            validatedWord.lowercase() == "i'll" ||
-                            validatedWord.lowercase() == "i've" ||
-                            validatedWord.lowercase() == "i'd"
-                    )
-
-            val displayWord =
-                if (isEnglishPronounI) {
-                    when (validatedWord.lowercase()) {
-                        "i" -> "I"
-                        "i'm" -> "I'm"
-                        "i'll" -> "I'll"
-                        "i've" -> "I've"
-                        "i'd" -> "I'd"
-                        else -> validatedWord
-                    }
-                } else if (shouldCapitalize) {
-                    validatedWord.replaceFirstChar { it.uppercase() }
-                } else {
-                    validatedWord
-                }
-
-            if (viewModel.state.value.isShiftPressed && !viewModel.state.value.isCapsLockOn) {
+            val keyboardState = viewModel.state.value
+            if (keyboardState.isShiftPressed && !keyboardState.isCapsLockOn) {
                 viewModel.onEvent(KeyboardEvent.ShiftStateChanged(false))
             }
 
             serviceScope.launch {
                 try {
+                    val currentLanguage =
+                        languageManager.currentLanguage.value
+                            .split("-")
+                            .first()
+
+                    val learnedOriginalCase =
+                        wordLearningEngine.getLearnedWordOriginalCase(validatedWord, currentLanguage)
+
+                    val displayWord =
+                        computeSwipeDisplayWord(
+                            validatedWord = validatedWord,
+                            learnedOriginalCase = learnedOriginalCase,
+                            currentLanguage = currentLanguage,
+                            keyboardState = keyboardState,
+                        )
+
                     val result =
                         textInputProcessor.processWordInput(validatedWord, InputMethod.SWIPED)
 
@@ -1864,14 +1849,14 @@ class UrikInputMethodService :
                     }
                 } catch (_: Exception) {
                     withContext(Dispatchers.Main) {
-                        currentInputConnection?.setComposingText(displayWord, 1)
-                        displayBuffer = displayWord
+                        currentInputConnection?.setComposingText(validatedWord, 1)
+                        displayBuffer = validatedWord
                         wordState =
                             WordState(
-                                buffer = displayWord,
+                                buffer = validatedWord,
                                 normalizedBuffer = validatedWord.lowercase(),
                                 isFromSwipe = true,
-                                graphemeCount = displayWord.length,
+                                graphemeCount = validatedWord.length,
                                 scriptCode = UScript.LATIN,
                             )
                     }
@@ -1881,6 +1866,46 @@ class UrikInputMethodService :
             currentInputConnection?.setComposingText(validatedWord, 1)
         }
     }
+
+    private fun computeSwipeDisplayWord(
+        validatedWord: String,
+        learnedOriginalCase: String?,
+        currentLanguage: String,
+        keyboardState: com.urik.keyboard.model.KeyboardState,
+    ): String {
+        val normalizedWord = validatedWord.lowercase()
+
+        if (currentLanguage == "en") {
+            val englishPronounForm = getEnglishPronounIForm(normalizedWord)
+            if (englishPronounForm != null) {
+                return englishPronounForm
+            }
+        }
+
+        val wordToUse = learnedOriginalCase ?: validatedWord
+        val preserveCase = learnedOriginalCase != null
+
+        val suggestion =
+            com.urik.keyboard.service.SpellingSuggestion(
+                word = wordToUse,
+                confidence = 1.0,
+                ranking = 0,
+                source = if (preserveCase) "learned" else "swipe",
+                preserveCase = preserveCase,
+            )
+
+        return caseTransformer.applyCasing(suggestion, keyboardState)
+    }
+
+    private fun getEnglishPronounIForm(normalizedWord: String): String? =
+        when (normalizedWord) {
+            "i" -> "I"
+            "i'm" -> "I'm"
+            "i'll" -> "I'll"
+            "i've" -> "I've"
+            "i'd" -> "I'd"
+            else -> null
+        }
 
     /**
      * Handles suggestion selection.

@@ -135,7 +135,7 @@ class KeyboardViewModel
         }
 
         fun enableAutoCapitalization() {
-            updateState { it.copy(isShiftPressed = true) }
+            updateState { it.copy(isShiftPressed = true, isAutoShift = true) }
         }
 
         /**
@@ -187,7 +187,7 @@ class KeyboardViewModel
         }
 
         fun clearShiftAndCapsState() {
-            updateState { it.copy(isShiftPressed = false, isCapsLockOn = false) }
+            updateState { it.copy(isShiftPressed = false, isCapsLockOn = false, isAutoShift = false) }
         }
 
         private fun handleEvent(event: KeyboardEvent) {
@@ -222,7 +222,7 @@ class KeyboardViewModel
          */
         fun clearShiftAfterCharacter(key: KeyboardKey.Character) {
             if (key.type == KeyboardKey.KeyType.LETTER && _state.value.isShiftPressed && !_state.value.isCapsLockOn) {
-                updateState { it.copy(isShiftPressed = false) }
+                updateState { it.copy(isShiftPressed = false, isAutoShift = false) }
             }
         }
 
@@ -230,7 +230,7 @@ class KeyboardViewModel
             when (action) {
                 KeyboardKey.ActionType.SHIFT -> {
                     val newShiftState = !_state.value.isShiftPressed
-                    updateState { it.copy(isShiftPressed = newShiftState) }
+                    updateState { it.copy(isShiftPressed = newShiftState, isAutoShift = false) }
                 }
                 KeyboardKey.ActionType.CAPS_LOCK -> {
                     val newCapsState = !_state.value.isCapsLockOn
@@ -238,6 +238,7 @@ class KeyboardViewModel
                         it.copy(
                             isCapsLockOn = newCapsState,
                             isShiftPressed = false,
+                            isAutoShift = false,
                         )
                     }
                 }

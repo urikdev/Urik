@@ -46,6 +46,7 @@ data class SpellingSuggestion(
     val confidence: Double,
     val ranking: Int,
     val source: String = "unknown",
+    val preserveCase: Boolean = false,
 )
 
 /**
@@ -621,6 +622,7 @@ class SpellCheckManager
                                     confidence = confidence,
                                     ranking = index,
                                     source = "learned",
+                                    preserveCase = true,
                                 ),
                             )
                             seenWords.add(word.lowercase())
