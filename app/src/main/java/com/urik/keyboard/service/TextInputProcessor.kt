@@ -20,7 +20,7 @@ data class WordState(
     val buffer: String = "",
     val normalizedBuffer: String = "",
     val isFromSwipe: Boolean = false,
-    val suggestions: List<String> = emptyList(),
+    val suggestions: List<SpellingSuggestion> = emptyList(),
     val graphemeCount: Int = 0,
     val scriptCode: Int = UScript.LATIN,
     val isValid: Boolean = false,
@@ -49,7 +49,7 @@ private data class ProcessingCache(
 )
 
 private data class SuggestionCacheEntry(
-    val suggestions: List<String>,
+    val suggestions: List<SpellingSuggestion>,
     val isValid: Boolean,
     val timestamp: Long,
 )
@@ -165,7 +165,7 @@ class TextInputProcessor
                 val requiresSpellCheck = spellCheckEnabled && graphemeCount >= TextProcessingConstants.MIN_SPELL_CHECK_LENGTH
                 val shouldGenerateSuggestions = suggestionsEnabled && graphemeCount >= TextProcessingConstants.MIN_SPELL_CHECK_LENGTH
                 var isValid = true
-                var suggestions = emptyList<String>()
+                var suggestions = emptyList<SpellingSuggestion>()
 
                 if (requiresSpellCheck || shouldGenerateSuggestions) {
                     val cachedEntry = getCachedSuggestions(normalized)
@@ -178,10 +178,10 @@ class TextInputProcessor
                         }
                         if (shouldGenerateSuggestions) {
                             suggestions =
-                                spellCheckManager.generateSuggestions(
-                                    normalized,
-                                    maxSuggestions = maxSuggestions,
-                                )
+                                spellCheckManager
+                                    .getSpellingSuggestionsWithConfidence(normalized)
+                                    .sortedByDescending { it.confidence }
+                                    .take(maxSuggestions)
                         }
                         cacheSuggestions(normalized, suggestions, isValid)
                     }
@@ -213,7 +213,7 @@ class TextInputProcessor
             }
         }
 
-        suspend fun getSuggestions(word: String): List<String> =
+        suspend fun getSuggestions(word: String): List<SpellingSuggestion> =
             withContext(Dispatchers.Default) {
                 val suggestionsEnabled = currentSettings.showSuggestions && currentSettings.spellCheckEnabled
                 val maxSuggestions = currentSettings.effectiveSuggestionCount
@@ -230,7 +230,10 @@ class TextInputProcessor
 
                 val suggestions =
                     try {
-                        spellCheckManager.generateSuggestions(normalized, maxSuggestions = maxSuggestions)
+                        spellCheckManager
+                            .getSpellingSuggestionsWithConfidence(normalized)
+                            .sortedByDescending { it.confidence }
+                            .take(maxSuggestions)
                     } catch (_: Exception) {
                         emptyList()
                     }
@@ -322,7 +325,7 @@ class TextInputProcessor
 
         private fun cacheSuggestions(
             word: String,
-            suggestions: List<String>,
+            suggestions: List<SpellingSuggestion>,
             isValid: Boolean,
         ) {
             suggestionCache.put(
