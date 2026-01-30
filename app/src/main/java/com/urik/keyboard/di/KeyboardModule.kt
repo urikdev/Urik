@@ -12,6 +12,7 @@ import com.urik.keyboard.service.DictionaryBackupManager
 import com.urik.keyboard.service.EmojiSearchManager
 import com.urik.keyboard.service.LanguageManager
 import com.urik.keyboard.service.SpellCheckManager
+import com.urik.keyboard.service.SwipeSpaceManager
 import com.urik.keyboard.service.TextInputProcessor
 import com.urik.keyboard.service.WordLearningEngine
 import com.urik.keyboard.service.WordNormalizer
@@ -124,6 +125,10 @@ object KeyboardModule {
         settingsRepository: SettingsRepository,
         cacheMemoryManager: CacheMemoryManager,
     ): TextInputProcessor = TextInputProcessor(spellCheckManager, settingsRepository, cacheMemoryManager)
+
+    @Provides
+    @Singleton
+    fun provideSwipeSpaceManager(): SwipeSpaceManager = SwipeSpaceManager()
 
     @Provides
     @Singleton

@@ -143,6 +143,9 @@ class UrikInputMethodService :
     @Inject
     lateinit var caseTransformer: com.urik.keyboard.utils.CaseTransformer
 
+    @Inject
+    lateinit var swipeSpaceManager: com.urik.keyboard.service.SwipeSpaceManager
+
     private lateinit var viewModel: KeyboardViewModel
     private lateinit var layoutManager: KeyboardLayoutManager
     private lateinit var lifecycleRegistry: LifecycleRegistry
@@ -511,6 +514,18 @@ class UrikInputMethodService :
             val textBefore = safeGetTextBeforeCursor(50)
             viewModel.checkAndApplyAutoCapitalization(textBefore, currentSettings.autoCapitalizationEnabled)
         }
+    }
+
+    private fun commitPreviousSwipeAndInsertSpace() {
+        if (!wordState.isFromSwipe || displayBuffer.isEmpty()) return
+
+        currentInputConnection?.finishComposingText()
+        val textBefore = safeGetTextBeforeCursor(1)
+        if (!swipeSpaceManager.isWhitespace(textBefore)) {
+            currentInputConnection?.commitText(" ", 1)
+            swipeSpaceManager.markAutoSpaceInserted()
+        }
+        displayBuffer = ""
     }
 
     /**
@@ -1502,9 +1517,11 @@ class UrikInputMethodService :
             if (displayBuffer.isNotEmpty() && wordState.isFromSwipe) {
                 currentInputConnection?.beginBatchEdit()
                 try {
-                    currentInputConnection?.commitText("$displayBuffer ", 1)
+                    currentInputConnection?.finishComposingText()
+                    currentInputConnection?.commitText(" ", 1)
 
                     coordinateStateClear()
+                    swipeSpaceManager.clearAutoSpaceFlag()
 
                     val textBefore = safeGetTextBeforeCursor(50)
                     viewModel.checkAndApplyAutoCapitalization(textBefore, currentSettings.autoCapitalizationEnabled)
@@ -1641,6 +1658,13 @@ class UrikInputMethodService :
                 if (isSecureField) {
                     currentInputConnection?.commitText(char, 1)
                     return@launch
+                }
+
+                if (char.length == 1) {
+                    val textBeforeCursor = safeGetTextBeforeCursor(1)
+                    if (swipeSpaceManager.shouldRemoveSpaceForPunctuation(char.single(), textBeforeCursor)) {
+                        currentInputConnection?.deleteSurroundingText(1, 0)
+                    }
                 }
 
                 if (displayBuffer.isNotEmpty()) {
@@ -1819,6 +1843,7 @@ class UrikInputMethodService :
                     when (result) {
                         is ProcessingResult.Success -> {
                             withContext(Dispatchers.Main) {
+                                commitPreviousSwipeAndInsertSpace()
                                 currentInputConnection?.setComposingText(displayWord, 1)
                                 displayBuffer = displayWord
                                 coordinateStateTransition(result.wordState)
@@ -1834,6 +1859,7 @@ class UrikInputMethodService :
 
                         is ProcessingResult.Error -> {
                             withContext(Dispatchers.Main) {
+                                commitPreviousSwipeAndInsertSpace()
                                 currentInputConnection?.setComposingText(displayWord, 1)
                                 displayBuffer = displayWord
                                 wordState =
@@ -1849,6 +1875,7 @@ class UrikInputMethodService :
                     }
                 } catch (_: Exception) {
                     withContext(Dispatchers.Main) {
+                        commitPreviousSwipeAndInsertSpace()
                         currentInputConnection?.setComposingText(validatedWord, 1)
                         displayBuffer = validatedWord
                         wordState =
@@ -2498,6 +2525,8 @@ class UrikInputMethodService :
                     currentInputConnection?.commitText(" ", 1)
                     return@launch
                 }
+
+                swipeSpaceManager.clearAutoSpaceFlag()
 
                 if (displayBuffer.isNotEmpty()) {
                     val actualTextBefore = safeGetTextBeforeCursor(1)
