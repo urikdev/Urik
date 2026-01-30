@@ -483,30 +483,24 @@ class UrikInputMethodService :
 
             isActivelyEditing = true
 
+            if (wordToLearn != null) {
+                learnWordAndInvalidateCache(
+                    wordToLearn,
+                    InputMethod.TYPED,
+                )
+            }
+
             currentInputConnection?.beginBatchEdit()
             try {
                 autoCapitalizePronounI()
-
-                if (wordToLearn != null) {
-                    learnWordAndInvalidateCache(
-                        wordToLearn,
-                        InputMethod.TYPED,
-                    )
-
-                    currentInputConnection?.finishComposingText()
-                } else {
-                    coordinateWordCompletion()
-                }
-
+                currentInputConnection?.finishComposingText()
                 currentInputConnection?.commitText(" ", 1)
-                coordinateStateClear()
+                clearInternalStateOnly()
                 showBigramPredictions()
             } catch (_: Exception) {
-                autoCapitalizePronounI()
-                coordinateWordCompletion()
+                currentInputConnection?.finishComposingText()
                 currentInputConnection?.commitText(" ", 1)
-                coordinateStateClear()
-                showBigramPredictions()
+                clearInternalStateOnly()
             } finally {
                 currentInputConnection?.endBatchEdit()
             }
@@ -528,10 +522,7 @@ class UrikInputMethodService :
         displayBuffer = ""
     }
 
-    /**
-     * Clears all input state and invalidates in-flight processing.
-     */
-    private fun coordinateStateClear() {
+    private fun clearInternalStateOnly() {
         synchronized(processingLock) {
             processingSequence++
         }
@@ -548,11 +539,14 @@ class UrikInputMethodService :
         composingRegionStart = -1
         lastKnownCursorPosition = -1
 
-        currentInputConnection?.finishComposingText()
-
         if (!viewModel.state.value.isCapsLockOn) {
             viewModel.onEvent(KeyboardEvent.ShiftStateChanged(false))
         }
+    }
+
+    private fun coordinateStateClear() {
+        clearInternalStateOnly()
+        currentInputConnection?.finishComposingText()
     }
 
     private fun invalidateComposingStateOnCursorJump() {
@@ -709,21 +703,10 @@ class UrikInputMethodService :
         }
     }
 
-    /**
-     * Completes current word and learns it.
-     *
-     */
     private suspend fun coordinateWordCompletion() {
         withContext(Dispatchers.Main) {
             try {
                 isActivelyEditing = true
-
-                val wordToCommit = displayBuffer.ifEmpty { wordState.buffer }
-
-                if (wordToCommit.isNotEmpty()) {
-                    currentInputConnection?.finishComposingText()
-                }
-
                 coordinateStateClear()
             } catch (_: Exception) {
                 coordinateStateClear()
@@ -2533,7 +2516,8 @@ class UrikInputMethodService :
                     val actualTextAfter = safeGetTextAfterCursor(1)
 
                     if (actualTextBefore.isEmpty() && actualTextAfter.isEmpty()) {
-                        coordinateStateClear()
+                        clearInternalStateOnly()
+                        currentInputConnection?.finishComposingText()
                     }
                 }
 
@@ -2547,8 +2531,8 @@ class UrikInputMethodService :
                     currentInputConnection?.beginBatchEdit()
                     try {
                         if (wordState.hasContent && !isSecureField) {
+                            clearInternalStateOnly()
                             currentInputConnection?.finishComposingText()
-                            coordinateStateClear()
                         }
                         currentInputConnection?.deleteSurroundingText(1, 0)
                         currentInputConnection?.commitText(". ", 1)
@@ -2590,9 +2574,9 @@ class UrikInputMethodService :
                                 try {
                                     autoCapitalizePronounI()
                                     currentInputConnection?.finishComposingText()
-                                    coordinateStateClear()
-                                    showBigramPredictions()
                                     currentInputConnection?.commitText(" ", 1)
+                                    clearInternalStateOnly()
+                                    showBigramPredictions()
 
                                     val textBefore =
                                         safeGetTextBeforeCursor(50)
@@ -2627,9 +2611,10 @@ class UrikInputMethodService :
                 currentInputConnection?.beginBatchEdit()
                 try {
                     autoCapitalizePronounI()
-                    coordinateWordCompletion()
-                    showBigramPredictions()
+                    currentInputConnection?.finishComposingText()
                     currentInputConnection?.commitText(" ", 1)
+                    clearInternalStateOnly()
+                    showBigramPredictions()
 
                     val textBefore = safeGetTextBeforeCursor(50)
                     viewModel.checkAndApplyAutoCapitalization(textBefore, currentSettings.autoCapitalizationEnabled)
@@ -2637,18 +2622,9 @@ class UrikInputMethodService :
                     currentInputConnection?.endBatchEdit()
                 }
             } catch (_: Exception) {
-                currentInputConnection?.beginBatchEdit()
-                try {
-                    autoCapitalizePronounI()
-                    coordinateWordCompletion()
-                    showBigramPredictions()
-                    currentInputConnection?.commitText(" ", 1)
-
-                    val textBefore = safeGetTextBeforeCursor(50)
-                    viewModel.checkAndApplyAutoCapitalization(textBefore, currentSettings.autoCapitalizationEnabled)
-                } finally {
-                    currentInputConnection?.endBatchEdit()
-                }
+                currentInputConnection?.finishComposingText()
+                currentInputConnection?.commitText(" ", 1)
+                clearInternalStateOnly()
             }
         }
     }
