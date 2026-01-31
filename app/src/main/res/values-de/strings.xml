@@ -1,7 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="ime_name" translatable="false">Urik Tastatur</string>
     <string name="ime_label">Urik Tastatur</string>
-    <string name="ime_description">Swipe-Typing, Rechtschreibprüfung, und Multilingualität ohne deine Privatsphäre zu riskieren. Keine Telemetrie. Alles bleibt auf deinem Gerät.</string>
+    <string name="ime_description">Wischgesten-Eingabe, Rechtschreibprüfung und Mehrsprachigkeit ohne deine Privatsphäre zu verletzen. Keine Telemetrie. Alles bleibt auf deinem Gerät.</string>
 
     <!-- Settings -->
     <string name="enable_keyboard_title">Verwenden</string>
@@ -20,35 +19,35 @@
     <string name="about_report_bug">Fehler melden</string>
     <string name="about_privacy_policy">Datenschutzrichtlinie</string>
     <string name="about_support">Entwicklung unterstützen</string>
-    <string name="autocorrect_settings_title">Auto-Korrektur-Einstellungen</string>
-    <string name="autocorrect_settings_description">Rechtschreibung und Verbesserungen</string>
+    <string name="autocorrect_settings_title">Autokorrektur-Einstellungen</string>
+    <string name="autocorrect_settings_description">Rechtschreibung und Vorschläge</string>
     <string name="language_settings_title">Spracheinstellungen</string>
     <string name="language_settings_description">Wähle deine Tastatursprachen</string>
     <string name="typing_settings_title">Schreibverhalten</string>
-    <string name="typing_settings_description">Zeichensetzung, haptisches Feedback</string>
-    <string name="layout_settings_title">Layout &amp; Input</string>
+    <string name="typing_settings_description">Zeichensetzung, haptisches Feedback, etc.</string>
+    <string name="layout_settings_title">Layout &amp; Eingabe</string>
     <string name="layout_settings_description">Zahlenreihe und Leertastenbreite</string>
     <string name="appearance_settings_title">Aussehen</string>
     <string name="appearance_settings_description">Thema und Größe</string>
     <string name="privacy_settings_title">Privatsphäre &amp; Daten</string>
     <string name="privacy_settings_description">Daten löschen und Einstellungen zurücksetzen</string>
     <string name="licenses_title">Open Source Lizenzen</string>
-    <string name="licenses_description">Lizenzen zu Drittanbietersoftware</string>
+    <string name="licenses_description">Lizenzen zu Drittanbieter-Software</string>
     <string name="dictionary_attribution_title">Wörterbuch</string>
-    <string name="theme_picker_title">Thema</string>
+    <string name="theme_picker_title">Tastatur Thema</string>
     <string name="dictionary_attribution_summary">FrequencyWords Lizenz</string>
     <string name="test_field_hint">Änderungen testen</string>
 
     <!-- Settings Enums -->
     <!-- Key Size -->
     <string name="key_size_small">Klein</string>
-    <string name="key_size_medium">Medium</string>
+    <string name="key_size_medium">Mittel</string>
     <string name="key_size_large">Groß</string>
     <string name="key_size_extra_large">Extra groß</string>
 
     <!-- Long Press Duration -->
     <string name="long_press_duration_short">Kurz</string>
-    <string name="long_press_duration_medium">Medium</string>
+    <string name="long_press_duration_medium">Mittel</string>
     <string name="long_press_duration_long">Lang</string>
     <string name="cursor_speed_slow">Langsam</string>
     <string name="cursor_speed_medium">Mittel</string>
@@ -61,22 +60,22 @@
 
     <!-- Key Label Size -->
     <string name="key_label_size_small">Klein</string>
-    <string name="key_label_size_medium">Medium</string>
+    <string name="key_label_size_medium">Mittel</string>
     <string name="key_label_size_large">Groß</string>
 
     <!-- Appearance Settings -->
     <string name="appearance_settings_theme">Thema</string>
     <string name="appearance_settings_key_size">Tastengröße</string>
-    <string name="appearance_settings_key_label_size">Tasten-Beschriftungs-Größe</string>
+    <string name="appearance_settings_key_label_size">Tasten-Schriftgröße</string>
 
     <!-- Auto-Correct Settings -->
     <string name="autocorrect_settings_spell_check">Rechtschreibprüfung</string>
     <string name="autocorrect_settings_spell_check_on">Rechtschreibprüfung aktiviert</string>
     <string name="autocorrect_settings_spell_check_off">Rechtschreibprüfung deaktiviert</string>
-    <string name="autocorrect_settings_show_suggestions">Verbesserungen anzeigen</string>
-    <string name="autocorrect_settings_suggestions_on">Verbesserungen werden angezeigt</string>
-    <string name="autocorrect_settings_suggestions_off">Verbesserungen werden versteckt</string>
-    <string name="autocorrect_settings_suggestion_count">Verbesserungs-Anzahl</string>
+    <string name="autocorrect_settings_show_suggestions">Vorschläge anzeigen</string>
+    <string name="autocorrect_settings_suggestions_on">Vorschläge werden angezeigt</string>
+    <string name="autocorrect_settings_suggestions_off">Vorschläge werden versteckt</string>
+    <string name="autocorrect_settings_suggestion_count">Anzahl Vorschläge</string>
     <string name="autocorrect_settings_learn_new_words">Neue Wörter automatisch lernen</string>
     <string name="autocorrect_settings_learn_new_words_on">Wörter werden automatisch gelernt</string>
     <string name="autocorrect_settings_learn_new_words_off">Wörter werden nicht automatisch gelernt</string>
@@ -100,18 +99,18 @@
     <string name="typing_settings_auto_capitalization_off">Keine automatische Großschreibung</string>
     <string name="typing_settings_swipe_on">Wischen zum Tippen aktiviert</string>
     <string name="typing_settings_swipe_off">Wischen zum Tippen deaktiviert</string>
-    <string name="typing_settings_long_press_duration">Lagzeit-Druck-Dauer</string>
+    <string name="typing_settings_long_press_duration">Dauer für langen Tastendruck</string>
 
     <!-- Layout & Input Settings -->
     <string name="layout_settings_alternative_layout">Tastaturlayout</string>
     <string name="layout_settings_adaptive_modes_enabled">Adaptive Tastaturbetriebsmodi</string>
     <string name="layout_settings_adaptive_modes_on">Passt sich automatisch an den Gerätetyp und die Haltung an (Tablets, faltbare Geräte)</string>
-    <string name="layout_settings_adaptive_modes_off">Immer das standardmäßige Vollbildlayout verwenden</string>
+    <string name="layout_settings_adaptive_modes_off">Immer das standardmäßige Vollbild-Layout verwenden</string>
     <string name="layout_settings_one_handed_mode_enabled">Einhändiger Modus</string>
     <string name="layout_settings_one_handed_mode_on">Aktiviert</string>
     <string name="layout_settings_one_handed_mode_off">Standard-Vollbild-Tastatur</string>
-    <string name="one_handed_mode_left">Tastatur nach links verankern</string>
-    <string name="one_handed_mode_right">Tastatur nach rechts verankern</string>
+    <string name="one_handed_mode_left">Tastatur links verankern</string>
+    <string name="one_handed_mode_right">Tastatur rechts verankern</string>
     <string name="one_handed_mode_full">Zur Vollbild-Tastatur zurückkehren</string>
     <string name="layout_settings_show_number_row">Zahlenreihe anzeigen</string>
     <string name="layout_settings_number_row_on">Zahlenreihe wird angezeigt</string>
@@ -125,13 +124,13 @@
     <string name="alternative_layout_colemak">Colemak</string>
     <string name="alternative_layout_workman">Workman</string>
     <string name="layout_settings_customize_keys">Tasten anpassen</string>
-    <string name="layout_settings_customize_keys_summary">Benutzerdefinierten Charakter für Langdruck zuweisen</string>
+    <string name="layout_settings_customize_keys_summary">Benutzerdefiniertes Zeichen für Langdruck zuweisen</string>
 
     <!-- Layout Mapper -->
     <string name="layout_mapper_title">Tasten anpassen</string>
-    <string name="layout_mapper_instructions">Tippe auf eine Taste, um einen benutzerdefinierten Charakter zuzuweisen. Durch Langdruck auf diese Taste auf der Tastatur wird dein Charakter eingefügt.</string>
+    <string name="layout_mapper_instructions">Tippe auf eine Taste, um ein benutzerdefiniertes Zeichen zuzuweisen. Durch Langdruck auf diese Taste auf der Tastatur wird dein Zeichen eingefügt.</string>
     <string name="layout_mapper_edit_key">Taste bearbeiten: %1$s</string>
-    <string name="layout_mapper_symbol_hint">Benutzerdefinierten Charakter</string>
+    <string name="layout_mapper_symbol_hint">Benutzerdefiniertes Zeichen</string>
     <string name="layout_mapper_save">Speichern</string>
     <string name="layout_mapper_remove">Entfernen</string>
     <string name="layout_mapper_reset_all">Alle zurücksetzen</string>
@@ -151,12 +150,12 @@
     <string name="privacy_settings_clipboard_history_off">Zwischenablage-Verlauf deaktiviert</string>
     <string name="privacy_settings_clear_learned_words">Erlernte Wörter löschen</string>
     <string name="privacy_settings_clear_learned_words_summary">Lösche alle erlernten Wörter im Wörterbuch</string>
-    <string name="privacy_settings_clear_learned_words_confirm">Alle erlernten Wörter löschen? Die kann nicht rückgängig gemacht werden.</string>
+    <string name="privacy_settings_clear_learned_words_confirm">Alle erlernten Wörter löschen? Dies kann nicht rückgängig gemacht werden.</string>
     <string name="privacy_settings_reset_to_defaults">Einstellungen zurücksetzen</string>
     <string name="privacy_settings_reset_to_defaults_confirm">Alle Einstellungen auf ihre Standardwerte zurücksetzen?</string>
-    <string name="privacy_settings_export_error_log">Error-Logs exportieren</string>
-    <string name="privacy_settings_export_error_log_summary">Diagnostische Logs für Debuggingzwecke teilen</string>
-    <string name="privacy_settings_export_error_log_failed">Error-Logs konnten nicht exportiert werden</string>
+    <string name="privacy_settings_export_error_log">Fehler-Logs exportieren</string>
+    <string name="privacy_settings_export_error_log_summary">Diagnostische Logs für Fehlersuche teilen</string>
+    <string name="privacy_settings_export_error_log_failed">Fehler-Logs konnten nicht exportiert werden</string>
     <string name="privacy_settings_export_dictionary">Wörterbuch exportieren</string>
     <string name="privacy_settings_export_dictionary_summary">Erlernte Wörter in eine Datei speichern</string>
     <string name="privacy_settings_import_dictionary">Wörterbuch importieren</string>
@@ -168,8 +167,8 @@
     <string name="error_update_key_size">Tastengröße konnte nicht geändert werden</string>
     <string name="error_update_key_label_size">Beschriftungsgröße konnte nicht geändert werden</string>
     <string name="error_update_spell_check">Rechtschreibprüfung konnte nicht geändert werden</string>
-    <string name="error_update_suggestions">Verbesserungs-Einstellungen konnten nicht geändert werden</string>
-    <string name="error_update_suggestion_count">Verbesserungsanzahl konnte nicht geändert werden</string>
+    <string name="error_update_suggestions">Vorschläge-Einstellungen konnten nicht geändert werden</string>
+    <string name="error_update_suggestion_count">Anzahl Vorschläge konnte nicht geändert werden</string>
     <string name="error_update_word_learning">Wörterbuch konnte nicht geändert werden</string>
     <string name="error_update_clipboard">Zwischenablage-Einstellungen konnten nicht geändert werden</string>
     <string name="error_update_language">Sprach-Einstellungen konnten nicht geändert werden</string>
@@ -178,7 +177,7 @@
     <string name="error_update_double_space_period">Doppel-Leerzeichen-Dauer konnte nicht geändert werden</string>
     <string name="error_update_auto_capitalization">Automatische Großschreibung konnte nicht geändert werden</string>
     <string name="error_update_swipe">Fehler beim Aktualisieren der Wischgesten-Eingabe</string>
-    <string name="error_update_long_press_duration">Langzeit-Druck-Dauer konnte nicht geändert werden</string>
+    <string name="error_update_long_press_duration">Dauer für langen Tastendruck konnte nicht geändert werden</string>
     <string name="error_update_number_row">Zahlenreihe konnte nicht geändert werden</string>
     <string name="error_update_space_bar_size">Leertasten-Breite konnte nicht geändert werden</string>
     <string name="error_update_alternative_layout">Tastaturlayout konnte nicht geändert werden</string>
@@ -204,13 +203,13 @@
     <!-- Accessibility descriptions -->
     <string name="key_character_description">%1$s</string>
 
-    <string name="shift_key_description">Umschalttaste</string>
+    <string name="shift_key_description">Umschalttaste; drücken, um nächstes Zeichen groß zu schreiben</string>
     <string name="shift_active_description">Umschalttaste ist aktiv, antippen um auszuschalten</string>
     <string name="caps_lock_description">Feststelltaste</string>
     <string name="caps_lock_on_description">Feststelltaste ist aktiv, antippen um auszuschalten</string>
-    <string name="backspace_key_description">Delete previous character</string>
+    <string name="backspace_key_description">Entfernt vorheriges Zeichen</string>
     <string name="space_key_description">Leertaste</string>
-    <string name="letters_mode_description">Zur Zeicheneingabe wechseln</string>
+    <string name="letters_mode_description">Zur Buchstabeneingabe wechseln</string>
     <string name="numbers_mode_description">Zur Zahleneingabe wechseln</string>
     <string name="symbols_mode_description">Zur Symboleingabe wechseln</string>
     <string name="language_switch_description">Tastatursprache wechseln</string>
@@ -239,22 +238,22 @@
     <string name="character_variation_position">Zeichenvariante %1$d von %2$d: %3$s</string>
 
     <!-- Blacklisting Words -->
-    <string name="remove_suggestion">Entferne %1$s aus den Verbesserungen?</string>
+    <string name="remove_suggestion">Entferne %1$s aus den Vorschlägen?</string>
     <string name="remove_cancel">Abbrechen</string>
     <string name="remove_confirm">Entfernen</string>
 
     <!-- Tips -->
     <string name="tip_1_title">Wörter erlernen</string>
-    <string name="tip_1_description">Drück die Leertaste nach einem Schreibfehler um das Wort dem Wörterbuch hinzuzufügen.</string>
+    <string name="tip_1_description">Drücke die Leertaste nach einem Schreibfehler, um das Wort dem Wörterbuch hinzuzufügen.</string>
 
-    <string name="tip_2_title">Zeichensetzungs-Quick-Menu</string>
-    <string name="tip_2_description">Halte die Leertaste gedrückt um das Zeichensetzungs-Quick-Menu zu öffnen.</string>
+    <string name="tip_2_title">Interpunktion-Schnellzugriffmenü</string>
+    <string name="tip_2_description">Halte die Leertaste gedrückt, um das Interpunktion-Schnellzugriffmenü zu öffnen.</string>
 
     <string name="tip_3_title">Zeichenvariationen</string>
-    <string name="tip_3_description">Halt eine Zeichentaste gedrückt um mehr Variationen dieses Zeichens zu sehen.</string>
+    <string name="tip_3_description">Halt eine Zeichentaste gedrückt, um mehr Variationen dieses Zeichens zu sehen.</string>
 
-    <string name="tip_4_title">Wörter vergessen</string>
-    <string name="tip_4_description">Drück und halte auf eine Verbesserung um sie aus dem Wörterbuch zu entfernen.</string>
+    <string name="tip_4_title">Wörter entfernen</string>
+    <string name="tip_4_description">Drücke einen Vorschlag lange, um ihn aus dem Wörterbuch zu entfernen.</string>
 
     <!-- Clipboard Panel -->
     <string name="tip_5_description">Durch langes Drücken der Symboltaste wird der Zwischenablage-Manager geöffnet.</string>
@@ -273,21 +272,21 @@
     <string name="clipboard_item_delete">Zwischenablage-Element löschen</string>
     <string name="tip_5_title">Zwischenablage-Manager</string>
     <string name="typing_settings_swipe_enabled">Wischgesten-Eingabe</string>
-    <string name="typing_settings_spacebar_cursor">Cursorsteuerung mit der Leertaste</string>
-    <string name="typing_settings_spacebar_cursor_on">Leertaste drücken, um den Cursor zu bewegen</string>
+    <string name="typing_settings_spacebar_cursor">Cursor-Positionierung mit der Leertaste</string>
+    <string name="typing_settings_spacebar_cursor_on">Leertaste wischen, um Cursor zu bewegen</string>
     <string name="typing_settings_spacebar_cursor_off">Leertaste-Cursorsteuerung deaktiviert</string>
-    <string name="typing_settings_cursor_speed">Cursorgeschwindigkeit</string>
+    <string name="typing_settings_cursor_speed">Cursor-Geschwindigkeit</string>
     <string name="typing_settings_backspace_swipe">Löschen mit der Rücktaste</string>
-    <string name="typing_settings_backspace_swipe_on">Nach links wischen, um ein Wort zu löschen</string>
-    <string name="typing_settings_backspace_swipe_off">Löschen mit der Rücktaste deaktiviert</string>
-    <string name="typing_settings_long_press_punctuation">Lange-Druck-Interpunktion</string>
+    <string name="typing_settings_backspace_swipe_on">Nach links wischen, um Wort zu löschen</string>
+    <string name="typing_settings_backspace_swipe_off">Löschen mit Rücktaste deaktiviert</string>
+    <string name="typing_settings_long_press_punctuation">Interpunktion durch langen Tastendruck</string>
     <string name="long_press_punctuation_off">Aus</string>
     <string name="long_press_punctuation_spacebar">Leertaste</string>
     <string name="long_press_punctuation_period">Punkttaste</string>
-    <string name="error_update_spacebar_cursor">Fehler beim Aktualisieren der Cursorsteuerung mit der Leertaste</string>
-    <string name="error_update_cursor_speed">Fehler beim Aktualisieren der Cursorgeschwindigkeit</string>
+    <string name="error_update_spacebar_cursor">Fehler beim Aktualisieren der Cursor-Positionierung mit der Leertaste</string>
+    <string name="error_update_cursor_speed">Fehler beim Aktualisieren der Cursor-Geschwindigkeit</string>
     <string name="error_update_backspace_swipe">Fehler beim Aktualisieren der Wischgeste zum Löschen mit der Rücktaste</string>
-    <string name="error_update_long_press_punctuation">Lange-Druck-Interpunktion konnte nicht geändert werden</string>
+    <string name="error_update_long_press_punctuation">Lang-Druck-Interpunktion konnte nicht geändert werden</string>
     <string name="max_languages_reached">Maximal 3 Sprachen erlaubt</string>
 
 </resources>

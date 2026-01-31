@@ -1,0 +1,38 @@
+Datenschutzorientierte Android-Tastatur mit Wischgesten-Eingabe, benutzerdefinierten Layouts und Passwortmanager-Unterstützung. Keine Nachverfolgung, 100 % Geräte-lokal und vollständig quelloffen.
+
+**Eingabe**
+- Wischgesten-Eingabe mit geometrischem Pfadabgleich und Eckpunkterkennung
+- Einhand- und Split-Modus mit Koordinatentransformation
+- Langes Drücken für Zeichenvariationen und benutzerdefinierte Tastenbelegung
+- Langes Drücken der Komma-Taste zum Wechseln der Tastatur (IME-Auswahl)
+- Wischen über die Leertaste zur Cursor-Positionierung
+- QWERTZ-, AZERTY-, Dvorak-, Colemak- und Workman-Layouts
+- Erkennung von Hardware-Tastaturen
+
+**Intelligenz**
+- Lokales Bigram-Modell zur Vorhersage des nächsten Wortes
+- Geräteinterne Rechtschreibprüfung mit SymSpell-Algorithmus
+- Intelligente Autokorrektur für URLs, E-Mail Adressen und Interpunktionskontext
+- Wortlernen mit verschlüsselter SQLCipher-Datenbank
+- Benutzerspezifische Aufzeichnung der Wortfrequenz
+- Unterstützt Mehrsprachigkeit mit dediziertem Sprachumschalter
+- Emoji-Suche anhand von Schlüsselwörtern
+
+**Integration**
+- Unterstützt automatisches Ausfüllen durch Passwortmanager (Android 11+)
+- Zwischenablageverlauf mit verschlüsseltem Speicher
+- Dynamische Material You Thema (Android 12+)
+
+**Anpassung**
+- Benutzerdefinierte Symbol- und Tastenbelegung durch langes Drücken
+- Schieberegler für die Stärke des haptischen Feedbacks
+- Umschalten der automatischen Großschreibung
+- Konfigurierbare Tastengrößen und Eingabeverhalten
+- WCAG AA-Kontrast und TalkBack-Unterstützung
+
+**Datenschutz**
+- Keine Telemetrie, Analysen oder Netzwerkberechtigungen
+- Lokale Verarbeitung auf dem Gerät
+- Verschlüsselte lokale Speicherung für Benutzerdaten (AES-256 + Android Keystore)
+- Export und Import von Wörterbüchern für Backups oder Migrationen
+- Bigram-Vorhersagen und Wortfrequenzen bleiben lokal (werden nicht exportiert)
