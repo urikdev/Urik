@@ -2,7 +2,7 @@
     <string name="app_name" translatable="false">Urik</string>
     <string name="ime_name">Urik Keyboard</string>
     <string name="ime_label">Urik Keyboard</string>
-    <string name="ime_description">Swipe typing, spell check, and multilingual support without compromising your privacy. No telemetry. No data collection. Everything stays on your device.</string>
+    <string name="ime_description">Swipe typing, spell check and multilingual support without compromising your privacy. No telemetry. No data collection. Everything stays on your device.</string>
 
     <!-- Settings -->
     <string name="enable_keyboard_title">Enable</string>
