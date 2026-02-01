@@ -31,7 +31,7 @@ Privacy-focused Android keyboard with swipe typing, custom layouts, and password
 - WCAG AA contrast and TalkBack support
 
 **Privacy**
-- No telemetry, analytics, or network permissions
+- No telemetry, analytics or network permissions
 - Local on-device processing
 - Encrypted local storage for user data (AES-256 + Android Keystore)
 - Dictionary export and import for backup or migration
