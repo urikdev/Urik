@@ -549,6 +549,43 @@ class UrikInputMethodService :
         currentInputConnection?.finishComposingText()
     }
 
+    private fun attemptRecompositionAtCursor(cursorPosition: Int) {
+        if (isSecureField || isUrlOrEmailField) return
+        if (displayBuffer.isNotEmpty()) return
+
+        val textBefore = safeGetTextBeforeCursor(KeyboardConstants.TextProcessingConstants.WORD_BOUNDARY_CONTEXT_LENGTH)
+        val textAfter = safeGetTextAfterCursor(KeyboardConstants.TextProcessingConstants.WORD_BOUNDARY_CONTEXT_LENGTH)
+
+        if (textBefore.isNotEmpty() && (textBefore.last().isWhitespace() || textBefore.last() == '\n')) {
+            return
+        }
+
+        val wordBeforeInfo =
+            if (textBefore.isNotEmpty()) {
+                CursorEditingUtils.extractWordBoundedByParagraph(textBefore)
+            } else {
+                null
+            }
+
+        if (wordBeforeInfo != null && wordBeforeInfo.first.isNotEmpty()) {
+            val wordAfterStart =
+                textAfter.indexOfFirst { char ->
+                    char.isWhitespace() || char == '\n' || CursorEditingUtils.isPunctuation(char)
+                }
+            val wordAfter = if (wordAfterStart >= 0) textAfter.take(wordAfterStart) else textAfter
+            val trimmedWordAfter = if (wordAfter.isNotEmpty() && CursorEditingUtils.isValidTextInput(wordAfter)) wordAfter else ""
+
+            val fullWord = wordBeforeInfo.first + trimmedWordAfter
+            val wordStart = cursorPosition - wordBeforeInfo.first.length
+
+            if (wordStart >= 0 && fullWord.length >= 2) {
+                currentInputConnection?.setComposingRegion(wordStart, wordStart + fullWord.length)
+                displayBuffer = fullWord
+                composingRegionStart = wordStart
+            }
+        }
+    }
+
     private fun invalidateComposingStateOnCursorJump() {
         synchronized(processingLock) {
             processingSequence++
@@ -1529,15 +1566,15 @@ class UrikInputMethodService :
             isActivelyEditing = true
 
             if (composingRegionStart != -1 && displayBuffer.isNotEmpty()) {
-                val currentText = safeGetTextBeforeCursor(displayBuffer.length + 10)
-                val expectedComposingText =
-                    if (currentText.length >= displayBuffer.length) {
-                        currentText.substring(maxOf(0, currentText.length - displayBuffer.length))
-                    } else {
-                        ""
-                    }
+                val absoluteCursorPos = safeGetCursorPosition()
+                val cursorOffsetInWord = (absoluteCursorPos - composingRegionStart).coerceIn(0, displayBuffer.length)
+                val charsAfterCursorInWord = displayBuffer.length - cursorOffsetInWord
 
-                if (expectedComposingText != displayBuffer) {
+                val textBeforePart = safeGetTextBeforeCursor(cursorOffsetInWord).takeLast(cursorOffsetInWord)
+                val textAfterPart = safeGetTextAfterCursor(charsAfterCursorInWord).take(charsAfterCursorInWord)
+                val actualComposingText = textBeforePart + textAfterPart
+
+                if (actualComposingText != displayBuffer) {
                     composingRegionStart = -1
                 }
             }
@@ -1550,9 +1587,10 @@ class UrikInputMethodService :
                     displayBuffer.length
                 }
 
+            val isStartingNewWord = displayBuffer.isEmpty()
+
             displayBuffer =
-                if (displayBuffer.isEmpty()) {
-                    composingRegionStart = -1
+                if (isStartingNewWord) {
                     char
                 } else {
                     StringBuilder(displayBuffer)
@@ -1560,11 +1598,23 @@ class UrikInputMethodService :
                         .toString()
                 }
 
+            val newCursorPositionInText = cursorPosInWord + char.length
+
             val ic = currentInputConnection
             if (ic != null) {
                 try {
                     ic.beginBatchEdit()
+
+                    if (isStartingNewWord) {
+                        composingRegionStart = safeGetCursorPosition()
+                    }
+
                     ic.setComposingText(displayBuffer, 1)
+
+                    if (composingRegionStart != -1) {
+                        val absoluteCursorPosition = composingRegionStart + newCursorPositionInText
+                        ic.setSelection(absoluteCursorPosition, absoluteCursorPosition)
+                    }
                 } finally {
                     ic.endBatchEdit()
                 }
@@ -2171,7 +2221,21 @@ class UrikInputMethodService :
                 pendingWordForLearning = null
             }
 
-            if (displayBuffer.isNotEmpty()) {
+            if (displayBuffer.isNotEmpty() && composingRegionStart != -1) {
+                val absoluteCursorPos = safeGetCursorPosition()
+                val cursorOffsetInWord = (absoluteCursorPos - composingRegionStart).coerceIn(0, displayBuffer.length)
+                val charsAfterCursorInWord = displayBuffer.length - cursorOffsetInWord
+
+                val textBeforePart = safeGetTextBeforeCursor(cursorOffsetInWord).takeLast(cursorOffsetInWord)
+                val textAfterPart = safeGetTextAfterCursor(charsAfterCursorInWord).take(charsAfterCursorInWord)
+                val actualComposingText = textBeforePart + textAfterPart
+
+                if (actualComposingText != displayBuffer) {
+                    coordinateStateClear()
+                    handleCommittedTextBackspace()
+                    return
+                }
+            } else if (displayBuffer.isNotEmpty()) {
                 val currentText = safeGetTextBeforeCursor(displayBuffer.length + 10)
                 val expectedComposingText =
                     if (currentText.length >= displayBuffer.length) {
@@ -2228,7 +2292,10 @@ class UrikInputMethodService :
                             viewModel.state.value.isShiftPressed &&
                             !viewModel.state.value.isCapsLockOn
 
+                    val previousLength = displayBuffer.length
                     displayBuffer = BackspaceUtils.deleteGraphemeClusterBeforePosition(displayBuffer, cursorPosInWord)
+                    val graphemeDeleted = previousLength - displayBuffer.length
+                    val newCursorPositionInText = cursorPosInWord - graphemeDeleted
 
                     if (shouldResetShift) {
                         viewModel.onEvent(KeyboardEvent.ShiftStateChanged(false))
@@ -2240,6 +2307,11 @@ class UrikInputMethodService :
                             try {
                                 ic.beginBatchEdit()
                                 ic.setComposingText(displayBuffer, 1)
+
+                                if (composingRegionStart != -1) {
+                                    val absoluteCursorPosition = composingRegionStart + newCursorPositionInText
+                                    ic.setSelection(absoluteCursorPosition, absoluteCursorPosition)
+                                }
                             } finally {
                                 ic.endBatchEdit()
                             }
@@ -2901,6 +2973,9 @@ class UrikInputMethodService :
                 invalidateComposingStateOnCursorJump()
             }
             lastKnownCursorPosition = newSelStart
+            if (newSelStart == newSelEnd) {
+                attemptRecompositionAtCursor(newSelStart)
+            }
             return
         }
 
@@ -2939,41 +3014,7 @@ class UrikInputMethodService :
         lastKnownCursorPosition = newSelStart
 
         if (!hasComposingText && !isActivelyEditing && newSelStart == newSelEnd) {
-            val textBefore = safeGetTextBeforeCursor(KeyboardConstants.TextProcessingConstants.WORD_BOUNDARY_CONTEXT_LENGTH)
-            val textAfter = safeGetTextAfterCursor(KeyboardConstants.TextProcessingConstants.WORD_BOUNDARY_CONTEXT_LENGTH)
-
-            if (textBefore.isNotEmpty() && textBefore.last().isWhitespace()) {
-                return
-            }
-
-            if (textBefore.isNotEmpty() && textBefore.last() == '\n') {
-                return
-            }
-
-            val wordBeforeInfo =
-                if (textBefore.isNotEmpty()) {
-                    CursorEditingUtils.extractWordBoundedByParagraph(textBefore)
-                } else {
-                    null
-                }
-
-            if (wordBeforeInfo != null && wordBeforeInfo.first.isNotEmpty()) {
-                val wordAfterStart =
-                    textAfter.indexOfFirst { char ->
-                        char.isWhitespace() || char == '\n' || CursorEditingUtils.isPunctuation(char)
-                    }
-                val wordAfter = if (wordAfterStart >= 0) textAfter.take(wordAfterStart) else textAfter
-                val trimmedWordAfter = if (wordAfter.isNotEmpty() && CursorEditingUtils.isValidTextInput(wordAfter)) wordAfter else ""
-
-                val fullWord = wordBeforeInfo.first + trimmedWordAfter
-                val wordStart = newSelStart - wordBeforeInfo.first.length
-
-                if (wordStart >= 0 && fullWord.length >= 2) {
-                    currentInputConnection?.setComposingRegion(wordStart, wordStart + fullWord.length)
-                    displayBuffer = fullWord
-                    composingRegionStart = wordStart
-                }
-            }
+            attemptRecompositionAtCursor(newSelStart)
         }
     }
 
