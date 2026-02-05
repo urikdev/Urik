@@ -119,6 +119,7 @@ class KeyboardLayoutManager(
     private val buttonPendingCallbacks = ConcurrentHashMap<Button, PendingCallbacks>()
     private val symbolsLongPressFired = ConcurrentHashMap.newKeySet<Button>()
     private val customMappingLongPressFired = ConcurrentHashMap.newKeySet<Button>()
+    private val characterLongPressFired = ConcurrentHashMap.newKeySet<Button>()
 
     private val cachedTextSizes = mutableMapOf<Int, Float>()
     private val cachedDimensions = mutableMapOf<String, Int>()
@@ -176,12 +177,14 @@ class KeyboardLayoutManager(
                 MotionEvent.ACTION_DOWN -> {
                     val key = view.getTag(R.id.key_data) as? KeyboardKey.Character ?: return@OnTouchListener false
                     val button = view as Button
+                    characterLongPressFired.remove(button)
                     customMappingLongPressFired.remove(button)
                     longPressStartX = event.rawX
                     longPressStartY = event.rawY
                     val handler = Handler(Looper.getMainLooper())
                     val runnable =
                         Runnable {
+                            characterLongPressFired.add(button)
                             performContextualHaptic(key)
                             handleCharacterLongPress(key, view, button)
                         }
@@ -208,7 +211,8 @@ class KeyboardLayoutManager(
                     buttonPendingCallbacks.remove(button)?.let { pending ->
                         pending.handler.removeCallbacks(pending.runnable)
                     }
-                    val consumed = customMappingLongPressFired.remove(button)
+                    customMappingLongPressFired.remove(button)
+                    val consumed = characterLongPressFired.remove(button)
                     consumed
                 }
 
@@ -1152,6 +1156,7 @@ class KeyboardLayoutManager(
         }
         symbolsLongPressFired.remove(button)
         customMappingLongPressFired.remove(button)
+        characterLongPressFired.remove(button)
 
         button.isPressed = false
         button.setOnClickListener(null)
