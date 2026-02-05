@@ -189,6 +189,9 @@ class UrikInputMethodService :
     private var isActivelyEditing = false
 
     @Volatile
+    private var isCurrentWordAtSentenceStart = false
+
+    @Volatile
     private var pendingSuggestions: List<String> = emptyList()
 
     @Volatile
@@ -530,6 +533,7 @@ class UrikInputMethodService :
         suggestionDebounceJob?.cancel()
 
         isActivelyEditing = true
+        isCurrentWordAtSentenceStart = false
         displayBuffer = ""
         wordState = WordState()
         pendingSuggestions = emptyList()
@@ -636,7 +640,9 @@ class UrikInputMethodService :
                                 preserveCase = false,
                             )
                         }
-                    val displayPredictions = applyCapitalizationToSuggestions(suggestionObjects)
+                    val textBefore = safeGetTextBeforeCursor(50)
+                    val bigramSentenceStart = viewModel.shouldAutoCapitalize(textBefore)
+                    val displayPredictions = applyCapitalizationToSuggestions(suggestionObjects, bigramSentenceStart)
                     withContext(Dispatchers.Main) {
                         if (displayBuffer.isEmpty()) {
                             isShowingBigramPredictions = true
@@ -658,9 +664,12 @@ class UrikInputMethodService :
         }
     }
 
-    private fun applyCapitalizationToSuggestions(suggestions: List<com.urik.keyboard.service.SpellingSuggestion>): List<String> {
+    private fun applyCapitalizationToSuggestions(
+        suggestions: List<com.urik.keyboard.service.SpellingSuggestion>,
+        isSentenceStart: Boolean = false,
+    ): List<String> {
         val state = viewModel.state.value
-        return caseTransformer.applyCasingToSuggestions(suggestions, state)
+        return caseTransformer.applyCasingToSuggestions(suggestions, state, isSentenceStart)
     }
 
     private fun isSentenceEndingPunctuation(char: Char): Boolean = UCharacter.hasBinaryProperty(char.code, UProperty.S_TERM)
@@ -679,7 +688,7 @@ class UrikInputMethodService :
                     suggestion.word.equals(displayBuffer, ignoreCase = true)
                 }
 
-            val displaySuggestions = applyCapitalizationToSuggestions(filteredSuggestions)
+            val displaySuggestions = applyCapitalizationToSuggestions(filteredSuggestions, isCurrentWordAtSentenceStart)
             pendingSuggestions = displaySuggestions
             swipeKeyboardView?.updateSuggestions(displaySuggestions)
         } else {
@@ -1499,6 +1508,9 @@ class UrikInputMethodService :
                     }
 
                     val char = viewModel.getCharacterForInput(key)
+                    if (key.type == KeyboardKey.KeyType.LETTER && displayBuffer.isEmpty()) {
+                        isCurrentWordAtSentenceStart = viewModel.state.value.isAutoShift
+                    }
                     viewModel.clearShiftAfterCharacter(key)
 
                     if (isAlphaNumericInput(char)) {
@@ -1656,7 +1668,7 @@ class UrikInputMethodService :
                                             wordState = result.wordState
 
                                             if (result.wordState.suggestions.isNotEmpty() && currentSettings.showSuggestions) {
-                                                val displaySuggestions = applyCapitalizationToSuggestions(result.wordState.suggestions)
+                                                val displaySuggestions = applyCapitalizationToSuggestions(result.wordState.suggestions, isCurrentWordAtSentenceStart)
                                                 pendingSuggestions = displaySuggestions
                                                 swipeKeyboardView?.updateSuggestions(displaySuggestions)
                                             } else {
@@ -1775,7 +1787,7 @@ class UrikInputMethodService :
                                     highlightCurrentWord()
 
                                     val suggestions = textInputProcessor.getSuggestions(wordState.normalizedBuffer)
-                                    val displaySuggestions = applyCapitalizationToSuggestions(suggestions)
+                                    val displaySuggestions = applyCapitalizationToSuggestions(suggestions, isCurrentWordAtSentenceStart)
                                     pendingSuggestions = displaySuggestions
                                     if (displaySuggestions.isNotEmpty()) {
                                         swipeKeyboardView?.updateSuggestions(displaySuggestions)
@@ -2345,7 +2357,7 @@ class UrikInputMethodService :
                                                                 currentSettings.showSuggestions
                                                             ) {
                                                                 val displaySuggestions =
-                                                                    applyCapitalizationToSuggestions(result.wordState.suggestions)
+                                                                    applyCapitalizationToSuggestions(result.wordState.suggestions, isCurrentWordAtSentenceStart)
                                                                 pendingSuggestions = displaySuggestions
                                                                 swipeKeyboardView?.updateSuggestions(displaySuggestions)
                                                             } else {
@@ -2502,7 +2514,7 @@ class UrikInputMethodService :
                                                                 currentSettings.showSuggestions
                                                             ) {
                                                                 val displaySuggestions =
-                                                                    applyCapitalizationToSuggestions(result.wordState.suggestions)
+                                                                    applyCapitalizationToSuggestions(result.wordState.suggestions, isCurrentWordAtSentenceStart)
                                                                 pendingSuggestions = displaySuggestions
                                                                 swipeKeyboardView?.updateSuggestions(displaySuggestions)
                                                             } else {
@@ -2667,7 +2679,7 @@ class UrikInputMethodService :
                             pendingWordForLearning = wordState.normalizedBuffer
 
                             highlightCurrentWord()
-                            val displaySuggestions = applyCapitalizationToSuggestions(suggestions)
+                            val displaySuggestions = applyCapitalizationToSuggestions(suggestions, isCurrentWordAtSentenceStart)
                             pendingSuggestions = displaySuggestions
                             if (displaySuggestions.isNotEmpty()) {
                                 swipeKeyboardView?.updateSuggestions(displaySuggestions)
