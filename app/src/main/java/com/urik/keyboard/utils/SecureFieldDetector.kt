@@ -1,5 +1,6 @@
 package com.urik.keyboard.utils
 
+import android.text.InputType
 import android.view.inputmethod.EditorInfo
 
 /**
@@ -17,6 +18,12 @@ import android.view.inputmethod.EditorInfo
  *
  * **Numeric passwords:**
  * - TYPE_NUMBER_VARIATION_PASSWORD (PIN codes, numeric passwords)
+ *
+ * ### Direct-Commit Field Types (CLI/Terminal)
+ * Fields that cannot render composing text and require immediate character commitment:
+ * - TYPE_NULL (raw input mode — terminals, game inputs)
+ * - TYPE_TEXT_FLAG_NO_SUGGESTIONS + TYPE_TEXT_VARIATION_VISIBLE_PASSWORD (CLI editors)
+ * - TYPE_TEXT_FLAG_NO_SUGGESTIONS + IME_FLAG_NO_EXTRACT_UI (apps opting out of IME features)
  *
  */
 object SecureFieldDetector {
@@ -51,8 +58,38 @@ object SecureFieldDetector {
                     inputVariation == EditorInfo.TYPE_TEXT_VARIATION_EMAIL_ADDRESS ||
                     inputVariation == EditorInfo.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS
             ) -> return true
+
             EditorInfo.TYPE_CLASS_NUMBER if inputVariation == EditorInfo.TYPE_NUMBER_VARIATION_PASSWORD -> return true
         }
+
+        return false
+    }
+
+    /**
+     * Detects if current input field requires direct character commitment (CLI/terminal mode).
+     *
+     * Unlike [isSecure], direct-commit fields are not a security concern — they are
+     * a technical limitation. No cache clearing is triggered.
+     *
+     * @param info EditorInfo from input field, or null if unavailable
+     * @return true if field requires direct-commit pipeline, false for normal text fields
+     */
+    fun isDirectCommit(info: EditorInfo?): Boolean {
+        if (info == null) return false
+
+        val inputType = info.inputType
+
+        if (inputType == InputType.TYPE_NULL) return true
+
+        val inputClass = inputType and InputType.TYPE_MASK_CLASS
+        if (inputClass != InputType.TYPE_CLASS_TEXT) return false
+
+        val flags = inputType and InputType.TYPE_MASK_FLAGS
+        val variation = inputType and InputType.TYPE_MASK_VARIATION
+        val hasNoSuggestions = (flags and InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS) != 0
+
+        if (hasNoSuggestions && variation == InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD) return true
+        if (hasNoSuggestions && (info.imeOptions and EditorInfo.IME_FLAG_NO_EXTRACT_UI) != 0) return true
 
         return false
     }
