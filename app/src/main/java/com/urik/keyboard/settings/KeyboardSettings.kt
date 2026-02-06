@@ -178,6 +178,12 @@ data class KeyboardSettings(
         get() = learnNewWords
 
     /**
+     * Whether clipboard monitoring is fully active (enabled AND user consented).
+     */
+    val isClipboardFullyActive: Boolean
+        get() = clipboardEnabled && clipboardConsentShown
+
+    /**
      * Effective suggestion count respecting suggestion toggle.
      * Returns 0 if suggestions are disabled.
      */

@@ -84,10 +84,10 @@ class UrikApplication : Application() {
     private fun observeClipboardSettings() {
         applicationScope.launch {
             settingsRepository.settings
-                .map { it.clipboardEnabled }
+                .map { it.isClipboardFullyActive }
                 .distinctUntilChanged()
-                .collect { enabled ->
-                    if (enabled) {
+                .collect { fullyActive ->
+                    if (fullyActive) {
                         clipboardMonitorService.startMonitoring()
                     } else {
                         clipboardMonitorService.stopMonitoring()
