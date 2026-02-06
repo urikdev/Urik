@@ -138,6 +138,9 @@ class SwipeDetector
         private var cachedAdaptiveSigmas = emptyMap<Char, PathGeometryAnalyzer.AdaptiveSigma>()
 
         @Volatile
+        private var cachedKeyNeighborhoods = emptyMap<Char, PathGeometryAnalyzer.KeyNeighborhood>()
+
+        @Volatile
         private var lastKeyPositionsHash = 0
 
         private val scopeJob = SupervisorJob()
@@ -1069,6 +1072,7 @@ class SwipeDetector
                     newSigmas[char] = pathGeometryAnalyzer.calculateAdaptiveSigma(char, keyPositions)
                 }
                 cachedAdaptiveSigmas = newSigmas
+                cachedKeyNeighborhoods = pathGeometryAnalyzer.computeKeyNeighborhoods(keyPositions)
                 lastKeyPositionsHash = positionsHash
             }
         }
@@ -1288,6 +1292,7 @@ class SwipeDetector
 
             var totalScore = 0f
             val sigmaCache = cachedAdaptiveSigmas
+            val neighborhoodCache = cachedKeyNeighborhoods
 
             for (letterIndex in word.indices) {
                 val char = word[letterIndex]
@@ -1298,15 +1303,12 @@ class SwipeDetector
                 val isLastLetter = letterIndex == word.length - 1
 
                 val adaptiveSigma = sigmaCache[lowerChar]?.sigma ?: GeometricScoringConstants.DEFAULT_SIGMA
-                val effectiveSigma =
+                val baseSigma =
                     if (isClusteredWord) {
                         adaptiveSigma * GeometricScoringConstants.CLUSTERED_SEQUENCE_TOLERANCE_MULTIPLIER
                     } else {
                         adaptiveSigma
                     }
-
-                val twoSigmaSquared = 2f * effectiveSigma * effectiveSigma
-                val expThreshold = (2.5f * effectiveSigma) * (2.5f * effectiveSigma)
 
                 val searchRange =
                     when {
@@ -1319,6 +1321,8 @@ class SwipeDetector
                 var minDistanceSquared = Float.MAX_VALUE
                 var closestPointIndex = -1
                 var velocityAtClosest = 0f
+                var closestPointX = 0f
+                var closestPointY = 0f
 
                 val searchStart = if (isLastLetter) swipePath.size - searchRange else 0
                 val searchEnd = if (isFirstLetter) searchRange else swipePath.size
@@ -1350,6 +1354,8 @@ class SwipeDetector
                         minDistanceSquared = spatialDistanceSquared
                         closestPointIndex = pointIndex
                         velocityAtClosest = point.velocity
+                        closestPointX = point.x
+                        closestPointY = point.y
 
                         if (spatialDistanceSquared < 100f && positionDeviation < 2f) {
                             break
@@ -1357,12 +1363,36 @@ class SwipeDetector
                     }
                 }
 
+                val anchorModifier = pathGeometryAnalyzer.calculateAnchorSigmaModifier(
+                    letterIndex,
+                    word.length,
+                    closestPointIndex,
+                    geometricAnalysis,
+                )
+                val effectiveSigma = baseSigma * anchorModifier
+                val twoSigmaSquared = 2f * effectiveSigma * effectiveSigma
+                val expThreshold = (2.5f * effectiveSigma) * (2.5f * effectiveSigma)
+
                 var letterScore =
                     if (minDistanceSquared > expThreshold) {
                         0.0f
                     } else {
                         exp(-minDistanceSquared / twoSigmaSquared)
                     }
+
+                if (letterScore < GeometricScoringConstants.NEIGHBORHOOD_RESCUE_THRESHOLD) {
+                    val neighborhood = neighborhoodCache[lowerChar]
+                    if (neighborhood != null) {
+                        val rescueScore = pathGeometryAnalyzer.calculateNeighborhoodRescueScore(
+                            closestPointX,
+                            closestPointY,
+                            neighborhood,
+                            keyPositions,
+                            effectiveSigma,
+                        )
+                        letterScore = maxOf(letterScore, rescueScore)
+                    }
+                }
 
                 val velocityWeight = pathGeometryAnalyzer.calculateVelocityWeight(velocityAtClosest)
                 letterScore *= velocityWeight
@@ -1394,6 +1424,8 @@ class SwipeDetector
                 totalScore += letterScore
             }
 
+            val lexicalCoherenceBonus = pathGeometryAnalyzer.calculateLexicalCoherenceBonus(letterScores)
+
             val sequencePenalty =
                 calculateSequencePenalty(
                     word,
@@ -1416,7 +1448,7 @@ class SwipeDetector
             val lengthBonus = calculateLengthBonus(word.length, ratioQuality)
 
             val spatialWithBonuses =
-                (baseSpatialScore * sequencePenalty * lengthBonus * wrongLetterPenalty * pathExhaustionPenalty)
+                (baseSpatialScore * sequencePenalty * lengthBonus * wrongLetterPenalty * pathExhaustionPenalty * lexicalCoherenceBonus)
                     .coerceAtMost(1.0f)
 
             val repetitionCount = word.length - uniqueLetterCount
@@ -1625,6 +1657,8 @@ class SwipeDetector
             scopeJob.cancel()
             _swipeListener = null
             keyCharacterPositions = emptyMap()
+            cachedAdaptiveSigmas = emptyMap()
+            cachedKeyNeighborhoods = emptyMap()
             reset()
         }
     }
