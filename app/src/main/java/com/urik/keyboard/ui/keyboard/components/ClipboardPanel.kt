@@ -1,17 +1,15 @@
 package com.urik.keyboard.ui.keyboard.components
 
 import android.content.Context
-import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.view.Gravity
+import android.view.View
 import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.LinearLayout
-import android.widget.PopupWindow
 import android.widget.ScrollView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
-import androidx.core.graphics.drawable.toDrawable
 import androidx.core.view.isVisible
 import com.urik.keyboard.R
 import com.urik.keyboard.data.database.ClipboardItem
@@ -20,12 +18,11 @@ import com.urik.keyboard.theme.ThemeManager
 /**
  * Clipboard history panel with consent screen and item management.
  *
- * Shows consent message on first use, then tabbed interface for pinned/recent items.
  */
 class ClipboardPanel(
-    private val context: Context,
+    context: Context,
     private val themeManager: ThemeManager,
-) : PopupWindow() {
+) : FrameLayout(context) {
     private var onConsentAccepted: (() -> Unit)? = null
     private var onItemSelected: ((String) -> Unit)? = null
     private var onItemPinToggled: ((ClipboardItem) -> Unit)? = null
@@ -33,13 +30,6 @@ class ClipboardPanel(
     private var onDeleteAllUnpinned: (() -> Unit)? = null
 
     private var deleteAllConfirmationOverlay: FrameLayout? = null
-
-    private val rootContainer: FrameLayout =
-        FrameLayout(context).apply {
-            val density = context.resources.displayMetrics.density
-            setBackgroundColor(themeManager.currentTheme.value.colors.keyboardBackground)
-            elevation = 8f * density
-        }
 
     private val consentScreen: LinearLayout =
         LinearLayout(context).apply {
@@ -116,6 +106,10 @@ class ClipboardPanel(
     init {
         val density = context.resources.displayMetrics.density
 
+        setBackgroundColor(themeManager.currentTheme.value.colors.keyboardBackground)
+        elevation = 8f * density
+        visibility = View.GONE
+
         val pinnedTabDrawable = createTabBackground(isSelected = false)
         pinnedTab =
             Button(context).apply {
@@ -186,22 +180,8 @@ class ClipboardPanel(
         clipboardContentScreen.addView(recentListContainer)
         clipboardContentScreen.addView(emptyStateText)
 
-        rootContainer.addView(consentScreen)
-        rootContainer.addView(clipboardContentScreen)
-
-        contentView = rootContainer
-        isOutsideTouchable = true
-        isFocusable = true
-        setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
-
-        setOnDismissListener {
-            hideDeleteAllConfirmation()
-            onConsentAccepted = null
-            onItemSelected = null
-            onItemPinToggled = null
-            onItemDeleted = null
-            onDeleteAllUnpinned = null
-        }
+        addView(consentScreen)
+        addView(clipboardContentScreen)
     }
 
     private fun createTabBackground(isSelected: Boolean): GradientDrawable {
@@ -262,6 +242,7 @@ class ClipboardPanel(
         this.onConsentAccepted = onAccepted
         consentScreen.isVisible = true
         clipboardContentScreen.isVisible = false
+        visibility = View.VISIBLE
     }
 
     fun showClipboardContent(
@@ -279,9 +260,24 @@ class ClipboardPanel(
 
         consentScreen.isVisible = false
         clipboardContentScreen.isVisible = true
+        visibility = View.VISIBLE
 
         refreshContent(pinnedItems, recentItems)
     }
+
+    fun hide() {
+        hideDeleteAllConfirmation()
+        returnItemViewsToPool()
+        visibility = View.GONE
+        onConsentAccepted = null
+        onItemSelected = null
+        onItemPinToggled = null
+        onItemDeleted = null
+        onDeleteAllUnpinned = null
+    }
+
+    val isShowing: Boolean
+        get() = visibility == View.VISIBLE
 
     fun refreshContent(
         pinnedItems: List<ClipboardItem>,
@@ -574,7 +570,7 @@ class ClipboardPanel(
                 )
             }
 
-        rootContainer.addView(
+        addView(
             deleteAllConfirmationOverlay,
             FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.MATCH_PARENT,
@@ -585,7 +581,7 @@ class ClipboardPanel(
 
     private fun hideDeleteAllConfirmation() {
         deleteAllConfirmationOverlay?.let { overlay ->
-            rootContainer.removeView(overlay)
+            removeView(overlay)
         }
         deleteAllConfirmationOverlay = null
     }

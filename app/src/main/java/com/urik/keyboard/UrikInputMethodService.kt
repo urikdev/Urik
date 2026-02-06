@@ -37,6 +37,7 @@ import com.urik.keyboard.model.KeyboardEvent
 import com.urik.keyboard.model.KeyboardKey
 import com.urik.keyboard.model.KeyboardMode
 import com.urik.keyboard.service.CharacterVariationService
+import com.urik.keyboard.service.ClipboardMonitorService
 import com.urik.keyboard.service.EmojiSearchManager
 import com.urik.keyboard.service.InputMethod
 import com.urik.keyboard.service.LanguageManager
@@ -129,6 +130,9 @@ class UrikInputMethodService :
     lateinit var clipboardRepository: com.urik.keyboard.data.ClipboardRepository
 
     @Inject
+    lateinit var clipboardMonitorService: ClipboardMonitorService
+
+    @Inject
     lateinit var emojiSearchManager: EmojiSearchManager
 
     @Inject
@@ -162,6 +166,7 @@ class UrikInputMethodService :
     private var swipeKeyboardView: SwipeKeyboardView? = null
     private var adaptiveContainer: com.urik.keyboard.ui.keyboard.components.AdaptiveKeyboardContainer? = null
     private var keyboardRootContainer: LinearLayout? = null
+    private var clipboardPanel: ClipboardPanel? = null
     private var lastDisplayDensity: Float = 0f
     private var lastKeyboardConfig: Int = android.content.res.Configuration.KEYBOARD_UNDEFINED
 
@@ -929,6 +934,16 @@ class UrikInputMethodService :
             val currentPostureInfo = postureDetector?.postureInfo?.value
             adaptive.setModeConfig(currentModeConfig, currentPostureInfo?.hingeBounds)
 
+            val panel =
+                ClipboardPanel(this, themeManager).apply {
+                    layoutParams =
+                        LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT,
+                            LinearLayout.LayoutParams.WRAP_CONTENT,
+                        )
+                }
+            clipboardPanel = panel
+
             val rootContainer =
                 LinearLayout(this).apply {
                     orientation = LinearLayout.VERTICAL
@@ -950,6 +965,14 @@ class UrikInputMethodService :
                         )
                         WindowInsetsCompat.CONSUMED
                     }
+
+                    addView(
+                        panel,
+                        LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT,
+                            LinearLayout.LayoutParams.WRAP_CONTENT,
+                        ),
+                    )
 
                     addView(
                         adaptive,
@@ -1073,55 +1096,42 @@ class UrikInputMethodService :
     /**
      * Handles clipboard button click.
      *
-     * Shows clipboard panel with consent screen or clipboard items.
+     * Toggles embedded clipboard panel visibility. On first use, shows consent
+     * screen. After consent, shows clipboard history. Panel is embedded within
+     * the IME's inputView hierarchy to prevent window token conflicts.
      */
     private fun handleClipboardButtonClick() {
+        val panel = clipboardPanel ?: return
+
+        if (panel.isShowing) {
+            dismissClipboardPanel()
+            return
+        }
+
         serviceScope.launch {
             try {
                 val settings = settingsRepository.settings.first()
 
                 if (!settings.clipboardEnabled) return@launch
 
-                val clipboardPanel = ClipboardPanel(this@UrikInputMethodService, themeManager)
+                val keyboardHeight = adaptiveContainer?.height ?: return@launch
+                adaptiveContainer?.visibility = View.GONE
+                panel.layoutParams =
+                    LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        keyboardHeight,
+                    )
 
                 if (!settings.clipboardConsentShown) {
-                    clipboardPanel.showConsentScreen {
+                    panel.showConsentScreen {
                         serviceScope.launch {
                             settingsRepository.updateClipboardConsentShown(true)
-                            clipboardPanel.dismiss()
+                            clipboardMonitorService.startMonitoring()
+                            showClipboardContentInPanel(panel)
                         }
                     }
                 } else {
-                    val pinnedResult = clipboardRepository.getPinnedItems()
-                    val recentResult = clipboardRepository.getRecentItems()
-
-                    val pinnedItems = pinnedResult.getOrElse { emptyList() }
-                    val recentItems = recentResult.getOrElse { emptyList() }
-
-                    clipboardPanel.showClipboardContent(
-                        pinnedItems = pinnedItems,
-                        recentItems = recentItems,
-                        onItemClick = { content ->
-                            handleClipboardItemPaste(content)
-                            clipboardPanel.dismiss()
-                        },
-                        onPinToggle = { item ->
-                            handleClipboardPinToggle(item, clipboardPanel)
-                        },
-                        onDelete = { item ->
-                            handleClipboardItemDelete(item, clipboardPanel)
-                        },
-                        onDeleteAll = {
-                            handleClipboardDeleteAll(clipboardPanel)
-                        },
-                    )
-                }
-
-                withContext(Dispatchers.Main) {
-                    val anchorView = swipeKeyboardView ?: return@withContext
-                    clipboardPanel.width = anchorView.width
-                    clipboardPanel.height = (anchorView.height * 0.75).toInt()
-                    clipboardPanel.showAsDropDown(anchorView, 0, -anchorView.height)
+                    showClipboardContentInPanel(panel)
                 }
             } catch (e: Exception) {
                 ErrorLogger.logException(
@@ -1131,6 +1141,39 @@ class UrikInputMethodService :
                     context = mapOf("operation" to "handleClipboardButtonClick"),
                 )
             }
+        }
+    }
+
+    private fun dismissClipboardPanel() {
+        clipboardPanel?.hide()
+        adaptiveContainer?.visibility = View.VISIBLE
+    }
+
+    private suspend fun showClipboardContentInPanel(panel: ClipboardPanel) {
+        val pinnedResult = clipboardRepository.getPinnedItems()
+        val recentResult = clipboardRepository.getRecentItems()
+
+        val pinnedItems = pinnedResult.getOrElse { emptyList() }
+        val recentItems = recentResult.getOrElse { emptyList() }
+
+        withContext(Dispatchers.Main) {
+            panel.showClipboardContent(
+                pinnedItems = pinnedItems,
+                recentItems = recentItems,
+                onItemClick = { content ->
+                    handleClipboardItemPaste(content)
+                    dismissClipboardPanel()
+                },
+                onPinToggle = { item ->
+                    handleClipboardPinToggle(item)
+                },
+                onDelete = { item ->
+                    handleClipboardItemDelete(item)
+                },
+                onDeleteAll = {
+                    handleClipboardDeleteAll()
+                },
+            )
         }
     }
 
@@ -1173,7 +1216,8 @@ class UrikInputMethodService :
         }
     }
 
-    private suspend fun refreshClipboardPanel(panel: ClipboardPanel) {
+    private suspend fun refreshClipboardPanel() {
+        val panel = clipboardPanel ?: return
         val pinnedResult = clipboardRepository.getPinnedItems()
         val recentResult = clipboardRepository.getRecentItems()
 
@@ -1185,30 +1229,24 @@ class UrikInputMethodService :
         }
     }
 
-    private fun handleClipboardPinToggle(
-        item: com.urik.keyboard.data.database.ClipboardItem,
-        panel: ClipboardPanel,
-    ) {
+    private fun handleClipboardPinToggle(item: com.urik.keyboard.data.database.ClipboardItem) {
         serviceScope.launch {
             clipboardRepository.togglePin(item.id, !item.isPinned)
-            refreshClipboardPanel(panel)
+            refreshClipboardPanel()
         }
     }
 
-    private fun handleClipboardItemDelete(
-        item: com.urik.keyboard.data.database.ClipboardItem,
-        panel: ClipboardPanel,
-    ) {
+    private fun handleClipboardItemDelete(item: com.urik.keyboard.data.database.ClipboardItem) {
         serviceScope.launch {
             clipboardRepository.deleteItem(item.id)
-            refreshClipboardPanel(panel)
+            refreshClipboardPanel()
         }
     }
 
-    private fun handleClipboardDeleteAll(panel: ClipboardPanel) {
+    private fun handleClipboardDeleteAll() {
         serviceScope.launch {
             clipboardRepository.deleteAllUnpinned()
-            refreshClipboardPanel(panel)
+            refreshClipboardPanel()
         }
     }
 
@@ -2819,6 +2857,7 @@ class UrikInputMethodService :
 
         suggestionDebounceJob?.cancel()
         swipeKeyboardView?.hideEmojiPicker()
+        dismissClipboardPanel()
 
         if (lifecycle.currentState != Lifecycle.State.DESTROYED) {
             lifecycleRegistry.currentState = Lifecycle.State.STARTED
@@ -2897,6 +2936,7 @@ class UrikInputMethodService :
 
         suggestionDebounceJob?.cancel()
         swipeKeyboardView?.hideEmojiPicker()
+        dismissClipboardPanel()
 
         if (displayBuffer.isNotEmpty() && !isSecureField) {
             val actualTextBefore = safeGetTextBeforeCursor(1)
@@ -3188,6 +3228,8 @@ class UrikInputMethodService :
         postureDetector = null
 
         coordinateStateClear()
+        dismissClipboardPanel()
+        clipboardPanel = null
         swipeKeyboardView = null
         adaptiveContainer = null
 
