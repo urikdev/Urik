@@ -122,6 +122,8 @@ object KeyboardConstants {
         const val PATH_EXHAUSTION_MIN_LETTERS_CHECK = 2
         const val LENGTH_BONUS_MIN_RATIO_QUALITY = 0.85f
         const val REPEATED_LETTER_MAX_INDEX_GAP = 3
+
+        const val PECK_LATE_DISPLACEMENT_RATIO = 0.95f
     }
 
     object GeometricScoringConstants {

@@ -487,12 +487,48 @@ class SwipeDetector
                         return
                     }
 
+                    if (isPeckLikeMotion()) {
+                        return
+                    }
+
                     isSwiping = true
                     pointCounter = swipePoints.size
                     _swipeListener?.onSwipeStart(PointF(start.x, start.y))
                     updateSwipePath(event)
                 }
             }
+        }
+
+        /**
+         * Discriminates peck taps from intentional swipes
+         */
+        private fun isPeckLikeMotion(): Boolean {
+            val pointCount = swipePoints.size
+            if (pointCount < 3) return false
+
+            val first = swipePoints[0]
+            val last = swipePoints[pointCount - 1]
+            val totalDuration = last.timestamp - first.timestamp
+            if (totalDuration <= 0) return false
+
+            val midTimestamp = first.timestamp + totalDuration / 2
+            var midPointIndex = 0
+            for (i in 1 until pointCount) {
+                if (swipePoints[i].timestamp >= midTimestamp) {
+                    midPointIndex = i
+                    break
+                }
+            }
+
+            if (midPointIndex == 0 || midPointIndex >= pointCount - 1) return false
+
+            val midPoint = swipePoints[midPointIndex]
+            val earlyDisplacement = calculateDistance(first.x, first.y, midPoint.x, midPoint.y)
+            val lateDisplacement = calculateDistance(midPoint.x, midPoint.y, last.x, last.y)
+            val totalDisplacement = earlyDisplacement + lateDisplacement
+            if (totalDisplacement <= 0f) return false
+
+            return lateDisplacement / totalDisplacement > SwipeDetectionConstants.PECK_LATE_DISPLACEMENT_RATIO
         }
 
         private fun shouldSamplePoint(
@@ -1363,12 +1399,13 @@ class SwipeDetector
                     }
                 }
 
-                val anchorModifier = pathGeometryAnalyzer.calculateAnchorSigmaModifier(
-                    letterIndex,
-                    word.length,
-                    closestPointIndex,
-                    geometricAnalysis,
-                )
+                val anchorModifier =
+                    pathGeometryAnalyzer.calculateAnchorSigmaModifier(
+                        letterIndex,
+                        word.length,
+                        closestPointIndex,
+                        geometricAnalysis,
+                    )
                 val effectiveSigma = baseSigma * anchorModifier
                 val twoSigmaSquared = 2f * effectiveSigma * effectiveSigma
                 val expThreshold = (2.5f * effectiveSigma) * (2.5f * effectiveSigma)
@@ -1383,13 +1420,14 @@ class SwipeDetector
                 if (letterScore < GeometricScoringConstants.NEIGHBORHOOD_RESCUE_THRESHOLD) {
                     val neighborhood = neighborhoodCache[lowerChar]
                     if (neighborhood != null) {
-                        val rescueScore = pathGeometryAnalyzer.calculateNeighborhoodRescueScore(
-                            closestPointX,
-                            closestPointY,
-                            neighborhood,
-                            keyPositions,
-                            effectiveSigma,
-                        )
+                        val rescueScore =
+                            pathGeometryAnalyzer.calculateNeighborhoodRescueScore(
+                                closestPointX,
+                                closestPointY,
+                                neighborhood,
+                                keyPositions,
+                                effectiveSigma,
+                            )
                         letterScore = maxOf(letterScore, rescueScore)
                     }
                 }
