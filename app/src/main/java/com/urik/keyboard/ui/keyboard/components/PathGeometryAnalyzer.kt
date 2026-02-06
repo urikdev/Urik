@@ -8,6 +8,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.math.abs
 import kotlin.math.atan2
+import kotlin.math.exp
 import kotlin.math.sqrt
 
 /**
@@ -100,6 +101,11 @@ class PathGeometryAnalyzer
         data class AdaptiveSigma(
             val sigma: Float,
             val neighborCount: Int,
+        )
+
+        class KeyNeighborhood(
+            val neighborChars: CharArray,
+            val neighborDistances: FloatArray,
         )
 
         private val reusableCurvatureArray = FloatArray(GeometricScoringConstants.MAX_PATH_POINTS)
@@ -1033,6 +1039,132 @@ class PathGeometryAnalyzer
             val deficit = minimumExpected - wordLength
 
             return deficit >= 5
+        }
+
+        fun computeKeyNeighborhoods(keyPositions: Map<Char, PointF>): Map<Char, KeyNeighborhood> {
+            val result = HashMap<Char, KeyNeighborhood>(keyPositions.size)
+            val tempChars = ArrayList<Char>(keyPositions.size)
+            val tempDists = ArrayList<Float>(keyPositions.size)
+
+            keyPositions.forEach { (key, keyPos) ->
+                tempChars.clear()
+                tempDists.clear()
+
+                keyPositions.forEach { (otherKey, otherPos) ->
+                    if (otherKey != key) {
+                        val dx = keyPos.x - otherPos.x
+                        val dy = keyPos.y - otherPos.y
+                        val distSq = dx * dx + dy * dy
+                        if (distSq < GeometricScoringConstants.NEIGHBORHOOD_PROXIMITY_RADIUS_SQ) {
+                            val dist = sqrt(distSq)
+                            var insertIdx = tempDists.size
+                            for (i in tempDists.indices) {
+                                if (dist < tempDists[i]) {
+                                    insertIdx = i
+                                    break
+                                }
+                            }
+                            tempChars.add(insertIdx, otherKey)
+                            tempDists.add(insertIdx, dist)
+                        }
+                    }
+                }
+
+                val count = minOf(tempChars.size, GeometricScoringConstants.MAX_KEY_NEIGHBORS)
+                val chars = CharArray(count)
+                val dists = FloatArray(count)
+                for (i in 0 until count) {
+                    chars[i] = tempChars[i]
+                    dists[i] = tempDists[i]
+                }
+
+                result[key] = KeyNeighborhood(chars, dists)
+            }
+
+            return result
+        }
+
+        fun calculateNeighborhoodRescueScore(
+            pathPointX: Float,
+            pathPointY: Float,
+            neighborhood: KeyNeighborhood,
+            keyPositions: Map<Char, PointF>,
+            sigma: Float,
+        ): Float {
+            val twoSigmaSq = 2f * sigma * sigma
+            val maxNeighborDist = sqrt(GeometricScoringConstants.NEIGHBORHOOD_PROXIMITY_RADIUS_SQ)
+            var bestRescue = 0f
+
+            for (i in neighborhood.neighborChars.indices) {
+                val neighborChar = neighborhood.neighborChars[i]
+                val interKeyDist = neighborhood.neighborDistances[i]
+                val neighborPos = keyPositions[neighborChar] ?: continue
+                val dx = pathPointX - neighborPos.x
+                val dy = pathPointY - neighborPos.y
+                val distToNeighborSq = dx * dx + dy * dy
+
+                val neighborGaussian = exp(-distToNeighborSq / twoSigmaSq)
+                val proximityTransfer = 1f - (interKeyDist / maxNeighborDist)
+                val rescueScore =
+                    neighborGaussian *
+                        proximityTransfer *
+                        GeometricScoringConstants.NEIGHBORHOOD_DECAY_FACTOR
+
+                if (rescueScore > bestRescue) {
+                    bestRescue = rescueScore
+                }
+            }
+
+            return bestRescue.coerceAtMost(GeometricScoringConstants.NEIGHBORHOOD_RESCUE_CEILING)
+        }
+
+        fun calculateAnchorSigmaModifier(
+            letterIndex: Int,
+            wordLength: Int,
+            closestPathIndex: Int,
+            analysis: GeometricAnalysis,
+        ): Float {
+            if (letterIndex == 0 || letterIndex == wordLength - 1) {
+                return GeometricScoringConstants.ANCHOR_SIGMA_TIGHTENING
+            }
+
+            for (inflection in analysis.inflectionPoints) {
+                if (inflection.isIntentional) {
+                    val pathIndexDistance = abs(closestPathIndex - inflection.pathIndex)
+                    if (pathIndexDistance < GeometricScoringConstants.ANCHOR_INFLECTION_PROXIMITY_THRESHOLD) {
+                        return GeometricScoringConstants.INFLECTION_ANCHOR_SIGMA_TIGHTENING
+                    }
+                }
+            }
+
+            return GeometricScoringConstants.MID_SWIPE_SIGMA_EXPANSION
+        }
+
+        fun calculateLexicalCoherenceBonus(letterScores: ArrayList<Pair<Char, Float>>): Float {
+            if (letterScores.size < GeometricScoringConstants.LEXICAL_COHERENCE_MIN_LETTERS) {
+                return 1.0f
+            }
+
+            var sum = 0f
+            var nearMissCount = 0
+
+            for ((_, score) in letterScores) {
+                sum += score
+                if (score in GeometricScoringConstants.LEXICAL_NEAR_MISS_LOWER..GeometricScoringConstants.LEXICAL_NEAR_MISS_UPPER) {
+                    nearMissCount++
+                }
+            }
+
+            val avgScore = sum / letterScores.size
+            if (avgScore < GeometricScoringConstants.LEXICAL_COHERENCE_AVG_THRESHOLD) return 1.0f
+
+            val coherenceRatio = nearMissCount.toFloat() / letterScores.size.toFloat()
+
+            return if (coherenceRatio > GeometricScoringConstants.LEXICAL_COHERENCE_RATIO_THRESHOLD) {
+                GeometricScoringConstants.LEXICAL_COHERENCE_BONUS
+            } else {
+                1.0f
+            }
         }
 
         private fun createEmptyAnalysis(): GeometricAnalysis =

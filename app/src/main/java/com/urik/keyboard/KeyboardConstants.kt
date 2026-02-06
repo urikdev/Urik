@@ -213,6 +213,24 @@ object KeyboardConstants {
         const val VERTEX_DENSE_AREA_SENSITIVITY_BOOST = 0.90f
         const val VERTEX_PATH_SIMPLIFICATION_EPSILON = 15f
         const val VERTEX_DENSE_AREA_RADIUS_PX = 55f
+
+        const val NEIGHBORHOOD_PROXIMITY_RADIUS_SQ = 14400f
+        const val MAX_KEY_NEIGHBORS = 6
+        const val NEIGHBORHOOD_RESCUE_THRESHOLD = 0.45f
+        const val NEIGHBORHOOD_DECAY_FACTOR = 0.65f
+        const val NEIGHBORHOOD_RESCUE_CEILING = 0.70f
+
+        const val ANCHOR_SIGMA_TIGHTENING = 0.80f
+        const val MID_SWIPE_SIGMA_EXPANSION = 1.20f
+        const val INFLECTION_ANCHOR_SIGMA_TIGHTENING = 0.88f
+        const val ANCHOR_INFLECTION_PROXIMITY_THRESHOLD = 5
+
+        const val LEXICAL_COHERENCE_MIN_LETTERS = 3
+        const val LEXICAL_COHERENCE_AVG_THRESHOLD = 0.55f
+        const val LEXICAL_COHERENCE_BONUS = 1.10f
+        const val LEXICAL_NEAR_MISS_LOWER = 0.35f
+        const val LEXICAL_NEAR_MISS_UPPER = 0.75f
+        const val LEXICAL_COHERENCE_RATIO_THRESHOLD = 0.50f
     }
 
     object TextProcessingConstants {
