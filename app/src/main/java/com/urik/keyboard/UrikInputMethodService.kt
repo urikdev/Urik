@@ -10,6 +10,7 @@ import android.text.style.BackgroundColorSpan
 import android.text.style.ForegroundColorSpan
 import android.util.Size
 import android.view.Gravity
+import android.view.KeyEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
@@ -207,6 +208,12 @@ class UrikInputMethodService :
 
     @Volatile
     private var isSecureField: Boolean = false
+
+    @Volatile
+    private var isDirectCommitField: Boolean = false
+
+    private val requiresDirectCommit: Boolean
+        get() = isSecureField || isDirectCommitField
 
     @Volatile
     private var currentInputAction: KeyboardKey.ActionType = KeyboardKey.ActionType.ENTER
@@ -559,7 +566,7 @@ class UrikInputMethodService :
     }
 
     private fun attemptRecompositionAtCursor(cursorPosition: Int) {
-        if (isSecureField || isUrlOrEmailField) return
+        if (requiresDirectCommit || isUrlOrEmailField) return
         if (displayBuffer.isNotEmpty()) return
 
         val textBefore = safeGetTextBeforeCursor(KeyboardConstants.TextProcessingConstants.WORD_BOUNDARY_CONTEXT_LENGTH)
@@ -618,7 +625,7 @@ class UrikInputMethodService :
     }
 
     private fun showBigramPredictions() {
-        if (isSecureField || !currentSettings.showSuggestions || lastCommittedWord.isBlank()) {
+        if (requiresDirectCommit || !currentSettings.showSuggestions || lastCommittedWord.isBlank()) {
             return
         }
 
@@ -1083,7 +1090,7 @@ class UrikInputMethodService :
                     }
                 }
 
-                if (!isSecureField && displayBuffer.isNotEmpty()) {
+                if (!requiresDirectCommit && displayBuffer.isNotEmpty()) {
                     coordinateWordCompletion()
                 }
 
@@ -1477,6 +1484,7 @@ class UrikInputMethodService :
         }
 
         isSecureField = SecureFieldDetector.isSecure(info)
+        isDirectCommitField = SecureFieldDetector.isDirectCommit(info)
         currentInputAction = ActionDetector.detectAction(info)
 
         val inputType = info?.inputType ?: 0
@@ -1579,7 +1587,7 @@ class UrikInputMethodService :
         try {
             lastSpaceTime = 0
 
-            if (isSecureField) {
+            if (requiresDirectCommit) {
                 currentInputConnection?.commitText(char, 1)
                 return
             }
@@ -1738,7 +1746,7 @@ class UrikInputMethodService :
             try {
                 lastSpaceTime = 0
 
-                if (isSecureField) {
+                if (requiresDirectCommit) {
                     currentInputConnection?.commitText(char, 1)
                     return@launch
                 }
@@ -1767,7 +1775,7 @@ class UrikInputMethodService :
 
                         if (char.length == 1) {
                             val singleChar = char.single()
-                            if (isSentenceEndingPunctuation(singleChar) && !isSecureField) {
+                            if (isSentenceEndingPunctuation(singleChar) && !requiresDirectCommit) {
                                 viewModel.disableCapsLockAfterPunctuation()
                                 val textBefore = safeGetTextBeforeCursor(50)
                                 viewModel.checkAndApplyAutoCapitalization(textBefore, currentSettings.autoCapitalizationEnabled)
@@ -1807,7 +1815,7 @@ class UrikInputMethodService :
                                         currentInputConnection?.commitText(char, 1)
 
                                         val singleChar = char.single()
-                                        if (isSentenceEndingPunctuation(singleChar) && !isSecureField) {
+                                        if (isSentenceEndingPunctuation(singleChar) && !requiresDirectCommit) {
                                             viewModel.disableCapsLockAfterPunctuation()
                                             val textAfter = safeGetTextBeforeCursor(50)
                                             viewModel.checkAndApplyAutoCapitalization(textAfter, currentSettings.autoCapitalizationEnabled)
@@ -1848,7 +1856,7 @@ class UrikInputMethodService :
 
                     if (char.length == 1) {
                         val singleChar = char.single()
-                        if (isSentenceEndingPunctuation(singleChar) && !isSecureField) {
+                        if (isSentenceEndingPunctuation(singleChar) && !requiresDirectCommit) {
                             viewModel.disableCapsLockAfterPunctuation()
                             val textBefore = safeGetTextBeforeCursor(50)
                             viewModel.checkAndApplyAutoCapitalization(textBefore, currentSettings.autoCapitalizationEnabled)
@@ -1871,8 +1879,8 @@ class UrikInputMethodService :
         try {
             clearBigramPredictions()
 
-            if (isSecureField) {
-                currentInputConnection?.setComposingText(validatedWord, 1)
+            if (requiresDirectCommit) {
+                currentInputConnection?.commitText(validatedWord, 1)
                 return
             }
 
@@ -2024,7 +2032,7 @@ class UrikInputMethodService :
      */
     private fun handleSuggestionSelected(suggestion: String) {
         serviceScope.launch {
-            if (isSecureField) {
+            if (requiresDirectCommit) {
                 return@launch
             }
 
@@ -2162,7 +2170,7 @@ class UrikInputMethodService :
      */
     private suspend fun performInputAction(imeAction: Int) {
         try {
-            if (!isSecureField && displayBuffer.isNotEmpty()) {
+            if (!requiresDirectCommit && displayBuffer.isNotEmpty()) {
                 val actualTextBefore = safeGetTextBeforeCursor(1)
                 val actualTextAfter = safeGetTextAfterCursor(1)
 
@@ -2227,6 +2235,18 @@ class UrikInputMethodService :
             if (!selectedText.isNullOrEmpty()) {
                 currentInputConnection?.commitText("", 1)
                 coordinateStateClear()
+                return
+            }
+
+            if (isDirectCommitField) {
+                val textBeforeCursor = safeGetTextBeforeCursor(1)
+                val handled = textBeforeCursor.isNotEmpty() &&
+                    (currentInputConnection?.deleteSurroundingText(
+                        BackspaceUtils.getLastGraphemeClusterLength(textBeforeCursor), 0,
+                    ) ?: false)
+                if (!handled) {
+                    sendDownUpKeyEvents(KeyEvent.KEYCODE_DEL)
+                }
                 return
             }
 
@@ -2626,7 +2646,7 @@ class UrikInputMethodService :
     private fun handleSpace() {
         serviceScope.launch {
             try {
-                if (isSecureField) {
+                if (requiresDirectCommit) {
                     currentInputConnection?.commitText(" ", 1)
                     return@launch
                 }
@@ -2652,7 +2672,7 @@ class UrikInputMethodService :
                 ) {
                     currentInputConnection?.beginBatchEdit()
                     try {
-                        if (wordState.hasContent && !isSecureField) {
+                        if (wordState.hasContent && !requiresDirectCommit) {
                             clearInternalStateOnly()
                             currentInputConnection?.finishComposingText()
                         }
@@ -2752,7 +2772,7 @@ class UrikInputMethodService :
     }
 
     private fun handleSpacebarCursorMove(distance: Int) {
-        if (isSecureField || !currentSettings.spacebarCursorControl) {
+        if (requiresDirectCommit || !currentSettings.spacebarCursorControl) {
             return
         }
 
@@ -2765,7 +2785,7 @@ class UrikInputMethodService :
     }
 
     private fun handleBackspaceSwipeDelete() {
-        if (isSecureField || !currentSettings.backspaceSwipeDelete) {
+        if (requiresDirectCommit || !currentSettings.backspaceSwipeDelete) {
             return
         }
 
@@ -2863,7 +2883,7 @@ class UrikInputMethodService :
             lifecycleRegistry.currentState = Lifecycle.State.STARTED
         }
 
-        if (displayBuffer.isNotEmpty() && !isSecureField) {
+        if (displayBuffer.isNotEmpty() && !requiresDirectCommit) {
             val actualTextBefore = safeGetTextBeforeCursor(1)
             val actualTextAfter = safeGetTextAfterCursor(1)
 
@@ -2911,6 +2931,7 @@ class UrikInputMethodService :
         lastKnownCursorPosition = -1
 
         isSecureField = SecureFieldDetector.isSecure(attribute)
+        isDirectCommitField = SecureFieldDetector.isDirectCommit(attribute)
         currentInputAction = ActionDetector.detectAction(attribute)
 
         val inputType = attribute?.inputType ?: 0
@@ -2938,7 +2959,7 @@ class UrikInputMethodService :
         swipeKeyboardView?.hideEmojiPicker()
         dismissClipboardPanel()
 
-        if (displayBuffer.isNotEmpty() && !isSecureField) {
+        if (displayBuffer.isNotEmpty() && !requiresDirectCommit) {
             val actualTextBefore = safeGetTextBeforeCursor(1)
             val actualTextAfter = safeGetTextAfterCursor(1)
 
@@ -2987,7 +3008,7 @@ class UrikInputMethodService :
             candidatesEnd,
         )
 
-        if (isSecureField) return
+        if (requiresDirectCommit) return
 
         val selectionResult =
             selectionStateTracker.updateSelection(
