@@ -410,6 +410,94 @@ class CaseTransformerTest {
     }
 
     @Test
+    fun `sentence start capitalizes dictionary suggestion without shift state`() {
+        val suggestion =
+            SpellingSuggestion(
+                word = "hello",
+                confidence = 0.90,
+                ranking = 0,
+                source = "symspell",
+                preserveCase = false,
+            )
+        val state =
+            KeyboardState(
+                isCapsLockOn = false,
+                isShiftPressed = false,
+                isAutoShift = false,
+            )
+
+        val result = caseTransformer.applyCasing(suggestion, state, isSentenceStart = true)
+
+        assertEquals("Hello", result)
+    }
+
+    @Test
+    fun `sentence start preserves learned word casing`() {
+        val suggestion =
+            SpellingSuggestion(
+                word = "iPhone",
+                confidence = 0.95,
+                ranking = 0,
+                source = "learned",
+                preserveCase = true,
+            )
+        val state =
+            KeyboardState(
+                isCapsLockOn = false,
+                isShiftPressed = false,
+                isAutoShift = false,
+            )
+
+        val result = caseTransformer.applyCasing(suggestion, state, isSentenceStart = true)
+
+        assertEquals("iPhone", result)
+    }
+
+    @Test
+    fun `sentence start with caps lock still uppercases`() {
+        val suggestion =
+            SpellingSuggestion(
+                word = "hello",
+                confidence = 0.90,
+                ranking = 0,
+                source = "symspell",
+                preserveCase = false,
+            )
+        val state =
+            KeyboardState(
+                isCapsLockOn = true,
+                isShiftPressed = false,
+                isAutoShift = false,
+            )
+
+        val result = caseTransformer.applyCasing(suggestion, state, isSentenceStart = true)
+
+        assertEquals("HELLO", result)
+    }
+
+    @Test
+    fun `mid-sentence no capitalization without shift`() {
+        val suggestion =
+            SpellingSuggestion(
+                word = "hello",
+                confidence = 0.90,
+                ranking = 0,
+                source = "symspell",
+                preserveCase = false,
+            )
+        val state =
+            KeyboardState(
+                isCapsLockOn = false,
+                isShiftPressed = false,
+                isAutoShift = false,
+            )
+
+        val result = caseTransformer.applyCasing(suggestion, state, isSentenceStart = false)
+
+        assertEquals("hello", result)
+    }
+
+    @Test
     fun `mixed case learned word like McLaren preserved`() {
         val suggestion =
             SpellingSuggestion(

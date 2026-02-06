@@ -18,6 +18,7 @@ class CaseTransformer
         fun applyCasing(
             suggestion: SpellingSuggestion,
             keyboardState: KeyboardState,
+            isSentenceStart: Boolean = false,
         ): String {
             if (keyboardState.isCapsLockOn) {
                 return suggestion.word.uppercase()
@@ -35,13 +36,22 @@ class CaseTransformer
                 }
             }
 
+            if (isSentenceStart) {
+                return if (suggestion.preserveCase) {
+                    suggestion.word
+                } else {
+                    capitalizeFirstLetter(suggestion.word)
+                }
+            }
+
             return suggestion.word
         }
 
         fun applyCasingToSuggestions(
             suggestions: List<SpellingSuggestion>,
             keyboardState: KeyboardState,
-        ): List<String> = suggestions.map { applyCasing(it, keyboardState) }
+            isSentenceStart: Boolean = false,
+        ): List<String> = suggestions.map { applyCasing(it, keyboardState, isSentenceStart) }
 
         private fun capitalizeFirstLetter(word: String): String {
             if (word.isEmpty()) return word
