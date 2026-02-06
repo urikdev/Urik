@@ -194,6 +194,114 @@ class SwipeDetectorTest {
         downEvent.recycle()
     }
 
+    @Test
+    fun `dwell-then-jump peck does not activate swipe`() {
+        swipeDetector.updateDisplayMetrics(2.0f)
+
+        val keyAt: (Float, Float) -> KeyboardKey? = { x, _ ->
+            if (x < 150f) {
+                KeyboardKey.Character("e", KeyboardKey.KeyType.LETTER)
+            } else {
+                KeyboardKey.Character("h", KeyboardKey.KeyType.LETTER)
+            }
+        }
+
+        val downEvent = createMotionEvent(MotionEvent.ACTION_DOWN, 100f, 200f)
+        swipeDetector.handleTouchEvent(downEvent, keyAt)
+        downEvent.recycle()
+
+        Thread.sleep(60)
+
+        val dwellMove = createMotionEvent(MotionEvent.ACTION_MOVE, 105f, 201f)
+        swipeDetector.handleTouchEvent(dwellMove, keyAt)
+        dwellMove.recycle()
+
+        Thread.sleep(60)
+
+        val jumpMove = createMotionEvent(MotionEvent.ACTION_MOVE, 250f, 200f)
+        val swipeActivated = swipeDetector.handleTouchEvent(jumpMove, keyAt)
+        jumpMove.recycle()
+
+        assertFalse("Dwell-then-jump peck should not activate swipe", swipeActivated)
+    }
+
+    @Test
+    fun `distributed swipe motion activates normally`() {
+        swipeDetector.updateDisplayMetrics(2.0f)
+
+        val keyAt: (Float, Float) -> KeyboardKey? = { x, _ ->
+            if (x < 150f) {
+                KeyboardKey.Character("e", KeyboardKey.KeyType.LETTER)
+            } else {
+                KeyboardKey.Character("h", KeyboardKey.KeyType.LETTER)
+            }
+        }
+
+        val downEvent = createMotionEvent(MotionEvent.ACTION_DOWN, 100f, 200f)
+        swipeDetector.handleTouchEvent(downEvent, keyAt)
+        downEvent.recycle()
+
+        var swipeActivated = false
+        val steps = arrayOf(
+            floatArrayOf(120f, 202f),
+            floatArrayOf(140f, 204f),
+            floatArrayOf(160f, 200f),
+            floatArrayOf(180f, 202f),
+            floatArrayOf(200f, 204f),
+            floatArrayOf(220f, 200f),
+            floatArrayOf(240f, 202f),
+            floatArrayOf(260f, 204f),
+        )
+
+        for (step in steps) {
+            Thread.sleep(20)
+            val moveEvent = createMotionEvent(MotionEvent.ACTION_MOVE, step[0], step[1])
+            if (swipeDetector.handleTouchEvent(moveEvent, keyAt)) {
+                swipeActivated = true
+            }
+            moveEvent.recycle()
+            if (swipeActivated) break
+        }
+
+        assertTrue("Distributed swipe motion should activate swipe", swipeActivated)
+    }
+
+    @Test
+    fun `peck rejection falls through to tap handler`() {
+        swipeDetector.updateDisplayMetrics(2.0f)
+
+        val keyAt: (Float, Float) -> KeyboardKey? = { x, _ ->
+            if (x < 150f) {
+                KeyboardKey.Character("e", KeyboardKey.KeyType.LETTER)
+            } else {
+                KeyboardKey.Character("h", KeyboardKey.KeyType.LETTER)
+            }
+        }
+
+        val downEvent = createMotionEvent(MotionEvent.ACTION_DOWN, 100f, 200f)
+        swipeDetector.handleTouchEvent(downEvent, keyAt)
+        downEvent.recycle()
+
+        Thread.sleep(60)
+
+        val dwellMove = createMotionEvent(MotionEvent.ACTION_MOVE, 105f, 201f)
+        swipeDetector.handleTouchEvent(dwellMove, keyAt)
+        dwellMove.recycle()
+
+        Thread.sleep(60)
+
+        val jumpMove = createMotionEvent(MotionEvent.ACTION_MOVE, 250f, 200f)
+        swipeDetector.handleTouchEvent(jumpMove, keyAt)
+        jumpMove.recycle()
+
+        val upEvent = createMotionEvent(MotionEvent.ACTION_UP, 250f, 200f)
+        val result = swipeDetector.handleTouchEvent(upEvent, keyAt)
+        upEvent.recycle()
+
+        assertTrue("Peck rejection should allow tap fallthrough on ACTION_UP", result)
+        verify(swipeListener).onTap(any())
+    }
+
     private fun createMotionEvent(
         action: Int,
         x: Float,
