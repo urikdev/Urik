@@ -1174,17 +1174,24 @@ class SwipeKeyboardView
          */
         fun clearSuggestions() {
             if (isDestroyed) return
-            isShowingAutofillSuggestions = false
-            autofillIndicatorIcon?.visibility = GONE
-            emojiButton?.visibility = VISIBLE
+            if (isShowingAutofillSuggestions) return
             updateSuggestionBarContent(emptyList())
             safeMappingPost()
         }
 
         fun clearAutofillIfShowing(): Boolean {
             if (isDestroyed || !isShowingAutofillSuggestions) return false
-            clearSuggestions()
+            forceClearAllSuggestions()
             return true
+        }
+
+        fun forceClearAllSuggestions() {
+            if (isDestroyed) return
+            isShowingAutofillSuggestions = false
+            autofillIndicatorIcon?.visibility = GONE
+            emojiButton?.visibility = VISIBLE
+            updateSuggestionBarContent(emptyList())
+            safeMappingPost()
         }
 
         fun updateInlineAutofillSuggestions(
