@@ -13,6 +13,7 @@ import com.urik.keyboard.settings.KeyboardSettings
 import com.urik.keyboard.utils.CacheMemoryManager
 import com.urik.keyboard.utils.ErrorLogger
 import com.urik.keyboard.utils.ManagedCache
+import com.urik.keyboard.utils.MemoryPressureSubscriber
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineDispatcher
@@ -62,7 +63,7 @@ class SpellCheckManager
         private val wordFrequencyRepository: com.urik.keyboard.data.WordFrequencyRepository,
         cacheMemoryManager: CacheMemoryManager,
         private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
-    ) {
+    ) : MemoryPressureSubscriber {
         private val initializationComplete = CompletableDeferred<Boolean>()
         private var initializationJob: Job? = null
         private val initScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
@@ -105,6 +106,8 @@ class SpellCheckManager
         private var cachedAverageKeySpacing = 0.0
 
         init {
+            cacheMemoryManager.registerPressureSubscriber(this)
+
             initializationJob =
                 initScope.launch {
                     val success =
@@ -1007,6 +1010,28 @@ class SpellCheckManager
             }
         }
 
+        override fun onMemoryPressure(level: Int) {
+            when (level) {
+                android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL,
+                android.content.ComponentCallbacks2.TRIM_MEMORY_COMPLETE,
+                -> {
+                    wordFrequencies.clear()
+                    commonWordsCache = emptyList()
+                    commonWordsCacheStripped = emptyList()
+                    commonWordsCacheLanguage = ""
+                    clearCaches()
+                }
+
+                android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_MODERATE,
+                android.content.ComponentCallbacks2.TRIM_MEMORY_MODERATE,
+                -> {
+                    commonWordsCache = emptyList()
+                    commonWordsCacheStripped = emptyList()
+                    commonWordsCacheLanguage = ""
+                }
+            }
+        }
+
         /**
          * Loads dictionary words sorted by frequency.
          *
@@ -1156,10 +1181,12 @@ class SpellCheckManager
                     ln(frequency.toDouble()) * SpellCheckConstants.HIGH_FREQUENCY_LOG_MULTIPLIER +
                         SpellCheckConstants.HIGH_FREQUENCY_BASE_BOOST
                 }
+
                 frequency >= SpellCheckConstants.MEDIUM_FREQUENCY_THRESHOLD -> {
                     ln(frequency.toDouble()) * SpellCheckConstants.MEDIUM_FREQUENCY_LOG_MULTIPLIER +
                         SpellCheckConstants.MEDIUM_FREQUENCY_BASE_BOOST
                 }
+
                 else -> {
                     ln(frequency.toDouble() + 1.0) * SpellCheckConstants.FREQUENCY_BOOST_MULTIPLIER
                 }

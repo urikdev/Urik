@@ -16,6 +16,14 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
+ * Subscriber interface for components holding non-cache memory
+ * that should be released under system memory pressure.
+ */
+interface MemoryPressureSubscriber {
+    fun onMemoryPressure(level: Int)
+}
+
+/**
  * Centralized cache memory management with LRU eviction and memory pressure handling.
  *
  * @see ManagedCache for LRU cache implementation details
@@ -28,6 +36,7 @@ class CacheMemoryManager
         private val context: Context,
     ) : ComponentCallbacks2 {
         private val managedCaches = ConcurrentHashMap<String, ManagedCache<*, *>>()
+        private val pressureSubscribers = ConcurrentHashMap.newKeySet<MemoryPressureSubscriber>()
         private val memoryMonitoringScope = CoroutineScope(Dispatchers.Default)
         private var memoryMonitoringJob: Job? = null
 
@@ -64,6 +73,20 @@ class CacheMemoryManager
             val cache = ManagedCache(name, maxSize, onEvict)
             managedCaches[name] = cache
             return cache
+        }
+
+        /**
+         * Registers a subscriber for memory pressure callbacks.
+         *
+         * Subscribers receive the same trim level as [onTrimMemory] after
+         * managed caches have been trimmed.
+         */
+        fun registerPressureSubscriber(subscriber: MemoryPressureSubscriber) {
+            pressureSubscribers.add(subscriber)
+        }
+
+        fun unregisterPressureSubscriber(subscriber: MemoryPressureSubscriber) {
+            pressureSubscribers.remove(subscriber)
         }
 
         private fun startMemoryMonitoring() {
@@ -158,6 +181,17 @@ class CacheMemoryManager
                     }
                 }
             }
+
+            notifyPressureSubscribers(level)
+        }
+
+        private fun notifyPressureSubscribers(level: Int) {
+            pressureSubscribers.forEach { subscriber ->
+                try {
+                    subscriber.onMemoryPressure(level)
+                } catch (_: Exception) {
+                }
+            }
         }
 
         override fun onConfigurationChanged(newConfig: Configuration) {
@@ -188,6 +222,7 @@ class CacheMemoryManager
             context.unregisterComponentCallbacks(this)
             managedCaches.values.forEach { it.invalidateAll() }
             managedCaches.clear()
+            pressureSubscribers.clear()
         }
     }
 

@@ -2,6 +2,7 @@ package com.urik.keyboard.utils
 
 import android.text.InputType
 import android.view.inputmethod.EditorInfo
+import com.urik.keyboard.utils.SecureFieldDetector.isSecure
 
 /**
  * Detects sensitive input fields requiring privacy protection (passwords, PINs, emails).

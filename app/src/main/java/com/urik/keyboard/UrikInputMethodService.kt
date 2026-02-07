@@ -3238,6 +3238,8 @@ class UrikInputMethodService :
     }
 
     override fun onDestroy() {
+        wordFrequencyRepository.clearCache()
+
         serviceJob.cancel()
         serviceJob = SupervisorJob()
         serviceScope = CoroutineScope(Dispatchers.Main + serviceJob)
