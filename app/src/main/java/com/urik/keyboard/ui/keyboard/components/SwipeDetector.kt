@@ -60,17 +60,6 @@ class SwipeDetector
         )
 
         /**
-         * Complete swipe path with context.
-         */
-        data class SwipePath(
-            val points: List<SwipePoint>,
-            val keysTraversed: List<KeyboardKey.Character>,
-            val scriptCode: Int,
-            val isRtl: Boolean = false,
-            val topCandidates: List<WordCandidate>,
-        )
-
-        /**
          * Callback interface for swipe events.
          */
         interface SwipeListener {
@@ -455,10 +444,14 @@ class SwipeDetector
                 }
 
                 if (swipePoints.size >= 3) {
-                    val largeGapCount =
-                        swipePoints.zipWithNext().count { (prev, curr) ->
-                            calculateDistance(prev.x, prev.y, curr.x, curr.y) > SwipeDetectionConstants.MAX_CONSECUTIVE_GAP_PX
+                    var largeGapCount = 0
+                    for (i in 0 until swipePoints.size - 1) {
+                        val prev = swipePoints[i]
+                        val curr = swipePoints[i + 1]
+                        if (calculateDistance(prev.x, prev.y, curr.x, curr.y) > SwipeDetectionConstants.MAX_CONSECUTIVE_GAP_PX) {
+                            largeGapCount++
                         }
+                    }
 
                     val gapRatio = largeGapCount.toFloat() / (swipePoints.size - 1)
                     if (gapRatio > 0.5f) {
@@ -493,7 +486,8 @@ class SwipeDetector
 
                     isSwiping = true
                     pointCounter = swipePoints.size
-                    _swipeListener?.onSwipeStart(PointF(start.x, start.y))
+                    cachedTransformPoint.set(start.x, start.y)
+                    _swipeListener?.onSwipeStart(cachedTransformPoint)
                     updateSwipePath(event)
                 }
             }
@@ -513,14 +507,16 @@ class SwipeDetector
 
             val midTimestamp = first.timestamp + totalDuration / 2
             var midPointIndex = 0
-            for (i in 1 until pointCount) {
-                if (swipePoints[i].timestamp >= midTimestamp) {
+            var minTimeDiff = Long.MAX_VALUE
+            for (i in 1 until pointCount - 1) {
+                val diff = kotlin.math.abs(swipePoints[i].timestamp - midTimestamp)
+                if (diff < minTimeDiff) {
+                    minTimeDiff = diff
                     midPointIndex = i
-                    break
                 }
             }
 
-            if (midPointIndex == 0 || midPointIndex >= pointCount - 1) return false
+            if (midPointIndex == 0) return false
 
             val midPoint = swipePoints[midPointIndex]
             val earlyDisplacement = calculateDistance(first.x, first.y, midPoint.x, midPoint.y)
@@ -626,15 +622,6 @@ class SwipeDetector
             val now = System.currentTimeMillis()
             if (now - lastUpdateTime >= SwipeDetectionConstants.UI_UPDATE_INTERVAL_MS) {
                 lastUpdateTime = now
-
-                SwipePath(
-                    points = swipePoints.toList(),
-                    keysTraversed = emptyList(),
-                    scriptCode = currentScriptCode,
-                    isRtl = currentIsRTL,
-                    topCandidates = emptyList(),
-                )
-
                 _swipeListener?.onSwipeUpdate(transformed)
             }
         }
@@ -656,16 +643,6 @@ class SwipeDetector
                 swipePoints.add(finalPoint)
 
                 val pathSnapshot = ArrayList(swipePoints)
-                val scriptSnapshot = currentScriptCode
-                val rtlSnapshot = currentIsRTL
-
-                SwipePath(
-                    points = pathSnapshot,
-                    keysTraversed = emptyList(),
-                    scriptCode = scriptSnapshot,
-                    isRtl = rtlSnapshot,
-                    topCandidates = emptyList(),
-                )
 
                 _swipeListener?.onSwipeEnd()
 
@@ -702,7 +679,7 @@ class SwipeDetector
         }
 
         private suspend fun performSpatialScoringAsync(swipePath: List<SwipePoint>): List<WordCandidate> =
-            withContext(Dispatchers.IO) {
+            withContext(Dispatchers.Default) {
                 try {
                     if (swipePath.isEmpty()) return@withContext emptyList()
 

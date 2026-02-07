@@ -290,6 +290,10 @@ object KeyboardConstants {
         const val DATABASE_VERSION = 6
         const val MAX_CLIPBOARD_ITEMS = 100
         const val MAX_CLIPBOARD_CONTENT_LENGTH = 100_000
+        const val FREQUENCY_PRUNING_CUTOFF_MS = 30L * 24 * 60 * 60 * 1000
+        const val MAX_FREQUENCY_ROWS = 10_000
+        const val MAX_BIGRAM_ROWS = 50_000
+        const val PRUNING_INTERVAL_FLUSHES = 50
     }
 
     object BigramConstants {

@@ -108,7 +108,7 @@ class ClipboardPanel(
 
         setBackgroundColor(themeManager.currentTheme.value.colors.keyboardBackground)
         elevation = 8f * density
-        visibility = View.GONE
+        visibility = GONE
 
         val pinnedTabDrawable = createTabBackground(isSelected = false)
         pinnedTab =
@@ -242,7 +242,7 @@ class ClipboardPanel(
         this.onConsentAccepted = onAccepted
         consentScreen.isVisible = true
         clipboardContentScreen.isVisible = false
-        visibility = View.VISIBLE
+        visibility = VISIBLE
     }
 
     fun showClipboardContent(
@@ -268,7 +268,7 @@ class ClipboardPanel(
     fun hide() {
         hideDeleteAllConfirmation()
         returnItemViewsToPool()
-        visibility = View.GONE
+        visibility = GONE
         onConsentAccepted = null
         onItemSelected = null
         onItemPinToggled = null
@@ -277,7 +277,7 @@ class ClipboardPanel(
     }
 
     val isShowing: Boolean
-        get() = visibility == View.VISIBLE
+        get() = isVisible
 
     fun refreshContent(
         pinnedItems: List<ClipboardItem>,
@@ -562,9 +562,9 @@ class ClipboardPanel(
 
                 addView(
                     container,
-                    FrameLayout.LayoutParams(
-                        FrameLayout.LayoutParams.WRAP_CONTENT,
-                        FrameLayout.LayoutParams.WRAP_CONTENT,
+                    LayoutParams(
+                        LayoutParams.WRAP_CONTENT,
+                        LayoutParams.WRAP_CONTENT,
                         Gravity.CENTER,
                     ),
                 )
@@ -572,9 +572,9 @@ class ClipboardPanel(
 
         addView(
             deleteAllConfirmationOverlay,
-            FrameLayout.LayoutParams(
-                FrameLayout.LayoutParams.MATCH_PARENT,
-                FrameLayout.LayoutParams.MATCH_PARENT,
+            LayoutParams(
+                LayoutParams.MATCH_PARENT,
+                LayoutParams.MATCH_PARENT,
             ),
         )
     }

@@ -2,6 +2,7 @@ package com.urik.keyboard.data
 
 import com.urik.keyboard.KeyboardConstants.BigramConstants
 import com.urik.keyboard.KeyboardConstants.CacheConstants
+import com.urik.keyboard.KeyboardConstants.DatabaseConstants
 import com.urik.keyboard.data.database.UserWordBigramDao
 import com.urik.keyboard.data.database.UserWordFrequencyDao
 import com.urik.keyboard.service.WordNormalizer
@@ -68,6 +69,9 @@ class WordFrequencyRepository
         private val bigramWriteMutex = Mutex()
         private val pendingFrequencyUpdates = ConcurrentHashMap<String, PendingFrequencyUpdate>()
         private val pendingBigramUpdates = ConcurrentHashMap<String, PendingBigramUpdate>()
+        private val flushCount =
+            java.util.concurrent.atomic
+                .AtomicInteger(0)
 
         private companion object {
             const val WRITE_DEBOUNCE_MS = 300L
@@ -126,13 +130,12 @@ class WordFrequencyRepository
 
                 updates.values.forEach { update ->
                     try {
-                        repeat(update.incrementCount) {
-                            userWordFrequencyDao.incrementFrequency(
-                                languageTag = update.languageTag,
-                                wordNormalized = update.wordNormalized,
-                                lastUsed = timestamp,
-                            )
-                        }
+                        userWordFrequencyDao.incrementFrequencyBy(
+                            languageTag = update.languageTag,
+                            wordNormalized = update.wordNormalized,
+                            amount = update.incrementCount,
+                            lastUsed = timestamp,
+                        )
                     } catch (e: Exception) {
                         ErrorLogger.logException(
                             component = "WordFrequencyRepository",
@@ -143,6 +146,7 @@ class WordFrequencyRepository
                     }
                 }
             }
+            pruneIfNeeded()
         }
 
         suspend fun getFrequency(
@@ -241,11 +245,17 @@ class WordFrequencyRepository
             }
 
         fun clearCache() {
+            frequencyFlushJob?.cancel()
+            bigramFlushJob?.cancel()
+
+            writeScope.launch {
+                flushPendingFrequencyUpdates()
+                flushPendingBigramUpdates()
+            }
+
             frequencyCache.invalidateAll()
             bigramCache.invalidateAll()
             topBigramsCache.clear()
-            pendingFrequencyUpdates.clear()
-            pendingBigramUpdates.clear()
         }
 
         fun recordBigram(
@@ -295,14 +305,13 @@ class WordFrequencyRepository
 
                 updates.values.forEach { update ->
                     try {
-                        repeat(update.incrementCount) {
-                            userWordBigramDao.incrementBigram(
-                                languageTag = update.languageTag,
-                                wordANormalized = update.wordANormalized,
-                                wordBNormalized = update.wordBNormalized,
-                                lastUsed = timestamp,
-                            )
-                        }
+                        userWordBigramDao.incrementBigramBy(
+                            languageTag = update.languageTag,
+                            wordANormalized = update.wordANormalized,
+                            wordBNormalized = update.wordBNormalized,
+                            amount = update.incrementCount,
+                            lastUsed = timestamp,
+                        )
                     } catch (e: Exception) {
                         ErrorLogger.logException(
                             component = "WordFrequencyRepository",
@@ -383,6 +392,28 @@ class WordFrequencyRepository
                     Result.failure(e)
                 }
             }
+
+        private suspend fun pruneIfNeeded() {
+            val count = flushCount.incrementAndGet()
+            if (count % DatabaseConstants.PRUNING_INTERVAL_FLUSHES != 0) return
+
+            withContext(ioDispatcher) {
+                try {
+                    val cutoff = System.currentTimeMillis() - DatabaseConstants.FREQUENCY_PRUNING_CUTOFF_MS
+                    userWordFrequencyDao.pruneStaleEntries(cutoff)
+                    userWordFrequencyDao.enforceMaxRows(DatabaseConstants.MAX_FREQUENCY_ROWS)
+                    userWordBigramDao.pruneStaleEntries(cutoff)
+                    userWordBigramDao.enforceMaxRows(DatabaseConstants.MAX_BIGRAM_ROWS)
+                } catch (e: Exception) {
+                    ErrorLogger.logException(
+                        component = "WordFrequencyRepository",
+                        severity = ErrorLogger.Severity.HIGH,
+                        exception = e,
+                        context = mapOf("operation" to "pruneIfNeeded"),
+                    )
+                }
+            }
+        }
 
         private fun buildBigramCacheKey(
             languageTag: String,

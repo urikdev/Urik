@@ -55,6 +55,23 @@ interface UserWordFrequencyDao {
         lastUsed: Long,
     )
 
+    @Query(
+        """
+        INSERT INTO user_word_frequency (language_tag, word_normalized, frequency, last_used)
+        VALUES (:languageTag, :wordNormalized, :amount, :lastUsed)
+        ON CONFLICT(language_tag, word_normalized)
+        DO UPDATE SET
+            frequency = frequency + :amount,
+            last_used = :lastUsed
+        """,
+    )
+    suspend fun incrementFrequencyBy(
+        languageTag: String,
+        wordNormalized: String,
+        amount: Int,
+        lastUsed: Long,
+    )
+
     @Query("DELETE FROM user_word_frequency WHERE language_tag = :languageTag")
     suspend fun clearLanguage(languageTag: String): Int
 
@@ -76,4 +93,18 @@ interface UserWordFrequencyDao {
         languageTag: String,
         limit: Int = 100,
     ): List<UserWordFrequency>
+
+    @Query("DELETE FROM user_word_frequency WHERE frequency = 1 AND last_used < :cutoff")
+    suspend fun pruneStaleEntries(cutoff: Long): Int
+
+    @Query(
+        """
+        DELETE FROM user_word_frequency WHERE id IN (
+            SELECT id FROM user_word_frequency
+            ORDER BY frequency ASC, last_used ASC
+            LIMIT MAX(0, (SELECT COUNT(*) FROM user_word_frequency) - :maxRows)
+        )
+        """,
+    )
+    suspend fun enforceMaxRows(maxRows: Int): Int
 }

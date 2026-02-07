@@ -317,8 +317,9 @@ class SwipeOverlayView
         }
 
         override fun onDetachedFromWindow() {
-            super.onDetachedFromWindow()
             cleanupSwipeState()
+            themeManager = null
+            super.onDetachedFromWindow()
         }
 
         override fun onAttachedToWindow() {

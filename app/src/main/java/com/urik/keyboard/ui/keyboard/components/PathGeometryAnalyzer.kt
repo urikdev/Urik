@@ -110,6 +110,7 @@ class PathGeometryAnalyzer
 
         private val reusableCurvatureArray = FloatArray(GeometricScoringConstants.MAX_PATH_POINTS)
         private val reusableVelocityArray = FloatArray(GeometricScoringConstants.MAX_PATH_POINTS)
+        private val reusableCoverageFlags = BooleanArray(GeometricScoringConstants.MAX_PATH_POINTS)
         private val cachedIntersectionPoint = PointF()
 
         /**
@@ -331,25 +332,33 @@ class PathGeometryAnalyzer
         ): Float {
             if (path.isEmpty() || letterPathIndices.isEmpty()) return 0f
 
-            val coveredIndices = mutableSetOf<Int>()
+            val size = path.size
+            val flags = reusableCoverageFlags
+            flags.fill(false, 0, minOf(size, flags.size))
             val coverageRadius = GeometricScoringConstants.PATH_COVERAGE_RADIUS
+            val radiusSq = coverageRadius * coverageRadius
 
             letterPathIndices.forEachIndexed { letterIdx, pathIdx ->
-                if (pathIdx >= 0 && pathIdx < path.size && letterIdx < word.length) {
+                if (pathIdx in 0..<size && letterIdx < word.length) {
                     val keyPos = keyPositions[word[letterIdx].lowercaseChar()] ?: return@forEachIndexed
 
-                    for (i in maxOf(0, pathIdx - 3)..minOf(path.size - 1, pathIdx + 3)) {
+                    for (i in maxOf(0, pathIdx - 3)..minOf(size - 1, pathIdx + 3)) {
                         val point = path[i]
                         val dx = point.x - keyPos.x
                         val dy = point.y - keyPos.y
-                        if (dx * dx + dy * dy < coverageRadius * coverageRadius) {
-                            coveredIndices.add(i)
+                        if (dx * dx + dy * dy < radiusSq) {
+                            flags[i] = true
                         }
                     }
                 }
             }
 
-            return coveredIndices.size.toFloat() / path.size.toFloat()
+            var coveredCount = 0
+            for (i in 0 until size) {
+                if (flags[i]) coveredCount++
+            }
+
+            return coveredCount.toFloat() / size.toFloat()
         }
 
         private fun calculateCurvatureProfile(path: List<SwipeDetector.SwipePoint>): FloatArray {
