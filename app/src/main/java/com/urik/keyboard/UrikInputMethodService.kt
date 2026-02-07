@@ -14,6 +14,7 @@ import android.view.KeyEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InlineSuggestion
 import android.view.inputmethod.InlineSuggestionsRequest
 import android.view.inputmethod.InlineSuggestionsResponse
 import android.widget.LinearLayout
@@ -43,6 +44,7 @@ import com.urik.keyboard.service.EmojiSearchManager
 import com.urik.keyboard.service.InputMethod
 import com.urik.keyboard.service.LanguageManager
 import com.urik.keyboard.service.ProcessingResult
+import com.urik.keyboard.service.AutofillStateTracker
 import com.urik.keyboard.service.SpellCheckManager
 import com.urik.keyboard.service.TextInputProcessor
 import com.urik.keyboard.service.WordLearningEngine
@@ -73,7 +75,9 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
+import kotlin.coroutines.resume
 import javax.inject.Inject
 
 /**
@@ -1525,6 +1529,14 @@ class UrikInputMethodService :
         }
 
         updateKeyboardForCurrentAction()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            autofillStateTracker.drainPendingResponse()?.let { buffered ->
+                if (!autofillStateTracker.isDismissed() && buffered.inlineSuggestions.isNotEmpty()) {
+                    inflateAndDisplaySuggestions(buffered.inlineSuggestions)
+                }
+            }
+        }
     }
 
     /**
@@ -1550,7 +1562,7 @@ class UrikInputMethodService :
             when (key) {
                 is KeyboardKey.Character -> {
                     if (swipeKeyboardView?.clearAutofillIfShowing() == true) {
-                        userDismissedAutofill = true
+                        autofillStateTracker.dismiss()
                     }
 
                     val char = viewModel.getCharacterForInput(key)
@@ -2909,6 +2921,10 @@ class UrikInputMethodService :
         } catch (_: Exception) {
             coordinateStateClear()
         }
+
+        autofillStateTracker.scheduleClear(serviceScope) {
+            swipeKeyboardView?.forceClearAllSuggestions()
+        }
     }
 
     override fun onStartInput(
@@ -2921,7 +2937,13 @@ class UrikInputMethodService :
             layoutManager.forceStopAcceleratedBackspace()
         }
 
-        userDismissedAutofill = false
+        autofillStateTracker.cancelPendingClear()
+        autofillStateTracker.onFieldChanged(
+            inputType = attribute?.inputType ?: 0,
+            imeOptions = attribute?.imeOptions ?: 0,
+            fieldId = attribute?.fieldId ?: 0,
+            packageHash = attribute?.packageName?.hashCode() ?: 0,
+        )
         selectionStateTracker.reset()
         coordinateStateClear()
 
@@ -3174,7 +3196,7 @@ class UrikInputMethodService :
         val stylesBundle = stylesBuilder.build()
 
         val specs = mutableListOf<InlinePresentationSpec>()
-        for (i in 0 until 3) {
+        for (i in 0 until 4) {
             val minSize = Size((80 * density).toInt(), (40 * density).toInt())
             val maxSize = Size((400 * density).toInt(), (40 * density).toInt())
 
@@ -3186,9 +3208,18 @@ class UrikInputMethodService :
             specs.add(spec)
         }
 
+        val iconMinSize = Size((32 * density).toInt(), (32 * density).toInt())
+        val iconMaxSize = Size((48 * density).toInt(), (40 * density).toInt())
+        specs.add(
+            InlinePresentationSpec
+                .Builder(iconMinSize, iconMaxSize)
+                .setStyle(stylesBundle)
+                .build(),
+        )
+
         return InlineSuggestionsRequest
             .Builder(specs)
-            .setMaxSuggestionCount(3)
+            .setMaxSuggestionCount(5)
             .build()
     }
 
@@ -3200,7 +3231,7 @@ class UrikInputMethodService :
      *
      * @return true if handled, false otherwise
      */
-    private var userDismissedAutofill = false
+    private val autofillStateTracker = AutofillStateTracker()
 
     @Suppress("NewApi")
     override fun onInlineSuggestionsResponse(response: InlineSuggestionsResponse): Boolean {
@@ -3210,35 +3241,62 @@ class UrikInputMethodService :
 
         if (suggestions.isEmpty()) {
             serviceScope.launch(Dispatchers.Main) {
-                swipeKeyboardView?.clearSuggestions()
+                swipeKeyboardView?.forceClearAllSuggestions()
             }
             return false
         }
 
-        if (userDismissedAutofill) {
+        if (autofillStateTracker.isDismissed()) {
             return true
         }
 
-        val views = mutableListOf<View>()
+        if (swipeKeyboardView == null) {
+            autofillStateTracker.bufferResponse(response)
+            return true
+        }
+
+        inflateAndDisplaySuggestions(suggestions)
+        return true
+    }
+
+    @Suppress("NewApi")
+    private fun inflateAndDisplaySuggestions(
+        suggestions: List<InlineSuggestion>,
+    ) {
         val density = resources.displayMetrics.density
         val size = Size((150 * density).toInt(), (40 * density).toInt())
 
-        suggestions.take(3).forEachIndexed { _, suggestion ->
-            suggestion.inflate(this, size, mainExecutor) { view ->
-                view?.let { views.add(it) }
+        serviceScope.launch(Dispatchers.Main) {
+            val views = mutableListOf<View>()
+            for (suggestion in suggestions.take(5)) {
+                val view = inflateSuggestionView(suggestion, size)
+                if (view != null) views.add(view)
+            }
+            if (views.isNotEmpty()) {
+                swipeKeyboardView?.updateInlineAutofillSuggestions(views, true)
+            }
+        }
+    }
 
-                if (views.size == minOf(suggestions.size, 3)) {
-                    serviceScope.launch(Dispatchers.Main) {
-                        swipeKeyboardView?.updateInlineAutofillSuggestions(views, true)
-                    }
+    @Suppress("NewApi")
+    private suspend fun inflateSuggestionView(
+        suggestion: InlineSuggestion,
+        size: Size,
+    ): View? = try {
+        suspendCancellableCoroutine { continuation ->
+            suggestion.inflate(this@UrikInputMethodService, size, mainExecutor) { view ->
+                if (continuation.isActive) {
+                    continuation.resume(view)
                 }
             }
         }
-        return true
+    } catch (_: Exception) {
+        null
     }
 
     override fun onDestroy() {
         wordFrequencyRepository.clearCache()
+        autofillStateTracker.cleanup()
 
         serviceJob.cancel()
         serviceJob = SupervisorJob()
