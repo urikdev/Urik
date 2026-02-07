@@ -89,8 +89,9 @@ class SwipeKeyboardView
         private var emojiButton: TextView? = null
 
         private var isSwipeActive = false
-        private var touchStartPoint: PointF? = null
-        private var touchStartTime: Long? = null
+        private var hasTouchStart = false
+        private val touchStartPoint = PointF()
+        private var touchStartTime = 0L
 
         private var isGestureActive = false
         private var gestureKey: KeyboardKey.Action? = null
@@ -133,6 +134,9 @@ class SwipeKeyboardView
         private var cachedLocationArray = IntArray(2)
         private var cachedParentLocationArray = IntArray(2)
         private val cachedKeyRect = Rect()
+
+        private var cachedCursorDrawable: android.graphics.drawable.GradientDrawable? = null
+        private var cachedCursorColor: Int = 0
 
         private var isDestroyed = false
 
@@ -304,20 +308,15 @@ class SwipeKeyboardView
             val bar = suggestionBar ?: return false
             if (!bar.isVisible) return false
 
-            val location = IntArray(2)
-            bar.getLocationInWindow(location)
-            val parentLocation = IntArray(2)
-            this.getLocationInWindow(parentLocation)
+            bar.getLocationInWindow(cachedLocationArray)
+            this.getLocationInWindow(cachedParentLocationArray)
 
-            val barRect =
-                Rect(
-                    location[0] - parentLocation[0],
-                    location[1] - parentLocation[1],
-                    location[0] - parentLocation[0] + bar.width,
-                    location[1] - parentLocation[1] + bar.height,
-                )
+            val left = cachedLocationArray[0] - cachedParentLocationArray[0]
+            val top = cachedLocationArray[1] - cachedParentLocationArray[1]
 
-            return barRect.contains(x.toInt(), y.toInt())
+            cachedKeyRect.set(left, top, left + bar.width, top + bar.height)
+
+            return cachedKeyRect.contains(x.toInt(), y.toInt())
         }
 
         private fun setupEmojiPickerViews() {
@@ -564,15 +563,20 @@ class SwipeKeyboardView
             emojiSearchInput?.setHintTextColor(theme.colors.suggestionText and 0x60FFFFFF)
 
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
-                emojiSearchInput?.textCursorDrawable =
-                    android.graphics.drawable.GradientDrawable().apply {
-                        shape = android.graphics.drawable.GradientDrawable.RECTANGLE
-                        setSize(
-                            (2 * context.resources.displayMetrics.density).toInt(),
-                            ((emojiSearchInput?.textSize ?: 16f) * 1.2f).toInt(),
-                        )
-                        setColor(theme.colors.keyTextCharacter)
-                    }
+                val cursorColor = theme.colors.keyTextCharacter
+                if (cachedCursorDrawable == null || cachedCursorColor != cursorColor) {
+                    cachedCursorColor = cursorColor
+                    cachedCursorDrawable =
+                        android.graphics.drawable.GradientDrawable().apply {
+                            shape = android.graphics.drawable.GradientDrawable.RECTANGLE
+                            setSize(
+                                (2 * context.resources.displayMetrics.density).toInt(),
+                                ((emojiSearchInput?.textSize ?: 16f) * 1.2f).toInt(),
+                            )
+                            setColor(cursorColor)
+                        }
+                }
+                emojiSearchInput?.textCursorDrawable = cachedCursorDrawable
             }
 
             searchCloseButton?.setTextColor(theme.colors.keyTextAction)
@@ -1525,14 +1529,11 @@ class SwipeKeyboardView
             keyViews.forEach { button ->
                 if (isDestroyed) return@forEach
 
-                val buttonLocation = IntArray(2)
-                val thisLocation = IntArray(2)
+                button.getLocationInWindow(cachedLocationArray)
+                this.getLocationInWindow(cachedParentLocationArray)
 
-                button.getLocationInWindow(buttonLocation)
-                this.getLocationInWindow(thisLocation)
-
-                val localX = buttonLocation[0] - thisLocation[0]
-                val localY = buttonLocation[1] - thisLocation[1]
+                val localX = cachedLocationArray[0] - cachedParentLocationArray[0]
+                val localY = cachedLocationArray[1] - cachedParentLocationArray[1]
 
                 val localRect =
                     Rect(
@@ -1686,7 +1687,8 @@ class SwipeKeyboardView
 
             when (ev.action) {
                 MotionEvent.ACTION_DOWN -> {
-                    touchStartPoint = PointF(ev.x, ev.y)
+                    touchStartPoint.set(ev.x, ev.y)
+                    hasTouchStart = true
                     touchStartTime = System.currentTimeMillis()
                     isSwipeActive = false
                     isGestureActive = false
@@ -1745,8 +1747,7 @@ class SwipeKeyboardView
                     isGestureActive = false
                     gestureKey = null
                     isSwipeActive = false
-                    touchStartPoint = null
-                    touchStartTime = null
+                    hasTouchStart = false
                     return wasGesture || wasSwipe
                 }
             }
@@ -1767,7 +1768,8 @@ class SwipeKeyboardView
 
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
-                    touchStartPoint = PointF(event.x, event.y)
+                    touchStartPoint.set(event.x, event.y)
+                    hasTouchStart = true
                     touchStartTime = System.currentTimeMillis()
 
                     val key = findKeyAt(event.x, event.y)
@@ -1799,12 +1801,11 @@ class SwipeKeyboardView
                 }
 
                 MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                    val startPoint = touchStartPoint
+                    val hadTouchStart = hasTouchStart
                     val wasGesture = isGestureActive
                     val currentGestureKey = gestureKey
 
-                    touchStartPoint = null
-                    touchStartTime = null
+                    hasTouchStart = false
                     isGestureActive = false
                     gestureKey = null
 
@@ -1821,9 +1822,9 @@ class SwipeKeyboardView
                         return true
                     }
 
-                    if (startPoint != null) {
-                        val dx = event.x - startPoint.x
-                        val dy = event.y - startPoint.y
+                    if (hadTouchStart) {
+                        val dx = event.x - touchStartPoint.x
+                        val dy = event.y - touchStartPoint.y
                         val distance = kotlin.math.sqrt(dx * dx + dy * dy)
 
                         if (distance < 20f) {
@@ -2030,6 +2031,7 @@ class SwipeKeyboardView
             suggestionBar = null
             emojiButton = null
             emojiSearchInput = null
+            cachedCursorDrawable = null
 
             searchScopeJob?.cancel()
             searchScopeJob = null
@@ -2066,8 +2068,7 @@ class SwipeKeyboardView
 
             currentLayout = null
             currentState = null
-            touchStartPoint = null
-            touchStartTime = null
+            hasTouchStart = false
             isSwipeActive = false
 
             hideRemovalConfirmation()

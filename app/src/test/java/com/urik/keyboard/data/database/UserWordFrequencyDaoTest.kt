@@ -199,4 +199,77 @@ class UserWordFrequencyDaoTest {
             assertEquals(-1L, result)
             assertEquals(1, dao.getTotalCount())
         }
+
+    @Test
+    fun `incrementFrequencyBy inserts new word with amount`() =
+        runTest {
+            dao.incrementFrequencyBy("en", "batch", 5, System.currentTimeMillis())
+
+            val word = dao.findWord("en", "batch")
+            assertNotNull(word)
+            assertEquals(5, word?.frequency)
+        }
+
+    @Test
+    fun `incrementFrequencyBy adds to existing frequency`() =
+        runTest {
+            val timestamp = System.currentTimeMillis()
+
+            dao.incrementFrequency("en", "hello", timestamp)
+            dao.incrementFrequencyBy("en", "hello", 3, timestamp + 1000)
+
+            val word = dao.findWord("en", "hello")
+            assertEquals(4, word?.frequency)
+        }
+
+    @Test
+    fun `pruneStaleEntries removes frequency-1 entries older than cutoff`() =
+        runTest {
+            val now = System.currentTimeMillis()
+            val old = now - 60 * 24 * 60 * 60 * 1000L
+
+            dao.incrementFrequency("en", "stale", old)
+            dao.incrementFrequency("en", "fresh", now)
+            dao.incrementFrequency("en", "frequent", old)
+            dao.incrementFrequency("en", "frequent", old)
+
+            val pruned = dao.pruneStaleEntries(now - 30L * 24 * 60 * 60 * 1000)
+
+            assertEquals(1, pruned)
+            assertNull(dao.findWord("en", "stale"))
+            assertNotNull(dao.findWord("en", "fresh"))
+            assertNotNull(dao.findWord("en", "frequent"))
+        }
+
+    @Test
+    fun `enforceMaxRows removes lowest frequency entries`() =
+        runTest {
+            val timestamp = System.currentTimeMillis()
+
+            dao.incrementFrequencyBy("en", "rare", 1, timestamp)
+            dao.incrementFrequencyBy("en", "medium", 5, timestamp)
+            dao.incrementFrequencyBy("en", "common", 10, timestamp)
+            dao.incrementFrequencyBy("en", "popular", 20, timestamp)
+
+            dao.enforceMaxRows(2)
+
+            assertEquals(2, dao.getTotalCount())
+            assertNull(dao.findWord("en", "rare"))
+            assertNull(dao.findWord("en", "medium"))
+            assertNotNull(dao.findWord("en", "common"))
+            assertNotNull(dao.findWord("en", "popular"))
+        }
+
+    @Test
+    fun `enforceMaxRows is no-op when below limit`() =
+        runTest {
+            val timestamp = System.currentTimeMillis()
+
+            dao.incrementFrequency("en", "one", timestamp)
+            dao.incrementFrequency("en", "two", timestamp)
+
+            dao.enforceMaxRows(100)
+
+            assertEquals(2, dao.getTotalCount())
+        }
 }
