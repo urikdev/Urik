@@ -584,4 +584,68 @@ class CaseTransformerTest {
 
         assertEquals("McLaren", result)
     }
+
+    @Test
+    fun `re-casing suggestions after shift toggle produces title case`() {
+        val suggestions = listOf(
+            SpellingSuggestion("car", 0.9, 0, "symspell", preserveCase = false),
+            SpellingSuggestion("can", 0.8, 1, "symspell", preserveCase = false),
+        )
+        val noShift = KeyboardState(isShiftPressed = false)
+        val manualShift = KeyboardState(isShiftPressed = true, isAutoShift = false)
+
+        val before = caseTransformer.applyCasingToSuggestions(suggestions, noShift)
+        val after = caseTransformer.applyCasingToSuggestions(suggestions, manualShift)
+
+        assertEquals(listOf("car", "can"), before)
+        assertEquals(listOf("Car", "Can"), after)
+    }
+
+    @Test
+    fun `re-casing suggestions after caps lock toggle produces all uppercase`() {
+        val suggestions = listOf(
+            SpellingSuggestion("car", 0.9, 0, "symspell", preserveCase = false),
+            SpellingSuggestion("can", 0.8, 1, "symspell", preserveCase = false),
+        )
+        val noShift = KeyboardState(isShiftPressed = false)
+        val capsLock = KeyboardState(isCapsLockOn = true)
+
+        val before = caseTransformer.applyCasingToSuggestions(suggestions, noShift)
+        val after = caseTransformer.applyCasingToSuggestions(suggestions, capsLock)
+
+        assertEquals(listOf("car", "can"), before)
+        assertEquals(listOf("CAR", "CAN"), after)
+    }
+
+    @Test
+    fun `learned word iPhone preserved under auto-shift but uppercased under caps lock`() {
+        val suggestions = listOf(
+            SpellingSuggestion("iPhone", 0.95, 0, "learned", preserveCase = true),
+            SpellingSuggestion("idea", 0.8, 1, "symspell", preserveCase = false),
+        )
+        val autoShift = KeyboardState(isShiftPressed = true, isAutoShift = true)
+        val capsLock = KeyboardState(isCapsLockOn = true)
+
+        val autoResult = caseTransformer.applyCasingToSuggestions(suggestions, autoShift)
+        val capsResult = caseTransformer.applyCasingToSuggestions(suggestions, capsLock)
+
+        assertEquals(listOf("iPhone", "Idea"), autoResult)
+        assertEquals(listOf("IPHONE", "IDEA"), capsResult)
+    }
+
+    @Test
+    fun `toggling shift off reverts suggestions to lowercase`() {
+        val suggestions = listOf(
+            SpellingSuggestion("hello", 0.9, 0, "symspell", preserveCase = false),
+            SpellingSuggestion("help", 0.8, 1, "symspell", preserveCase = false),
+        )
+        val manualShift = KeyboardState(isShiftPressed = true, isAutoShift = false)
+        val noShift = KeyboardState(isShiftPressed = false)
+
+        val shifted = caseTransformer.applyCasingToSuggestions(suggestions, manualShift)
+        val reverted = caseTransformer.applyCasingToSuggestions(suggestions, noShift)
+
+        assertEquals(listOf("Hello", "Help"), shifted)
+        assertEquals(listOf("hello", "help"), reverted)
+    }
 }
