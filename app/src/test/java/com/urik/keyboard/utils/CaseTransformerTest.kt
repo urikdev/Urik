@@ -498,6 +498,72 @@ class CaseTransformerTest {
     }
 
     @Test
+    fun `ALL CAPS learned word NASA preserved with auto-shift`() {
+        val suggestion =
+            SpellingSuggestion(
+                word = "NASA",
+                confidence = 1.0,
+                ranking = 0,
+                source = "learned",
+                preserveCase = true,
+            )
+        val state =
+            KeyboardState(
+                isCapsLockOn = false,
+                isShiftPressed = true,
+                isAutoShift = true,
+            )
+
+        val result = caseTransformer.applyCasing(suggestion, state)
+
+        assertEquals("NASA", result)
+    }
+
+    @Test
+    fun `ALL CAPS learned word GUHH preserved mid-sentence`() {
+        val suggestion =
+            SpellingSuggestion(
+                word = "GUHH",
+                confidence = 1.0,
+                ranking = 0,
+                source = "learned",
+                preserveCase = true,
+            )
+        val state =
+            KeyboardState(
+                isCapsLockOn = false,
+                isShiftPressed = false,
+                isAutoShift = false,
+            )
+
+        val result = caseTransformer.applyCasing(suggestion, state)
+
+        assertEquals("GUHH", result)
+    }
+
+    @Test
+    fun `camelCase myAPI preserved at sentence start`() {
+        val suggestion =
+            SpellingSuggestion(
+                word = "myAPI",
+                confidence = 1.0,
+                ranking = 0,
+                source = "learned",
+                preserveCase = true,
+            )
+        val state =
+            KeyboardState(
+                isCapsLockOn = false,
+                isShiftPressed = false,
+                isAutoShift = false,
+            )
+
+        val result = caseTransformer.applyCasing(suggestion, state, isSentenceStart = true)
+
+        assertEquals("myAPI", result)
+    }
+
+    @Test
     fun `mixed case learned word like McLaren preserved`() {
         val suggestion =
             SpellingSuggestion(

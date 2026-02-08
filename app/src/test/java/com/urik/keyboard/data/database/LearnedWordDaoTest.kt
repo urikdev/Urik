@@ -420,6 +420,220 @@ class LearnedWordDaoTest {
             assertEquals(1, swipedCount)
         }
 
+    @Test
+    fun `learnWord promotes camelCase over lowercase`() =
+        runTest {
+            dao.learnWord(createTestWord("iphone", "iphone", "en"))
+            dao.learnWord(createTestWord("iPhone", "iphone", "en"))
+
+            val retrieved = dao.findExactWord("en", "iphone")
+            assertEquals("iPhone", retrieved?.word)
+            assertEquals(2, retrieved?.frequency)
+        }
+
+    @Test
+    fun `learnWord promotes title case over lowercase`() =
+        runTest {
+            dao.learnWord(createTestWord("maryland", "maryland", "en"))
+            dao.learnWord(createTestWord("Maryland", "maryland", "en"))
+
+            val retrieved = dao.findExactWord("en", "maryland")
+            assertEquals("Maryland", retrieved?.word)
+            assertEquals(2, retrieved?.frequency)
+        }
+
+    @Test
+    fun `learnWord does not demote camelCase to lowercase`() =
+        runTest {
+            dao.learnWord(createTestWord("iPhone", "iphone", "en"))
+            dao.learnWord(createTestWord("iphone", "iphone", "en"))
+
+            val retrieved = dao.findExactWord("en", "iphone")
+            assertEquals("iPhone", retrieved?.word)
+            assertEquals(2, retrieved?.frequency)
+        }
+
+    @Test
+    fun `learnWord does not demote McLaren to lowercase`() =
+        runTest {
+            dao.learnWord(createTestWord("McLaren", "mclaren", "en"))
+            repeat(5) {
+                dao.learnWord(createTestWord("mclaren", "mclaren", "en"))
+            }
+
+            val retrieved = dao.findExactWord("en", "mclaren")
+            assertEquals("McLaren", retrieved?.word)
+            assertEquals(6, retrieved?.frequency)
+        }
+
+    @Test
+    fun `learnWord promotes short acronym over lowercase`() =
+        runTest {
+            dao.learnWord(createTestWord("api", "api", "en"))
+            dao.learnWord(createTestWord("API", "api", "en"))
+
+            val retrieved = dao.findExactWord("en", "api")
+            assertEquals("API", retrieved?.word)
+        }
+
+    @Test
+    fun `learnWord promotes long ALL CAPS over lowercase`() =
+        runTest {
+            dao.learnWord(createTestWord("guhh", "guhh", "en"))
+            dao.learnWord(createTestWord("GUHH", "guhh", "en"))
+
+            val retrieved = dao.findExactWord("en", "guhh")
+            assertEquals("GUHH", retrieved?.word)
+        }
+
+    @Test
+    fun `learnWord does not demote ALL CAPS to lowercase`() =
+        runTest {
+            dao.learnWord(createTestWord("NASA", "nasa", "en"))
+            dao.learnWord(createTestWord("nasa", "nasa", "en"))
+
+            val retrieved = dao.findExactWord("en", "nasa")
+            assertEquals("NASA", retrieved?.word)
+        }
+
+    @Test
+    fun `learnWord promotes camelCase over ALL CAPS`() =
+        runTest {
+            dao.learnWord(createTestWord("IPHONE", "iphone", "en"))
+            dao.learnWord(createTestWord("iPhone", "iphone", "en"))
+
+            val retrieved = dao.findExactWord("en", "iphone")
+            assertEquals("iPhone", retrieved?.word)
+        }
+
+    @Test
+    fun `learnWord promotes camelCase over title case`() =
+        runTest {
+            dao.learnWord(createTestWord("Iphone", "iphone", "en"))
+            dao.learnWord(createTestWord("iPhone", "iphone", "en"))
+
+            val retrieved = dao.findExactWord("en", "iphone")
+            assertEquals("iPhone", retrieved?.word)
+        }
+
+    @Test
+    fun `learnWord keeps same casing stable across repeated learns`() =
+        runTest {
+            repeat(10) {
+                dao.learnWord(createTestWord("hello", "hello", "en"))
+            }
+
+            val retrieved = dao.findExactWord("en", "hello")
+            assertEquals("hello", retrieved?.word)
+            assertEquals(10, retrieved?.frequency)
+        }
+
+    @Test
+    fun `importWordWithMerge promotes camelCase casing`() =
+        runTest {
+            dao.insertWord(createTestWord("iphone", "iphone", "en", frequency = 50))
+
+            val imported = createTestWord("iPhone", "iphone", "en", frequency = 3)
+            dao.importWordWithMerge(imported)
+
+            val retrieved = dao.findExactWord("en", "iphone")
+            assertEquals("iPhone", retrieved?.word)
+            assertEquals(53, retrieved?.frequency)
+        }
+
+    @Test
+    fun `casingIntentScore scores lowercase as 0`() {
+        assertEquals(0, LearnedWord.casingIntentScore("hello"))
+        assertEquals(0, LearnedWord.casingIntentScore("iphone"))
+        assertEquals(0, LearnedWord.casingIntentScore("fasty"))
+    }
+
+    @Test
+    fun `casingIntentScore scores long ALL CAPS as 1`() {
+        assertEquals(1, LearnedWord.casingIntentScore("HELLO"))
+        assertEquals(1, LearnedWord.casingIntentScore("GUHH"))
+        assertEquals(1, LearnedWord.casingIntentScore("FASTY"))
+    }
+
+    @Test
+    fun `casingIntentScore scores title case as 2`() {
+        assertEquals(2, LearnedWord.casingIntentScore("Maryland"))
+        assertEquals(2, LearnedWord.casingIntentScore("Google"))
+        assertEquals(2, LearnedWord.casingIntentScore("Hello"))
+    }
+
+    @Test
+    fun `casingIntentScore scores short acronym as 3`() {
+        assertEquals(3, LearnedWord.casingIntentScore("API"))
+        assertEquals(3, LearnedWord.casingIntentScore("US"))
+        assertEquals(3, LearnedWord.casingIntentScore("UK"))
+    }
+
+    @Test
+    fun `casingIntentScore scores mixed case as 4`() {
+        assertEquals(4, LearnedWord.casingIntentScore("iPhone"))
+        assertEquals(4, LearnedWord.casingIntentScore("McLaren"))
+        assertEquals(4, LearnedWord.casingIntentScore("myAPI"))
+        assertEquals(4, LearnedWord.casingIntentScore("DeepMind"))
+    }
+
+    @Test
+    fun `casingIntentScore returns 0 for empty string`() {
+        assertEquals(0, LearnedWord.casingIntentScore(""))
+    }
+
+    @Test
+    fun `casingIntentScore hierarchy mixed beats title beats lowercase`() {
+        val lowercase = LearnedWord.casingIntentScore("iphone")
+        val allCaps = LearnedWord.casingIntentScore("IPHONE")
+        val titleCase = LearnedWord.casingIntentScore("Iphone")
+        val mixedCase = LearnedWord.casingIntentScore("iPhone")
+
+        assertTrue(mixedCase > titleCase)
+        assertTrue(titleCase > allCaps)
+        assertTrue(allCaps > lowercase)
+    }
+
+    @Test
+    fun `updateCasingIfPreferred promotes to higher intent`() {
+        val word = createTestWord("iphone", "iphone", "en", frequency = 10)
+        val updated = word.updateCasingIfPreferred("iPhone")
+
+        assertEquals("iPhone", updated.word)
+        assertEquals(11, updated.frequency)
+    }
+
+    @Test
+    fun `updateCasingIfPreferred does not demote to lower intent`() {
+        val word = createTestWord("iPhone", "iphone", "en", frequency = 10)
+        val updated = word.updateCasingIfPreferred("iphone")
+
+        assertEquals("iPhone", updated.word)
+        assertEquals(11, updated.frequency)
+    }
+
+    @Test
+    fun `updateCasingIfPreferred keeps same casing`() {
+        val word = createTestWord("iPhone", "iphone", "en", frequency = 10)
+        val updated = word.updateCasingIfPreferred("iPhone")
+
+        assertEquals("iPhone", updated.word)
+        assertEquals(11, updated.frequency)
+    }
+
+    @Test
+    fun `importWordWithMerge does not demote camelCase`() =
+        runTest {
+            dao.insertWord(createTestWord("iPhone", "iphone", "en", frequency = 50))
+
+            val imported = createTestWord("iphone", "iphone", "en", frequency = 100)
+            dao.importWordWithMerge(imported)
+
+            val retrieved = dao.findExactWord("en", "iphone")
+            assertEquals("iPhone", retrieved?.word)
+            assertEquals(150, retrieved?.frequency)
+        }
+
     /**
      * Creates test word with defaults for frequency, source, and timestamps.
      */

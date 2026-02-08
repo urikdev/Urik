@@ -183,17 +183,18 @@ interface LearnedWordDao {
     suspend fun upsertWord(word: LearnedWord): Long
 
     /**
-     * Learns word with frequency tracking and FTS synchronization.
+     * Learns word with frequency tracking and casing promotion.
      *
-     * If word exists: increments frequency, updates timestamp
-     * If new: inserts with frequency=1
+     * If word exists: increments frequency, promotes casing when the new
+     * variant has higher intentionality (e.g., "iPhone" over "iphone").
+     * If new: inserts with frequency=1.
      * FTS table automatically synchronized in transaction.
      */
     @Transaction
     suspend fun learnWord(word: LearnedWord) {
         val existing = findExactWord(word.languageTag, word.wordNormalized)
         if (existing != null) {
-            val updated = existing.incrementFrequency()
+            val updated = existing.updateCasingIfPreferred(word.word)
             updateWord(updated)
         } else {
             insertWord(word)
@@ -274,8 +275,15 @@ interface LearnedWordDao {
     suspend fun importWordWithMerge(word: LearnedWord) {
         val existing = findExactWord(word.languageTag, word.wordNormalized)
         if (existing != null) {
+            val preferredWord =
+                if (LearnedWord.casingIntentScore(word.word) > LearnedWord.casingIntentScore(existing.word)) {
+                    word.word
+                } else {
+                    existing.word
+                }
             val merged =
                 existing.copy(
+                    word = preferredWord,
                     frequency = existing.frequency + word.frequency,
                     lastUsed = maxOf(existing.lastUsed, word.lastUsed),
                 )
