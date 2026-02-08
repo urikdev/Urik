@@ -78,15 +78,15 @@
           {"type": "character", "char": "9", "keyType": "number"}
         ],
         [
-          {"type": "character", "char": ".", "keyType": "punctuation"},
+          {"type": "character", "char": ",", "keyType": "punctuation"},
           {"type": "character", "char": "0", "keyType": "number"},
           {"type": "action", "action": "backspace"}
         ],
         [
           {"type": "action", "action": "mode_switch_letters"},
-          {"type": "character", "char": ",", "keyType": "punctuation"},
-          {"type": "action", "action": "space"},
           {"type": "character", "char": ".", "keyType": "punctuation"},
+          {"type": "action", "action": "space"},
+          {"type": "character", "char": "-", "keyType": "symbol"},
           {"type": "action", "action": "dynamic_action"}
         ]
       ]
@@ -97,7 +97,7 @@
           {"type": "character", "char": "!", "keyType": "symbol"},
           {"type": "character", "char": "@", "keyType": "symbol"},
           {"type": "character", "char": "#", "keyType": "symbol"},
-          {"type": "character", "char": "$", "keyType": "symbol"},
+          {"type": "character", "char": "€", "keyType": "symbol"},
           {"type": "character", "char": "%", "keyType": "symbol"},
           {"type": "character", "char": "^", "keyType": "symbol"},
           {"type": "character", "char": "&", "keyType": "symbol"},
