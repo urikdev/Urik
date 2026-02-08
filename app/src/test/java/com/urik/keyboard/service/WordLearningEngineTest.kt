@@ -823,6 +823,96 @@ class WordLearningEngineTest {
         }
 
     @Test
+    fun `learnWord preserves original casing in DAO call`() =
+        runTest {
+            wordLearningEngine.learnWord("iPhone", InputMethod.TYPED)
+
+            verify(learnedWordDao).learnWord(
+                argThat {
+                    word == "iPhone" && wordNormalized == "iphone"
+                },
+            )
+        }
+
+    @Test
+    fun `learnWord passes camelCase casing to DAO for promotion`() =
+        runTest {
+            wordLearningEngine.learnWord("McLaren", InputMethod.TYPED)
+
+            verify(learnedWordDao).learnWord(
+                argThat {
+                    word == "McLaren" && wordNormalized == "mclaren"
+                },
+            )
+        }
+
+    @Test
+    fun `learnWord passes ALL CAPS casing to DAO`() =
+        runTest {
+            wordLearningEngine.learnWord("NASA", InputMethod.TYPED)
+
+            verify(learnedWordDao).learnWord(
+                argThat {
+                    word == "NASA" && wordNormalized == "nasa"
+                },
+            )
+        }
+
+    @Test
+    fun `getSimilarLearnedWordsWithFrequency returns original casing from DB`() =
+        runTest {
+            val storedWord =
+                LearnedWord.create(
+                    word = "iPhone",
+                    wordNormalized = "iphone",
+                    languageTag = "en",
+                    frequency = 50,
+                    source = WordSource.USER_TYPED,
+                )
+            whenever(learnedWordDao.findExactWord("en", "iphone")).thenReturn(storedWord)
+
+            val results = wordLearningEngine.getSimilarLearnedWordsWithFrequency("iphone", "en", 3)
+
+            assertEquals(1, results.size)
+            assertEquals("iPhone", results[0].first)
+            assertEquals(50, results[0].second)
+        }
+
+    @Test
+    fun `getLearnedWordOriginalCase returns stored casing`() =
+        runTest {
+            val storedWord =
+                LearnedWord.create(
+                    word = "McLaren",
+                    wordNormalized = "mclaren",
+                    languageTag = "en",
+                    frequency = 10,
+                )
+            whenever(learnedWordDao.findExactWord("en", "mclaren")).thenReturn(storedWord)
+
+            val originalCase = wordLearningEngine.getLearnedWordOriginalCase("mclaren", "en")
+
+            assertEquals("McLaren", originalCase)
+        }
+
+    @Test
+    fun `getLearnedWordOriginalCase normalizes input before lookup`() =
+        runTest {
+            val storedWord =
+                LearnedWord.create(
+                    word = "iPhone",
+                    wordNormalized = "iphone",
+                    languageTag = "en",
+                    frequency = 10,
+                )
+            whenever(learnedWordDao.findExactWord("en", "iphone")).thenReturn(storedWord)
+
+            val originalCase = wordLearningEngine.getLearnedWordOriginalCase("IPHONE", "en")
+
+            assertEquals("iPhone", originalCase)
+        }
+
+    @Test
     fun `getLearnedWordsForSwipeAllLanguages merges multiple languages`() =
         runTest {
             val englishWords =

@@ -1820,7 +1820,7 @@ class UrikInputMethodService :
                                     try {
                                         autoCapitalizePronounI()
                                         learnWordAndInvalidateCache(
-                                            wordState.normalizedBuffer,
+                                            wordState.buffer,
                                             InputMethod.TYPED,
                                         )
                                         currentInputConnection?.finishComposingText()
@@ -1841,7 +1841,7 @@ class UrikInputMethodService :
                                     return@launch
                                 } else {
                                     spellConfirmationState = SpellConfirmationState.AWAITING_CONFIRMATION
-                                    pendingWordForLearning = wordState.normalizedBuffer
+                                    pendingWordForLearning = wordState.buffer
                                     highlightCurrentWord()
 
                                     val suggestions = textInputProcessor.getSuggestions(wordState.normalizedBuffer)
@@ -1954,7 +1954,7 @@ class UrikInputMethodService :
                                 if (result.shouldHighlight) {
                                     spellConfirmationState =
                                         SpellConfirmationState.AWAITING_CONFIRMATION
-                                    pendingWordForLearning = result.wordState.normalizedBuffer
+                                    pendingWordForLearning = result.wordState.buffer
                                     highlightCurrentWord()
                                 }
                             }
@@ -2746,7 +2746,7 @@ class UrikInputMethodService :
                                 textInputProcessor.getSuggestions(wordState.normalizedBuffer)
 
                             spellConfirmationState = SpellConfirmationState.AWAITING_CONFIRMATION
-                            pendingWordForLearning = wordState.normalizedBuffer
+                            pendingWordForLearning = wordState.buffer
 
                             highlightCurrentWord()
                             val displaySuggestions = applyCapitalizationToSuggestions(suggestions, isCurrentWordAtSentenceStart)
