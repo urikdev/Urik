@@ -202,7 +202,13 @@ class UrikInputMethodService :
     private var isCurrentWordAtSentenceStart = false
 
     @Volatile
+    private var isCurrentWordManualShifted = false
+
+    @Volatile
     private var pendingSuggestions: List<String> = emptyList()
+
+    @Volatile
+    private var currentRawSuggestions: List<com.urik.keyboard.service.SpellingSuggestion> = emptyList()
 
     @Volatile
     private var spellConfirmationState = SpellConfirmationState.NORMAL
@@ -550,9 +556,11 @@ class UrikInputMethodService :
 
         isActivelyEditing = true
         isCurrentWordAtSentenceStart = false
+        isCurrentWordManualShifted = false
         displayBuffer = ""
         wordState = WordState()
         pendingSuggestions = emptyList()
+        currentRawSuggestions = emptyList()
         isShowingBigramPredictions = false
         clearSpellConfirmationState()
         swipeKeyboardView?.clearSuggestions()
@@ -684,7 +692,11 @@ class UrikInputMethodService :
         suggestions: List<com.urik.keyboard.service.SpellingSuggestion>,
         isSentenceStart: Boolean = false,
     ): List<String> {
-        val state = viewModel.state.value
+        currentRawSuggestions = suggestions
+        var state = viewModel.state.value
+        if (isCurrentWordManualShifted && !state.isShiftPressed && !state.isCapsLockOn) {
+            state = state.copy(isShiftPressed = true, isAutoShift = false)
+        }
         return caseTransformer.applyCasingToSuggestions(suggestions, state, isSentenceStart)
     }
 
@@ -1317,7 +1329,31 @@ class UrikInputMethodService :
 
         observerJobs.add(
             serviceScope.launch {
-                viewModel.state.collect { updateSwipeKeyboard() }
+                var prevShift = false
+                var prevCapsLock = false
+                var prevAutoShift = false
+                viewModel.state.collect { state ->
+                    updateSwipeKeyboard()
+
+                    val shiftChanged = state.isShiftPressed != prevShift ||
+                        state.isCapsLockOn != prevCapsLock ||
+                        state.isAutoShift != prevAutoShift
+                    prevShift = state.isShiftPressed
+                    prevCapsLock = state.isCapsLockOn
+                    prevAutoShift = state.isAutoShift
+
+                    if (shiftChanged && currentRawSuggestions.isNotEmpty()) {
+                        var effectiveState = state
+                        if (isCurrentWordManualShifted && !state.isShiftPressed && !state.isCapsLockOn) {
+                            effectiveState = state.copy(isShiftPressed = true, isAutoShift = false)
+                        }
+                        val recased = caseTransformer.applyCasingToSuggestions(
+                            currentRawSuggestions, effectiveState, isCurrentWordAtSentenceStart
+                        )
+                        pendingSuggestions = recased
+                        swipeKeyboardView?.updateSuggestions(recased)
+                    }
+                }
             },
         )
 
@@ -1567,7 +1603,9 @@ class UrikInputMethodService :
 
                     val char = viewModel.getCharacterForInput(key)
                     if (key.type == KeyboardKey.KeyType.LETTER && displayBuffer.isEmpty()) {
-                        isCurrentWordAtSentenceStart = viewModel.state.value.isAutoShift
+                        val state = viewModel.state.value
+                        isCurrentWordAtSentenceStart = state.isAutoShift
+                        isCurrentWordManualShifted = state.isShiftPressed && !state.isAutoShift && !state.isCapsLockOn
                     }
                     viewModel.clearShiftAfterCharacter(key)
 
