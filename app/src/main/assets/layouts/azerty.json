@@ -49,6 +49,7 @@
           {"type": "character", "char": "v", "keyType": "letter"},
           {"type": "character", "char": "b", "keyType": "letter"},
           {"type": "character", "char": "n", "keyType": "letter"},
+          {"type": "character", "char": "'", "keyType": "punctuation"},
           {"type": "action", "action": "backspace"}
         ],
         [
