@@ -70,6 +70,9 @@ class KeyboardLayoutManager(
     private var showLanguageSwitchKey = false
     private var hasMultipleImes = false
 
+    var effectiveLayout: KeyboardLayout? = null
+        private set
+
     @Volatile
     private var customKeyMappings: Map<String, String> = emptyMap()
     private val keyHintRenderer = KeyHintRenderer(context)
@@ -715,6 +718,23 @@ class KeyboardLayoutManager(
     ): View {
         returnActiveButtonsToPool()
 
+        val processedRows =
+            layout.rows.map { row ->
+                if (shouldInjectGlobeButton(row)) {
+                    injectGlobeButton(row)
+                } else {
+                    row
+                }
+            }
+
+        effectiveLayout =
+            KeyboardLayout(
+                mode = layout.mode,
+                rows = processedRows,
+                isRTL = layout.isRTL,
+                script = layout.script,
+            )
+
         val keyboardContainer =
             LinearLayout(context).apply {
                 orientation = LinearLayout.VERTICAL
@@ -734,14 +754,8 @@ class KeyboardLayoutManager(
                 contentDescription = context.getString(R.string.keyboard_description)
             }
 
-        layout.rows.forEach { row ->
-            val processedRow =
-                if (shouldInjectGlobeButton(row)) {
-                    injectGlobeButton(row)
-                } else {
-                    row
-                }
-            val rowView = createRowView(processedRow, state)
+        processedRows.forEach { row ->
+            val rowView = createRowView(row, state)
             keyboardContainer.addView(rowView)
         }
 
@@ -1935,6 +1949,7 @@ class KeyboardLayoutManager(
         backgroundJob.cancel()
         backgroundJob = SupervisorJob()
         backgroundScope = CoroutineScope(Dispatchers.IO + backgroundJob)
+        effectiveLayout = null
         returnActiveButtonsToPool()
         buttonPool.clear()
         buttonPendingCallbacks.forEach { (_, pending) ->
