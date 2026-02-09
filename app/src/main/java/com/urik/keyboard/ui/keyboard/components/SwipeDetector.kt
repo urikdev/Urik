@@ -443,7 +443,7 @@ class SwipeDetector
                     )
                 }
 
-                if (swipePoints.size >= 3) {
+                if (swipePoints.size >= 3 && timeSinceDown >= SwipeDetectionConstants.SWIPE_TIME_THRESHOLD_MS) {
                     var largeGapCount = 0
                     for (i in 0 until swipePoints.size - 1) {
                         val prev = swipePoints[i]
@@ -460,22 +460,25 @@ class SwipeDetector
                     }
                 }
 
-                if (timeSinceDown < SwipeDetectionConstants.SWIPE_TIME_THRESHOLD_MS) {
-                    return
-                }
-
                 if (directionReversals >= 3) {
                     reset()
                     return
                 }
 
-                if (distance > swipeStartDistancePx) {
+                val isHighVelocity = timeSinceDown < SwipeDetectionConstants.SWIPE_TIME_THRESHOLD_MS
+                val effectiveDistance = if (isHighVelocity) {
+                    swipeStartDistancePx * SwipeDetectionConstants.HIGH_VELOCITY_DISTANCE_MULTIPLIER
+                } else {
+                    swipeStartDistancePx
+                }
+
+                if (distance > effectiveDistance) {
                     val currentKey = keyAt(event.x, event.y)
                     if (currentKey == startingKey) {
                         return
                     }
 
-                    val avgVelocity = distance / timeSinceDown.toFloat()
+                    val avgVelocity = distance / timeSinceDown.coerceAtLeast(1L).toFloat()
                     if (avgVelocity > SwipeDetectionConstants.MAX_SWIPE_VELOCITY_PX_PER_MS) {
                         return
                     }
