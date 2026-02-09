@@ -1380,6 +1380,10 @@ class SwipeKeyboardView
             val keyboardView = keyboardLayoutManager?.createKeyboardView(layout, state)
 
             if (keyboardView is ViewGroup) {
+                keyboardLayoutManager?.effectiveLayout?.let { effective ->
+                    currentLayout = effective
+                }
+
                 addView(
                     keyboardView,
                     childCount - 1,
@@ -1681,6 +1685,13 @@ class SwipeKeyboardView
             }
         }
 
+        override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
+            if (!isDestroyed && (isGestureActive || isSwipeActive)) {
+                return onTouchEvent(ev)
+            }
+            return super.dispatchTouchEvent(ev)
+        }
+
         override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
             if (isDestroyed) return false
 
@@ -1725,6 +1736,7 @@ class SwipeKeyboardView
 
                         if (distance > gestureThreshold) {
                             isGestureActive = true
+                            parent?.requestDisallowInterceptTouchEvent(true)
                             keyboardLayoutManager?.cancelAllPendingCallbacks()
                             keyboardLayoutManager?.dismissVariationPopup()
                             keyboardLayoutManager?.triggerHapticFeedback()
@@ -1750,6 +1762,10 @@ class SwipeKeyboardView
                 MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                     val wasGesture = isGestureActive
                     val wasSwipe = isSwipeActive
+
+                    if (wasGesture || wasSwipe) {
+                        parent?.requestDisallowInterceptTouchEvent(false)
+                    }
 
                     isGestureActive = false
                     gestureKey = null
@@ -1811,6 +1827,10 @@ class SwipeKeyboardView
                     val hadTouchStart = hasTouchStart
                     val wasGesture = isGestureActive
                     val currentGestureKey = gestureKey
+
+                    if (wasGesture || isSwipeActive) {
+                        parent?.requestDisallowInterceptTouchEvent(false)
+                    }
 
                     hasTouchStart = false
                     isGestureActive = false
