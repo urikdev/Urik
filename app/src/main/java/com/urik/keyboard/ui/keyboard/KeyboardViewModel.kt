@@ -177,6 +177,8 @@ class KeyboardViewModel
             if (!autoCapEnabled) return
             if (shouldAutoCapitalize(textBeforeCursor) && !_state.value.isCapsLockOn) {
                 enableAutoCapitalization()
+            } else if (_state.value.isAutoShift) {
+                updateState { it.copy(isShiftPressed = false, isAutoShift = false) }
             }
         }
 
