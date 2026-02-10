@@ -1956,6 +1956,18 @@ class UrikInputMethodService :
             if (validatedWord.isEmpty()) return
 
             val keyboardState = viewModel.state.value
+            val isSentenceStart = keyboardState.isAutoShift
+            val isManualShifted = keyboardState.isShiftPressed && !keyboardState.isAutoShift && !keyboardState.isCapsLockOn
+            isCurrentWordAtSentenceStart = isSentenceStart
+            isCurrentWordManualShifted = isManualShifted
+
+            val effectiveState =
+                if (isManualShifted) {
+                    keyboardState.copy(isShiftPressed = true, isAutoShift = false)
+                } else {
+                    keyboardState
+                }
+
             if (keyboardState.isShiftPressed && !keyboardState.isCapsLockOn) {
                 viewModel.onEvent(KeyboardEvent.ShiftStateChanged(false))
             }
@@ -1975,7 +1987,8 @@ class UrikInputMethodService :
                             validatedWord = validatedWord,
                             learnedOriginalCase = learnedOriginalCase,
                             currentLanguage = currentLanguage,
-                            keyboardState = keyboardState,
+                            keyboardState = effectiveState,
+                            isSentenceStart = isSentenceStart,
                         )
 
                     val result =
@@ -2016,15 +2029,24 @@ class UrikInputMethodService :
                     }
                 } catch (_: Exception) {
                     withContext(Dispatchers.Main) {
+                        val fallbackSuggestion =
+                            com.urik.keyboard.service.SpellingSuggestion(
+                                word = validatedWord,
+                                confidence = 1.0,
+                                ranking = 0,
+                                source = "swipe",
+                                preserveCase = false,
+                            )
+                        val fallbackDisplay = caseTransformer.applyCasing(fallbackSuggestion, effectiveState, isSentenceStart)
                         commitPreviousSwipeAndInsertSpace()
-                        currentInputConnection?.setComposingText(validatedWord, 1)
-                        displayBuffer = validatedWord
+                        currentInputConnection?.setComposingText(fallbackDisplay, 1)
+                        displayBuffer = fallbackDisplay
                         wordState =
                             WordState(
-                                buffer = validatedWord,
+                                buffer = fallbackDisplay,
                                 normalizedBuffer = validatedWord.lowercase(),
                                 isFromSwipe = true,
-                                graphemeCount = validatedWord.length,
+                                graphemeCount = fallbackDisplay.length,
                                 scriptCode = UScript.LATIN,
                             )
                     }
@@ -2040,6 +2062,7 @@ class UrikInputMethodService :
         learnedOriginalCase: String?,
         currentLanguage: String,
         keyboardState: com.urik.keyboard.model.KeyboardState,
+        isSentenceStart: Boolean = false,
     ): String {
         val normalizedWord = validatedWord.lowercase()
 
@@ -2062,7 +2085,7 @@ class UrikInputMethodService :
                 preserveCase = preserveCase,
             )
 
-        return caseTransformer.applyCasing(suggestion, keyboardState)
+        return caseTransformer.applyCasing(suggestion, keyboardState, isSentenceStart)
     }
 
     private fun getEnglishPronounIForm(normalizedWord: String): String? =
