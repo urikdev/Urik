@@ -38,13 +38,13 @@ import com.urik.keyboard.model.KeyboardDisplayMode
 import com.urik.keyboard.model.KeyboardEvent
 import com.urik.keyboard.model.KeyboardKey
 import com.urik.keyboard.model.KeyboardMode
+import com.urik.keyboard.service.AutofillStateTracker
 import com.urik.keyboard.service.CharacterVariationService
 import com.urik.keyboard.service.ClipboardMonitorService
 import com.urik.keyboard.service.EmojiSearchManager
 import com.urik.keyboard.service.InputMethod
 import com.urik.keyboard.service.LanguageManager
 import com.urik.keyboard.service.ProcessingResult
-import com.urik.keyboard.service.AutofillStateTracker
 import com.urik.keyboard.service.SpellCheckManager
 import com.urik.keyboard.service.TextInputProcessor
 import com.urik.keyboard.service.WordLearningEngine
@@ -77,8 +77,8 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
-import kotlin.coroutines.resume
 import javax.inject.Inject
+import kotlin.coroutines.resume
 
 /**
  * Main input method service for the Urik keyboard.
@@ -1335,9 +1335,10 @@ class UrikInputMethodService :
                 viewModel.state.collect { state ->
                     updateSwipeKeyboard()
 
-                    val shiftChanged = state.isShiftPressed != prevShift ||
-                        state.isCapsLockOn != prevCapsLock ||
-                        state.isAutoShift != prevAutoShift
+                    val shiftChanged =
+                        state.isShiftPressed != prevShift ||
+                            state.isCapsLockOn != prevCapsLock ||
+                            state.isAutoShift != prevAutoShift
                     prevShift = state.isShiftPressed
                     prevCapsLock = state.isCapsLockOn
                     prevAutoShift = state.isAutoShift
@@ -1347,9 +1348,12 @@ class UrikInputMethodService :
                         if (isCurrentWordManualShifted && !state.isShiftPressed && !state.isCapsLockOn) {
                             effectiveState = state.copy(isShiftPressed = true, isAutoShift = false)
                         }
-                        val recased = caseTransformer.applyCasingToSuggestions(
-                            currentRawSuggestions, effectiveState, isCurrentWordAtSentenceStart
-                        )
+                        val recased =
+                            caseTransformer.applyCasingToSuggestions(
+                                currentRawSuggestions,
+                                effectiveState,
+                                isCurrentWordAtSentenceStart,
+                            )
                         pendingSuggestions = recased
                         swipeKeyboardView?.updateSuggestions(recased)
                     }
@@ -1764,7 +1768,11 @@ class UrikInputMethodService :
                                             wordState = result.wordState
 
                                             if (result.wordState.suggestions.isNotEmpty() && currentSettings.showSuggestions) {
-                                                val displaySuggestions = applyCapitalizationToSuggestions(result.wordState.suggestions, isCurrentWordAtSentenceStart)
+                                                val displaySuggestions =
+                                                    applyCapitalizationToSuggestions(
+                                                        result.wordState.suggestions,
+                                                        isCurrentWordAtSentenceStart,
+                                                    )
                                                 pendingSuggestions = displaySuggestions
                                                 swipeKeyboardView?.updateSuggestions(displaySuggestions)
                                             } else {
@@ -2313,10 +2321,14 @@ class UrikInputMethodService :
 
             if (isDirectCommitField) {
                 val textBeforeCursor = safeGetTextBeforeCursor(1)
-                val handled = textBeforeCursor.isNotEmpty() &&
-                    (currentInputConnection?.deleteSurroundingText(
-                        BackspaceUtils.getLastGraphemeClusterLength(textBeforeCursor), 0,
-                    ) ?: false)
+                val handled =
+                    textBeforeCursor.isNotEmpty() &&
+                        (
+                            currentInputConnection?.deleteSurroundingText(
+                                BackspaceUtils.getLastGraphemeClusterLength(textBeforeCursor),
+                                0,
+                            ) ?: false
+                        )
                 if (!handled) {
                     sendDownUpKeyEvents(KeyEvent.KEYCODE_DEL)
                 }
@@ -2488,7 +2500,10 @@ class UrikInputMethodService :
                                                                 currentSettings.showSuggestions
                                                             ) {
                                                                 val displaySuggestions =
-                                                                    applyCapitalizationToSuggestions(result.wordState.suggestions, isCurrentWordAtSentenceStart)
+                                                                    applyCapitalizationToSuggestions(
+                                                                        result.wordState.suggestions,
+                                                                        isCurrentWordAtSentenceStart,
+                                                                    )
                                                                 pendingSuggestions = displaySuggestions
                                                                 swipeKeyboardView?.updateSuggestions(displaySuggestions)
                                                             } else {
@@ -2645,7 +2660,10 @@ class UrikInputMethodService :
                                                                 currentSettings.showSuggestions
                                                             ) {
                                                                 val displaySuggestions =
-                                                                    applyCapitalizationToSuggestions(result.wordState.suggestions, isCurrentWordAtSentenceStart)
+                                                                    applyCapitalizationToSuggestions(
+                                                                        result.wordState.suggestions,
+                                                                        isCurrentWordAtSentenceStart,
+                                                                    )
                                                                 pendingSuggestions = displaySuggestions
                                                                 swipeKeyboardView?.updateSuggestions(displaySuggestions)
                                                             } else {
@@ -3321,9 +3339,7 @@ class UrikInputMethodService :
     }
 
     @Suppress("NewApi")
-    private fun inflateAndDisplaySuggestions(
-        suggestions: List<InlineSuggestion>,
-    ) {
+    private fun inflateAndDisplaySuggestions(suggestions: List<InlineSuggestion>) {
         val density = resources.displayMetrics.density
         val size = Size((150 * density).toInt(), (40 * density).toInt())
 
@@ -3343,17 +3359,18 @@ class UrikInputMethodService :
     private suspend fun inflateSuggestionView(
         suggestion: InlineSuggestion,
         size: Size,
-    ): View? = try {
-        suspendCancellableCoroutine { continuation ->
-            suggestion.inflate(this@UrikInputMethodService, size, mainExecutor) { view ->
-                if (continuation.isActive) {
-                    continuation.resume(view)
+    ): View? =
+        try {
+            suspendCancellableCoroutine { continuation ->
+                suggestion.inflate(this@UrikInputMethodService, size, mainExecutor) { view ->
+                    if (continuation.isActive) {
+                        continuation.resume(view)
+                    }
                 }
             }
+        } catch (_: Exception) {
+            null
         }
-    } catch (_: Exception) {
-        null
-    }
 
     override fun onDestroy() {
         wordFrequencyRepository.clearCache()

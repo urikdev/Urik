@@ -260,7 +260,7 @@ class ClipboardPanel(
 
         consentScreen.isVisible = false
         clipboardContentScreen.isVisible = true
-        visibility = View.VISIBLE
+        visibility = VISIBLE
 
         refreshContent(pinnedItems, recentItems)
     }
