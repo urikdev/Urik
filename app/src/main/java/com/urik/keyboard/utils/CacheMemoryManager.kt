@@ -85,10 +85,6 @@ class CacheMemoryManager
             pressureSubscribers.add(subscriber)
         }
 
-        fun unregisterPressureSubscriber(subscriber: MemoryPressureSubscriber) {
-            pressureSubscribers.remove(subscriber)
-        }
-
         private fun startMemoryMonitoring() {
             memoryMonitoringJob?.cancel()
             memoryMonitoringJob =
@@ -112,6 +108,7 @@ class CacheMemoryManager
                 availableMemoryMb < criticalMemoryThresholdMb -> {
                     onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL)
                 }
+
                 availableMemoryMb < lowMemoryThresholdMb -> {
                     onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_RUNNING_MODERATE)
                 }
