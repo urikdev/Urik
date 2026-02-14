@@ -1,0 +1,148 @@
+{
+  "locale": "ar",
+  "script": "Arab",
+  "isRTL": true,
+  "modes": {
+    "letters": {
+      "rows": [
+        [
+          {"type": "character", "char": "ذ", "keyType": "letter"},
+          {"type": "character", "char": "1", "keyType": "number"},
+          {"type": "character", "char": "2", "keyType": "number"},
+          {"type": "character", "char": "3", "keyType": "number"},
+          {"type": "character", "char": "4", "keyType": "number"},
+          {"type": "character", "char": "5", "keyType": "number"},
+          {"type": "character", "char": "6", "keyType": "number"},
+          {"type": "character", "char": "7", "keyType": "number"},
+          {"type": "character", "char": "8", "keyType": "number"},
+          {"type": "character", "char": "9", "keyType": "number"},
+          {"type": "character", "char": "0", "keyType": "number"}
+        ],
+        [
+          {"type": "character", "char": "ض", "keyType": "letter"},
+          {"type": "character", "char": "ص", "keyType": "letter"},
+          {"type": "character", "char": "ث", "keyType": "letter"},
+          {"type": "character", "char": "ق", "keyType": "letter"},
+          {"type": "character", "char": "ف", "keyType": "letter"},
+          {"type": "character", "char": "غ", "keyType": "letter"},
+          {"type": "character", "char": "ع", "keyType": "letter"},
+          {"type": "character", "char": "ه", "keyType": "letter"},
+          {"type": "character", "char": "خ", "keyType": "letter"},
+          {"type": "character", "char": "ح", "keyType": "letter"},
+          {"type": "character", "char": "ج", "keyType": "letter"},
+          {"type": "character", "char": "د", "keyType": "letter"}
+        ],
+        [
+          {"type": "character", "char": "ش", "keyType": "letter"},
+          {"type": "character", "char": "س", "keyType": "letter"},
+          {"type": "character", "char": "ي", "keyType": "letter"},
+          {"type": "character", "char": "ب", "keyType": "letter"},
+          {"type": "character", "char": "ل", "keyType": "letter"},
+          {"type": "character", "char": "ا", "keyType": "letter"},
+          {"type": "character", "char": "ت", "keyType": "letter"},
+          {"type": "character", "char": "ن", "keyType": "letter"},
+          {"type": "character", "char": "م", "keyType": "letter"},
+          {"type": "character", "char": "ك", "keyType": "letter"},
+          {"type": "character", "char": "ط", "keyType": "letter"}
+        ],
+        [
+          {"type": "action", "action": "shift"},
+          {"type": "character", "char": "ئ", "keyType": "letter"},
+          {"type": "character", "char": "ء", "keyType": "letter"},
+          {"type": "character", "char": "ؤ", "keyType": "letter"},
+          {"type": "character", "char": "ر", "keyType": "letter"},
+          {"type": "character", "char": "لا", "keyType": "letter"},
+          {"type": "character", "char": "ى", "keyType": "letter"},
+          {"type": "character", "char": "ة", "keyType": "letter"},
+          {"type": "character", "char": "و", "keyType": "letter"},
+          {"type": "character", "char": "ز", "keyType": "letter"},
+          {"type": "character", "char": "ظ", "keyType": "letter"},
+          {"type": "action", "action": "backspace"}
+        ],
+        [
+          {"type": "action", "action": "mode_switch_symbols"},
+          {"type": "character", "char": ",", "keyType": "punctuation"},
+          {"type": "action", "action": "space"},
+          {"type": "character", "char": ".", "keyType": "punctuation"},
+          {"type": "action", "action": "dynamic_action"}
+        ]
+      ]
+    },
+    "numbers": {
+      "rows": [
+        [
+          {"type": "character", "char": "1", "keyType": "number"},
+          {"type": "character", "char": "2", "keyType": "number"},
+          {"type": "character", "char": "3", "keyType": "number"}
+        ],
+        [
+          {"type": "character", "char": "4", "keyType": "number"},
+          {"type": "character", "char": "5", "keyType": "number"},
+          {"type": "character", "char": "6", "keyType": "number"}
+        ],
+        [
+          {"type": "character", "char": "7", "keyType": "number"},
+          {"type": "character", "char": "8", "keyType": "number"},
+          {"type": "character", "char": "9", "keyType": "number"}
+        ],
+        [
+          {"type": "character", "char": ".", "keyType": "punctuation"},
+          {"type": "character", "char": "0", "keyType": "number"},
+          {"type": "action", "action": "backspace"}
+        ],
+        [
+          {"type": "action", "action": "mode_switch_letters"},
+          {"type": "character", "char": ",", "keyType": "punctuation"},
+          {"type": "action", "action": "space"},
+          {"type": "character", "char": ".", "keyType": "punctuation"},
+          {"type": "action", "action": "dynamic_action"}
+        ]
+      ]
+    },
+    "symbols": {
+      "rows": [
+        [
+          {"type": "character", "char": "!", "keyType": "symbol"},
+          {"type": "character", "char": "@", "keyType": "symbol"},
+          {"type": "character", "char": "#", "keyType": "symbol"},
+          {"type": "character", "char": "$", "keyType": "symbol"},
+          {"type": "character", "char": "%", "keyType": "symbol"},
+          {"type": "character", "char": "^", "keyType": "symbol"},
+          {"type": "character", "char": "&", "keyType": "symbol"},
+          {"type": "character", "char": "*", "keyType": "symbol"},
+          {"type": "character", "char": "(", "keyType": "symbol"},
+          {"type": "character", "char": ")", "keyType": "symbol"}
+        ],
+        [
+          {"type": "character", "char": "-", "keyType": "symbol"},
+          {"type": "character", "char": "_", "keyType": "symbol"},
+          {"type": "character", "char": "=", "keyType": "symbol"},
+          {"type": "character", "char": "+", "keyType": "symbol"},
+          {"type": "character", "char": "[", "keyType": "symbol"},
+          {"type": "character", "char": "]", "keyType": "symbol"},
+          {"type": "character", "char": "{", "keyType": "symbol"},
+          {"type": "character", "char": "}", "keyType": "symbol"},
+          {"type": "character", "char": "\\", "keyType": "symbol"},
+          {"type": "character", "char": "|", "keyType": "symbol"}
+        ],
+        [
+          {"type": "character", "char": ".", "keyType": "symbol"},
+          {"type": "character", "char": ",", "keyType": "symbol"},
+          {"type": "character", "char": "'", "keyType": "symbol"},
+          {"type": "character", "char": "\"", "keyType": "symbol"},
+          {"type": "character", "char": ":", "keyType": "symbol"},
+          {"type": "character", "char": "<", "keyType": "symbol"},
+          {"type": "character", "char": ">", "keyType": "symbol"},
+          {"type": "character", "char": "/", "keyType": "symbol"},
+          {"type": "character", "char": "?", "keyType": "symbol"},
+          {"type": "action", "action": "backspace"}
+        ],
+        [
+          {"type": "action", "action": "mode_switch_letters"},
+          {"type": "action", "action": "space"},
+          {"type": "action", "action": "dynamic_action"}
+        ]
+      ]
+    }
+  }
+}
