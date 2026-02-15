@@ -1127,6 +1127,27 @@ class SpellCheckManager
                 }
             }
 
+        suspend fun getWordsByPrefix(
+            prefix: String,
+            languages: List<String>,
+            maxResults: Int,
+        ): List<Pair<String, Int>> {
+            if (prefix.length < 2) return emptyList()
+
+            val dictionary = getCommonWordsForLanguages(languages)
+            val lowerPrefix = prefix.lowercase()
+
+            return dictionary.entries
+                .asSequence()
+                .filter { (word, _) ->
+                    word.startsWith(lowerPrefix) && word.length > prefix.length
+                }
+                .sortedByDescending { it.value }
+                .take(maxResults)
+                .map { it.key to it.value }
+                .toList()
+        }
+
         private fun calculateProximityBonus(
             char1: Char,
             char2: Char,
