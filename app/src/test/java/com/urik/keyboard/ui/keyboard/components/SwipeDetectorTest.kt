@@ -2,6 +2,7 @@ package com.urik.keyboard.ui.keyboard.components
 
 import android.graphics.PointF
 import android.view.MotionEvent
+import com.urik.keyboard.data.WordFrequencyRepository
 import com.urik.keyboard.model.KeyboardKey
 import com.urik.keyboard.service.SpellCheckManager
 import com.urik.keyboard.service.WordLearningEngine
@@ -33,6 +34,15 @@ class SwipeDetectorTest {
     private lateinit var pathGeometryAnalyzer: PathGeometryAnalyzer
 
     @Mock
+    private lateinit var wordFrequencyRepository: WordFrequencyRepository
+
+    @Mock
+    private lateinit var residualScorer: ResidualScorer
+
+    @Mock
+    private lateinit var zipfCheck: ZipfCheck
+
+    @Mock
     private lateinit var swipeListener: SwipeDetector.SwipeListener
 
     private lateinit var swipeDetector: SwipeDetector
@@ -41,7 +51,15 @@ class SwipeDetectorTest {
     @Before
     fun setup() {
         closeable = MockitoAnnotations.openMocks(this)
-        swipeDetector = SwipeDetector(spellCheckManager, wordLearningEngine, pathGeometryAnalyzer)
+        swipeDetector =
+            SwipeDetector(
+                spellCheckManager,
+                wordLearningEngine,
+                pathGeometryAnalyzer,
+                wordFrequencyRepository,
+                residualScorer,
+                zipfCheck,
+            )
         swipeDetector.setSwipeListener(swipeListener)
     }
 
@@ -242,16 +260,17 @@ class SwipeDetectorTest {
         downEvent.recycle()
 
         var swipeActivated = false
-        val steps = arrayOf(
-            floatArrayOf(120f, 202f),
-            floatArrayOf(140f, 204f),
-            floatArrayOf(160f, 200f),
-            floatArrayOf(180f, 202f),
-            floatArrayOf(200f, 204f),
-            floatArrayOf(220f, 200f),
-            floatArrayOf(240f, 202f),
-            floatArrayOf(260f, 204f),
-        )
+        val steps =
+            arrayOf(
+                floatArrayOf(120f, 202f),
+                floatArrayOf(140f, 204f),
+                floatArrayOf(160f, 200f),
+                floatArrayOf(180f, 202f),
+                floatArrayOf(200f, 204f),
+                floatArrayOf(220f, 200f),
+                floatArrayOf(240f, 202f),
+                floatArrayOf(260f, 204f),
+            )
 
         for (step in steps) {
             Thread.sleep(20)

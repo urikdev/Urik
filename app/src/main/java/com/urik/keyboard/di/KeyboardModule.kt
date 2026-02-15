@@ -18,7 +18,9 @@ import com.urik.keyboard.service.WordLearningEngine
 import com.urik.keyboard.service.WordNormalizer
 import com.urik.keyboard.settings.SettingsRepository
 import com.urik.keyboard.ui.keyboard.components.PathGeometryAnalyzer
+import com.urik.keyboard.ui.keyboard.components.ResidualScorer
 import com.urik.keyboard.ui.keyboard.components.SwipeDetector
+import com.urik.keyboard.ui.keyboard.components.ZipfCheck
 import com.urik.keyboard.utils.CacheMemoryManager
 import dagger.Module
 import dagger.Provides
@@ -106,7 +108,18 @@ object KeyboardModule {
         spellCheckManager: SpellCheckManager,
         wordLearningEngine: WordLearningEngine,
         pathGeometryAnalyzer: PathGeometryAnalyzer,
-    ): SwipeDetector = SwipeDetector(spellCheckManager, wordLearningEngine, pathGeometryAnalyzer)
+        wordFrequencyRepository: WordFrequencyRepository,
+        residualScorer: ResidualScorer,
+        zipfCheck: ZipfCheck,
+    ): SwipeDetector =
+        SwipeDetector(
+            spellCheckManager,
+            wordLearningEngine,
+            pathGeometryAnalyzer,
+            wordFrequencyRepository,
+            residualScorer,
+            zipfCheck,
+        )
 
     @Provides
     @Singleton

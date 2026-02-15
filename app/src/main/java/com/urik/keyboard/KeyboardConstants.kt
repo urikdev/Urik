@@ -125,6 +125,39 @@ object KeyboardConstants {
 
         const val PECK_LATE_DISPLACEMENT_RATIO = 0.95f
         const val HIGH_VELOCITY_DISTANCE_MULTIPLIER = 1.5f
+
+        const val START_CENTROID_POINTS_FAST = 5
+        const val START_CENTROID_POINTS_NORMAL = 3
+        const val HIGH_VELOCITY_START_THRESHOLD = 1.5f
+        const val VELOCITY_EXPANDED_RADIUS_MULTIPLIER = 1.6f
+        const val EXTREME_VELOCITY_START_THRESHOLD = 15.0f
+        const val EXTREME_VELOCITY_RADIUS_MULTIPLIER = 2.0f
+        const val POINT_ZERO_PROXIMITY_COUNT = 3
+        const val BACKPROJECTION_BASE_PX = 100f
+        const val BACKPROJECTION_LOG_SCALE = 80f
+        const val BACKPROJECTION_MAX_PX = 260f
+        const val END_CENTROID_POINTS = 5
+
+        const val BOUNDS_FULL_COVERAGE_THRESHOLD = 0.60f
+        const val BOUNDS_PARTIAL_COVERAGE_THRESHOLD = 0.40f
+        const val BOUNDS_MINIMUM_COVERAGE_THRESHOLD = 0.25f
+        const val BOUNDS_LONG_WORD_MINIMUM_COVERAGE = 0.15f
+        const val BOUNDS_LONG_WORD_LENGTH_THRESHOLD = 6
+        const val BOUNDS_LONG_WORD_PENALTY = 0.50f
+        const val BOUNDS_PARTIAL_PENALTY = 0.85f
+        const val BOUNDS_LOW_PENALTY = 0.65f
+
+        const val PATH_LENGTH_RATIO_SIGMA = 0.35f
+        const val PATH_LENGTH_RATIO_MIN_MULTIPLIER = 0.75f
+        const val PATH_LENGTH_RATIO_MIN_WORD_LENGTH = 4
+        const val PATH_LENGTH_RATIO_MIN_EXPECTED_PX = 100f
+
+        const val PATH_RESIDUAL_ACTIVATION_RATIO = 1.50f
+        const val PATH_RESIDUAL_MIN_EXPECTED_PX = 80f
+        const val PATH_RESIDUAL_MILD_PENALTY = 0.80f
+        const val PATH_RESIDUAL_MODERATE_PENALTY = 0.55f
+        const val PATH_RESIDUAL_HEAVY_PENALTY = 0.35f
+        const val PATH_RESIDUAL_SEVERE_PENALTY = 0.20f
     }
 
     object GeometricScoringConstants {
@@ -149,7 +182,7 @@ object KeyboardConstants {
         const val INTENTIONAL_CORNER_KEY_RADIUS = 60f
         const val INFLECTION_BOOST_RADIUS = 50f
         const val INFLECTION_BOOST_BASE = 1.0f
-        const val INFLECTION_BOOST_MAX = 1.30f
+        const val INFLECTION_BOOST_MAX = 1.50f
         const val MAX_EXPECTED_ANGLE = 2.5f
 
         const val KEY_TRAVERSAL_RADIUS = 58f
@@ -190,7 +223,7 @@ object KeyboardConstants {
         const val CLUSTERED_SEQUENCE_TOLERANCE_MULTIPLIER = 0.5f
 
         const val TRAVERSAL_FLOOR_SCORE = 0.65f
-        const val GEOMETRIC_SIMILARITY_THRESHOLD = 0.02f
+        const val GEOMETRIC_SIMILARITY_THRESHOLD = 0.05f
 
         const val VELOCITY_INTERPOLATION_THRESHOLD = 1.1f
         const val MAX_INTERPOLATED_POINTS = 3
@@ -209,13 +242,19 @@ object KeyboardConstants {
         const val VERTEX_ANGLE_THRESHOLD_RAD = 1.22f
         const val VERTEX_VELOCITY_DROP_RATIO = 0.35f
         const val VERTEX_MIN_SEGMENT_LENGTH_PX = 25f
-        const val VERTEX_TOLERANCE_CONSTANT = 5
+        const val VERTEX_TOLERANCE_CONSTANT = 6
         const val VERTEX_MINIMUM_FOR_FILTER = 6
+        const val VERTEX_FILTER_MIN_PATH_POINTS = 100
+        const val VERTEX_LONG_WORD_PRUNE_THRESHOLD = 7
+        const val VERTEX_LONG_WORD_DEFICIT_PENALTY = 0.55f
         const val VERTEX_LENGTH_MISMATCH_PENALTY = 0.40f
         const val VERTEX_MILD_MISMATCH_PENALTY = 0.75f
         const val VERTEX_DENSE_AREA_SENSITIVITY_BOOST = 0.90f
         const val VERTEX_PATH_SIMPLIFICATION_EPSILON = 15f
         const val VERTEX_DENSE_AREA_RADIUS_PX = 55f
+        const val VERTEX_FLY_BY_GAP_THRESHOLD_PX = 35f
+        const val VERTEX_WIDE_ANGLE_RADIUS = 65f
+        const val VERTEX_WIDE_ANGLE_THRESHOLD_RAD = 1.40f
 
         const val NEIGHBORHOOD_PROXIMITY_RADIUS_SQ = 14400f
         const val MAX_KEY_NEIGHBORS = 6
@@ -228,12 +267,55 @@ object KeyboardConstants {
         const val INFLECTION_ANCHOR_SIGMA_TIGHTENING = 0.88f
         const val ANCHOR_INFLECTION_PROXIMITY_THRESHOLD = 5
 
+        const val ANCHOR_KEY_MIN_WORD_LENGTH = 7
+        const val ANCHOR_KEY_HIGH_PROXIMITY_THRESHOLD = 0.50f
+        const val ANCHOR_KEY_COVERAGE_RATIO = 0.50f
+        const val ANCHOR_KEY_PROTECTED_FLOOR = 0.70f
+
+        const val POINT_ZERO_DOMINANCE_VELOCITY_THRESHOLD = 18f
+        const val POINT_ZERO_DISTANCE_WEIGHT = 0.5f
+
+        const val LONG_WORD_MID_SIGMA_EXPANSION = 1.40f
+        const val LONG_WORD_SIGMA_THRESHOLD = 6
+
         const val LEXICAL_COHERENCE_MIN_LETTERS = 3
         const val LEXICAL_COHERENCE_AVG_THRESHOLD = 0.55f
         const val LEXICAL_COHERENCE_BONUS = 1.10f
         const val LEXICAL_NEAR_MISS_LOWER = 0.35f
         const val LEXICAL_NEAR_MISS_UPPER = 0.75f
         const val LEXICAL_COHERENCE_RATIO_THRESHOLD = 0.50f
+
+        const val DWELL_CLUSTER_VELOCITY_THRESHOLD = 3.0f
+        const val DWELL_CLUSTER_RADIUS_SQ = 2500f
+        const val DWELL_CLUSTER_MIN_POINTS = 3
+        const val DWELL_INTEREST_BOOST = 1.25f
+        const val DWELL_INTEREST_KEY_RADIUS = 55f
+
+        const val CORNER_COMPENSATION_VELOCITY_THRESHOLD = 8.0f
+        const val CORNER_COMPENSATION_MAX_OFFSET_PX = 25f
+        const val CORNER_COMPENSATION_VELOCITY_SCALE = 20f
+
+        const val BIGRAM_TIEBREAKER_WEIGHT = 0.20f
+        const val BIGRAM_TIEBREAKER_PENALTY = 0.05f
+
+        const val PREFIX_COMPLETION_SCORE_THRESHOLD = 0.55f
+        const val PREFIX_COMPLETION_MIN_PREFIX_LENGTH = 3
+        const val PREFIX_COMPLETION_MIN_EXTENSION_LENGTH = 3
+        const val PREFIX_COMPLETION_MAX_RESULTS = 2
+        const val PREFIX_COMPLETION_PATH_LENGTH_RATIO = 0.6f
+
+        const val VERTICAL_EMPHASIS_FACTOR = 1.28f
+
+        const val PATH_COHERENCE_VERTICAL_WEIGHT = 1.45f
+        const val PATH_COHERENCE_MIN_WORD_LENGTH = 4
+        const val PATH_COHERENCE_MIN_SEGMENT_PX = 30f
+        const val PATH_COHERENCE_DIRECTION_WEIGHT = 0.50f
+        const val PATH_COHERENCE_MAGNITUDE_WEIGHT = 0.50f
+        const val PATH_COHERENCE_MAGNITUDE_SIGMA = 80f
+        const val PATH_COHERENCE_NEUTRAL = 0.50f
+        const val PATH_COHERENCE_SENSITIVITY = 0.60f
+        const val PATH_COHERENCE_MIN_MULTIPLIER = 0.70f
+        const val PATH_COHERENCE_MAX_MULTIPLIER = 1.40f
     }
 
     object TextProcessingConstants {
