@@ -518,6 +518,7 @@ class UrikInputMethodService :
             currentInputConnection?.beginBatchEdit()
             try {
                 autoCapitalizePronounI()
+                if (displayBuffer.isNotEmpty()) swipeDetector.updateLastCommittedWord(displayBuffer)
                 currentInputConnection?.finishComposingText()
                 currentInputConnection?.commitText(" ", 1)
                 clearInternalStateOnly()
@@ -537,6 +538,8 @@ class UrikInputMethodService :
 
     private fun commitPreviousSwipeAndInsertSpace() {
         if (!wordState.isFromSwipe || displayBuffer.isEmpty()) return
+
+        swipeDetector.updateLastCommittedWord(displayBuffer)
 
         currentInputConnection?.finishComposingText()
         val textBefore = safeGetTextBeforeCursor(1)
@@ -1383,6 +1386,7 @@ class UrikInputMethodService :
                 languageManager.activeLanguages.collect { languages ->
                     layoutManager.updateActiveLanguages(languages)
                     swipeDetector.updateActiveLanguages(languages)
+                    swipeDetector.updateCurrentLanguage(languages.firstOrNull()?.split("-")?.first() ?: "en")
                     updateSwipeKeyboard()
 
                     languages.forEach { lang ->
@@ -1946,6 +1950,7 @@ class UrikInputMethodService :
                 currentInputConnection?.beginBatchEdit()
                 try {
                     autoCapitalizePronounI()
+                    swipeDetector.updateLastCommittedWord(displayBuffer)
                     currentInputConnection?.commitText("$displayBuffer ", 1)
 
                     coordinateStateClear()
@@ -2806,6 +2811,7 @@ class UrikInputMethodService :
                                 currentInputConnection?.beginBatchEdit()
                                 try {
                                     autoCapitalizePronounI()
+                                    swipeDetector.updateLastCommittedWord(displayBuffer)
                                     currentInputConnection?.finishComposingText()
                                     currentInputConnection?.commitText(" ", 1)
                                     clearInternalStateOnly()
@@ -2844,6 +2850,7 @@ class UrikInputMethodService :
                 currentInputConnection?.beginBatchEdit()
                 try {
                     autoCapitalizePronounI()
+                    if (displayBuffer.isNotEmpty()) swipeDetector.updateLastCommittedWord(displayBuffer)
                     currentInputConnection?.finishComposingText()
                     currentInputConnection?.commitText(" ", 1)
                     clearInternalStateOnly()
