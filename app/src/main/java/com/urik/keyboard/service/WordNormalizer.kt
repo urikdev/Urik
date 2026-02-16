@@ -10,13 +10,14 @@ import javax.inject.Singleton
 class WordNormalizer
     @Inject
     constructor() {
-        private val normalizer = Normalizer2.getNFCInstance()
+        private val nfcNormalizer = Normalizer2.getNFCInstance()
+        private val nfdNormalizer = Normalizer2.getNFDInstance()
 
         fun normalize(
             word: String,
             languageTag: String,
         ): String {
-            val standardNormalized = normalizer.normalize(word.trim())
+            val standardNormalized = nfcNormalizer.normalize(word.trim())
             val locale =
                 try {
                     ULocale.forLanguageTag(languageTag)
@@ -26,5 +27,16 @@ class WordNormalizer
             return UCharacter
                 .toLowerCase(locale, standardNormalized)
                 .trim()
+        }
+
+        fun stripDiacritics(word: String): String {
+            val decomposed = nfdNormalizer.normalize(word)
+            return buildString(decomposed.length) {
+                for (ch in decomposed) {
+                    if (Character.getType(ch) != Character.NON_SPACING_MARK.toInt()) {
+                        append(ch)
+                    }
+                }
+            }
         }
     }

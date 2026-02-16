@@ -49,6 +49,7 @@ object KeyboardConstants {
         const val MAX_SUGGESTIONS = 5
         const val MIN_COMPLETION_LENGTH = 4
         const val APOSTROPHE_BOOST = 0.30
+        const val DIACRITIC_PROMOTION_BOOST = 0.08
         const val CONTRACTION_GUARANTEED_CONFIDENCE = 0.995
 
         const val DICTIONARY_BATCH_SIZE = 2000
