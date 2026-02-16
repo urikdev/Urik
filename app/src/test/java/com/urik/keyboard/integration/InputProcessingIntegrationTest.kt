@@ -70,9 +70,13 @@ class InputProcessingIntegrationTest {
             val mockAssets = mock<AssetManager>()
             whenever(mockAssets.open(any())).thenAnswer {
                 when {
-                    it.getArgument<String>(0).contains("_symspell.txt") ->
+                    it.getArgument<String>(0).contains("_symspell.txt") -> {
                         ByteArrayInputStream(testDictionary.toByteArray())
-                    else -> throw java.io.FileNotFoundException()
+                    }
+
+                    else -> {
+                        throw java.io.FileNotFoundException()
+                    }
                 }
             }
             val mockContext = spy(context)
@@ -124,6 +128,7 @@ class InputProcessingIntegrationTest {
                     languageManager,
                     wordLearningEngine,
                     wordFrequencyRepository,
+                    wordNormalizer,
                     cacheMemoryManager,
                     testDispatcher,
                 )

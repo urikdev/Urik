@@ -61,6 +61,7 @@ class SpellCheckManager
         private val languageManager: LanguageManager,
         private val wordLearningEngine: WordLearningEngine,
         private val wordFrequencyRepository: com.urik.keyboard.data.WordFrequencyRepository,
+        private val wordNormalizer: WordNormalizer,
         cacheMemoryManager: CacheMemoryManager,
         private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
     ) : MemoryPressureSubscriber {
@@ -87,11 +88,18 @@ class SpellCheckManager
 
         private val blacklistedWords = mutableSetOf<String>()
 
+        private data class CachedWord(
+            val word: String,
+            val frequency: Int,
+            val strippedWord: String,
+            val accentStrippedWord: String,
+        )
+
         @Volatile
         private var commonWordsCache = emptyList<Pair<String, Int>>()
 
         @Volatile
-        private var commonWordsCacheStripped = emptyList<Triple<String, Int, String>>()
+        private var commonWordsCacheIndexed = emptyList<CachedWord>()
 
         @Volatile
         private var commonWordsCacheLanguage = ""
@@ -699,6 +707,7 @@ class SpellCheckManager
                     val spellChecker = getSpellCheckerForLanguage(languageCode)
                     if (spellChecker != null) {
                         val symSpellResults = spellChecker.lookup(normalizedWord, Verbosity.All, SpellCheckConstants.MAX_EDIT_DISTANCE)
+                        val inputAccentStripped = wordNormalizer.stripDiacritics(normalizedWord)
 
                         val filteredResults =
                             symSpellResults.filter { result ->
@@ -764,6 +773,11 @@ class SpellCheckManager
                                                 baseConfidence += SpellCheckConstants.APOSTROPHE_BOOST
                                             }
 
+                                            val termStripped = wordNormalizer.stripDiacritics(result.term.lowercase())
+                                            if (inputAccentStripped == termStripped && normalizedWord != result.term.lowercase()) {
+                                                baseConfidence += SpellCheckConstants.DIACRITIC_PROMOTION_BOOST
+                                            }
+
                                             if (userFrequency > 0) {
                                                 val userFreqBoost = calculateFrequencyBoost(userFrequency)
                                                 baseConfidence += userFreqBoost
@@ -815,7 +829,7 @@ class SpellCheckManager
             prefix: String,
             languageCode: String,
         ): List<Pair<String, Int>> {
-            if (languageCode != commonWordsCacheLanguage || commonWordsCacheStripped.isEmpty()) {
+            if (languageCode != commonWordsCacheLanguage || commonWordsCacheIndexed.isEmpty()) {
                 try {
                     getCommonWords(languageCode)
                 } catch (_: Exception) {
@@ -826,12 +840,27 @@ class SpellCheckManager
             val strippedPrefix =
                 com.urik.keyboard.utils.TextMatchingUtils
                     .stripWordPunctuation(prefix)
+            val accentStrippedPrefix = wordNormalizer.stripDiacritics(prefix).lowercase()
 
-            return commonWordsCacheStripped
-                .filter { (word, _, strippedWord) ->
-                    strippedWord.startsWith(strippedPrefix, ignoreCase = true) &&
-                        (strippedWord.length > strippedPrefix.length || word != strippedWord)
-                }.map { (word, freq, _) -> word to freq }
+            val exactPrefixMatches = commonWordsCacheIndexed
+                .filter { cached ->
+                    cached.strippedWord.startsWith(strippedPrefix, ignoreCase = true) &&
+                        (cached.strippedWord.length > strippedPrefix.length || cached.word != cached.strippedWord)
+                }.map { it.word to it.frequency }
+
+            if (exactPrefixMatches.size >= SpellCheckConstants.MAX_PREFIX_COMPLETION_RESULTS) {
+                return exactPrefixMatches.take(SpellCheckConstants.MAX_PREFIX_COMPLETION_RESULTS)
+            }
+
+            val exactWords = exactPrefixMatches.map { it.first }.toSet()
+            val accentFallbackMatches = commonWordsCacheIndexed
+                .filter { cached ->
+                    cached.word !in exactWords &&
+                        cached.accentStrippedWord.startsWith(accentStrippedPrefix) &&
+                        cached.accentStrippedWord.length > accentStrippedPrefix.length
+                }.map { it.word to it.frequency }
+
+            return (exactPrefixMatches + accentFallbackMatches)
                 .take(SpellCheckConstants.MAX_PREFIX_COMPLETION_RESULTS)
         }
 
@@ -964,7 +993,7 @@ class SpellCheckManager
                 dictionaryCache.invalidate(cacheKey)
                 suggestionCache.invalidateAll()
                 commonWordsCache = emptyList()
-                commonWordsCacheStripped = emptyList()
+                commonWordsCacheIndexed = emptyList()
             } catch (_: Exception) {
             }
         }
@@ -988,7 +1017,7 @@ class SpellCheckManager
                     dictionaryCache.invalidate(cacheKey)
                     suggestionCache.invalidateAll()
                     commonWordsCache = emptyList()
-                    commonWordsCacheStripped = emptyList()
+                    commonWordsCacheIndexed = emptyList()
                 }
             } catch (_: Exception) {
             }
@@ -1017,7 +1046,7 @@ class SpellCheckManager
                 -> {
                     wordFrequencies.clear()
                     commonWordsCache = emptyList()
-                    commonWordsCacheStripped = emptyList()
+                    commonWordsCacheIndexed = emptyList()
                     commonWordsCacheLanguage = ""
                     clearCaches()
                 }
@@ -1026,7 +1055,7 @@ class SpellCheckManager
                 android.content.ComponentCallbacks2.TRIM_MEMORY_MODERATE,
                 -> {
                     commonWordsCache = emptyList()
-                    commonWordsCacheStripped = emptyList()
+                    commonWordsCacheIndexed = emptyList()
                     commonWordsCacheLanguage = ""
                 }
             }
@@ -1074,16 +1103,17 @@ class SpellCheckManager
 
                     val sortedWordsWithStripped =
                         sortedWords.map { (word, freq) ->
-                            Triple(
-                                word,
-                                freq,
-                                com.urik.keyboard.utils.TextMatchingUtils
+                            CachedWord(
+                                word = word,
+                                frequency = freq,
+                                strippedWord = com.urik.keyboard.utils.TextMatchingUtils
                                     .stripWordPunctuation(word),
+                                accentStrippedWord = wordNormalizer.stripDiacritics(word).lowercase(),
                             )
                         }
 
                     commonWordsCache = sortedWords
-                    commonWordsCacheStripped = sortedWordsWithStripped
+                    commonWordsCacheIndexed = sortedWordsWithStripped
                     commonWordsCacheLanguage = targetLang
 
                     return@withContext sortedWords

@@ -140,6 +140,7 @@ class SwipeInputIntegrationTest {
                     languageManager,
                     wordLearningEngine,
                     wordFrequencyRepository,
+                    wordNormalizer,
                     cacheMemoryManager,
                     testDispatcher,
                 )
@@ -162,6 +163,7 @@ class SwipeInputIntegrationTest {
                     wordFrequencyRepository,
                     residualScorer,
                     zipfCheck,
+                    wordNormalizer,
                 )
         }
 

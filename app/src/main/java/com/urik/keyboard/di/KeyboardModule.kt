@@ -111,6 +111,7 @@ object KeyboardModule {
         wordFrequencyRepository: WordFrequencyRepository,
         residualScorer: ResidualScorer,
         zipfCheck: ZipfCheck,
+        wordNormalizer: WordNormalizer,
     ): SwipeDetector =
         SwipeDetector(
             spellCheckManager,
@@ -119,6 +120,7 @@ object KeyboardModule {
             wordFrequencyRepository,
             residualScorer,
             zipfCheck,
+            wordNormalizer,
         )
 
     @Provides
@@ -129,7 +131,9 @@ object KeyboardModule {
         wordLearningEngine: WordLearningEngine,
         wordFrequencyRepository: WordFrequencyRepository,
         cacheMemoryManager: CacheMemoryManager,
-    ): SpellCheckManager = SpellCheckManager(context, languageManager, wordLearningEngine, wordFrequencyRepository, cacheMemoryManager)
+        wordNormalizer: WordNormalizer,
+    ): SpellCheckManager =
+        SpellCheckManager(context, languageManager, wordLearningEngine, wordFrequencyRepository, wordNormalizer, cacheMemoryManager)
 
     @Provides
     @Singleton

@@ -13,6 +13,7 @@ import com.urik.keyboard.data.WordFrequencyRepository
 import com.urik.keyboard.model.KeyboardKey
 import com.urik.keyboard.service.SpellCheckManager
 import com.urik.keyboard.service.WordLearningEngine
+import com.urik.keyboard.service.WordNormalizer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -52,6 +53,7 @@ class SwipeDetector
         private val wordFrequencyRepository: WordFrequencyRepository,
         private val residualScorer: ResidualScorer,
         private val zipfCheck: ZipfCheck,
+        private val wordNormalizer: WordNormalizer,
     ) {
         /**
          * Captured swipe point with metadata.
@@ -774,46 +776,6 @@ class SwipeDetector
                             wordFrequencyMap,
                             interpolatedPath.size,
                         )
-
-                    val top1 = results.maxByOrNull { it.combinedScore }
-                    val top2 = results.sortedByDescending { it.combinedScore }.getOrNull(1)
-                    val winner = arbitration.candidates.firstOrNull()
-                    val gap = if (top1 != null && top2 != null) top1.combinedScore - top2.combinedScore else 0f
-
-                    Log.d(
-                        TAG,
-                        "CERT: word=%s | res=%.4f | gap=%.4f | v=%.1f | p=%d".format(
-                            winner?.word ?: "none",
-                            top1?.residual ?: 0f,
-                            gap,
-                            signal.averageVelocity,
-                            interpolatedPath.size,
-                        ),
-                    )
-                    if (top1 != null && top2 != null) {
-                        Log.d(
-                            TAG,
-                            "DETAIL: top1=%s(s:%.3f, c:%.3f, f:%.3f) | top2=%s(s:%.3f, c:%.3f, f:%.3f)".format(
-                                top1.word,
-                                top1.spatialScore,
-                                top1.combinedScore,
-                                top1.frequencyScore,
-                                top2.word,
-                                top2.spatialScore,
-                                top2.combinedScore,
-                                top2.frequencyScore,
-                            ),
-                        )
-                    }
-                    Log.d(
-                        TAG,
-                        "PHYSICS: elasticity=%b | dwell_bonus=%.2f | arbiter_fired=%b".format(
-                            top1?.elasticityApplied ?: false,
-                            top1?.dwellBonus ?: 0f,
-                            arbitration.arbiterFired,
-                        ),
-                    )
-
                     return@withContext arbitration.candidates
                 } catch (_: Exception) {
                     return@withContext emptyList()
@@ -961,7 +923,7 @@ class SwipeDetector
                         word = word,
                         frequencyScore = ln(frequency.toFloat() + 1f) / 20f,
                         rawFrequency = frequency.toLong(),
-                        firstChar = word.first().lowercaseChar(),
+                        firstChar = wordNormalizer.stripDiacritics(word.first().toString()).first().lowercaseChar(),
                         uniqueLetterCount = word.toSet().size,
                     )
                 }.groupBy { it.firstChar }

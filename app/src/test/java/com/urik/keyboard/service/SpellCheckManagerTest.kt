@@ -47,6 +47,7 @@ class SpellCheckManagerTest {
     private lateinit var wordLearningEngine: WordLearningEngine
     private lateinit var wordFrequencyRepository: WordFrequencyRepository
     private lateinit var cacheMemoryManager: CacheMemoryManager
+    private lateinit var wordNormalizer: WordNormalizer
     private lateinit var suggestionCache: ManagedCache<String, List<SpellingSuggestion>>
     private lateinit var dictionaryCache: ManagedCache<String, Boolean>
 
@@ -97,6 +98,8 @@ class SpellCheckManagerTest {
         assetManager = mock()
         languageManager = mock()
         cacheMemoryManager = mock()
+        wordNormalizer = mock()
+        whenever(wordNormalizer.stripDiacritics(any())).thenAnswer { it.arguments[0] as String }
 
         wordLearningEngine =
             mock {
@@ -163,6 +166,7 @@ class SpellCheckManagerTest {
                 wordFrequencyRepository = wordFrequencyRepository,
                 cacheMemoryManager = cacheMemoryManager,
                 ioDispatcher = testDispatcher,
+                wordNormalizer = wordNormalizer,
             )
     }
 
@@ -681,7 +685,15 @@ class SpellCheckManagerTest {
                 .thenThrow(java.io.IOException("File error"))
 
             val failingManager =
-                SpellCheckManager(context, languageManager, wordLearningEngine, wordFrequencyRepository, cacheMemoryManager, testDispatcher)
+                SpellCheckManager(
+                    context,
+                    languageManager,
+                    wordLearningEngine,
+                    wordFrequencyRepository,
+                    wordNormalizer,
+                    cacheMemoryManager,
+                    testDispatcher,
+                )
             val words = failingManager.getCommonWords()
 
             assertTrue(words.isEmpty())

@@ -6,6 +6,7 @@ import com.urik.keyboard.data.WordFrequencyRepository
 import com.urik.keyboard.model.KeyboardKey
 import com.urik.keyboard.service.SpellCheckManager
 import com.urik.keyboard.service.WordLearningEngine
+import com.urik.keyboard.service.WordNormalizer
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.After
 import org.junit.Assert.assertFalse
@@ -34,6 +35,9 @@ class SwipeDetectorTest {
     private lateinit var pathGeometryAnalyzer: PathGeometryAnalyzer
 
     @Mock
+    private lateinit var wordNormalizer: WordNormalizer
+
+    @Mock
     private lateinit var wordFrequencyRepository: WordFrequencyRepository
 
     @Mock
@@ -59,6 +63,7 @@ class SwipeDetectorTest {
                 wordFrequencyRepository,
                 residualScorer,
                 zipfCheck,
+                wordNormalizer,
             )
         swipeDetector.setSwipeListener(swipeListener)
     }
