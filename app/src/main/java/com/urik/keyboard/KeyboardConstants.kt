@@ -345,6 +345,7 @@ object KeyboardConstants {
 
     object SelectionTrackingConstants {
         const val NON_SEQUENTIAL_JUMP_THRESHOLD = 5
+        const val MAX_COMPOSING_REASSERTIONS = 2
     }
 
     object InputTimingConstants {
