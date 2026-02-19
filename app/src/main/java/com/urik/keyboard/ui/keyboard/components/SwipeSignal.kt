@@ -26,6 +26,7 @@ class SwipeSignal private constructor(
     val startAnchor: StartAnchor,
     val endAnchor: EndAnchor,
     val traversedKeys: Set<Char>,
+    val passthroughKeys: Set<Char>,
     val intentionalInflectionCount: Int,
     val expectedWordLength: Int,
     val offRowKeys: Set<Char>,
@@ -90,6 +91,19 @@ class SwipeSignal private constructor(
                 traversedKeys.add(key.lowercaseChar())
             }
 
+            val passthroughKeys = HashSet<Char>(geometricAnalysis.traversedKeys.size)
+            for ((key, traversal) in geometricAnalysis.traversedKeys) {
+                val lc = key.lowercaseChar()
+                if (traversal.velocityAtKey > GeometricScoringConstants.PASSTHROUGH_VELOCITY_THRESHOLD) {
+                    val hasIntentionalInflection = geometricAnalysis.inflectionPoints.any { inflection ->
+                        inflection.isIntentional && inflection.nearestKey?.lowercaseChar() == lc
+                    }
+                    if (!hasIntentionalInflection) {
+                        passthroughKeys.add(lc)
+                    }
+                }
+            }
+
             var intentionalInflectionCount = 0
             for (inflection in geometricAnalysis.inflectionPoints) {
                 if (inflection.isIntentional) intentionalInflectionCount++
@@ -114,6 +128,7 @@ class SwipeSignal private constructor(
                 startAnchor = startAnchor,
                 endAnchor = endAnchor,
                 traversedKeys = traversedKeys,
+                passthroughKeys = passthroughKeys,
                 intentionalInflectionCount = intentionalInflectionCount,
                 expectedWordLength = expectedWordLength,
                 offRowKeys = offRowKeys,
