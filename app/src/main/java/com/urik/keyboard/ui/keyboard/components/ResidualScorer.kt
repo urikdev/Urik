@@ -39,6 +39,7 @@ class ResidualScorer
             val traversalPenalty: Float,
             val orderPenalty: Float,
             val vertexLengthPenalty: Float,
+            val passthroughPenalty: Float,
         )
 
         private val reuseLetterPathIndices = ArrayList<Int>(20)
@@ -95,7 +96,7 @@ class ResidualScorer
             val ratioPenalty = calculateRatioPenalty(pointsPerLetter, optimalRatio)
             val adjustedSpatialScore = spatialScore * ratioPenalty
 
-            val frequencyBoost = calculateFrequencyBoost(entry.rawFrequency)
+            val frequencyBoost = calculateFrequencyBoost(entry.frequencyTier)
             val boostedFrequencyScore = entry.frequencyScore * frequencyBoost
 
             val (spatialWeight, frequencyWeight) = determineFinalWeights(
@@ -196,6 +197,8 @@ class ResidualScorer
                 signal.pathLength, expectedPathLen,
             )
 
+            val passthroughPenalty = calculatePassthroughPenalty(entry.word, signal)
+
             @Suppress("ktlint:standard:max-line-length")
             val combinedScore =
                 (adjustedSpatialScore * spatialWeight + boostedFrequencyScore * frequencyWeight) *
@@ -203,7 +206,8 @@ class ResidualScorer
                     startKeyBonus * startDirectionPenalty * endKeyBonus *
                     traversalPenalty * orderPenalty * vertexLengthPenalty *
                     pathCoherenceMultiplier * boundsPenalty *
-                    pathLengthMultiplier * pathResidualPenalty
+                    pathLengthMultiplier * pathResidualPenalty *
+                    passthroughPenalty
 
             val residual = 1.0f - combinedScore.coerceIn(0f, 1f)
 
@@ -231,6 +235,7 @@ class ResidualScorer
                 traversalPenalty = traversalPenalty,
                 orderPenalty = orderPenalty,
                 vertexLengthPenalty = vertexLengthPenalty,
+                passthroughPenalty = passthroughPenalty,
             )
         }
 
@@ -386,7 +391,9 @@ class ResidualScorer
                     letterScore *= velocityDwellBoost
                 }
 
-                if (pathGeometryAnalyzer.didPathTraverseKey(lowerChar, geometricAnalysis)) {
+                if (pathGeometryAnalyzer.didPathTraverseKey(lowerChar, geometricAnalysis) &&
+                    lowerChar !in signal.passthroughKeys
+                ) {
                     letterScore = maxOf(letterScore, GeometricScoringConstants.TRAVERSAL_FLOOR_SCORE)
                 }
 
@@ -645,11 +652,11 @@ class ResidualScorer
             else -> 1.0f
         }
 
-        private fun calculateFrequencyBoost(rawFrequency: Long): Float = when {
-            rawFrequency > 10_000_000L -> 1.20f
-            rawFrequency > 5_000_000L -> 1.15f
-            rawFrequency > 2_000_000L -> 1.10f
-            else -> 1.0f
+        private fun calculateFrequencyBoost(tier: SwipeDetector.FrequencyTier): Float = when (tier) {
+            SwipeDetector.FrequencyTier.TOP_100 -> GeometricScoringConstants.FREQ_TIER_TOP100_BOOST
+            SwipeDetector.FrequencyTier.TOP_1000 -> GeometricScoringConstants.FREQ_TIER_TOP1000_BOOST
+            SwipeDetector.FrequencyTier.TOP_5000 -> GeometricScoringConstants.FREQ_TIER_TOP5000_BOOST
+            SwipeDetector.FrequencyTier.COMMON -> 1.0f
         }
 
         private fun determineFinalWeights(
@@ -727,6 +734,26 @@ class ResidualScorer
                 excessRatio > 2.5f -> SwipeDetectionConstants.PATH_RESIDUAL_HEAVY_PENALTY
                 excessRatio > 2.0f -> SwipeDetectionConstants.PATH_RESIDUAL_MODERATE_PENALTY
                 else -> SwipeDetectionConstants.PATH_RESIDUAL_MILD_PENALTY
+            }
+        }
+
+        private fun calculatePassthroughPenalty(word: String, signal: SwipeSignal): Float {
+            if (signal.passthroughKeys.isEmpty()) return 1.0f
+            val intentionalKeys = signal.traversedKeys - signal.passthroughKeys
+            var passthroughOnlyCount = 0
+            val seen = HashSet<Char>(word.length)
+            for (char in word) {
+                val lc = char.lowercaseChar()
+                if (!seen.add(lc)) continue
+                if (lc in signal.passthroughKeys && lc !in intentionalKeys) {
+                    passthroughOnlyCount++
+                }
+            }
+            return when (passthroughOnlyCount) {
+                0 -> 1.0f
+                1 -> GeometricScoringConstants.PASSTHROUGH_PENALTY_ONE
+                2 -> GeometricScoringConstants.PASSTHROUGH_PENALTY_TWO
+                else -> GeometricScoringConstants.PASSTHROUGH_PENALTY_THREE_PLUS
             }
         }
     }

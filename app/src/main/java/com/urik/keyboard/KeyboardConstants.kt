@@ -127,6 +127,13 @@ object KeyboardConstants {
         const val PECK_LATE_DISPLACEMENT_RATIO = 0.95f
         const val HIGH_VELOCITY_DISTANCE_MULTIPLIER = 1.5f
 
+        const val GHOST_DENSITY_VELOCITY_GATE = 2.0f
+        const val GHOST_MIN_PATH_DENSITY = 0.025f
+        const val GHOST_START_MOMENTUM_VELOCITY = 3.0f
+        const val GHOST_START_INTENT_POINTS = 4
+        const val GHOST_START_SLOWDOWN_RATIO = 0.7f
+        const val GHOST_IMPOSSIBLE_GAP_PX = 200f
+
         const val START_CENTROID_POINTS_FAST = 5
         const val START_CENTROID_POINTS_NORMAL = 3
         const val HIGH_VELOCITY_START_THRESHOLD = 1.5f
@@ -317,6 +324,15 @@ object KeyboardConstants {
         const val PATH_COHERENCE_SENSITIVITY = 0.60f
         const val PATH_COHERENCE_MIN_MULTIPLIER = 0.70f
         const val PATH_COHERENCE_MAX_MULTIPLIER = 1.40f
+
+        const val PASSTHROUGH_VELOCITY_THRESHOLD = 1.5f
+        const val PASSTHROUGH_PENALTY_ONE = 0.88f
+        const val PASSTHROUGH_PENALTY_TWO = 0.73f
+        const val PASSTHROUGH_PENALTY_THREE_PLUS = 0.55f
+
+        const val FREQ_TIER_TOP100_BOOST = 1.60f
+        const val FREQ_TIER_TOP1000_BOOST = 1.35f
+        const val FREQ_TIER_TOP5000_BOOST = 1.15f
     }
 
     object TextProcessingConstants {
