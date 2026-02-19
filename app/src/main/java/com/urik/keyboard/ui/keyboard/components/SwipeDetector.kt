@@ -81,12 +81,29 @@ class SwipeDetector
             fun onTap(key: KeyboardKey)
         }
 
+        enum class FrequencyTier {
+            TOP_100,
+            TOP_1000,
+            TOP_5000,
+            COMMON;
+
+            companion object {
+                fun fromRank(rank: Int): FrequencyTier = when {
+                    rank < 100 -> TOP_100
+                    rank < 1000 -> TOP_1000
+                    rank < 5000 -> TOP_5000
+                    else -> COMMON
+                }
+            }
+        }
+
         data class DictionaryEntry(
             val word: String,
             val frequencyScore: Float,
             val rawFrequency: Long,
             val firstChar: Char,
             val uniqueLetterCount: Int,
+            val frequencyTier: FrequencyTier = FrequencyTier.COMMON,
         )
 
         @Suppress("ktlint:standard:backing-property-naming")
@@ -504,6 +521,10 @@ class SwipeDetector
                         return
                     }
 
+                    if (isGhostPath(distance, avgVelocity)) {
+                        return
+                    }
+
                     isSwiping = true
                     pointCounter = swipePoints.size
                     cachedTransformPoint.set(start.x, start.y)
@@ -542,6 +563,84 @@ class SwipeDetector
             if (totalDisplacement <= 0f) return false
 
             return lateDisplacement / totalDisplacement > SwipeDetectionConstants.PECK_LATE_DISPLACEMENT_RATIO
+        }
+
+        private fun isGhostPath(
+            totalDistance: Float,
+            avgVelocity: Float,
+        ): Boolean {
+            if (hasImpossibleGap()) return true
+            if (isSparsePath(totalDistance, avgVelocity)) return true
+            if (isSlideOffStart(avgVelocity)) return true
+            return false
+        }
+
+        private fun hasImpossibleGap(): Boolean {
+            val threshold = SwipeDetectionConstants.GHOST_IMPOSSIBLE_GAP_PX
+            val thresholdSq = threshold * threshold
+            for (i in 0 until swipePoints.size - 1) {
+                val p1 = swipePoints[i]
+                val p2 = swipePoints[i + 1]
+                val dx = p2.x - p1.x
+                val dy = p2.y - p1.y
+                val dt = (p2.timestamp - p1.timestamp).coerceAtLeast(1L)
+                if (dx * dx + dy * dy > thresholdSq && dt <= 16L) {
+                    return true
+                }
+            }
+            return false
+        }
+
+        private fun isSparsePath(
+            totalDistance: Float,
+            avgVelocity: Float,
+        ): Boolean {
+            if (avgVelocity < SwipeDetectionConstants.GHOST_DENSITY_VELOCITY_GATE) return false
+            if (totalDistance < 1f) return false
+            val density = swipePoints.size.toFloat() / totalDistance
+            return density < SwipeDetectionConstants.GHOST_MIN_PATH_DENSITY
+        }
+
+        private fun isSlideOffStart(avgVelocity: Float): Boolean {
+            if (swipePoints.size < 3) return false
+            if (avgVelocity < SwipeDetectionConstants.GHOST_DENSITY_VELOCITY_GATE) return false
+
+            val p0 = swipePoints[0]
+            val p1 = swipePoints[1]
+            val dt01 = (p1.timestamp - p0.timestamp).coerceAtLeast(1L).toFloat()
+            val dx01 = p1.x - p0.x
+            val dy01 = p1.y - p0.y
+            val initialVelocity = sqrt(dx01 * dx01 + dy01 * dy01) / dt01
+
+            if (initialVelocity < SwipeDetectionConstants.GHOST_START_MOMENTUM_VELOCITY) return false
+
+            val checkEnd = minOf(swipePoints.size, SwipeDetectionConstants.GHOST_START_INTENT_POINTS)
+            for (i in 2 until checkEnd) {
+                val prev = swipePoints[i - 1]
+                val curr = swipePoints[i]
+                val dt = (curr.timestamp - prev.timestamp).coerceAtLeast(1L).toFloat()
+                val dx = curr.x - prev.x
+                val dy = curr.y - prev.y
+                val v = sqrt(dx * dx + dy * dy) / dt
+
+                if (v < initialVelocity * SwipeDetectionConstants.GHOST_START_SLOWDOWN_RATIO) {
+                    return false
+                }
+
+                val prevDx = prev.x - swipePoints[i - 2].x
+                val prevDy = prev.y - swipePoints[i - 2].y
+                val dot = prevDx * dx + prevDy * dy
+                val prevLen = sqrt(prevDx * prevDx + prevDy * prevDy)
+                val currLen = sqrt(dx * dx + dy * dy)
+                if (prevLen > 0.1f && currLen > 0.1f) {
+                    val cosAngle = dot / (prevLen * currLen)
+                    if (cosAngle < 0.7f) {
+                        return false
+                    }
+                }
+            }
+
+            return true
         }
 
         private fun shouldSamplePoint(
@@ -914,19 +1013,21 @@ class SwipeDetector
             wordFrequencyMap: Map<String, Int>,
             minLength: Int,
             maxLength: Int,
-        ): Map<Char, List<DictionaryEntry>> =
-            wordFrequencyMap.entries
-                .asSequence()
+        ): Map<Char, List<DictionaryEntry>> {
+            val filtered = wordFrequencyMap.entries
                 .filter { (word, _) -> word.length in minLength..maxLength }
-                .map { (word, frequency) ->
-                    DictionaryEntry(
-                        word = word,
-                        frequencyScore = ln(frequency.toFloat() + 1f) / 20f,
-                        rawFrequency = frequency.toLong(),
-                        firstChar = wordNormalizer.stripDiacritics(word.first().toString()).first().lowercaseChar(),
-                        uniqueLetterCount = word.toSet().size,
-                    )
-                }.groupBy { it.firstChar }
+                .sortedByDescending { it.value }
+            return filtered.mapIndexed { rank, (word, frequency) ->
+                DictionaryEntry(
+                    word = word,
+                    frequencyScore = ln(frequency.toFloat() + 1f) / 20f,
+                    rawFrequency = frequency.toLong(),
+                    firstChar = wordNormalizer.stripDiacritics(word.first().toString()).first().lowercaseChar(),
+                    uniqueLetterCount = word.toSet().size,
+                    frequencyTier = FrequencyTier.fromRank(rank),
+                )
+            }.groupBy { it.firstChar }
+        }
 
         private fun calculateVelocity(event: MotionEvent): Float {
             if (swipePoints.size < 2) return 0.0f
