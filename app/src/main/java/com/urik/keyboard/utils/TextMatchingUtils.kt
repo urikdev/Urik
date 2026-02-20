@@ -17,7 +17,11 @@ object TextMatchingUtils {
             Character.START_PUNCTUATION.toInt() -> false
             Character.END_PUNCTUATION.toInt() -> false
             Character.CONNECTOR_PUNCTUATION.toInt() -> false
-            Character.OTHER_PUNCTUATION.toInt() -> {
+            Character.OTHER_PUNCTUATION.toInt(),
+            Character.FINAL_QUOTE_PUNCTUATION.toInt(),
+            Character.INITIAL_QUOTE_PUNCTUATION.toInt(),
+            Character.MODIFIER_LETTER.toInt(),
+            -> {
                 when (char.code) {
                     0x0027, 0x02BC, 0x055A, 0x05F3, 0x2019, 0x201B, 0x2032 -> true
                     else -> false
@@ -36,7 +40,11 @@ object TextMatchingUtils {
         val type = Character.getType(char.code)
         return when (type) {
             Character.DASH_PUNCTUATION.toInt() -> true
-            Character.OTHER_PUNCTUATION.toInt() -> {
+            Character.OTHER_PUNCTUATION.toInt(),
+            Character.FINAL_QUOTE_PUNCTUATION.toInt(),
+            Character.INITIAL_QUOTE_PUNCTUATION.toInt(),
+            Character.MODIFIER_LETTER.toInt(),
+            -> {
                 when (char.code) {
                     0x0027, 0x02BC, 0x055A, 0x05F3, 0x2019, 0x201B, 0x2032 -> true
                     else -> false
