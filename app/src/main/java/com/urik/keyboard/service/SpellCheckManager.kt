@@ -410,7 +410,45 @@ class SpellCheckManager
                 return true
             }
 
-            return checkSymSpellDictionary(normalizedWord, languageCode)
+            if (checkSymSpellDictionary(normalizedWord, languageCode)) {
+                return true
+            }
+
+            return isCliticFormValid(normalizedWord, languageCode)
+        }
+
+        private suspend fun isCliticFormValid(
+            normalizedWord: String,
+            languageCode: String,
+        ): Boolean {
+            val apostropheIndex = normalizedWord.indexOf('\'')
+            if (apostropheIndex <= 0 || apostropheIndex >= normalizedWord.length - 1) {
+                return false
+            }
+
+            val prefix = normalizedWord.substring(0, apostropheIndex + 1)
+            val suffix = normalizedWord.substring(apostropheIndex + 1)
+
+            if (suffix.isBlank()) return false
+
+            val prefixValid =
+                wordLearningEngine.isWordLearned(prefix) ||
+                    checkSymSpellDictionary(prefix, languageCode) ||
+                    wordFrequencies.containsKey(prefix)
+
+            if (!prefixValid) return false
+
+            val suffixValid =
+                wordLearningEngine.isWordLearned(suffix) ||
+                    checkSymSpellDictionary(suffix, languageCode) ||
+                    wordFrequencies.containsKey(suffix)
+
+            if (suffixValid) {
+                val cacheKey = buildCacheKey(normalizedWord, languageCode)
+                dictionaryCache.put(cacheKey, true)
+            }
+
+            return suffixValid
         }
 
         /**
@@ -837,30 +875,50 @@ class SpellCheckManager
                 }
             }
 
+            val hasApostrophe = prefix.contains('\'')
+
+            val apostropheMatches =
+                if (hasApostrophe) {
+                    commonWordsCacheIndexed
+                        .filter { cached ->
+                            cached.word.startsWith(prefix, ignoreCase = true) &&
+                                cached.word.length > prefix.length
+                        }.map { it.word to it.frequency }
+                } else {
+                    emptyList()
+                }
+
+            if (apostropheMatches.size >= SpellCheckConstants.MAX_PREFIX_COMPLETION_RESULTS) {
+                return apostropheMatches.take(SpellCheckConstants.MAX_PREFIX_COMPLETION_RESULTS)
+            }
+
             val strippedPrefix =
                 com.urik.keyboard.utils.TextMatchingUtils
                     .stripWordPunctuation(prefix)
             val accentStrippedPrefix = wordNormalizer.stripDiacritics(prefix).lowercase()
 
+            val apostropheWords = apostropheMatches.map { it.first }.toSet()
             val exactPrefixMatches = commonWordsCacheIndexed
                 .filter { cached ->
-                    cached.strippedWord.startsWith(strippedPrefix, ignoreCase = true) &&
+                    cached.word !in apostropheWords &&
+                        cached.strippedWord.startsWith(strippedPrefix, ignoreCase = true) &&
                         (cached.strippedWord.length > strippedPrefix.length || cached.word != cached.strippedWord)
                 }.map { it.word to it.frequency }
 
-            if (exactPrefixMatches.size >= SpellCheckConstants.MAX_PREFIX_COMPLETION_RESULTS) {
-                return exactPrefixMatches.take(SpellCheckConstants.MAX_PREFIX_COMPLETION_RESULTS)
+            val combined = apostropheMatches + exactPrefixMatches
+            if (combined.size >= SpellCheckConstants.MAX_PREFIX_COMPLETION_RESULTS) {
+                return combined.take(SpellCheckConstants.MAX_PREFIX_COMPLETION_RESULTS)
             }
 
-            val exactWords = exactPrefixMatches.map { it.first }.toSet()
+            val seenWords = combined.map { it.first }.toSet()
             val accentFallbackMatches = commonWordsCacheIndexed
                 .filter { cached ->
-                    cached.word !in exactWords &&
+                    cached.word !in seenWords &&
                         cached.accentStrippedWord.startsWith(accentStrippedPrefix) &&
                         cached.accentStrippedWord.length > accentStrippedPrefix.length
                 }.map { it.word to it.frequency }
 
-            return (exactPrefixMatches + accentFallbackMatches)
+            return (combined + accentFallbackMatches)
                 .take(SpellCheckConstants.MAX_PREFIX_COMPLETION_RESULTS)
         }
 
