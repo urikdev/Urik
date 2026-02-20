@@ -1055,4 +1055,137 @@ class SpellCheckManagerTest {
             assertTrue(words.containsKey("hello"))
             assertFalse(words.isEmpty())
         }
+
+    @Test
+    fun `isWordInDictionary validates clitic form via decomposition`() =
+        runTest {
+            val frenchDictionary =
+                """
+                j' 500
+                ai 1000
+                le 900
+                la 800
+                arbre 600
+                l' 700
+                """.trimIndent()
+
+            whenever(assetManager.open("dictionaries/fr_symspell.txt"))
+                .thenAnswer { ByteArrayInputStream(frenchDictionary.toByteArray()) }
+
+            activeLanguagesFlow.value = listOf("fr")
+            currentLanguageFlow.value = "fr"
+            whenever(wordLearningEngine.isWordLearned(any())).thenReturn(false)
+
+            val frenchManager =
+                SpellCheckManager(
+                    context = context,
+                    languageManager = languageManager,
+                    wordLearningEngine = wordLearningEngine,
+                    wordFrequencyRepository = wordFrequencyRepository,
+                    wordNormalizer = wordNormalizer,
+                    cacheMemoryManager = cacheMemoryManager,
+                    ioDispatcher = testDispatcher,
+                )
+
+            val result = frenchManager.isWordInDictionary("j'ai")
+
+            assertTrue("j'ai should be valid via clitic decomposition (j' + ai)", result)
+        }
+
+    @Test
+    fun `isWordInDictionary validates Italian elision via decomposition`() =
+        runTest {
+            val italianDictionary =
+                """
+                l' 700
+                uomo 500
+                dell' 600
+                """.trimIndent()
+
+            whenever(assetManager.open("dictionaries/it_symspell.txt"))
+                .thenAnswer { ByteArrayInputStream(italianDictionary.toByteArray()) }
+
+            activeLanguagesFlow.value = listOf("it")
+            currentLanguageFlow.value = "it"
+            whenever(wordLearningEngine.isWordLearned(any())).thenReturn(false)
+
+            val italianManager =
+                SpellCheckManager(
+                    context = context,
+                    languageManager = languageManager,
+                    wordLearningEngine = wordLearningEngine,
+                    wordFrequencyRepository = wordFrequencyRepository,
+                    wordNormalizer = wordNormalizer,
+                    cacheMemoryManager = cacheMemoryManager,
+                    ioDispatcher = testDispatcher,
+                )
+
+            val result = italianManager.isWordInDictionary("l'uomo")
+
+            assertTrue("l'uomo should be valid via clitic decomposition (l' + uomo)", result)
+        }
+
+    @Test
+    fun `isWordInDictionary rejects invalid clitic form`() =
+        runTest {
+            whenever(wordLearningEngine.isWordLearned(any())).thenReturn(false)
+
+            val result = spellCheckManager.isWordInDictionary("x'zzz")
+
+            assertFalse("x'zzz should not be valid (neither part is a word)", result)
+        }
+
+    @Test
+    fun `isWordInDictionary validates English possessive via learned word`() =
+        runTest {
+            whenever(wordLearningEngine.isWordLearned("user's")).thenReturn(false)
+            whenever(wordLearningEngine.isWordLearned("user'")).thenReturn(false)
+            whenever(wordLearningEngine.isWordLearned("s")).thenReturn(false)
+
+            val result = spellCheckManager.isWordInDictionary("user's")
+
+            assertFalse("user's requires at least one part in dictionary", result)
+        }
+
+    @Test
+    fun `apostrophe-aware prefix completion matches unstripped dictionary words`() =
+        runTest {
+            val frenchDictionary =
+                """
+                j'ai 500
+                j'aime 400
+                jaune 300
+                jardin 200
+                """.trimIndent()
+
+            whenever(assetManager.open("dictionaries/fr_symspell.txt"))
+                .thenAnswer { ByteArrayInputStream(frenchDictionary.toByteArray()) }
+
+            activeLanguagesFlow.value = listOf("fr")
+            currentLanguageFlow.value = "fr"
+            whenever(wordLearningEngine.isWordLearned(any())).thenReturn(false)
+            whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency(any(), any(), any()))
+                .thenReturn(emptyList())
+
+            val frenchManager =
+                SpellCheckManager(
+                    context = context,
+                    languageManager = languageManager,
+                    wordLearningEngine = wordLearningEngine,
+                    wordFrequencyRepository = wordFrequencyRepository,
+                    wordNormalizer = wordNormalizer,
+                    cacheMemoryManager = cacheMemoryManager,
+                    ioDispatcher = testDispatcher,
+                )
+
+            frenchManager.getCommonWords("fr")
+
+            val suggestions = frenchManager.getSpellingSuggestionsWithConfidence("j'a")
+
+            val completionWords = suggestions.map { it.word }
+            assertTrue(
+                "Should find j'ai or j'aime when prefix is j'a",
+                completionWords.any { it.startsWith("j'a", ignoreCase = true) },
+            )
+        }
 }

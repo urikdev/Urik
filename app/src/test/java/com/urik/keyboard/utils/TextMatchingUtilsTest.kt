@@ -62,8 +62,18 @@ class TextMatchingUtilsTest {
     }
 
     @Test
-    fun `isWordSeparatingPunctuation returns false for right single quotation mark`() {
-        assertFalse(TextMatchingUtils.isWordSeparatingPunctuation('\u2019'))
+    fun `isWordSeparatingPunctuation detects right single quotation mark`() {
+        assertTrue(TextMatchingUtils.isWordSeparatingPunctuation('\u2019'))
+    }
+
+    @Test
+    fun `isWordSeparatingPunctuation detects single high-reversed-9 quotation mark`() {
+        assertTrue(TextMatchingUtils.isWordSeparatingPunctuation('\u201B'))
+    }
+
+    @Test
+    fun `isWordSeparatingPunctuation detects modifier letter apostrophe`() {
+        assertTrue(TextMatchingUtils.isWordSeparatingPunctuation('\u02BC'))
     }
 
     @Test
@@ -112,6 +122,16 @@ class TextMatchingUtilsTest {
     }
 
     @Test
+    fun `isValidWordPunctuation detects right single quotation mark`() {
+        assertTrue(TextMatchingUtils.isValidWordPunctuation('\u2019'))
+    }
+
+    @Test
+    fun `isValidWordPunctuation detects modifier letter apostrophe`() {
+        assertTrue(TextMatchingUtils.isValidWordPunctuation('\u02BC'))
+    }
+
+    @Test
     fun `stripWordPunctuation handles empty string`() {
         val result = TextMatchingUtils.stripWordPunctuation("")
         assertEquals("", result)
@@ -130,9 +150,9 @@ class TextMatchingUtilsTest {
     }
 
     @Test
-    fun `stripWordPunctuation preserves right single quotation mark`() {
+    fun `stripWordPunctuation strips right single quotation mark`() {
         val result = TextMatchingUtils.stripWordPunctuation("don\u2019t")
-        assertEquals("don\u2019t", result)
+        assertEquals("dont", result)
     }
 
     @Test
@@ -184,9 +204,9 @@ class TextMatchingUtilsTest {
     }
 
     @Test
-    fun `stripWordPunctuation preserves modifier letter apostrophe`() {
-        val result = TextMatchingUtils.stripWordPunctuation("Hawaiʻi")
-        assertEquals("Hawaiʻi", result)
+    fun `stripWordPunctuation strips modifier letter apostrophe`() {
+        val result = TextMatchingUtils.stripWordPunctuation("Hawai\u02BCi")
+        assertEquals("Hawaii", result)
     }
 
     @Test
@@ -308,5 +328,15 @@ class TextMatchingUtilsTest {
         assertTrue(TextMatchingUtils.isContractionSuggestion("DONT", "don't"))
         assertTrue(TextMatchingUtils.isContractionSuggestion("dont", "DON'T"))
         assertTrue(TextMatchingUtils.isContractionSuggestion("DoNt", "DoN't"))
+    }
+
+    @Test
+    fun `isContractionSuggestion works with curly apostrophe`() {
+        assertTrue(TextMatchingUtils.isContractionSuggestion("dont", "don\u2019t"))
+    }
+
+    @Test
+    fun `isContractionSuggestion works with French clitic curly apostrophe`() {
+        assertTrue(TextMatchingUtils.isContractionSuggestion("lhomme", "l\u2019homme"))
     }
 }
