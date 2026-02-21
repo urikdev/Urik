@@ -242,6 +242,7 @@ class UrikInputMethodService :
     @Volatile
     private var lastKnownCursorPosition: Int = -1
 
+
     private fun safeGetTextBeforeCursor(
         length: Int,
         flags: Int = 0,
@@ -288,6 +289,7 @@ class UrikInputMethodService :
 
     @Volatile
     private var isUrlOrEmailField: Boolean = false
+
 
     fun setAcceleratedDeletion(active: Boolean) {
         isAcceleratedDeletion = active
@@ -375,7 +377,6 @@ class UrikInputMethodService :
         spellConfirmationState = SpellConfirmationState.NORMAL
         pendingWordForLearning = null
 
-        currentInputConnection?.beginBatchEdit()
         try {
             if (displayBuffer.isNotEmpty()) {
                 currentInputConnection?.setComposingText(displayBuffer, 1)
@@ -383,8 +384,6 @@ class UrikInputMethodService :
                 currentInputConnection?.finishComposingText()
             }
         } catch (_: Exception) {
-        } finally {
-            currentInputConnection?.endBatchEdit()
         }
     }
 
@@ -1759,22 +1758,26 @@ class UrikInputMethodService :
 
             val ic = currentInputConnection
             if (ic != null) {
-                try {
+                if (isStartingNewWord) {
+                    composingRegionStart = safeGetCursorPosition()
+                }
+
+                val needsCursorRepositioning = composingRegionStart != -1 &&
+                    newCursorPositionInText != displayBuffer.length
+
+                if (needsCursorRepositioning) {
                     ic.beginBatchEdit()
-
-                    if (isStartingNewWord) {
-                        composingRegionStart = safeGetCursorPosition()
-                    }
-
-                    ic.setComposingText(displayBuffer, 1)
-                    composingReassertionCount = 0
-
-                    if (composingRegionStart != -1) {
+                    try {
+                        ic.setComposingText(displayBuffer, 1)
+                        composingReassertionCount = 0
                         val absoluteCursorPosition = composingRegionStart + newCursorPositionInText
                         ic.setSelection(absoluteCursorPosition, absoluteCursorPosition)
+                    } finally {
+                        ic.endBatchEdit()
                     }
-                } finally {
-                    ic.endBatchEdit()
+                } else {
+                    ic.setComposingText(displayBuffer, 1)
+                    composingReassertionCount = 0
                 }
             }
 
@@ -2054,13 +2057,8 @@ class UrikInputMethodService :
                             withContext(Dispatchers.Main) {
                                 isActivelyEditing = true
                                 commitPreviousSwipeAndInsertSpace()
-                                currentInputConnection?.beginBatchEdit()
-                                try {
-                                    currentInputConnection?.setComposingText(displayWord, 1)
-                                    composingRegionStart = safeGetCursorPosition() - displayWord.length
-                                } finally {
-                                    currentInputConnection?.endBatchEdit()
-                                }
+                                currentInputConnection?.setComposingText(displayWord, 1)
+                                composingRegionStart = safeGetCursorPosition() - displayWord.length
                                 displayBuffer = displayWord
                                 coordinateStateTransition(result.wordState)
 
@@ -2077,13 +2075,8 @@ class UrikInputMethodService :
                             withContext(Dispatchers.Main) {
                                 isActivelyEditing = true
                                 commitPreviousSwipeAndInsertSpace()
-                                currentInputConnection?.beginBatchEdit()
-                                try {
-                                    currentInputConnection?.setComposingText(displayWord, 1)
-                                    composingRegionStart = safeGetCursorPosition() - displayWord.length
-                                } finally {
-                                    currentInputConnection?.endBatchEdit()
-                                }
+                                currentInputConnection?.setComposingText(displayWord, 1)
+                                composingRegionStart = safeGetCursorPosition() - displayWord.length
                                 displayBuffer = displayWord
                                 wordState =
                                     WordState(
@@ -2109,13 +2102,8 @@ class UrikInputMethodService :
                         val fallbackDisplay = caseTransformer.applyCasing(fallbackSuggestion, effectiveState, isSentenceStart)
                         isActivelyEditing = true
                         commitPreviousSwipeAndInsertSpace()
-                        currentInputConnection?.beginBatchEdit()
-                        try {
-                            currentInputConnection?.setComposingText(fallbackDisplay, 1)
-                            composingRegionStart = safeGetCursorPosition() - fallbackDisplay.length
-                        } finally {
-                            currentInputConnection?.endBatchEdit()
-                        }
+                        currentInputConnection?.setComposingText(fallbackDisplay, 1)
+                        composingRegionStart = safeGetCursorPosition() - fallbackDisplay.length
                         displayBuffer = fallbackDisplay
                         wordState =
                             WordState(
@@ -2527,16 +2515,20 @@ class UrikInputMethodService :
                     if (displayBuffer.isNotEmpty()) {
                         val ic = currentInputConnection
                         if (ic != null) {
-                            try {
-                                ic.beginBatchEdit()
-                                ic.setComposingText(displayBuffer, 1)
+                            val needsCursorRepositioning = composingRegionStart != -1 &&
+                                newCursorPositionInText != displayBuffer.length
 
-                                if (composingRegionStart != -1) {
+                            if (needsCursorRepositioning) {
+                                ic.beginBatchEdit()
+                                try {
+                                    ic.setComposingText(displayBuffer, 1)
                                     val absoluteCursorPosition = composingRegionStart + newCursorPositionInText
                                     ic.setSelection(absoluteCursorPosition, absoluteCursorPosition)
+                                } finally {
+                                    ic.endBatchEdit()
                                 }
-                            } finally {
-                                ic.endBatchEdit()
+                            } else {
+                                ic.setComposingText(displayBuffer, 1)
                             }
                         }
 
@@ -3208,6 +3200,15 @@ class UrikInputMethodService :
             if (!isUrlOrEmailField) {
                 viewModel.checkAndApplyAutoCapitalization(textBefore, currentSettings.autoCapitalizationEnabled)
             }
+        }
+
+        if (selectionResult is SelectionChangeResult.AppSelectionExtended) {
+            if (displayBuffer.isNotEmpty() || wordState.hasContent) {
+                clearInternalStateOnly()
+                isActivelyEditing = false
+            }
+            lastKnownCursorPosition = newSelStart
+            return
         }
 
         if (isUrlOrEmailField) return
