@@ -409,6 +409,28 @@ class KeyboardSettingsTest {
     }
 
     @Test
+    fun `defaultForLocale supports arabic`() {
+        val settings = KeyboardSettings.defaultForLocale("ar")
+
+        assertEquals(listOf("ar"), settings.activeLanguages)
+        assertEquals("ar", settings.primaryLanguage)
+    }
+
+    @Test
+    fun `validated preserves arabic as supported language`() {
+        val settings =
+            KeyboardSettings(
+                activeLanguages = listOf("ar", "en", "ja"),
+                primaryLanguage = "ar",
+            )
+
+        val validated = settings.validated()
+
+        assertEquals(listOf("ar", "en"), validated.activeLanguages)
+        assertEquals("ar", validated.primaryLanguage)
+    }
+
+    @Test
     fun `defaultForLocale falls back to english for unsupported`() {
         val settings = KeyboardSettings.defaultForLocale("ja")
 
