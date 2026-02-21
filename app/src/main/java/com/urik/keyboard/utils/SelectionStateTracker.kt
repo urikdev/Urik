@@ -65,6 +65,13 @@ class SelectionStateTracker {
         val newCursor = if (newState.hasSelection) -1 else newState.selectionStart
 
         if (previousCursor == -1 || newCursor == -1) {
+            if (isAppSelectionExtension(previousState, newState)) {
+                lastKnownValidPosition = newSelStart
+                return SelectionChangeResult.AppSelectionExtended(
+                    anchorPosition = newSelStart,
+                    selectionEnd = newSelEnd,
+                )
+            }
             lastKnownValidPosition = newSelStart
             return SelectionChangeResult.SelectionChanged
         }
@@ -126,6 +133,23 @@ class SelectionStateTracker {
         }
 
         return distance > JUMP_THRESHOLD
+    }
+
+    private fun isAppSelectionExtension(
+        previousState: SelectionState,
+        newState: SelectionState,
+    ): Boolean {
+        if (previousState.hasSelection) return false
+
+        val previousCursor = previousState.selectionStart
+        val newStart = newState.selectionStart
+        val newEnd = newState.selectionEnd
+
+        if (newStart == newEnd) return false
+        if (newStart != previousCursor) return false
+        if (newEnd <= newStart) return false
+
+        return !newState.hasComposingRegion
     }
 
     fun getCurrentState(): SelectionState = currentState.get()
@@ -234,6 +258,11 @@ sealed class SelectionChangeResult {
         val previousPosition: Int,
         val newPosition: Int,
         val distance: Int,
+    ) : SelectionChangeResult()
+
+    data class AppSelectionExtended(
+        val anchorPosition: Int,
+        val selectionEnd: Int,
     ) : SelectionChangeResult()
 
     fun requiresStateInvalidation(): Boolean =
