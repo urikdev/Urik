@@ -1,5 +1,4 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="app_name" translatable="false">Urik</string>
     <string name="ime_name">لوحة مفاتيح أوريك</string>
     <string name="ime_label">لوحة مفاتيح أوريك</string>
     <string name="ime_description">كتابة بالتمرير، وتصحيح الكلمات، ودعم لغات متعددة دون التعدي على خصوصيتك. لا يجمع البيانات خارج جهازك، جميع البيانات تبقى داخل جهازك.</string>
@@ -88,6 +87,7 @@
     <string name="primary_layout_language">التخطيط الحالي</string>
 
     <!-- Sound & Feedback Settings -->
+    <string name="merged_dictionaries_off">لغة التخطيط النشطة الوحيدة المستخدمة للاقتراحات</string>
     <string name="feedback_settings_haptic_feedback">الإهتزازات</string>
     <string name="feedback_settings_haptic_on">الإهتزازات مفعلة</string>
     <string name="feedback_settings_haptic_off">الإهتزازات غير مفعلة</string>
@@ -294,5 +294,8 @@
     <string name="clipboard_item_pin">ثبت محتوى الحافظة</string>
     <string name="clipboard_item_unpin">ألغ تثبيت محتوى الحافظة</string>
     <string name="clipboard_item_delete">إحذف محتوى الحافظة</string>
+    <string name="merged_dictionaries_category">قاموس</string>
+    <string name="merged_dictionaries_title">قواميس مدمجة</string>
+    <string name="merged_dictionaries_on">جميع قواميس اللغات المستخدمة في الاقتراحات</string>
 
 </resources>
