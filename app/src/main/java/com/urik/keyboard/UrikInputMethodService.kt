@@ -1856,14 +1856,13 @@ class UrikInputMethodService :
      * @param char Non-letter character to process
      */
     private fun handleNonLetterInput(char: String) {
+        if (requiresDirectCommit) {
+            currentInputConnection?.commitText(char, 1)
+            return
+        }
         serviceScope.launch {
             try {
                 lastSpaceTime = 0
-
-                if (requiresDirectCommit) {
-                    currentInputConnection?.commitText(char, 1)
-                    return@launch
-                }
 
                 if (char.length == 1) {
                     val textBeforeCursor = safeGetTextBeforeCursor(1)

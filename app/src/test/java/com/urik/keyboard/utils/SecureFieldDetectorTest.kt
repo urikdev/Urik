@@ -231,16 +231,58 @@ class SecureFieldDetectorTest {
     }
 
     @Test
-    fun `test number class is not direct commit`() {
+    fun `test number class is direct commit`() {
         val field =
             createEditorInfo(
                 inputClass = EditorInfo.TYPE_CLASS_NUMBER,
                 inputVariation = EditorInfo.TYPE_NUMBER_VARIATION_NORMAL,
             )
 
-        Assert.assertFalse(
-            "Number class should not be detected as direct commit",
+        Assert.assertTrue(
+            "Number class should be detected as direct commit",
             SecureFieldDetector.isDirectCommit(field),
+        )
+    }
+
+    @Test
+    fun `test number class with decimal flag is direct commit`() {
+        val field = EditorInfo()
+        field.inputType =
+            EditorInfo.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
+
+        Assert.assertTrue(
+            "Number class with decimal flag should be detected as direct commit",
+            SecureFieldDetector.isDirectCommit(field),
+        )
+    }
+
+    @Test
+    fun `test number class with signed flag is direct commit`() {
+        val field = EditorInfo()
+        field.inputType =
+            EditorInfo.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_SIGNED
+
+        Assert.assertTrue(
+            "Number class with signed flag should be detected as direct commit",
+            SecureFieldDetector.isDirectCommit(field),
+        )
+    }
+
+    @Test
+    fun `test number password is not direct commit but is secure`() {
+        val field =
+            createEditorInfo(
+                inputClass = EditorInfo.TYPE_CLASS_NUMBER,
+                inputVariation = EditorInfo.TYPE_NUMBER_VARIATION_PASSWORD,
+            )
+
+        Assert.assertFalse(
+            "Number password should not be detected as direct commit",
+            SecureFieldDetector.isDirectCommit(field),
+        )
+        Assert.assertTrue(
+            "Number password should be detected as secure",
+            SecureFieldDetector.isSecure(field),
         )
     }
 
