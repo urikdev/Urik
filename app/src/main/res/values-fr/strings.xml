@@ -1,5 +1,4 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="app_name" translatable="false">Urik</string>
     <string name="ime_name">Urik Keyboard</string>
     <string name="ime_label">Urik Keyboard</string>
     <string name="ime_description">Saisie par glissement, vérification orthographique et prise en charge multilingue sans compromettre votre confidentialité. Pas de télémétrie. Pas de collecte de données. Tout reste sur votre appareil.</string>

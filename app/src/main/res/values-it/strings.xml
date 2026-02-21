@@ -1,5 +1,4 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="app_name" translatable="false">Urik</string>
     <string name="ime_name">Tastiera Urik</string>
     <string name="ime_label">Tastiera Urik</string>
     <string name="ime_description">Digitazione a scorrimento, controllo ortografico e supporto multilingue senza compromettere la tua privacy. Nessuna telemetria. Nessuna raccolta dati. Tutto rimane sul tuo dispositivo.</string>

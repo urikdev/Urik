@@ -1,5 +1,4 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="app_name" translatable="false">Urik</string>
     <string name="ime_name">کیبورد Urik</string>
     <string name="ime_label">کیبورد Urik</string>
     <string name="ime_description">تایپ با کشیدن دست (سوایپ)، بررسی املا، و پشتیبانی چندزبانه بدون به خطر انداختن حریم خصوصی شما. بدون ثبت داده. بدون جمع‌آوری اطلاعات. همه چیز روی دستگاه شما باقی می‌ماند.</string>
