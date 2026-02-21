@@ -209,6 +209,7 @@
     <string name="error_dictionary_import">فشل إستيراد المعجم</string>
 
     <!-- Success Messages -->
+    <string name="error_update_merged_dictionaries">فشل تحديث وضع القاموس</string>
     <string name="success_learned_words_cleared">تم حذف الكلمات المتعلمة</string>
     <string name="success_settings_reset">تم إعادة ضبط الإعدادات</string>
     <string name="success_dictionary_exported">تم تصدير %1$d كلمة</string>
