@@ -85,6 +85,10 @@
 
     <!-- Sound & Feedback Settings -->
     <string name="primary_layout_language">Aktuelles Layout</string>
+    <string name="merged_dictionaries_category">Wörterbuch</string>
+    <string name="merged_dictionaries_title">Zusammengeführte Wörterbücher</string>
+    <string name="merged_dictionaries_on">Alle Sprachwörterbücher für Vorschläge verwenden</string>
+    <string name="merged_dictionaries_off">Nur Wörterbuch des aktiven Layouts für Vorschläge</string>
     <string name="feedback_settings_haptic_feedback">Haptisches Feedback</string>
     <string name="feedback_settings_haptic_on">Haptisches Feedback ist an</string>
     <string name="feedback_settings_haptic_off">Haptisches Feedback ist aus</string>
@@ -185,6 +189,7 @@
     <string name="error_reset_to_defaults">Einstellungen konnten nicht zurückgesetzt werden</string>
     <string name="error_dictionary_export">Wörterbuch konnte nicht exportiert werden</string>
     <string name="error_dictionary_import">Wörterbuch konnte nicht importiert werden</string>
+    <string name="error_update_merged_dictionaries">Wörterbuchmodus konnte nicht aktualisiert werden</string>
 
     <!-- Success Messages -->
     <string name="success_learned_words_cleared">Wörterbuch wurde geleert</string>

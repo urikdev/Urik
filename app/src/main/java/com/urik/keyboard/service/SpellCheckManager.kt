@@ -144,7 +144,13 @@ class SpellCheckManager
                                 preloadLanguage(languageCode)
                             }
                         }
+                    }
+                }
+            }
 
+            initScope.launch {
+                languageManager.effectiveDictionaryLanguages.collect {
+                    if (isInitialized) {
                         suggestionCache.invalidateAll()
                         dictionaryCache.invalidateAll()
                     }
@@ -268,7 +274,7 @@ class SpellCheckManager
             }
 
             try {
-                val words = getCommonWords()
+                val words = getCommonWords(languageCode)
                 commonWordsCache = words
                 commonWordsCacheLanguage = languageCode
             } catch (_: Exception) {
@@ -385,11 +391,11 @@ class SpellCheckManager
                         return@withContext false
                     }
 
-                    val activeLanguages = languageManager.activeLanguages.value
+                    val effectiveLanguages = languageManager.effectiveDictionaryLanguages.value
                     val locale = getLocaleForLanguage()
                     val normalizedWord = word.lowercase(locale).trim()
 
-                    for (lang in activeLanguages) {
+                    for (lang in effectiveLanguages) {
                         if (isWordInDictionary(normalizedWord, lang)) {
                             return@withContext true
                         }
@@ -469,9 +475,8 @@ class SpellCheckManager
                 }
 
                 val results = mutableMapOf<String, Boolean>()
-                val currentLang = getCurrentLanguage()
+                val effectiveLanguages = languageManager.effectiveDictionaryLanguages.value
                 val locale = getLocaleForLanguage()
-                val spellChecker = getSpellCheckerForLanguage(currentLang)
 
                 val wordsToProcess = mutableListOf<Pair<String, String>>()
 
@@ -482,12 +487,19 @@ class SpellCheckManager
                     }
 
                     val normalizedWord = word.lowercase(locale).trim()
-                    val cacheKey = buildCacheKey(normalizedWord, currentLang)
 
-                    dictionaryCache.getIfPresent(cacheKey)?.let { cached ->
-                        results[word] = cached
-                        continue
+                    var foundInCache = false
+                    for (lang in effectiveLanguages) {
+                        val cacheKey = buildCacheKey(normalizedWord, lang)
+                        dictionaryCache.getIfPresent(cacheKey)?.let { cached ->
+                            if (cached) {
+                                results[word] = true
+                                foundInCache = true
+                            }
+                        }
+                        if (foundInCache) break
                     }
+                    if (foundInCache) continue
 
                     wordsToProcess.add(word to normalizedWord)
                 }
@@ -505,28 +517,33 @@ class SpellCheckManager
                     }
 
                 for ((originalWord, normalizedWord) in wordsToProcess) {
-                    val cacheKey = buildCacheKey(normalizedWord, currentLang)
-
                     val isLearned = learnedStatus[normalizedWord] ?: false
                     if (isLearned) {
-                        dictionaryCache.put(cacheKey, true)
+                        for (lang in effectiveLanguages) {
+                            dictionaryCache.put(buildCacheKey(normalizedWord, lang), true)
+                        }
                         results[originalWord] = true
                         continue
                     }
 
-                    if (spellChecker != null) {
-                        val suggestions = spellChecker.lookup(normalizedWord, Verbosity.All, SpellCheckConstants.MAX_EDIT_DISTANCE)
-                        val isInDictionary =
-                            suggestions.any {
-                                it.term.equals(normalizedWord, ignoreCase = true) && it.distance == 0.0
-                            }
+                    var foundInDict = false
+                    for (lang in effectiveLanguages) {
+                        val spellChecker = getSpellCheckerForLanguage(lang)
+                        if (spellChecker != null) {
+                            val suggestions = spellChecker.lookup(normalizedWord, Verbosity.All, SpellCheckConstants.MAX_EDIT_DISTANCE)
+                            val isInDictionary =
+                                suggestions.any {
+                                    it.term.equals(normalizedWord, ignoreCase = true) && it.distance == 0.0
+                                }
 
-                        dictionaryCache.put(cacheKey, isInDictionary)
-                        results[originalWord] = isInDictionary
-                    } else {
-                        dictionaryCache.put(cacheKey, false)
-                        results[originalWord] = false
+                            dictionaryCache.put(buildCacheKey(normalizedWord, lang), isInDictionary)
+                            if (isInDictionary) {
+                                foundInDict = true
+                                break
+                            }
+                        }
                     }
+                    results[originalWord] = foundInDict
                 }
 
                 return@withContext results
@@ -580,11 +597,11 @@ class SpellCheckManager
                         return@withContext emptyList()
                     }
 
-                    val activeLanguages = languageManager.activeLanguages.value
+                    val effectiveLanguages = languageManager.effectiveDictionaryLanguages.value
                     val locale = getLocaleForLanguage()
                     val normalizedWord = word.lowercase(locale).trim()
 
-                    return@withContext getSpellingSuggestions(normalizedWord, activeLanguages)
+                    return@withContext getSpellingSuggestions(normalizedWord, effectiveLanguages)
                 } catch (_: Exception) {
                     return@withContext emptyList()
                 }

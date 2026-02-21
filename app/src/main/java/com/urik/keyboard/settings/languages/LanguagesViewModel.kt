@@ -36,6 +36,7 @@ class LanguagesViewModel
                         activeLanguages = settings.activeLanguages,
                         primaryLanguage = settings.primaryLanguage,
                         primaryLayoutLanguage = settings.primaryLayoutLanguage,
+                        mergedDictionaries = settings.mergedDictionaries,
                     )
                 }.stateIn(
                     scope = viewModelScope,
@@ -70,6 +71,14 @@ class LanguagesViewModel
             }
         }
 
+        fun toggleMergedDictionaries(enabled: Boolean) {
+            viewModelScope.launch {
+                settingsRepository
+                    .updateMergedDictionaries(enabled)
+                    .onFailure { _events.emit(SettingsEvent.Error.MergedDictionariesToggleFailed) }
+            }
+        }
+
         private companion object {
             const val STOP_TIMEOUT_MILLIS = 5000L
         }
@@ -82,4 +91,5 @@ data class LanguagesUiState(
     val activeLanguages: List<String> = listOf(KeyboardSettings.DEFAULT_LANGUAGE),
     val primaryLanguage: String = KeyboardSettings.DEFAULT_LANGUAGE,
     val primaryLayoutLanguage: String = KeyboardSettings.DEFAULT_LANGUAGE,
+    val mergedDictionaries: Boolean = true,
 )

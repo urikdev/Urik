@@ -57,6 +57,8 @@ sealed interface SettingsEvent {
         data object DictionaryExportFailed : Error
 
         data object DictionaryImportFailed : Error
+
+        data object MergedDictionariesToggleFailed : Error
     }
 
     /**

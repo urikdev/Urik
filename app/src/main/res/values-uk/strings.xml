@@ -86,6 +86,10 @@
 
     <!-- Sound & Feedback Settings -->
     <string name="primary_layout_language">Основна розкладка</string>
+    <string name="merged_dictionaries_category">Словник</string>
+    <string name="merged_dictionaries_title">Об\'єднані словники</string>
+    <string name="merged_dictionaries_on">Усі мовні словники використовуються для пропозицій</string>
+    <string name="merged_dictionaries_off">Лише словник активної розкладки для пропозицій</string>
     <string name="feedback_settings_haptic_feedback">Тактильна Віддача</string>
     <string name="feedback_settings_haptic_on">Тактильна віддача увімкнена</string>
     <string name="feedback_settings_haptic_off">Тактильна віддача вимкнена</string>
@@ -187,6 +191,7 @@
     <string name="error_reset_to_defaults">Не вдалося скинути налаштування</string>
     <string name="error_dictionary_export">Не вдалося експортувати словник</string>
     <string name="error_dictionary_import">Не вдалося імпортувати словник</string>
+    <string name="error_update_merged_dictionaries">Не вдалося оновити режим словника</string>
 
     <!-- Success Messages -->
     <string name="success_learned_words_cleared">Запам\'ятовані слова видалені</string>

@@ -117,6 +117,10 @@ class SettingsEventHandler(
                     context.getString(R.string.error_dictionary_import)
                 }
 
+                is SettingsEvent.Error.MergedDictionariesToggleFailed -> {
+                    context.getString(R.string.error_update_merged_dictionaries)
+                }
+
                 is SettingsEvent.Success.LearnedWordsCleared -> {
                     context.getString(R.string.success_learned_words_cleared)
                 }

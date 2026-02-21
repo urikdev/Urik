@@ -75,6 +75,7 @@ class SettingsRepository
             val KEYBOARD_DISPLAY_MODE = stringPreferencesKey("keyboard_display_mode")
             val ONE_HANDED_MODE_ENABLED = booleanPreferencesKey("one_handed_mode_enabled")
             val SHOW_LANGUAGE_SWITCH_KEY = booleanPreferencesKey("show_language_switch_key")
+            val MERGED_DICTIONARIES = booleanPreferencesKey("merged_dictionaries")
         }
 
         /**
@@ -227,6 +228,7 @@ class SettingsRepository
                             },
                         oneHandedModeEnabled = preferences[PreferenceKeys.ONE_HANDED_MODE_ENABLED] ?: false,
                         showLanguageSwitchKey = preferences[PreferenceKeys.SHOW_LANGUAGE_SWITCH_KEY] ?: false,
+                        mergedDictionaries = preferences[PreferenceKeys.MERGED_DICTIONARIES] ?: true,
                     ).validated()
                 }.catch { e ->
                     ErrorLogger.logException(
@@ -606,6 +608,14 @@ class SettingsRepository
         suspend fun updateShowLanguageSwitchKey(enabled: Boolean): Result<Unit> =
             try {
                 dataStore.edit { it[PreferenceKeys.SHOW_LANGUAGE_SWITCH_KEY] = enabled }
+                Result.success(Unit)
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+
+        suspend fun updateMergedDictionaries(enabled: Boolean): Result<Unit> =
+            try {
+                dataStore.edit { it[PreferenceKeys.MERGED_DICTIONARIES] = enabled }
                 Result.success(Unit)
             } catch (e: Exception) {
                 Result.failure(e)
