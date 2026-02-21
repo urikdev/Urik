@@ -61,6 +61,7 @@ class SpellCheckManager
         private val languageManager: LanguageManager,
         private val wordLearningEngine: WordLearningEngine,
         private val wordFrequencyRepository: com.urik.keyboard.data.WordFrequencyRepository,
+        private val wordNormalizer: WordNormalizer,
         cacheMemoryManager: CacheMemoryManager,
         private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
     ) : MemoryPressureSubscriber {
@@ -87,11 +88,18 @@ class SpellCheckManager
 
         private val blacklistedWords = mutableSetOf<String>()
 
+        private data class CachedWord(
+            val word: String,
+            val frequency: Int,
+            val strippedWord: String,
+            val accentStrippedWord: String,
+        )
+
         @Volatile
         private var commonWordsCache = emptyList<Pair<String, Int>>()
 
         @Volatile
-        private var commonWordsCacheStripped = emptyList<Triple<String, Int, String>>()
+        private var commonWordsCacheIndexed = emptyList<CachedWord>()
 
         @Volatile
         private var commonWordsCacheLanguage = ""
@@ -136,7 +144,13 @@ class SpellCheckManager
                                 preloadLanguage(languageCode)
                             }
                         }
+                    }
+                }
+            }
 
+            initScope.launch {
+                languageManager.effectiveDictionaryLanguages.collect {
+                    if (isInitialized) {
                         suggestionCache.invalidateAll()
                         dictionaryCache.invalidateAll()
                     }
@@ -260,7 +274,7 @@ class SpellCheckManager
             }
 
             try {
-                val words = getCommonWords()
+                val words = getCommonWords(languageCode)
                 commonWordsCache = words
                 commonWordsCacheLanguage = languageCode
             } catch (_: Exception) {
@@ -377,11 +391,11 @@ class SpellCheckManager
                         return@withContext false
                     }
 
-                    val activeLanguages = languageManager.activeLanguages.value
+                    val effectiveLanguages = languageManager.effectiveDictionaryLanguages.value
                     val locale = getLocaleForLanguage()
                     val normalizedWord = word.lowercase(locale).trim()
 
-                    for (lang in activeLanguages) {
+                    for (lang in effectiveLanguages) {
                         if (isWordInDictionary(normalizedWord, lang)) {
                             return@withContext true
                         }
@@ -402,7 +416,45 @@ class SpellCheckManager
                 return true
             }
 
-            return checkSymSpellDictionary(normalizedWord, languageCode)
+            if (checkSymSpellDictionary(normalizedWord, languageCode)) {
+                return true
+            }
+
+            return isCliticFormValid(normalizedWord, languageCode)
+        }
+
+        private suspend fun isCliticFormValid(
+            normalizedWord: String,
+            languageCode: String,
+        ): Boolean {
+            val apostropheIndex = normalizedWord.indexOf('\'')
+            if (apostropheIndex <= 0 || apostropheIndex >= normalizedWord.length - 1) {
+                return false
+            }
+
+            val prefix = normalizedWord.substring(0, apostropheIndex + 1)
+            val suffix = normalizedWord.substring(apostropheIndex + 1)
+
+            if (suffix.isBlank()) return false
+
+            val prefixValid =
+                wordLearningEngine.isWordLearned(prefix) ||
+                    checkSymSpellDictionary(prefix, languageCode) ||
+                    wordFrequencies.containsKey(prefix)
+
+            if (!prefixValid) return false
+
+            val suffixValid =
+                wordLearningEngine.isWordLearned(suffix) ||
+                    checkSymSpellDictionary(suffix, languageCode) ||
+                    wordFrequencies.containsKey(suffix)
+
+            if (suffixValid) {
+                val cacheKey = buildCacheKey(normalizedWord, languageCode)
+                dictionaryCache.put(cacheKey, true)
+            }
+
+            return suffixValid
         }
 
         /**
@@ -423,9 +475,8 @@ class SpellCheckManager
                 }
 
                 val results = mutableMapOf<String, Boolean>()
-                val currentLang = getCurrentLanguage()
+                val effectiveLanguages = languageManager.effectiveDictionaryLanguages.value
                 val locale = getLocaleForLanguage()
-                val spellChecker = getSpellCheckerForLanguage(currentLang)
 
                 val wordsToProcess = mutableListOf<Pair<String, String>>()
 
@@ -436,12 +487,19 @@ class SpellCheckManager
                     }
 
                     val normalizedWord = word.lowercase(locale).trim()
-                    val cacheKey = buildCacheKey(normalizedWord, currentLang)
 
-                    dictionaryCache.getIfPresent(cacheKey)?.let { cached ->
-                        results[word] = cached
-                        continue
+                    var foundInCache = false
+                    for (lang in effectiveLanguages) {
+                        val cacheKey = buildCacheKey(normalizedWord, lang)
+                        dictionaryCache.getIfPresent(cacheKey)?.let { cached ->
+                            if (cached) {
+                                results[word] = true
+                                foundInCache = true
+                            }
+                        }
+                        if (foundInCache) break
                     }
+                    if (foundInCache) continue
 
                     wordsToProcess.add(word to normalizedWord)
                 }
@@ -459,28 +517,33 @@ class SpellCheckManager
                     }
 
                 for ((originalWord, normalizedWord) in wordsToProcess) {
-                    val cacheKey = buildCacheKey(normalizedWord, currentLang)
-
                     val isLearned = learnedStatus[normalizedWord] ?: false
                     if (isLearned) {
-                        dictionaryCache.put(cacheKey, true)
+                        for (lang in effectiveLanguages) {
+                            dictionaryCache.put(buildCacheKey(normalizedWord, lang), true)
+                        }
                         results[originalWord] = true
                         continue
                     }
 
-                    if (spellChecker != null) {
-                        val suggestions = spellChecker.lookup(normalizedWord, Verbosity.All, SpellCheckConstants.MAX_EDIT_DISTANCE)
-                        val isInDictionary =
-                            suggestions.any {
-                                it.term.equals(normalizedWord, ignoreCase = true) && it.distance == 0.0
-                            }
+                    var foundInDict = false
+                    for (lang in effectiveLanguages) {
+                        val spellChecker = getSpellCheckerForLanguage(lang)
+                        if (spellChecker != null) {
+                            val suggestions = spellChecker.lookup(normalizedWord, Verbosity.All, SpellCheckConstants.MAX_EDIT_DISTANCE)
+                            val isInDictionary =
+                                suggestions.any {
+                                    it.term.equals(normalizedWord, ignoreCase = true) && it.distance == 0.0
+                                }
 
-                        dictionaryCache.put(cacheKey, isInDictionary)
-                        results[originalWord] = isInDictionary
-                    } else {
-                        dictionaryCache.put(cacheKey, false)
-                        results[originalWord] = false
+                            dictionaryCache.put(buildCacheKey(normalizedWord, lang), isInDictionary)
+                            if (isInDictionary) {
+                                foundInDict = true
+                                break
+                            }
+                        }
                     }
+                    results[originalWord] = foundInDict
                 }
 
                 return@withContext results
@@ -534,11 +597,11 @@ class SpellCheckManager
                         return@withContext emptyList()
                     }
 
-                    val activeLanguages = languageManager.activeLanguages.value
+                    val effectiveLanguages = languageManager.effectiveDictionaryLanguages.value
                     val locale = getLocaleForLanguage()
                     val normalizedWord = word.lowercase(locale).trim()
 
-                    return@withContext getSpellingSuggestions(normalizedWord, activeLanguages)
+                    return@withContext getSpellingSuggestions(normalizedWord, effectiveLanguages)
                 } catch (_: Exception) {
                     return@withContext emptyList()
                 }
@@ -699,6 +762,7 @@ class SpellCheckManager
                     val spellChecker = getSpellCheckerForLanguage(languageCode)
                     if (spellChecker != null) {
                         val symSpellResults = spellChecker.lookup(normalizedWord, Verbosity.All, SpellCheckConstants.MAX_EDIT_DISTANCE)
+                        val inputAccentStripped = wordNormalizer.stripDiacritics(normalizedWord)
 
                         val filteredResults =
                             symSpellResults.filter { result ->
@@ -764,6 +828,11 @@ class SpellCheckManager
                                                 baseConfidence += SpellCheckConstants.APOSTROPHE_BOOST
                                             }
 
+                                            val termStripped = wordNormalizer.stripDiacritics(result.term.lowercase())
+                                            if (inputAccentStripped == termStripped && normalizedWord != result.term.lowercase()) {
+                                                baseConfidence += SpellCheckConstants.DIACRITIC_PROMOTION_BOOST
+                                            }
+
                                             if (userFrequency > 0) {
                                                 val userFreqBoost = calculateFrequencyBoost(userFrequency)
                                                 baseConfidence += userFreqBoost
@@ -815,7 +884,7 @@ class SpellCheckManager
             prefix: String,
             languageCode: String,
         ): List<Pair<String, Int>> {
-            if (languageCode != commonWordsCacheLanguage || commonWordsCacheStripped.isEmpty()) {
+            if (languageCode != commonWordsCacheLanguage || commonWordsCacheIndexed.isEmpty()) {
                 try {
                     getCommonWords(languageCode)
                 } catch (_: Exception) {
@@ -823,15 +892,50 @@ class SpellCheckManager
                 }
             }
 
+            val hasApostrophe = prefix.contains('\'')
+
+            val apostropheMatches =
+                if (hasApostrophe) {
+                    commonWordsCacheIndexed
+                        .filter { cached ->
+                            cached.word.startsWith(prefix, ignoreCase = true) &&
+                                cached.word.length > prefix.length
+                        }.map { it.word to it.frequency }
+                } else {
+                    emptyList()
+                }
+
+            if (apostropheMatches.size >= SpellCheckConstants.MAX_PREFIX_COMPLETION_RESULTS) {
+                return apostropheMatches.take(SpellCheckConstants.MAX_PREFIX_COMPLETION_RESULTS)
+            }
+
             val strippedPrefix =
                 com.urik.keyboard.utils.TextMatchingUtils
                     .stripWordPunctuation(prefix)
+            val accentStrippedPrefix = wordNormalizer.stripDiacritics(prefix).lowercase()
 
-            return commonWordsCacheStripped
-                .filter { (word, _, strippedWord) ->
-                    strippedWord.startsWith(strippedPrefix, ignoreCase = true) &&
-                        (strippedWord.length > strippedPrefix.length || word != strippedWord)
-                }.map { (word, freq, _) -> word to freq }
+            val apostropheWords = apostropheMatches.map { it.first }.toSet()
+            val exactPrefixMatches = commonWordsCacheIndexed
+                .filter { cached ->
+                    cached.word !in apostropheWords &&
+                        cached.strippedWord.startsWith(strippedPrefix, ignoreCase = true) &&
+                        (cached.strippedWord.length > strippedPrefix.length || cached.word != cached.strippedWord)
+                }.map { it.word to it.frequency }
+
+            val combined = apostropheMatches + exactPrefixMatches
+            if (combined.size >= SpellCheckConstants.MAX_PREFIX_COMPLETION_RESULTS) {
+                return combined.take(SpellCheckConstants.MAX_PREFIX_COMPLETION_RESULTS)
+            }
+
+            val seenWords = combined.map { it.first }.toSet()
+            val accentFallbackMatches = commonWordsCacheIndexed
+                .filter { cached ->
+                    cached.word !in seenWords &&
+                        cached.accentStrippedWord.startsWith(accentStrippedPrefix) &&
+                        cached.accentStrippedWord.length > accentStrippedPrefix.length
+                }.map { it.word to it.frequency }
+
+            return (combined + accentFallbackMatches)
                 .take(SpellCheckConstants.MAX_PREFIX_COMPLETION_RESULTS)
         }
 
@@ -964,7 +1068,7 @@ class SpellCheckManager
                 dictionaryCache.invalidate(cacheKey)
                 suggestionCache.invalidateAll()
                 commonWordsCache = emptyList()
-                commonWordsCacheStripped = emptyList()
+                commonWordsCacheIndexed = emptyList()
             } catch (_: Exception) {
             }
         }
@@ -988,7 +1092,7 @@ class SpellCheckManager
                     dictionaryCache.invalidate(cacheKey)
                     suggestionCache.invalidateAll()
                     commonWordsCache = emptyList()
-                    commonWordsCacheStripped = emptyList()
+                    commonWordsCacheIndexed = emptyList()
                 }
             } catch (_: Exception) {
             }
@@ -1017,7 +1121,7 @@ class SpellCheckManager
                 -> {
                     wordFrequencies.clear()
                     commonWordsCache = emptyList()
-                    commonWordsCacheStripped = emptyList()
+                    commonWordsCacheIndexed = emptyList()
                     commonWordsCacheLanguage = ""
                     clearCaches()
                 }
@@ -1026,7 +1130,7 @@ class SpellCheckManager
                 android.content.ComponentCallbacks2.TRIM_MEMORY_MODERATE,
                 -> {
                     commonWordsCache = emptyList()
-                    commonWordsCacheStripped = emptyList()
+                    commonWordsCacheIndexed = emptyList()
                     commonWordsCacheLanguage = ""
                 }
             }
@@ -1074,16 +1178,17 @@ class SpellCheckManager
 
                     val sortedWordsWithStripped =
                         sortedWords.map { (word, freq) ->
-                            Triple(
-                                word,
-                                freq,
-                                com.urik.keyboard.utils.TextMatchingUtils
+                            CachedWord(
+                                word = word,
+                                frequency = freq,
+                                strippedWord = com.urik.keyboard.utils.TextMatchingUtils
                                     .stripWordPunctuation(word),
+                                accentStrippedWord = wordNormalizer.stripDiacritics(word).lowercase(),
                             )
                         }
 
                     commonWordsCache = sortedWords
-                    commonWordsCacheStripped = sortedWordsWithStripped
+                    commonWordsCacheIndexed = sortedWordsWithStripped
                     commonWordsCacheLanguage = targetLang
 
                     return@withContext sortedWords
@@ -1126,6 +1231,27 @@ class SpellCheckManager
                     return@withContext emptyMap()
                 }
             }
+
+        suspend fun getWordsByPrefix(
+            prefix: String,
+            languages: List<String>,
+            maxResults: Int,
+        ): List<Pair<String, Int>> {
+            if (prefix.length < 2) return emptyList()
+
+            val dictionary = getCommonWordsForLanguages(languages)
+            val lowerPrefix = prefix.lowercase()
+
+            return dictionary.entries
+                .asSequence()
+                .filter { (word, _) ->
+                    word.startsWith(lowerPrefix) && word.length > prefix.length
+                }
+                .sortedByDescending { it.value }
+                .take(maxResults)
+                .map { it.key to it.value }
+                .toList()
+        }
 
         private fun calculateProximityBonus(
             char1: Char,

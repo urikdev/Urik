@@ -86,6 +86,10 @@
     <!-- Language Settings -->
     <string name="max_languages_reached">Maximum 3 languages allowed</string>
     <string name="primary_layout_language">Current layout</string>
+    <string name="merged_dictionaries_category">Dictionary</string>
+    <string name="merged_dictionaries_title">Merged Dictionaries</string>
+    <string name="merged_dictionaries_on">All language dictionaries used for suggestions</string>
+    <string name="merged_dictionaries_off">Only active layout language used for suggestions</string>
 
     <!-- Sound & Feedback Settings -->
     <string name="feedback_settings_haptic_feedback">Haptic Feedback</string>
@@ -207,6 +211,7 @@
     <string name="error_reset_to_defaults">Failed to reset settings</string>
     <string name="error_dictionary_export">Failed to export dictionary</string>
     <string name="error_dictionary_import">Failed to import dictionary</string>
+    <string name="error_update_merged_dictionaries">Failed to update dictionary mode</string>
 
     <!-- Success Messages -->
     <string name="success_learned_words_cleared">Learned words cleared</string>

@@ -188,4 +188,82 @@ class LanguageManagerTest {
             val next = languageManager.getNextLayoutLanguage()
             assertEquals("en", next)
         }
+
+    @Test
+    fun `effectiveDictionaryLanguages returns all active when merged`() =
+        runTest {
+            settingsFlow.value =
+                KeyboardSettings(
+                    activeLanguages = listOf("en", "es", "fr"),
+                    primaryLanguage = "en",
+                    primaryLayoutLanguage = "en",
+                    mergedDictionaries = true,
+                )
+            languageManager.initialize()
+
+            assertEquals(listOf("en", "es", "fr"), languageManager.effectiveDictionaryLanguages.value)
+        }
+
+    @Test
+    fun `effectiveDictionaryLanguages returns only layout language when not merged`() =
+        runTest {
+            settingsFlow.value =
+                KeyboardSettings(
+                    activeLanguages = listOf("en", "es", "fr"),
+                    primaryLanguage = "en",
+                    primaryLayoutLanguage = "es",
+                    mergedDictionaries = false,
+                )
+            languageManager.initialize()
+
+            assertEquals(listOf("es"), languageManager.effectiveDictionaryLanguages.value)
+        }
+
+    @Test
+    fun `effectiveDictionaryLanguages updates when mergedDictionaries toggled`() =
+        runTest {
+            settingsFlow.value =
+                KeyboardSettings(
+                    activeLanguages = listOf("en", "es"),
+                    primaryLanguage = "en",
+                    primaryLayoutLanguage = "en",
+                    mergedDictionaries = true,
+                )
+            languageManager.initialize()
+
+            assertEquals(listOf("en", "es"), languageManager.effectiveDictionaryLanguages.value)
+
+            settingsFlow.value =
+                settingsFlow.value.copy(mergedDictionaries = false)
+
+            assertEquals(listOf("en"), languageManager.effectiveDictionaryLanguages.value)
+        }
+
+    @Test
+    fun `effectiveDictionaryLanguages updates when layout language switches while not merged`() =
+        runTest {
+            settingsFlow.value =
+                KeyboardSettings(
+                    activeLanguages = listOf("en", "fr"),
+                    primaryLanguage = "en",
+                    primaryLayoutLanguage = "en",
+                    mergedDictionaries = false,
+                )
+            languageManager.initialize()
+
+            assertEquals(listOf("en"), languageManager.effectiveDictionaryLanguages.value)
+
+            settingsFlow.value =
+                settingsFlow.value.copy(primaryLayoutLanguage = "fr")
+
+            assertEquals(listOf("fr"), languageManager.effectiveDictionaryLanguages.value)
+        }
+
+    @Test
+    fun `mergedDictionaries defaults to true`() =
+        runTest {
+            languageManager.initialize()
+
+            assertTrue(languageManager.mergedDictionaries.value)
+        }
 }

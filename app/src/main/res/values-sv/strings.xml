@@ -44,6 +44,10 @@
     <string name="autocorrect_settings_learn_new_words_on">Lärande aktiverat</string>
     <string name="autocorrect_settings_learn_new_words_off">Lärande funktionshindrade</string>
     <string name="primary_layout_language">Nuvarande layout</string>
+    <string name="merged_dictionaries_category">Ordbok</string>
+    <string name="merged_dictionaries_title">Sammanslagna ordböcker</string>
+    <string name="merged_dictionaries_on">Alla språkordböcker används för förslag</string>
+    <string name="merged_dictionaries_off">Endast aktiv layoutens ordbok för förslag</string>
     <string name="feedback_settings_haptic_feedback">Haptisk återkoppling</string>
     <string name="feedback_settings_haptic_on">Haptisk aktiverad</string>
     <string name="feedback_settings_haptic_off">Haptisk inaktiverad</string>
@@ -130,6 +134,7 @@
     <string name="error_reset_to_defaults">Misslyckades med att återställa inställningarna</string>
     <string name="error_dictionary_export">Misslyckades med att exportera ordboken</string>
     <string name="error_dictionary_import">Misslyckades med att importera ordboken</string>
+    <string name="error_update_merged_dictionaries">Kunde inte uppdatera ordboksläge</string>
     <string name="success_learned_words_cleared">Inlärda ord rensade</string>
     <string name="success_settings_reset">Inställningarna återställda till standardinställningarna</string>
     <string name="success_dictionary_exported">%1$d ord exporterade</string>

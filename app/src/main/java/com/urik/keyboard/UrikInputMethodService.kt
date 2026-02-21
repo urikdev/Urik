@@ -237,7 +237,11 @@ class UrikInputMethodService :
     private val selectionStateTracker = SelectionStateTracker()
 
     @Volatile
+    private var composingReassertionCount: Int = 0
+
+    @Volatile
     private var lastKnownCursorPosition: Int = -1
+
 
     private fun safeGetTextBeforeCursor(
         length: Int,
@@ -285,6 +289,7 @@ class UrikInputMethodService :
 
     @Volatile
     private var isUrlOrEmailField: Boolean = false
+
 
     fun setAcceleratedDeletion(active: Boolean) {
         isAcceleratedDeletion = active
@@ -404,7 +409,12 @@ class UrikInputMethodService :
                     Spanned.SPAN_EXCLUSIVE_EXCLUSIVE,
                 )
 
-                currentInputConnection?.setComposingText(spannableString, 1)
+                currentInputConnection?.beginBatchEdit()
+                try {
+                    currentInputConnection?.setComposingText(spannableString, 1)
+                } finally {
+                    currentInputConnection?.endBatchEdit()
+                }
             }
         } catch (_: Exception) {
         }
@@ -518,6 +528,7 @@ class UrikInputMethodService :
             currentInputConnection?.beginBatchEdit()
             try {
                 autoCapitalizePronounI()
+                if (displayBuffer.isNotEmpty()) swipeDetector.updateLastCommittedWord(displayBuffer)
                 currentInputConnection?.finishComposingText()
                 currentInputConnection?.commitText(" ", 1)
                 clearInternalStateOnly()
@@ -538,11 +549,18 @@ class UrikInputMethodService :
     private fun commitPreviousSwipeAndInsertSpace() {
         if (!wordState.isFromSwipe || displayBuffer.isEmpty()) return
 
-        currentInputConnection?.finishComposingText()
-        val textBefore = safeGetTextBeforeCursor(1)
-        if (!swipeSpaceManager.isWhitespace(textBefore)) {
-            currentInputConnection?.commitText(" ", 1)
-            swipeSpaceManager.markAutoSpaceInserted()
+        swipeDetector.updateLastCommittedWord(displayBuffer)
+
+        currentInputConnection?.beginBatchEdit()
+        try {
+            currentInputConnection?.finishComposingText()
+            val textBefore = safeGetTextBeforeCursor(1)
+            if (!swipeSpaceManager.isWhitespace(textBefore)) {
+                currentInputConnection?.commitText(" ", 1)
+                swipeSpaceManager.markAutoSpaceInserted()
+            }
+        } finally {
+            currentInputConnection?.endBatchEdit()
         }
         displayBuffer = ""
     }
@@ -562,9 +580,11 @@ class UrikInputMethodService :
         pendingSuggestions = emptyList()
         currentRawSuggestions = emptyList()
         isShowingBigramPredictions = false
-        clearSpellConfirmationState()
+        spellConfirmationState = SpellConfirmationState.NORMAL
+        pendingWordForLearning = null
         swipeKeyboardView?.clearSuggestions()
         composingRegionStart = -1
+        composingReassertionCount = 0
         lastKnownCursorPosition = -1
 
         if (!viewModel.state.value.isCapsLockOn) {
@@ -629,11 +649,35 @@ class UrikInputMethodService :
         wordState = WordState()
         pendingSuggestions = emptyList()
         isShowingBigramPredictions = false
-        clearSpellConfirmationState()
+        spellConfirmationState = SpellConfirmationState.NORMAL
+        pendingWordForLearning = null
         swipeKeyboardView?.clearSuggestions()
         composingRegionStart = -1
         lastKnownCursorPosition = -1
         selectionStateTracker.clearExpectedPosition()
+    }
+
+    private fun reassertComposingRegion(newSelStart: Int): Boolean {
+        if (displayBuffer.isEmpty() || composingRegionStart == -1) return false
+        if (composingReassertionCount >= KeyboardConstants.SelectionTrackingConstants.MAX_COMPOSING_REASSERTIONS) return false
+
+        val expectedStart = composingRegionStart
+        val expectedEnd = composingRegionStart + displayBuffer.length
+        if (newSelStart < expectedStart || newSelStart > expectedEnd) return false
+
+        composingReassertionCount++
+        isActivelyEditing = true
+
+        currentInputConnection?.beginBatchEdit()
+        try {
+            currentInputConnection?.setComposingText(displayBuffer, 1)
+            if (composingRegionStart != -1) {
+                currentInputConnection?.setSelection(newSelStart, newSelStart)
+            }
+        } finally {
+            currentInputConnection?.endBatchEdit()
+        }
+        return true
     }
 
     private fun showBigramPredictions() {
@@ -1374,6 +1418,7 @@ class UrikInputMethodService :
                 languageManager.currentLayoutLanguage.collect { detectedLanguage ->
                     val locale = ULocale.forLanguageTag(detectedLanguage)
                     updateScriptContext(locale)
+                    swipeDetector.updateCurrentLanguage(detectedLanguage.split("-").first())
                 }
             },
         )
@@ -1382,12 +1427,19 @@ class UrikInputMethodService :
             serviceScope.launch {
                 languageManager.activeLanguages.collect { languages ->
                     layoutManager.updateActiveLanguages(languages)
-                    swipeDetector.updateActiveLanguages(languages)
                     updateSwipeKeyboard()
 
                     languages.forEach { lang ->
                         wordFrequencyRepository.preloadTopBigrams(lang)
                     }
+                }
+            },
+        )
+
+        observerJobs.add(
+            serviceScope.launch {
+                languageManager.effectiveDictionaryLanguages.collect { languages ->
+                    swipeDetector.updateActiveLanguages(languages)
                 }
             },
         )
@@ -1545,9 +1597,8 @@ class UrikInputMethodService :
         if (isSecureField) {
             clearSecureFieldState()
         } else if (!isUrlOrEmailField) {
-            try {
-                currentInputConnection?.finishComposingText()
-            } catch (_: Exception) {
+            if (displayBuffer.isNotEmpty() || wordState.hasContent) {
+                coordinateStateClear()
             }
 
             val textBefore = safeGetTextBeforeCursor(50)
@@ -1714,21 +1765,26 @@ class UrikInputMethodService :
 
             val ic = currentInputConnection
             if (ic != null) {
-                try {
+                if (isStartingNewWord) {
+                    composingRegionStart = safeGetCursorPosition()
+                }
+
+                val needsCursorRepositioning = composingRegionStart != -1 &&
+                    newCursorPositionInText != displayBuffer.length
+
+                if (needsCursorRepositioning) {
                     ic.beginBatchEdit()
-
-                    if (isStartingNewWord) {
-                        composingRegionStart = safeGetCursorPosition()
-                    }
-
-                    ic.setComposingText(displayBuffer, 1)
-
-                    if (composingRegionStart != -1) {
+                    try {
+                        ic.setComposingText(displayBuffer, 1)
+                        composingReassertionCount = 0
                         val absoluteCursorPosition = composingRegionStart + newCursorPositionInText
                         ic.setSelection(absoluteCursorPosition, absoluteCursorPosition)
+                    } finally {
+                        ic.endBatchEdit()
                     }
-                } finally {
-                    ic.endBatchEdit()
+                } else {
+                    ic.setComposingText(displayBuffer, 1)
+                    composingReassertionCount = 0
                 }
             }
 
@@ -1946,6 +2002,7 @@ class UrikInputMethodService :
                 currentInputConnection?.beginBatchEdit()
                 try {
                     autoCapitalizePronounI()
+                    swipeDetector.updateLastCommittedWord(displayBuffer)
                     currentInputConnection?.commitText("$displayBuffer ", 1)
 
                     coordinateStateClear()
@@ -2005,8 +2062,10 @@ class UrikInputMethodService :
                     when (result) {
                         is ProcessingResult.Success -> {
                             withContext(Dispatchers.Main) {
+                                isActivelyEditing = true
                                 commitPreviousSwipeAndInsertSpace()
                                 currentInputConnection?.setComposingText(displayWord, 1)
+                                composingRegionStart = safeGetCursorPosition() - displayWord.length
                                 displayBuffer = displayWord
                                 coordinateStateTransition(result.wordState)
 
@@ -2021,8 +2080,10 @@ class UrikInputMethodService :
 
                         is ProcessingResult.Error -> {
                             withContext(Dispatchers.Main) {
+                                isActivelyEditing = true
                                 commitPreviousSwipeAndInsertSpace()
                                 currentInputConnection?.setComposingText(displayWord, 1)
+                                composingRegionStart = safeGetCursorPosition() - displayWord.length
                                 displayBuffer = displayWord
                                 wordState =
                                     WordState(
@@ -2046,8 +2107,10 @@ class UrikInputMethodService :
                                 preserveCase = false,
                             )
                         val fallbackDisplay = caseTransformer.applyCasing(fallbackSuggestion, effectiveState, isSentenceStart)
+                        isActivelyEditing = true
                         commitPreviousSwipeAndInsertSpace()
                         currentInputConnection?.setComposingText(fallbackDisplay, 1)
+                        composingRegionStart = safeGetCursorPosition() - fallbackDisplay.length
                         displayBuffer = fallbackDisplay
                         wordState =
                             WordState(
@@ -2459,16 +2522,20 @@ class UrikInputMethodService :
                     if (displayBuffer.isNotEmpty()) {
                         val ic = currentInputConnection
                         if (ic != null) {
-                            try {
-                                ic.beginBatchEdit()
-                                ic.setComposingText(displayBuffer, 1)
+                            val needsCursorRepositioning = composingRegionStart != -1 &&
+                                newCursorPositionInText != displayBuffer.length
 
-                                if (composingRegionStart != -1) {
+                            if (needsCursorRepositioning) {
+                                ic.beginBatchEdit()
+                                try {
+                                    ic.setComposingText(displayBuffer, 1)
                                     val absoluteCursorPosition = composingRegionStart + newCursorPositionInText
                                     ic.setSelection(absoluteCursorPosition, absoluteCursorPosition)
+                                } finally {
+                                    ic.endBatchEdit()
                                 }
-                            } finally {
-                                ic.endBatchEdit()
+                            } else {
+                                ic.setComposingText(displayBuffer, 1)
                             }
                         }
 
@@ -2806,6 +2873,7 @@ class UrikInputMethodService :
                                 currentInputConnection?.beginBatchEdit()
                                 try {
                                     autoCapitalizePronounI()
+                                    swipeDetector.updateLastCommittedWord(displayBuffer)
                                     currentInputConnection?.finishComposingText()
                                     currentInputConnection?.commitText(" ", 1)
                                     clearInternalStateOnly()
@@ -2844,6 +2912,7 @@ class UrikInputMethodService :
                 currentInputConnection?.beginBatchEdit()
                 try {
                     autoCapitalizePronounI()
+                    if (displayBuffer.isNotEmpty()) swipeDetector.updateLastCommittedWord(displayBuffer)
                     currentInputConnection?.finishComposingText()
                     currentInputConnection?.commitText(" ", 1)
                     clearInternalStateOnly()
@@ -3140,6 +3209,15 @@ class UrikInputMethodService :
             }
         }
 
+        if (selectionResult is SelectionChangeResult.AppSelectionExtended) {
+            if (displayBuffer.isNotEmpty() || wordState.hasContent) {
+                clearInternalStateOnly()
+                isActivelyEditing = false
+            }
+            lastKnownCursorPosition = newSelStart
+            return
+        }
+
         if (isUrlOrEmailField) return
 
         if (selectionResult is SelectionChangeResult.NonSequentialJump) {
@@ -3168,6 +3246,10 @@ class UrikInputMethodService :
         }
 
         if (selectionResult.requiresStateInvalidation()) {
+            if (displayBuffer.isNotEmpty() && reassertComposingRegion(newSelStart)) {
+                lastKnownCursorPosition = newSelStart
+                return
+            }
             invalidateComposingStateOnCursorJump()
             lastKnownCursorPosition = newSelStart
             return
@@ -3180,6 +3262,10 @@ class UrikInputMethodService :
         }
 
         if (!hasComposingText && (wordState.hasContent || displayBuffer.isNotEmpty())) {
+            if (displayBuffer.isNotEmpty() && reassertComposingRegion(newSelStart)) {
+                lastKnownCursorPosition = newSelStart
+                return
+            }
             invalidateComposingStateOnCursorJump()
             lastKnownCursorPosition = newSelStart
             return

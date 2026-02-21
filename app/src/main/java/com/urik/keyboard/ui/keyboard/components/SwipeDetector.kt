@@ -3,14 +3,17 @@
 package com.urik.keyboard.ui.keyboard.components
 
 import android.graphics.PointF
+import android.util.Log
 import android.view.MotionEvent
 import com.ibm.icu.lang.UScript
 import com.ibm.icu.util.ULocale
 import com.urik.keyboard.KeyboardConstants.GeometricScoringConstants
 import com.urik.keyboard.KeyboardConstants.SwipeDetectionConstants
+import com.urik.keyboard.data.WordFrequencyRepository
 import com.urik.keyboard.model.KeyboardKey
 import com.urik.keyboard.service.SpellCheckManager
 import com.urik.keyboard.service.WordLearningEngine
+import com.urik.keyboard.service.WordNormalizer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -20,10 +23,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.yield
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.math.exp
 import kotlin.math.ln
-import kotlin.math.max
-import kotlin.math.min
 import kotlin.math.sqrt
 
 /**
@@ -37,8 +37,11 @@ data class WordCandidate(
 )
 
 /**
- * Detects swipe gestures and converts to word candidates.
+ * Detects swipe gestures and orchestrates the scoring pipeline.
  *
+ * Touch handling and path collection live here. Scoring is delegated to
+ * [ResidualScorer], tie-breaking to [ZipfCheck], and path feature
+ * extraction to [SwipeSignal].
  */
 @Singleton
 class SwipeDetector
@@ -47,6 +50,10 @@ class SwipeDetector
         private val spellCheckManager: SpellCheckManager,
         private val wordLearningEngine: WordLearningEngine,
         private val pathGeometryAnalyzer: PathGeometryAnalyzer,
+        private val wordFrequencyRepository: WordFrequencyRepository,
+        private val residualScorer: ResidualScorer,
+        private val zipfCheck: ZipfCheck,
+        private val wordNormalizer: WordNormalizer,
     ) {
         /**
          * Captured swipe point with metadata.
@@ -73,6 +80,31 @@ class SwipeDetector
 
             fun onTap(key: KeyboardKey)
         }
+
+        enum class FrequencyTier {
+            TOP_100,
+            TOP_1000,
+            TOP_5000,
+            COMMON;
+
+            companion object {
+                fun fromRank(rank: Int): FrequencyTier = when {
+                    rank < 100 -> TOP_100
+                    rank < 1000 -> TOP_1000
+                    rank < 5000 -> TOP_5000
+                    else -> COMMON
+                }
+            }
+        }
+
+        data class DictionaryEntry(
+            val word: String,
+            val frequencyScore: Float,
+            val rawFrequency: Long,
+            val firstChar: Char,
+            val uniqueLetterCount: Int,
+            val frequencyTier: FrequencyTier = FrequencyTier.COMMON,
+        )
 
         @Suppress("ktlint:standard:backing-property-naming")
         private var _swipeListener: SwipeListener? = null
@@ -132,25 +164,20 @@ class SwipeDetector
         @Volatile
         private var lastKeyPositionsHash = 0
 
+        @Volatile
+        private var lastCommittedWord: String = ""
+
+        @Volatile
+        private var currentLanguageTag: String = "en"
+
         private val scopeJob = SupervisorJob()
         private val scope = CoroutineScope(Dispatchers.Default + scopeJob)
         private var scoringJob: Job? = null
 
         private val cachedTransformPoint = PointF()
 
-        data class DictionaryEntry(
-            val word: String,
-            val frequencyScore: Float,
-            val rawFrequency: Long,
-            val firstChar: Char,
-            val uniqueLetterCount: Int,
-        )
-
         /**
          * Updates layout transform for adaptive keyboard modes.
-         *
-         * @param scaleFactor Width scaling factor (e.g., 0.7 for one-handed mode)
-         * @param offsetX Horizontal offset in pixels (e.g., for right-aligned one-handed mode)
          */
         fun updateLayoutTransform(
             scaleFactor: Float,
@@ -162,8 +189,6 @@ class SwipeDetector
 
         /**
          * Updates key position mapping for spatial scoring.
-         *
-         * Call when keyboard layout changes (mode switch, language change).
          */
         fun updateKeyPositions(positions: Map<KeyboardKey.Character, PointF>) {
             val newMap = mutableMapOf<Char, PointF>()
@@ -253,6 +278,14 @@ class SwipeDetector
 
         fun setSwipeListener(listener: SwipeListener?) {
             this._swipeListener = listener
+        }
+
+        fun updateLastCommittedWord(word: String) {
+            lastCommittedWord = word
+        }
+
+        fun updateCurrentLanguage(tag: String) {
+            currentLanguageTag = tag
         }
 
         /**
@@ -466,11 +499,12 @@ class SwipeDetector
                 }
 
                 val isHighVelocity = timeSinceDown < SwipeDetectionConstants.SWIPE_TIME_THRESHOLD_MS
-                val effectiveDistance = if (isHighVelocity) {
-                    swipeStartDistancePx * SwipeDetectionConstants.HIGH_VELOCITY_DISTANCE_MULTIPLIER
-                } else {
-                    swipeStartDistancePx
-                }
+                val effectiveDistance =
+                    if (isHighVelocity) {
+                        swipeStartDistancePx * SwipeDetectionConstants.HIGH_VELOCITY_DISTANCE_MULTIPLIER
+                    } else {
+                        swipeStartDistancePx
+                    }
 
                 if (distance > effectiveDistance) {
                     val currentKey = keyAt(event.x, event.y)
@@ -487,6 +521,10 @@ class SwipeDetector
                         return
                     }
 
+                    if (isGhostPath(distance, avgVelocity)) {
+                        return
+                    }
+
                     isSwiping = true
                     pointCounter = swipePoints.size
                     cachedTransformPoint.set(start.x, start.y)
@@ -496,9 +534,6 @@ class SwipeDetector
             }
         }
 
-        /**
-         * Discriminates peck taps from intentional swipes
-         */
         private fun isPeckLikeMotion(): Boolean {
             val pointCount = swipePoints.size
             if (pointCount < 3) return false
@@ -528,6 +563,84 @@ class SwipeDetector
             if (totalDisplacement <= 0f) return false
 
             return lateDisplacement / totalDisplacement > SwipeDetectionConstants.PECK_LATE_DISPLACEMENT_RATIO
+        }
+
+        private fun isGhostPath(
+            totalDistance: Float,
+            avgVelocity: Float,
+        ): Boolean {
+            if (hasImpossibleGap()) return true
+            if (isSparsePath(totalDistance, avgVelocity)) return true
+            if (isSlideOffStart(avgVelocity)) return true
+            return false
+        }
+
+        private fun hasImpossibleGap(): Boolean {
+            val threshold = SwipeDetectionConstants.GHOST_IMPOSSIBLE_GAP_PX
+            val thresholdSq = threshold * threshold
+            for (i in 0 until swipePoints.size - 1) {
+                val p1 = swipePoints[i]
+                val p2 = swipePoints[i + 1]
+                val dx = p2.x - p1.x
+                val dy = p2.y - p1.y
+                val dt = (p2.timestamp - p1.timestamp).coerceAtLeast(1L)
+                if (dx * dx + dy * dy > thresholdSq && dt <= 16L) {
+                    return true
+                }
+            }
+            return false
+        }
+
+        private fun isSparsePath(
+            totalDistance: Float,
+            avgVelocity: Float,
+        ): Boolean {
+            if (avgVelocity < SwipeDetectionConstants.GHOST_DENSITY_VELOCITY_GATE) return false
+            if (totalDistance < 1f) return false
+            val density = swipePoints.size.toFloat() / totalDistance
+            return density < SwipeDetectionConstants.GHOST_MIN_PATH_DENSITY
+        }
+
+        private fun isSlideOffStart(avgVelocity: Float): Boolean {
+            if (swipePoints.size < 3) return false
+            if (avgVelocity < SwipeDetectionConstants.GHOST_DENSITY_VELOCITY_GATE) return false
+
+            val p0 = swipePoints[0]
+            val p1 = swipePoints[1]
+            val dt01 = (p1.timestamp - p0.timestamp).coerceAtLeast(1L).toFloat()
+            val dx01 = p1.x - p0.x
+            val dy01 = p1.y - p0.y
+            val initialVelocity = sqrt(dx01 * dx01 + dy01 * dy01) / dt01
+
+            if (initialVelocity < SwipeDetectionConstants.GHOST_START_MOMENTUM_VELOCITY) return false
+
+            val checkEnd = minOf(swipePoints.size, SwipeDetectionConstants.GHOST_START_INTENT_POINTS)
+            for (i in 2 until checkEnd) {
+                val prev = swipePoints[i - 1]
+                val curr = swipePoints[i]
+                val dt = (curr.timestamp - prev.timestamp).coerceAtLeast(1L).toFloat()
+                val dx = curr.x - prev.x
+                val dy = curr.y - prev.y
+                val v = sqrt(dx * dx + dy * dy) / dt
+
+                if (v < initialVelocity * SwipeDetectionConstants.GHOST_START_SLOWDOWN_RATIO) {
+                    return false
+                }
+
+                val prevDx = prev.x - swipePoints[i - 2].x
+                val prevDy = prev.y - swipePoints[i - 2].y
+                val dot = prevDx * dx + prevDy * dy
+                val prevLen = sqrt(prevDx * prevDx + prevDy * prevDy)
+                val currLen = sqrt(dx * dx + dy * dy)
+                if (prevLen > 0.1f && currLen > 0.1f) {
+                    val cosAngle = dot / (prevLen * currLen)
+                    if (cosAngle < 0.7f) {
+                        return false
+                    }
+                }
+            }
+
+            return true
         }
 
         private fun shouldSamplePoint(
@@ -687,10 +800,7 @@ class SwipeDetector
                     if (swipePath.isEmpty()) return@withContext emptyList()
 
                     val keyPositionsSnapshot = keyCharacterPositions
-
-                    if (keyPositionsSnapshot.isEmpty()) {
-                        return@withContext emptyList()
-                    }
+                    if (keyPositionsSnapshot.isEmpty()) return@withContext emptyList()
 
                     val interpolatedPath = interpolatePathForFastSegments(swipePath, keyPositionsSnapshot)
 
@@ -698,272 +808,78 @@ class SwipeDetector
                     val maxLength = (interpolatedPath.size / 5).coerceIn(5, 20)
 
                     val compatibleLanguages = getCompatibleLanguagesForSwipe(activeLanguages, currentScriptCode)
-
                     val wordFrequencyMap = loadOrCacheDictionary(compatibleLanguages, minLength, maxLength)
+                    if (wordFrequencyMap.isEmpty()) return@withContext emptyList()
 
-                    if (wordFrequencyMap.isEmpty()) {
-                        return@withContext emptyList()
-                    }
+                    val bigramPredictions: Set<String> =
+                        if (lastCommittedWord.isNotBlank()) {
+                            wordFrequencyRepository.getBigramPredictions(lastCommittedWord, currentLanguageTag).toSet()
+                        } else {
+                            emptySet()
+                        }
 
                     updateAdaptiveSigmaCache(keyPositionsSnapshot)
+                    val sigmaCache = cachedAdaptiveSigmas
+                    val neighborhoodCache = cachedKeyNeighborhoods
 
-                    val geometricAnalysis = pathGeometryAnalyzer.analyze(interpolatedPath, keyPositionsSnapshot)
-
-                    val (baselineSpatialWeight, baselineFreqWeight) =
-                        pathGeometryAnalyzer.calculateDynamicWeights(geometricAnalysis.pathConfidence)
+                    val signal =
+                        SwipeSignal.extract(
+                            interpolatedPath,
+                            keyPositionsSnapshot,
+                            pathGeometryAnalyzer,
+                            sigmaCache,
+                        )
 
                     val dictionaryByFirstChar = buildDictionaryIndex(wordFrequencyMap, minLength, maxLength)
-
-                    val candidatesMap = mutableMapOf<String, ScoredCandidate>()
-                    val pathBounds = calculatePathBounds(interpolatedPath)
-                    var maxFrequencySeen = 0L
-
-                    val charsInBounds = filterCharsByBounds(keyPositionsSnapshot, pathBounds)
-                    val candidateStartKeys = findCandidateStartKeys(interpolatedPath, keyPositionsSnapshot)
-                    val firstPoint = interpolatedPath.first()
-                    val startKeyDistances =
-                        candidateStartKeys.associateWith { char ->
-                            val keyPos = keyPositionsSnapshot[char] ?: return@associateWith Float.MAX_VALUE
-                            val dx = keyPos.x - firstPoint.x
-                            val dy = keyPos.y - firstPoint.y
-                            sqrt(dx * dx + dy * dy)
-                        }
-                    val closestStartKey = startKeyDistances.minByOrNull { it.value }?.key
-
-                    val lastPoint = interpolatedPath.last()
-                    val endKeyDistances =
-                        keyPositionsSnapshot.mapValues { (_, keyPos) ->
-                            val dx = keyPos.x - lastPoint.x
-                            val dy = keyPos.y - lastPoint.y
-                            sqrt(dx * dx + dy * dy)
-                        }
-                    val closestEndKey = endKeyDistances.minByOrNull { it.value }?.key
-
-                    val relevantChars = candidateStartKeys.ifEmpty { dictionaryByFirstChar.keys }
+                    val relevantChars = signal.startAnchor.candidateKeys.ifEmpty { dictionaryByFirstChar.keys }
                     val dictionarySnapshot = relevantChars.flatMap { dictionaryByFirstChar[it] ?: emptyList() }
 
-                    val traversedKeySet = HashSet<Char>(geometricAnalysis.traversedKeys.size)
-                    for (key in geometricAnalysis.traversedKeys.keys) {
-                        traversedKeySet.add(key.lowercaseChar())
-                    }
-
-                    var intentionalInflectionCount = 0
-                    for (inflection in geometricAnalysis.inflectionPoints) {
-                        if (inflection.isIntentional) intentionalInflectionCount++
-                    }
-
-                    val reuseLetterPathIndices = ArrayList<Int>(20)
-                    val reuseLetterScores = ArrayList<Pair<Char, Float>>(20)
-                    val reusableWordLetters = HashSet<Char>(10)
-
-                    val vertexAnalysis = geometricAnalysis.vertexAnalysis
+                    var maxFrequencySeen = 0L
+                    val results = ArrayList<ResidualScorer.CandidateResult>(dictionarySnapshot.size / 4)
 
                     for (i in dictionarySnapshot.indices) {
                         if (i % 50 == 0) yield()
 
                         val entry = dictionarySnapshot[i]
-
-                        if (!couldMatchPath(entry.word, charsInBounds)) continue
-
-                        if (pathGeometryAnalyzer.shouldPruneCandidate(entry.word.length, vertexAnalysis)) continue
-
-                        val isClusteredWord = pathGeometryAnalyzer.isClusteredWord(entry.word, keyPositionsSnapshot)
-
-                        val pointsPerLetter = interpolatedPath.size.toFloat() / entry.word.length.toFloat()
-                        val optimalRatio = if (entry.word.length <= 3) 3.0f else 4.0f
-                        val ratioQuality = pointsPerLetter / optimalRatio
-
-                        val spatialScore =
-                            calculateGeometricSpatialScore(
-                                entry.word,
-                                interpolatedPath,
-                                keyPositionsSnapshot,
-                                entry.uniqueLetterCount,
-                                reuseLetterPathIndices,
-                                reuseLetterScores,
-                                ratioQuality,
-                                geometricAnalysis,
-                                isClusteredWord,
-                            )
-
-                        val ratioPenalty = calculateRatioPenalty(pointsPerLetter, optimalRatio)
-                        val adjustedSpatialScore = spatialScore * ratioPenalty
-
-                        val frequencyBoost = calculateFrequencyBoost(entry.rawFrequency)
-                        val boostedFrequencyScore = entry.frequencyScore * frequencyBoost
-
                         if (entry.rawFrequency > maxFrequencySeen) {
                             maxFrequencySeen = entry.rawFrequency
                         }
 
-                        val (spatialWeight, frequencyWeight) =
-                            determineFinalWeights(
+                        val result =
+                            residualScorer.scoreCandidate(
                                 entry,
-                                adjustedSpatialScore,
-                                maxFrequencySeen,
-                                baselineSpatialWeight,
-                                baselineFreqWeight,
-                                isClusteredWord,
-                            )
-
-                        val pathCoverage =
-                            pathGeometryAnalyzer.calculatePathCoverage(
-                                entry.word,
-                                interpolatedPath,
+                                signal,
                                 keyPositionsSnapshot,
-                                reuseLetterPathIndices,
-                            )
+                                sigmaCache,
+                                neighborhoodCache,
+                                maxFrequencySeen,
+                            ) ?: continue
 
-                        var orderViolations = 0
-                        for (j in 0 until reuseLetterPathIndices.size - 1) {
-                            if (reuseLetterPathIndices[j + 1] < reuseLetterPathIndices[j]) {
-                                orderViolations++
-                            }
-                        }
-                        val orderPenalty =
-                            when (orderViolations) {
-                                0 -> 1.0f
-                                1 -> 0.85f
-                                2 -> 0.70f
-                                else -> 0.50f
-                            }
+                        results.add(result)
 
-                        val coverageBonus =
-                            if (pathCoverage > GeometricScoringConstants.MIN_PATH_COVERAGE_THRESHOLD) {
-                                1.0f + (pathCoverage - GeometricScoringConstants.MIN_PATH_COVERAGE_THRESHOLD) * 0.25f
-                            } else {
-                                0.80f + pathCoverage * 0.35f
-                            }
-
-                        val maxInflectionLength =
-                            when {
-                                interpolatedPath.size < 35 -> 3
-                                interpolatedPath.size < 50 -> 4
-                                interpolatedPath.size < 70 -> 6
-                                interpolatedPath.size < 100 -> 8
-                                interpolatedPath.size < 150 -> 12
-                                interpolatedPath.size < 200 -> 16
-                                else -> 20
-                            }
-                        val inflectionBasedLength = (intentionalInflectionCount + 2).coerceIn(2, maxInflectionLength)
-                        val pathPointBasedLength = (interpolatedPath.size / 14).coerceIn(2, 20)
-                        val expectedWordLength = maxOf(inflectionBasedLength, pathPointBasedLength)
-
-                        val lengthExcess = maxOf(0, entry.word.length - expectedWordLength)
-                        val lengthExcessPenalty = 1.0f - (lengthExcess * GeometricScoringConstants.WORD_LENGTH_EXCESS_PENALTY)
-
-                        val lengthDeficit = maxOf(0, expectedWordLength - entry.word.length)
-                        val lengthDeficitPenalty = 1.0f - (lengthDeficit * GeometricScoringConstants.WORD_LENGTH_DEFICIT_PENALTY)
-
-                        val lengthPenalty = lengthExcessPenalty * lengthDeficitPenalty
-
-                        val wordFirstChar = entry.word.first().lowercaseChar()
-                        val startKeyBonus =
-                            if (wordFirstChar == closestStartKey) {
-                                GeometricScoringConstants.START_KEY_MATCH_BONUS
-                            } else {
-                                val distToWordStart = startKeyDistances[wordFirstChar] ?: Float.MAX_VALUE
-                                val distToClosest = startKeyDistances[closestStartKey] ?: 1f
-                                val distanceRatio = (distToWordStart / distToClosest.coerceAtLeast(1f)).coerceAtMost(3f)
-                                1.0f / (1.0f + (distanceRatio - 1.0f) * GeometricScoringConstants.START_KEY_DISTANCE_PENALTY_FACTOR)
-                            }
-
-                        val wordLastChar = entry.word.last().lowercaseChar()
-                        val endKeyBonus =
-                            if (wordLastChar == closestEndKey) {
-                                GeometricScoringConstants.END_KEY_MATCH_BONUS
-                            } else {
-                                val distToWordEnd = endKeyDistances[wordLastChar] ?: Float.MAX_VALUE
-                                val distToClosestEnd = endKeyDistances[closestEndKey] ?: 1f
-                                val distanceRatio = (distToWordEnd / distToClosestEnd.coerceAtLeast(1f)).coerceAtMost(3f)
-                                1.0f / (1.0f + (distanceRatio - 1.0f) * GeometricScoringConstants.END_KEY_DISTANCE_PENALTY_FACTOR)
-                            }
-
-                        reusableWordLetters.clear()
-                        for (c in entry.word) {
-                            reusableWordLetters.add(c.lowercaseChar())
-                        }
-                        var missingLetters = 0
-                        for (letter in reusableWordLetters) {
-                            if (letter !in traversedKeySet) missingLetters++
-                        }
-                        val traversalPenalty =
-                            when (missingLetters) {
-                                0 -> 1.0f
-                                1 -> 0.75f
-                                else -> 0.5f
-                            }
-
-                        val vertexLengthPenalty =
-                            pathGeometryAnalyzer.calculateVertexLengthPenalty(
-                                entry.word.length,
-                                vertexAnalysis,
-                            )
-
-                        @Suppress("ktlint:standard:max-line-length")
-                        val combinedScore =
-                            (adjustedSpatialScore * spatialWeight + boostedFrequencyScore * frequencyWeight) * coverageBonus * lengthPenalty *
-                                startKeyBonus *
-                                endKeyBonus *
-                                traversalPenalty *
-                                orderPenalty *
-                                vertexLengthPenalty
-
-                        val scored =
-                            ScoredCandidate(
-                                word = entry.word,
-                                spatialScore = adjustedSpatialScore,
-                                frequencyScore = entry.frequencyScore,
-                                combinedScore = combinedScore,
-                                pathCoverage = pathCoverage,
-                                letterPathIndices = ArrayList(reuseLetterPathIndices),
-                                isClusteredWord = isClusteredWord,
-                                lengthPenalty = lengthPenalty,
-                                traversalPenalty = traversalPenalty,
-                                orderPenalty = orderPenalty,
-                                vertexLengthPenalty = vertexLengthPenalty,
-                            )
-
-                        val existing = candidatesMap[entry.word]
-                        if (existing == null || combinedScore > existing.combinedScore) {
-                            candidatesMap[entry.word] = scored
-                        }
-
-                        if (combinedScore > SwipeDetectionConstants.EXCELLENT_CANDIDATE_THRESHOLD) {
+                        if (result.combinedScore > SwipeDetectionConstants.EXCELLENT_CANDIDATE_THRESHOLD) {
                             var excellentCount = 0
-                            for (candidate in candidatesMap.values) {
+                            for (candidate in results) {
                                 if (candidate.combinedScore > 0.90f) excellentCount++
                             }
                             if (excellentCount >= SwipeDetectionConstants.MIN_EXCELLENT_CANDIDATES) break
                         }
                     }
 
-                    val topCandidates =
-                        selectTopCandidatesWithGeometricDisambiguation(
-                            candidatesMap.values.toList(),
-                            geometricAnalysis,
+                    val arbitration =
+                        zipfCheck.arbitrate(
+                            results,
+                            signal.geometricAnalysis,
                             keyPositionsSnapshot,
+                            bigramPredictions,
+                            wordFrequencyMap,
+                            interpolatedPath.size,
                         )
-
-                    return@withContext topCandidates
+                    return@withContext arbitration.candidates
                 } catch (_: Exception) {
                     return@withContext emptyList()
                 }
             }
-
-        private data class ScoredCandidate(
-            val word: String,
-            val spatialScore: Float,
-            val frequencyScore: Float,
-            val combinedScore: Float,
-            val pathCoverage: Float,
-            val letterPathIndices: List<Int>,
-            val isClusteredWord: Boolean,
-            val lengthPenalty: Float = 1.0f,
-            val traversalPenalty: Float = 1.0f,
-            val orderPenalty: Float = 1.0f,
-            val vertexLengthPenalty: Float = 1.0f,
-        )
 
         private fun interpolatePathForFastSegments(
             path: List<SwipePoint>,
@@ -1097,541 +1013,21 @@ class SwipeDetector
             wordFrequencyMap: Map<String, Int>,
             minLength: Int,
             maxLength: Int,
-        ): Map<Char, List<DictionaryEntry>> =
-            wordFrequencyMap.entries
-                .asSequence()
+        ): Map<Char, List<DictionaryEntry>> {
+            val filtered = wordFrequencyMap.entries
                 .filter { (word, _) -> word.length in minLength..maxLength }
-                .map { (word, frequency) ->
-                    DictionaryEntry(
-                        word = word,
-                        frequencyScore = ln(frequency.toFloat() + 1f) / 20f,
-                        rawFrequency = frequency.toLong(),
-                        firstChar = word.first().lowercaseChar(),
-                        uniqueLetterCount = word.toSet().size,
-                    )
-                }.groupBy { it.firstChar }
-
-        private fun filterCharsByBounds(
-            keyPositions: Map<Char, PointF>,
-            pathBounds: PathBounds,
-        ): Set<Char> {
-            val margin = SwipeDetectionConstants.PATH_BOUNDS_MARGIN_PX
-            return keyPositions.keys.filterTo(mutableSetOf()) { char ->
-                val pos = keyPositions[char]!!
-                pos.x >= pathBounds.minX - margin &&
-                    pos.x <= pathBounds.maxX + margin &&
-                    pos.y >= pathBounds.minY - margin &&
-                    pos.y <= pathBounds.maxY + margin
-            }
-        }
-
-        private fun findCandidateStartKeys(
-            path: List<SwipePoint>,
-            keyPositions: Map<Char, PointF>,
-        ): Set<Char> {
-            val firstPoint = path.firstOrNull() ?: return emptySet()
-
-            return keyPositions.entries
-                .map { (char, pos) ->
-                    val dx = pos.x - firstPoint.x
-                    val dy = pos.y - firstPoint.y
-                    char to (dx * dx + dy * dy)
-                }.sortedBy { it.second }
-                .take(8)
-                .filter { it.second < SwipeDetectionConstants.CLOSE_KEY_DISTANCE_THRESHOLD_SQ }
-                .map { it.first }
-                .toSet()
-        }
-
-        private fun calculateRatioPenalty(
-            pointsPerLetter: Float,
-            optimalRatio: Float,
-        ): Float =
-            when {
-                pointsPerLetter < optimalRatio * 0.50f -> 0.50f
-                pointsPerLetter < optimalRatio * 0.65f -> 0.60f
-                pointsPerLetter < optimalRatio * 0.75f -> 0.75f
-                pointsPerLetter < optimalRatio * 0.85f -> 0.90f
-                pointsPerLetter > optimalRatio * 2.00f -> 0.60f
-                pointsPerLetter > optimalRatio * 1.60f -> 0.75f
-                pointsPerLetter > optimalRatio * 1.40f -> 0.85f
-                else -> 1.0f
-            }
-
-        private fun calculateFrequencyBoost(rawFrequency: Long): Float =
-            when {
-                rawFrequency > 10_000_000L -> 1.20f
-                rawFrequency > 5_000_000L -> 1.15f
-                rawFrequency > 2_000_000L -> 1.10f
-                else -> 1.0f
-            }
-
-        private fun determineFinalWeights(
-            entry: DictionaryEntry,
-            adjustedSpatialScore: Float,
-            maxFrequencySeen: Long,
-            baselineSpatialWeight: Float,
-            baselineFreqWeight: Float,
-            isClusteredWord: Boolean,
-        ): Pair<Float, Float> {
-            if (isClusteredWord) {
-                return GeometricScoringConstants.CLUSTERED_WORD_SPATIAL_WEIGHT to
-                    GeometricScoringConstants.CLUSTERED_WORD_FREQ_WEIGHT
-            }
-
-            val frequencyRatio =
-                if (maxFrequencySeen > 0) {
-                    entry.rawFrequency.toFloat() / maxFrequencySeen.toFloat()
-                } else {
-                    1.0f
-                }
-
-            return when {
-                entry.word.length == 2 && adjustedSpatialScore > 0.75f -> 0.88f to 0.12f
-                frequencyRatio >= 10.0f -> minOf(baselineSpatialWeight, 0.50f) to maxOf(baselineFreqWeight, 0.50f)
-                frequencyRatio >= 5.0f -> minOf(baselineSpatialWeight, 0.55f) to maxOf(baselineFreqWeight, 0.45f)
-                frequencyRatio >= 3.0f -> minOf(baselineSpatialWeight, 0.58f) to maxOf(baselineFreqWeight, 0.42f)
-                else -> baselineSpatialWeight to baselineFreqWeight
-            }
-        }
-
-        private fun selectTopCandidatesWithGeometricDisambiguation(
-            candidates: List<ScoredCandidate>,
-            geometricAnalysis: PathGeometryAnalyzer.GeometricAnalysis,
-            keyPositions: Map<Char, PointF>,
-        ): List<WordCandidate> {
-            if (candidates.isEmpty()) return emptyList()
-
-            val filtered = candidates.filter { !spellCheckManager.isWordBlacklisted(it.word) }
-            val sorted = filtered.sortedByDescending { it.combinedScore }
-            val top = sorted.take(10)
-
-            if (top.size < 2) {
-                return top.map { WordCandidate(it.word, it.spatialScore, it.frequencyScore, it.combinedScore) }
-            }
-
-            val leader = top[0]
-            val runnerUp = top[1]
-            val scoreDelta = leader.combinedScore - runnerUp.combinedScore
-
-            if (scoreDelta < GeometricScoringConstants.GEOMETRIC_SIMILARITY_THRESHOLD) {
-                val disambiguated =
-                    disambiguateCloseCompetitors(
-                        leader,
-                        runnerUp,
-                        geometricAnalysis,
-                        keyPositions,
-                    )
-                val reordered = mutableListOf(disambiguated.first, disambiguated.second)
-                reordered.addAll(top.drop(2))
-
-                return reordered.take(3).map {
-                    WordCandidate(it.word, it.spatialScore, it.frequencyScore, it.combinedScore)
-                }
-            }
-
-            return top.take(3).map {
-                WordCandidate(it.word, it.spatialScore, it.frequencyScore, it.combinedScore)
-            }
-        }
-
-        private fun disambiguateCloseCompetitors(
-            candidate1: ScoredCandidate,
-            candidate2: ScoredCandidate,
-            geometricAnalysis: PathGeometryAnalyzer.GeometricAnalysis,
-            keyPositions: Map<Char, PointF>,
-        ): Pair<ScoredCandidate, ScoredCandidate> {
-            val inflectionScore1 = calculateInflectionAlignment(candidate1.word, geometricAnalysis)
-            val inflectionScore2 = calculateInflectionAlignment(candidate2.word, geometricAnalysis)
-
-            val coverageScore1 = candidate1.pathCoverage
-            val coverageScore2 = candidate2.pathCoverage
-
-            val freqScore1 = candidate1.frequencyScore
-            val freqScore2 = candidate2.frequencyScore
-
-            val originalLeaderBonus1 = if (candidate1.combinedScore > candidate2.combinedScore) 0.1f else 0f
-            val originalLeaderBonus2 = if (candidate2.combinedScore > candidate1.combinedScore) 0.1f else 0f
-
-            val tiebreaker1 = inflectionScore1 * 0.4f + coverageScore1 * 0.2f + freqScore1 * 0.3f + originalLeaderBonus1
-            val tiebreaker2 = inflectionScore2 * 0.4f + coverageScore2 * 0.2f + freqScore2 * 0.3f + originalLeaderBonus2
-
-            return if (tiebreaker1 >= tiebreaker2) {
-                val boostedWinner = candidate1.copy(combinedScore = maxOf(candidate1.combinedScore, candidate2.combinedScore) + 0.001f)
-                boostedWinner to candidate2
-            } else {
-                val boostedWinner = candidate2.copy(combinedScore = maxOf(candidate1.combinedScore, candidate2.combinedScore) + 0.001f)
-                boostedWinner to candidate1
-            }
-        }
-
-        private fun calculateInflectionAlignment(
-            word: String,
-            geometricAnalysis: PathGeometryAnalyzer.GeometricAnalysis,
-        ): Float {
-            if (geometricAnalysis.inflectionPoints.isEmpty()) return 0.5f
-
-            var alignedInflections = 0
-            var totalRelevantInflections = 0
-
-            for (inflection in geometricAnalysis.inflectionPoints) {
-                if (inflection.isIntentional && inflection.nearestKey != null) {
-                    totalRelevantInflections++
-                    if (word.contains(inflection.nearestKey, ignoreCase = true)) {
-                        alignedInflections++
-                    }
-                }
-            }
-
-            return if (totalRelevantInflections > 0) {
-                alignedInflections.toFloat() / totalRelevantInflections.toFloat()
-            } else {
-                0.5f
-            }
-        }
-
-        private fun calculateGeometricSpatialScore(
-            word: String,
-            swipePath: List<SwipePoint>,
-            keyPositions: Map<Char, PointF>,
-            uniqueLetterCount: Int,
-            letterPathIndices: ArrayList<Int>,
-            letterScores: ArrayList<Pair<Char, Float>>,
-            ratioQuality: Float,
-            geometricAnalysis: PathGeometryAnalyzer.GeometricAnalysis,
-            isClusteredWord: Boolean,
-        ): Float {
-            if (swipePath.isEmpty()) return 0f
-
-            letterPathIndices.clear()
-            letterScores.clear()
-
-            var totalScore = 0f
-            val sigmaCache = cachedAdaptiveSigmas
-            val neighborhoodCache = cachedKeyNeighborhoods
-
-            for (letterIndex in word.indices) {
-                val char = word[letterIndex]
-                val lowerChar = char.lowercaseChar()
-                val keyPos = keyPositions[lowerChar] ?: return 0f
-
-                val isFirstLetter = letterIndex == 0
-                val isLastLetter = letterIndex == word.length - 1
-
-                val adaptiveSigma = sigmaCache[lowerChar]?.sigma ?: GeometricScoringConstants.DEFAULT_SIGMA
-                val baseSigma =
-                    if (isClusteredWord) {
-                        adaptiveSigma * GeometricScoringConstants.CLUSTERED_SEQUENCE_TOLERANCE_MULTIPLIER
-                    } else {
-                        adaptiveSigma
-                    }
-
-                val searchRange =
-                    when {
-                        isFirstLetter -> (swipePath.size * 0.30).toInt().coerceAtLeast(3)
-                        isLastLetter -> swipePath.size - (swipePath.size * 0.30).toInt().coerceAtLeast(swipePath.size - 3)
-                        else -> swipePath.size
-                    }
-
-                var minTotalDistance = Float.MAX_VALUE
-                var minDistanceSquared = Float.MAX_VALUE
-                var closestPointIndex = -1
-                var velocityAtClosest = 0f
-                var closestPointX = 0f
-                var closestPointY = 0f
-
-                val searchStart = if (isLastLetter) swipePath.size - searchRange else 0
-                val searchEnd = if (isFirstLetter) searchRange else swipePath.size
-
-                val expectedPathProgress =
-                    if (word.length > 1) {
-                        letterIndex.toFloat() / (word.length - 1).toFloat()
-                    } else {
-                        0.5f
-                    }
-                val expectedPathIndex = (expectedPathProgress * (swipePath.size - 1)).toInt()
-
-                val positionPenaltyFactor = if (isClusteredWord) 200f else 150f
-
-                for (relativeIndex in 0 until (searchEnd - searchStart)) {
-                    val pointIndex = searchStart + relativeIndex
-                    val point = swipePath[pointIndex]
-                    val dx = keyPos.x - point.x
-                    val dy = keyPos.y - point.y
-                    val spatialDistanceSquared = dx * dx + dy * dy
-
-                    val positionDeviation = kotlin.math.abs(pointIndex - expectedPathIndex).toFloat()
-                    val positionPenalty = positionDeviation * positionPenaltyFactor
-
-                    val totalDistance = spatialDistanceSquared + positionPenalty
-
-                    if (totalDistance < minTotalDistance) {
-                        minTotalDistance = totalDistance
-                        minDistanceSquared = spatialDistanceSquared
-                        closestPointIndex = pointIndex
-                        velocityAtClosest = point.velocity
-                        closestPointX = point.x
-                        closestPointY = point.y
-
-                        if (spatialDistanceSquared < 100f && positionDeviation < 2f) {
-                            break
-                        }
-                    }
-                }
-
-                val anchorModifier =
-                    pathGeometryAnalyzer.calculateAnchorSigmaModifier(
-                        letterIndex,
-                        word.length,
-                        closestPointIndex,
-                        geometricAnalysis,
-                    )
-                val effectiveSigma = baseSigma * anchorModifier
-                val twoSigmaSquared = 2f * effectiveSigma * effectiveSigma
-                val expThreshold = (2.5f * effectiveSigma) * (2.5f * effectiveSigma)
-
-                var letterScore =
-                    if (minDistanceSquared > expThreshold) {
-                        0.0f
-                    } else {
-                        exp(-minDistanceSquared / twoSigmaSquared)
-                    }
-
-                if (letterScore < GeometricScoringConstants.NEIGHBORHOOD_RESCUE_THRESHOLD) {
-                    val neighborhood = neighborhoodCache[lowerChar]
-                    if (neighborhood != null) {
-                        val rescueScore =
-                            pathGeometryAnalyzer.calculateNeighborhoodRescueScore(
-                                closestPointX,
-                                closestPointY,
-                                neighborhood,
-                                keyPositions,
-                                effectiveSigma,
-                            )
-                        letterScore = maxOf(letterScore, rescueScore)
-                    }
-                }
-
-                val velocityWeight = pathGeometryAnalyzer.calculateVelocityWeight(velocityAtClosest)
-                letterScore *= velocityWeight
-
-                val inflectionBoost =
-                    pathGeometryAnalyzer.getInflectionBoost(
-                        lowerChar,
-                        geometricAnalysis,
-                    )
-                letterScore *= inflectionBoost
-
-                if (pathGeometryAnalyzer.didPathTraverseKey(lowerChar, geometricAnalysis)) {
-                    letterScore = maxOf(letterScore, GeometricScoringConstants.TRAVERSAL_FLOOR_SCORE)
-                }
-
-                if (letterIndex > 0 && word[letterIndex] == word[letterIndex - 1]) {
-                    val repeatedLetterBoost =
-                        pathGeometryAnalyzer.detectRepeatedLetterSignal(
-                            swipePath,
-                            keyPos,
-                            letterPathIndices.lastOrNull() ?: 0,
-                            closestPointIndex,
-                        )
-                    letterScore *= (1f + repeatedLetterBoost)
-                }
-
-                letterPathIndices.add(closestPointIndex)
-                letterScores.add(char to letterScore)
-                totalScore += letterScore
-            }
-
-            val lexicalCoherenceBonus = pathGeometryAnalyzer.calculateLexicalCoherenceBonus(letterScores)
-
-            val sequencePenalty =
-                calculateSequencePenalty(
-                    word,
-                    letterPathIndices,
-                    uniqueLetterCount,
-                    isClusteredWord,
+                .sortedByDescending { it.value }
+            return filtered.mapIndexed { rank, (word, frequency) ->
+                DictionaryEntry(
+                    word = word,
+                    frequencyScore = ln(frequency.toFloat() + 1f) / 20f,
+                    rawFrequency = frequency.toLong(),
+                    firstChar = wordNormalizer.stripDiacritics(word.first().toString()).first().lowercaseChar(),
+                    uniqueLetterCount = word.toSet().size,
+                    frequencyTier = FrequencyTier.fromRank(rank),
                 )
-
-            val baseSpatialScore = totalScore / word.length.toFloat()
-
-            val wrongLetterPenalty = calculateWrongLetterPenalty(letterScores, word.length)
-
-            val pathExhaustionPenalty =
-                calculatePathExhaustionPenalty(
-                    word,
-                    letterPathIndices,
-                    swipePath.size,
-                )
-
-            val lengthBonus = calculateLengthBonus(word.length, ratioQuality)
-
-            val spatialWithBonuses =
-                (baseSpatialScore * sequencePenalty * lengthBonus * wrongLetterPenalty * pathExhaustionPenalty * lexicalCoherenceBonus)
-                    .coerceAtMost(1.0f)
-
-            val repetitionCount = word.length - uniqueLetterCount
-            val repetitionRatio = repetitionCount.toFloat() / word.length.toFloat()
-            val repetitionPenalty =
-                if (repetitionRatio > 0.30f) {
-                    1.0f - ((repetitionCount - 1) * SwipeDetectionConstants.REPETITION_PENALTY_FACTOR).coerceAtMost(0.20f)
-                } else {
-                    1.0f
-                }
-
-            return spatialWithBonuses * repetitionPenalty
+            }.groupBy { it.firstChar }
         }
-
-        private fun calculateSequencePenalty(
-            word: String,
-            letterPathIndices: ArrayList<Int>,
-            uniqueLetterCount: Int,
-            isClusteredWord: Boolean,
-        ): Float {
-            var sequenceViolations = 0
-
-            for (i in 1 until letterPathIndices.size) {
-                val currentIndex = letterPathIndices[i]
-                val previousIndex = letterPathIndices[i - 1]
-                val isRepeatedLetter = i < word.length && word[i] == word[i - 1]
-                val indexAdvancement = currentIndex - previousIndex
-
-                if (isRepeatedLetter) {
-                    if (indexAdvancement > SwipeDetectionConstants.REPEATED_LETTER_MAX_INDEX_GAP || indexAdvancement < 1) {
-                        sequenceViolations++
-                    }
-                } else {
-                    if (currentIndex < previousIndex) {
-                        sequenceViolations++
-                    }
-                }
-            }
-
-            val baseTolerableViolations =
-                when {
-                    word.length <= 4 -> 0
-                    word.length <= 6 -> 1
-                    else -> 1
-                }
-
-            val adjustedTolerance =
-                if (isClusteredWord) {
-                    (baseTolerableViolations * GeometricScoringConstants.CLUSTERED_SEQUENCE_TOLERANCE_MULTIPLIER).toInt()
-                } else {
-                    val repetitionCount = word.length - uniqueLetterCount
-                    val repetitionPenaltyFactor = if (word.length >= 6) 0 else 1
-                    baseTolerableViolations + (repetitionCount * repetitionPenaltyFactor)
-                }
-
-            return when {
-                sequenceViolations <= adjustedTolerance -> 1.0f
-                sequenceViolations == adjustedTolerance + 1 -> 0.92f
-                sequenceViolations == adjustedTolerance + 2 -> 0.80f
-                else -> 0.65f
-            }
-        }
-
-        private fun calculateWrongLetterPenalty(
-            letterScores: ArrayList<Pair<Char, Float>>,
-            wordLength: Int,
-        ): Float {
-            val badLetterCount = letterScores.count { it.second < 0.30f }
-            val veryBadLetterCount = letterScores.count { it.second < 0.15f }
-
-            return when {
-                veryBadLetterCount > 0 -> 0.40f
-                badLetterCount >= 2 && wordLength <= 4 -> 0.45f
-                badLetterCount >= 1 && wordLength == 2 -> 0.35f
-                badLetterCount >= 1 && wordLength == 3 -> 0.50f
-                badLetterCount >= 1 && wordLength >= 4 -> 0.70f
-                else -> 1.0f
-            }
-        }
-
-        private fun calculatePathExhaustionPenalty(
-            word: String,
-            letterPathIndices: ArrayList<Int>,
-            pathSize: Int,
-        ): Float {
-            if (word.length < SwipeDetectionConstants.PATH_EXHAUSTION_MIN_WORD_LENGTH || letterPathIndices.isEmpty()) {
-                return 1.0f
-            }
-
-            val lastQuartileThreshold = (pathSize * SwipeDetectionConstants.PATH_EXHAUSTION_QUARTILE_THRESHOLD).toInt()
-            val tailLetterCount =
-                (word.length * SwipeDetectionConstants.PATH_EXHAUSTION_TAIL_RATIO)
-                    .toInt()
-                    .coerceAtLeast(SwipeDetectionConstants.PATH_EXHAUSTION_MIN_LETTERS_CHECK)
-
-            val startIndex = letterPathIndices.size - tailLetterCount
-            var lettersInLastQuartile = 0
-
-            for (i in startIndex until letterPathIndices.size) {
-                if (letterPathIndices[i] >= lastQuartileThreshold) {
-                    lettersInLastQuartile++
-                }
-            }
-
-            return when {
-                lettersInLastQuartile >= 3 -> 0.60f
-                lettersInLastQuartile == 2 -> 0.80f
-                else -> 1.0f
-            }
-        }
-
-        private fun calculateLengthBonus(
-            wordLength: Int,
-            ratioQuality: Float,
-        ): Float {
-            if (ratioQuality < SwipeDetectionConstants.LENGTH_BONUS_MIN_RATIO_QUALITY) {
-                return 1.0f
-            }
-
-            return when {
-                wordLength >= 8 -> 1.25f
-                wordLength == 7 -> 1.18f
-                wordLength == 6 -> 1.12f
-                wordLength == 5 -> 1.06f
-                else -> 1.0f
-            }
-        }
-
-        private fun couldMatchPath(
-            word: String,
-            charsInBounds: Set<Char>,
-        ): Boolean {
-            var charsInBoundsCount = 0
-            for (char in word) {
-                if (char.lowercaseChar() in charsInBounds) {
-                    charsInBoundsCount++
-                }
-            }
-
-            val requiredChars = (word.length * SwipeDetectionConstants.MIN_CHARS_IN_BOUNDS_RATIO).toInt().coerceAtLeast(1)
-            return charsInBoundsCount >= requiredChars
-        }
-
-        private fun calculatePathBounds(swipePath: List<SwipePoint>): PathBounds {
-            var minX = Float.MAX_VALUE
-            var maxX = Float.MIN_VALUE
-            var minY = Float.MAX_VALUE
-            var maxY = Float.MIN_VALUE
-
-            swipePath.forEach { point ->
-                minX = min(minX, point.x)
-                maxX = max(maxX, point.x)
-                minY = min(minY, point.y)
-                maxY = max(maxY, point.y)
-            }
-
-            return PathBounds(minX, maxX, minY, maxY)
-        }
-
-        private data class PathBounds(
-            val minX: Float,
-            val maxX: Float,
-            val minY: Float,
-            val maxY: Float,
-        )
 
         private fun calculateVelocity(event: MotionEvent): Float {
             if (swipePoints.size < 2) return 0.0f
@@ -1678,5 +1074,9 @@ class SwipeDetector
             cachedAdaptiveSigmas = emptyMap()
             cachedKeyNeighborhoods = emptyMap()
             reset()
+        }
+
+        companion object {
+            private const val TAG = "SwipeEngine"
         }
     }

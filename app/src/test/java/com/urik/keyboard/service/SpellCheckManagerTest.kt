@@ -47,11 +47,13 @@ class SpellCheckManagerTest {
     private lateinit var wordLearningEngine: WordLearningEngine
     private lateinit var wordFrequencyRepository: WordFrequencyRepository
     private lateinit var cacheMemoryManager: CacheMemoryManager
+    private lateinit var wordNormalizer: WordNormalizer
     private lateinit var suggestionCache: ManagedCache<String, List<SpellingSuggestion>>
     private lateinit var dictionaryCache: ManagedCache<String, Boolean>
 
     private lateinit var currentLanguageFlow: MutableStateFlow<String>
     private lateinit var activeLanguagesFlow: MutableStateFlow<List<String>>
+    private lateinit var effectiveDictionaryLanguagesFlow: MutableStateFlow<List<String>>
 
     private lateinit var spellCheckManager: SpellCheckManager
 
@@ -97,6 +99,8 @@ class SpellCheckManagerTest {
         assetManager = mock()
         languageManager = mock()
         cacheMemoryManager = mock()
+        wordNormalizer = mock()
+        whenever(wordNormalizer.stripDiacritics(any())).thenAnswer { it.arguments[0] as String }
 
         wordLearningEngine =
             mock {
@@ -147,6 +151,9 @@ class SpellCheckManagerTest {
         activeLanguagesFlow = MutableStateFlow(listOf("en"))
         whenever(languageManager.activeLanguages).thenReturn(activeLanguagesFlow)
 
+        effectiveDictionaryLanguagesFlow = MutableStateFlow(listOf("en"))
+        whenever(languageManager.effectiveDictionaryLanguages).thenReturn(effectiveDictionaryLanguagesFlow)
+
         val keyPositionsFlow = MutableStateFlow<Map<Char, android.graphics.PointF>>(emptyMap())
         whenever(languageManager.keyPositions).thenReturn(keyPositionsFlow)
 
@@ -163,6 +170,7 @@ class SpellCheckManagerTest {
                 wordFrequencyRepository = wordFrequencyRepository,
                 cacheMemoryManager = cacheMemoryManager,
                 ioDispatcher = testDispatcher,
+                wordNormalizer = wordNormalizer,
             )
     }
 
@@ -185,6 +193,7 @@ class SpellCheckManagerTest {
                 .thenThrow(java.io.FileNotFoundException())
 
             activeLanguagesFlow.emit(listOf("sv"))
+            effectiveDictionaryLanguagesFlow.emit(listOf("sv"))
 
             val result = spellCheckManager.isWordInDictionary("test")
             assertFalse(result)
@@ -577,6 +586,7 @@ class SpellCheckManagerTest {
                 .thenReturn(ByteArrayInputStream(swedishDictionary.toByteArray()))
 
             activeLanguagesFlow.value = listOf("en", "sv")
+            effectiveDictionaryLanguagesFlow.value = listOf("en", "sv")
 
             spellCheckManager.isWordInDictionary("hello")
             assertTrue(dictionaryCache.getIfPresent("en_hello") != null)
@@ -681,7 +691,15 @@ class SpellCheckManagerTest {
                 .thenThrow(java.io.IOException("File error"))
 
             val failingManager =
-                SpellCheckManager(context, languageManager, wordLearningEngine, wordFrequencyRepository, cacheMemoryManager, testDispatcher)
+                SpellCheckManager(
+                    context,
+                    languageManager,
+                    wordLearningEngine,
+                    wordFrequencyRepository,
+                    wordNormalizer,
+                    cacheMemoryManager,
+                    testDispatcher,
+                )
             val words = failingManager.getCommonWords()
 
             assertTrue(words.isEmpty())
@@ -1042,5 +1060,217 @@ class SpellCheckManagerTest {
 
             assertTrue(words.containsKey("hello"))
             assertFalse(words.isEmpty())
+        }
+
+    @Test
+    fun `isWordInDictionary validates clitic form via decomposition`() =
+        runTest {
+            val frenchDictionary =
+                """
+                j' 500
+                ai 1000
+                le 900
+                la 800
+                arbre 600
+                l' 700
+                """.trimIndent()
+
+            whenever(assetManager.open("dictionaries/fr_symspell.txt"))
+                .thenAnswer { ByteArrayInputStream(frenchDictionary.toByteArray()) }
+
+            activeLanguagesFlow.value = listOf("fr")
+            effectiveDictionaryLanguagesFlow.value = listOf("fr")
+            currentLanguageFlow.value = "fr"
+            whenever(wordLearningEngine.isWordLearned(any())).thenReturn(false)
+
+            val frenchManager =
+                SpellCheckManager(
+                    context = context,
+                    languageManager = languageManager,
+                    wordLearningEngine = wordLearningEngine,
+                    wordFrequencyRepository = wordFrequencyRepository,
+                    wordNormalizer = wordNormalizer,
+                    cacheMemoryManager = cacheMemoryManager,
+                    ioDispatcher = testDispatcher,
+                )
+
+            val result = frenchManager.isWordInDictionary("j'ai")
+
+            assertTrue("j'ai should be valid via clitic decomposition (j' + ai)", result)
+        }
+
+    @Test
+    fun `isWordInDictionary validates Italian elision via decomposition`() =
+        runTest {
+            val italianDictionary =
+                """
+                l' 700
+                uomo 500
+                dell' 600
+                """.trimIndent()
+
+            whenever(assetManager.open("dictionaries/it_symspell.txt"))
+                .thenAnswer { ByteArrayInputStream(italianDictionary.toByteArray()) }
+
+            activeLanguagesFlow.value = listOf("it")
+            effectiveDictionaryLanguagesFlow.value = listOf("it")
+            currentLanguageFlow.value = "it"
+            whenever(wordLearningEngine.isWordLearned(any())).thenReturn(false)
+
+            val italianManager =
+                SpellCheckManager(
+                    context = context,
+                    languageManager = languageManager,
+                    wordLearningEngine = wordLearningEngine,
+                    wordFrequencyRepository = wordFrequencyRepository,
+                    wordNormalizer = wordNormalizer,
+                    cacheMemoryManager = cacheMemoryManager,
+                    ioDispatcher = testDispatcher,
+                )
+
+            val result = italianManager.isWordInDictionary("l'uomo")
+
+            assertTrue("l'uomo should be valid via clitic decomposition (l' + uomo)", result)
+        }
+
+    @Test
+    fun `isWordInDictionary rejects invalid clitic form`() =
+        runTest {
+            whenever(wordLearningEngine.isWordLearned(any())).thenReturn(false)
+
+            val result = spellCheckManager.isWordInDictionary("x'zzz")
+
+            assertFalse("x'zzz should not be valid (neither part is a word)", result)
+        }
+
+    @Test
+    fun `isWordInDictionary validates English possessive via learned word`() =
+        runTest {
+            whenever(wordLearningEngine.isWordLearned("user's")).thenReturn(false)
+            whenever(wordLearningEngine.isWordLearned("user'")).thenReturn(false)
+            whenever(wordLearningEngine.isWordLearned("s")).thenReturn(false)
+
+            val result = spellCheckManager.isWordInDictionary("user's")
+
+            assertFalse("user's requires at least one part in dictionary", result)
+        }
+
+    @Test
+    fun `apostrophe-aware prefix completion matches unstripped dictionary words`() =
+        runTest {
+            val frenchDictionary =
+                """
+                j'ai 500
+                j'aime 400
+                jaune 300
+                jardin 200
+                """.trimIndent()
+
+            whenever(assetManager.open("dictionaries/fr_symspell.txt"))
+                .thenAnswer { ByteArrayInputStream(frenchDictionary.toByteArray()) }
+
+            activeLanguagesFlow.value = listOf("fr")
+            effectiveDictionaryLanguagesFlow.value = listOf("fr")
+            currentLanguageFlow.value = "fr"
+            whenever(wordLearningEngine.isWordLearned(any())).thenReturn(false)
+            whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency(any(), any(), any()))
+                .thenReturn(emptyList())
+
+            val frenchManager =
+                SpellCheckManager(
+                    context = context,
+                    languageManager = languageManager,
+                    wordLearningEngine = wordLearningEngine,
+                    wordFrequencyRepository = wordFrequencyRepository,
+                    wordNormalizer = wordNormalizer,
+                    cacheMemoryManager = cacheMemoryManager,
+                    ioDispatcher = testDispatcher,
+                )
+
+            frenchManager.getCommonWords("fr")
+
+            val suggestions = frenchManager.getSpellingSuggestionsWithConfidence("j'a")
+
+            val completionWords = suggestions.map { it.word }
+            assertTrue(
+                "Should find j'ai or j'aime when prefix is j'a",
+                completionWords.any { it.startsWith("j'a", ignoreCase = true) },
+            )
+        }
+
+    @Test
+    fun `isWordInDictionary respects effective languages when isolated`() =
+        runTest {
+            val spanishDictionary = "hola 2000\nmundo 1500"
+            whenever(assetManager.open("dictionaries/es_symspell.txt"))
+                .thenAnswer { ByteArrayInputStream(spanishDictionary.toByteArray()) }
+
+            activeLanguagesFlow.value = listOf("en", "es")
+            effectiveDictionaryLanguagesFlow.value = listOf("en")
+
+            val result = spellCheckManager.isWordInDictionary("hola")
+
+            assertFalse("hola should not be found when effective languages is only en", result)
+        }
+
+    @Test
+    fun `isWordInDictionary finds word when effective languages includes its language`() =
+        runTest {
+            val spanishDictionary = "hola 2000\nmundo 1500"
+            whenever(assetManager.open("dictionaries/es_symspell.txt"))
+                .thenAnswer { ByteArrayInputStream(spanishDictionary.toByteArray()) }
+
+            activeLanguagesFlow.value = listOf("en", "es")
+            effectiveDictionaryLanguagesFlow.value = listOf("en", "es")
+
+            val result = spellCheckManager.isWordInDictionary("hola")
+
+            assertTrue("hola should be found when effective languages includes es", result)
+        }
+
+    @Test
+    fun `suggestions restricted to effective languages when isolated`() =
+        runTest {
+            val spanishDictionary = "hola 2000\nmundo 1500"
+            whenever(assetManager.open("dictionaries/es_symspell.txt"))
+                .thenAnswer { ByteArrayInputStream(spanishDictionary.toByteArray()) }
+
+            activeLanguagesFlow.value = listOf("en", "es")
+            effectiveDictionaryLanguagesFlow.value = listOf("en")
+
+            val suggestions = spellCheckManager.getSpellingSuggestionsWithConfidence("hola")
+            val words = suggestions.map { it.word }
+
+            assertFalse("hola should not appear in suggestions when isolated to en", words.contains("hola"))
+        }
+
+    @Test
+    fun `areWordsInDictionary respects effective languages`() =
+        runTest {
+            val spanishDictionary = "hola 2000\nmundo 1500"
+            whenever(assetManager.open("dictionaries/es_symspell.txt"))
+                .thenAnswer { ByteArrayInputStream(spanishDictionary.toByteArray()) }
+
+            activeLanguagesFlow.value = listOf("en", "es")
+            effectiveDictionaryLanguagesFlow.value = listOf("en")
+
+            val results = spellCheckManager.areWordsInDictionary(listOf("hello", "hola"))
+
+            assertTrue("hello should be valid in en", results["hello"] == true)
+            assertFalse("hola should not be valid when isolated to en", results["hola"] == true)
+        }
+
+    @Test
+    fun `switching effective languages invalidates caches`() =
+        runTest {
+            spellCheckManager.isWordInDictionary("hello")
+            assertTrue(dictionaryCache.getIfPresent("en_hello") != null)
+
+            effectiveDictionaryLanguagesFlow.value = listOf("es")
+
+            assertTrue(
+                "Cache should be invalidated after effective language change",
+                dictionaryCache.getIfPresent("en_hello") == null,
+            )
         }
 }

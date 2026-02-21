@@ -975,4 +975,57 @@ class WordLearningEngineTest {
             assertTrue(words.containsKey("test"))
             assertFalse(words.containsKey("verylongword"))
         }
+
+    @Test
+    fun `learnWord stores apostrophe-bearing word correctly`() =
+        runTest {
+            wordLearningEngine.learnWord("j'ai", InputMethod.TYPED)
+
+            verify(learnedWordDao).learnWord(
+                argThat {
+                    word == "j'ai" && wordNormalized == "j'ai"
+                },
+            )
+        }
+
+    @Test
+    fun `isWordLearned finds apostrophe-bearing word`() =
+        runTest {
+            wordLearningEngine.learnWord("j'ai", InputMethod.TYPED)
+
+            assertTrue(wordLearningEngine.isWordLearned("j'ai"))
+        }
+
+    @Test
+    fun `getSimilarLearnedWordsWithFrequency returns apostrophe word for prefix`() =
+        runTest {
+            val learnedCliticWord =
+                LearnedWord.create(
+                    word = "j'ai",
+                    wordNormalized = "j'ai",
+                    languageTag = "fr",
+                    frequency = 20,
+                    source = WordSource.USER_TYPED,
+                )
+            whenever(learnedWordDao.findWordsWithPrefix("fr", "j'a", 3))
+                .thenReturn(listOf(learnedCliticWord))
+
+            whenever(languageManager.currentLanguage).thenReturn(MutableStateFlow("fr"))
+
+            val results = wordLearningEngine.getSimilarLearnedWordsWithFrequency("j'a", "fr", 3)
+
+            assertTrue("Should find j'ai for prefix j'a", results.any { it.first == "j'ai" })
+        }
+
+    @Test
+    fun `learnWord normalizes curly apostrophe to ASCII`() =
+        runTest {
+            wordLearningEngine.learnWord("j\u2019ai", InputMethod.TYPED)
+
+            verify(learnedWordDao).learnWord(
+                argThat {
+                    word == "j\u2019ai" && wordNormalized == "j'ai"
+                },
+            )
+        }
 }

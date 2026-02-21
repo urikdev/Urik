@@ -87,6 +87,10 @@
 
     <!-- Sound & Feedback Settings -->
     <string name="primary_layout_language">طرح فعلی</string>
+    <string name="merged_dictionaries_category">فرهنگ لغت</string>
+    <string name="merged_dictionaries_title">فرهنگ‌های ادغام‌شده</string>
+    <string name="merged_dictionaries_on">از همه فرهنگ‌های زبان برای پیشنهادات استفاده می‌شود</string>
+    <string name="merged_dictionaries_off">فقط فرهنگ زبان فعال برای پیشنهادات استفاده می‌شود</string>
     <string name="feedback_settings_haptic_feedback">بازخورد لمسی (هاپتیک)</string>
     <string name="feedback_settings_haptic_on">بازخورد لمسی فعال است</string>
     <string name="feedback_settings_haptic_off">بازخورد لمسی غیرفعال است</string>
@@ -203,6 +207,7 @@
     <string name="error_reset_to_defaults">بازنشانی تنظیمات ناموفق بود</string>
     <string name="error_dictionary_export">صادر کردن فرهنگ لغت ناموفق بود</string>
     <string name="error_dictionary_import">وارد کردن فرهنگ لغت ناموفق بود</string>
+    <string name="error_update_merged_dictionaries">به‌روزرسانی حالت فرهنگ لغت ناموفق بود</string>
 
     <!-- Success Messages -->
     <string name="success_learned_words_cleared">واژه‌های آموخته‌شده پاک شدند</string>

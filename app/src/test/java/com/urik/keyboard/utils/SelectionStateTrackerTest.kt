@@ -92,13 +92,31 @@ class SelectionStateTrackerTest {
     }
 
     @Test
-    fun `selection change returns SelectionChanged`() {
+    fun `app extending selection forward from cursor returns AppSelectionExtended`() {
         tracker.updateSelection(10, 10, -1, -1)
 
         val result =
             tracker.updateSelection(
                 newSelStart = 10,
                 newSelEnd = 20,
+                candidatesStart = -1,
+                candidatesEnd = -1,
+            )
+
+        assertTrue(result is SelectionChangeResult.AppSelectionExtended)
+        val sync = result as SelectionChangeResult.AppSelectionExtended
+        assertEquals(10, sync.anchorPosition)
+        assertEquals(20, sync.selectionEnd)
+    }
+
+    @Test
+    fun `backward selection from cursor returns SelectionChanged`() {
+        tracker.updateSelection(10, 10, -1, -1)
+
+        val result =
+            tracker.updateSelection(
+                newSelStart = 5,
+                newSelEnd = 10,
                 candidatesStart = -1,
                 candidatesEnd = -1,
             )
@@ -228,6 +246,7 @@ class SelectionStateTrackerTest {
         assertFalse(SelectionChangeResult.Initial.requiresStateInvalidation())
         assertFalse(SelectionChangeResult.Sequential.requiresStateInvalidation())
         assertFalse(SelectionChangeResult.SelectionChanged.requiresStateInvalidation())
+        assertFalse(SelectionChangeResult.AppSelectionExtended(0, 10).requiresStateInvalidation())
     }
 
     @Test
@@ -251,5 +270,80 @@ class SelectionStateTrackerTest {
         tracker.updateSelection(30, 30, -1, -1)
 
         assertEquals(30, tracker.getLastKnownValidPosition())
+    }
+
+    @Test
+    fun `firefox autocomplete extends selection forward from typed char`() {
+        tracker.updateSelection(0, 0, -1, -1)
+        tracker.updateSelection(1, 1, 0, 1)
+
+        val result =
+            tracker.updateSelection(
+                newSelStart = 1,
+                newSelEnd = 7,
+                candidatesStart = -1,
+                candidatesEnd = -1,
+            )
+
+        assertTrue(result is SelectionChangeResult.AppSelectionExtended)
+        val sync = result as SelectionChangeResult.AppSelectionExtended
+        assertEquals(1, sync.anchorPosition)
+        assertEquals(7, sync.selectionEnd)
+    }
+
+    @Test
+    fun `app selection extension not detected when composing region exists`() {
+        tracker.updateSelection(5, 5, -1, -1)
+
+        val result =
+            tracker.updateSelection(
+                newSelStart = 5,
+                newSelEnd = 12,
+                candidatesStart = 5,
+                candidatesEnd = 12,
+            )
+
+        assertEquals(SelectionChangeResult.SelectionChanged, result)
+    }
+
+    @Test
+    fun `app selection extension not detected when anchor shifted`() {
+        tracker.updateSelection(5, 5, -1, -1)
+
+        val result =
+            tracker.updateSelection(
+                newSelStart = 3,
+                newSelEnd = 10,
+                candidatesStart = -1,
+                candidatesEnd = -1,
+            )
+
+        assertEquals(SelectionChangeResult.SelectionChanged, result)
+    }
+
+    @Test
+    fun `repeated app selection extensions after each keystroke`() {
+        tracker.updateSelection(0, 0, -1, -1)
+        tracker.updateSelection(1, 1, 0, 1)
+
+        val first =
+            tracker.updateSelection(
+                newSelStart = 1,
+                newSelEnd = 7,
+                candidatesStart = -1,
+                candidatesEnd = -1,
+            )
+        assertTrue(first is SelectionChangeResult.AppSelectionExtended)
+
+        tracker.updateSelection(2, 2, 1, 2)
+
+        val second =
+            tracker.updateSelection(
+                newSelStart = 2,
+                newSelEnd = 7,
+                candidatesStart = -1,
+                candidatesEnd = -1,
+            )
+        assertTrue(second is SelectionChangeResult.AppSelectionExtended)
     }
 }
