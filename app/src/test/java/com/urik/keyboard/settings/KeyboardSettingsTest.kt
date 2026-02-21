@@ -593,4 +593,29 @@ class KeyboardSettingsTest {
 
         assertTrue(validated.autoCapitalizationEnabled)
     }
+
+    @Test
+    fun `mergedDictionaries defaults to true`() {
+        val settings = KeyboardSettings()
+
+        assertTrue(settings.mergedDictionaries)
+    }
+
+    @Test
+    fun `validated preserves mergedDictionaries when false`() {
+        val settings = KeyboardSettings(mergedDictionaries = false)
+
+        val validated = settings.validated()
+
+        assertFalse(validated.mergedDictionaries)
+    }
+
+    @Test
+    fun `validated preserves mergedDictionaries when true`() {
+        val settings = KeyboardSettings(mergedDictionaries = true)
+
+        val validated = settings.validated()
+
+        assertTrue(validated.mergedDictionaries)
+    }
 }

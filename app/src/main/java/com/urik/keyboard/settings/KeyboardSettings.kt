@@ -133,6 +133,7 @@ data class KeyboardSettings(
     val keyboardDisplayMode: KeyboardDisplayMode? = null,
     val oneHandedModeEnabled: Boolean = false,
     val showLanguageSwitchKey: Boolean = false,
+    val mergedDictionaries: Boolean = true,
 ) {
     /**
      * Returns validated copy with constraints enforced.

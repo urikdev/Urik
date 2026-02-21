@@ -86,6 +86,10 @@
 
     <!-- Sound & Feedback Settings -->
     <string name="primary_layout_language">Aktualny układ</string>
+    <string name="merged_dictionaries_category">Słownik</string>
+    <string name="merged_dictionaries_title">Połączone słowniki</string>
+    <string name="merged_dictionaries_on">Wszystkie słowniki językowe używane do sugestii</string>
+    <string name="merged_dictionaries_off">Tylko słownik aktywnego układu dla sugestii</string>
     <string name="feedback_settings_haptic_feedback">Wibracje haptyczne</string>
     <string name="feedback_settings_haptic_on">Wibracje haptyczne włączone</string>
     <string name="feedback_settings_haptic_off">Wibracje haptyczne wyłączone</string>
@@ -187,6 +191,7 @@
     <string name="error_reset_to_defaults">Nie udało się przywrócić ustawień do domyślnych</string>
     <string name="error_dictionary_export">Nie udało się wyeksportować słownika</string>
     <string name="error_dictionary_import">Nie udało się zaimportować słownika</string>
+    <string name="error_update_merged_dictionaries">Nie udało się zaktualizować trybu słownika</string>
 
     <!-- Success Messages -->
     <string name="success_learned_words_cleared">Nauczone słowa wyczyszczone</string>

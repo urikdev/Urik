@@ -86,6 +86,10 @@
 
     <!-- Sound & Feedback Settings -->
     <string name="primary_layout_language">Layout atual</string>
+    <string name="merged_dictionaries_category">Dicionário</string>
+    <string name="merged_dictionaries_title">Dicionários combinados</string>
+    <string name="merged_dictionaries_on">Todos os dicionários de idiomas usados para sugestões</string>
+    <string name="merged_dictionaries_off">Apenas o dicionário do idioma ativo para sugestões</string>
     <string name="feedback_settings_haptic_feedback">Feedback por vibração</string>
     <string name="feedback_settings_haptic_on">Vibração ativada</string>
     <string name="feedback_settings_haptic_off">Vibração desativada</string>
@@ -186,6 +190,7 @@
     <string name="error_reset_to_defaults">Não foi possível restaurar as configurações</string>
     <string name="error_dictionary_export">Não foi possível exportar o dicionário</string>
     <string name="error_dictionary_import">Não foi possível importar o dicionário</string>
+    <string name="error_update_merged_dictionaries">Falha ao atualizar modo do dicionário</string>
 
     <!-- Success Messages -->
     <string name="success_learned_words_cleared">Palavras aprendidas apagadas</string>

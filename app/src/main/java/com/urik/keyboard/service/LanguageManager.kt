@@ -10,6 +10,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
@@ -37,6 +38,12 @@ class LanguageManager
         private val _activeLanguages = MutableStateFlow(listOf("en"))
         val activeLanguages: StateFlow<List<String>> = _activeLanguages.asStateFlow()
 
+        private val _mergedDictionaries = MutableStateFlow(true)
+        val mergedDictionaries: StateFlow<Boolean> = _mergedDictionaries.asStateFlow()
+
+        private val _effectiveDictionaryLanguages = MutableStateFlow(listOf("en"))
+        val effectiveDictionaryLanguages: StateFlow<List<String>> = _effectiveDictionaryLanguages.asStateFlow()
+
         private val _keyPositions = MutableStateFlow<Map<Char, PointF>>(emptyMap())
         val keyPositions: StateFlow<Map<Char, PointF>> = _keyPositions.asStateFlow()
 
@@ -47,6 +54,8 @@ class LanguageManager
                     _currentLanguage.value = initialSettings.primaryLanguage
                     _currentLayoutLanguage.value = initialSettings.primaryLayoutLanguage
                     _activeLanguages.value = initialSettings.activeLanguages
+                    _mergedDictionaries.value = initialSettings.mergedDictionaries
+                    updateEffectiveDictionaryLanguages()
 
                     settingsRepository.settings
                         .map { it.primaryLanguage }
@@ -64,6 +73,22 @@ class LanguageManager
                         .map { it.activeLanguages }
                         .distinctUntilChanged()
                         .onEach { _activeLanguages.value = it }
+                        .launchIn(scope)
+
+                    settingsRepository.settings
+                        .map { it.mergedDictionaries }
+                        .distinctUntilChanged()
+                        .onEach { _mergedDictionaries.value = it }
+                        .launchIn(scope)
+
+                    combine(
+                        _activeLanguages,
+                        _currentLayoutLanguage,
+                        _mergedDictionaries,
+                    ) { active, layout, merged ->
+                        if (merged) active else listOf(layout)
+                    }.distinctUntilChanged()
+                        .onEach { _effectiveDictionaryLanguages.value = it }
                         .launchIn(scope)
 
                     Result.success(Unit)
@@ -103,6 +128,15 @@ class LanguageManager
             } else {
                 currentActiveLanguages[currentIndex + 1]
             }
+        }
+
+        private fun updateEffectiveDictionaryLanguages() {
+            _effectiveDictionaryLanguages.value =
+                if (_mergedDictionaries.value) {
+                    _activeLanguages.value
+                } else {
+                    listOf(_currentLayoutLanguage.value)
+                }
         }
 
         fun cleanup() {

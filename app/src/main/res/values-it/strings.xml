@@ -85,6 +85,10 @@
     <!-- Language Settings -->
     <string name="max_languages_reached">Massimo 3 lingue consentite</string>
     <string name="primary_layout_language">Layout corrente</string>
+    <string name="merged_dictionaries_category">Dizionario</string>
+    <string name="merged_dictionaries_title">Dizionari unificati</string>
+    <string name="merged_dictionaries_on">Tutti i dizionari linguistici usati per i suggerimenti</string>
+    <string name="merged_dictionaries_off">Solo il dizionario della lingua attiva per i suggerimenti</string>
     <string name="select_active_language">Seleziona lingua attiva</string>
 
     <!-- Sound & Feedback Settings -->
@@ -204,6 +208,7 @@
     <string name="error_reset_to_defaults">Ripristino impostazioni non riuscito</string>
     <string name="error_dictionary_export">Esportazione dizionario non riuscita</string>
     <string name="error_dictionary_import">Importazione dizionario non riuscita</string>
+    <string name="error_update_merged_dictionaries">Impossibile aggiornare la modalità dizionario</string>
 
     <!-- Success Messages -->
     <string name="success_learned_words_cleared">Parole apprese cancellate</string>
