@@ -86,6 +86,10 @@
 
     <!-- Sound & Feedback Settings -->
     <string name="primary_layout_language">Aktuální rozvržení</string>
+    <string name="merged_dictionaries_category">Slovník</string>
+    <string name="merged_dictionaries_title">Sloučené slovníky</string>
+    <string name="merged_dictionaries_on">Pro návrhy se používají všechny jazykové slovníky</string>
+    <string name="merged_dictionaries_off">Pro návrhy se používá pouze slovník aktivního rozložení</string>
     <string name="feedback_settings_haptic_feedback">Haptická odezva</string>
     <string name="feedback_settings_haptic_on">Haptika zapnuta</string>
     <string name="feedback_settings_haptic_off">Haptika vypnuta</string>
@@ -186,6 +190,7 @@
     <string name="error_reset_to_defaults">Nepodařilo se obnovit nastavení</string>
     <string name="error_dictionary_export">Nepodařilo se exportovat slovník</string>
     <string name="error_dictionary_import">Nepodařilo se importovat slovník</string>
+    <string name="error_update_merged_dictionaries">Nepodařilo se aktualizovat režim slovníku</string>
 
     <!-- Success Messages -->
     <string name="success_learned_words_cleared">Naučená slova smazána</string>

@@ -84,6 +84,10 @@
     <!-- Language Settings -->
     <string name="max_languages_reached">Maximaal 3 talen toegestaan</string>
     <string name="primary_layout_language">Huidige indeling</string>
+    <string name="merged_dictionaries_category">Woordenboek</string>
+    <string name="merged_dictionaries_title">Samengevoegde woordenboeken</string>
+    <string name="merged_dictionaries_on">Alle taalwoordenboeken gebruikt voor suggesties</string>
+    <string name="merged_dictionaries_off">Alleen woordenboek van actieve indeling voor suggesties</string>
     <string name="select_active_language">Selecteer actieve taal</string>
 
     <!-- Sound & Feedback Settings -->
@@ -203,6 +207,7 @@
     <string name="error_reset_to_defaults">Terugzetten naar standaardwaarden mislukt</string>
     <string name="error_dictionary_export">Woordenboek exporteren mislukt</string>
     <string name="error_dictionary_import">Woordenboek importeren mislukt</string>
+    <string name="error_update_merged_dictionaries">Woordenboekmodus bijwerken mislukt</string>
 
     <!-- Success Messages -->
     <string name="success_learned_words_cleared">Gewilde woorden gewist</string>

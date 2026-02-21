@@ -53,6 +53,7 @@ class SpellCheckManagerTest {
 
     private lateinit var currentLanguageFlow: MutableStateFlow<String>
     private lateinit var activeLanguagesFlow: MutableStateFlow<List<String>>
+    private lateinit var effectiveDictionaryLanguagesFlow: MutableStateFlow<List<String>>
 
     private lateinit var spellCheckManager: SpellCheckManager
 
@@ -150,6 +151,9 @@ class SpellCheckManagerTest {
         activeLanguagesFlow = MutableStateFlow(listOf("en"))
         whenever(languageManager.activeLanguages).thenReturn(activeLanguagesFlow)
 
+        effectiveDictionaryLanguagesFlow = MutableStateFlow(listOf("en"))
+        whenever(languageManager.effectiveDictionaryLanguages).thenReturn(effectiveDictionaryLanguagesFlow)
+
         val keyPositionsFlow = MutableStateFlow<Map<Char, android.graphics.PointF>>(emptyMap())
         whenever(languageManager.keyPositions).thenReturn(keyPositionsFlow)
 
@@ -189,6 +193,7 @@ class SpellCheckManagerTest {
                 .thenThrow(java.io.FileNotFoundException())
 
             activeLanguagesFlow.emit(listOf("sv"))
+            effectiveDictionaryLanguagesFlow.emit(listOf("sv"))
 
             val result = spellCheckManager.isWordInDictionary("test")
             assertFalse(result)
@@ -581,6 +586,7 @@ class SpellCheckManagerTest {
                 .thenReturn(ByteArrayInputStream(swedishDictionary.toByteArray()))
 
             activeLanguagesFlow.value = listOf("en", "sv")
+            effectiveDictionaryLanguagesFlow.value = listOf("en", "sv")
 
             spellCheckManager.isWordInDictionary("hello")
             assertTrue(dictionaryCache.getIfPresent("en_hello") != null)
@@ -1073,6 +1079,7 @@ class SpellCheckManagerTest {
                 .thenAnswer { ByteArrayInputStream(frenchDictionary.toByteArray()) }
 
             activeLanguagesFlow.value = listOf("fr")
+            effectiveDictionaryLanguagesFlow.value = listOf("fr")
             currentLanguageFlow.value = "fr"
             whenever(wordLearningEngine.isWordLearned(any())).thenReturn(false)
 
@@ -1106,6 +1113,7 @@ class SpellCheckManagerTest {
                 .thenAnswer { ByteArrayInputStream(italianDictionary.toByteArray()) }
 
             activeLanguagesFlow.value = listOf("it")
+            effectiveDictionaryLanguagesFlow.value = listOf("it")
             currentLanguageFlow.value = "it"
             whenever(wordLearningEngine.isWordLearned(any())).thenReturn(false)
 
@@ -1162,6 +1170,7 @@ class SpellCheckManagerTest {
                 .thenAnswer { ByteArrayInputStream(frenchDictionary.toByteArray()) }
 
             activeLanguagesFlow.value = listOf("fr")
+            effectiveDictionaryLanguagesFlow.value = listOf("fr")
             currentLanguageFlow.value = "fr"
             whenever(wordLearningEngine.isWordLearned(any())).thenReturn(false)
             whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency(any(), any(), any()))
@@ -1186,6 +1195,82 @@ class SpellCheckManagerTest {
             assertTrue(
                 "Should find j'ai or j'aime when prefix is j'a",
                 completionWords.any { it.startsWith("j'a", ignoreCase = true) },
+            )
+        }
+
+    @Test
+    fun `isWordInDictionary respects effective languages when isolated`() =
+        runTest {
+            val spanishDictionary = "hola 2000\nmundo 1500"
+            whenever(assetManager.open("dictionaries/es_symspell.txt"))
+                .thenAnswer { ByteArrayInputStream(spanishDictionary.toByteArray()) }
+
+            activeLanguagesFlow.value = listOf("en", "es")
+            effectiveDictionaryLanguagesFlow.value = listOf("en")
+
+            val result = spellCheckManager.isWordInDictionary("hola")
+
+            assertFalse("hola should not be found when effective languages is only en", result)
+        }
+
+    @Test
+    fun `isWordInDictionary finds word when effective languages includes its language`() =
+        runTest {
+            val spanishDictionary = "hola 2000\nmundo 1500"
+            whenever(assetManager.open("dictionaries/es_symspell.txt"))
+                .thenAnswer { ByteArrayInputStream(spanishDictionary.toByteArray()) }
+
+            activeLanguagesFlow.value = listOf("en", "es")
+            effectiveDictionaryLanguagesFlow.value = listOf("en", "es")
+
+            val result = spellCheckManager.isWordInDictionary("hola")
+
+            assertTrue("hola should be found when effective languages includes es", result)
+        }
+
+    @Test
+    fun `suggestions restricted to effective languages when isolated`() =
+        runTest {
+            val spanishDictionary = "hola 2000\nmundo 1500"
+            whenever(assetManager.open("dictionaries/es_symspell.txt"))
+                .thenAnswer { ByteArrayInputStream(spanishDictionary.toByteArray()) }
+
+            activeLanguagesFlow.value = listOf("en", "es")
+            effectiveDictionaryLanguagesFlow.value = listOf("en")
+
+            val suggestions = spellCheckManager.getSpellingSuggestionsWithConfidence("hola")
+            val words = suggestions.map { it.word }
+
+            assertFalse("hola should not appear in suggestions when isolated to en", words.contains("hola"))
+        }
+
+    @Test
+    fun `areWordsInDictionary respects effective languages`() =
+        runTest {
+            val spanishDictionary = "hola 2000\nmundo 1500"
+            whenever(assetManager.open("dictionaries/es_symspell.txt"))
+                .thenAnswer { ByteArrayInputStream(spanishDictionary.toByteArray()) }
+
+            activeLanguagesFlow.value = listOf("en", "es")
+            effectiveDictionaryLanguagesFlow.value = listOf("en")
+
+            val results = spellCheckManager.areWordsInDictionary(listOf("hello", "hola"))
+
+            assertTrue("hello should be valid in en", results["hello"] == true)
+            assertFalse("hola should not be valid when isolated to en", results["hola"] == true)
+        }
+
+    @Test
+    fun `switching effective languages invalidates caches`() =
+        runTest {
+            spellCheckManager.isWordInDictionary("hello")
+            assertTrue(dictionaryCache.getIfPresent("en_hello") != null)
+
+            effectiveDictionaryLanguagesFlow.value = listOf("es")
+
+            assertTrue(
+                "Cache should be invalidated after effective language change",
+                dictionaryCache.getIfPresent("en_hello") == null,
             )
         }
 }

@@ -1418,6 +1418,7 @@ class UrikInputMethodService :
                 languageManager.currentLayoutLanguage.collect { detectedLanguage ->
                     val locale = ULocale.forLanguageTag(detectedLanguage)
                     updateScriptContext(locale)
+                    swipeDetector.updateCurrentLanguage(detectedLanguage.split("-").first())
                 }
             },
         )
@@ -1426,13 +1427,19 @@ class UrikInputMethodService :
             serviceScope.launch {
                 languageManager.activeLanguages.collect { languages ->
                     layoutManager.updateActiveLanguages(languages)
-                    swipeDetector.updateActiveLanguages(languages)
-                    swipeDetector.updateCurrentLanguage(languages.firstOrNull()?.split("-")?.first() ?: "en")
                     updateSwipeKeyboard()
 
                     languages.forEach { lang ->
                         wordFrequencyRepository.preloadTopBigrams(lang)
                     }
+                }
+            },
+        )
+
+        observerJobs.add(
+            serviceScope.launch {
+                languageManager.effectiveDictionaryLanguages.collect { languages ->
+                    swipeDetector.updateActiveLanguages(languages)
                 }
             },
         )

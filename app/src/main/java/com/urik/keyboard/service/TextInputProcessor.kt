@@ -92,7 +92,8 @@ class TextInputProcessor
             currentSettings = settings
 
             if (previousSettings.spellCheckEnabled != settings.spellCheckEnabled ||
-                previousSettings.showSuggestions != settings.showSuggestions
+                previousSettings.showSuggestions != settings.showSuggestions ||
+                previousSettings.mergedDictionaries != settings.mergedDictionaries
             ) {
                 clearCaches()
                 spellCheckManager.clearCaches()

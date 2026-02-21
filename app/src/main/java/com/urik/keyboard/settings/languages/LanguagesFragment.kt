@@ -8,7 +8,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.preference.CheckBoxPreference
+import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceFragmentCompat
+import androidx.preference.SwitchPreferenceCompat
 import com.urik.keyboard.R
 import com.urik.keyboard.settings.KeyboardSettings
 import com.urik.keyboard.settings.SettingsEventHandler
@@ -25,6 +27,7 @@ class LanguagesFragment : PreferenceFragmentCompat() {
     private lateinit var viewModel: LanguagesViewModel
     private lateinit var eventHandler: SettingsEventHandler
     private lateinit var languageRadioButtons: Map<String, CheckBoxPreference>
+    private lateinit var mergedDictionariesSwitch: SwitchPreferenceCompat
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,6 +42,23 @@ class LanguagesFragment : PreferenceFragmentCompat() {
         val screen = preferenceManager.createPreferenceScreen(context)
 
         eventHandler = SettingsEventHandler(requireContext())
+
+        val dictionaryCategory =
+            PreferenceCategory(context).apply {
+                key = "dictionary_category"
+                title = getString(R.string.merged_dictionaries_category)
+            }
+        screen.addPreference(dictionaryCategory)
+
+        mergedDictionariesSwitch =
+            SwitchPreferenceCompat(context).apply {
+                key = "merged_dictionaries"
+                isPersistent = false
+                title = getString(R.string.merged_dictionaries_title)
+                summaryOn = getString(R.string.merged_dictionaries_on)
+                summaryOff = getString(R.string.merged_dictionaries_off)
+            }
+        dictionaryCategory.addPreference(mergedDictionariesSwitch)
 
         val radioButtons = mutableMapOf<String, CheckBoxPreference>()
         val languageDisplayNames = KeyboardSettings.getLanguageDisplayNames()
@@ -55,6 +75,7 @@ class LanguagesFragment : PreferenceFragmentCompat() {
         }
 
         languageRadioButtons = radioButtons
+
         preferenceScreen = screen
     }
 
@@ -86,6 +107,11 @@ class LanguagesFragment : PreferenceFragmentCompat() {
             }
         }
 
+        mergedDictionariesSwitch.setOnPreferenceChangeListener { _, newValue ->
+            viewModel.toggleMergedDictionaries(newValue as Boolean)
+            true
+        }
+
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
@@ -99,6 +125,8 @@ class LanguagesFragment : PreferenceFragmentCompat() {
                                 checkbox.summary = null
                             }
                         }
+
+                        mergedDictionariesSwitch.isChecked = state.mergedDictionaries
                     }
                 }
 
