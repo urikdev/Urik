@@ -123,6 +123,7 @@ class KeyboardLayoutManager(
     private val symbolsLongPressFired = ConcurrentHashMap.newKeySet<Button>()
     private val customMappingLongPressFired = ConcurrentHashMap.newKeySet<Button>()
     private val characterLongPressFired = ConcurrentHashMap.newKeySet<Button>()
+    private val longPressConsumedButtons = ConcurrentHashMap.newKeySet<Button>()
 
     private val cachedTextSizes = mutableMapOf<Int, Float>()
     private val cachedDimensions = mutableMapOf<String, Int>()
@@ -157,6 +158,8 @@ class KeyboardLayoutManager(
 
     private val keyClickListener =
         View.OnClickListener { view ->
+            if (longPressConsumedButtons.remove(view as? Button) == true) return@OnClickListener
+
             val key = view.getTag(R.id.key_data) as? KeyboardKey ?: return@OnClickListener
             performContextualHaptic(key)
 
@@ -182,12 +185,14 @@ class KeyboardLayoutManager(
                     val button = view as Button
                     characterLongPressFired.remove(button)
                     customMappingLongPressFired.remove(button)
+                    longPressConsumedButtons.remove(button)
                     longPressStartX = event.rawX
                     longPressStartY = event.rawY
                     val handler = Handler(Looper.getMainLooper())
                     val runnable =
                         Runnable {
                             characterLongPressFired.add(button)
+                            longPressConsumedButtons.add(button)
                             performContextualHaptic(key)
                             handleCharacterLongPress(key, view, button)
                         }
@@ -215,7 +220,8 @@ class KeyboardLayoutManager(
                         pending.handler.removeCallbacks(pending.runnable)
                     }
                     customMappingLongPressFired.remove(button)
-                    val consumed = characterLongPressFired.remove(button)
+                    val consumed = characterLongPressFired.remove(button) ||
+                        longPressConsumedButtons.contains(button)
                     consumed
                 }
 
@@ -231,15 +237,17 @@ class KeyboardLayoutManager(
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
                     popupSelectionMode = false
+                    longPressConsumedButtons.remove(view as Button)
                     spaceGestureStartX = event.x
                     spaceGestureStartY = event.y
                     val handler = Handler(Looper.getMainLooper())
                     val runnable =
                         Runnable {
+                            longPressConsumedButtons.add(view)
                             performContextualHaptic(KeyboardKey.Action(KeyboardKey.ActionType.SPACE))
                             handleSpaceLongPress(view)
                         }
-                    buttonPendingCallbacks[view as Button] = PendingCallbacks(handler, runnable)
+                    buttonPendingCallbacks[view] = PendingCallbacks(handler, runnable)
                     handler.postDelayed(runnable, currentLongPressDuration.durationMs)
                     false
                 }
@@ -320,14 +328,16 @@ class KeyboardLayoutManager(
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
                     popupSelectionMode = false
+                    longPressConsumedButtons.remove(view as Button)
                     val key = view.getTag(R.id.key_data) as? KeyboardKey.Character ?: return@OnTouchListener false
                     val handler = Handler(Looper.getMainLooper())
                     val runnable =
                         Runnable {
+                            longPressConsumedButtons.add(view)
                             performContextualHaptic(key)
                             handlePunctuationLongPress(key, view)
                         }
-                    buttonPendingCallbacks[view as Button] = PendingCallbacks(handler, runnable)
+                    buttonPendingCallbacks[view] = PendingCallbacks(handler, runnable)
                     handler.postDelayed(runnable, currentLongPressDuration.durationMs)
                     false
                 }
@@ -397,14 +407,16 @@ class KeyboardLayoutManager(
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
                     shiftLongPressFired = false
+                    longPressConsumedButtons.remove(view as Button)
                     val handler = Handler(Looper.getMainLooper())
                     val runnable =
                         Runnable {
                             shiftLongPressFired = true
+                            longPressConsumedButtons.add(view)
                             performContextualHaptic(KeyboardKey.Action(KeyboardKey.ActionType.SHIFT))
                             handleShiftLongPress(view)
                         }
-                    buttonPendingCallbacks[view as Button] = PendingCallbacks(handler, runnable)
+                    buttonPendingCallbacks[view] = PendingCallbacks(handler, runnable)
                     handler.postDelayed(runnable, currentLongPressDuration.durationMs)
                     false
                 }
@@ -431,10 +443,12 @@ class KeyboardLayoutManager(
                 MotionEvent.ACTION_DOWN -> {
                     val button = view as Button
                     symbolsLongPressFired.remove(button)
+                    longPressConsumedButtons.remove(button)
                     val handler = Handler(Looper.getMainLooper())
                     val runnable =
                         Runnable {
                             symbolsLongPressFired.add(button)
+                            longPressConsumedButtons.add(button)
                             button.isPressed = false
                             performContextualHaptic(null)
                             onSymbolsLongPress()
@@ -489,17 +503,19 @@ class KeyboardLayoutManager(
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
                     commaLongPressFired = false
+                    longPressConsumedButtons.remove(view as Button)
                     longPressStartX = event.rawX
                     longPressStartY = event.rawY
                     val handler = Handler(Looper.getMainLooper())
                     val runnable =
                         Runnable {
                             commaLongPressFired = true
+                            longPressConsumedButtons.add(view)
                             view.isPressed = false
                             performContextualHaptic(KeyboardKey.Character(",", KeyboardKey.KeyType.PUNCTUATION))
                             onShowInputMethodPicker()
                         }
-                    buttonPendingCallbacks[view as Button] = PendingCallbacks(handler, runnable)
+                    buttonPendingCallbacks[view] = PendingCallbacks(handler, runnable)
                     handler.postDelayed(runnable, currentLongPressDuration.durationMs)
                     false
                 }
@@ -1952,6 +1968,7 @@ class KeyboardLayoutManager(
         effectiveLayout = null
         returnActiveButtonsToPool()
         buttonPool.clear()
+        longPressConsumedButtons.clear()
         buttonPendingCallbacks.forEach { (_, pending) ->
             pending.handler.removeCallbacks(pending.runnable)
         }
