@@ -230,7 +230,9 @@ class SpellCheckManager
             languageCode: String,
         ): Boolean {
             val cacheKey = buildCacheKey(normalizedWord, languageCode)
-            dictionaryCache.getIfPresent(cacheKey)?.let { return it }
+            dictionaryCache.getIfPresent(cacheKey)?.let {
+                return it
+            }
 
             val spellChecker = getSpellCheckerForLanguage(languageCode)
             if (spellChecker != null) {
@@ -863,6 +865,8 @@ class SpellCheckManager
                 } catch (_: Exception) {
                 }
 
+
+
                 return allSuggestions.sortedByDescending { it.confidence }
             } catch (_: Exception) {
                 return emptyList()
@@ -915,12 +919,13 @@ class SpellCheckManager
             val accentStrippedPrefix = wordNormalizer.stripDiacritics(prefix).lowercase()
 
             val apostropheWords = apostropheMatches.map { it.first }.toSet()
-            val exactPrefixMatches = commonWordsCacheIndexed
-                .filter { cached ->
-                    cached.word !in apostropheWords &&
-                        cached.strippedWord.startsWith(strippedPrefix, ignoreCase = true) &&
-                        (cached.strippedWord.length > strippedPrefix.length || cached.word != cached.strippedWord)
-                }.map { it.word to it.frequency }
+            val exactPrefixMatches =
+                commonWordsCacheIndexed
+                    .filter { cached ->
+                        cached.word !in apostropheWords &&
+                            cached.strippedWord.startsWith(strippedPrefix, ignoreCase = true) &&
+                            (cached.strippedWord.length > strippedPrefix.length || cached.word != cached.strippedWord)
+                    }.map { it.word to it.frequency }
 
             val combined = apostropheMatches + exactPrefixMatches
             if (combined.size >= SpellCheckConstants.MAX_PREFIX_COMPLETION_RESULTS) {
@@ -928,12 +933,13 @@ class SpellCheckManager
             }
 
             val seenWords = combined.map { it.first }.toSet()
-            val accentFallbackMatches = commonWordsCacheIndexed
-                .filter { cached ->
-                    cached.word !in seenWords &&
-                        cached.accentStrippedWord.startsWith(accentStrippedPrefix) &&
-                        cached.accentStrippedWord.length > accentStrippedPrefix.length
-                }.map { it.word to it.frequency }
+            val accentFallbackMatches =
+                commonWordsCacheIndexed
+                    .filter { cached ->
+                        cached.word !in seenWords &&
+                            cached.accentStrippedWord.startsWith(accentStrippedPrefix) &&
+                            cached.accentStrippedWord.length > accentStrippedPrefix.length
+                    }.map { it.word to it.frequency }
 
             return (combined + accentFallbackMatches)
                 .take(SpellCheckConstants.MAX_PREFIX_COMPLETION_RESULTS)
@@ -1181,8 +1187,9 @@ class SpellCheckManager
                             CachedWord(
                                 word = word,
                                 frequency = freq,
-                                strippedWord = com.urik.keyboard.utils.TextMatchingUtils
-                                    .stripWordPunctuation(word),
+                                strippedWord =
+                                    com.urik.keyboard.utils.TextMatchingUtils
+                                        .stripWordPunctuation(word),
                                 accentStrippedWord = wordNormalizer.stripDiacritics(word).lowercase(),
                             )
                         }
@@ -1246,8 +1253,7 @@ class SpellCheckManager
                 .asSequence()
                 .filter { (word, _) ->
                     word.startsWith(lowerPrefix) && word.length > prefix.length
-                }
-                .sortedByDescending { it.value }
+                }.sortedByDescending { it.value }
                 .take(maxResults)
                 .map { it.key to it.value }
                 .toList()
