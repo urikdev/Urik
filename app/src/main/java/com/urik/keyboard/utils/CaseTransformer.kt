@@ -19,20 +19,21 @@ class CaseTransformer
             suggestion: SpellingSuggestion,
             keyboardState: KeyboardState,
             isSentenceStart: Boolean = false,
+            locale: java.util.Locale = java.util.Locale.ROOT,
         ): String {
             if (keyboardState.isCapsLockOn) {
-                return suggestion.word.uppercase()
+                return suggestion.word.uppercase(locale)
             }
 
             if (keyboardState.isShiftPressed && !keyboardState.isAutoShift) {
-                return capitalizeFirstLetter(suggestion.word)
+                return capitalizeFirstLetter(suggestion.word, locale)
             }
 
             if (keyboardState.isShiftPressed) {
                 return if (suggestion.preserveCase) {
                     suggestion.word
                 } else {
-                    capitalizeFirstLetter(suggestion.word)
+                    capitalizeFirstLetter(suggestion.word, locale)
                 }
             }
 
@@ -40,7 +41,7 @@ class CaseTransformer
                 return if (suggestion.preserveCase) {
                     suggestion.word
                 } else {
-                    capitalizeFirstLetter(suggestion.word)
+                    capitalizeFirstLetter(suggestion.word, locale)
                 }
             }
 
@@ -51,9 +52,10 @@ class CaseTransformer
             suggestions: List<SpellingSuggestion>,
             keyboardState: KeyboardState,
             isSentenceStart: Boolean = false,
-        ): List<String> = suggestions.map { applyCasing(it, keyboardState, isSentenceStart) }
+            locale: java.util.Locale = java.util.Locale.ROOT,
+        ): List<String> = suggestions.map { applyCasing(it, keyboardState, isSentenceStart, locale) }
 
-        private fun capitalizeFirstLetter(word: String): String {
+        private fun capitalizeFirstLetter(word: String, locale: java.util.Locale = java.util.Locale.ROOT): String {
             if (word.isEmpty()) return word
 
             val firstChar = word[0]
@@ -70,7 +72,7 @@ class CaseTransformer
             val firstGrapheme = word.take(firstGraphemeEnd)
             val rest = word.substring(firstGraphemeEnd)
 
-            return firstGrapheme.uppercase() + rest
+            return firstGrapheme.uppercase(locale) + rest
         }
 
         private fun isAsciiLetter(char: Char): Boolean = char in 'a'..'z' || char in 'A'..'Z'
