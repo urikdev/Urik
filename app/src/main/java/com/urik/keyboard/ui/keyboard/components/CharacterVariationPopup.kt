@@ -10,6 +10,9 @@ import android.widget.HorizontalScrollView
 import android.widget.LinearLayout
 import android.widget.PopupWindow
 import androidx.core.graphics.drawable.toDrawable
+import androidx.core.view.AccessibilityDelegateCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
 import com.urik.keyboard.R
 import com.urik.keyboard.theme.ThemeManager
 
@@ -28,6 +31,22 @@ class CharacterVariationPopup(
     private val scrollView: HorizontalScrollView =
         HorizontalScrollView(context).apply {
             isHorizontalScrollBarEnabled = false
+            importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+            ViewCompat.setAccessibilityDelegate(
+                this,
+                object : AccessibilityDelegateCompat() {
+                    override fun onInitializeAccessibilityNodeInfo(
+                        host: View,
+                        info: AccessibilityNodeInfoCompat,
+                    ) {
+                        super.onInitializeAccessibilityNodeInfo(host, info)
+                        info.removeAction(
+                            AccessibilityNodeInfoCompat.AccessibilityActionCompat.ACTION_SET_TEXT,
+                        )
+                        info.isEditable = false
+                    }
+                },
+            )
         }
 
     private val variationContainer: LinearLayout =
@@ -42,6 +61,7 @@ class CharacterVariationPopup(
 
             setBackgroundColor(themeManager.currentTheme.value.colors.keyBackgroundAction)
             elevation = 8f * density
+            importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
         }
 
     init {
@@ -169,6 +189,24 @@ class CharacterVariationPopup(
                         totalCount,
                         char,
                     )
+
+                ViewCompat.setAccessibilityDelegate(
+                    this,
+                    object : AccessibilityDelegateCompat() {
+                        override fun onInitializeAccessibilityNodeInfo(
+                            host: View,
+                            info: AccessibilityNodeInfoCompat,
+                        ) {
+                            super.onInitializeAccessibilityNodeInfo(host, info)
+                            info.roleDescription =
+                                context.getString(R.string.character_option_role)
+                            info.removeAction(
+                                AccessibilityNodeInfoCompat.AccessibilityActionCompat.ACTION_SET_TEXT,
+                            )
+                            info.isEditable = false
+                        }
+                    },
+                )
             }
 
         characterButtons.add(button)

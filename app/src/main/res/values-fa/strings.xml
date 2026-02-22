@@ -258,6 +258,7 @@
 
     <!-- Character Variation Accessibility -->
     <string name="character_variation_position">تنوع کاراکتر %1$d از %2$d: %3$s</string>
+    <string name="character_option_role">گزینه کاراکتر</string>
 
     <!-- Blacklisting Words -->
     <string name="remove_suggestion">%1$s از پیشنهادات حذف شود؟</string>

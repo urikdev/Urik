@@ -172,6 +172,7 @@
     <string name="theme_add_favorite">Lägg till %1$s i favoriter</string>
     <string name="theme_remove_favorite">Ta bort %1$s från favoriter</string>
     <string name="character_variation_position">Teckenvariant %1$d av %2$d: %3$s</string>
+    <string name="character_option_role">teckenalternativ</string>
     <string name="remove_suggestion">Ta bort %1$s från förslagen?</string>
     <string name="remove_cancel">Avboka</string>
     <string name="remove_confirm">Ta bort</string>

@@ -259,6 +259,7 @@
 
     <!-- Character Variation Accessibility -->
     <string name="character_variation_position">Tekenvariatie %1$d van %2$d: %3$s</string>
+    <string name="character_option_role">tekenoptie</string>
 
     <!-- Blacklisting Words -->
     <string name="remove_suggestion">%1$s uit suggesties verwijderen?</string>
