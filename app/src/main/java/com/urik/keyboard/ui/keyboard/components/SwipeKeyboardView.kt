@@ -1705,6 +1705,7 @@ class SwipeKeyboardView
                     val minDistance = com.urik.keyboard.KeyboardConstants.GestureConstants.BACKSPACE_SWIPE_MIN_DISTANCE_DP * gestureDensity
 
                     if (dx < 0 && absDx > absDy && absDx > minDistance) {
+                        keyboardLayoutManager?.triggerBackspaceHaptic()
                         onBackspaceSwipeDelete?.invoke()
                     }
                 }

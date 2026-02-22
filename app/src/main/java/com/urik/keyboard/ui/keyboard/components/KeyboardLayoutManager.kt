@@ -625,6 +625,15 @@ class KeyboardLayoutManager(
         performContextualHaptic(null)
     }
 
+    fun triggerBackspaceHaptic() {
+        if (!hapticEnabled || hapticAmplitude == 0) return
+        try {
+            val effect = HapticSignature.BackspaceChirp.createEffect(hapticAmplitude)
+            vibrator?.vibrate(effect)
+        } catch (_: Exception) {
+        }
+    }
+
     fun forceStopAcceleratedBackspace() {
         stopAcceleratedBackspace()
     }
