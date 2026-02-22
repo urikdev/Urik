@@ -120,7 +120,7 @@ class KeyboardViewModel
                     if (key.value == "ß") {
                         "ẞ"
                     } else {
-                        key.value.uppercase()
+                        key.value.uppercase(getCurrentLocale().toLocale())
                     }
                 }
                 else -> {

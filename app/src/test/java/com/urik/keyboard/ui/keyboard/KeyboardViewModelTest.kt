@@ -628,6 +628,17 @@ class KeyboardViewModelTest {
         assertEquals("Arab", layout?.script)
     }
 
+    @Test
+    fun `getCharacterForInput Arabic letter unchanged with shift`() =
+        runTest {
+            viewModel.onEvent(KeyboardEvent.ShiftStateChanged(true))
+            val key = KeyboardKey.Character("\u0636", KeyboardKey.KeyType.LETTER)
+
+            val result = viewModel.getCharacterForInput(key)
+
+            assertEquals("\u0636", result)
+        }
+
     private fun createMockLayout(mode: KeyboardMode): KeyboardLayout =
         KeyboardLayout(
             mode = mode,
