@@ -140,6 +140,9 @@ class KeyboardLayoutManager(
     private var languagePickerPopup: LanguagePickerPopup? = null
 
     private val characterVariationCallback: (String) -> Unit = { selectedChar ->
+        popupSelectionMode = false
+        swipeKeyboardView?.setPopupActive(false)
+
         val keyType = currentVariationKeyType ?: KeyboardKey.KeyType.LETTER
         val selectedKey = KeyboardKey.Character(selectedChar, keyType)
         performContextualHaptic(selectedKey)
@@ -149,7 +152,7 @@ class KeyboardLayoutManager(
     private val punctuationVariationCallback: (String) -> Unit = { selectedPunctuation ->
         activePunctuationPopup = null
         popupSelectionMode = false
-        swipeKeyboardView?.setPunctuationPopupActive(false)
+        swipeKeyboardView?.setPopupActive(false)
 
         val punctuationKey = KeyboardKey.Character(selectedPunctuation, KeyboardKey.KeyType.PUNCTUATION)
         performContextualHaptic(punctuationKey)
@@ -203,6 +206,18 @@ class KeyboardLayoutManager(
 
                 MotionEvent.ACTION_MOVE -> {
                     val button = view as Button
+                    if (popupSelectionMode && variationPopup?.isShowing == true) {
+                        val previousChar = variationPopup?.getHighlightedCharacter()
+                        val char = variationPopup?.getCharacterAt(event.rawX, event.rawY)
+                        variationPopup?.setHighlighted(char)
+                        if (char != null && char != previousChar) {
+                            performContextualHaptic(null)
+                        }
+                        return@OnTouchListener true
+                    }
+                    if (characterLongPressFired.contains(button)) {
+                        return@OnTouchListener true
+                    }
                     val dx = event.rawX - longPressStartX
                     val dy = event.rawY - longPressStartY
                     val distance = kotlin.math.sqrt(dx * dx + dy * dy)
@@ -214,11 +229,52 @@ class KeyboardLayoutManager(
                     false
                 }
 
-                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                MotionEvent.ACTION_UP -> {
                     val button = view as Button
                     buttonPendingCallbacks.remove(button)?.let { pending ->
                         pending.handler.removeCallbacks(pending.runnable)
                     }
+
+                    if (popupSelectionMode && variationPopup?.isShowing == true) {
+                        val selectedChar = variationPopup?.getHighlightedCharacter()
+                        if (selectedChar != null) {
+                            variationPopup?.dismiss()
+                            variationPopup = null
+                            popupSelectionMode = false
+                            swipeKeyboardView?.setPopupActive(false)
+
+                            val keyType = currentVariationKeyType ?: KeyboardKey.KeyType.LETTER
+                            val selectedKey = KeyboardKey.Character(selectedChar, keyType)
+                            performContextualHaptic(selectedKey)
+                            onKeyClick(selectedKey)
+                        } else {
+                            popupSelectionMode = false
+                            swipeKeyboardView?.setPopupActive(false)
+                        }
+                        customMappingLongPressFired.remove(button)
+                        characterLongPressFired.remove(button)
+                        return@OnTouchListener true
+                    }
+
+                    customMappingLongPressFired.remove(button)
+                    val consumed = characterLongPressFired.remove(button) ||
+                        longPressConsumedButtons.contains(button)
+                    consumed
+                }
+
+                MotionEvent.ACTION_CANCEL -> {
+                    val button = view as Button
+                    buttonPendingCallbacks.remove(button)?.let { pending ->
+                        pending.handler.removeCallbacks(pending.runnable)
+                    }
+
+                    if (popupSelectionMode && variationPopup?.isShowing == true) {
+                        variationPopup?.dismiss()
+                        variationPopup = null
+                        popupSelectionMode = false
+                        swipeKeyboardView?.setPopupActive(false)
+                    }
+
                     customMappingLongPressFired.remove(button)
                     val consumed = characterLongPressFired.remove(button) ||
                         longPressConsumedButtons.contains(button)
@@ -284,7 +340,7 @@ class KeyboardLayoutManager(
                             activePunctuationPopup?.dismiss()
                             activePunctuationPopup = null
                             popupSelectionMode = false
-                            swipeKeyboardView?.setPunctuationPopupActive(false)
+                            swipeKeyboardView?.setPopupActive(false)
 
                             val punctuationKey = KeyboardKey.Character(selectedChar, KeyboardKey.KeyType.PUNCTUATION)
                             performContextualHaptic(punctuationKey)
@@ -307,7 +363,7 @@ class KeyboardLayoutManager(
                         activePunctuationPopup?.dismiss()
                         activePunctuationPopup = null
                         popupSelectionMode = false
-                        swipeKeyboardView?.setPunctuationPopupActive(false)
+                        swipeKeyboardView?.setPopupActive(false)
                     }
 
                     buttonPendingCallbacks.remove(view as Button)?.let { pending ->
@@ -363,7 +419,7 @@ class KeyboardLayoutManager(
                             activePunctuationPopup?.dismiss()
                             activePunctuationPopup = null
                             popupSelectionMode = false
-                            swipeKeyboardView?.setPunctuationPopupActive(false)
+                            swipeKeyboardView?.setPopupActive(false)
 
                             val punctuationKey = KeyboardKey.Character(selectedChar, KeyboardKey.KeyType.PUNCTUATION)
                             performContextualHaptic(punctuationKey)
@@ -386,7 +442,7 @@ class KeyboardLayoutManager(
                         activePunctuationPopup?.dismiss()
                         activePunctuationPopup = null
                         popupSelectionMode = false
-                        swipeKeyboardView?.setPunctuationPopupActive(false)
+                        swipeKeyboardView?.setPopupActive(false)
                     }
 
                     buttonPendingCallbacks.remove(view as Button)?.let { pending ->
@@ -1466,7 +1522,7 @@ class KeyboardLayoutManager(
         variationPopup = popup
         activePunctuationPopup = popup
         popupSelectionMode = true
-        swipeKeyboardView?.setPunctuationPopupActive(true)
+        swipeKeyboardView?.setPopupActive(true)
     }
 
     private fun loadPunctuationWithErrorHandling(languageCode: String): List<String> {
@@ -1667,6 +1723,9 @@ class KeyboardLayoutManager(
                 setCharacterVariations(key.value, variations, characterVariationCallback)
                 showAboveAnchor(anchorView)
             }
+
+        popupSelectionMode = true
+        swipeKeyboardView?.setPopupActive(true)
     }
 
     private fun startAcceleratedBackspace() {
