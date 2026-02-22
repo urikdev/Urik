@@ -1004,6 +1004,9 @@ class SwipeKeyboardView
 
                 activeSuggestionViews.add(btn)
 
+                btn.gravity =
+                    if (suggestions.size == 1) Gravity.CENTER else Gravity.START or Gravity.CENTER_VERTICAL
+
                 val layoutParams = LinearLayout.LayoutParams(0, LayoutParams.WRAP_CONTENT, 1f)
                 bar.addView(btn, layoutParams)
 
@@ -1184,9 +1187,9 @@ class SwipeKeyboardView
 
         private fun calculateResponsiveSuggestionTextSize(): Float {
             val keyHeight = context.resources.getDimensionPixelSize(R.dimen.key_height)
-            val baseTextSize = keyHeight * 0.30f / context.resources.displayMetrics.density
-            val minSize = 13f
-            val maxSize = 16f
+            val baseTextSize = keyHeight * 0.40f / context.resources.displayMetrics.density
+            val minSize = 15f
+            val maxSize = 19f
 
             return baseTextSize.coerceIn(minSize, maxSize)
         }
