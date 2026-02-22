@@ -189,6 +189,7 @@ class AdaptiveKeyboardContainer
                 LinearLayout(context).apply {
                     orientation = LinearLayout.VERTICAL
                     gravity = Gravity.CENTER
+                    importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
                     layoutParams =
                         LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT).apply {
                             gravity = Gravity.CENTER_VERTICAL

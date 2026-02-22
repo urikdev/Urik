@@ -11,6 +11,9 @@ import android.widget.CheckedTextView
 import android.widget.LinearLayout
 import android.widget.ListView
 import android.widget.TextView
+import androidx.core.view.AccessibilityDelegateCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.urik.keyboard.R
 import com.urik.keyboard.settings.KeyboardSettings
@@ -41,6 +44,7 @@ class LanguagePickerPopup(
                     LinearLayout(context).apply {
                         orientation = LinearLayout.VERTICAL
                         setBackgroundColor(theme.colors.keyboardBackground)
+                        importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
                         layoutParams =
                             ViewGroup.LayoutParams(
                                 ViewGroup.LayoutParams.MATCH_PARENT,
@@ -65,6 +69,22 @@ class LanguagePickerPopup(
 
                 val listView =
                     ListView(context).apply {
+                        importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+                        ViewCompat.setAccessibilityDelegate(
+                            this,
+                            object : AccessibilityDelegateCompat() {
+                                override fun onInitializeAccessibilityNodeInfo(
+                                    host: View,
+                                    info: AccessibilityNodeInfoCompat,
+                                ) {
+                                    super.onInitializeAccessibilityNodeInfo(host, info)
+                                    info.removeAction(
+                                        AccessibilityNodeInfoCompat.AccessibilityActionCompat.ACTION_SET_TEXT,
+                                    )
+                                    info.isEditable = false
+                                }
+                            },
+                        )
                         adapter =
                             object : ArrayAdapter<String>(
                                 context,
