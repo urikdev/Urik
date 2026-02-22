@@ -138,6 +138,7 @@ class KeyboardLayoutManager(
     private var variationPopup: CharacterVariationPopup? = null
     private var currentVariationKeyType: KeyboardKey.KeyType? = null
     private var languagePickerPopup: LanguagePickerPopup? = null
+    private var lastKeyboardState: KeyboardState = KeyboardState()
 
     private val characterVariationCallback: (String) -> Unit = { selectedChar ->
         popupSelectionMode = false
@@ -788,6 +789,7 @@ class KeyboardLayoutManager(
         layout: KeyboardLayout,
         state: KeyboardState,
     ): View {
+        lastKeyboardState = state
         returnActiveButtonsToPool()
 
         val processedRows =
@@ -1685,8 +1687,9 @@ class KeyboardLayoutManager(
             try {
                 val variations = characterVariationService.getVariations(key.value, currentLayoutLang)
                 if (variations.isNotEmpty()) {
+                    val casedVariations = applyCasingToVariations(variations)
                     withContext(Dispatchers.Main) {
-                        showCharacterVariationPopup(key, view, variations)
+                        showCharacterVariationPopup(key, view, casedVariations)
                     }
                 } else {
                     withContext(Dispatchers.Main) {
@@ -1718,9 +1721,20 @@ class KeyboardLayoutManager(
 
         currentVariationKeyType = key.type
 
+        val script = effectiveLayout?.script ?: "Latn"
+        val casedBaseChar =
+            if (key.type == KeyboardKey.KeyType.LETTER &&
+                isBicameralScript(script) &&
+                shouldCapitalize(lastKeyboardState)
+            ) {
+                key.value.uppercase(getCurrentLocale())
+            } else {
+                key.value
+            }
+
         variationPopup =
             CharacterVariationPopup(context, themeManager).apply {
-                setCharacterVariations(key.value, variations, characterVariationCallback)
+                setCharacterVariations(casedBaseChar, variations, characterVariationCallback)
                 showAboveAnchor(anchorView)
             }
 
@@ -1945,6 +1959,15 @@ class KeyboardLayoutManager(
     }
 
     private fun shouldCapitalize(state: KeyboardState): Boolean = state.isShiftPressed || state.isCapsLockOn
+
+    private fun applyCasingToVariations(variations: List<String>): List<String> {
+        val script = effectiveLayout?.script ?: "Latn"
+        if (!isBicameralScript(script) || !shouldCapitalize(lastKeyboardState)) {
+            return variations
+        }
+        val locale = getCurrentLocale()
+        return variations.map { it.uppercase(locale) }
+    }
 
     private fun getKeyActivatedState(
         key: KeyboardKey,
