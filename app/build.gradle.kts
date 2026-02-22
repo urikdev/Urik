@@ -67,6 +67,8 @@ android {
 
     buildFeatures {
         viewBinding = true
+        resValues = false
+        shaders = false
     }
 
     packaging {
