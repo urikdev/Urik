@@ -1210,18 +1210,32 @@ class KeyboardLayoutManager(
         activeButtons.clear()
     }
 
+    private fun isBicameralScript(script: String): Boolean =
+        when (script) {
+            "Latn", "Cyrl", "Grek" -> true
+            else -> false
+        }
+
+    private fun getCurrentLocale(): java.util.Locale {
+        val lang = languageManager.currentLayoutLanguage.value.split("-").first()
+        return java.util.Locale.forLanguageTag(lang)
+    }
+
     private fun getKeyLabel(
         key: KeyboardKey,
         state: KeyboardState,
     ): String =
         when (key) {
             is KeyboardKey.Character -> {
+                val script = effectiveLayout?.script ?: "Latn"
                 when {
-                    key.type == KeyboardKey.KeyType.LETTER && shouldCapitalize(state) -> {
+                    key.type == KeyboardKey.KeyType.LETTER &&
+                        isBicameralScript(script) &&
+                        shouldCapitalize(state) -> {
                         if (key.value == "ß") {
                             "ẞ"
                         } else {
-                            key.value.uppercase()
+                            key.value.uppercase(getCurrentLocale())
                         }
                     }
 
@@ -1252,13 +1266,16 @@ class KeyboardLayoutManager(
     ): String =
         when (key) {
             is KeyboardKey.Character -> {
+                val script = effectiveLayout?.script ?: "Latn"
                 val char =
                     when {
-                        key.type == KeyboardKey.KeyType.LETTER && shouldCapitalize(state) -> {
+                        key.type == KeyboardKey.KeyType.LETTER &&
+                            isBicameralScript(script) &&
+                            shouldCapitalize(state) -> {
                             if (key.value == "ß") {
                                 "ẞ"
                             } else {
-                                key.value.uppercase()
+                                key.value.uppercase(getCurrentLocale())
                             }
                         }
 

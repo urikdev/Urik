@@ -476,6 +476,50 @@ class CaseTransformerTest {
     }
 
     @Test
+    fun `locale-aware caps lock uses provided locale`() {
+        val suggestion =
+            SpellingSuggestion(
+                word = "über",
+                confidence = 0.90,
+                ranking = 0,
+                source = "symspell",
+                preserveCase = false,
+            )
+        val state =
+            KeyboardState(
+                isCapsLockOn = true,
+                isShiftPressed = false,
+                isAutoShift = false,
+            )
+
+        val result = caseTransformer.applyCasing(suggestion, state, locale = java.util.Locale.GERMAN)
+
+        assertEquals("ÜBER", result)
+    }
+
+    @Test
+    fun `locale-aware capitalize first letter uses provided locale`() {
+        val suggestion =
+            SpellingSuggestion(
+                word = "über",
+                confidence = 0.90,
+                ranking = 0,
+                source = "symspell",
+                preserveCase = false,
+            )
+        val state =
+            KeyboardState(
+                isCapsLockOn = false,
+                isShiftPressed = true,
+                isAutoShift = false,
+            )
+
+        val result = caseTransformer.applyCasing(suggestion, state, locale = java.util.Locale.GERMAN)
+
+        assertEquals("Über", result)
+    }
+
+    @Test
     fun `mid-sentence no capitalization without shift`() {
         val suggestion =
             SpellingSuggestion(
