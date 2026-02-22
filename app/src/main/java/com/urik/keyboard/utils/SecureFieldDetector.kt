@@ -20,9 +20,10 @@ import com.urik.keyboard.utils.SecureFieldDetector.isSecure
  * **Numeric passwords:**
  * - TYPE_NUMBER_VARIATION_PASSWORD (PIN codes, numeric passwords)
  *
- * ### Direct-Commit Field Types (CLI/Terminal)
- * Fields that cannot render composing text and require immediate character commitment:
+ * ### Direct-Commit Field Types
+ * Fields where composing regions serve no purpose and require immediate character commitment:
  * - TYPE_NULL (raw input mode — terminals, game inputs)
+ * - TYPE_CLASS_NUMBER non-password (OTP boxes, calculators, amount fields)
  * - TYPE_TEXT_FLAG_NO_SUGGESTIONS + TYPE_TEXT_VARIATION_VISIBLE_PASSWORD (CLI editors)
  * - TYPE_TEXT_FLAG_NO_SUGGESTIONS + IME_FLAG_NO_EXTRACT_UI (apps opting out of IME features)
  *
@@ -83,6 +84,12 @@ object SecureFieldDetector {
         if (inputType == InputType.TYPE_NULL) return true
 
         val inputClass = inputType and InputType.TYPE_MASK_CLASS
+
+        if (inputClass == InputType.TYPE_CLASS_NUMBER) {
+            val variation = inputType and InputType.TYPE_MASK_VARIATION
+            return variation != InputType.TYPE_NUMBER_VARIATION_PASSWORD
+        }
+
         if (inputClass != InputType.TYPE_CLASS_TEXT) return false
 
         val flags = inputType and InputType.TYPE_MASK_FLAGS
