@@ -33,6 +33,7 @@ import com.ibm.icu.lang.UProperty
 import com.ibm.icu.lang.UScript
 import com.ibm.icu.util.ULocale
 import com.urik.keyboard.KeyboardConstants.InputTimingConstants
+import com.urik.keyboard.KeyboardConstants.TextProcessingConstants
 import com.urik.keyboard.data.KeyboardRepository
 import com.urik.keyboard.model.KeyboardDisplayMode
 import com.urik.keyboard.model.KeyboardEvent
@@ -242,7 +243,6 @@ class UrikInputMethodService :
     @Volatile
     private var lastKnownCursorPosition: Int = -1
 
-
     private fun safeGetTextBeforeCursor(
         length: Int,
         flags: Int = 0,
@@ -289,7 +289,6 @@ class UrikInputMethodService :
 
     @Volatile
     private var isUrlOrEmailField: Boolean = false
-
 
     fun setAcceleratedDeletion(active: Boolean) {
         isAcceleratedDeletion = active
@@ -834,7 +833,6 @@ class UrikInputMethodService :
 
     override fun onCreate() {
         super.onCreate()
-
         try {
             lifecycleRegistry = LifecycleRegistry(this)
             lifecycleRegistry.currentState = Lifecycle.State.CREATED
@@ -1769,8 +1767,9 @@ class UrikInputMethodService :
                     composingRegionStart = safeGetCursorPosition()
                 }
 
-                val needsCursorRepositioning = composingRegionStart != -1 &&
-                    newCursorPositionInText != displayBuffer.length
+                val needsCursorRepositioning =
+                    composingRegionStart != -1 &&
+                        newCursorPositionInText != displayBuffer.length
 
                 if (needsCursorRepositioning) {
                     ic.beginBatchEdit()
@@ -1900,8 +1899,8 @@ class UrikInputMethodService :
                     return@launch
                 }
 
-                if (displayBuffer.isNotEmpty() && wordState.requiresSpellCheck) {
-                    if (wordState.graphemeCount >= 2) {
+                if (displayBuffer.isNotEmpty() && currentSettings.spellCheckEnabled) {
+                    if (displayBuffer.length >= TextProcessingConstants.MIN_SPELL_CHECK_LENGTH) {
                         val textBefore = safeGetTextBeforeCursor(100)
                         val isUrlOrEmail =
                             UrlEmailDetector.isUrlOrEmailContext(
@@ -1911,7 +1910,8 @@ class UrikInputMethodService :
                             )
 
                         if (!isUrlOrEmail) {
-                            val isValid = textInputProcessor.validateWord(wordState.normalizedBuffer)
+                            suggestionDebounceJob?.cancel()
+                            val isValid = textInputProcessor.validateWord(displayBuffer)
                             if (!isValid) {
                                 val isPunctuation =
                                     char.length == 1 && CursorEditingUtils.isPunctuation(char.single())
@@ -1921,7 +1921,7 @@ class UrikInputMethodService :
                                     try {
                                         autoCapitalizePronounI()
                                         learnWordAndInvalidateCache(
-                                            wordState.buffer,
+                                            displayBuffer,
                                             InputMethod.TYPED,
                                         )
                                         currentInputConnection?.finishComposingText()
@@ -1942,10 +1942,10 @@ class UrikInputMethodService :
                                     return@launch
                                 } else {
                                     spellConfirmationState = SpellConfirmationState.AWAITING_CONFIRMATION
-                                    pendingWordForLearning = wordState.buffer
+                                    pendingWordForLearning = displayBuffer
                                     highlightCurrentWord()
 
-                                    val suggestions = textInputProcessor.getSuggestions(wordState.normalizedBuffer)
+                                    val suggestions = textInputProcessor.getSuggestions(displayBuffer)
                                     val displaySuggestions = applyCapitalizationToSuggestions(suggestions, isCurrentWordAtSentenceStart)
                                     pendingSuggestions = displaySuggestions
                                     if (displaySuggestions.isNotEmpty()) {
@@ -2529,8 +2529,9 @@ class UrikInputMethodService :
                     if (displayBuffer.isNotEmpty()) {
                         val ic = currentInputConnection
                         if (ic != null) {
-                            val needsCursorRepositioning = composingRegionStart != -1 &&
-                                newCursorPositionInText != displayBuffer.length
+                            val needsCursorRepositioning =
+                                composingRegionStart != -1 &&
+                                    newCursorPositionInText != displayBuffer.length
 
                             if (needsCursorRepositioning) {
                                 ic.beginBatchEdit()
@@ -2862,8 +2863,8 @@ class UrikInputMethodService :
                     return@launch
                 }
 
-                if (wordState.hasContent && wordState.requiresSpellCheck) {
-                    if (wordState.graphemeCount >= 2) {
+                if (displayBuffer.isNotEmpty() && currentSettings.spellCheckEnabled) {
+                    if (displayBuffer.length >= TextProcessingConstants.MIN_SPELL_CHECK_LENGTH) {
                         val textBeforeForUrlCheck = safeGetTextBeforeCursor(100)
                         val isUrlOrEmail =
                             UrlEmailDetector.isUrlOrEmailContext(
@@ -2873,10 +2874,11 @@ class UrikInputMethodService :
                             )
 
                         if (!isUrlOrEmail) {
-                            val isValid = textInputProcessor.validateWord(wordState.normalizedBuffer)
+                            suggestionDebounceJob?.cancel()
+                            val isValid = textInputProcessor.validateWord(displayBuffer)
                             if (isValid) {
                                 isActivelyEditing = true
-                                recordWordUsage(wordState.normalizedBuffer)
+                                recordWordUsage(displayBuffer)
                                 currentInputConnection?.beginBatchEdit()
                                 try {
                                     autoCapitalizePronounI()
@@ -2897,10 +2899,10 @@ class UrikInputMethodService :
                             }
 
                             val suggestions =
-                                textInputProcessor.getSuggestions(wordState.normalizedBuffer)
+                                textInputProcessor.getSuggestions(displayBuffer)
 
                             spellConfirmationState = SpellConfirmationState.AWAITING_CONFIRMATION
-                            pendingWordForLearning = wordState.buffer
+                            pendingWordForLearning = displayBuffer
 
                             highlightCurrentWord()
                             val displaySuggestions = applyCapitalizationToSuggestions(suggestions, isCurrentWordAtSentenceStart)

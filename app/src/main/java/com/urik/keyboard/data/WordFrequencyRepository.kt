@@ -162,7 +162,9 @@ class WordFrequencyRepository
                     val normalized = normalizeWord(word, languageTag)
                     val cacheKey = buildCacheKey(languageTag, normalized)
 
-                    frequencyCache.getIfPresent(cacheKey)?.let { return@withContext it }
+                    frequencyCache.getIfPresent(cacheKey)?.let {
+                        return@withContext it
+                    }
 
                     val frequency =
                         withContext(ioDispatcher) {
