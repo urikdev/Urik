@@ -78,7 +78,7 @@ class SwipeKeyboardView
         private val keyMapping = mutableMapOf<Button, KeyboardKey>()
         private val keyCharacterPositions = mutableMapOf<KeyboardKey.Character, PointF>()
 
-        private var punctuationPopupActive = false
+        private var popupActive = false
 
         internal var currentLayout: KeyboardLayout? = null
         internal var currentState: KeyboardState? = null
@@ -882,8 +882,8 @@ class SwipeKeyboardView
             }
         }
 
-        fun setPunctuationPopupActive(active: Boolean) {
-            punctuationPopupActive = active
+        fun setPopupActive(active: Boolean) {
+            popupActive = active
         }
 
         fun setCursorSpeed(speed: com.urik.keyboard.settings.CursorSpeed) {
@@ -1755,7 +1755,7 @@ class SwipeKeyboardView
                 }
 
                 MotionEvent.ACTION_MOVE -> {
-                    if (gestureKey != null && !isGestureActive && !punctuationPopupActive) {
+                    if (gestureKey != null && !isGestureActive && !popupActive) {
                         val dx = ev.x - gestureStartX
                         val dy = ev.y - gestureStartY
                         val distance = kotlin.math.sqrt(dx * dx + dy * dy)
@@ -1775,6 +1775,10 @@ class SwipeKeyboardView
                     if (isGestureActive) {
                         processGestureMovement(ev.x, ev.y)
                         return true
+                    }
+
+                    if (popupActive) {
+                        return false
                     }
 
                     val isSwipe = swipeDetector?.handleTouchEvent(ev) { x, y -> findKeyAt(x, y) } ?: false
