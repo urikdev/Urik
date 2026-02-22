@@ -262,6 +262,7 @@
 
     <!-- Character Variation Accessibility -->
     <string name="character_variation_position">Variation de caractère %1$d sur %2$d : %3$s</string>
+    <string name="character_option_role">option de caractère</string>
 
     <!-- Blacklisting Words -->
     <string name="remove_suggestion">Supprimer %1$s des suggestions ?</string>

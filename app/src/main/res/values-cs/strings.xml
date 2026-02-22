@@ -242,6 +242,7 @@
 
     <!-- Character Variation Accessibility -->
     <string name="character_variation_position">Variace znaků %1$d z %2$d: %3$s</string>
+    <string name="character_option_role">volba znaku</string>
 
     <!-- Blacklisting Words -->
     <string name="remove_suggestion">Odstranit %1$s z doporučení?</string>

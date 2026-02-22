@@ -10,6 +10,9 @@ import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
+import androidx.core.view.AccessibilityDelegateCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
 import androidx.core.view.isVisible
 import com.urik.keyboard.R
 import com.urik.keyboard.data.database.ClipboardItem
@@ -28,6 +31,20 @@ class ClipboardPanel(
     private var onItemPinToggled: ((ClipboardItem) -> Unit)? = null
     private var onItemDeleted: ((ClipboardItem) -> Unit)? = null
     private var onDeleteAllUnpinned: (() -> Unit)? = null
+
+    private val transientOverlayA11yDelegate =
+        object : AccessibilityDelegateCompat() {
+            override fun onInitializeAccessibilityNodeInfo(
+                host: View,
+                info: AccessibilityNodeInfoCompat,
+            ) {
+                super.onInitializeAccessibilityNodeInfo(host, info)
+                info.removeAction(
+                    AccessibilityNodeInfoCompat.AccessibilityActionCompat.ACTION_SET_TEXT,
+                )
+                info.isEditable = false
+            }
+        }
 
     private var deleteAllConfirmationOverlay: FrameLayout? = null
 
@@ -65,21 +82,33 @@ class ClipboardPanel(
     private val pinnedListContainer: ScrollView =
         ScrollView(context).apply {
             isVisible = false
+            importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+            ViewCompat.setAccessibilityDelegate(
+                this,
+                transientOverlayA11yDelegate,
+            )
         }
 
     private val recentListContainer: ScrollView =
         ScrollView(context).apply {
             isVisible = true
+            importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+            ViewCompat.setAccessibilityDelegate(
+                this,
+                transientOverlayA11yDelegate,
+            )
         }
 
     private val pinnedList: LinearLayout =
         LinearLayout(context).apply {
             orientation = LinearLayout.VERTICAL
+            importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
         }
 
     private val recentList: LinearLayout =
         LinearLayout(context).apply {
             orientation = LinearLayout.VERTICAL
+            importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
         }
 
     private val emptyStateText: TextView =
@@ -395,6 +424,7 @@ class ClipboardPanel(
             LinearLayout(context).apply {
                 orientation = LinearLayout.HORIZONTAL
                 gravity = Gravity.CENTER_VERTICAL or Gravity.END
+                importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
                 layoutParams =
                     LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -503,12 +533,14 @@ class ClipboardPanel(
             FrameLayout(context).apply {
                 setBackgroundColor(ContextCompat.getColor(context, android.R.color.black))
                 alpha = 0.8f
+                importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
 
                 val container =
                     LinearLayout(context).apply {
                         orientation = LinearLayout.VERTICAL
                         gravity = Gravity.CENTER
                         setBackgroundColor(themeManager.currentTheme.value.colors.keyboardBackground)
+                        importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
 
                         val padding = (16 * density).toInt()
                         setPadding(padding, padding, padding, padding)

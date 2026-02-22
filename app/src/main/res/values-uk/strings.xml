@@ -243,6 +243,7 @@
 
     <!-- Character Variation Accessibility -->
     <string name="character_variation_position">Варіація символу %1$d з %2$d: %3$s</string>
+    <string name="character_option_role">варіант символу</string>
 
     <!-- Blacklisting Words -->
     <string name="remove_suggestion">Видалити %1$s з пропозицій?</string>

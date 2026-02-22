@@ -243,6 +243,7 @@
 
     <!-- Character Variation Accessibility -->
     <string name="character_variation_position">Wariant znaku %1$d z %2$d: %3$s</string>
+    <string name="character_option_role">opcja znaku</string>
 
     <!-- Blacklisting Words -->
     <string name="remove_suggestion">Usunąć %1$s z sugestii?</string>

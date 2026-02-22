@@ -259,6 +259,7 @@
 
     <!-- Character Variation Accessibility -->
     <string name="character_variation_position">تفاوت الحرف %1$d من %2$d: %3$s</string>
+    <string name="character_option_role">خيار حرف</string>
 
     <!-- Blacklisting Words -->
     <string name="remove_suggestion">إحذف %1$s من الإقتراحات؟</string>
