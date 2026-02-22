@@ -229,4 +229,128 @@ class KeyboardModeUtilsTest {
         currentMode = KeyboardModeUtils.determineTargetMode(emailInput, currentMode)
         assertEquals(KeyboardMode.SYMBOLS, currentMode)
     }
+
+    @Test
+    fun `isTextClassInput returns true for TYPE_CLASS_TEXT`() {
+        val editorInfo =
+            EditorInfo().apply {
+                inputType = InputType.TYPE_CLASS_TEXT
+            }
+
+        assertTrue(KeyboardModeUtils.isTextClassInput(editorInfo))
+    }
+
+    @Test
+    fun `isTextClassInput returns true for text with variation`() {
+        val editorInfo =
+            EditorInfo().apply {
+                inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
+            }
+
+        assertTrue(KeyboardModeUtils.isTextClassInput(editorInfo))
+    }
+
+    @Test
+    fun `isTextClassInput returns false for TYPE_CLASS_NUMBER`() {
+        val editorInfo =
+            EditorInfo().apply {
+                inputType = InputType.TYPE_CLASS_NUMBER
+            }
+
+        assertFalse(KeyboardModeUtils.isTextClassInput(editorInfo))
+    }
+
+    @Test
+    fun `isTextClassInput returns false for TYPE_CLASS_PHONE`() {
+        val editorInfo =
+            EditorInfo().apply {
+                inputType = InputType.TYPE_CLASS_PHONE
+            }
+
+        assertFalse(KeyboardModeUtils.isTextClassInput(editorInfo))
+    }
+
+    @Test
+    fun `isTextClassInput returns false for null EditorInfo`() {
+        assertFalse(KeyboardModeUtils.isTextClassInput(null))
+    }
+
+    @Test
+    fun `shouldResetToLettersOnEnter returns true from SYMBOLS in text field`() {
+        val editorInfo =
+            EditorInfo().apply {
+                inputType = InputType.TYPE_CLASS_TEXT
+            }
+
+        assertTrue(
+            KeyboardModeUtils.shouldResetToLettersOnEnter(KeyboardMode.SYMBOLS, editorInfo),
+        )
+    }
+
+    @Test
+    fun `shouldResetToLettersOnEnter returns true from NUMBERS in text field`() {
+        val editorInfo =
+            EditorInfo().apply {
+                inputType = InputType.TYPE_CLASS_TEXT
+            }
+
+        assertTrue(
+            KeyboardModeUtils.shouldResetToLettersOnEnter(KeyboardMode.NUMBERS, editorInfo),
+        )
+    }
+
+    @Test
+    fun `shouldResetToLettersOnEnter returns false when already in LETTERS`() {
+        val editorInfo =
+            EditorInfo().apply {
+                inputType = InputType.TYPE_CLASS_TEXT
+            }
+
+        assertFalse(
+            KeyboardModeUtils.shouldResetToLettersOnEnter(KeyboardMode.LETTERS, editorInfo),
+        )
+    }
+
+    @Test
+    fun `shouldResetToLettersOnEnter returns false for number field`() {
+        val editorInfo =
+            EditorInfo().apply {
+                inputType = InputType.TYPE_CLASS_NUMBER
+            }
+
+        assertFalse(
+            KeyboardModeUtils.shouldResetToLettersOnEnter(KeyboardMode.SYMBOLS, editorInfo),
+        )
+    }
+
+    @Test
+    fun `shouldResetToLettersOnEnter returns false for phone field`() {
+        val editorInfo =
+            EditorInfo().apply {
+                inputType = InputType.TYPE_CLASS_PHONE
+            }
+
+        assertFalse(
+            KeyboardModeUtils.shouldResetToLettersOnEnter(KeyboardMode.NUMBERS, editorInfo),
+        )
+    }
+
+    @Test
+    fun `shouldResetToLettersOnEnter returns false for null EditorInfo`() {
+        assertFalse(
+            KeyboardModeUtils.shouldResetToLettersOnEnter(KeyboardMode.SYMBOLS, null),
+        )
+    }
+
+    @Test
+    fun `shouldResetToLettersOnEnter returns true from SYMBOLS in password field`() {
+        val editorInfo =
+            EditorInfo().apply {
+                inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
+            }
+
+        assertTrue(
+            KeyboardModeUtils.shouldResetToLettersOnEnter(KeyboardMode.SYMBOLS, editorInfo),
+        )
+    }
 }

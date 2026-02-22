@@ -2344,6 +2344,14 @@ class UrikInputMethodService :
 
             coordinateStateClear()
 
+            if (KeyboardModeUtils.shouldResetToLettersOnEnter(
+                    viewModel.state.value.currentMode,
+                    currentInputEditorInfo,
+                )
+            ) {
+                viewModel.onEvent(KeyboardEvent.ModeChanged(KeyboardMode.LETTERS))
+            }
+
             if (imeAction == EditorInfo.IME_ACTION_NONE) {
                 val textBefore = safeGetTextBeforeCursor(50)
                 viewModel.checkAndApplyAutoCapitalization(textBefore, currentSettings.autoCapitalizationEnabled)

@@ -11,6 +11,17 @@ object KeyboardModeUtils {
         return inputClass == InputType.TYPE_CLASS_NUMBER
     }
 
+    fun isTextClassInput(editorInfo: EditorInfo?): Boolean {
+        val inputType = editorInfo?.inputType ?: return false
+        val inputClass = inputType and InputType.TYPE_MASK_CLASS
+        return inputClass == InputType.TYPE_CLASS_TEXT
+    }
+
+    fun shouldResetToLettersOnEnter(
+        currentMode: KeyboardMode,
+        editorInfo: EditorInfo?,
+    ): Boolean = currentMode != KeyboardMode.LETTERS && isTextClassInput(editorInfo)
+
     fun determineTargetMode(
         editorInfo: EditorInfo?,
         currentMode: KeyboardMode,
