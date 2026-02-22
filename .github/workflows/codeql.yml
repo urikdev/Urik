@@ -3,8 +3,6 @@ name: "CodeQL Advanced"
 on:
   push:
     branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
   schedule:
     - cron: '30 2 * * 1'
 
@@ -37,13 +35,15 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v4
-
-    - name: Set up JDK 17
-      if: matrix.language == 'java-kotlin'
-      uses: actions/setup-java@v4
+      uses: actions/checkout@v6
       with:
-        java-version: '17'
+        persist-credentials: false
+
+    - name: Set up JDK 21
+      if: matrix.language == 'java-kotlin'
+      uses: actions/setup-java@v5
+      with:
+        java-version: '21'
         distribution: 'temurin'
 
     - name: Initialize CodeQL
