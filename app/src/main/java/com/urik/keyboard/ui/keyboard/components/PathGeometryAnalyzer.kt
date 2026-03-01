@@ -124,9 +124,9 @@ class PathGeometryAnalyzer
             val neighborDistances: FloatArray,
         )
 
-        private val reusableCurvatureArray = FloatArray(GeometricScoringConstants.MAX_PATH_POINTS)
-        private val reusableVelocityArray = FloatArray(GeometricScoringConstants.MAX_PATH_POINTS)
-        private val reusableCoverageFlags = BooleanArray(GeometricScoringConstants.MAX_PATH_POINTS)
+        private val reusableCurvatureArray = FloatArray(MAX_PATH_POINTS)
+        private val reusableVelocityArray = FloatArray(MAX_PATH_POINTS)
+        private val reusableCoverageFlags = BooleanArray(MAX_PATH_POINTS)
         private val cachedIntersectionPoint = PointF()
 
         /**
@@ -180,7 +180,7 @@ class PathGeometryAnalyzer
                     val dx = keyPos.x - otherPos.x
                     val dy = keyPos.y - otherPos.y
                     val distSq = dx * dx + dy * dy
-                    if (distSq < GeometricScoringConstants.NEIGHBOR_RADIUS_SQ) {
+                    if (distSq < NEIGHBOR_RADIUS_SQ) {
                         neighborCount++
                     }
                 }
@@ -188,16 +188,16 @@ class PathGeometryAnalyzer
 
             val sigma =
                 when {
-                    neighborCount >= GeometricScoringConstants.TIGHT_CLUSTER_THRESHOLD -> {
-                        GeometricScoringConstants.TIGHT_CLUSTER_SIGMA
+                    neighborCount >= TIGHT_CLUSTER_THRESHOLD -> {
+                        TIGHT_CLUSTER_SIGMA
                     }
 
-                    neighborCount >= GeometricScoringConstants.NORMAL_CLUSTER_THRESHOLD -> {
-                        GeometricScoringConstants.NORMAL_SIGMA
+                    neighborCount >= NORMAL_CLUSTER_THRESHOLD -> {
+                        NORMAL_SIGMA
                     }
 
                     else -> {
-                        GeometricScoringConstants.EDGE_KEY_SIGMA
+                        EDGE_KEY_SIGMA
                     }
                 }
 
@@ -209,8 +209,8 @@ class PathGeometryAnalyzer
          */
         fun calculateVelocityWeight(velocity: Float): Float =
             when {
-                velocity < GeometricScoringConstants.SLOW_VELOCITY_THRESHOLD -> {
-                    GeometricScoringConstants.SLOW_VELOCITY_BOOST
+                velocity < SLOW_VELOCITY_THRESHOLD -> {
+                    SLOW_VELOCITY_BOOST
                 }
 
                 velocity < GeometricScoringConstants.NORMAL_VELOCITY_THRESHOLD -> {
@@ -241,15 +241,15 @@ class PathGeometryAnalyzer
                 analysis.inflectionPoints.find { inflection ->
                     inflection.nearestKey == key &&
                         inflection.isIntentional &&
-                        inflection.distanceToKey < GeometricScoringConstants.INFLECTION_BOOST_RADIUS
+                        inflection.distanceToKey < INFLECTION_BOOST_RADIUS
                 }
 
             return nearbyInflection?.let { inflection ->
                 val angleBoost =
-                    (inflection.angle / GeometricScoringConstants.MAX_EXPECTED_ANGLE)
+                    (inflection.angle / MAX_EXPECTED_ANGLE)
                         .coerceIn(0.5f, 1.0f)
-                GeometricScoringConstants.INFLECTION_BOOST_BASE +
-                    (GeometricScoringConstants.INFLECTION_BOOST_MAX - GeometricScoringConstants.INFLECTION_BOOST_BASE) * angleBoost
+                INFLECTION_BOOST_BASE +
+                    (INFLECTION_BOOST_MAX - INFLECTION_BOOST_BASE) * angleBoost
             } ?: 1.0f
         }
 
@@ -258,24 +258,24 @@ class PathGeometryAnalyzer
          */
         fun calculateDynamicWeights(pathConfidence: Float): Pair<Float, Float> =
             when {
-                pathConfidence > GeometricScoringConstants.HIGH_CONFIDENCE_THRESHOLD -> {
-                    GeometricScoringConstants.HIGH_CONFIDENCE_SPATIAL_WEIGHT to
-                        GeometricScoringConstants.HIGH_CONFIDENCE_FREQ_WEIGHT
+                pathConfidence > HIGH_CONFIDENCE_THRESHOLD -> {
+                    HIGH_CONFIDENCE_SPATIAL_WEIGHT to
+                        HIGH_CONFIDENCE_FREQ_WEIGHT
                 }
 
-                pathConfidence > GeometricScoringConstants.MEDIUM_CONFIDENCE_THRESHOLD -> {
-                    GeometricScoringConstants.MEDIUM_CONFIDENCE_SPATIAL_WEIGHT to
-                        GeometricScoringConstants.MEDIUM_CONFIDENCE_FREQ_WEIGHT
+                pathConfidence > MEDIUM_CONFIDENCE_THRESHOLD -> {
+                    MEDIUM_CONFIDENCE_SPATIAL_WEIGHT to
+                        MEDIUM_CONFIDENCE_FREQ_WEIGHT
                 }
 
-                pathConfidence > GeometricScoringConstants.LOW_CONFIDENCE_THRESHOLD -> {
-                    GeometricScoringConstants.LOW_CONFIDENCE_SPATIAL_WEIGHT to
-                        GeometricScoringConstants.LOW_CONFIDENCE_FREQ_WEIGHT
+                pathConfidence > LOW_CONFIDENCE_THRESHOLD -> {
+                    LOW_CONFIDENCE_SPATIAL_WEIGHT to
+                        LOW_CONFIDENCE_FREQ_WEIGHT
                 }
 
                 else -> {
-                    GeometricScoringConstants.VERY_LOW_CONFIDENCE_SPATIAL_WEIGHT to
-                        GeometricScoringConstants.VERY_LOW_CONFIDENCE_FREQ_WEIGHT
+                    VERY_LOW_CONFIDENCE_SPATIAL_WEIGHT to
+                        VERY_LOW_CONFIDENCE_FREQ_WEIGHT
                 }
             }
 
@@ -300,9 +300,9 @@ class PathGeometryAnalyzer
                 val dy = point.y - keyPosition.y
                 val distSq = dx * dx + dy * dy
 
-                if (distSq < GeometricScoringConstants.DWELL_DETECTION_RADIUS_SQ) {
+                if (distSq < DWELL_DETECTION_RADIUS_SQ) {
                     pointsNearKey++
-                    if (point.velocity < GeometricScoringConstants.DWELL_VELOCITY_THRESHOLD) {
+                    if (point.velocity < DWELL_VELOCITY_THRESHOLD) {
                         dwellScore += 0.15f
                     }
                 }
@@ -312,7 +312,7 @@ class PathGeometryAnalyzer
                 oscillationScore = detectOscillation(path, startIndex, endIndex)
             }
 
-            return (dwellScore + oscillationScore).coerceAtMost(GeometricScoringConstants.MAX_REPEATED_LETTER_BOOST)
+            return (dwellScore + oscillationScore).coerceAtMost(MAX_REPEATED_LETTER_BOOST)
         }
 
         /**
@@ -322,7 +322,7 @@ class PathGeometryAnalyzer
             word: String,
             keyPositions: Map<Char, PointF>,
         ): Boolean {
-            if (word.length > GeometricScoringConstants.MAX_CLUSTERED_WORD_LENGTH) return false
+            if (word.length > MAX_CLUSTERED_WORD_LENGTH) return false
 
             for (i in word.indices) {
                 val pos1 = keyPositions[word[i].lowercaseChar()] ?: return false
@@ -331,7 +331,7 @@ class PathGeometryAnalyzer
                     val dx = pos1.x - pos2.x
                     val dy = pos1.y - pos2.y
                     val distSq = dx * dx + dy * dy
-                    if (distSq > GeometricScoringConstants.CLUSTER_MAX_DISTANCE_SQ) {
+                    if (distSq > CLUSTER_MAX_DISTANCE_SQ) {
                         return false
                     }
                 }
@@ -353,7 +353,7 @@ class PathGeometryAnalyzer
             val size = path.size
             val flags = reusableCoverageFlags
             flags.fill(false, 0, minOf(size, flags.size))
-            val coverageRadius = GeometricScoringConstants.PATH_COVERAGE_RADIUS
+            val coverageRadius = PATH_COVERAGE_RADIUS
             val radiusSq = coverageRadius * coverageRadius
 
             letterPathIndices.forEachIndexed { letterIdx, pathIdx ->
@@ -433,18 +433,18 @@ class PathGeometryAnalyzer
             for (i in 1 until minOf(path.size - 1, curvatureProfile.size)) {
                 val curvature = abs(curvatureProfile[i])
 
-                if (curvature > GeometricScoringConstants.INFLECTION_ANGLE_THRESHOLD) {
+                if (curvature > INFLECTION_ANGLE_THRESHOLD) {
                     val point = path[i]
                     val (nearestKey, distance) = findNearestKey(point, keyPositions)
 
                     val isIntentional =
-                        curvature > GeometricScoringConstants.INTENTIONAL_CORNER_THRESHOLD &&
-                            distance < GeometricScoringConstants.INTENTIONAL_CORNER_KEY_RADIUS
+                        curvature > INTENTIONAL_CORNER_THRESHOLD &&
+                            distance < INTENTIONAL_CORNER_KEY_RADIUS
 
                     val velocity = if (i < velocityProfile.size) velocityProfile[i] else 0f
 
                     val compensated =
-                        if (velocity > GeometricScoringConstants.CORNER_COMPENSATION_VELOCITY_THRESHOLD &&
+                        if (velocity > CORNER_COMPENSATION_VELOCITY_THRESHOLD &&
                             i > 0 && i < path.size - 1
                         ) {
                             computeCornerCompensation(path, i, velocity)
@@ -495,8 +495,8 @@ class PathGeometryAnalyzer
 
             if (bisectLen < 0.001f) return PointF(curr.x, curr.y)
 
-            val offset = (velocity * GeometricScoringConstants.CORNER_COMPENSATION_VELOCITY_SCALE)
-                .coerceAtMost(GeometricScoringConstants.CORNER_COMPENSATION_MAX_OFFSET_PX)
+            val offset = (velocity * CORNER_COMPENSATION_VELOCITY_SCALE)
+                .coerceAtMost(CORNER_COMPENSATION_MAX_OFFSET_PX)
 
             return PointF(
                 curr.x - (bisectX / bisectLen) * offset,
@@ -601,7 +601,7 @@ class PathGeometryAnalyzer
                 val dy = p1.y - keyPos.y
                 if (dx * dx + dy * dy < keyRadiusSq) {
                     pointsInRadius++
-                    if (p1.velocity < GeometricScoringConstants.DWELL_VELOCITY_THRESHOLD) {
+                    if (p1.velocity < DWELL_VELOCITY_THRESHOLD) {
                         dwellTime += 1f
                     }
                 }
@@ -676,7 +676,7 @@ class PathGeometryAnalyzer
 
             val velocityScore =
                 when {
-                    velocity < GeometricScoringConstants.SLOW_VELOCITY_THRESHOLD -> 1.0f
+                    velocity < SLOW_VELOCITY_THRESHOLD -> 1.0f
                     velocity < GeometricScoringConstants.NORMAL_VELOCITY_THRESHOLD -> 0.85f
                     else -> 0.7f
                 }
@@ -731,9 +731,9 @@ class PathGeometryAnalyzer
             val velocity = if (index < velocityProfile.size) velocityProfile[index] else 0f
 
             return when {
-                velocity < GeometricScoringConstants.DWELL_VELOCITY_THRESHOLD -> SegmentType.DWELL
-                curvature > GeometricScoringConstants.CORNER_CURVATURE_THRESHOLD -> SegmentType.CORNER
-                curvature > GeometricScoringConstants.CURVE_CURVATURE_THRESHOLD -> SegmentType.CURVE
+                velocity < DWELL_VELOCITY_THRESHOLD -> SegmentType.DWELL
+                curvature > CORNER_CURVATURE_THRESHOLD -> SegmentType.CORNER
+                curvature > CURVE_CURVATURE_THRESHOLD -> SegmentType.CURVE
                 else -> SegmentType.STRAIGHT
             }
         }
@@ -752,7 +752,7 @@ class PathGeometryAnalyzer
                     val point = path[i]
                     val dx = point.x - traversal.intersectionPoint.x
                     val dy = point.y - traversal.intersectionPoint.y
-                    if (dx * dx + dy * dy < GeometricScoringConstants.SEGMENT_KEY_PROXIMITY_SQ) {
+                    if (dx * dx + dy * dy < SEGMENT_KEY_PROXIMITY_SQ) {
                         keysInSegment.add(key)
                         break
                     }
@@ -815,9 +815,9 @@ class PathGeometryAnalyzer
             val pathSmoothness = calculatePathSmoothness(curvatureProfile, path.size)
 
             return (
-                intentionalRatio * GeometricScoringConstants.CONFIDENCE_INFLECTION_WEIGHT +
-                    velocityConsistency * GeometricScoringConstants.CONFIDENCE_VELOCITY_WEIGHT +
-                    pathSmoothness * GeometricScoringConstants.CONFIDENCE_SMOOTHNESS_WEIGHT
+                intentionalRatio * CONFIDENCE_INFLECTION_WEIGHT +
+                    velocityConsistency * CONFIDENCE_VELOCITY_WEIGHT +
+                    pathSmoothness * CONFIDENCE_SMOOTHNESS_WEIGHT
             ).coerceIn(0f, 1f)
         }
 
@@ -859,7 +859,7 @@ class PathGeometryAnalyzer
             }
 
             val avgCurvature = totalCurvature / actualSize
-            val normalizedCurvature = avgCurvature / GeometricScoringConstants.MAX_EXPECTED_CURVATURE
+            val normalizedCurvature = avgCurvature / MAX_EXPECTED_CURVATURE
 
             return (1f - normalizedCurvature.coerceIn(0f, 1f))
         }
@@ -973,22 +973,22 @@ class PathGeometryAnalyzer
                             1f
                         }
 
-                    val isAngleVertex = angleChange > GeometricScoringConstants.VERTEX_ANGLE_THRESHOLD_RAD
-                    val isVelocityVertex = velocityRatio < GeometricScoringConstants.VERTEX_VELOCITY_DROP_RATIO
+                    val isAngleVertex = angleChange > VERTEX_ANGLE_THRESHOLD_RAD
+                    val isVelocityVertex = velocityRatio < VERTEX_VELOCITY_DROP_RATIO
 
                     val isDenseArea = isDenseKeyboardArea(curr, keyPositions)
                     val adjustedAngleThreshold =
                         if (isDenseArea) {
-                            GeometricScoringConstants.VERTEX_ANGLE_THRESHOLD_RAD *
-                                GeometricScoringConstants.VERTEX_DENSE_AREA_SENSITIVITY_BOOST
+                            VERTEX_ANGLE_THRESHOLD_RAD *
+                                VERTEX_DENSE_AREA_SENSITIVITY_BOOST
                         } else {
-                            GeometricScoringConstants.VERTEX_ANGLE_THRESHOLD_RAD
+                            VERTEX_ANGLE_THRESHOLD_RAD
                         }
                     val isDenseAreaVertex = isDenseArea && angleChange > adjustedAngleThreshold
 
                     val isSignificant = isAngleVertex || isVelocityVertex || isDenseAreaVertex
 
-                    if (isSignificant || angleChange > GeometricScoringConstants.VERTEX_ANGLE_THRESHOLD_RAD * 0.7f) {
+                    if (isSignificant || angleChange > VERTEX_ANGLE_THRESHOLD_RAD * 0.7f) {
                         vertices.add(
                             PathVertex(
                                 pathIndex = currIdx,
@@ -1008,7 +1008,7 @@ class PathGeometryAnalyzer
             val minimumExpected =
                 maxOf(
                     2,
-                    significantCount - GeometricScoringConstants.VERTEX_TOLERANCE_CONSTANT,
+                    significantCount - VERTEX_TOLERANCE_CONSTANT,
                 )
 
             return VertexAnalysis(
@@ -1022,7 +1022,7 @@ class PathGeometryAnalyzer
         private fun douglasPeuckerSimplify(path: List<SwipeDetector.SwipePoint>): List<Int> {
             if (path.size <= 2) return path.indices.toList()
 
-            val epsilon = GeometricScoringConstants.VERTEX_PATH_SIMPLIFICATION_EPSILON
+            val epsilon = VERTEX_PATH_SIMPLIFICATION_EPSILON
             val result = mutableListOf<Int>()
             val stack = ArrayDeque<Pair<Int, Int>>()
             stack.addLast(0 to path.size - 1)
@@ -1098,8 +1098,8 @@ class PathGeometryAnalyzer
             keyPositions: Map<Char, PointF>,
         ): Boolean {
             val thresholdSq =
-                GeometricScoringConstants.VERTEX_DENSE_AREA_RADIUS_PX *
-                    GeometricScoringConstants.VERTEX_DENSE_AREA_RADIUS_PX
+                VERTEX_DENSE_AREA_RADIUS_PX *
+                    VERTEX_DENSE_AREA_RADIUS_PX
             var nearbyKeys = 0
 
             keyPositions.values.forEach { keyPos ->
@@ -1121,8 +1121,8 @@ class PathGeometryAnalyzer
         ) {
             if (simplifiedIndices.size < 2) return
 
-            val gapThreshold = GeometricScoringConstants.VERTEX_FLY_BY_GAP_THRESHOLD_PX
-            val angleThreshold = GeometricScoringConstants.VERTEX_ANGLE_THRESHOLD_RAD * 0.7f
+            val gapThreshold = VERTEX_FLY_BY_GAP_THRESHOLD_PX
+            val angleThreshold = VERTEX_ANGLE_THRESHOLD_RAD * 0.7f
             val keyRadius = GeometricScoringConstants.KEY_TRAVERSAL_RADIUS
 
             for (i in 0 until simplifiedIndices.size - 1) {
@@ -1180,7 +1180,7 @@ class PathGeometryAnalyzer
                             angleChange = angle,
                             velocityRatio = 1.0f,
                             nearestKey = key,
-                            isSignificant = angle > GeometricScoringConstants.VERTEX_ANGLE_THRESHOLD_RAD,
+                            isSignificant = angle > VERTEX_ANGLE_THRESHOLD_RAD,
                         ),
                     )
                 }
@@ -1194,21 +1194,21 @@ class PathGeometryAnalyzer
             if (vertexAnalysis.pathPointCount <= GeometricScoringConstants.VERTEX_FILTER_MIN_PATH_POINTS) {
                 return 1.0f
             }
-            if (vertexAnalysis.significantVertexCount < GeometricScoringConstants.VERTEX_MINIMUM_FOR_FILTER) {
+            if (vertexAnalysis.significantVertexCount < VERTEX_MINIMUM_FOR_FILTER) {
                 return 1.0f
             }
 
             val minimumExpected = vertexAnalysis.minimumExpectedLength
             val deficit = minimumExpected - wordLength
 
-            if (wordLength > GeometricScoringConstants.VERTEX_LONG_WORD_PRUNE_THRESHOLD && deficit >= 5) {
-                return GeometricScoringConstants.VERTEX_LONG_WORD_DEFICIT_PENALTY
+            if (wordLength > VERTEX_LONG_WORD_PRUNE_THRESHOLD && deficit >= 5) {
+                return VERTEX_LONG_WORD_DEFICIT_PENALTY
             }
 
             return when {
                 deficit <= 0 -> 1.0f
-                deficit == 1 -> GeometricScoringConstants.VERTEX_MILD_MISMATCH_PENALTY
-                else -> GeometricScoringConstants.VERTEX_LENGTH_MISMATCH_PENALTY
+                deficit == 1 -> VERTEX_MILD_MISMATCH_PENALTY
+                else -> VERTEX_LENGTH_MISMATCH_PENALTY
             }
         }
 
@@ -1219,11 +1219,11 @@ class PathGeometryAnalyzer
             if (vertexAnalysis.pathPointCount <= GeometricScoringConstants.VERTEX_FILTER_MIN_PATH_POINTS) {
                 return false
             }
-            if (vertexAnalysis.significantVertexCount < GeometricScoringConstants.VERTEX_MINIMUM_FOR_FILTER) {
+            if (vertexAnalysis.significantVertexCount < VERTEX_MINIMUM_FOR_FILTER) {
                 return false
             }
 
-            if (wordLength > GeometricScoringConstants.VERTEX_LONG_WORD_PRUNE_THRESHOLD) {
+            if (wordLength > VERTEX_LONG_WORD_PRUNE_THRESHOLD) {
                 return false
             }
 
@@ -1247,7 +1247,7 @@ class PathGeometryAnalyzer
                         val dx = keyPos.x - otherPos.x
                         val dy = keyPos.y - otherPos.y
                         val distSq = dx * dx + dy * dy
-                        if (distSq < GeometricScoringConstants.NEIGHBORHOOD_PROXIMITY_RADIUS_SQ) {
+                        if (distSq < NEIGHBORHOOD_PROXIMITY_RADIUS_SQ) {
                             val dist = sqrt(distSq)
                             var insertIdx = tempDists.size
                             for (i in tempDists.indices) {
@@ -1262,7 +1262,7 @@ class PathGeometryAnalyzer
                     }
                 }
 
-                val count = minOf(tempChars.size, GeometricScoringConstants.MAX_KEY_NEIGHBORS)
+                val count = minOf(tempChars.size, MAX_KEY_NEIGHBORS)
                 val chars = CharArray(count)
                 val dists = FloatArray(count)
                 for (i in 0 until count) {
@@ -1284,7 +1284,7 @@ class PathGeometryAnalyzer
             sigma: Float,
         ): Float {
             val twoSigmaSq = 2f * sigma * sigma
-            val maxNeighborDist = sqrt(GeometricScoringConstants.NEIGHBORHOOD_PROXIMITY_RADIUS_SQ)
+            val maxNeighborDist = sqrt(NEIGHBORHOOD_PROXIMITY_RADIUS_SQ)
             var bestRescue = 0f
 
             for (i in neighborhood.neighborChars.indices) {
@@ -1300,14 +1300,14 @@ class PathGeometryAnalyzer
                 val rescueScore =
                     neighborGaussian *
                         proximityTransfer *
-                        GeometricScoringConstants.NEIGHBORHOOD_DECAY_FACTOR
+                        NEIGHBORHOOD_DECAY_FACTOR
 
                 if (rescueScore > bestRescue) {
                     bestRescue = rescueScore
                 }
             }
 
-            return bestRescue.coerceAtMost(GeometricScoringConstants.NEIGHBORHOOD_RESCUE_CEILING)
+            return bestRescue.coerceAtMost(NEIGHBORHOOD_RESCUE_CEILING)
         }
 
         fun calculateAnchorSigmaModifier(
@@ -1317,27 +1317,27 @@ class PathGeometryAnalyzer
             analysis: GeometricAnalysis,
         ): Float {
             if (letterIndex == 0 || letterIndex == wordLength - 1) {
-                return GeometricScoringConstants.ANCHOR_SIGMA_TIGHTENING
+                return ANCHOR_SIGMA_TIGHTENING
             }
 
             for (inflection in analysis.inflectionPoints) {
                 if (inflection.isIntentional) {
                     val pathIndexDistance = abs(closestPathIndex - inflection.pathIndex)
-                    if (pathIndexDistance < GeometricScoringConstants.ANCHOR_INFLECTION_PROXIMITY_THRESHOLD) {
-                        return GeometricScoringConstants.INFLECTION_ANCHOR_SIGMA_TIGHTENING
+                    if (pathIndexDistance < ANCHOR_INFLECTION_PROXIMITY_THRESHOLD) {
+                        return INFLECTION_ANCHOR_SIGMA_TIGHTENING
                     }
                 }
             }
 
-            return if (wordLength > GeometricScoringConstants.LONG_WORD_SIGMA_THRESHOLD) {
-                GeometricScoringConstants.LONG_WORD_MID_SIGMA_EXPANSION
+            return if (wordLength > LONG_WORD_SIGMA_THRESHOLD) {
+                LONG_WORD_MID_SIGMA_EXPANSION
             } else {
-                GeometricScoringConstants.MID_SWIPE_SIGMA_EXPANSION
+                MID_SWIPE_SIGMA_EXPANSION
             }
         }
 
         fun calculateLexicalCoherenceBonus(letterScores: ArrayList<Pair<Char, Float>>): Float {
-            if (letterScores.size < GeometricScoringConstants.LEXICAL_COHERENCE_MIN_LETTERS) {
+            if (letterScores.size < LEXICAL_COHERENCE_MIN_LETTERS) {
                 return 1.0f
             }
 
@@ -1346,18 +1346,18 @@ class PathGeometryAnalyzer
 
             for ((_, score) in letterScores) {
                 sum += score
-                if (score in GeometricScoringConstants.LEXICAL_NEAR_MISS_LOWER..GeometricScoringConstants.LEXICAL_NEAR_MISS_UPPER) {
+                if (score in LEXICAL_NEAR_MISS_LOWER..LEXICAL_NEAR_MISS_UPPER) {
                     nearMissCount++
                 }
             }
 
             val avgScore = sum / letterScores.size
-            if (avgScore < GeometricScoringConstants.LEXICAL_COHERENCE_AVG_THRESHOLD) return 1.0f
+            if (avgScore < LEXICAL_COHERENCE_AVG_THRESHOLD) return 1.0f
 
             val coherenceRatio = nearMissCount.toFloat() / letterScores.size.toFloat()
 
-            return if (coherenceRatio > GeometricScoringConstants.LEXICAL_COHERENCE_RATIO_THRESHOLD) {
-                GeometricScoringConstants.LEXICAL_COHERENCE_BONUS
+            return if (coherenceRatio > LEXICAL_COHERENCE_RATIO_THRESHOLD) {
+                LEXICAL_COHERENCE_BONUS
             } else {
                 1.0f
             }
@@ -1368,19 +1368,19 @@ class PathGeometryAnalyzer
             velocityProfile: FloatArray,
             keyPositions: Map<Char, PointF>,
         ): List<DwellInterestPoint> {
-            if (path.size < GeometricScoringConstants.DWELL_CLUSTER_MIN_POINTS) return emptyList()
+            if (path.size < DWELL_CLUSTER_MIN_POINTS) return emptyList()
 
             val clusters = mutableListOf<DwellInterestPoint>()
             var runStart = -1
 
             for (i in velocityProfile.indices) {
-                if (velocityProfile[i] < GeometricScoringConstants.DWELL_CLUSTER_VELOCITY_THRESHOLD) {
+                if (velocityProfile[i] < DWELL_CLUSTER_VELOCITY_THRESHOLD) {
                     if (runStart == -1) runStart = i
                 } else {
                     if (runStart != -1) {
                         val runEnd = i - 1
                         val pointCount = runEnd - runStart + 1
-                        if (pointCount >= GeometricScoringConstants.DWELL_CLUSTER_MIN_POINTS) {
+                        if (pointCount >= DWELL_CLUSTER_MIN_POINTS) {
                             buildDwellCluster(path, runStart, runEnd, keyPositions)?.let { clusters.add(it) }
                         }
                         runStart = -1
@@ -1391,7 +1391,7 @@ class PathGeometryAnalyzer
             if (runStart != -1) {
                 val runEnd = velocityProfile.size - 1
                 val pointCount = runEnd - runStart + 1
-                if (pointCount >= GeometricScoringConstants.DWELL_CLUSTER_MIN_POINTS) {
+                if (pointCount >= DWELL_CLUSTER_MIN_POINTS) {
                     buildDwellCluster(path, runStart, runEnd, keyPositions)?.let { clusters.add(it) }
                 }
             }
@@ -1420,7 +1420,7 @@ class PathGeometryAnalyzer
             for (i in startIdx..endIdx) {
                 val dx = path[i].x - centroidX
                 val dy = path[i].y - centroidY
-                if (dx * dx + dy * dy > GeometricScoringConstants.DWELL_CLUSTER_RADIUS_SQ) {
+                if (dx * dx + dy * dy > DWELL_CLUSTER_RADIUS_SQ) {
                     return null
                 }
             }
@@ -1437,7 +1437,7 @@ class PathGeometryAnalyzer
                 }
             }
 
-            if (minDist > GeometricScoringConstants.DWELL_INTEREST_KEY_RADIUS) return null
+            if (minDist > DWELL_INTEREST_KEY_RADIUS) return null
 
             val confidence = (pointCount / 6.0f).coerceAtMost(1.0f)
 
@@ -1461,7 +1461,7 @@ class PathGeometryAnalyzer
                 if (dwell.nearestKey == key &&
                     closestPointIndex in dwell.pathIndexStart..dwell.pathIndexEnd
                 ) {
-                    return 1.0f + (GeometricScoringConstants.DWELL_INTEREST_BOOST - 1.0f) * dwell.confidence
+                    return 1.0f + (DWELL_INTEREST_BOOST - 1.0f) * dwell.confidence
                 }
             }
             return 1.0f
@@ -1477,8 +1477,8 @@ class PathGeometryAnalyzer
             val surroundingAvg = calculateSurroundingVelocity(analysis.velocityProfile, idx)
             if (surroundingAvg <= 0f) return 1.0f
             val dropRatio = velocityAtPoint / surroundingAvg
-            val threshold = GeometricScoringConstants.VERTEX_VELOCITY_DROP_RATIO * 2f
-            return if (dropRatio < threshold) GeometricScoringConstants.DWELL_INTEREST_BOOST else 1.0f
+            val threshold = VERTEX_VELOCITY_DROP_RATIO * 2f
+            return if (dropRatio < threshold) DWELL_INTEREST_BOOST else 1.0f
         }
 
         fun getVertexCurvatureBoost(
@@ -1498,18 +1498,18 @@ class PathGeometryAnalyzer
                 val dx = keyPosition.x - vertex.position.x
                 val dy = keyPosition.y - vertex.position.y
                 val distToKey = sqrt(dx * dx + dy * dy)
-                val effectiveRadius = if (vertex.angleChange > GeometricScoringConstants.VERTEX_WIDE_ANGLE_THRESHOLD_RAD) {
-                    GeometricScoringConstants.VERTEX_WIDE_ANGLE_RADIUS
+                val effectiveRadius = if (vertex.angleChange > VERTEX_WIDE_ANGLE_THRESHOLD_RAD) {
+                    VERTEX_WIDE_ANGLE_RADIUS
                 } else {
-                    GeometricScoringConstants.INFLECTION_BOOST_RADIUS
+                    INFLECTION_BOOST_RADIUS
                 }
                 val positionMatch = distToKey < effectiveRadius
 
                 if (keyMatch || positionMatch) {
-                    val normalizedAngle = vertex.angleChange / GeometricScoringConstants.VERTEX_ANGLE_THRESHOLD_RAD
-                    val boost = (GeometricScoringConstants.INFLECTION_BOOST_BASE +
-                        normalizedAngle * (GeometricScoringConstants.INFLECTION_BOOST_MAX - GeometricScoringConstants.INFLECTION_BOOST_BASE))
-                        .coerceAtMost(GeometricScoringConstants.INFLECTION_BOOST_MAX)
+                    val normalizedAngle = vertex.angleChange / VERTEX_ANGLE_THRESHOLD_RAD
+                    val boost = (INFLECTION_BOOST_BASE +
+                        normalizedAngle * (INFLECTION_BOOST_MAX - INFLECTION_BOOST_BASE))
+                        .coerceAtMost(INFLECTION_BOOST_MAX)
                     if (boost > bestBoost) bestBoost = boost
                 }
             }
@@ -1517,11 +1517,11 @@ class PathGeometryAnalyzer
             if (bestBoost == 1.0f) {
                 for (inflection in analysis.inflectionPoints) {
                     if (!inflection.isIntentional || inflection.nearestKey != key) continue
-                    if (inflection.distanceToKey >= GeometricScoringConstants.INFLECTION_BOOST_RADIUS) continue
-                    val angleBoost = (inflection.angle / GeometricScoringConstants.MAX_EXPECTED_ANGLE)
+                    if (inflection.distanceToKey >= INFLECTION_BOOST_RADIUS) continue
+                    val angleBoost = (inflection.angle / MAX_EXPECTED_ANGLE)
                         .coerceIn(0.5f, 1.0f)
-                    val boost = GeometricScoringConstants.INFLECTION_BOOST_BASE +
-                        (GeometricScoringConstants.INFLECTION_BOOST_MAX - GeometricScoringConstants.INFLECTION_BOOST_BASE) * angleBoost
+                    val boost = INFLECTION_BOOST_BASE +
+                        (INFLECTION_BOOST_MAX - INFLECTION_BOOST_BASE) * angleBoost
                     if (boost > bestBoost) bestBoost = boost
                 }
             }
@@ -1555,12 +1555,12 @@ class PathGeometryAnalyzer
                 return GeometricScoringConstants.PATH_COHERENCE_NEUTRAL
             }
 
-            val minSegPx = GeometricScoringConstants.PATH_COHERENCE_MIN_SEGMENT_PX
-            val magSigma = GeometricScoringConstants.PATH_COHERENCE_MAGNITUDE_SIGMA
+            val minSegPx = PATH_COHERENCE_MIN_SEGMENT_PX
+            val magSigma = PATH_COHERENCE_MAGNITUDE_SIGMA
             val magSigmaSq2 = 2f * magSigma * magSigma
-            val dirW = GeometricScoringConstants.PATH_COHERENCE_DIRECTION_WEIGHT
-            val magW = GeometricScoringConstants.PATH_COHERENCE_MAGNITUDE_WEIGHT
-            val vertW = GeometricScoringConstants.PATH_COHERENCE_VERTICAL_WEIGHT
+            val dirW = PATH_COHERENCE_DIRECTION_WEIGHT
+            val magW = PATH_COHERENCE_MAGNITUDE_WEIGHT
+            val vertW = PATH_COHERENCE_VERTICAL_WEIGHT
 
             var totalScore = 0f
             var segments = 0
@@ -1620,4 +1620,109 @@ class PathGeometryAnalyzer
                     ),
                 dwellInterestPoints = emptyList(),
             )
+
+        private companion object {
+            const val MAX_PATH_POINTS = 500
+
+            const val TIGHT_CLUSTER_SIGMA = 35f
+            const val NORMAL_SIGMA = 42f
+            const val EDGE_KEY_SIGMA = 55f
+
+            const val NEIGHBOR_RADIUS_SQ = 10000f
+            const val TIGHT_CLUSTER_THRESHOLD = 4
+            const val NORMAL_CLUSTER_THRESHOLD = 2
+
+            const val SLOW_VELOCITY_THRESHOLD = 0.3f
+            const val SLOW_VELOCITY_BOOST = 1.35f
+
+            const val INFLECTION_ANGLE_THRESHOLD = 0.52f
+            const val INTENTIONAL_CORNER_THRESHOLD = 0.87f
+            const val INTENTIONAL_CORNER_KEY_RADIUS = 60f
+            const val INFLECTION_BOOST_RADIUS = 50f
+            const val INFLECTION_BOOST_BASE = 1.0f
+            const val INFLECTION_BOOST_MAX = 1.50f
+            const val MAX_EXPECTED_ANGLE = 2.5f
+
+            const val DWELL_DETECTION_RADIUS_SQ = 2500f
+            const val DWELL_VELOCITY_THRESHOLD = 0.25f
+            const val MAX_REPEATED_LETTER_BOOST = 1.25f
+
+            const val MAX_CLUSTERED_WORD_LENGTH = 4
+            const val CLUSTER_MAX_DISTANCE_SQ = 14400f
+
+            const val PATH_COVERAGE_RADIUS = 45f
+
+            const val CORNER_CURVATURE_THRESHOLD = 0.70f
+            const val CURVE_CURVATURE_THRESHOLD = 0.30f
+            const val SEGMENT_KEY_PROXIMITY_SQ = 3600f
+
+            const val CONFIDENCE_INFLECTION_WEIGHT = 0.40f
+            const val CONFIDENCE_VELOCITY_WEIGHT = 0.25f
+            const val CONFIDENCE_SMOOTHNESS_WEIGHT = 0.35f
+            const val MAX_EXPECTED_CURVATURE = 1.5f
+
+            const val HIGH_CONFIDENCE_THRESHOLD = 0.80f
+            const val MEDIUM_CONFIDENCE_THRESHOLD = 0.60f
+            const val LOW_CONFIDENCE_THRESHOLD = 0.40f
+
+            const val HIGH_CONFIDENCE_SPATIAL_WEIGHT = 0.85f
+            const val HIGH_CONFIDENCE_FREQ_WEIGHT = 0.15f
+            const val MEDIUM_CONFIDENCE_SPATIAL_WEIGHT = 0.72f
+            const val MEDIUM_CONFIDENCE_FREQ_WEIGHT = 0.28f
+            const val LOW_CONFIDENCE_SPATIAL_WEIGHT = 0.60f
+            const val LOW_CONFIDENCE_FREQ_WEIGHT = 0.40f
+            const val VERY_LOW_CONFIDENCE_SPATIAL_WEIGHT = 0.52f
+            const val VERY_LOW_CONFIDENCE_FREQ_WEIGHT = 0.48f
+
+            const val VERTEX_ANGLE_THRESHOLD_RAD = 1.22f
+            const val VERTEX_VELOCITY_DROP_RATIO = 0.35f
+            const val VERTEX_TOLERANCE_CONSTANT = 6
+            const val VERTEX_MINIMUM_FOR_FILTER = 6
+            const val VERTEX_LONG_WORD_PRUNE_THRESHOLD = 7
+            const val VERTEX_LONG_WORD_DEFICIT_PENALTY = 0.55f
+            const val VERTEX_LENGTH_MISMATCH_PENALTY = 0.40f
+            const val VERTEX_MILD_MISMATCH_PENALTY = 0.75f
+            const val VERTEX_DENSE_AREA_SENSITIVITY_BOOST = 0.90f
+            const val VERTEX_PATH_SIMPLIFICATION_EPSILON = 15f
+            const val VERTEX_DENSE_AREA_RADIUS_PX = 55f
+            const val VERTEX_FLY_BY_GAP_THRESHOLD_PX = 35f
+            const val VERTEX_WIDE_ANGLE_RADIUS = 65f
+            const val VERTEX_WIDE_ANGLE_THRESHOLD_RAD = 1.40f
+
+            const val NEIGHBORHOOD_PROXIMITY_RADIUS_SQ = 14400f
+            const val MAX_KEY_NEIGHBORS = 6
+            const val NEIGHBORHOOD_DECAY_FACTOR = 0.65f
+            const val NEIGHBORHOOD_RESCUE_CEILING = 0.70f
+
+            const val ANCHOR_SIGMA_TIGHTENING = 0.80f
+            const val MID_SWIPE_SIGMA_EXPANSION = 1.20f
+            const val INFLECTION_ANCHOR_SIGMA_TIGHTENING = 0.88f
+            const val ANCHOR_INFLECTION_PROXIMITY_THRESHOLD = 5
+
+            const val LONG_WORD_MID_SIGMA_EXPANSION = 1.40f
+            const val LONG_WORD_SIGMA_THRESHOLD = 6
+
+            const val LEXICAL_COHERENCE_MIN_LETTERS = 3
+            const val LEXICAL_COHERENCE_AVG_THRESHOLD = 0.55f
+            const val LEXICAL_COHERENCE_BONUS = 1.10f
+            const val LEXICAL_NEAR_MISS_LOWER = 0.35f
+            const val LEXICAL_NEAR_MISS_UPPER = 0.75f
+            const val LEXICAL_COHERENCE_RATIO_THRESHOLD = 0.50f
+
+            const val DWELL_CLUSTER_VELOCITY_THRESHOLD = 3.0f
+            const val DWELL_CLUSTER_RADIUS_SQ = 2500f
+            const val DWELL_CLUSTER_MIN_POINTS = 3
+            const val DWELL_INTEREST_BOOST = 1.25f
+            const val DWELL_INTEREST_KEY_RADIUS = 55f
+
+            const val CORNER_COMPENSATION_VELOCITY_THRESHOLD = 8.0f
+            const val CORNER_COMPENSATION_MAX_OFFSET_PX = 25f
+            const val CORNER_COMPENSATION_VELOCITY_SCALE = 20f
+
+            const val PATH_COHERENCE_VERTICAL_WEIGHT = 1.45f
+            const val PATH_COHERENCE_MIN_SEGMENT_PX = 30f
+            const val PATH_COHERENCE_DIRECTION_WEIGHT = 0.50f
+            const val PATH_COHERENCE_MAGNITUDE_WEIGHT = 0.50f
+            const val PATH_COHERENCE_MAGNITUDE_SIGMA = 80f
+        }
     }

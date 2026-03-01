@@ -2,8 +2,6 @@ package com.urik.keyboard.data
 
 import android.content.Context
 import com.ibm.icu.util.ULocale
-import com.urik.keyboard.KeyboardConstants.AssetLoadingConstants
-import com.urik.keyboard.KeyboardConstants.CacheConstants
 import com.urik.keyboard.model.KeyboardKey
 import com.urik.keyboard.model.KeyboardLayout
 import com.urik.keyboard.model.KeyboardMode
@@ -85,22 +83,22 @@ class KeyboardRepository
         private val layoutCache: ManagedCache<String, KeyboardLayout> =
             cacheMemoryManager.createCache(
                 name = "keyboard_layouts",
-                maxSize = CacheConstants.LAYOUT_CACHE_SIZE,
+                maxSize = LAYOUT_CACHE_SIZE,
             )
 
         private val failedLocales = mutableSetOf<String>()
-        private val errorTracker = BoundedLayoutErrorTracker(maxSize = AssetLoadingConstants.LAYOUT_ERROR_TRACKER_MAX_SIZE)
+        private val errorTracker = BoundedLayoutErrorTracker(maxSize = LAYOUT_ERROR_TRACKER_MAX_SIZE)
 
-        private val maxLayoutRetries = AssetLoadingConstants.MAX_LAYOUT_RETRIES
-        private val layoutErrorCooldownMs = AssetLoadingConstants.LAYOUT_ERROR_COOLDOWN_MS
-        private val errorStateExpiryMs = AssetLoadingConstants.LAYOUT_ERROR_STATE_EXPIRY_MS
+        private val maxLayoutRetries = MAX_LAYOUT_RETRIES
+        private val layoutErrorCooldownMs = LAYOUT_ERROR_COOLDOWN_MS
+        private val errorStateExpiryMs = LAYOUT_ERROR_STATE_EXPIRY_MS
 
         private var lastErrorCleanup = System.currentTimeMillis()
 
         private fun cleanupExpiredErrors() {
             val now = System.currentTimeMillis()
 
-            if ((now - lastErrorCleanup) > AssetLoadingConstants.LAYOUT_ERROR_CLEANUP_INTERVAL_MS) {
+            if ((now - lastErrorCleanup) > LAYOUT_ERROR_CLEANUP_INTERVAL_MS) {
                 errorTracker.cleanExpired(errorStateExpiryMs)
 
                 val iterator = failedLocales.iterator()
@@ -447,5 +445,14 @@ class KeyboardRepository
             layoutCache.invalidateAll()
             failedLocales.clear()
             errorTracker.clear()
+        }
+
+        private companion object {
+            const val LAYOUT_CACHE_SIZE = 20
+            const val MAX_LAYOUT_RETRIES = 3
+            const val LAYOUT_ERROR_COOLDOWN_MS = 60000L
+            const val LAYOUT_ERROR_STATE_EXPIRY_MS = 3600000L
+            const val LAYOUT_ERROR_CLEANUP_INTERVAL_MS = 600000L
+            const val LAYOUT_ERROR_TRACKER_MAX_SIZE = 20
         }
     }

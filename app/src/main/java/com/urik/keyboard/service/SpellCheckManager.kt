@@ -7,8 +7,6 @@ import com.darkrockstudios.symspellkt.api.SpellChecker
 import com.darkrockstudios.symspellkt.common.SpellCheckSettings
 import com.darkrockstudios.symspellkt.common.Verbosity
 import com.darkrockstudios.symspellkt.impl.SymSpell
-import com.urik.keyboard.KeyboardConstants.CacheConstants
-import com.urik.keyboard.KeyboardConstants.SpellCheckConstants
 import com.urik.keyboard.settings.KeyboardSettings
 import com.urik.keyboard.utils.CacheMemoryManager
 import com.urik.keyboard.utils.ErrorLogger
@@ -77,13 +75,13 @@ class SpellCheckManager
         private val suggestionCache: ManagedCache<String, List<SpellingSuggestion>> =
             cacheMemoryManager.createCache(
                 name = "spell_suggestions",
-                maxSize = CacheConstants.SUGGESTION_CACHE_SIZE,
+                maxSize = SUGGESTION_CACHE_SIZE,
             )
 
         private val dictionaryCache: ManagedCache<String, Boolean> =
             cacheMemoryManager.createCache(
                 name = "dictionary_cache",
-                maxSize = CacheConstants.DICTIONARY_CACHE_SIZE,
+                maxSize = DICTIONARY_CACHE_SIZE,
             )
 
         private val blacklistedWords = mutableSetOf<String>()
@@ -171,13 +169,13 @@ class SpellCheckManager
         }
 
         private suspend fun ensureInitialized(): Boolean =
-            withTimeoutOrNull(SpellCheckConstants.INITIALIZATION_TIMEOUT_MS) {
+            withTimeoutOrNull(INITIALIZATION_TIMEOUT_MS) {
                 initializationComplete.await()
             } ?: run {
                 ErrorLogger.logException(
                     component = "SpellCheckManager",
                     severity = ErrorLogger.Severity.CRITICAL,
-                    exception = TimeoutException("Initialization timeout after ${SpellCheckConstants.INITIALIZATION_TIMEOUT_MS}ms"),
+                    exception = TimeoutException("Initialization timeout after ${INITIALIZATION_TIMEOUT_MS}ms"),
                     context = mapOf("phase" to "ensureInitialized"),
                 )
                 false
@@ -236,7 +234,7 @@ class SpellCheckManager
 
             val spellChecker = getSpellCheckerForLanguage(languageCode)
             if (spellChecker != null) {
-                val suggestions = spellChecker.lookup(normalizedWord, Verbosity.All, SpellCheckConstants.MAX_EDIT_DISTANCE)
+                val suggestions = spellChecker.lookup(normalizedWord, Verbosity.All, MAX_EDIT_DISTANCE)
                 val isInDictionary =
                     suggestions.any {
                         it.term.equals(normalizedWord, ignoreCase = true) && it.distance == 0.0
@@ -292,10 +290,10 @@ class SpellCheckManager
                 try {
                     val settings =
                         SpellCheckSettings(
-                            maxEditDistance = SpellCheckConstants.MAX_EDIT_DISTANCE,
-                            prefixLength = SpellCheckConstants.PREFIX_LENGTH,
-                            countThreshold = SpellCheckConstants.COUNT_THRESHOLD,
-                            topK = SpellCheckConstants.TOP_K,
+                            maxEditDistance = MAX_EDIT_DISTANCE,
+                            prefixLength = PREFIX_LENGTH,
+                            countThreshold = COUNT_THRESHOLD,
+                            topK = TOP_K,
                         )
 
                     val symSpell = SymSpell(settings)
@@ -305,7 +303,7 @@ class SpellCheckManager
                     inputStream.bufferedReader().use { reader ->
                         val lines = reader.readLines()
 
-                        lines.chunked(SpellCheckConstants.DICTIONARY_BATCH_SIZE).forEach { batch ->
+                        lines.chunked(DICTIONARY_BATCH_SIZE).forEach { batch ->
                             ensureActive()
 
                             batch.forEach { line ->
@@ -532,7 +530,7 @@ class SpellCheckManager
                     for (lang in effectiveLanguages) {
                         val spellChecker = getSpellCheckerForLanguage(lang)
                         if (spellChecker != null) {
-                            val suggestions = spellChecker.lookup(normalizedWord, Verbosity.All, SpellCheckConstants.MAX_EDIT_DISTANCE)
+                            val suggestions = spellChecker.lookup(normalizedWord, Verbosity.All, MAX_EDIT_DISTANCE)
                             val isInDictionary =
                                 suggestions.any {
                                     it.term.equals(normalizedWord, ignoreCase = true) && it.distance == 0.0
@@ -643,7 +641,7 @@ class SpellCheckManager
                             }.awaitAll()
                             .flatten()
 
-                    mergeAndRankSuggestions(allLanguageSuggestions, SpellCheckConstants.MAX_SUGGESTIONS)
+                    mergeAndRankSuggestions(allLanguageSuggestions, MAX_SUGGESTIONS)
                 } catch (_: Exception) {
                     emptyList()
                 }
@@ -674,13 +672,13 @@ class SpellCheckManager
 
                             val confidence =
                                 if (isContraction) {
-                                    SpellCheckConstants.CONTRACTION_GUARANTEED_CONFIDENCE
+                                    CONTRACTION_GUARANTEED_CONFIDENCE
                                 } else {
                                     val frequencyBoost = calculateFrequencyBoost(frequency)
-                                    val baseConfidence = SpellCheckConstants.LEARNED_WORD_BASE_CONFIDENCE - (index * 0.02)
+                                    val baseConfidence = LEARNED_WORD_BASE_CONFIDENCE - (index * 0.02)
                                     (baseConfidence + frequencyBoost).coerceIn(
-                                        SpellCheckConstants.LEARNED_WORD_CONFIDENCE_MIN,
-                                        SpellCheckConstants.LEARNED_WORD_CONFIDENCE_MAX,
+                                        LEARNED_WORD_CONFIDENCE_MIN,
+                                        LEARNED_WORD_CONFIDENCE_MAX,
                                     )
                                 }
 
@@ -699,13 +697,13 @@ class SpellCheckManager
                 }
 
                 try {
-                    if (normalizedWord.length >= SpellCheckConstants.MIN_COMPLETION_LENGTH) {
+                    if (normalizedWord.length >= MIN_COMPLETION_LENGTH) {
                         val completions = getCompletionsForPrefix(normalizedWord, languageCode)
 
                         val filteredCompletions =
                             completions
                                 .filter { (word, _) -> !seenWords.contains(word.lowercase()) && !isWordBlacklisted(word) }
-                                .take(SpellCheckConstants.MAX_PREFIX_COMPLETIONS)
+                                .take(MAX_PREFIX_COMPLETIONS)
 
                         val userFrequencies =
                             try {
@@ -727,13 +725,13 @@ class SpellCheckManager
 
                                 val confidence =
                                     if (isContraction) {
-                                        SpellCheckConstants.CONTRACTION_GUARANTEED_CONFIDENCE
+                                        CONTRACTION_GUARANTEED_CONFIDENCE
                                     } else {
                                         val lengthRatio = normalizedWord.length.toDouble() / word.length.toDouble()
-                                        val frequencyScore = ln(frequency.toDouble() + 1.0) / SpellCheckConstants.FREQUENCY_SCORE_DIVISOR
+                                        val frequencyScore = ln(frequency.toDouble() + 1.0) / FREQUENCY_SCORE_DIVISOR
                                         var baseConfidence =
-                                            SpellCheckConstants.COMPLETION_LENGTH_WEIGHT * lengthRatio +
-                                                SpellCheckConstants.COMPLETION_FREQUENCY_WEIGHT * frequencyScore
+                                            COMPLETION_LENGTH_WEIGHT * lengthRatio +
+                                                COMPLETION_FREQUENCY_WEIGHT * frequencyScore
 
                                         if (userFrequency > 0) {
                                             val userFreqBoost = calculateFrequencyBoost(userFrequency)
@@ -741,7 +739,7 @@ class SpellCheckManager
                                         }
 
                                         baseConfidence.coerceIn(
-                                            SpellCheckConstants.COMPLETION_CONFIDENCE_MIN,
+                                            COMPLETION_CONFIDENCE_MIN,
                                             0.99,
                                         )
                                     }
@@ -763,7 +761,7 @@ class SpellCheckManager
                 try {
                     val spellChecker = getSpellCheckerForLanguage(languageCode)
                     if (spellChecker != null) {
-                        val symSpellResults = spellChecker.lookup(normalizedWord, Verbosity.All, SpellCheckConstants.MAX_EDIT_DISTANCE)
+                        val symSpellResults = spellChecker.lookup(normalizedWord, Verbosity.All, MAX_EDIT_DISTANCE)
                         val inputAccentStripped = wordNormalizer.stripDiacritics(normalizedWord)
 
                         val filteredResults =
@@ -794,24 +792,24 @@ class SpellCheckManager
 
                                     val confidence =
                                         if (isContraction) {
-                                            SpellCheckConstants.CONTRACTION_GUARANTEED_CONFIDENCE
+                                            CONTRACTION_GUARANTEED_CONFIDENCE
                                         } else {
-                                            val maxDistance = SpellCheckConstants.MAX_EDIT_DISTANCE
+                                            val maxDistance = MAX_EDIT_DISTANCE
                                             val distanceScore = (maxDistance - editDistance) / maxDistance
-                                            val freqScore = ln(frequency.toDouble() + 1.0) / ln(SpellCheckConstants.MAX_DICT_FREQUENCY)
+                                            val freqScore = ln(frequency.toDouble() + 1.0) / ln(MAX_DICT_FREQUENCY)
                                             var baseConfidence =
-                                                (SpellCheckConstants.SYMSPELL_DISTANCE_WEIGHT * distanceScore) +
-                                                    (SpellCheckConstants.SYMSPELL_FREQUENCY_WEIGHT * freqScore)
+                                                (SYMSPELL_DISTANCE_WEIGHT * distanceScore) +
+                                                    (SYMSPELL_FREQUENCY_WEIGHT * freqScore)
 
                                             if (editDistance == 1.0 && normalizedWord.length == result.term.length) {
-                                                baseConfidence += SpellCheckConstants.SAME_LENGTH_BONUS
+                                                baseConfidence += SAME_LENGTH_BONUS
 
                                                 if (normalizedWord.firstOrNull() == result.term.firstOrNull()) {
-                                                    baseConfidence += SpellCheckConstants.SAME_FIRST_LETTER_BONUS
+                                                    baseConfidence += SAME_FIRST_LETTER_BONUS
                                                 }
 
                                                 if (normalizedWord.length > 1 && normalizedWord.lastOrNull() == result.term.lastOrNull()) {
-                                                    baseConfidence += SpellCheckConstants.SAME_LAST_LETTER_BONUS
+                                                    baseConfidence += SAME_LAST_LETTER_BONUS
                                                 }
 
                                                 for (i in normalizedWord.indices) {
@@ -827,12 +825,12 @@ class SpellCheckManager
                                                 com.urik.keyboard.utils.TextMatchingUtils
                                                     .stripWordPunctuation(result.term)
                                             if (strippedResult != result.term && editDistance == 1.0) {
-                                                baseConfidence += SpellCheckConstants.APOSTROPHE_BOOST
+                                                baseConfidence += APOSTROPHE_BOOST
                                             }
 
                                             val termStripped = wordNormalizer.stripDiacritics(result.term.lowercase())
                                             if (inputAccentStripped == termStripped && normalizedWord != result.term.lowercase()) {
-                                                baseConfidence += SpellCheckConstants.DIACRITIC_PROMOTION_BOOST
+                                                baseConfidence += DIACRITIC_PROMOTION_BOOST
                                             }
 
                                             if (userFrequency > 0) {
@@ -841,14 +839,14 @@ class SpellCheckManager
                                             }
 
                                             baseConfidence.coerceIn(
-                                                SpellCheckConstants.SYMSPELL_CONFIDENCE_MIN,
+                                                SYMSPELL_CONFIDENCE_MIN,
                                                 0.99,
                                             )
                                         }
 
                                     result to confidence
                                 }.sortedByDescending { it.second }
-                                .take(SpellCheckConstants.MAX_SUGGESTIONS)
+                                .take(MAX_SUGGESTIONS)
 
                         scoredResults.forEachIndexed { index, (result, confidence) ->
                             allSuggestions.add(
@@ -909,8 +907,8 @@ class SpellCheckManager
                     emptyList()
                 }
 
-            if (apostropheMatches.size >= SpellCheckConstants.MAX_PREFIX_COMPLETION_RESULTS) {
-                return apostropheMatches.take(SpellCheckConstants.MAX_PREFIX_COMPLETION_RESULTS)
+            if (apostropheMatches.size >= MAX_PREFIX_COMPLETION_RESULTS) {
+                return apostropheMatches.take(MAX_PREFIX_COMPLETION_RESULTS)
             }
 
             val strippedPrefix =
@@ -928,8 +926,8 @@ class SpellCheckManager
                     }.map { it.word to it.frequency }
 
             val combined = apostropheMatches + exactPrefixMatches
-            if (combined.size >= SpellCheckConstants.MAX_PREFIX_COMPLETION_RESULTS) {
-                return combined.take(SpellCheckConstants.MAX_PREFIX_COMPLETION_RESULTS)
+            if (combined.size >= MAX_PREFIX_COMPLETION_RESULTS) {
+                return combined.take(MAX_PREFIX_COMPLETION_RESULTS)
             }
 
             val seenWords = combined.map { it.first }.toSet()
@@ -942,7 +940,7 @@ class SpellCheckManager
                     }.map { it.word to it.frequency }
 
             return (combined + accentFallbackMatches)
-                .take(SpellCheckConstants.MAX_PREFIX_COMPLETION_RESULTS)
+                .take(MAX_PREFIX_COMPLETION_RESULTS)
         }
 
         private fun isValidInput(text: String): Boolean {
@@ -958,7 +956,7 @@ class SpellCheckManager
                 }
 
             val codePointCount = text.codePointCount(0, text.length)
-            return hasValidChars && codePointCount in 1..SpellCheckConstants.MAX_INPUT_CODEPOINTS
+            return hasValidChars && codePointCount in 1..MAX_INPUT_CODEPOINTS
         }
 
         private fun parseDictionaryLine(line: String): Pair<String, Int>? {
@@ -974,7 +972,7 @@ class SpellCheckManager
                 }
 
             val isValid =
-                word.length in SpellCheckConstants.COMMON_WORD_MIN_LENGTH..SpellCheckConstants.COMMON_WORD_MAX_LENGTH &&
+                word.length in COMMON_WORD_MIN_LENGTH..COMMON_WORD_MAX_LENGTH &&
                     word.all {
                         Character.isLetter(it.code) ||
                             Character.getType(it.code) == Character.OTHER_LETTER.toInt() ||
@@ -1278,10 +1276,10 @@ class SpellCheckManager
             val dy = pos1.y - pos2.y
             val distanceSquared = dx * dx + dy * dy
 
-            val sigma = avgKeySpacing * SpellCheckConstants.PROXIMITY_SIGMA_MULTIPLIER
+            val sigma = avgKeySpacing * PROXIMITY_SIGMA_MULTIPLIER
             val proximityScore = kotlin.math.exp(-distanceSquared / (2 * sigma * sigma))
 
-            return proximityScore * SpellCheckConstants.PROXIMITY_MAX_BONUS
+            return proximityScore * PROXIMITY_MAX_BONUS
         }
 
         private fun calculateAverageKeySpacing(keyPositions: Map<Char, android.graphics.PointF>): Double {
@@ -1309,19 +1307,73 @@ class SpellCheckManager
             if (frequency <= 0) return 0.0
 
             return when {
-                frequency >= SpellCheckConstants.HIGH_FREQUENCY_THRESHOLD -> {
-                    ln(frequency.toDouble()) * SpellCheckConstants.HIGH_FREQUENCY_LOG_MULTIPLIER +
-                        SpellCheckConstants.HIGH_FREQUENCY_BASE_BOOST
+                frequency >= HIGH_FREQUENCY_THRESHOLD -> {
+                    ln(frequency.toDouble()) * HIGH_FREQUENCY_LOG_MULTIPLIER +
+                        HIGH_FREQUENCY_BASE_BOOST
                 }
 
-                frequency >= SpellCheckConstants.MEDIUM_FREQUENCY_THRESHOLD -> {
-                    ln(frequency.toDouble()) * SpellCheckConstants.MEDIUM_FREQUENCY_LOG_MULTIPLIER +
-                        SpellCheckConstants.MEDIUM_FREQUENCY_BASE_BOOST
+                frequency >= MEDIUM_FREQUENCY_THRESHOLD -> {
+                    ln(frequency.toDouble()) * MEDIUM_FREQUENCY_LOG_MULTIPLIER +
+                        MEDIUM_FREQUENCY_BASE_BOOST
                 }
 
                 else -> {
-                    ln(frequency.toDouble() + 1.0) * SpellCheckConstants.FREQUENCY_BOOST_MULTIPLIER
+                    ln(frequency.toDouble() + 1.0) * FREQUENCY_BOOST_MULTIPLIER
                 }
             }
+        }
+
+        private companion object {
+            const val SUGGESTION_CACHE_SIZE = 500
+            const val DICTIONARY_CACHE_SIZE = 1000
+
+            const val MAX_EDIT_DISTANCE = 2.0
+            const val PREFIX_LENGTH = 7
+            const val COUNT_THRESHOLD = 1L
+            const val TOP_K = 100
+            const val MAX_SUGGESTIONS = 5
+            const val MIN_COMPLETION_LENGTH = 4
+            const val APOSTROPHE_BOOST = 0.30
+            const val DIACRITIC_PROMOTION_BOOST = 0.08
+            const val CONTRACTION_GUARANTEED_CONFIDENCE = 0.995
+
+            const val DICTIONARY_BATCH_SIZE = 2000
+            const val INITIALIZATION_TIMEOUT_MS = 5000L
+
+            const val FREQUENCY_BOOST_MULTIPLIER = 0.02
+            const val LEARNED_WORD_BASE_CONFIDENCE = 0.95
+            const val LEARNED_WORD_CONFIDENCE_MIN = 0.85
+            const val LEARNED_WORD_CONFIDENCE_MAX = 0.99
+
+            const val MAX_PREFIX_COMPLETIONS = 5
+            const val FREQUENCY_SCORE_DIVISOR = 15.0
+            const val COMPLETION_LENGTH_WEIGHT = 0.70
+            const val COMPLETION_FREQUENCY_WEIGHT = 0.30
+            const val COMPLETION_CONFIDENCE_MIN = 0.50
+
+            const val SYMSPELL_DISTANCE_WEIGHT = 0.45
+            const val SYMSPELL_FREQUENCY_WEIGHT = 0.05
+            const val SYMSPELL_CONFIDENCE_MIN = 0.0
+            const val MAX_DICT_FREQUENCY = 30_000_000.0
+
+            const val SAME_LENGTH_BONUS = 0.10
+            const val SAME_FIRST_LETTER_BONUS = 0.15
+            const val SAME_LAST_LETTER_BONUS = 0.10
+
+            const val PROXIMITY_MAX_BONUS = 0.20
+            const val PROXIMITY_SIGMA_MULTIPLIER = 2.0
+
+            const val MAX_PREFIX_COMPLETION_RESULTS = 10
+            const val MAX_INPUT_CODEPOINTS = 100
+
+            const val COMMON_WORD_MIN_LENGTH = 2
+            const val COMMON_WORD_MAX_LENGTH = 15
+
+            const val HIGH_FREQUENCY_THRESHOLD = 10
+            const val MEDIUM_FREQUENCY_THRESHOLD = 3
+            const val HIGH_FREQUENCY_BASE_BOOST = 0.15
+            const val HIGH_FREQUENCY_LOG_MULTIPLIER = 0.04
+            const val MEDIUM_FREQUENCY_BASE_BOOST = 0.05
+            const val MEDIUM_FREQUENCY_LOG_MULTIPLIER = 0.03
         }
     }

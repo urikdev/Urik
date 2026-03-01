@@ -8,7 +8,6 @@ import android.view.MotionEvent
 import com.ibm.icu.lang.UScript
 import com.ibm.icu.util.ULocale
 import com.urik.keyboard.KeyboardConstants.GeometricScoringConstants
-import com.urik.keyboard.KeyboardConstants.SwipeDetectionConstants
 import com.urik.keyboard.data.WordFrequencyRepository
 import com.urik.keyboard.model.KeyboardKey
 import com.urik.keyboard.service.SpellCheckManager
@@ -111,7 +110,7 @@ class SwipeDetector
 
         private var lastUpdateTime = 0L
         private var isSwiping = false
-        private var swipePoints = ArrayList<SwipePoint>(SwipeDetectionConstants.MAX_SWIPE_POINTS)
+        private var swipePoints = ArrayList<SwipePoint>(MAX_SWIPE_POINTS)
         private var startTime = 0L
         private var pointCounter = 0
         private var firstPoint: SwipePoint? = null
@@ -273,7 +272,7 @@ class SwipeDetector
          * Updates swipe distance threshold based on screen density.
          */
         fun updateDisplayMetrics(density: Float) {
-            swipeStartDistancePx = SwipeDetectionConstants.SWIPE_START_DISTANCE_DP * density
+            swipeStartDistancePx = SWIPE_START_DISTANCE_DP * density
         }
 
         fun setSwipeListener(listener: SwipeListener?) {
@@ -306,7 +305,7 @@ class SwipeDetector
 
                     MotionEvent.ACTION_UP -> {
                         val duration = System.currentTimeMillis() - startTime
-                        if (duration > 0 && duration <= SwipeDetectionConstants.TAP_DURATION_THRESHOLD_MS) {
+                        if (duration > 0 && duration <= TAP_DURATION_THRESHOLD_MS) {
                             val tappedKey = keyAt(event.x, event.y)
                             if (tappedKey != null) {
                                 _swipeListener?.onTap(tappedKey)
@@ -476,12 +475,12 @@ class SwipeDetector
                     )
                 }
 
-                if (swipePoints.size >= 3 && timeSinceDown >= SwipeDetectionConstants.SWIPE_TIME_THRESHOLD_MS) {
+                if (swipePoints.size >= 3 && timeSinceDown >= SWIPE_TIME_THRESHOLD_MS) {
                     var largeGapCount = 0
                     for (i in 0 until swipePoints.size - 1) {
                         val prev = swipePoints[i]
                         val curr = swipePoints[i + 1]
-                        if (calculateDistance(prev.x, prev.y, curr.x, curr.y) > SwipeDetectionConstants.MAX_CONSECUTIVE_GAP_PX) {
+                        if (calculateDistance(prev.x, prev.y, curr.x, curr.y) > MAX_CONSECUTIVE_GAP_PX) {
                             largeGapCount++
                         }
                     }
@@ -498,10 +497,10 @@ class SwipeDetector
                     return
                 }
 
-                val isHighVelocity = timeSinceDown < SwipeDetectionConstants.SWIPE_TIME_THRESHOLD_MS
+                val isHighVelocity = timeSinceDown < SWIPE_TIME_THRESHOLD_MS
                 val effectiveDistance =
                     if (isHighVelocity) {
-                        swipeStartDistancePx * SwipeDetectionConstants.HIGH_VELOCITY_DISTANCE_MULTIPLIER
+                        swipeStartDistancePx * HIGH_VELOCITY_DISTANCE_MULTIPLIER
                     } else {
                         swipeStartDistancePx
                     }
@@ -513,7 +512,7 @@ class SwipeDetector
                     }
 
                     val avgVelocity = distance / timeSinceDown.coerceAtLeast(1L).toFloat()
-                    if (avgVelocity > SwipeDetectionConstants.MAX_SWIPE_VELOCITY_PX_PER_MS) {
+                    if (avgVelocity > MAX_SWIPE_VELOCITY_PX_PER_MS) {
                         return
                     }
 
@@ -562,7 +561,7 @@ class SwipeDetector
             val totalDisplacement = earlyDisplacement + lateDisplacement
             if (totalDisplacement <= 0f) return false
 
-            return lateDisplacement / totalDisplacement > SwipeDetectionConstants.PECK_LATE_DISPLACEMENT_RATIO
+            return lateDisplacement / totalDisplacement > PECK_LATE_DISPLACEMENT_RATIO
         }
 
         private fun isGhostPath(
@@ -576,7 +575,7 @@ class SwipeDetector
         }
 
         private fun hasImpossibleGap(): Boolean {
-            val threshold = SwipeDetectionConstants.GHOST_IMPOSSIBLE_GAP_PX
+            val threshold = GHOST_IMPOSSIBLE_GAP_PX
             val thresholdSq = threshold * threshold
             for (i in 0 until swipePoints.size - 1) {
                 val p1 = swipePoints[i]
@@ -595,15 +594,15 @@ class SwipeDetector
             totalDistance: Float,
             avgVelocity: Float,
         ): Boolean {
-            if (avgVelocity < SwipeDetectionConstants.GHOST_DENSITY_VELOCITY_GATE) return false
+            if (avgVelocity < GHOST_DENSITY_VELOCITY_GATE) return false
             if (totalDistance < 1f) return false
             val density = swipePoints.size.toFloat() / totalDistance
-            return density < SwipeDetectionConstants.GHOST_MIN_PATH_DENSITY
+            return density < GHOST_MIN_PATH_DENSITY
         }
 
         private fun isSlideOffStart(avgVelocity: Float): Boolean {
             if (swipePoints.size < 3) return false
-            if (avgVelocity < SwipeDetectionConstants.GHOST_DENSITY_VELOCITY_GATE) return false
+            if (avgVelocity < GHOST_DENSITY_VELOCITY_GATE) return false
 
             val p0 = swipePoints[0]
             val p1 = swipePoints[1]
@@ -612,9 +611,9 @@ class SwipeDetector
             val dy01 = p1.y - p0.y
             val initialVelocity = sqrt(dx01 * dx01 + dy01 * dy01) / dt01
 
-            if (initialVelocity < SwipeDetectionConstants.GHOST_START_MOMENTUM_VELOCITY) return false
+            if (initialVelocity < GHOST_START_MOMENTUM_VELOCITY) return false
 
-            val checkEnd = minOf(swipePoints.size, SwipeDetectionConstants.GHOST_START_INTENT_POINTS)
+            val checkEnd = minOf(swipePoints.size, GHOST_START_INTENT_POINTS)
             for (i in 2 until checkEnd) {
                 val prev = swipePoints[i - 1]
                 val curr = swipePoints[i]
@@ -623,7 +622,7 @@ class SwipeDetector
                 val dy = curr.y - prev.y
                 val v = sqrt(dx * dx + dy * dy) / dt
 
-                if (v < initialVelocity * SwipeDetectionConstants.GHOST_START_SLOWDOWN_RATIO) {
+                if (v < initialVelocity * GHOST_START_SLOWDOWN_RATIO) {
                     return false
                 }
 
@@ -648,7 +647,7 @@ class SwipeDetector
             counter: Int,
             velocity: Float,
         ): Boolean {
-            if (swipePoints.size < SwipeDetectionConstants.MIN_SWIPE_POINTS_FOR_SAMPLING) return true
+            if (swipePoints.size < MIN_SWIPE_POINTS_FOR_SAMPLING) return true
 
             val lastPoint = swipePoints.lastOrNull() ?: return true
 
@@ -656,29 +655,29 @@ class SwipeDetector
             val dy = newPoint.y - lastPoint.y
             val distanceSquared = dx * dx + dy * dy
 
-            if (distanceSquared < SwipeDetectionConstants.MIN_POINT_DISTANCE * SwipeDetectionConstants.MIN_POINT_DISTANCE) return false
+            if (distanceSquared < MIN_POINT_DISTANCE * MIN_POINT_DISTANCE) return false
 
             val samplingInterval =
                 when {
-                    swipePoints.size < SwipeDetectionConstants.ADAPTIVE_THRESHOLD -> {
-                        SwipeDetectionConstants.MIN_SAMPLING_INTERVAL
+                    swipePoints.size < ADAPTIVE_THRESHOLD -> {
+                        MIN_SAMPLING_INTERVAL
                     }
 
-                    swipePoints.size < SwipeDetectionConstants.MAX_SWIPE_POINTS * SwipeDetectionConstants.ADAPTIVE_THRESHOLD_RATIO -> {
-                        SwipeDetectionConstants.MIN_SAMPLING_INTERVAL +
+                    swipePoints.size < MAX_SWIPE_POINTS * ADAPTIVE_THRESHOLD_RATIO -> {
+                        MIN_SAMPLING_INTERVAL +
                             2
                     }
 
                     else -> {
-                        SwipeDetectionConstants.MAX_SAMPLING_INTERVAL
+                        MAX_SAMPLING_INTERVAL
                     }
                 }
 
             if (counter % samplingInterval != 0) return false
 
-            val isSlowPreciseMovement = velocity < SwipeDetectionConstants.SLOW_MOVEMENT_VELOCITY_THRESHOLD && swipePoints.size > 10
+            val isSlowPreciseMovement = velocity < SLOW_MOVEMENT_VELOCITY_THRESHOLD && swipePoints.size > 10
             if (isSlowPreciseMovement) {
-                return counter % SwipeDetectionConstants.MIN_SAMPLING_INTERVAL == 0
+                return counter % MIN_SAMPLING_INTERVAL == 0
             }
 
             return true
@@ -736,7 +735,7 @@ class SwipeDetector
             }
 
             val now = System.currentTimeMillis()
-            if (now - lastUpdateTime >= SwipeDetectionConstants.UI_UPDATE_INTERVAL_MS) {
+            if (now - lastUpdateTime >= UI_UPDATE_INTERVAL_MS) {
                 lastUpdateTime = now
                 _swipeListener?.onSwipeUpdate(transformed)
             }
@@ -781,7 +780,7 @@ class SwipeDetector
                 return true
             } else {
                 val duration = System.currentTimeMillis() - startTime
-                if (duration <= SwipeDetectionConstants.TAP_DURATION_THRESHOLD_MS) {
+                if (duration <= TAP_DURATION_THRESHOLD_MS) {
                     val tappedKey = keyAt(event.x, event.y)
                     if (tappedKey != null) {
                         _swipeListener?.onTap(tappedKey)
@@ -857,12 +856,12 @@ class SwipeDetector
 
                         results.add(result)
 
-                        if (result.combinedScore > SwipeDetectionConstants.EXCELLENT_CANDIDATE_THRESHOLD) {
+                        if (result.combinedScore > EXCELLENT_CANDIDATE_THRESHOLD) {
                             var excellentCount = 0
                             for (candidate in results) {
                                 if (candidate.combinedScore > 0.90f) excellentCount++
                             }
-                            if (excellentCount >= SwipeDetectionConstants.MIN_EXCELLENT_CANDIDATES) break
+                            if (excellentCount >= MIN_EXCELLENT_CANDIDATES) break
                         }
                     }
 
@@ -902,15 +901,15 @@ class SwipeDetector
 
                 val shouldInterpolate =
                     (
-                        avgVelocity > GeometricScoringConstants.VELOCITY_INTERPOLATION_THRESHOLD &&
-                            distance > GeometricScoringConstants.INTERPOLATION_MIN_GAP_PX
+                        avgVelocity > VELOCITY_INTERPOLATION_THRESHOLD &&
+                            distance > INTERPOLATION_MIN_GAP_PX
                     ) ||
-                        distance > GeometricScoringConstants.LARGE_GAP_INTERPOLATION_THRESHOLD_PX
+                        distance > LARGE_GAP_INTERPOLATION_THRESHOLD_PX
 
                 if (shouldInterpolate) {
                     val keysOnSegment = findKeysOnSegment(prev, curr, keyPositions)
 
-                    keysOnSegment.take(GeometricScoringConstants.MAX_INTERPOLATED_POINTS).forEach { (_, _, t) ->
+                    keysOnSegment.take(MAX_INTERPOLATED_POINTS).forEach { (_, _, t) ->
                         val interpX = prev.x + dx * t
                         val interpY = prev.y + dy * t
                         val interpTime = prev.timestamp + ((curr.timestamp - prev.timestamp) * t).toLong()
@@ -1076,7 +1075,37 @@ class SwipeDetector
             reset()
         }
 
-        companion object {
+        private companion object {
             private const val TAG = "SwipeEngine"
+
+            private const val MAX_SWIPE_POINTS = 500
+            private const val MIN_SAMPLING_INTERVAL = 2
+            private const val MAX_SAMPLING_INTERVAL = 8
+            private const val ADAPTIVE_THRESHOLD = 40
+            private const val ADAPTIVE_THRESHOLD_RATIO = 0.75
+            private const val MIN_POINT_DISTANCE = 8f
+            private const val MAX_CONSECUTIVE_GAP_PX = 45f
+            private const val MIN_EXCELLENT_CANDIDATES = 3
+            private const val SWIPE_TIME_THRESHOLD_MS = 100L
+            private const val SWIPE_START_DISTANCE_DP = 35f
+            private const val MIN_SWIPE_POINTS_FOR_SAMPLING = 3
+            private const val SLOW_MOVEMENT_VELOCITY_THRESHOLD = 0.5f
+            private const val UI_UPDATE_INTERVAL_MS = 16
+            private const val TAP_DURATION_THRESHOLD_MS = 350L
+            private const val MAX_SWIPE_VELOCITY_PX_PER_MS = 5f
+            private const val EXCELLENT_CANDIDATE_THRESHOLD = 0.95f
+            private const val PECK_LATE_DISPLACEMENT_RATIO = 0.95f
+            private const val HIGH_VELOCITY_DISTANCE_MULTIPLIER = 1.5f
+            private const val GHOST_DENSITY_VELOCITY_GATE = 2.0f
+            private const val GHOST_MIN_PATH_DENSITY = 0.025f
+            private const val GHOST_START_MOMENTUM_VELOCITY = 3.0f
+            private const val GHOST_START_INTENT_POINTS = 4
+            private const val GHOST_START_SLOWDOWN_RATIO = 0.7f
+            private const val GHOST_IMPOSSIBLE_GAP_PX = 200f
+
+            private const val VELOCITY_INTERPOLATION_THRESHOLD = 1.1f
+            private const val MAX_INTERPOLATED_POINTS = 3
+            private const val INTERPOLATION_MIN_GAP_PX = 25f
+            private const val LARGE_GAP_INTERPOLATION_THRESHOLD_PX = 60f
         }
     }

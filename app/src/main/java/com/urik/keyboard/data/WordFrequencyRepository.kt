@@ -1,8 +1,5 @@
 package com.urik.keyboard.data
 
-import com.urik.keyboard.KeyboardConstants.BigramConstants
-import com.urik.keyboard.KeyboardConstants.CacheConstants
-import com.urik.keyboard.KeyboardConstants.DatabaseConstants
 import com.urik.keyboard.data.database.UserWordBigramDao
 import com.urik.keyboard.data.database.UserWordFrequencyDao
 import com.urik.keyboard.service.WordNormalizer
@@ -50,13 +47,13 @@ class WordFrequencyRepository
         private val frequencyCache: ManagedCache<String, Int> =
             cacheMemoryManager.createCache(
                 name = "user_word_frequency_cache",
-                maxSize = CacheConstants.USER_FREQUENCY_CACHE_SIZE,
+                maxSize = USER_FREQUENCY_CACHE_SIZE,
             )
 
         private val bigramCache: ManagedCache<String, List<String>> =
             cacheMemoryManager.createCache(
                 name = "user_bigram_cache",
-                maxSize = BigramConstants.BIGRAM_CACHE_SIZE,
+                maxSize = BIGRAM_CACHE_SIZE,
             )
 
         @Volatile
@@ -75,6 +72,13 @@ class WordFrequencyRepository
 
         private companion object {
             const val WRITE_DEBOUNCE_MS = 300L
+            const val USER_FREQUENCY_CACHE_SIZE = 2000
+            const val BIGRAM_CACHE_SIZE = 100
+            const val MAX_BIGRAM_PREDICTIONS = 3
+            const val PRUNING_INTERVAL_FLUSHES = 50
+            const val FREQUENCY_PRUNING_CUTOFF_MS = 30L * 24 * 60 * 60 * 1000
+            const val MAX_FREQUENCY_ROWS = 10_000
+            const val MAX_BIGRAM_ROWS = 50_000
         }
 
         private fun normalizeWord(
@@ -329,7 +333,7 @@ class WordFrequencyRepository
         suspend fun getBigramPredictions(
             wordA: String,
             languageTag: String,
-            limit: Int = BigramConstants.MAX_BIGRAM_PREDICTIONS,
+            limit: Int = MAX_BIGRAM_PREDICTIONS,
         ): List<String> =
             withContext(defaultDispatcher) {
                 try {
@@ -370,7 +374,7 @@ class WordFrequencyRepository
         suspend fun preloadTopBigrams(languageTag: String): Result<Unit> =
             withContext(ioDispatcher) {
                 try {
-                    val topBigrams = userWordBigramDao.getTopBigrams(languageTag, BigramConstants.BIGRAM_CACHE_SIZE)
+                    val topBigrams = userWordBigramDao.getTopBigrams(languageTag, BIGRAM_CACHE_SIZE)
 
                     val bigramMap =
                         topBigrams
@@ -397,15 +401,15 @@ class WordFrequencyRepository
 
         private suspend fun pruneIfNeeded() {
             val count = flushCount.incrementAndGet()
-            if (count % DatabaseConstants.PRUNING_INTERVAL_FLUSHES != 0) return
+            if (count % PRUNING_INTERVAL_FLUSHES != 0) return
 
             withContext(ioDispatcher) {
                 try {
-                    val cutoff = System.currentTimeMillis() - DatabaseConstants.FREQUENCY_PRUNING_CUTOFF_MS
+                    val cutoff = System.currentTimeMillis() - FREQUENCY_PRUNING_CUTOFF_MS
                     userWordFrequencyDao.pruneStaleEntries(cutoff)
-                    userWordFrequencyDao.enforceMaxRows(DatabaseConstants.MAX_FREQUENCY_ROWS)
+                    userWordFrequencyDao.enforceMaxRows(MAX_FREQUENCY_ROWS)
                     userWordBigramDao.pruneStaleEntries(cutoff)
-                    userWordBigramDao.enforceMaxRows(DatabaseConstants.MAX_BIGRAM_ROWS)
+                    userWordBigramDao.enforceMaxRows(MAX_BIGRAM_ROWS)
                 } catch (e: Exception) {
                     ErrorLogger.logException(
                         component = "WordFrequencyRepository",
@@ -421,4 +425,5 @@ class WordFrequencyRepository
             languageTag: String,
             normalizedWordA: String,
         ): String = "bigram_${languageTag}_$normalizedWordA"
+
     }
