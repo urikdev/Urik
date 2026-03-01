@@ -4,8 +4,7 @@ import android.database.sqlite.SQLiteDatabaseCorruptException
 import android.database.sqlite.SQLiteDatabaseLockedException
 import android.database.sqlite.SQLiteException
 import android.database.sqlite.SQLiteFullException
-import com.urik.keyboard.KeyboardConstants.CacheConstants
-import com.urik.keyboard.KeyboardConstants.WordLearningConstants
+import com.urik.keyboard.KeyboardConstants.MemoryConstants
 import com.urik.keyboard.data.database.LearnedWord
 import com.urik.keyboard.data.database.LearnedWordDao
 import com.urik.keyboard.data.database.WordSource
@@ -36,11 +35,11 @@ import javax.inject.Singleton
  * Word learning configuration.
  */
 data class LearningConfig(
-    val minWordLength: Int = WordLearningConstants.MIN_WORD_LENGTH,
-    val maxWordLength: Int = WordLearningConstants.MAX_WORD_LENGTH,
-    val minFrequencyThreshold: Int = WordLearningConstants.MIN_FREQUENCY_THRESHOLD,
-    val maxConsecutiveErrors: Int = WordLearningConstants.MAX_CONSECUTIVE_ERRORS,
-    val errorCooldownMs: Long = WordLearningConstants.ERROR_COOLDOWN_MS,
+    val minWordLength: Int = 1,
+    val maxWordLength: Int = 100,
+    val minFrequencyThreshold: Int = 2,
+    val maxConsecutiveErrors: Int = 5,
+    val errorCooldownMs: Long = 1500L,
 )
 
 /**
@@ -81,7 +80,7 @@ class WordLearningEngine
         private val learnedWordsCache: ManagedCache<String, MutableSet<String>> =
             cacheMemoryManager.createCache(
                 name = "learned_words_cache",
-                maxSize = CacheConstants.LEARNED_WORDS_CACHE_SIZE,
+                maxSize = LEARNED_WORDS_CACHE_SIZE,
             )
 
         private val cacheLock = Any()
@@ -360,12 +359,12 @@ class WordLearningEngine
             withContext(ioDispatcher) {
                 return@withContext try {
                     val cleanWord = word.trim()
-                    if (cleanWord.isBlank() || cleanWord.length > WordLearningConstants.MAX_SIMILAR_WORD_LENGTH) {
+                    if (cleanWord.isBlank() || cleanWord.length > MAX_SIMILAR_WORD_LENGTH) {
                         return@withContext emptyList()
                     }
 
                     val normalized = normalizeWord(cleanWord)
-                    if (normalized.length > WordLearningConstants.MAX_NORMALIZED_WORD_LENGTH) {
+                    if (normalized.length > MAX_NORMALIZED_WORD_LENGTH) {
                         return@withContext emptyList()
                     }
 
@@ -390,7 +389,7 @@ class WordLearningEngine
                     } catch (_: Exception) {
                     }
 
-                    if (results.size < maxResults && normalized.length >= WordLearningConstants.MIN_PREFIX_MATCH_LENGTH) {
+                    if (results.size < maxResults && normalized.length >= MIN_PREFIX_MATCH_LENGTH) {
                         try {
                             val prefixMatches =
                                 learnedWordDao.findWordsWithPrefix(
@@ -407,13 +406,13 @@ class WordLearningEngine
                         }
                     }
 
-                    if (results.size < maxResults && strippedInput.length >= WordLearningConstants.MIN_PREFIX_MATCH_LENGTH) {
+                    if (results.size < maxResults && strippedInput.length >= MIN_PREFIX_MATCH_LENGTH) {
                         try {
                             val searchLimit =
                                 if (strippedInput.length <= 3) {
-                                    WordLearningConstants.STRIPPED_MATCH_LIMIT_SHORT
+                                    STRIPPED_MATCH_LIMIT_SHORT
                                 } else {
-                                    WordLearningConstants.STRIPPED_MATCH_LIMIT_MEDIUM
+                                    STRIPPED_MATCH_LIMIT_MEDIUM
                                 }
 
                             val frequentWords =
@@ -439,7 +438,7 @@ class WordLearningEngine
                         }
                     }
 
-                    if (results.size < maxResults && normalized.length >= WordLearningConstants.MIN_FUZZY_SEARCH_LENGTH) {
+                    if (results.size < maxResults && normalized.length >= MIN_FUZZY_SEARCH_LENGTH) {
                         val runtime = Runtime.getRuntime()
                         val availableMemory = runtime.maxMemory() - (runtime.totalMemory() - runtime.freeMemory())
                         val memoryThresholdBytes = com.urik.keyboard.KeyboardConstants.MemoryConstants.LOW_MEMORY_THRESHOLD_MB * 1024 * 1024
@@ -452,21 +451,21 @@ class WordLearningEngine
                             val candidates =
                                 learnedWordDao.getMostFrequentWords(
                                     languageTag = languageCode,
-                                    limit = WordLearningConstants.FUZZY_SEARCH_CANDIDATE_LIMIT,
+                                    limit = FUZZY_SEARCH_CANDIDATE_LIMIT,
                                 )
 
                             val viableCandidates =
                                 candidates.filter { candidate ->
                                     val lengthDiff = kotlin.math.abs(candidate.wordNormalized.length - normalized.length)
-                                    lengthDiff <= WordLearningConstants.MAX_LENGTH_DIFFERENCE_FUZZY &&
-                                        candidate.wordNormalized.length <= WordLearningConstants.MAX_SIMILAR_WORD_LENGTH
+                                    lengthDiff <= MAX_LENGTH_DIFFERENCE_FUZZY &&
+                                        candidate.wordNormalized.length <= MAX_SIMILAR_WORD_LENGTH
                                 }
 
                             viableCandidates
                                 .map { candidate ->
                                     candidate to calculateEditDistance(candidate.wordNormalized, normalized)
                                 }.filter { (candidate, distance) ->
-                                    distance in WordLearningConstants.MIN_EDIT_DISTANCE..WordLearningConstants.MAX_EDIT_DISTANCE_FUZZY &&
+                                    distance in MIN_EDIT_DISTANCE..MAX_EDIT_DISTANCE_FUZZY &&
                                         !results.containsKey(candidate.word) &&
                                         candidate.word != normalized
                                 }.sortedBy { it.second }
@@ -574,17 +573,17 @@ class WordLearningEngine
             if (s1.isEmpty()) return s2.length
             if (s2.isEmpty()) return s1.length
 
-            val maxStringLength = WordLearningConstants.MAX_EDIT_DISTANCE_STRING_LENGTH
+            val maxStringLength = MAX_EDIT_DISTANCE_STRING_LENGTH
             if (s1.length > maxStringLength || s2.length > maxStringLength) {
                 return Int.MAX_VALUE
             }
 
             val lengthDiff = kotlin.math.abs(s1.length - s2.length)
-            if (lengthDiff > WordLearningConstants.MAX_LENGTH_DIFFERENCE_FUZZY) {
+            if (lengthDiff > MAX_LENGTH_DIFFERENCE_FUZZY) {
                 return Int.MAX_VALUE
             }
 
-            val maxArraySize = WordLearningConstants.MAX_EDIT_DISTANCE_ARRAY_SIZE
+            val maxArraySize = MAX_EDIT_DISTANCE_ARRAY_SIZE
             val rows = minOf(s1.length + 1, maxArraySize)
             val cols = minOf(s2.length + 1, maxArraySize)
 
@@ -612,7 +611,7 @@ class WordLearningEngine
                     minInRow = minOf(minInRow, dp[i][j])
                 }
 
-                if (minInRow > WordLearningConstants.EDIT_DISTANCE_ROW_THRESHOLD) {
+                if (minInRow > EDIT_DISTANCE_ROW_THRESHOLD) {
                     return Int.MAX_VALUE
                 }
             }
@@ -812,7 +811,7 @@ class WordLearningEngine
 
         private suspend fun tryCleanupOldWords() {
             try {
-                val cutoff = System.currentTimeMillis() - WordLearningConstants.CLEANUP_CUTOFF_MS
+                val cutoff = System.currentTimeMillis() - CLEANUP_CUTOFF_MS
                 learnedWordDao.cleanupLowFrequencyWords(cutoff)
             } catch (_: Exception) {
             }
@@ -901,4 +900,25 @@ class WordLearningEngine
                     emptyMap()
                 }
             }
+
+        private companion object {
+            const val LEARNED_WORDS_CACHE_SIZE = 100
+
+            const val MAX_SIMILAR_WORD_LENGTH = 50
+            const val MAX_NORMALIZED_WORD_LENGTH = 50
+            const val MIN_PREFIX_MATCH_LENGTH = 2
+            const val MIN_FUZZY_SEARCH_LENGTH = 4
+            const val FUZZY_SEARCH_CANDIDATE_LIMIT = 30
+            const val STRIPPED_MATCH_LIMIT_SHORT = 200
+            const val STRIPPED_MATCH_LIMIT_MEDIUM = 100
+            const val MAX_LENGTH_DIFFERENCE_FUZZY = 2
+            const val MIN_EDIT_DISTANCE = 1
+            const val MAX_EDIT_DISTANCE_FUZZY = 2
+
+            const val MAX_EDIT_DISTANCE_STRING_LENGTH = 50
+            const val MAX_EDIT_DISTANCE_ARRAY_SIZE = 51
+            const val EDIT_DISTANCE_ROW_THRESHOLD = 2
+
+            const val CLEANUP_CUTOFF_MS = 30L * 24 * 60 * 60 * 1000
+        }
     }

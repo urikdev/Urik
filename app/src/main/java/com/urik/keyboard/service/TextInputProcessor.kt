@@ -3,7 +3,6 @@ package com.urik.keyboard.service
 import com.ibm.icu.lang.UScript
 import com.ibm.icu.text.BreakIterator
 import com.ibm.icu.util.ULocale
-import com.urik.keyboard.KeyboardConstants.CacheConstants
 import com.urik.keyboard.KeyboardConstants.TextProcessingConstants
 import com.urik.keyboard.settings.KeyboardSettings
 import com.urik.keyboard.settings.SettingsRepository
@@ -65,12 +64,12 @@ class TextInputProcessor
         private val processingCache =
             cacheMemoryManager.createCache<String, ProcessingCache>(
                 name = "text_processing_cache",
-                maxSize = CacheConstants.PROCESSING_CACHE_MAX_SIZE,
+                maxSize = PROCESSING_CACHE_MAX_SIZE,
             )
         private val suggestionCache =
             cacheMemoryManager.createCache<String, SuggestionCacheEntry>(
                 name = "text_suggestion_cache",
-                maxSize = CacheConstants.PROCESSING_CACHE_MAX_SIZE,
+                maxSize = PROCESSING_CACHE_MAX_SIZE,
             )
 
         private var currentScriptCode = UScript.LATIN
@@ -219,7 +218,7 @@ class TextInputProcessor
                 val suggestionsEnabled = currentSettings.showSuggestions && currentSettings.spellCheckEnabled
                 val maxSuggestions = currentSettings.effectiveSuggestionCount
 
-                if (!suggestionsEnabled || word.length < TextProcessingConstants.MIN_SUGGESTION_QUERY_LENGTH) {
+                if (!suggestionsEnabled || word.length < MIN_SUGGESTION_QUERY_LENGTH) {
                     return@withContext emptyList()
                 }
 
@@ -287,7 +286,7 @@ class TextInputProcessor
         }
 
         private fun isValidWordInput(word: String): Boolean =
-            word.isNotBlank() && word.length <= TextProcessingConstants.MAX_WORD_INPUT_LENGTH
+            word.isNotBlank() && word.length <= MAX_WORD_INPUT_LENGTH
 
         private fun getCachedProcessing(word: String): ProcessingCache? {
             val cached = processingCache.getIfPresent(word) ?: return null
@@ -339,7 +338,7 @@ class TextInputProcessor
             )
         }
 
-        private fun isCacheExpired(timestamp: Long): Boolean = System.currentTimeMillis() - timestamp > CacheConstants.CACHE_TTL_MS
+        private fun isCacheExpired(timestamp: Long): Boolean = System.currentTimeMillis() - timestamp > CACHE_TTL_MS
 
         suspend fun removeSuggestion(word: String): Result<Boolean> =
             withContext(Dispatchers.Default) {
@@ -368,4 +367,11 @@ class TextInputProcessor
         }
 
         fun getCurrentSettings(): KeyboardSettings = currentSettings
+
+        private companion object {
+            const val PROCESSING_CACHE_MAX_SIZE = 200
+            const val CACHE_TTL_MS = 300000L
+            const val MIN_SUGGESTION_QUERY_LENGTH = 1
+            const val MAX_WORD_INPUT_LENGTH = 50
+        }
     }

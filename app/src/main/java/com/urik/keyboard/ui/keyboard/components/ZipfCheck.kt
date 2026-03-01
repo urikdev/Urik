@@ -3,7 +3,6 @@
 package com.urik.keyboard.ui.keyboard.components
 
 import android.graphics.PointF
-import com.urik.keyboard.KeyboardConstants.GeometricScoringConstants
 import com.urik.keyboard.service.SpellCheckManager
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -65,7 +64,7 @@ class ZipfCheck
             val runnerUp = top[1]
             val scoreDelta = leader.combinedScore - runnerUp.combinedScore
 
-            if (scoreDelta <= GeometricScoringConstants.GEOMETRIC_SIMILARITY_THRESHOLD) {
+            if (scoreDelta <= GEOMETRIC_SIMILARITY_THRESHOLD) {
                 val (winner, loser, winReason) =
                     disambiguateCloseCompetitors(
                         leader,
@@ -115,7 +114,7 @@ class ZipfCheck
             val freqScore2 = candidate2.frequencyScore
 
             val gap = abs(candidate1.combinedScore - candidate2.combinedScore)
-            val leaderScale = (gap / GeometricScoringConstants.GEOMETRIC_SIMILARITY_THRESHOLD).coerceIn(0f, 1f)
+            val leaderScale = (gap / GEOMETRIC_SIMILARITY_THRESHOLD).coerceIn(0f, 1f)
             val originalLeaderBonus1 = if (candidate1.combinedScore > candidate2.combinedScore) 0.02f * leaderScale else 0f
             val originalLeaderBonus2 = if (candidate2.combinedScore > candidate1.combinedScore) 0.02f * leaderScale else 0f
 
@@ -124,18 +123,18 @@ class ZipfCheck
 
             val bigramBoost1 =
                 when {
-                    c1InBigram && !c2InBigram -> GeometricScoringConstants.BIGRAM_TIEBREAKER_WEIGHT
-                    !c1InBigram && c2InBigram -> -GeometricScoringConstants.BIGRAM_TIEBREAKER_PENALTY
+                    c1InBigram && !c2InBigram -> BIGRAM_TIEBREAKER_WEIGHT
+                    !c1InBigram && c2InBigram -> -BIGRAM_TIEBREAKER_PENALTY
                     else -> 0f
                 }
             val bigramBoost2 =
                 when {
-                    c2InBigram && !c1InBigram -> GeometricScoringConstants.BIGRAM_TIEBREAKER_WEIGHT
-                    !c2InBigram && c1InBigram -> -GeometricScoringConstants.BIGRAM_TIEBREAKER_PENALTY
+                    c2InBigram && !c1InBigram -> BIGRAM_TIEBREAKER_WEIGHT
+                    !c2InBigram && c1InBigram -> -BIGRAM_TIEBREAKER_PENALTY
                     else -> 0f
                 }
 
-            val razorThin = GeometricScoringConstants.GEOMETRIC_SIMILARITY_THRESHOLD * 0.4f
+            val razorThin = GEOMETRIC_SIMILARITY_THRESHOLD * 0.4f
             val inflectionWeight: Float
             val coverageWeight: Float
             val freqWeight: Float
@@ -146,7 +145,7 @@ class ZipfCheck
                     freqWeight = 0.80f
                 }
 
-                gap < GeometricScoringConstants.GEOMETRIC_SIMILARITY_THRESHOLD -> {
+                gap < GEOMETRIC_SIMILARITY_THRESHOLD -> {
                     inflectionWeight = 0.15f
                     coverageWeight = 0.10f
                     freqWeight =
@@ -272,10 +271,10 @@ class ZipfCheck
             if (candidates.isEmpty()) return candidates
 
             val topCandidate = candidates[0]
-            if (topCandidate.combinedScore >= GeometricScoringConstants.PREFIX_COMPLETION_SCORE_THRESHOLD) {
+            if (topCandidate.combinedScore >= PREFIX_COMPLETION_SCORE_THRESHOLD) {
                 return candidates
             }
-            if (topCandidate.word.length < GeometricScoringConstants.PREFIX_COMPLETION_MIN_PREFIX_LENGTH) {
+            if (topCandidate.word.length < PREFIX_COMPLETION_MIN_PREFIX_LENGTH) {
                 return candidates
             }
 
@@ -287,10 +286,10 @@ class ZipfCheck
                     .asSequence()
                     .filter { (word, _) ->
                         word.startsWith(prefix) &&
-                            word.length >= prefix.length + GeometricScoringConstants.PREFIX_COMPLETION_MIN_EXTENSION_LENGTH &&
+                            word.length >= prefix.length + PREFIX_COMPLETION_MIN_EXTENSION_LENGTH &&
                             word.lowercase() !in existingWords
                     }.sortedByDescending { it.value }
-                    .take(GeometricScoringConstants.PREFIX_COMPLETION_MAX_RESULTS)
+                    .take(PREFIX_COMPLETION_MAX_RESULTS)
                     .toList()
 
             if (completions.isEmpty()) return candidates
@@ -301,7 +300,7 @@ class ZipfCheck
 
             for ((word, _) in completions) {
                 val pathRatio = estimatedLetters.toFloat() / word.length.toFloat()
-                if (pathRatio > GeometricScoringConstants.PREFIX_COMPLETION_PATH_LENGTH_RATIO) continue
+                if (pathRatio > PREFIX_COMPLETION_PATH_LENGTH_RATIO) continue
 
                 result.add(
                     WordCandidate(
@@ -314,5 +313,16 @@ class ZipfCheck
             }
 
             return result
+        }
+
+        private companion object {
+            const val GEOMETRIC_SIMILARITY_THRESHOLD = 0.05f
+            const val BIGRAM_TIEBREAKER_WEIGHT = 0.20f
+            const val BIGRAM_TIEBREAKER_PENALTY = 0.05f
+            const val PREFIX_COMPLETION_SCORE_THRESHOLD = 0.55f
+            const val PREFIX_COMPLETION_MIN_PREFIX_LENGTH = 3
+            const val PREFIX_COMPLETION_MIN_EXTENSION_LENGTH = 3
+            const val PREFIX_COMPLETION_MAX_RESULTS = 2
+            const val PREFIX_COMPLETION_PATH_LENGTH_RATIO = 0.6f
         }
     }

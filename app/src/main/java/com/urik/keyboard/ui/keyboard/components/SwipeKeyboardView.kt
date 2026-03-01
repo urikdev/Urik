@@ -1702,7 +1702,7 @@ class SwipeKeyboardView
                     val dy = y - gestureStartY
                     val absDx = kotlin.math.abs(dx)
                     val absDy = kotlin.math.abs(dy)
-                    val minDistance = com.urik.keyboard.KeyboardConstants.GestureConstants.BACKSPACE_SWIPE_MIN_DISTANCE_DP * gestureDensity
+                    val minDistance = 30f * gestureDensity
 
                     if (dx < 0 && absDx > absDy && absDx > minDistance) {
                         keyboardLayoutManager?.triggerBackspaceHaptic()
@@ -1761,7 +1761,7 @@ class SwipeKeyboardView
                         val dy = ev.y - gestureStartY
                         val distance = kotlin.math.sqrt(dx * dx + dy * dy)
                         val gestureThreshold =
-                            com.urik.keyboard.KeyboardConstants.GestureConstants.GESTURE_START_DISTANCE_DP * gestureDensity
+                            20f * gestureDensity
 
                         if (distance > gestureThreshold) {
                             isGestureActive = true

@@ -1,8 +1,6 @@
 package com.urik.keyboard.service
 
 import android.content.Context
-import com.urik.keyboard.KeyboardConstants.AssetLoadingConstants
-import com.urik.keyboard.KeyboardConstants.CacheConstants
 import com.urik.keyboard.utils.CacheMemoryManager
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
@@ -84,15 +82,15 @@ class CharacterVariationService
         private val variationCache =
             cacheMemoryManager.createCache<String, Map<String, List<String>>>(
                 name = "character_variations",
-                maxSize = CacheConstants.CHARACTER_VARIATIONS_CACHE_SIZE,
+                maxSize = CHARACTER_VARIATIONS_CACHE_SIZE,
             )
 
         private val failedLanguages = mutableSetOf<String>()
-        private val errorTracker = BoundedVariationErrorTracker(maxSize = AssetLoadingConstants.ERROR_TRACKER_MAX_SIZE)
+        private val errorTracker = BoundedVariationErrorTracker(maxSize = ERROR_TRACKER_MAX_SIZE)
 
-        private val maxAssetRetries = AssetLoadingConstants.MAX_ASSET_RETRIES
-        private val assetErrorCooldownMs = AssetLoadingConstants.ASSET_ERROR_COOLDOWN_MS
-        private val errorStateExpiryMs = AssetLoadingConstants.ERROR_STATE_EXPIRY_MS
+        private val maxAssetRetries = MAX_ASSET_RETRIES
+        private val assetErrorCooldownMs = ASSET_ERROR_COOLDOWN_MS
+        private val errorStateExpiryMs = ERROR_STATE_EXPIRY_MS
 
         private var isDestroyed = false
         private var lastErrorCleanup = System.currentTimeMillis()
@@ -100,7 +98,7 @@ class CharacterVariationService
         private fun cleanupExpiredErrors() {
             val now = System.currentTimeMillis()
 
-            if ((now - lastErrorCleanup) > AssetLoadingConstants.ERROR_CLEANUP_INTERVAL_MS) {
+            if ((now - lastErrorCleanup) > ERROR_CLEANUP_INTERVAL_MS) {
                 errorTracker.cleanExpired(errorStateExpiryMs)
 
                 val iterator = failedLanguages.iterator()
@@ -320,5 +318,14 @@ class CharacterVariationService
             failedLanguages.clear()
             errorTracker.clear()
             contextRef.clear()
+        }
+
+        private companion object {
+            const val CHARACTER_VARIATIONS_CACHE_SIZE = 8
+            const val MAX_ASSET_RETRIES = 3
+            const val ASSET_ERROR_COOLDOWN_MS = 60000L
+            const val ERROR_STATE_EXPIRY_MS = 3600000L
+            const val ERROR_CLEANUP_INTERVAL_MS = 600000L
+            const val ERROR_TRACKER_MAX_SIZE = 15
         }
     }

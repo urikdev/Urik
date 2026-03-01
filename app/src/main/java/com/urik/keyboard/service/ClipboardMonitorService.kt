@@ -85,7 +85,7 @@ class ClipboardMonitorService
 
                     if (text.isNullOrBlank()) return@launch
 
-                    val truncatedText = text.take(com.urik.keyboard.KeyboardConstants.DatabaseConstants.MAX_CLIPBOARD_CONTENT_LENGTH)
+                    val truncatedText = text.take(100_000)
 
                     val textHash = truncatedText.hashCode()
                     if (textHash == lastClipContentHash) return@launch

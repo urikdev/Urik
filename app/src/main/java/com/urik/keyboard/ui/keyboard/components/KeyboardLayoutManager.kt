@@ -1770,7 +1770,7 @@ class KeyboardLayoutManager(
                 }
             }
 
-        backspaceHandler?.postDelayed(backspaceRunnable!!, com.urik.keyboard.KeyboardConstants.GestureConstants.BACKSPACE_INITIAL_DELAY_MS)
+        backspaceHandler?.postDelayed(backspaceRunnable!!, 50L)
     }
 
     private fun stopAcceleratedBackspace() {

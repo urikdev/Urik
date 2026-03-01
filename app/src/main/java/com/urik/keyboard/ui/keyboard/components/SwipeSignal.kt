@@ -4,7 +4,6 @@ package com.urik.keyboard.ui.keyboard.components
 
 import android.graphics.PointF
 import com.urik.keyboard.KeyboardConstants.GeometricScoringConstants
-import com.urik.keyboard.KeyboardConstants.SwipeDetectionConstants
 import kotlin.math.ln
 import kotlin.math.min
 import kotlin.math.max
@@ -60,6 +59,23 @@ class SwipeSignal private constructor(
     )
 
     companion object {
+        private const val PATH_BOUNDS_MARGIN_PX = 50f
+        private const val CLOSE_KEY_DISTANCE_THRESHOLD_SQ = 7225f
+        private const val START_CENTROID_POINTS_FAST = 5
+        private const val START_CENTROID_POINTS_NORMAL = 3
+        private const val HIGH_VELOCITY_START_THRESHOLD = 1.5f
+        private const val VELOCITY_EXPANDED_RADIUS_MULTIPLIER = 1.6f
+        private const val EXTREME_VELOCITY_START_THRESHOLD = 15.0f
+        private const val EXTREME_VELOCITY_RADIUS_MULTIPLIER = 2.0f
+        private const val POINT_ZERO_PROXIMITY_COUNT = 3
+        private const val BACKPROJECTION_BASE_PX = 100f
+        private const val BACKPROJECTION_LOG_SCALE = 80f
+        private const val BACKPROJECTION_MAX_PX = 260f
+        private const val END_CENTROID_POINTS = 5
+        private const val POINT_ZERO_DOMINANCE_VELOCITY_THRESHOLD = 18f
+        private const val POINT_ZERO_DISTANCE_WEIGHT = 0.5f
+        private const val PASSTHROUGH_VELOCITY_THRESHOLD = 1.5f
+
         /**
          * Extracts all spatial features from an interpolated swipe path.
          *
@@ -82,7 +98,7 @@ class SwipeSignal private constructor(
 
             val vp = geometricAnalysis.velocityProfile
             val vAvg = if (vp.isNotEmpty()) vp.sum() / vp.size else 0f
-            val pointZeroDominant = vAvg < GeometricScoringConstants.POINT_ZERO_DOMINANCE_VELOCITY_THRESHOLD
+            val pointZeroDominant = vAvg < POINT_ZERO_DOMINANCE_VELOCITY_THRESHOLD
 
             val offRowKeys = detectOffRowKeys(vAvg, keyPositions)
 
@@ -94,7 +110,7 @@ class SwipeSignal private constructor(
             val passthroughKeys = HashSet<Char>(geometricAnalysis.traversedKeys.size)
             for ((key, traversal) in geometricAnalysis.traversedKeys) {
                 val lc = key.lowercaseChar()
-                if (traversal.velocityAtKey > GeometricScoringConstants.PASSTHROUGH_VELOCITY_THRESHOLD) {
+                if (traversal.velocityAtKey > PASSTHROUGH_VELOCITY_THRESHOLD) {
                     val hasIntentionalInflection = geometricAnalysis.inflectionPoints.any { inflection ->
                         inflection.isIntentional && inflection.nearestKey?.lowercaseChar() == lc
                     }
@@ -156,7 +172,7 @@ class SwipeSignal private constructor(
             keyPositions: Map<Char, PointF>,
             bounds: PathBounds,
         ): Set<Char> {
-            val margin = SwipeDetectionConstants.PATH_BOUNDS_MARGIN_PX
+            val margin = PATH_BOUNDS_MARGIN_PX
             return keyPositions.keys.filterTo(mutableSetOf()) { char ->
                 val pos = keyPositions[char]!!
                 pos.x >= bounds.minX - margin &&
@@ -238,7 +254,7 @@ class SwipeSignal private constructor(
                 val dyP = keyPos.y - pointZero.y
                 val distPointZero = sqrt(dxP * dxP + dyP * dyP)
                 val weightedPointZero = if (pointZeroDominant) {
-                    distPointZero * GeometricScoringConstants.POINT_ZERO_DISTANCE_WEIGHT
+                    distPointZero * POINT_ZERO_DISTANCE_WEIGHT
                 } else {
                     distPointZero
                 }
@@ -302,10 +318,10 @@ class SwipeSignal private constructor(
             } else {
                 0f
             }
-            val sampleCount = if (startVelocity > SwipeDetectionConstants.HIGH_VELOCITY_START_THRESHOLD) {
-                SwipeDetectionConstants.START_CENTROID_POINTS_FAST
+            val sampleCount = if (startVelocity > HIGH_VELOCITY_START_THRESHOLD) {
+                START_CENTROID_POINTS_FAST
             } else {
-                SwipeDetectionConstants.START_CENTROID_POINTS_NORMAL
+                START_CENTROID_POINTS_NORMAL
             }
             val n = minOf(sampleCount, path.size)
             var sumX = 0f
@@ -323,7 +339,7 @@ class SwipeSignal private constructor(
             val p1 = path[1]
             val dt = (p1.timestamp - p0.timestamp).coerceAtLeast(1L).toFloat()
             val startVelocity = sqrt((p1.x - p0.x).let { it * it } + (p1.y - p0.y).let { it * it }) / dt
-            if (startVelocity <= SwipeDetectionConstants.HIGH_VELOCITY_START_THRESHOLD) return null
+            if (startVelocity <= HIGH_VELOCITY_START_THRESHOLD) return null
 
             val sampleEnd = minOf(5, path.size)
             var vecX = 0f
@@ -338,9 +354,9 @@ class SwipeSignal private constructor(
             val normX = vecX / vecLen
             val normY = vecY / vecLen
             val projectionDist = minOf(
-                SwipeDetectionConstants.BACKPROJECTION_BASE_PX +
-                    SwipeDetectionConstants.BACKPROJECTION_LOG_SCALE * ln(startVelocity),
-                SwipeDetectionConstants.BACKPROJECTION_MAX_PX,
+                BACKPROJECTION_BASE_PX +
+                    BACKPROJECTION_LOG_SCALE * ln(startVelocity),
+                BACKPROJECTION_MAX_PX,
             )
             return PointF(p0.x - normX * projectionDist, p0.y - normY * projectionDist)
         }
@@ -364,14 +380,14 @@ class SwipeSignal private constructor(
                 0f
             }
 
-            val baseThresholdSq = SwipeDetectionConstants.CLOSE_KEY_DISTANCE_THRESHOLD_SQ
+            val baseThresholdSq = CLOSE_KEY_DISTANCE_THRESHOLD_SQ
             val effectiveThresholdSq = when {
-                startVelocity > SwipeDetectionConstants.EXTREME_VELOCITY_START_THRESHOLD -> {
-                    val m = SwipeDetectionConstants.EXTREME_VELOCITY_RADIUS_MULTIPLIER
+                startVelocity > EXTREME_VELOCITY_START_THRESHOLD -> {
+                    val m = EXTREME_VELOCITY_RADIUS_MULTIPLIER
                     baseThresholdSq * m * m
                 }
-                startVelocity > SwipeDetectionConstants.HIGH_VELOCITY_START_THRESHOLD -> {
-                    val m = SwipeDetectionConstants.VELOCITY_EXPANDED_RADIUS_MULTIPLIER
+                startVelocity > HIGH_VELOCITY_START_THRESHOLD -> {
+                    val m = VELOCITY_EXPANDED_RADIUS_MULTIPLIER
                     baseThresholdSq * m * m
                 }
                 else -> baseThresholdSq
@@ -395,7 +411,7 @@ class SwipeSignal private constructor(
                     val dy = pos.y - firstPoint.y
                     char to (dx * dx + dy * dy)
                 }.sortedBy { it.second }
-                .take(SwipeDetectionConstants.POINT_ZERO_PROXIMITY_COUNT)
+                .take(POINT_ZERO_PROXIMITY_COUNT)
                 .map { it.first }
                 .toSet()
 
@@ -406,7 +422,7 @@ class SwipeSignal private constructor(
                         val dy = pos.y - backprojectedStart.y
                         char to (dx * dx + dy * dy)
                     }.sortedBy { it.second }
-                    .take(SwipeDetectionConstants.POINT_ZERO_PROXIMITY_COUNT)
+                    .take(POINT_ZERO_PROXIMITY_COUNT)
                     .map { it.first }
                     .toSet()
             } else {
@@ -420,7 +436,7 @@ class SwipeSignal private constructor(
             path: List<SwipeDetector.SwipePoint>,
             keyPositions: Map<Char, PointF>,
         ): EndAnchor {
-            val endN = minOf(SwipeDetectionConstants.END_CENTROID_POINTS, path.size)
+            val endN = minOf(END_CENTROID_POINTS, path.size)
             var endCentroidX = 0f
             var endCentroidY = 0f
             for (i in path.size - endN until path.size) {

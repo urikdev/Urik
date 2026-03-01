@@ -4,7 +4,6 @@ package com.urik.keyboard.service
 
 import android.content.Context
 import android.content.res.AssetManager
-import com.urik.keyboard.KeyboardConstants.SpellCheckConstants
 import com.urik.keyboard.data.WordFrequencyRepository
 import com.urik.keyboard.utils.CacheMemoryManager
 import com.urik.keyboard.utils.ManagedCache
@@ -768,7 +767,7 @@ class SpellCheckManagerTest {
             assertNotNull("Should find learned contraction don't", contractionSuggestion)
             assertEquals(
                 "Learned contraction should have guaranteed confidence",
-                SpellCheckConstants.CONTRACTION_GUARANTEED_CONFIDENCE,
+                0.995,
                 contractionSuggestion!!.confidence,
                 0.001,
             )
@@ -786,7 +785,7 @@ class SpellCheckManagerTest {
             assertNotNull("Should find contraction don't from dictionary", contractionSuggestion)
             assertEquals(
                 "Prefix completion contraction should have guaranteed confidence",
-                SpellCheckConstants.CONTRACTION_GUARANTEED_CONFIDENCE,
+                0.995,
                 contractionSuggestion!!.confidence,
                 0.001,
             )
@@ -804,7 +803,7 @@ class SpellCheckManagerTest {
             assertNotNull("Should find contraction haven't from SymSpell", contractionSuggestion)
             assertEquals(
                 "SymSpell contraction should have guaranteed confidence",
-                SpellCheckConstants.CONTRACTION_GUARANTEED_CONFIDENCE,
+                0.995,
                 contractionSuggestion!!.confidence,
                 0.001,
             )
@@ -872,7 +871,7 @@ class SpellCheckManagerTest {
             if (dontSuggestion != null) {
                 assertNotEquals(
                     "Should not apply contraction boost when input already has apostrophe",
-                    SpellCheckConstants.CONTRACTION_GUARANTEED_CONFIDENCE,
+                    0.995,
                     dontSuggestion.confidence,
                     0.001,
                 )
@@ -891,7 +890,7 @@ class SpellCheckManagerTest {
             if (dontSuggestion != null) {
                 assertNotEquals(
                     "Should not apply contraction boost for reverse direction (don't -> dont)",
-                    SpellCheckConstants.CONTRACTION_GUARANTEED_CONFIDENCE,
+                    0.995,
                     dontSuggestion.confidence,
                     0.001,
                 )
@@ -910,7 +909,7 @@ class SpellCheckManagerTest {
             assertNotNull("Should find you're contraction", contractionSuggestion)
             assertEquals(
                 "you're should have guaranteed confidence",
-                SpellCheckConstants.CONTRACTION_GUARANTEED_CONFIDENCE,
+                0.995,
                 contractionSuggestion!!.confidence,
                 0.001,
             )
@@ -991,7 +990,7 @@ class SpellCheckManagerTest {
             assertNotNull("Should find contraction don't", contractionSuggestion)
             assertEquals(
                 "Contraction should have guaranteed confidence",
-                SpellCheckConstants.CONTRACTION_GUARANTEED_CONFIDENCE,
+                0.995,
                 contractionSuggestion!!.confidence,
                 0.001,
             )
@@ -1009,7 +1008,7 @@ class SpellCheckManagerTest {
             assertNotNull("Should find hyphenated word co-worker", hyphenatedSuggestion)
             assertEquals(
                 "Hyphenated compound should have guaranteed confidence",
-                SpellCheckConstants.CONTRACTION_GUARANTEED_CONFIDENCE,
+                0.995,
                 hyphenatedSuggestion!!.confidence,
                 0.001,
             )
