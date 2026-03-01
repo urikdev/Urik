@@ -25,12 +25,12 @@
 ## Development Process
 
 1. Fork the repository
-2. Create feature branch from `develop`
+2. Create feature branch from `main`
 3. Make your changes following code standards
 4. Run tests locally: `./gradlew test`
 5. Ensure ktlint passes: `./gradlew ktlintCheck`
 6. Push to your fork
-7. Open PR against `develop` branch
+7. Open PR against `main` branch
 
 ## Code Standards
 
@@ -48,7 +48,7 @@
 
 ## Pull Request Requirements
 
-- Branch from `develop`, target `develop`
+- Branch from `main`, target `main`
 - Add tests as appropriate
 - Pass all CI checks (ktlint, tests, build)
 - Reference related issue number if available
