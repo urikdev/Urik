@@ -37,6 +37,7 @@ import com.urik.keyboard.service.AutofillStateTracker
 import com.urik.keyboard.service.CharacterVariationService
 import com.urik.keyboard.service.ClipboardMonitorService
 import com.urik.keyboard.service.EmojiSearchManager
+import com.urik.keyboard.service.EnglishPronounI
 import com.urik.keyboard.service.InputMethod
 import com.urik.keyboard.service.InputStateManager
 import com.urik.keyboard.service.LanguageManager
@@ -47,7 +48,6 @@ import com.urik.keyboard.service.SpellConfirmationState
 import com.urik.keyboard.service.SuggestionPipeline
 import com.urik.keyboard.service.TextInputProcessor
 import com.urik.keyboard.service.ViewCallback
-import com.urik.keyboard.service.EnglishPronounI
 import com.urik.keyboard.service.WordLearningEngine
 import com.urik.keyboard.service.WordState
 import com.urik.keyboard.settings.KeyboardSettings
@@ -94,6 +94,9 @@ class UrikInputMethodService :
 
     @Inject
     lateinit var swipeDetector: SwipeDetector
+
+    @Inject
+    lateinit var streamingScoringEngine: com.urik.keyboard.ui.keyboard.components.StreamingScoringEngine
 
     @Inject
     lateinit var languageManager: LanguageManager
@@ -229,6 +232,7 @@ class UrikInputMethodService :
     private fun isSentenceEndingPunctuation(char: Char): Boolean = UCharacter.hasBinaryProperty(char.code, UProperty.S_TERM)
 
     private fun coordinateStateClear() {
+        streamingScoringEngine.cancelActiveGesture()
         outputBridge.coordinateStateClear()
     }
 
@@ -1159,7 +1163,11 @@ class UrikInputMethodService :
             val cursorPosInWord =
                 if (inputState.composingRegionStart != -1 && inputState.displayBuffer.isNotEmpty()) {
                     val absoluteCursorPos = outputBridge.safeGetCursorPosition()
-                    CursorEditingUtils.calculateCursorPositionInWord(absoluteCursorPos, inputState.composingRegionStart, inputState.displayBuffer.length)
+                    CursorEditingUtils.calculateCursorPositionInWord(
+                        absoluteCursorPos,
+                        inputState.composingRegionStart,
+                        inputState.displayBuffer.length,
+                    )
                 } else {
                     inputState.displayBuffer.length
                 }
@@ -1313,7 +1321,11 @@ class UrikInputMethodService :
                                     outputBridge.highlightCurrentWord()
 
                                     val suggestions = textInputProcessor.getSuggestions(inputState.displayBuffer)
-                                    val displaySuggestions = suggestionPipeline.storeAndCapitalizeSuggestions(suggestions, inputState.isCurrentWordAtSentenceStart)
+                                    val displaySuggestions =
+                                        suggestionPipeline.storeAndCapitalizeSuggestions(
+                                            suggestions,
+                                            inputState.isCurrentWordAtSentenceStart,
+                                        )
                                     inputState.pendingSuggestions = displaySuggestions
                                     if (displaySuggestions.isNotEmpty()) {
                                         swipeKeyboardView?.updateSuggestions(displaySuggestions)
@@ -1520,8 +1532,7 @@ class UrikInputMethodService :
         return caseTransformer.applyCasing(suggestion, keyboardState, isSentenceStart)
     }
 
-    private fun getEnglishPronounIForm(normalizedWord: String): String? =
-        EnglishPronounI.capitalize(normalizedWord)
+    private fun getEnglishPronounIForm(normalizedWord: String): String? = EnglishPronounI.capitalize(normalizedWord)
 
     private fun handleSuggestionSelected(suggestion: String) {
         serviceScope.launch {
@@ -1701,7 +1712,8 @@ class UrikInputMethodService :
             val actualCursorPos = outputBridge.safeGetCursorPosition()
 
             if (inputState.displayBuffer.isNotEmpty() && inputState.composingRegionStart != -1) {
-                val expectedCursorRange = inputState.composingRegionStart..(inputState.composingRegionStart + inputState.displayBuffer.length)
+                val expectedCursorRange =
+                    inputState.composingRegionStart..(inputState.composingRegionStart + inputState.displayBuffer.length)
                 if (actualCursorPos !in expectedCursorRange) {
                     invalidateComposingStateOnCursorJump()
                 }
@@ -1811,12 +1823,20 @@ class UrikInputMethodService :
 
                 val cursorPosInWord =
                     if (inputState.composingRegionStart != -1) {
-                        CursorEditingUtils.calculateCursorPositionInWord(absoluteCursorPos, inputState.composingRegionStart, inputState.displayBuffer.length)
+                        CursorEditingUtils.calculateCursorPositionInWord(
+                            absoluteCursorPos,
+                            inputState.composingRegionStart,
+                            inputState.displayBuffer.length,
+                        )
                     } else {
                         val potentialStart = absoluteCursorPos - inputState.displayBuffer.length
                         if (potentialStart >= 0) {
                             inputState.composingRegionStart = potentialStart
-                            CursorEditingUtils.calculateCursorPositionInWord(absoluteCursorPos, inputState.composingRegionStart, inputState.displayBuffer.length)
+                            CursorEditingUtils.calculateCursorPositionInWord(
+                                absoluteCursorPos,
+                                inputState.composingRegionStart,
+                                inputState.displayBuffer.length,
+                            )
                         } else {
                             inputState.displayBuffer.length
                         }
@@ -2099,7 +2119,11 @@ class UrikInputMethodService :
                             inputState.pendingWordForLearning = inputState.displayBuffer
 
                             outputBridge.highlightCurrentWord()
-                            val displaySuggestions = suggestionPipeline.storeAndCapitalizeSuggestions(suggestions, inputState.isCurrentWordAtSentenceStart)
+                            val displaySuggestions =
+                                suggestionPipeline.storeAndCapitalizeSuggestions(
+                                    suggestions,
+                                    inputState.isCurrentWordAtSentenceStart,
+                                )
                             inputState.pendingSuggestions = displaySuggestions
                             if (displaySuggestions.isNotEmpty()) {
                                 swipeKeyboardView?.updateSuggestions(displaySuggestions)
@@ -2483,6 +2507,7 @@ class UrikInputMethodService :
 
     override fun onConfigurationChanged(newConfig: android.content.res.Configuration) {
         super.onConfigurationChanged(newConfig)
+        streamingScoringEngine.cancelActiveGesture()
 
         val currentDensity = resources.displayMetrics.density
 
@@ -2645,6 +2670,7 @@ class UrikInputMethodService :
         }
 
     override fun onDestroy() {
+        streamingScoringEngine.shutdown()
         wordFrequencyRepository.clearCache()
         autofillStateTracker.cleanup()
 

@@ -18,6 +18,7 @@ import com.urik.keyboard.settings.KeyboardSettings
 import com.urik.keyboard.settings.SettingsRepository
 import com.urik.keyboard.ui.keyboard.components.PathGeometryAnalyzer
 import com.urik.keyboard.ui.keyboard.components.ResidualScorer
+import com.urik.keyboard.ui.keyboard.components.StreamingScoringEngine
 import com.urik.keyboard.ui.keyboard.components.SwipeDetector
 import com.urik.keyboard.ui.keyboard.components.ZipfCheck
 import com.urik.keyboard.utils.CacheMemoryManager
@@ -155,16 +156,16 @@ class SwipeInputIntegrationTest {
             val pathGeometryAnalyzer = PathGeometryAnalyzer()
             val residualScorer = ResidualScorer(pathGeometryAnalyzer)
             val zipfCheck = ZipfCheck(spellCheckManager)
-            swipeDetector =
-                SwipeDetector(
-                    spellCheckManager,
-                    wordLearningEngine,
-                    pathGeometryAnalyzer,
-                    wordFrequencyRepository,
-                    residualScorer,
-                    zipfCheck,
-                    wordNormalizer,
-                )
+            val streamingScoringEngine = StreamingScoringEngine(
+                spellCheckManager,
+                wordLearningEngine,
+                pathGeometryAnalyzer,
+                wordFrequencyRepository,
+                residualScorer,
+                zipfCheck,
+                wordNormalizer,
+            )
+            swipeDetector = SwipeDetector(streamingScoringEngine)
         }
 
     @After

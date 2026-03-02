@@ -355,12 +355,13 @@ class PathGeometryAnalyzer
             flags.fill(false, 0, minOf(size, flags.size))
             val coverageRadius = PATH_COVERAGE_RADIUS
             val radiusSq = coverageRadius * coverageRadius
+            val windowRadius = (size / 15).coerceIn(3, 20)
 
             letterPathIndices.forEachIndexed { letterIdx, pathIdx ->
                 if (pathIdx in 0..<size && letterIdx < word.length) {
                     val keyPos = keyPositions[word[letterIdx].lowercaseChar()] ?: return@forEachIndexed
 
-                    for (i in maxOf(0, pathIdx - 3)..minOf(size - 1, pathIdx + 3)) {
+                    for (i in maxOf(0, pathIdx - windowRadius)..minOf(size - 1, pathIdx + windowRadius)) {
                         val point = path[i]
                         val dx = point.x - keyPos.x
                         val dy = point.y - keyPos.y
@@ -1079,7 +1080,7 @@ class PathGeometryAnalyzer
             velocityProfile: FloatArray,
             centerIndex: Int,
         ): Float {
-            val windowSize = 3
+            val windowSize = maxOf(3, velocityProfile.size / 15)
             var sum = 0f
             var count = 0
 
@@ -1190,8 +1191,9 @@ class PathGeometryAnalyzer
         fun calculateVertexLengthPenalty(
             wordLength: Int,
             vertexAnalysis: VertexAnalysis,
+            rawPointCount: Int = vertexAnalysis.pathPointCount,
         ): Float {
-            if (vertexAnalysis.pathPointCount <= GeometricScoringConstants.VERTEX_FILTER_MIN_PATH_POINTS) {
+            if (rawPointCount <= GeometricScoringConstants.VERTEX_FILTER_MIN_PATH_POINTS) {
                 return 1.0f
             }
             if (vertexAnalysis.significantVertexCount < VERTEX_MINIMUM_FOR_FILTER) {
@@ -1215,8 +1217,9 @@ class PathGeometryAnalyzer
         fun shouldPruneCandidate(
             wordLength: Int,
             vertexAnalysis: VertexAnalysis,
+            rawPointCount: Int = vertexAnalysis.pathPointCount,
         ): Boolean {
-            if (vertexAnalysis.pathPointCount <= GeometricScoringConstants.VERTEX_FILTER_MIN_PATH_POINTS) {
+            if (rawPointCount <= GeometricScoringConstants.VERTEX_FILTER_MIN_PATH_POINTS) {
                 return false
             }
             if (vertexAnalysis.significantVertexCount < VERTEX_MINIMUM_FOR_FILTER) {
@@ -1315,15 +1318,17 @@ class PathGeometryAnalyzer
             wordLength: Int,
             closestPathIndex: Int,
             analysis: GeometricAnalysis,
+            pathSize: Int = 50,
         ): Float {
             if (letterIndex == 0 || letterIndex == wordLength - 1) {
                 return ANCHOR_SIGMA_TIGHTENING
             }
 
+            val proximityThreshold = maxOf(ANCHOR_INFLECTION_PROXIMITY_THRESHOLD, pathSize / 10)
             for (inflection in analysis.inflectionPoints) {
                 if (inflection.isIntentional) {
                     val pathIndexDistance = abs(closestPathIndex - inflection.pathIndex)
-                    if (pathIndexDistance < ANCHOR_INFLECTION_PROXIMITY_THRESHOLD) {
+                    if (pathIndexDistance < proximityThreshold) {
                         return INFLECTION_ANCHOR_SIGMA_TIGHTENING
                     }
                 }
@@ -1486,9 +1491,10 @@ class PathGeometryAnalyzer
             closestPointIndex: Int,
             keyPosition: PointF,
             analysis: GeometricAnalysis,
+            pathSize: Int = 50,
         ): Float {
             var bestBoost = 1.0f
-            val pathIndexProximity = 8
+            val pathIndexProximity = maxOf(8, pathSize / 6)
 
             for (vertex in analysis.vertexAnalysis.vertices) {
                 if (!vertex.isSignificant) continue
@@ -1532,10 +1538,12 @@ class PathGeometryAnalyzer
         fun getCornerCompensation(
             closestPointIndex: Int,
             analysis: GeometricAnalysis,
+            pathSize: Int = 50,
         ): PointF? {
+            val proximityThreshold = maxOf(2, pathSize / 22)
             for (inflection in analysis.inflectionPoints) {
                 if (inflection.compensatedPosition != null &&
-                    abs(closestPointIndex - inflection.pathIndex) <= 2
+                    abs(closestPointIndex - inflection.pathIndex) <= proximityThreshold
                 ) {
                     return inflection.compensatedPosition
                 }

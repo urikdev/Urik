@@ -5,8 +5,8 @@ package com.urik.keyboard.ui.keyboard.components
 import android.graphics.PointF
 import com.urik.keyboard.KeyboardConstants.GeometricScoringConstants
 import kotlin.math.ln
-import kotlin.math.min
 import kotlin.math.max
+import kotlin.math.min
 import kotlin.math.sqrt
 
 /**
@@ -32,6 +32,7 @@ class SwipeSignal private constructor(
     val spatialWeight: Float,
     val frequencyWeight: Float,
     val pointZeroDominant: Boolean,
+    val rawPointCount: Int,
 ) {
     data class PathBounds(
         val minX: Float,
@@ -86,6 +87,7 @@ class SwipeSignal private constructor(
             keyPositions: Map<Char, PointF>,
             pathGeometryAnalyzer: PathGeometryAnalyzer,
             cachedAdaptiveSigmas: Map<Char, PathGeometryAnalyzer.AdaptiveSigma>,
+            rawPointCount: Int = interpolatedPath.size,
         ): SwipeSignal {
             val geometricAnalysis = pathGeometryAnalyzer.analyze(interpolatedPath, keyPositions)
 
@@ -111,9 +113,10 @@ class SwipeSignal private constructor(
             for ((key, traversal) in geometricAnalysis.traversedKeys) {
                 val lc = key.lowercaseChar()
                 if (traversal.velocityAtKey > PASSTHROUGH_VELOCITY_THRESHOLD) {
-                    val hasIntentionalInflection = geometricAnalysis.inflectionPoints.any { inflection ->
-                        inflection.isIntentional && inflection.nearestKey?.lowercaseChar() == lc
-                    }
+                    val hasIntentionalInflection =
+                        geometricAnalysis.inflectionPoints.any { inflection ->
+                            inflection.isIntentional && inflection.nearestKey?.lowercaseChar() == lc
+                        }
                     if (!hasIntentionalInflection) {
                         passthroughKeys.add(lc)
                     }
@@ -125,13 +128,18 @@ class SwipeSignal private constructor(
                 if (inflection.isIntentional) intentionalInflectionCount++
             }
 
-            val expectedWordLength = calculateExpectedWordLength(
-                intentionalInflectionCount, interpolatedPath.size,
-            )
+            val expectedWordLength =
+                calculateExpectedWordLength(
+                    intentionalInflectionCount,
+                    rawPointCount,
+                )
 
-            val startAnchor = buildStartAnchor(
-                interpolatedPath, keyPositions, pointZeroDominant,
-            )
+            val startAnchor =
+                buildStartAnchor(
+                    interpolatedPath,
+                    keyPositions,
+                    pointZeroDominant,
+                )
             val endAnchor = buildEndAnchor(interpolatedPath, keyPositions)
 
             return SwipeSignal(
@@ -151,6 +159,7 @@ class SwipeSignal private constructor(
                 spatialWeight = baselineSpatialWeight,
                 frequencyWeight = baselineFreqWeight,
                 pointZeroDominant = pointZeroDominant,
+                rawPointCount = rawPointCount,
             )
         }
 
@@ -221,15 +230,16 @@ class SwipeSignal private constructor(
             intentionalInflectionCount: Int,
             pathSize: Int,
         ): Int {
-            val maxInflectionLength = when {
-                pathSize < 35 -> 3
-                pathSize < 50 -> 4
-                pathSize < 70 -> 6
-                pathSize < 100 -> 8
-                pathSize < 150 -> 12
-                pathSize < 200 -> 16
-                else -> 20
-            }
+            val maxInflectionLength =
+                when {
+                    pathSize < 35 -> 3
+                    pathSize < 50 -> 4
+                    pathSize < 70 -> 6
+                    pathSize < 100 -> 8
+                    pathSize < 150 -> 12
+                    pathSize < 200 -> 16
+                    else -> 20
+                }
             val inflectionBasedLength = (intentionalInflectionCount + 2).coerceIn(2, maxInflectionLength)
             val pathPointBasedLength = (pathSize / 14).coerceIn(2, 20)
             return maxOf(inflectionBasedLength, pathPointBasedLength)
@@ -245,27 +255,29 @@ class SwipeSignal private constructor(
             val candidateKeys = findCandidateStartKeys(centroid, path, keyPositions, backprojected)
 
             val pointZero = path[0]
-            val keyDistances = candidateKeys.associateWith { char ->
-                val keyPos = keyPositions[char] ?: return@associateWith Float.MAX_VALUE
-                val dxC = keyPos.x - centroid.x
-                val dyC = keyPos.y - centroid.y
-                val distCentroid = sqrt(dxC * dxC + dyC * dyC)
-                val dxP = keyPos.x - pointZero.x
-                val dyP = keyPos.y - pointZero.y
-                val distPointZero = sqrt(dxP * dxP + dyP * dyP)
-                val weightedPointZero = if (pointZeroDominant) {
-                    distPointZero * POINT_ZERO_DISTANCE_WEIGHT
-                } else {
-                    distPointZero
+            val keyDistances =
+                candidateKeys.associateWith { char ->
+                    val keyPos = keyPositions[char] ?: return@associateWith Float.MAX_VALUE
+                    val dxC = keyPos.x - centroid.x
+                    val dyC = keyPos.y - centroid.y
+                    val distCentroid = sqrt(dxC * dxC + dyC * dyC)
+                    val dxP = keyPos.x - pointZero.x
+                    val dyP = keyPos.y - pointZero.y
+                    val distPointZero = sqrt(dxP * dxP + dyP * dyP)
+                    val weightedPointZero =
+                        if (pointZeroDominant) {
+                            distPointZero * POINT_ZERO_DISTANCE_WEIGHT
+                        } else {
+                            distPointZero
+                        }
+                    var best = minOf(distCentroid, weightedPointZero)
+                    if (backprojected != null) {
+                        val dxB = keyPos.x - backprojected.x
+                        val dyB = keyPos.y - backprojected.y
+                        best = minOf(best, sqrt(dxB * dxB + dyB * dyB))
+                    }
+                    best
                 }
-                var best = minOf(distCentroid, weightedPointZero)
-                if (backprojected != null) {
-                    val dxB = keyPos.x - backprojected.x
-                    val dyB = keyPos.y - backprojected.y
-                    best = minOf(best, sqrt(dxB * dxB + dyB * dyB))
-                }
-                best
-            }
             val closestKey = keyDistances.minByOrNull { it.value }?.key
 
             var pointZeroNearest: Char? = null
@@ -287,10 +299,12 @@ class SwipeSignal private constructor(
                 }
             }
 
-            val anchorThresholdSq = GeometricScoringConstants.VERTEX_MIN_SEGMENT_LENGTH_PX *
-                GeometricScoringConstants.VERTEX_MIN_SEGMENT_LENGTH_PX
-            val isAmbiguous = pointZeroSecond != null &&
-                (pointZeroSecondDistSq - pointZeroMinDistSq) < anchorThresholdSq
+            val anchorThresholdSq =
+                GeometricScoringConstants.VERTEX_MIN_SEGMENT_LENGTH_PX *
+                    GeometricScoringConstants.VERTEX_MIN_SEGMENT_LENGTH_PX
+            val isAmbiguous =
+                pointZeroSecond != null &&
+                    (pointZeroSecondDistSq - pointZeroMinDistSq) < anchorThresholdSq
             val isAnchorLocked = pointZeroMinDistSq < anchorThresholdSq
 
             return StartAnchor(
@@ -308,21 +322,23 @@ class SwipeSignal private constructor(
 
         private fun computeStartCentroid(path: List<SwipeDetector.SwipePoint>): PointF {
             if (path.isEmpty()) return PointF(0f, 0f)
-            val startVelocity = if (path.size >= 2) {
-                val p0 = path[0]
-                val p1 = path[1]
-                val dt = (p1.timestamp - p0.timestamp).coerceAtLeast(1L).toFloat()
-                val dx = p1.x - p0.x
-                val dy = p1.y - p0.y
-                sqrt(dx * dx + dy * dy) / dt
-            } else {
-                0f
-            }
-            val sampleCount = if (startVelocity > HIGH_VELOCITY_START_THRESHOLD) {
-                START_CENTROID_POINTS_FAST
-            } else {
-                START_CENTROID_POINTS_NORMAL
-            }
+            val startVelocity =
+                if (path.size >= 2) {
+                    val p0 = path[0]
+                    val p1 = path[1]
+                    val dt = (p1.timestamp - p0.timestamp).coerceAtLeast(1L).toFloat()
+                    val dx = p1.x - p0.x
+                    val dy = p1.y - p0.y
+                    sqrt(dx * dx + dy * dy) / dt
+                } else {
+                    0f
+                }
+            val sampleCount =
+                if (startVelocity > HIGH_VELOCITY_START_THRESHOLD) {
+                    START_CENTROID_POINTS_FAST
+                } else {
+                    START_CENTROID_POINTS_NORMAL
+                }
             val n = minOf(sampleCount, path.size)
             var sumX = 0f
             var sumY = 0f
@@ -353,11 +369,12 @@ class SwipeSignal private constructor(
 
             val normX = vecX / vecLen
             val normY = vecY / vecLen
-            val projectionDist = minOf(
-                BACKPROJECTION_BASE_PX +
-                    BACKPROJECTION_LOG_SCALE * ln(startVelocity),
-                BACKPROJECTION_MAX_PX,
-            )
+            val projectionDist =
+                minOf(
+                    BACKPROJECTION_BASE_PX +
+                        BACKPROJECTION_LOG_SCALE * ln(startVelocity),
+                    BACKPROJECTION_MAX_PX,
+                )
             return PointF(p0.x - normX * projectionDist, p0.y - normY * projectionDist)
         }
 
@@ -369,65 +386,74 @@ class SwipeSignal private constructor(
         ): Set<Char> {
             if (path.isEmpty()) return emptySet()
 
-            val startVelocity = if (path.size >= 2) {
-                val p0 = path[0]
-                val p1 = path[1]
-                val dt = (p1.timestamp - p0.timestamp).coerceAtLeast(1L).toFloat()
-                val dx = p1.x - p0.x
-                val dy = p1.y - p0.y
-                sqrt(dx * dx + dy * dy) / dt
-            } else {
-                0f
-            }
+            val startVelocity =
+                if (path.size >= 2) {
+                    val p0 = path[0]
+                    val p1 = path[1]
+                    val dt = (p1.timestamp - p0.timestamp).coerceAtLeast(1L).toFloat()
+                    val dx = p1.x - p0.x
+                    val dy = p1.y - p0.y
+                    sqrt(dx * dx + dy * dy) / dt
+                } else {
+                    0f
+                }
 
             val baseThresholdSq = CLOSE_KEY_DISTANCE_THRESHOLD_SQ
-            val effectiveThresholdSq = when {
-                startVelocity > EXTREME_VELOCITY_START_THRESHOLD -> {
-                    val m = EXTREME_VELOCITY_RADIUS_MULTIPLIER
-                    baseThresholdSq * m * m
+            val effectiveThresholdSq =
+                when {
+                    startVelocity > EXTREME_VELOCITY_START_THRESHOLD -> {
+                        val m = EXTREME_VELOCITY_RADIUS_MULTIPLIER
+                        baseThresholdSq * m * m
+                    }
+
+                    startVelocity > HIGH_VELOCITY_START_THRESHOLD -> {
+                        val m = VELOCITY_EXPANDED_RADIUS_MULTIPLIER
+                        baseThresholdSq * m * m
+                    }
+
+                    else -> {
+                        baseThresholdSq
+                    }
                 }
-                startVelocity > HIGH_VELOCITY_START_THRESHOLD -> {
-                    val m = VELOCITY_EXPANDED_RADIUS_MULTIPLIER
-                    baseThresholdSq * m * m
-                }
-                else -> baseThresholdSq
-            }
 
-            val centroidKeys = keyPositions.entries
-                .map { (char, pos) ->
-                    val dx = pos.x - centroid.x
-                    val dy = pos.y - centroid.y
-                    char to (dx * dx + dy * dy)
-                }.sortedBy { it.second }
-                .take(8)
-                .filter { it.second < effectiveThresholdSq }
-                .map { it.first }
-                .toSet()
-
-            val firstPoint = path[0]
-            val pointZeroKeys = keyPositions.entries
-                .map { (char, pos) ->
-                    val dx = pos.x - firstPoint.x
-                    val dy = pos.y - firstPoint.y
-                    char to (dx * dx + dy * dy)
-                }.sortedBy { it.second }
-                .take(POINT_ZERO_PROXIMITY_COUNT)
-                .map { it.first }
-                .toSet()
-
-            val backprojKeys = if (backprojectedStart != null) {
+            val centroidKeys =
                 keyPositions.entries
                     .map { (char, pos) ->
-                        val dx = pos.x - backprojectedStart.x
-                        val dy = pos.y - backprojectedStart.y
+                        val dx = pos.x - centroid.x
+                        val dy = pos.y - centroid.y
+                        char to (dx * dx + dy * dy)
+                    }.sortedBy { it.second }
+                    .take(8)
+                    .filter { it.second < effectiveThresholdSq }
+                    .map { it.first }
+                    .toSet()
+
+            val firstPoint = path[0]
+            val pointZeroKeys =
+                keyPositions.entries
+                    .map { (char, pos) ->
+                        val dx = pos.x - firstPoint.x
+                        val dy = pos.y - firstPoint.y
                         char to (dx * dx + dy * dy)
                     }.sortedBy { it.second }
                     .take(POINT_ZERO_PROXIMITY_COUNT)
                     .map { it.first }
                     .toSet()
-            } else {
-                emptySet()
-            }
+
+            val backprojKeys =
+                if (backprojectedStart != null) {
+                    keyPositions.entries
+                        .map { (char, pos) ->
+                            val dx = pos.x - backprojectedStart.x
+                            val dy = pos.y - backprojectedStart.y
+                            char to (dx * dx + dy * dy)
+                        }.sortedBy { it.second }
+                        .take(POINT_ZERO_PROXIMITY_COUNT)
+                        .map { it.first }
+                        .toSet()
+                } else {
+                    emptySet()
+                }
 
             return centroidKeys + pointZeroKeys + backprojKeys
         }
@@ -447,11 +473,12 @@ class SwipeSignal private constructor(
             endCentroidY /= endN
 
             val centroid = PointF(endCentroidX, endCentroidY)
-            val keyDistances = keyPositions.mapValues { (_, keyPos) ->
-                val dx = keyPos.x - endCentroidX
-                val dy = keyPos.y - endCentroidY
-                sqrt(dx * dx + dy * dy)
-            }
+            val keyDistances =
+                keyPositions.mapValues { (_, keyPos) ->
+                    val dx = keyPos.x - endCentroidX
+                    val dy = keyPos.y - endCentroidY
+                    sqrt(dx * dx + dy * dy)
+                }
             val closestKey = keyDistances.minByOrNull { it.value }?.key
 
             return EndAnchor(

@@ -104,7 +104,6 @@ class ResidualScorer
          *
          * @return scored result, or null if the candidate was pruned by bounds or vertex filters
          */
-        @Synchronized
         fun scoreCandidate(
             entry: SwipeDetector.DictionaryEntry,
             signal: SwipeSignal,
@@ -124,6 +123,7 @@ class ResidualScorer
             if (pathGeometryAnalyzer.shouldPruneCandidate(
                     entry.word.length,
                     signal.geometricAnalysis.vertexAnalysis,
+                    signal.rawPointCount,
                 )
             ) {
                 return null
@@ -131,7 +131,7 @@ class ResidualScorer
 
             val isClusteredWord = pathGeometryAnalyzer.isClusteredWord(entry.word, keyPositions)
 
-            val pointsPerLetter = signal.path.size.toFloat() / entry.word.length.toFloat()
+            val pointsPerLetter = signal.rawPointCount.toFloat() / entry.word.length.toFloat()
             val optimalRatio = if (entry.word.length <= 3) 3.0f else 4.0f
             val ratioQuality = pointsPerLetter / optimalRatio
 
@@ -181,7 +181,7 @@ class ResidualScorer
             }
 
             val lengthExcess = maxOf(0, entry.word.length - signal.expectedWordLength)
-            val excessRate = if (signal.path.size <= 30) {
+            val excessRate = if (signal.rawPointCount <= 30) {
                 WORD_LENGTH_DEFICIT_PENALTY +
                     WORD_LENGTH_EXCESS_PENALTY
             } else {
@@ -221,7 +221,7 @@ class ResidualScorer
             }
 
             val vertexLengthPenalty = pathGeometryAnalyzer.calculateVertexLengthPenalty(
-                entry.word.length, signal.geometricAnalysis.vertexAnalysis,
+                entry.word.length, signal.geometricAnalysis.vertexAnalysis, signal.rawPointCount,
             )
 
             val pathCoherence = pathGeometryAnalyzer.calculatePathCoherenceScore(
@@ -395,7 +395,7 @@ class ResidualScorer
                     }
                 }
 
-                val compensation = pathGeometryAnalyzer.getCornerCompensation(closestPointIndex, geometricAnalysis)
+                val compensation = pathGeometryAnalyzer.getCornerCompensation(closestPointIndex, geometricAnalysis, swipePath.size)
                 if (compensation != null) {
                     val compDx = keyPos.x - compensation.x
                     val compDy = keyPos.y - compensation.y
@@ -406,7 +406,7 @@ class ResidualScorer
                 }
 
                 val anchorModifier = pathGeometryAnalyzer.calculateAnchorSigmaModifier(
-                    letterIndex, word.length, closestPointIndex, geometricAnalysis,
+                    letterIndex, word.length, closestPointIndex, geometricAnalysis, swipePath.size,
                 )
                 val effectiveSigma = baseSigma * anchorModifier
                 val twoSigmaSquared = 2f * effectiveSigma * effectiveSigma
@@ -432,14 +432,14 @@ class ResidualScorer
                 letterScore *= velocityWeight
 
                 val curvatureBoost = pathGeometryAnalyzer.getVertexCurvatureBoost(
-                    lowerChar, closestPointIndex, keyPos, geometricAnalysis,
+                    lowerChar, closestPointIndex, keyPos, geometricAnalysis, swipePath.size,
                 )
                 letterScore *= curvatureBoost
 
                 val dwellBoost = pathGeometryAnalyzer.getDwellInterestBoost(lowerChar, closestPointIndex, geometricAnalysis)
                 letterScore *= dwellBoost
 
-                if (swipePath.size <= GeometricScoringConstants.VERTEX_FILTER_MIN_PATH_POINTS) {
+                if (signal.rawPointCount <= GeometricScoringConstants.VERTEX_FILTER_MIN_PATH_POINTS) {
                     val velocityDwellBoost = pathGeometryAnalyzer.getVelocityDwellBoost(closestPointIndex, geometricAnalysis)
                     letterScore *= velocityDwellBoost
                 }
@@ -548,7 +548,7 @@ class ResidualScorer
 
             val expectedDx = secondCharPos.x - firstCharPos.x
             val expectedDy = secondCharPos.y - firstCharPos.y
-            val earlyIdx = minOf(4, path.size - 1)
+            val earlyIdx = minOf(maxOf(4, path.size / 10), path.size - 1)
             val actualDx = path[earlyIdx].x - path[0].x
             val actualDy = path[earlyIdx].y - path[0].y
             val dot = expectedDx * actualDx + expectedDy * actualDy

@@ -19,6 +19,7 @@ import com.urik.keyboard.service.WordNormalizer
 import com.urik.keyboard.settings.SettingsRepository
 import com.urik.keyboard.ui.keyboard.components.PathGeometryAnalyzer
 import com.urik.keyboard.ui.keyboard.components.ResidualScorer
+import com.urik.keyboard.ui.keyboard.components.StreamingScoringEngine
 import com.urik.keyboard.ui.keyboard.components.SwipeDetector
 import com.urik.keyboard.ui.keyboard.components.ZipfCheck
 import com.urik.keyboard.utils.CacheMemoryManager
@@ -104,7 +105,7 @@ object KeyboardModule {
 
     @Provides
     @Singleton
-    fun provideSwipeDetector(
+    fun provideStreamingScoringEngine(
         spellCheckManager: SpellCheckManager,
         wordLearningEngine: WordLearningEngine,
         pathGeometryAnalyzer: PathGeometryAnalyzer,
@@ -112,8 +113,8 @@ object KeyboardModule {
         residualScorer: ResidualScorer,
         zipfCheck: ZipfCheck,
         wordNormalizer: WordNormalizer,
-    ): SwipeDetector =
-        SwipeDetector(
+    ): StreamingScoringEngine =
+        StreamingScoringEngine(
             spellCheckManager,
             wordLearningEngine,
             pathGeometryAnalyzer,
@@ -122,6 +123,12 @@ object KeyboardModule {
             zipfCheck,
             wordNormalizer,
         )
+
+    @Provides
+    @Singleton
+    fun provideSwipeDetector(
+        streamingScoringEngine: StreamingScoringEngine,
+    ): SwipeDetector = SwipeDetector(streamingScoringEngine)
 
     @Provides
     @Singleton
