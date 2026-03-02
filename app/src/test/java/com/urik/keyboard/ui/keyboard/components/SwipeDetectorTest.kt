@@ -2,11 +2,7 @@ package com.urik.keyboard.ui.keyboard.components
 
 import android.graphics.PointF
 import android.view.MotionEvent
-import com.urik.keyboard.data.WordFrequencyRepository
 import com.urik.keyboard.model.KeyboardKey
-import com.urik.keyboard.service.SpellCheckManager
-import com.urik.keyboard.service.WordLearningEngine
-import com.urik.keyboard.service.WordNormalizer
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.After
 import org.junit.Assert.assertFalse
@@ -26,25 +22,7 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class SwipeDetectorTest {
     @Mock
-    private lateinit var spellCheckManager: SpellCheckManager
-
-    @Mock
-    private lateinit var wordLearningEngine: WordLearningEngine
-
-    @Mock
-    private lateinit var pathGeometryAnalyzer: PathGeometryAnalyzer
-
-    @Mock
-    private lateinit var wordNormalizer: WordNormalizer
-
-    @Mock
-    private lateinit var wordFrequencyRepository: WordFrequencyRepository
-
-    @Mock
-    private lateinit var residualScorer: ResidualScorer
-
-    @Mock
-    private lateinit var zipfCheck: ZipfCheck
+    private lateinit var streamingScoringEngine: StreamingScoringEngine
 
     @Mock
     private lateinit var swipeListener: SwipeDetector.SwipeListener
@@ -55,16 +33,7 @@ class SwipeDetectorTest {
     @Before
     fun setup() {
         closeable = MockitoAnnotations.openMocks(this)
-        swipeDetector =
-            SwipeDetector(
-                spellCheckManager,
-                wordLearningEngine,
-                pathGeometryAnalyzer,
-                wordFrequencyRepository,
-                residualScorer,
-                zipfCheck,
-                wordNormalizer,
-            )
+        swipeDetector = SwipeDetector(streamingScoringEngine)
         swipeDetector.setSwipeListener(swipeListener)
     }
 

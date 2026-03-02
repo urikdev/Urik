@@ -4,7 +4,6 @@ import android.database.sqlite.SQLiteDatabaseCorruptException
 import android.database.sqlite.SQLiteDatabaseLockedException
 import android.database.sqlite.SQLiteException
 import android.database.sqlite.SQLiteFullException
-import com.urik.keyboard.KeyboardConstants.MemoryConstants
 import com.urik.keyboard.data.database.LearnedWord
 import com.urik.keyboard.data.database.LearnedWordDao
 import com.urik.keyboard.data.database.WordSource
