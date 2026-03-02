@@ -494,6 +494,13 @@ class SwipeDetector
 
                 cachedTransformPoint.set(firstPointX, firstPointY)
                 _swipeListener?.onSwipeStart(cachedTransformPoint)
+
+                val buffered = ringBuffer.snapshot()
+                for (i in 1 until buffered.size) {
+                    cachedTransformPoint.set(buffered[i].x, buffered[i].y)
+                    _swipeListener?.onSwipeUpdate(cachedTransformPoint)
+                }
+                lastUpdateTime = System.currentTimeMillis()
             }
         }
 
@@ -807,7 +814,7 @@ class SwipeDetector
             private const val SLOW_MOVEMENT_VELOCITY_THRESHOLD = 0.5f
             private const val UI_UPDATE_INTERVAL_MS = 16
             private const val TAP_DURATION_THRESHOLD_MS = 350L
-            private const val MAX_SWIPE_VELOCITY_PX_PER_MS = 5f
+            private const val MAX_SWIPE_VELOCITY_PX_PER_MS = 9f
             private const val PECK_LATE_DISPLACEMENT_RATIO = 0.95f
             private const val HIGH_VELOCITY_DISTANCE_MULTIPLIER = 1.5f
             private const val GHOST_DENSITY_VELOCITY_GATE = 2.0f

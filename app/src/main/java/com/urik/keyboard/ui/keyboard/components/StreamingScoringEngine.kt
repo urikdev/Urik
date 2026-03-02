@@ -128,6 +128,7 @@ class StreamingScoringEngine
         if (currentKeyPositions.isEmpty()) return
 
         val elapsedMs = (System.nanoTime() - gestureStartTimeNanos) / 1_000_000L
+        val beforeSize = liveCandidates.size
 
         when {
             elapsedMs >= TRAVERSAL_PRUNE_MS && tickCount >= 3 -> {
@@ -421,7 +422,7 @@ class StreamingScoringEngine
         private const val START_ANCHOR_RADIUS = 85f
         private const val BOUNDS_MARGIN = 60f
         private const val TRAVERSAL_RADIUS = 40f
-        private const val BOUNDS_SAFETY_MARGIN = 1
+        private const val BOUNDS_SAFETY_MARGIN = 2
         private const val TRAVERSAL_MIN_OVERLAP = 0.30f
         private const val LIVE_SET_CAPACITY = 50
         private const val EXCELLENT_CANDIDATE_THRESHOLD = 0.95f

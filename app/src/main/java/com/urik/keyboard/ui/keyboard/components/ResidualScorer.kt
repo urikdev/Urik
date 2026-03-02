@@ -75,6 +75,25 @@ class ResidualScorer
             const val FREQ_TIER_TOP100_BOOST = 1.60f
             const val FREQ_TIER_TOP1000_BOOST = 1.35f
             const val FREQ_TIER_TOP5000_BOOST = 1.15f
+            const val SHORT_WORD_FIDELITY_BONUS_4 = 1.08f
+            const val SHORT_WORD_FIDELITY_BONUS_3 = 1.12f
+            const val SHORT_WORD_FIDELITY_BONUS_2 = 1.15f
+            const val SHORT_WORD_FIDELITY_MIN_RATIO_QUALITY = 0.90f
+            const val SHORT_WORD_SPATIAL_WEIGHT = 0.85f
+            const val SHORT_WORD_FREQ_WEIGHT = 0.15f
+            const val SHORT_WORD_SPATIAL_THRESHOLD = 0.60f
+            const val SHORT_PATH_DAMPENER_MIN_WORD_LENGTH = 4
+            const val SHORT_PATH_DAMPENER_MIN_EXPECTED_PX = 100f
+            const val SHORT_PATH_DAMPENER_MILD_RATIO = 0.50f
+            const val SHORT_PATH_DAMPENER_MODERATE_RATIO = 0.35f
+            const val SHORT_PATH_DAMPENER_SEVERE_RATIO = 0.20f
+            const val SHORT_PATH_DAMPENER_MILD_PENALTY = 0.85f
+            const val SHORT_PATH_DAMPENER_MODERATE_PENALTY = 0.60f
+            const val SHORT_PATH_DAMPENER_SEVERE_PENALTY = 0.35f
+
+            const val REPEATED_LETTER_NO_DWELL_ATTENUATION = 0.40f
+            const val NON_CONSECUTIVE_REVISIT_MIN_SPAN = 3
+
         }
 
         data class CandidateResult(
@@ -132,7 +151,7 @@ class ResidualScorer
             val isClusteredWord = pathGeometryAnalyzer.isClusteredWord(entry.word, keyPositions)
 
             val pointsPerLetter = signal.rawPointCount.toFloat() / entry.word.length.toFloat()
-            val optimalRatio = if (entry.word.length <= 3) 3.0f else 4.0f
+            val optimalRatio = if (entry.word.length <= 3) 6.0f else 4.0f
             val ratioQuality = pointsPerLetter / optimalRatio
 
             val spatialScore = calculateGeometricSpatialScore(
@@ -249,6 +268,9 @@ class ResidualScorer
             val pathResidualPenalty = calculatePathResidualPenalty(
                 signal.pathLength, expectedPathLen,
             )
+            val shortPathDampener = calculateShortPathDampener(
+                signal.pathLength, expectedPathLen, entry.word.length, isClusteredWord,
+            )
 
             val passthroughPenalty = calculatePassthroughPenalty(entry.word, signal)
 
@@ -260,7 +282,7 @@ class ResidualScorer
                     traversalPenalty * orderPenalty * vertexLengthPenalty *
                     pathCoherenceMultiplier * boundsPenalty *
                     pathLengthMultiplier * pathResidualPenalty *
-                    passthroughPenalty
+                    passthroughPenalty * shortPathDampener
 
             val residual = 1.0f - combinedScore.coerceIn(0f, 1f)
 
@@ -450,11 +472,36 @@ class ResidualScorer
                     letterScore = maxOf(letterScore, TRAVERSAL_FLOOR_SCORE)
                 }
 
-                if (letterIndex > 0 && word[letterIndex] == word[letterIndex - 1]) {
-                    val repeatedLetterBoost = pathGeometryAnalyzer.detectRepeatedLetterSignal(
-                        swipePath, keyPos, reuseLetterPathIndices.lastOrNull() ?: 0, closestPointIndex,
-                    )
-                    letterScore *= (1f + repeatedLetterBoost)
+                if (letterIndex > 0) {
+                    val isConsecutiveRepeat = word[letterIndex] == word[letterIndex - 1]
+                    var prevOccurrence = -1
+                    if (!isConsecutiveRepeat) {
+                        for (k in letterIndex - 1 downTo 0) {
+                            if (word[k].lowercaseChar() == lowerChar) {
+                                prevOccurrence = k
+                                break
+                            }
+                        }
+                    }
+                    if (isConsecutiveRepeat) {
+                        val repeatedLetterBoost = pathGeometryAnalyzer.detectRepeatedLetterSignal(
+                            swipePath, keyPos, reuseLetterPathIndices.lastOrNull() ?: 0, closestPointIndex,
+                        )
+                        letterScore *= (1f + repeatedLetterBoost)
+                    } else if (prevOccurrence >= 0) {
+                        val prevPathIdx = reuseLetterPathIndices[prevOccurrence]
+                        val pathSpan = kotlin.math.abs(closestPointIndex - prevPathIdx)
+                        val repeatedLetterBoost = pathGeometryAnalyzer.detectRepeatedLetterSignal(
+                            swipePath, keyPos, prevPathIdx, closestPointIndex,
+                        )
+                        if (repeatedLetterBoost > 0f) {
+                            letterScore *= (1f + repeatedLetterBoost)
+                        } else if (pathSpan >= NON_CONSECUTIVE_REVISIT_MIN_SPAN) {
+                            letterScore *= 1f
+                        } else {
+                            letterScore *= REPEATED_LETTER_NO_DWELL_ATTENUATION
+                        }
+                    }
                 }
 
                 reuseLetterPathIndices.add(closestPointIndex)
@@ -657,15 +704,16 @@ class ResidualScorer
         private fun calculateLengthBonus(
             wordLength: Int,
             ratioQuality: Float,
-        ): Float {
-            if (ratioQuality < LENGTH_BONUS_MIN_RATIO_QUALITY) return 1.0f
-            return when {
-                wordLength >= 8 -> 1.25f
-                wordLength == 7 -> 1.18f
-                wordLength == 6 -> 1.12f
-                wordLength == 5 -> 1.06f
-                else -> 1.0f
-            }
+        ): Float = when {
+            ratioQuality >= SHORT_WORD_FIDELITY_MIN_RATIO_QUALITY && wordLength == 2 -> SHORT_WORD_FIDELITY_BONUS_2
+            ratioQuality >= SHORT_WORD_FIDELITY_MIN_RATIO_QUALITY && wordLength == 3 -> SHORT_WORD_FIDELITY_BONUS_3
+            ratioQuality >= SHORT_WORD_FIDELITY_MIN_RATIO_QUALITY && wordLength == 4 -> SHORT_WORD_FIDELITY_BONUS_4
+            ratioQuality < LENGTH_BONUS_MIN_RATIO_QUALITY -> 1.0f
+            wordLength >= 8 -> 1.25f
+            wordLength == 7 -> 1.18f
+            wordLength == 6 -> 1.12f
+            wordLength == 5 -> 1.06f
+            else -> 1.0f
         }
 
         private fun calculateBoundsPenalty(
@@ -731,6 +779,7 @@ class ResidualScorer
             }
             return when {
                 entry.word.length == 2 && adjustedSpatialScore > 0.75f -> 0.88f to 0.12f
+                entry.word.length in 3..4 && adjustedSpatialScore >= SHORT_WORD_SPATIAL_THRESHOLD -> SHORT_WORD_SPATIAL_WEIGHT to SHORT_WORD_FREQ_WEIGHT
                 frequencyRatio >= 10.0f -> minOf(baselineSpatialWeight, 0.50f) to maxOf(baselineFreqWeight, 0.50f)
                 frequencyRatio >= 5.0f -> minOf(baselineSpatialWeight, 0.55f) to maxOf(baselineFreqWeight, 0.45f)
                 frequencyRatio >= 3.0f -> minOf(baselineSpatialWeight, 0.58f) to maxOf(baselineFreqWeight, 0.42f)
@@ -787,6 +836,24 @@ class ResidualScorer
                 excessRatio > 2.5f -> PATH_RESIDUAL_HEAVY_PENALTY
                 excessRatio > 2.0f -> PATH_RESIDUAL_MODERATE_PENALTY
                 else -> PATH_RESIDUAL_MILD_PENALTY
+            }
+        }
+
+        private fun calculateShortPathDampener(
+            physicalPathLength: Float,
+            expectedWordPathLength: Float,
+            wordLength: Int,
+            isClusteredWord: Boolean,
+        ): Float {
+            if (wordLength < SHORT_PATH_DAMPENER_MIN_WORD_LENGTH) return 1.0f
+            if (isClusteredWord) return 1.0f
+            if (expectedWordPathLength < SHORT_PATH_DAMPENER_MIN_EXPECTED_PX) return 1.0f
+            val ratio = physicalPathLength / expectedWordPathLength
+            if (ratio >= SHORT_PATH_DAMPENER_MILD_RATIO) return 1.0f
+            return when {
+                ratio < SHORT_PATH_DAMPENER_SEVERE_RATIO -> SHORT_PATH_DAMPENER_SEVERE_PENALTY
+                ratio < SHORT_PATH_DAMPENER_MODERATE_RATIO -> SHORT_PATH_DAMPENER_MODERATE_PENALTY
+                else -> SHORT_PATH_DAMPENER_MILD_PENALTY
             }
         }
 
