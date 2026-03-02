@@ -236,6 +236,9 @@ class KeyboardLayoutManager(
                         pending.handler.removeCallbacks(pending.runnable)
                     }
 
+                    val longPressConsumed = characterLongPressFired.remove(button) ||
+                        longPressConsumedButtons.contains(button)
+
                     if (popupSelectionMode && variationPopup?.isShowing == true) {
                         val selectedChar = variationPopup?.getHighlightedCharacter()
                         if (selectedChar != null) {
@@ -253,14 +256,11 @@ class KeyboardLayoutManager(
                             swipeKeyboardView?.setPopupActive(false)
                         }
                         customMappingLongPressFired.remove(button)
-                        characterLongPressFired.remove(button)
                         return@OnTouchListener true
                     }
 
                     customMappingLongPressFired.remove(button)
-                    val consumed = characterLongPressFired.remove(button) ||
-                        longPressConsumedButtons.contains(button)
-                    consumed
+                    longPressConsumed
                 }
 
                 MotionEvent.ACTION_CANCEL -> {
@@ -268,6 +268,9 @@ class KeyboardLayoutManager(
                     buttonPendingCallbacks.remove(button)?.let { pending ->
                         pending.handler.removeCallbacks(pending.runnable)
                     }
+
+                    val longPressConsumed = characterLongPressFired.remove(button) ||
+                        longPressConsumedButtons.contains(button)
 
                     if (popupSelectionMode && variationPopup?.isShowing == true) {
                         variationPopup?.dismiss()
@@ -277,9 +280,7 @@ class KeyboardLayoutManager(
                     }
 
                     customMappingLongPressFired.remove(button)
-                    val consumed = characterLongPressFired.remove(button) ||
-                        longPressConsumedButtons.contains(button)
-                    consumed
+                    longPressConsumed
                 }
 
                 else -> {
@@ -482,7 +483,8 @@ class KeyboardLayoutManager(
                     buttonPendingCallbacks.remove(view as Button)?.let { pending ->
                         pending.handler.removeCallbacks(pending.runnable)
                     }
-                    val shouldConsume = shiftLongPressFired
+                    val shouldConsume = shiftLongPressFired ||
+                        longPressConsumedButtons.contains(view)
                     shiftLongPressFired = false
                     shouldConsume
                 }
