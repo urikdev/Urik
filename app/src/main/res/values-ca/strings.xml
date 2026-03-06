@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="ime_name">Teclat Urik</string>
+    <string name="ime_label">Teclat Urik</string>
+    <string name="ime_description">Escriptura lliscant el dit, corrector ortogràfic i compatibilitat multilingüe sense comprometre la teva privacitat. Sense telemetria. Sense recopilar dades. Tot es queda al teu dispositiu.</string>
+    <!-- Settings -->
+    <string name="enable_keyboard_title">Activar</string>
+    <string name="open_settings">Obrir configuració</string>
+    <string name="error_opening_settings">Impossible d\'obrir la configuració</string>
+    <!-- Settings Activity -->
+    <string name="settings_title">Configuració del teclat</string>
+    <string name="about_title">Sobre</string>
+    <string name="about_button">Sobre</string>
+    <string name="about_version">Versió</string>
+    <string name="about_copyright">Copyright © 2025 Urik Development</string>
+    <string name="about_license">Llicència: GNU GPL v3.0</string>
+    <string name="about_source_code">Codi Font</string>
+    <string name="about_release_notes">Notes de la versió</string>
+    <string name="about_report_bug">Informa d\'un error</string>
+    <string name="about_privacy_policy">Política de privacitat</string>
+    <string name="about_support">Dona suport al desenvolupament</string>
+    <string name="autocorrect_settings_title">Configuració d\'auto-correcció</string>
+    <string name="autocorrect_settings_description">Ortografia i suggeriments</string>
+    <string name="language_settings_title">Configuració d\'idioma</string>
+    <string name="language_settings_description">Tria els idiomes del teclat</string>
+    <string name="select_active_language">Selecciona l\'idioma actiu</string>
+    <string name="typing_settings_title">Configuració del comportament de la introducció de text</string>
+    <string name="typing_settings_description">Puntuació, retroalimentació hàptica, etc.</string>
+    <string name="layout_settings_title">Maquetació &amp; entrada</string>
+    <string name="layout_settings_description">Número de fila, mida de la barra espaiadora</string>
+    <string name="appearance_settings_title">Aparença</string>
+    <string name="appearance_settings_description">Tema, mida</string>
+    <string name="privacy_settings_title">Privacitat &amp; dades</string>
+    <string name="privacy_settings_description">Esborrar dades, restablir configuració</string>
+    <string name="licenses_title">Llicències de codi obert</string>
+    <string name="licenses_description">Veure les llicències de les biblioteques de tercers</string>
+    <string name="dictionary_attribution_title">Dades del diccionari</string>
+    <string name="theme_picker_title">Tema del teclat</string>
+    <string name="dictionary_attribution_summary">Llicència i atribució de FrequencyWords</string>
+    <string name="test_field_hint">Provar canvis</string>
+    <!-- Settings Enums -->
+    <!-- Key Size -->
+    <string name="key_size_small">Petita</string>
+    <string name="key_size_medium">Mitjana</string>
+    <string name="key_size_large">Gran</string>
+    <string name="key_size_extra_large">Molt gran</string>
+    <!-- Long Press Duration -->
+    <string name="long_press_duration_short">Curta</string>
+    <string name="long_press_duration_medium">Mitjana</string>
+    <string name="long_press_duration_long">Llarga</string>
+    <string name="cursor_speed_slow">Lenta</string>
+    <string name="cursor_speed_medium">Mitjana</string>
+    <string name="cursor_speed_fast">Ràpida</string>
+    <!-- Space Bar Size -->
+    <string name="space_bar_size_compact">Compacta</string>
+    <string name="space_bar_size_standard">Estàndard</string>
+    <string name="space_bar_size_wide">Amplada</string>
+    <!-- Key Label Size -->
+    <string name="key_label_size_small">Petita</string>
+    <string name="key_label_size_medium">Mitjana</string>
+    <string name="key_label_size_large">Gran</string>
+    <!-- Appearance Settings -->
+    <string name="appearance_settings_theme">Tema</string>
+    <string name="appearance_settings_key_size">Mida de la clau</string>
+    <string name="appearance_settings_key_label_size">Mida de l\'etiqueta tecla</string>
+    <!-- Auto-Correct Settings -->
+    <string name="autocorrect_settings_spell_check">Correcció ortogràfica</string>
+    <string name="autocorrect_settings_spell_check_on">Correcció ortogràfica activada</string>
+    <string name="autocorrect_settings_spell_check_off">Correcció ortogràfica desactivada</string>
+    <string name="autocorrect_settings_show_suggestions">Mostrar suggeriments</string>
+    <string name="autocorrect_settings_suggestions_on">Suggeriments mostrats</string>
+    <string name="autocorrect_settings_suggestions_off">Suggeriments amagats</string>
+    <string name="autocorrect_settings_suggestion_count">Comptador de suggeriments</string>
+    <string name="autocorrect_settings_learn_new_words">Aprendre noves paraules</string>
+    <string name="autocorrect_settings_learn_new_words_on">Aprenentatge activat</string>
+    <string name="autocorrect_settings_learn_new_words_off">Aprenentatge desactivat</string>
+    <!-- Language Settings -->
+    <string name="max_languages_reached">Es permeten un màxim de 3 idiomes</string>
+    <string name="primary_layout_language">Disseny actual</string>
+    <string name="merged_dictionaries_category">Diccionari</string>
+    <string name="merged_dictionaries_title">Diccionaris combinats</string>
+    <string name="merged_dictionaries_on">S\'utilitzen tots els diccionaris d\'idiomes per als suggeriments</string>
+    <string name="merged_dictionaries_off">Només s\'utilitza el diccionari de l\'idioma actiu per als suggeriments</string>
+    <!-- Sound & Feedback Settings -->
+    <string name="feedback_settings_haptic_feedback">Retroalimentació hàptica</string>
+    <string name="feedback_settings_haptic_on">Hàptic activat</string>
+    <string name="feedback_settings_haptic_off">Hàptic desactivat</string>
+    <string name="feedback_settings_vibration_strength">Intensitat de la vibració</string>
+    <!-- Typing Behavior Settings -->
+    <string name="typing_settings_double_space_period">Període d\'espai doble</string>
+    <string name="typing_settings_double_space_on">Inserció de punt amb doble espaiat</string>
+    <string name="typing_settings_double_space_off">Inserció d\'un espai amb doble espai</string>
+    <string name="typing_settings_auto_capitalization">Majúscules automàtiques</string>
+    <string name="typing_settings_auto_capitalization_on">Majúscules automàtiques a l\'inici de la frase</string>
+    <string name="typing_settings_auto_capitalization_off">Sense majúscules automàtiques</string>
+    <string name="typing_settings_swipe_enabled">Escriptura per lliscada</string>
+    <string name="typing_settings_swipe_on">Escriptura per lliscada activada</string>
+    <string name="typing_settings_swipe_off">Escriptura per lliscada desactivada</string>
+    <string name="typing_settings_spacebar_cursor">Control del cursor amb la barra espaiadora</string>
+    <string name="typing_settings_spacebar_cursor_on">Arrossegueu la barra espaiadora per moure el cursor</string>
+    <string name="typing_settings_spacebar_cursor_off">El control del cursor amb la barra espaiadora està desactivat</string>
+    <string name="typing_settings_cursor_speed">Velocitat del cursor</string>
+    <string name="typing_settings_backspace_swipe">Retrocedir Lliscar Eliminar</string>
+    <string name="typing_settings_backspace_swipe_on">Esbosseu cap a l\'esquerra a sobre de la tecla retrocedir per esborrar la paraula</string>
+    <string name="typing_settings_backspace_swipe_off">Desactivat l\'esborrat per lliscada amb la tecla de retrocedir</string>
+    <string name="typing_settings_long_press_punctuation">Prem llarg per marcar</string>
+    <string name="long_press_punctuation_off">Desactivar</string>
+    <string name="long_press_punctuation_spacebar">Barra espaiadora</string>
+    <string name="long_press_punctuation_period">Tecla del període</string>
+    <string name="typing_settings_long_press_duration">Duració de pulsació llarga</string>
+    <!-- Layout & Input Settings -->
+    <string name="layout_settings_alternative_layout">Disseny del teclat</string>
+    <string name="layout_settings_adaptive_modes_enabled">Modes adaptatius del teclat</string>
+    <string name="layout_settings_adaptive_modes_on">S\'adapta automàticament al tipus de dispositiu i a la seva posició (taules, dispositius plegables)</string>
+    <string name="layout_settings_adaptive_modes_off">Utilitzeu sempre el disseny estàndard d\'amplada completa</string>
+    <string name="layout_settings_one_handed_mode_enabled">Mode d\'una mà</string>
+    <string name="layout_settings_one_handed_mode_on">Activat</string>
+    <string name="layout_settings_one_handed_mode_off">Teclat estàndard de mida completa</string>
+    <string name="one_handed_mode_left">Fixa el teclat a l\'esquerra</string>
+    <string name="one_handed_mode_right">Fixa el teclat a la dreta</string>
+    <string name="one_handed_mode_full">Tornar al teclat d\'amplada completa</string>
+    <string name="layout_settings_show_number_row">Mostrar fila de números</string>
+    <string name="layout_settings_number_row_on">Fila de números mostrada</string>
+    <string name="layout_settings_number_row_off">Fila de números amagada</string>
+    <string name="layout_settings_show_language_switch_key">Mostrar tecla de canvi d\'idioma</string>
+    <string name="layout_settings_language_switch_key_on">Activat</string>
+    <string name="layout_settings_language_switch_key_off">Desactivat</string>
+    <string name="layout_settings_space_bar_size">Mida de la barra espaiadora</string>
+    <string name="alternative_layout_default">Predeterminat (Disseny d\'idioma)</string>
+    <string name="alternative_layout_dvorak">Dvorak</string>
+    <string name="alternative_layout_colemak">Colemak</string>
+    <string name="alternative_layout_workman">Workman</string>
+    <string name="layout_settings_customize_keys">Personalitzar tecles</string>
+    <string name="layout_settings_customize_keys_summary">Assignar un caràcter personalitzat a la premsa llarga</string>
+    <!-- Layout Mapper -->
+    <string name="layout_mapper_title">Personalitzar tecles</string>
+    <string name="layout_mapper_instructions">Toca una tecla per assignar un caràcter personalitzat. Mantingues premuda aquesta tecla al teclat per inserir el teu caràcter.</string>
+    <string name="layout_mapper_edit_key">Editar tecla: %1$s</string>
+    <string name="layout_mapper_symbol_hint">Caràcter personalitzat</string>
+    <string name="layout_mapper_save">Desar</string>
+    <string name="layout_mapper_remove">Eliminar</string>
+    <string name="layout_mapper_reset_all">Reinicialitza-ho tot</string>
+    <string name="layout_mapper_reset_title">Restablir totes les assignacions?</string>
+    <string name="layout_mapper_reset_message">Això eliminarà totes les assignacions de tecles personalitzades. Això no es pot desfer.</string>
+    <string name="layout_mapper_reset_confirm">Restablir</string>
+    <string name="layout_mapper_saved">Assignació desada</string>
+    <string name="layout_mapper_removed">Assignació eliminada</string>
+    <string name="layout_mapper_cleared">Totes les assignacions esborrades</string>
+    <string name="layout_mapper_save_failed">Error desant l\'assignació</string>
+    <string name="layout_mapper_remove_failed">Error eliminant l\'assignació</string>
+    <string name="layout_mapper_clear_failed">Error esborrant les assignacions</string>
+    <!-- Privacy & Data Settings -->
+    <string name="privacy_settings_clipboard_history">Historial del porta-retalls</string>
+    <string name="privacy_settings_clipboard_history_on">Historial del porta-retalls activat</string>
+    <string name="privacy_settings_clipboard_history_off">Historial del porta-retalls desactivat</string>
+    <string name="privacy_settings_clear_learned_words">Paraules apreses esborrades</string>
+    <string name="privacy_settings_clear_learned_words_summary">Eliminar tot el vocabulari après</string>
+    <string name="privacy_settings_clear_learned_words_confirm">Eliminar totes les paraules apreses? No es pot desfer.</string>
+    <string name="privacy_settings_reset_to_defaults">Restaurar els valors per defecte</string>
+    <string name="privacy_settings_reset_to_defaults_confirm">Restablir tots els paràmetres als valors per defecte?</string>
+    <string name="privacy_settings_export_error_log">Registre d\'errors d\'exportació</string>
+    <string name="privacy_settings_export_error_log_summary">Compartir els registres de diagnòstic per a depurar</string>
+    <string name="privacy_settings_export_error_log_failed">Ha fallat l\'exportació del registre d\'errors</string>
+    <string name="privacy_settings_export_dictionary">Exportar el diccionari</string>
+    <string name="privacy_settings_export_dictionary_summary">Desar les paraules apreses en un arxiu</string>
+    <string name="privacy_settings_import_dictionary">Importar diccionari</string>
+    <string name="privacy_settings_import_dictionary_summary">Restaurar les paraules apreses des d\'un arxiu</string>
+    <!-- Error Messages -->
+    <string name="error_title">Error</string>
+    <string name="error_update_theme">Ha fallat l\'actualització del tema</string>
+    <string name="error_update_key_size">Ha fallat l\'actualització de la mida de la tecla</string>
+    <string name="error_update_key_label_size">Ha fallat l\'actualització de la mida de l\'etiqueta</string>
+    <string name="error_update_spell_check">Ha fallat l\'actualització de la correcció ortogràfica</string>
+    <string name="error_update_suggestions">Ha fallat l\'actualització de la configuració de suggeriments</string>
+    <string name="error_update_suggestion_count">Ha fallat l\'actualització del recompte de suggeriments</string>
+    <string name="error_update_word_learning">Ha fallat l\'actualització de l\'aprenentatge de paraules</string>
+    <string name="error_update_clipboard">Ha fallat l\'actualització de la configuració del porta-retalls</string>
+    <string name="error_update_language">Ha fallat l\'actualització de la configuració de l\'idioma</string>
+    <string name="error_update_haptic_feedback">Ha fallat l\'actualització de la retroalimentació hàptica</string>
+    <string name="error_update_vibration_strength">Ha fallat l\'actualització de la intensitat de la vibració</string>
+    <string name="error_update_double_space_period">Ha fallat l\'actualització del període del doble espai</string>
+    <string name="error_update_auto_capitalization">Ha fallat l\'actualització de les majúscules automàtiques</string>
+    <string name="error_update_swipe">Ha fallat l\'actualització de l\'escriptura per lliscament</string>
+    <string name="error_update_spacebar_cursor">Ha fallat l\'actualització del control del cursor de la barra espaiadora</string>
+    <string name="error_update_cursor_speed">Ha fallat l\'actualització de la velocitat del cursor</string>
+    <string name="error_update_backspace_swipe">Ha fallat l\'actualització de la funció retrocedir lliscar eliminar</string>
+    <string name="error_update_long_press_punctuation">Ha fallat l\'actualització de la puntuació de pulsació llarga</string>
+    <string name="error_update_long_press_duration">Ha fallat l\'actualització de la duració de la pulsació llarga</string>
+    <string name="error_update_number_row">Ha fallat l\'actualització de la fila de números</string>
+    <string name="error_update_space_bar_size">Ha fallat l\'actualització de la mida de la barra espaiadora</string>
+    <string name="error_update_alternative_layout">Ha fallat l\'actualització del disseny del teclat</string>
+    <string name="error_update_merged_dictionaries">Ha fallat l\'actualització del mode de diccionari</string>
+    <string name="error_clear_learned_words">No s\'han esborrat les paraules apreses</string>
+    <string name="error_reset_to_defaults">Ha fallat el restabliment de la configuració</string>
+    <string name="error_dictionary_export">No s\'ha pogut exportar el diccionari</string>
+    <string name="error_dictionary_import">No s\'ha pogut importar el diccionari</string>
+    <!-- Success Messages -->
+    <string name="success_learned_words_cleared">Paraules apreses esborrades</string>
+    <string name="success_settings_reset">Configuració reiniciada als valors per defecte</string>
+    <string name="success_dictionary_exported">%1$d paraules exportades</string>
+    <string name="success_dictionary_imported">%1$d noves afegides, %2$d paraules actualitzades</string>
+    <!-- Keyboard descriptions -->
+    <string name="keyboard_description">Teclat virtual</string>
+    <!-- Default key labels -->
+    <string name="letters_mode_label">ABC</string>
+    <string name="numbers_mode_label">123</string>
+    <string name="symbols_mode_label">+=&lt;</string>
+    <!-- Accessibility descriptions -->
+    <string name="key_character_description">Tipus %1$s</string>
+    <string name="shift_key_description">Tecla majúscules, premi per posar en majúscula la següent lletra</string>
+    <string name="shift_active_description">La tecla Shift està activada, premi per desactivar-la</string>
+    <string name="caps_lock_description">Bloquejar majúscules</string>
+    <string name="caps_lock_on_description">El bloqueig de les majúscules està activada, premi per desactivar</string>
+    <string name="backspace_key_description">Eliminar caràcter previ</string>
+    <string name="space_key_description">Barra espaiadora</string>
+    <string name="letters_mode_description">Canviar el teclat amb lletres</string>
+    <string name="numbers_mode_description">Canviar al teclat amb números</string>
+    <string name="symbols_mode_description">Canviar al teclat amb símbols</string>
+    <string name="language_switch_description">Canviar l\'idioma del teclat</string>
+    <string name="ime_prediction_description">Predicció: %1$s</string>
+    <!-- Action button accessibility descriptions -->
+    <string name="action_enter_description">Premi entrar</string>
+    <string name="action_send_description">Enviar missatge</string>
+    <string name="action_search_description">Cercar</string>
+    <string name="action_done_description">Edició finalitzada</string>
+    <string name="action_go_description">Anar al destí</string>
+    <string name="action_next_description">Passar al següent camp</string>
+    <string name="action_previous_description">Passar al camp anterior</string>
+    <string name="action_emoji">Emoji</string>
+    <string name="emoji_search_hint" tools:ignore="TypographyEllipsis">Cercar emojis...</string>
+    <string name="autofill_indicator_description">Suggeriments disponibles del gestar de contrasenyes</string>
+    <!-- Theme Picker Accessibility -->
+    <string name="theme_description">Tema %1$s</string>
+    <string name="theme_description_selected">Tema %1$s, actualment seleccionat</string>
+    <string name="theme_add_favorite">Afegir %1$s a preferits</string>
+    <string name="theme_remove_favorite">Eliminar %1$s de preferits</string>
+    <!-- Character Variation Accessibility -->
+    <string name="character_variation_position">Variant de caràcter %1$d de %2$d: %3$s</string>
+    <string name="character_option_role">opció de caràcter</string>
+    <!-- Blacklisting Words -->
+    <string name="remove_suggestion">Eliminar %1$s de suggeriments?</string>
+    <string name="remove_cancel">Cancel·lar</string>
+    <string name="remove_confirm">Eliminar</string>
+    <!-- Tips -->
+    <string name="tip_1_title">Aprendre paraules</string>
+    <string name="tip_1_description">Premeu la barra espaiadora després d\'una errada tipogràfica ressaltada per afegir la paraula al vostre diccionari.</string>
+    <string name="tip_2_title">Menú ràpid de puntuació</string>
+    <string name="tip_2_description">Mantingueu premuda la barra espaiadora per obrir un menú ràpid de puntuació.</string>
+    <string name="tip_3_title">Variacions de caràcters</string>
+    <string name="tip_3_description">Prem llargament un caràcter per seleccionar-ne una variació.</string>
+    <string name="tip_4_title">Eliminar paraules</string>
+    <string name="tip_4_description">Mantingueu premut un suggeriment per eliminar-lo del vostre diccionari.</string>
+    <string name="tip_5_title">Administrador del porta-retalls</string>
+    <string name="tip_5_description">Mantingueu premut el símbol de la tecla per obrir l\'administrador del porta-retalls.</string>
+    <!-- Clipboard Panel -->
+    <string name="clipboard_panel_title">Porta-retalls</string>
+    <string name="clipboard_panel_pinned">Fixat</string>
+    <string name="clipboard_panel_recent">Recent</string>
+    <string name="clipboard_panel_empty">Sense historial al porta-retalls</string>
+    <string name="clipboard_panel_delete_all">Esborrar-ho tot</string>
+    <string name="clipboard_panel_delete_all_confirm">Esborrar tots els elements del porta-retalls no fixats?</string>
+    <string name="clipboard_consent_message">Urik pot llegir i emmagatzemar el contingut del porta-retalls indefinidament. Si no ho desitges, ves a la configuració i desactiva l\'historial del porta-retalls.</string>
+    <!-- Clipboard Accessibility -->
+    <string name="clipboard_item_description">Element del porta-retalls %1$s</string>
+    <string name="clipboard_item_pin">Fixar element al porta-retalls</string>
+    <string name="clipboard_item_unpin">Deixar de fixar l\'element al porta-retalls</string>
+    <string name="clipboard_item_delete">Eliminar l\'element del porta-retalls</string>
+</resources>
