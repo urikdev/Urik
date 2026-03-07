@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="ime_name">Πληκτρολόγιο Urik</string>
+    <string name="ime_label">Πληκτρολόγιο Urik</string>
+    <string name="ime_description">Πληκτρολόγηση σάρωσης, έλεγχος ορθογραφίας και πολυγλωσσική υποστήριξη με απόλυτο σεβασμό στην ιδιωτικότητά σας. Χωρίς τηλεμετρία και συλλογή δεδομένων. Όλα μένουν στη συσκευή σας.</string>
+    <!-- Settings -->
+    <string name="enable_keyboard_title">Ενεργοποίηση</string>
+    <string name="open_settings">Άνοιγμα ρυθμίσεων</string>
+    <string name="error_opening_settings">Αδυναμία ανοίγματος ρυθμίσεων</string>
+    <!-- Settings Activity -->
+    <string name="settings_title">Ρυθμίσεις πληκτρολογίου</string>
+    <string name="about_title">Σχετικά με</string>
+    <string name="about_button">Σχετικά με</string>
+    <string name="about_version">Έκδοση</string>
+    <string name="about_copyright">Copyright © 2025 Urik Development</string>
+    <string name="about_license">Άδεια χρήσης: GNU GPL v3.0</string>
+    <string name="about_source_code">Πηγαίος κώδικας</string>
+    <string name="about_release_notes">Σημειώσεις έκδοσης</string>
+    <string name="about_report_bug">Αναφορά σφάλματος</string>
+    <string name="about_privacy_policy">Πολιτική απορρήτου</string>
+    <string name="about_support">Υποστηρίξτε την ανάπτυξη της εφαρμογής</string>
+    <string name="autocorrect_settings_title">Ρυθμίσεις αυτόματης διόρθωσης</string>
+    <string name="autocorrect_settings_description">Ορθογραφικός έλεγχος και προτάσεις</string>
+    <string name="language_settings_title">Ρυθμίσεις γλώσσας</string>
+    <string name="language_settings_description">Επιλέξτε τις γλώσσες πληκτρολογίου</string>
+    <string name="select_active_language">Επιλέξτε την ενεργή γλώσσα</string>
+    <string name="typing_settings_title">Ρυθμίσεις συμπεριφοράς πληκτρολόγησης</string>
+    <string name="typing_settings_description">Στίξη, απτική ανάδραση κ.λπ.</string>
+    <string name="layout_settings_title">Διάταξη &amp; Εισαγωγή</string>
+    <string name="layout_settings_description">Σειρά αριθμών, μέγεθος μπάρας διαστήματος</string>
+    <string name="appearance_settings_title">Εμφάνιση</string>
+    <string name="appearance_settings_description">Θέμα, μέγεθος</string>
+    <string name="privacy_settings_title">Ιδιωτικότητα &amp; Δεδομένα</string>
+    <string name="privacy_settings_description">Εκκαθάριση δεδομένων, επαναφορά ρυθμίσεων</string>
+    <string name="licenses_title">Άδειες ανοικτού κώδικα</string>
+    <string name="licenses_description">Προβολή αδειών βιβλιοθηκών τρίτων</string>
+    <string name="dictionary_attribution_title">Δεδομένα λεξικού</string>
+    <string name="theme_picker_title">Θέμα πληκτρολογίου</string>
+    <string name="dictionary_attribution_summary">Άδεια χρήσης και αναφορά του FrequencyWords</string>
+    <string name="test_field_hint">Δοκιμή αλλαγών</string>
+    <!-- Settings Enums -->
+    <!-- Key Size -->
+    <string name="key_size_small">Μικρά</string>
+    <string name="key_size_medium">Μεσαία</string>
+    <string name="key_size_large">Μεγάλα</string>
+    <string name="key_size_extra_large">Πολύ μεγάλα</string>
+    <!-- Long Press Duration -->
+    <string name="long_press_duration_short">Σύντομο</string>
+    <string name="long_press_duration_medium">Κανονικό</string>
+    <string name="long_press_duration_long">Παρατεταμένο</string>
+    <string name="cursor_speed_slow">Αργή</string>
+    <string name="cursor_speed_medium">Κανονική</string>
+    <string name="cursor_speed_fast">Γρήγορη</string>
+    <!-- Space Bar Size -->
+    <string name="space_bar_size_compact">Στενό</string>
+    <string name="space_bar_size_standard">Κανονικό</string>
+    <string name="space_bar_size_wide">Ευρύ</string>
+    <!-- Key Label Size -->
+    <string name="key_label_size_small">Μικρό</string>
+    <string name="key_label_size_medium">Μεσαίο</string>
+    <string name="key_label_size_large">Μεγάλο</string>
+    <!-- Appearance Settings -->
+    <string name="appearance_settings_theme">Θέμα</string>
+    <string name="appearance_settings_key_size">Μέγεθος πλήκτρου</string>
+    <string name="appearance_settings_key_label_size">Μέγεθος χαρακτήρα πλήκτρου</string>
+    <!-- Auto-Correct Settings -->
+    <string name="autocorrect_settings_spell_check">Ορθογραφικός έλεγχος</string>
+    <string name="autocorrect_settings_spell_check_on">Ορθογραφικός έλεγχος ενεργός</string>
+    <string name="autocorrect_settings_spell_check_off">Ορθογραφικός έλεγχος ανενεργός</string>
+    <string name="autocorrect_settings_show_suggestions">Εμφάνιση προτάσεων</string>
+    <string name="autocorrect_settings_suggestions_on">Εμφανίζονται προτάσεις</string>
+    <string name="autocorrect_settings_suggestions_off">Δεν εμφανίζονται προτάσεις</string>
+    <string name="autocorrect_settings_suggestion_count">Αριθμός προτάσεων</string>
+    <string name="autocorrect_settings_learn_new_words">Εκμάθηση νέων λέξεων</string>
+    <string name="autocorrect_settings_learn_new_words_on">Εκμάθηση ενεργή</string>
+    <string name="autocorrect_settings_learn_new_words_off">Εκμάθηση ανενεργή</string>
+    <!-- Language Settings -->
+    <string name="max_languages_reached">Επιτρέπονται έως τρεις γλώσσες</string>
+    <string name="primary_layout_language">Τρέχουσα διάταξη</string>
+    <string name="merged_dictionaries_category">Λεξικό</string>
+    <string name="merged_dictionaries_title">Συνδυασμένα λεξικά</string>
+    <string name="merged_dictionaries_on">Χρησιμοποιούνται όλα τα λεξικά γλωσσών για προτάσεις</string>
+    <string name="merged_dictionaries_off">Χρησιμοποιείται μόνο το λεξικό της ενεργής γλώσσας για προτάσεις</string>
+    <!-- Sound & Feedback Settings -->
+    <string name="feedback_settings_haptic_feedback">Απτική ανάδραση</string>
+    <string name="feedback_settings_haptic_on">Απτική ανάδραση ενεργή</string>
+    <string name="feedback_settings_haptic_off">Απτική ανάδραση ανενεργή</string>
+    <string name="feedback_settings_vibration_strength">Ένταση δόνησης</string>
+    <!-- Typing Behavior Settings -->
+    <string name="typing_settings_double_space_period">Διπλό διάστημα: τελεία</string>
+    <string name="typing_settings_double_space_on">Το διπλό διάστημα εισάγει τελεία</string>
+    <string name="typing_settings_double_space_off">Το διπλό διάστημα εισάγει κενό</string>
+    <string name="typing_settings_auto_capitalization">Αυτόματη κεφαλαίωση</string>
+    <string name="typing_settings_auto_capitalization_on">Κεφαλαίωση της αρχής της πρότασης</string>
+    <string name="typing_settings_auto_capitalization_off">Χωρίς αυτόματη κεφαλαίωση</string>
+    <string name="typing_settings_swipe_enabled">Πληκτρολόγηση με σάρωση</string>
+    <string name="typing_settings_swipe_on">Πληκτρολόγηση με σάρωση ενεργή</string>
+    <string name="typing_settings_swipe_off">Πληκτρολόγηση με σάρωση ανενεργή</string>
+    <string name="typing_settings_spacebar_cursor">Έλεγχος δρομέα με πλήκτρο διαστήματος</string>
+    <string name="typing_settings_spacebar_cursor_on">Σύρετε το πλήκτρο διαστήματος για να μετακινήσετε το δρομέα</string>
+    <string name="typing_settings_spacebar_cursor_off">Έλεγχος δρομέα με πλήκτρο διαστήματος ανενεργός</string>
+    <string name="typing_settings_cursor_speed">Ταχύτητα δρομέα</string>
+    <string name="typing_settings_backspace_swipe">Διαγραφή με σάρωση του πλήκτρου διαγραφής</string>
+    <string name="typing_settings_backspace_swipe_on">Σύρετε αριστερά στο πλήκτρο διαγραφής για διαγραφή λέξης</string>
+    <string name="typing_settings_backspace_swipe_off">Σάρωση του πλήκτρου διαγραφής ανενεργή</string>
+    <string name="typing_settings_long_press_punctuation">Παρατεταμένο πάτημα για σημεία στίξης</string>
+    <string name="long_press_punctuation_off">Ανενεργό</string>
+    <string name="long_press_punctuation_spacebar">Πλήκτρο διαστήματος</string>
+    <string name="long_press_punctuation_period">Πλήκτρο τελείας</string>
+    <string name="typing_settings_long_press_duration">Διάρκεια παρατεταμένου πατήματος</string>
+    <!-- Layout & Input Settings -->
+    <string name="layout_settings_alternative_layout">Διάταξη πληκτρολογίου</string>
+    <string name="layout_settings_adaptive_modes_enabled">Προσαρμοζόμενες λειτουργίες πληκτρολογίου</string>
+    <string name="layout_settings_adaptive_modes_on">Προσαρμόζεται αυτόματα στον τύπο και στον προσανατολισμό της συσκευής (τάμπλετ, αναδιπλούμενα κινητά)</string>
+    <string name="layout_settings_adaptive_modes_off">Να χρησιμοποιείται πάντα η τυπική διάταξη πλήρους πλάτους</string>
+    <string name="layout_settings_one_handed_mode_enabled">Λειτουργία ενός χεριού</string>
+    <string name="layout_settings_one_handed_mode_on">Ενεργοποιημένο</string>
+    <string name="layout_settings_one_handed_mode_off">Τυπικό πληκτρολόγιο πλήρους πλάτους</string>
+    <string name="one_handed_mode_left">Αγκύρωση πληκτρολογίου στα αριστερά</string>
+    <string name="one_handed_mode_right">Αγκύρωση πληκτρολογίου στα δεξιά</string>
+    <string name="one_handed_mode_full">Επιστροφή στο πληκτρολόγιο πλήρους πλάτους</string>
+    <string name="layout_settings_show_number_row">Εμφάνιση σειράς αριθμών</string>
+    <string name="layout_settings_number_row_on">Εμφανίζεται η σειρά αριθμών</string>
+    <string name="layout_settings_number_row_off">Δεν εμφανίζεται η σειρά αριθμών</string>
+    <string name="layout_settings_show_language_switch_key">Εμφάνιση πλήκτρου εναλλαγής γλώσσας</string>
+    <string name="layout_settings_language_switch_key_on">Ενεργοποιημένο</string>
+    <string name="layout_settings_language_switch_key_off">Απενεργοποιημένο</string>
+    <string name="layout_settings_space_bar_size">Μέγεθος πλήκτρου διαστήματος</string>
+    <string name="alternative_layout_default">Προεπιλογή (διάταξη γλώσσας)</string>
+    <string name="alternative_layout_dvorak">Dvorak</string>
+    <string name="alternative_layout_colemak">Colemak</string>
+    <string name="alternative_layout_workman">Workman</string>
+    <string name="layout_settings_customize_keys">Προσαρμογή πλήκτρων</string>
+    <string name="layout_settings_customize_keys_summary">Ορισμός προσαρμοσμένου χαρακτήρα για παρατεταμένο πάτημα</string>
+    <!-- Layout Mapper -->
+    <string name="layout_mapper_title">Προσαρμογή πλήκτρων</string>
+    <string name="layout_mapper_instructions">Πατήστε ένα πλήκτρο για να ορίσετε προσαρμοσμένο χαρακτήρα. Με παρατεταμένο πάτημα αυτού του πλήκτρου στο πληκτρολόγιο θα γίνεται εισαγωγή του χαρακτήρα σας.</string>
+    <string name="layout_mapper_edit_key">Επεξεργασία πλήκτρου: %1$s</string>
+    <string name="layout_mapper_symbol_hint">Προσαρμοσμένος χαρακτήρας</string>
+    <string name="layout_mapper_save">Αποθήκευση</string>
+    <string name="layout_mapper_remove">Κατάργηση</string>
+    <string name="layout_mapper_reset_all">Επαναφορά όλων</string>
+    <string name="layout_mapper_reset_title">Επαναφορά όλων των αντιστοιχίσεων;</string>
+    <string name="layout_mapper_reset_message">Αυτό θα καταργήσει όλες τις προσαρμοσμένες αντιστοιχίσεις πλήκτρων. Αυτή η ενέργεια δεν μπορεί να αναιρεθεί.</string>
+    <string name="layout_mapper_reset_confirm">Επαναφορά</string>
+    <string name="layout_mapper_saved">Η αντιστοίχιση αποθηκεύτηκε</string>
+    <string name="layout_mapper_removed">Η αντιστοίχιση αφαιρέθηκε</string>
+    <string name="layout_mapper_cleared">Καταργήθηκαν όλες οι αντιστοιχίσεις</string>
+    <string name="layout_mapper_save_failed">Αποτυχία αποθήκευσης αντιστοίχισης</string>
+    <string name="layout_mapper_remove_failed">Αποτυχία αφαίρεσης αντιστοίχισης</string>
+    <string name="layout_mapper_clear_failed">Αποτυχία κατάργησης αντιστοιχίσεων</string>
+    <!-- Privacy & Data Settings -->
+    <string name="privacy_settings_clipboard_history">Ιστορικό προχείρου</string>
+    <string name="privacy_settings_clipboard_history_on">Το ιστορικό προχείρου ενεργοποιήθηκε</string>
+    <string name="privacy_settings_clipboard_history_off">Το ιστορικό προχείρου απενεργοποιήθηκε</string>
+    <string name="privacy_settings_clear_learned_words">Εκκαθάριση μαθημένων λέξεων</string>
+    <string name="privacy_settings_clear_learned_words_summary">Διαγραφή όλου του μαθημένου λεξιλογίου</string>
+    <string name="privacy_settings_clear_learned_words_confirm">Εκκαθάριση όλων των μαθημένων λέξεων; Αυτή η ενέργεια δεν μπορεί να αναιρεθεί.</string>
+    <string name="privacy_settings_reset_to_defaults">Επαναφορά προεπιλογών</string>
+    <string name="privacy_settings_reset_to_defaults_confirm">Επαναφορά όλων των ρυθμίσεων στις προεπιλογές;</string>
+    <string name="privacy_settings_export_error_log">Εξαγωγή αρχείου καταγραφής σφαλμάτων</string>
+    <string name="privacy_settings_export_error_log_summary">Κοινοποίηση διαγνωστικών αρχείων καταγραφής για εντοπισμό σφαλμάτων</string>
+    <string name="privacy_settings_export_error_log_failed">Αποτυχία εξαγωγής αρχείου καταγραφής σφαλμάτων</string>
+    <string name="privacy_settings_export_dictionary">Εξαγωγή λεξικού</string>
+    <string name="privacy_settings_export_dictionary_summary">Αποθήκευση μαθημένων λέξεων σε αρχείο</string>
+    <string name="privacy_settings_import_dictionary">Εισαγωγή λεξικού</string>
+    <string name="privacy_settings_import_dictionary_summary">Επαναφορά μαθημένων λέξεων από αρχείο</string>
+    <!-- Error Messages -->
+    <string name="error_title">Σφάλμα</string>
+    <string name="error_update_theme">Αποτυχία ενημέρωσης θέματος</string>
+    <string name="error_update_key_size">Αποτυχία ενημέρωσης μεγέθους πλήκτρου</string>
+    <string name="error_update_key_label_size">Αποτυχία ενημέρωσης μεγέθους χαρακτήρα πλήκτρου</string>
+    <string name="error_update_spell_check">Αποτυχία ενημέρωσης ορθογραφικού ελέγχου</string>
+    <string name="error_update_suggestions">Αποτυχία ενημέρωσης ρυθμίσεων προτάσεων</string>
+    <string name="error_update_suggestion_count">Αποτυχία ενημέρωσης αριθμού προτάσεων</string>
+    <string name="error_update_word_learning">Αποτυχία ενημέρωσης της εκμάθησης λέξεων</string>
+    <string name="error_update_clipboard">Αποτυχία ενημέρωσης ρυθμίσεων προχείρου</string>
+    <string name="error_update_language">Αποτυχία ενημέρωσης ρυθμίσεων γλώσσας</string>
+    <string name="error_update_haptic_feedback">Αποτυχία ενημέρωσης της απτικής ανάδρασης</string>
+    <string name="error_update_vibration_strength">Αποτυχία ενημέρωσης έντασης δόνησης</string>
+    <string name="error_update_double_space_period">Αποτυχία ενημέρωσης της ρύθμισης διπλού διαστήματος</string>
+    <string name="error_update_auto_capitalization">Αποτυχία ενημέρωσης αυτόματης κεφαλαίωσης</string>
+    <string name="error_update_swipe">Αποτυχία ενημέρωσης της ρύθμισης Πληκτρολόγηση με σάρωση</string>
+    <string name="error_update_spacebar_cursor">Αποτυχία ενημέρωσης του ελέγχου δρομέα με το πλήκτρο διαστήματος</string>
+    <string name="error_update_cursor_speed">Αποτυχία ενημέρωσης ταχύτητας δρομέα</string>
+    <string name="error_update_backspace_swipe">Αποτυχία ενημέρωσης της ρύθμισης σάρωσης του πλήκτρου διαγραφής</string>
+    <string name="error_update_long_press_punctuation">Αποτυχία ενημέρωσης της ρύθμισης Γρήγορο μενού σημείων στίξης</string>
+    <string name="error_update_long_press_duration">Αποτυχία ενημέρωσης διάρκειας παρατεταμένου πατήματος</string>
+    <string name="error_update_number_row">Αποτυχία ενημέρωσης σειράς αριθμών</string>
+    <string name="error_update_space_bar_size">Αποτυχία ενημέρωσης μεγέθους πλήκτρου διαστήματος</string>
+    <string name="error_update_alternative_layout">Αποτυχία ενημέρωσης διάταξης πληκτρολογίου</string>
+    <string name="error_clear_learned_words">Αποτυχία εκκαθάρισης μαθημένων λέξεων</string>
+    <string name="error_reset_to_defaults">Αποτυχία επαναφοράς ρυθμίσεων</string>
+    <string name="error_dictionary_export">Αποτυχία εξαγωγής λεξικού</string>
+    <string name="error_dictionary_import">Αποτυχία εισαγωγής λεξικού</string>
+    <string name="error_update_merged_dictionaries">Αποτυχία ενημέρωσης λειτουργίας λεξικού</string>
+    <!-- Success Messages -->
+    <string name="success_learned_words_cleared">Οι μαθημένες λέξεις εκκαθαρίστηκαν</string>
+    <string name="success_settings_reset">Οι ρυθμίσεις επανήλθαν στις προεπιλογές</string>
+    <string name="success_dictionary_exported">Εξάχθηκαν %1$d λέξεις</string>
+    <string name="success_dictionary_imported">Προστέθηκαν %1$d νέες λέξεις, ενημερώθηκαν %2$d λέξεις</string>
+    <!-- Keyboard descriptions -->
+    <string name="keyboard_description">Εικονικό πληκτρολόγιο</string>
+    <!-- Default key labels -->
+    <string name="letters_mode_label">ABC</string>
+    <string name="numbers_mode_label">123</string>
+    <string name="symbols_mode_label">+=&lt;</string>
+    <!-- Accessibility descriptions -->
+    <string name="key_character_description">Χαρακτήρας %1$s</string>
+    <string name="shift_key_description">Πλήκτρο shift, πατήστε για κεφαλαίωση του επόμενου γράμματος</string>
+    <string name="shift_active_description">Το πλήκτρο shift είναι ενεργό, πατήστε για απενεργοποίηση</string>
+    <string name="caps_lock_description">Κλείδωμα κεφαλαίων</string>
+    <string name="caps_lock_on_description">Το κλείδωμα κεφαλαίων είναι ενεργό, πατήστε για απενεργοποίηση</string>
+    <string name="backspace_key_description">Διαγραφή προηγούμενου χαρακτήρα</string>
+    <string name="space_key_description">Πλήκτρο διαστήματος</string>
+    <string name="letters_mode_description">Εναλλαγή στο αλφαβητικό πληκτρολόγιο</string>
+    <string name="numbers_mode_description">Εναλλαγή σε αριθμητικό πληκτρολόγιο</string>
+    <string name="symbols_mode_description">Εναλλαγή σε πληκτρολόγιο συμβόλων</string>
+    <string name="language_switch_description">Εναλλαγή γλώσσας πληκτρολογίου</string>
+    <string name="ime_prediction_description">Πρόβλεψη: %1$s</string>
+    <!-- Action button accessibility descriptions -->
+    <string name="action_enter_description">Πατήστε enter</string>
+    <string name="action_send_description">Αποστολή μηνύματος</string>
+    <string name="action_search_description">Αναζήτηση</string>
+    <string name="action_done_description">Ολοκλήρωση επεξεργασίας</string>
+    <string name="action_go_description">Μετάβαση στον προορισμό</string>
+    <string name="action_next_description">Μετάβαση στο επόμενο πεδίο</string>
+    <string name="action_previous_description">Μετάβαση στο προηγούμενο πεδίο</string>
+    <string name="action_emoji">Emoji</string>
+    <string name="emoji_search_hint" tools:ignore="TypographyEllipsis">Αναζήτηση emojis...</string>
+    <string name="autofill_indicator_description">Διαθέσιμες προτάσεις διαχειριστή κωδικών πρόσβασης</string>
+    <!-- Theme Picker Accessibility -->
+    <string name="theme_description">Θέμα %1$s</string>
+    <string name="theme_description_selected">Θέμα %1$s, επιλεγμένο</string>
+    <string name="theme_add_favorite">Προσθήκη %1$s στα αγαπημένα</string>
+    <string name="theme_remove_favorite">Κατάργηση %1$s από τα αγαπημένα</string>
+    <!-- Character Variation Accessibility -->
+    <string name="character_variation_position">Παραλλαγή χαρακτήρα %1$d από %2$d: %3$s</string>
+    <string name="character_option_role">επιλογή χαρακτήρα</string>
+    <!-- Blacklisting Words -->
+    <string name="remove_suggestion">Κατάργηση %1$s από τις προτάσεις;</string>
+    <string name="remove_cancel">Ακύρωση</string>
+    <string name="remove_confirm">Κατάργηση</string>
+    <!-- Tips -->
+    <string name="tip_1_title">Εκμάθηση λέξεων</string>
+    <string name="tip_1_description">Πατήστε το διάστημα μετά από επισημασμένο ορθογραφικό λάθος για να προσθέσετε τη λέξη στο λεξικό σας.</string>
+    <string name="tip_2_title">Γρήγορο μενού σημείων στίξης</string>
+    <string name="tip_2_description">Πατήστε παρατεταμένα το πλήκτρο διαστήματος για να ανοίξετε το γρήγορο μενού σημείων στίξης.</string>
+    <string name="tip_3_title">Παραλλαγές χαρακτήρων</string>
+    <string name="tip_3_description">Πατήστε παρατεταμένα έναν χαρακτήρα για να επιλέξετε μια παραλλαγή του.</string>
+    <string name="tip_4_title">Διαγραφή λέξεων</string>
+    <string name="tip_4_description">Πατήστε παρατεταμένα μια πρόταση για να τη διαγράψετε από το λεξικό σας.</string>
+    <string name="tip_5_title">Διαχείριση προχείρου</string>
+    <string name="tip_5_description">Πατήστε παρατεταμένα το πλήκτρο συμβόλων για να ανοίξετε τον διαχειριστή προχείρου.</string>
+    <!-- Clipboard Panel -->
+    <string name="clipboard_panel_title">Πρόχειρο</string>
+    <string name="clipboard_panel_pinned">Καρφιτσωμένο</string>
+    <string name="clipboard_panel_recent">Πρόσφατα</string>
+    <string name="clipboard_panel_empty">Δεν υπάρχει ιστορικό προχείρου</string>
+    <string name="clipboard_panel_delete_all">Διαγραφή όλων</string>
+    <string name="clipboard_panel_delete_all_confirm">Διαγραφή όλων των μη καρφιτσωμένων στοιχείων του προχείρου;</string>
+    <string name="clipboard_consent_message">Το Urik μπορεί να διαβάζει και να αποθηκεύει τα περιεχόμενα του προχείρου επ\' αόριστον. Αν δεν το θέλετε, μεταβείτε στις ρυθμίσεις και απενεργοποιήστε το ιστορικό προχείρου.</string>
+    <!-- Clipboard Accessibility -->
+    <string name="clipboard_item_description">Στοιχείο προχείρου: %1$s</string>
+    <string name="clipboard_item_pin">Καρφίτσωμα στοιχείου προχείρου</string>
+    <string name="clipboard_item_unpin">Ξεκαρφίτσωμα στοιχείου προχείρου</string>
+    <string name="clipboard_item_delete">Διαγραφή στοιχείου προχείρου</string>
+</resources>
