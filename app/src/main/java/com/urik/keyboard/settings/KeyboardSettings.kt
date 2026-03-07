@@ -95,6 +95,7 @@ enum class AlternativeKeyboardLayout(
     DVORAK(R.string.alternative_layout_dvorak),
     COLEMAK(R.string.alternative_layout_colemak),
     WORKMAN(R.string.alternative_layout_workman),
+    HCESAR(R.string.alternative_layout_hcesar),
 }
 
 /**

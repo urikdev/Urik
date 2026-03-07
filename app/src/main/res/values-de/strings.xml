@@ -125,9 +125,6 @@
     <string name="layout_settings_language_switch_key_off">Deaktiviert</string>
     <string name="layout_settings_space_bar_size">Leertastenbreite</string>
     <string name="alternative_layout_default">Standard (Sprachlayout)</string>
-    <string name="alternative_layout_dvorak">Dvorak</string>
-    <string name="alternative_layout_colemak">Colemak</string>
-    <string name="alternative_layout_workman">Workman</string>
     <string name="layout_settings_customize_keys">Tasten anpassen</string>
     <string name="layout_settings_customize_keys_summary">Benutzerdefiniertes Zeichen für Langdruck zuweisen</string>
 

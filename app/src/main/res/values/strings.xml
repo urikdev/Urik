@@ -143,9 +143,10 @@
     <string name="alternative_layout_qwerty" translatable="false">QWERTY</string>
     <string name="alternative_layout_azerty" translatable="false">AZERTY</string>
     <string name="alternative_layout_qwertz" translatable="false">QWERTZ</string>
-    <string name="alternative_layout_dvorak">Dvorak</string>
-    <string name="alternative_layout_colemak">Colemak</string>
-    <string name="alternative_layout_workman">Workman</string>
+    <string name="alternative_layout_dvorak" translatable="false">Dvorak</string>
+    <string name="alternative_layout_colemak" translatable="false">Colemak</string>
+    <string name="alternative_layout_workman" translatable="false">Workman</string>
+    <string name="alternative_layout_hcesar" translatable="false">HCESAR</string>
     <string name="layout_settings_customize_keys">Customize Keys</string>
     <string name="layout_settings_customize_keys_summary">Assign custom character to long-press</string>
 

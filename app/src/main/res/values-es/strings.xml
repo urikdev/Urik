@@ -126,9 +126,6 @@
     <string name="layout_settings_language_switch_key_off">Deshabilitado</string>
     <string name="layout_settings_space_bar_size">Tamaño de la barra espaciadora</string>
     <string name="alternative_layout_default">Predeterminado (Diseño de idioma)</string>
-    <string name="alternative_layout_dvorak">Dvorak</string>
-    <string name="alternative_layout_colemak">Colemak</string>
-    <string name="alternative_layout_workman">Workman</string>
     <string name="layout_settings_customize_keys">Personalizar teclas</string>
     <string name="layout_settings_customize_keys_summary">Asignar carácter personalizado a pulsación larga</string>
 

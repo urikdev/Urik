@@ -148,9 +148,6 @@
     <string name="layout_settings_language_switch_key_off">Выключено</string>
     <string name="layout_settings_space_bar_size">Размер Пробела</string>
     <string name="alternative_layout_default">По умолчанию (Языковая раскладка)</string>
-    <string name="alternative_layout_dvorak">Dvorak</string>
-    <string name="alternative_layout_colemak">Colemak</string>
-    <string name="alternative_layout_workman">Workman</string>
 
     <!-- Privacy & Data Settings -->
     <string name="privacy_settings_clipboard_history">История Буфера Обмена</string>

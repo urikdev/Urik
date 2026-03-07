@@ -126,9 +126,6 @@
     <string name="layout_settings_language_switch_key_off">Zakázáno</string>
     <string name="layout_settings_space_bar_size">Velikost mezerníku</string>
     <string name="alternative_layout_default">Výchozí (Jazykové rozložení)</string>
-    <string name="alternative_layout_dvorak">Dvorak</string>
-    <string name="alternative_layout_colemak">Colemak</string>
-    <string name="alternative_layout_workman">Workman</string>
     <string name="layout_settings_customize_keys">Přizpůsobit klávesy</string>
     <string name="layout_settings_customize_keys_summary">Přiřadit vlastní znak dlouhému stisknutí</string>
 

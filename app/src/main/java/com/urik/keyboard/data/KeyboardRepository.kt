@@ -145,6 +145,7 @@ class KeyboardRepository
                         com.urik.keyboard.settings.AlternativeKeyboardLayout.DVORAK -> "dvorak"
                         com.urik.keyboard.settings.AlternativeKeyboardLayout.COLEMAK -> "colemak"
                         com.urik.keyboard.settings.AlternativeKeyboardLayout.WORKMAN -> "workman"
+                        com.urik.keyboard.settings.AlternativeKeyboardLayout.HCESAR -> "hcesar"
                     }
 
                 val cacheKey = "${layoutIdentifier}_${mode.name}_${currentAction.name}"

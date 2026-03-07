@@ -146,9 +146,6 @@
     <string name="layout_settings_language_switch_key_off">Desativado</string>
     <string name="layout_settings_space_bar_size">Tamanho da barra de espaço</string>
     <string name="alternative_layout_default">Padrão (Layout do idioma)</string>
-    <string name="alternative_layout_dvorak">Dvorak</string>
-    <string name="alternative_layout_colemak">Colemak</string>
-    <string name="alternative_layout_workman">Workman</string>
 
     <!-- Privacy & Data Settings -->
     <string name="privacy_settings_clipboard_history">Histórico da área de transferência</string>
