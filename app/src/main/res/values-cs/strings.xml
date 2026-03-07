@@ -53,6 +53,7 @@
     <string name="cursor_speed_slow">Pomalá</string>
     <string name="cursor_speed_medium">Střední</string>
     <string name="cursor_speed_fast">Rychlá</string>
+    <string name="cursor_speed_very_fast">Velmi rychlá</string>
 
     <!-- Space Bar Size -->
     <string name="space_bar_size_compact">Kompaktní</string>

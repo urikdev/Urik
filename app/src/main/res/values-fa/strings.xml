@@ -53,6 +53,7 @@
     <string name="cursor_speed_slow">کند</string>
     <string name="cursor_speed_medium">متوسط</string>
     <string name="cursor_speed_fast">سریع</string>
+    <string name="cursor_speed_very_fast">خیلی سریع</string>
 
     <!-- Space Bar Size -->
     <string name="space_bar_size_compact">جمع‌وجور</string>

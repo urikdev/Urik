@@ -95,6 +95,13 @@ class KeyboardLayoutManager(
             @Suppress("DEPRECATION")
             context.getSystemService(Context.VIBRATOR_SERVICE) as? android.os.Vibrator
         }
+    private val supportsAmplitudeControl = vibrator?.hasAmplitudeControl() == true
+    private val vibrationAttributes =
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            android.os.VibrationAttributes.createForUsage(android.os.VibrationAttributes.USAGE_TOUCH)
+        } else {
+            null
+        }
     private var hapticEnabled = true
     private var hapticAmplitude = 170
     private var shiftLongPressFired = false
@@ -629,11 +636,9 @@ class KeyboardLayoutManager(
 
     fun triggerBackspaceHaptic() {
         if (!hapticEnabled || hapticAmplitude == 0) return
-        try {
-            val effect = HapticSignature.BackspaceChirp.createEffect(hapticAmplitude)
-            vibrator?.vibrate(effect)
-        } catch (_: Exception) {
-        }
+        val amplitude = if (supportsAmplitudeControl) hapticAmplitude else android.os.VibrationEffect.DEFAULT_AMPLITUDE
+        val effect = HapticSignature.BackspaceChirp.createEffect(amplitude)
+        vibrateEffect(effect)
     }
 
     fun forceStopAcceleratedBackspace() {
@@ -718,6 +723,18 @@ class KeyboardLayoutManager(
         customKeyMappings = mappings
     }
 
+    private fun vibrateEffect(effect: android.os.VibrationEffect) {
+        val v = vibrator ?: return
+        try {
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU && vibrationAttributes != null) {
+                v.vibrate(effect, vibrationAttributes)
+            } else {
+                v.vibrate(effect)
+            }
+        } catch (_: Exception) {
+        }
+    }
+
     private fun performContextualHaptic(key: KeyboardKey?) {
         if (!hapticEnabled || hapticAmplitude == 0) return
 
@@ -752,8 +769,9 @@ class KeyboardLayoutManager(
                     }
                 }
 
-            val effect = signature.createEffect(hapticAmplitude)
-            vibrator?.vibrate(effect)
+            val amplitude = if (supportsAmplitudeControl) hapticAmplitude else android.os.VibrationEffect.DEFAULT_AMPLITUDE
+            val effect = signature.createEffect(amplitude)
+            vibrateEffect(effect)
         } catch (_: Exception) {
         }
     }
@@ -1811,10 +1829,14 @@ class KeyboardLayoutManager(
                             val phaseProgress = elapsed / 500f
                             val intervalMs = (80 - phaseProgress * 20).toLong().coerceAtLeast(60)
                             val intensity = 0.4f + phaseProgress * 0.3f
-                            val amplitude = (hapticAmplitude * intensity).toInt().coerceIn(1, 255)
+                            val amplitude = if (supportsAmplitudeControl) {
+                                (hapticAmplitude * intensity).toInt().coerceIn(1, 255)
+                            } else {
+                                android.os.VibrationEffect.DEFAULT_AMPLITUDE
+                            }
 
                             withContext(Dispatchers.Main) {
-                                vibrator?.vibrate(
+                                vibrateEffect(
                                     android.os.VibrationEffect.createOneShot(intervalMs / 2, amplitude),
                                 )
                             }
@@ -1832,10 +1854,14 @@ class KeyboardLayoutManager(
                             val phaseProgress = (elapsed - 500) / 1000f
                             val intervalMs = (60 - phaseProgress * 30).toLong().coerceAtLeast(30)
                             val intensity = 0.7f + phaseProgress * 0.3f
-                            val amplitude = (hapticAmplitude * intensity).toInt().coerceIn(1, 255)
+                            val amplitude = if (supportsAmplitudeControl) {
+                                (hapticAmplitude * intensity).toInt().coerceIn(1, 255)
+                            } else {
+                                android.os.VibrationEffect.DEFAULT_AMPLITUDE
+                            }
 
                             withContext(Dispatchers.Main) {
-                                vibrator?.vibrate(
+                                vibrateEffect(
                                     android.os.VibrationEffect.createOneShot(intervalMs / 2, amplitude),
                                 )
                             }
@@ -1873,21 +1899,22 @@ class KeyboardLayoutManager(
                     }
 
                 val intensity = 0.4f + progress * 0.7f
-                (hapticAmplitude * intensity).toInt().coerceIn(1, 255)
+                if (supportsAmplitudeControl) {
+                    (hapticAmplitude * intensity).toInt().coerceIn(1, 255)
+                } else {
+                    android.os.VibrationEffect.DEFAULT_AMPLITUDE
+                }
             }
 
         backgroundScope.launch {
             withContext(Dispatchers.Main) {
-                try {
-                    vibrator?.vibrate(
-                        android.os.VibrationEffect.createWaveform(
-                            timings,
-                            amplitudes,
-                            rampSteps + 2,
-                        ),
-                    )
-                } catch (_: Exception) {
-                }
+                vibrateEffect(
+                    android.os.VibrationEffect.createWaveform(
+                        timings,
+                        amplitudes,
+                        rampSteps + 2,
+                    ),
+                )
             }
         }
     }

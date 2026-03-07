@@ -53,6 +53,7 @@
     <string name="cursor_speed_slow">Wolna</string>
     <string name="cursor_speed_medium">Średnia</string>
     <string name="cursor_speed_fast">Szybka</string>
+    <string name="cursor_speed_very_fast">Bardzo szybko</string>
 
     <!-- Space Bar Size -->
     <string name="space_bar_size_compact">Kompaktowy</string>

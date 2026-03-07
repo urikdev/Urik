@@ -54,6 +54,7 @@
     <string name="cursor_speed_slow">بطيء</string>
     <string name="cursor_speed_medium">متوسط</string>
     <string name="cursor_speed_fast">سريع</string>
+    <string name="cursor_speed_very_fast">سريع جداً</string>
 
     <!-- Space Bar Size -->
     <string name="space_bar_size_compact">نحيف</string>
