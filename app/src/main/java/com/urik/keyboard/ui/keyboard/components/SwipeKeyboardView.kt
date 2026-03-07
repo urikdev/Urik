@@ -57,6 +57,13 @@ class SwipeKeyboardView
         private val activeSuggestionViews = mutableListOf<TextView>()
         private val dividerViewPool = mutableListOf<View>()
         private val activeDividerViews = mutableListOf<View>()
+        private val suggestionMeasurePaint = android.text.TextPaint()
+        private var suggestionTextSizeSp = 0f
+        private var suggestionDividerMargin = 0
+        private var suggestionDividerWidth = 0
+        private var suggestionMaxPadding = 0
+        private var suggestionMinPadding = 0
+        private var suggestionVerticalPadding = 0
         private var spellCheckManager: SpellCheckManager? = null
         private var keyboardLayoutManager: KeyboardLayoutManager? = null
         private var swipeDetector: SwipeDetector? = null
@@ -964,19 +971,35 @@ class SwipeKeyboardView
             }
         }
 
+        private fun cacheSuggestionMetrics() {
+            val density = context.resources.displayMetrics.density
+            suggestionTextSizeSp = calculateResponsiveSuggestionTextSize()
+            suggestionDividerMargin = context.resources.getDimensionPixelSize(R.dimen.key_margin_horizontal) / 2
+            suggestionDividerWidth = (density).toInt() + suggestionDividerMargin * 2
+            suggestionMaxPadding = (suggestionTextSizeSp * density * 1.2f).toInt()
+            suggestionMinPadding = (4 * density).toInt()
+            suggestionVerticalPadding = (suggestionTextSizeSp * density * 0.65f).toInt()
+            suggestionMeasurePaint.textSize = suggestionTextSizeSp * density
+            suggestionMeasurePaint.typeface = android.graphics.Typeface.DEFAULT
+            suggestionMeasurePaint.letterSpacing = 0f
+        }
+
         private fun populateSuggestions(
             bar: LinearLayout,
             suggestions: List<String>,
         ) {
-            suggestions.take(3).forEachIndexed { index, suggestion ->
+            val capped = suggestions.take(3)
+            val emojiWidth = emojiButton?.let { it.measuredWidth.takeIf { w -> w > 0 } } ?: 0
+            val barWidth = bar.width.takeIf { it > 0 }
+                ?: context.resources.displayMetrics.widthPixels
+            val cellWidth = (barWidth - emojiWidth - suggestionDividerWidth * (capped.size - 1).coerceAtLeast(0)) / capped.size
+
+            capped.forEachIndexed { index, suggestion ->
                 if (isDestroyed) return@forEachIndexed
 
                 val btn = getOrCreateSuggestionView()
 
-                btn.text = suggestion
-
-                val suggestionTextSize = calculateResponsiveSuggestionTextSize()
-                btn.setTextSize(TypedValue.COMPLEX_UNIT_SP, suggestionTextSize)
+                btn.setTextSize(TypedValue.COMPLEX_UNIT_SP, suggestionTextSizeSp)
                 btn.setTextColor(
                     themeManager!!
                         .currentTheme.value.colors.suggestionText,
@@ -990,15 +1013,17 @@ class SwipeKeyboardView
                     }
 
                 btn.maxLines = 1
-                btn.ellipsize = android.text.TextUtils.TruncateAt.MIDDLE
+                btn.isSingleLine = true
+                btn.typeface = android.graphics.Typeface.DEFAULT
 
                 btn.contentDescription = context.getString(R.string.ime_prediction_description, suggestion)
 
-                val horizontalPadding = (suggestionTextSize * context.resources.displayMetrics.density * 1.2f).toInt()
-                val verticalPadding = (suggestionTextSize * context.resources.displayMetrics.density * 0.65f).toInt()
-                btn.setPadding(horizontalPadding, verticalPadding, horizontalPadding, verticalPadding)
-
-                btn.typeface = android.graphics.Typeface.DEFAULT
+                suggestionMeasurePaint.letterSpacing = 0f
+                val fitted = fitSuggestionText(suggestionMeasurePaint, suggestion, cellWidth, suggestionMaxPadding, suggestionMinPadding)
+                btn.setPadding(fitted.horizontalPadding, suggestionVerticalPadding, fitted.horizontalPadding, suggestionVerticalPadding)
+                btn.letterSpacing = fitted.letterSpacing
+                btn.ellipsize = fitted.ellipsize
+                btn.text = suggestion
 
                 btn.setTag(R.id.suggestion_text, suggestion)
                 btn.setOnClickListener(suggestionClickListener)
@@ -1006,13 +1031,12 @@ class SwipeKeyboardView
 
                 activeSuggestionViews.add(btn)
 
-                btn.gravity =
-                    if (suggestions.size == 1) Gravity.CENTER else Gravity.START or Gravity.CENTER_VERTICAL
+                btn.gravity = Gravity.CENTER
 
                 val layoutParams = LinearLayout.LayoutParams(0, LayoutParams.WRAP_CONTENT, 1f)
                 bar.addView(btn, layoutParams)
 
-                if (index < suggestions.take(3).size - 1) {
+                if (index < capped.size - 1) {
                     val divider = getOrCreateDividerView()
 
                     divider.setBackgroundColor(
@@ -1023,18 +1047,59 @@ class SwipeKeyboardView
                     val dividerParams =
                         LinearLayout
                             .LayoutParams(
-                                (1 * context.resources.displayMetrics.density).toInt(),
+                                (context.resources.displayMetrics.density).toInt(),
                                 LayoutParams.MATCH_PARENT,
                             ).apply {
-                                val margin = context.resources.getDimensionPixelSize(R.dimen.key_margin_horizontal) / 2
-                                marginStart = margin
-                                marginEnd = margin
+                                marginStart = suggestionDividerMargin
+                                marginEnd = suggestionDividerMargin
                             }
 
                     activeDividerViews.add(divider)
                     bar.addView(divider, dividerParams)
                 }
             }
+        }
+
+        private data class SuggestionFit(
+            val horizontalPadding: Int,
+            val letterSpacing: Float,
+            val ellipsize: android.text.TextUtils.TruncateAt?,
+        )
+
+        private fun fitSuggestionText(
+            paint: android.text.TextPaint,
+            text: String,
+            cellWidth: Int,
+            maxPadding: Int,
+            minPadding: Int,
+        ): SuggestionFit {
+            if (text.isEmpty() || cellWidth <= 0) return SuggestionFit(maxPadding, 0f, null)
+
+            paint.letterSpacing = 0f
+            val textWidth = paint.measureText(text)
+
+            if (textWidth <= cellWidth - maxPadding * 2) {
+                return SuggestionFit(maxPadding, 0f, null)
+            }
+
+            if (textWidth <= cellWidth - minPadding * 2) {
+                val neededPadding = ((cellWidth - textWidth) / 2).toInt()
+                return SuggestionFit(neededPadding, 0f, null)
+            }
+
+            val availableAtMinPad = cellWidth - minPadding * 2
+            val minSpacing = -0.15f
+            val gaps = (text.length - 1).coerceAtLeast(1)
+            val neededSpacing = (availableAtMinPad - textWidth) / (paint.textSize * gaps)
+            val clamped = neededSpacing.coerceIn(minSpacing, 0f)
+
+            paint.letterSpacing = clamped
+            val verifiedWidth = paint.measureText(text)
+            paint.letterSpacing = 0f
+
+            if (verifiedWidth <= availableAtMinPad) return SuggestionFit(minPadding, clamped, null)
+
+            return SuggestionFit(minPadding, minSpacing, android.text.TextUtils.TruncateAt.END)
         }
 
         private fun getOrCreateSuggestionView(): TextView =
@@ -1056,6 +1121,8 @@ class SwipeKeyboardView
                 activeSuggestionViews.forEach { view ->
                     view.setOnClickListener(null)
                     view.setOnLongClickListener(null)
+                    view.letterSpacing = 0f
+                    view.ellipsize = null
                     if (suggestionViewPool.size < 10) {
                         suggestionViewPool.add(view)
                     }
@@ -1479,6 +1546,7 @@ class SwipeKeyboardView
                         addView(emojiButton)
                     }
 
+                cacheSuggestionMetrics()
                 insertSuggestionBar()
 
                 if (existingSuggestions.isNotEmpty()) {
