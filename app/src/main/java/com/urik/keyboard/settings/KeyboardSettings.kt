@@ -64,6 +64,7 @@ enum class CursorSpeed(
     SLOW(R.string.cursor_speed_slow, 40f),
     MEDIUM(R.string.cursor_speed_medium, 25f),
     FAST(R.string.cursor_speed_fast, 15f),
+    VERY_FAST(R.string.cursor_speed_very_fast, 8f),
 }
 
 /**

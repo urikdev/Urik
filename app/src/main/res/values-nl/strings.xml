@@ -53,6 +53,7 @@
     <string name="cursor_speed_slow">Traag</string>
     <string name="cursor_speed_medium">Gemiddeld</string>
     <string name="cursor_speed_fast">Snel</string>
+    <string name="cursor_speed_very_fast">Zeer snel</string>
 
     <!-- Space Bar Size -->
     <string name="space_bar_size_compact">Compact</string>

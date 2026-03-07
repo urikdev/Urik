@@ -102,6 +102,8 @@ class SwipeKeyboardView
         private var gestureStartY = 0f
         private var gestureLastProcessedX = 0f
         private var gestureDensity = 1f
+        private var gesturePrevX = 0f
+        private var gesturePrevTime = 0L
         private var currentCursorSpeed: com.urik.keyboard.settings.CursorSpeed = com.urik.keyboard.settings.CursorSpeed.MEDIUM
 
         private var confirmationOverlay: FrameLayout? = null
@@ -1672,9 +1674,24 @@ class SwipeKeyboardView
 
             when (key.action) {
                 KeyboardKey.ActionType.SPACE -> {
-                    val totalDx = x - gestureStartX
-                    val sensitivity = currentCursorSpeed.sensitivityDp * gestureDensity
+                    val now = System.currentTimeMillis()
+                    val dt = (now - gesturePrevTime).coerceAtLeast(1)
+                    val velocityPxPerMs = kotlin.math.abs(x - gesturePrevX) / dt.toFloat()
+                    gesturePrevX = x
+                    gesturePrevTime = now
 
+                    val velocityDpPerMs = velocityPxPerMs / gestureDensity
+                    val accelerationMultiplier = when {
+                        velocityDpPerMs > 1.5f -> 3.0f
+                        velocityDpPerMs > 0.8f -> 2.0f
+                        velocityDpPerMs > 0.4f -> 1.4f
+                        else -> 1.0f
+                    }
+
+                    val baseSensitivity = currentCursorSpeed.sensitivityDp * gestureDensity
+                    val sensitivity = baseSensitivity / accelerationMultiplier
+
+                    val totalDx = x - gestureStartX
                     val positionsToMove = (totalDx / sensitivity).toInt()
                     val lastPositionsMoved = ((gestureLastProcessedX - gestureStartX) / sensitivity).toInt()
                     val deltaPositions = positionsToMove - lastPositionsMoved
@@ -1749,6 +1766,8 @@ class SwipeKeyboardView
                         gestureStartX = ev.x
                         gestureStartY = ev.y
                         gestureLastProcessedX = ev.x
+                        gesturePrevX = ev.x
+                        gesturePrevTime = System.currentTimeMillis()
                     }
 
                     swipeDetector?.handleTouchEvent(ev) { x, y -> findKeyAt(x, y) }

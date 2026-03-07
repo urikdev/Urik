@@ -53,6 +53,7 @@
     <string name="cursor_speed_slow">Повільна</string>
     <string name="cursor_speed_medium">Середня</string>
     <string name="cursor_speed_fast">Швидка</string>
+    <string name="cursor_speed_very_fast">Дуже швидко</string>
 
     <!-- Space Bar Size -->
     <string name="space_bar_size_compact">Компактний</string>

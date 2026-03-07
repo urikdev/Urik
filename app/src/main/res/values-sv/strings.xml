@@ -188,6 +188,7 @@
     <string name="cursor_speed_slow">Långsam</string>
     <string name="cursor_speed_medium">Medium</string>
     <string name="cursor_speed_fast">Snabb</string>
+    <string name="cursor_speed_very_fast">Mycket snabb</string>
     <string name="space_bar_size_compact">Kompakt</string>
     <string name="space_bar_size_standard">Standard</string>
     <string name="space_bar_size_wide">Bred</string>

@@ -51,6 +51,7 @@
     <string name="cursor_speed_slow">Αργή</string>
     <string name="cursor_speed_medium">Κανονική</string>
     <string name="cursor_speed_fast">Γρήγορη</string>
+    <string name="cursor_speed_very_fast">Πολύ γρήγορο</string>
     <!-- Space Bar Size -->
     <string name="space_bar_size_compact">Στενό</string>
     <string name="space_bar_size_standard">Κανονικό</string>
