@@ -159,9 +159,6 @@
     <string name="layout_settings_language_switch_key_off">Disabilitato</string>
     <string name="layout_settings_space_bar_size">Dimensione barra spaziatrice</string>
     <string name="alternative_layout_default">Predefinito (Layout lingua)</string>
-    <string name="alternative_layout_dvorak">Dvorak</string>
-    <string name="alternative_layout_colemak">Colemak</string>
-    <string name="alternative_layout_workman">Workman</string>
 
     <!-- Privacy & Data Settings -->
     <string name="privacy_settings_clipboard_history">Cronologia appunti</string>

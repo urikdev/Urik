@@ -100,9 +100,6 @@
     <string name="layout_settings_language_switch_key_off">Inaktiverad</string>
     <string name="layout_settings_space_bar_size">Storlek på mellanslagstangenten</string>
     <string name="alternative_layout_default">Standard (Språklayout)</string>
-    <string name="alternative_layout_dvorak">Dvorak</string>
-    <string name="alternative_layout_colemak">Colemak</string>
-    <string name="alternative_layout_workman">Workman</string>
     <string name="privacy_settings_clipboard_history">Urklippshistorik</string>
     <string name="privacy_settings_clipboard_history_on">Urklippshistorik aktiverad</string>
     <string name="privacy_settings_clipboard_history_off">Urklippshistorik inaktiverad</string>

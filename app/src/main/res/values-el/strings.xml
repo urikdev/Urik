@@ -128,9 +128,6 @@
     <string name="layout_settings_language_switch_key_off">Απενεργοποιημένο</string>
     <string name="layout_settings_space_bar_size">Μέγεθος πλήκτρου διαστήματος</string>
     <string name="alternative_layout_default">Προεπιλογή (διάταξη γλώσσας)</string>
-    <string name="alternative_layout_dvorak">Dvorak</string>
-    <string name="alternative_layout_colemak">Colemak</string>
-    <string name="alternative_layout_workman">Workman</string>
     <string name="layout_settings_customize_keys">Προσαρμογή πλήκτρων</string>
     <string name="layout_settings_customize_keys_summary">Ορισμός προσαρμοσμένου χαρακτήρα για παρατεταμένο πάτημα</string>
     <!-- Layout Mapper -->

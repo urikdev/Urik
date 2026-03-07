@@ -128,9 +128,6 @@
     <string name="layout_settings_language_switch_key_off">Desactivat</string>
     <string name="layout_settings_space_bar_size">Mida de la barra espaiadora</string>
     <string name="alternative_layout_default">Predeterminat (Disseny d\'idioma)</string>
-    <string name="alternative_layout_dvorak">Dvorak</string>
-    <string name="alternative_layout_colemak">Colemak</string>
-    <string name="alternative_layout_workman">Workman</string>
     <string name="layout_settings_customize_keys">Personalitzar tecles</string>
     <string name="layout_settings_customize_keys_summary">Assignar un caràcter personalitzat a la premsa llarga</string>
     <!-- Layout Mapper -->

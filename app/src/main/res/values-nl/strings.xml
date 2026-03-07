@@ -159,9 +159,6 @@
     <string name="layout_settings_language_switch_key_off">Uitgeschakeld</string>
     <string name="layout_settings_space_bar_size">Spatiebalkgrootte</string>
     <string name="alternative_layout_default">Standaard (Taalindeling)</string>
-    <string name="alternative_layout_dvorak">Dvorak</string>
-    <string name="alternative_layout_colemak">Colemak</string>
-    <string name="alternative_layout_workman">Workman</string>
 
     <!-- Privacy & Data Settings -->
     <string name="privacy_settings_clipboard_history">Klembordgeschiedenis</string>

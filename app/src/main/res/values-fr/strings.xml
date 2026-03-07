@@ -139,12 +139,6 @@
     <string name="layout_settings_language_switch_key_off">Désactivée</string>
     <string name="layout_settings_space_bar_size">Taille de la barre d\'espace</string>
     <string name="alternative_layout_default">Par défaut (disposition linguistique)</string>
-    <string name="alternative_layout_qwerty" translatable="false">QWERTY</string>
-    <string name="alternative_layout_azerty" translatable="false">AZERTY</string>
-    <string name="alternative_layout_qwertz" translatable="false">QWERTZ</string>
-    <string name="alternative_layout_dvorak">Dvorak</string>
-    <string name="alternative_layout_colemak">Colemak</string>
-    <string name="alternative_layout_workman">Workman</string>
     <string name="layout_settings_customize_keys">Personnaliser les touches</string>
     <string name="layout_settings_customize_keys_summary">Attribuer un caractère personnalisé à un appui long</string>
 
