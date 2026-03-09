@@ -27,6 +27,9 @@ class CharacterVariationPopup(
     private var onVariationSelected: ((String) -> Unit)? = null
     private val characterButtons = mutableListOf<Button>()
     private var highlightedButton: Button? = null
+    private val density = context.resources.displayMetrics.density
+    private val cachedCornerRadius = 8f * density
+    private val cachedStrokeWidth = (1 * density).toInt()
 
     private val scrollView: HorizontalScrollView =
         HorizontalScrollView(context).apply {
@@ -54,7 +57,6 @@ class CharacterVariationPopup(
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER
 
-            val density = context.resources.displayMetrics.density
             val paddingH = (8 * density).toInt()
             val paddingV = (4 * density).toInt()
             setPadding(paddingH, paddingV, paddingH, paddingV)
@@ -107,14 +109,12 @@ class CharacterVariationPopup(
             addCharacterView(variation, isBase = false, index = actualIndex, totalCount = totalCount)
         }
 
-        val density = context.resources.displayMetrics.density
         val itemSize = (40 * density).toInt()
         val totalItems = variations.size + if (baseChar.isNotEmpty()) 1 else 0
         val idealWidth = totalItems * itemSize + (16 * density).toInt()
         val popupHeight = itemSize + (8 * density).toInt()
 
-        val displayMetrics = context.resources.displayMetrics
-        val screenWidth = displayMetrics.widthPixels
+        val screenWidth = context.resources.displayMetrics.widthPixels
         val maxWidth = screenWidth - (32 * density).toInt()
 
         width = minOf(idealWidth, maxWidth)
@@ -127,8 +127,6 @@ class CharacterVariationPopup(
         index: Int,
         totalCount: Int,
     ) {
-        val density = context.resources.displayMetrics.density
-
         val button =
             Button(context).apply {
                 text = char
@@ -158,15 +156,11 @@ class CharacterVariationPopup(
                         theme.colors.keyBackgroundCharacter
                     }
 
-                val cornerRadius = 8f * density
                 background =
                     GradientDrawable().apply {
                         setColor(backgroundColor)
-                        this.cornerRadius = cornerRadius
-                        setStroke(
-                            (1 * density).toInt(),
-                            theme.colors.keyBorder,
-                        )
+                        cornerRadius = cachedCornerRadius
+                        setStroke(cachedStrokeWidth, theme.colors.keyBorder)
                     }
 
                 minHeight = 0
@@ -229,7 +223,6 @@ class CharacterVariationPopup(
             return
         }
 
-        val density = context.resources.displayMetrics.density
         val gap = (8 * density).toInt()
 
         val displayMetrics = context.resources.displayMetrics
@@ -311,7 +304,6 @@ class CharacterVariationPopup(
 
     fun setHighlighted(char: String?) {
         val theme = themeManager.currentTheme.value
-        val density = context.resources.displayMetrics.density
 
         highlightedButton?.let { button ->
             val isBase = button == characterButtons.firstOrNull()
@@ -322,15 +314,11 @@ class CharacterVariationPopup(
                     theme.colors.keyBackgroundCharacter
                 }
 
-            val cornerRadius = 8f * density
             button.background =
                 GradientDrawable().apply {
                     setColor(backgroundColor)
-                    this.cornerRadius = cornerRadius
-                    setStroke(
-                        (1 * density).toInt(),
-                        theme.colors.keyBorder,
-                    )
+                    cornerRadius = cachedCornerRadius
+                    setStroke(cachedStrokeWidth, theme.colors.keyBorder)
                 }
         }
 
@@ -340,15 +328,11 @@ class CharacterVariationPopup(
             val button = characterButtons.find { it.text == char }
             if (button != null) {
                 highlightedButton = button
-                val cornerRadius = 8f * density
                 button.background =
                     GradientDrawable().apply {
                         setColor(theme.colors.statePressed)
-                        this.cornerRadius = cornerRadius
-                        setStroke(
-                            (1 * density).toInt(),
-                            theme.colors.keyBorder,
-                        )
+                        cornerRadius = cachedCornerRadius
+                        setStroke(cachedStrokeWidth, theme.colors.keyBorder)
                     }
             }
         }

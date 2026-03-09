@@ -89,13 +89,6 @@ class KeyboardViewModel
                     }
             }
 
-            viewModelScope.launch {
-                themeManager.currentTheme
-                    .drop(1)
-                    .collect { theme ->
-                        startLoadLayout(_state.value.currentMode)
-                    }
-            }
         }
 
         fun onEvent(event: KeyboardEvent) {

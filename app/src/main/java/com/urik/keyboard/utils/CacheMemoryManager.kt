@@ -143,6 +143,7 @@ class CacheMemoryManager
                 "generation_cache",
                 "suggestion_cache",
                 "learned_words",
+                "learned_words_cache",
                 "spell_suggestions",
             )
 
