@@ -68,8 +68,8 @@
 
     <!-- Appearance Settings -->
     <string name="appearance_settings_theme">Thème</string>
-    <string name="appearance_settings_key_size">Taille des Touches</string>
-    <string name="appearance_settings_key_label_size">Key Label Size</string>
+    <string name="appearance_settings_key_size">Taille des touches</string>
+    <string name="appearance_settings_key_label_size">Taille du texte des touches</string>
 
     <!-- Auto-Correct Settings -->
     <string name="autocorrect_settings_spell_check">Vérification orthographique</string>
@@ -95,7 +95,7 @@
     <string name="feedback_settings_haptic_feedback">Retour haptique</string>
     <string name="feedback_settings_haptic_on">Haptique activé</string>
     <string name="feedback_settings_haptic_off">Haptique désactivé</string>
-    <string name="feedback_settings_vibration_strength">Puissance des Vibrations</string>
+    <string name="feedback_settings_vibration_strength">Puissance des vibrations</string>
 
     <!-- Typing Behavior Settings -->
     <string name="typing_settings_double_space_period">Double espace après le point</string>
@@ -104,17 +104,17 @@
     <string name="typing_settings_auto_capitalization">Capitalisation automatique</string>
     <string name="typing_settings_auto_capitalization_on">Mettre une majuscule au début de la phrase</string>
     <string name="typing_settings_auto_capitalization_off">Pas de capitalisation automatique</string>
-    <string name="typing_settings_swipe_enabled">Saisie Gestuelle</string>
-    <string name="typing_settings_swipe_on">Saisie Gestuelle activée</string>
-    <string name="typing_settings_swipe_off">Saisie Gestuelle désactivée</string>
+    <string name="typing_settings_swipe_enabled">Saisie gestuelle</string>
+    <string name="typing_settings_swipe_on">Saisie gestuelle activée</string>
+    <string name="typing_settings_swipe_off">Saisie gestuelle désactivée</string>
     <string name="typing_settings_spacebar_cursor">Contrôle du curseur avec la barre d\'espace</string>
     <string name="typing_settings_spacebar_cursor_on">Faites glisser la barre d\'espace pour déplacer le curseur.</string>
     <string name="typing_settings_spacebar_cursor_off">Contrôle du curseur à l\'aide de la barre d\'espace désactivé</string>
-    <string name="typing_settings_cursor_speed">Vitesse du Curseur</string>
+    <string name="typing_settings_cursor_speed">Vitesse du curseur</string>
     <string name="typing_settings_backspace_swipe">Suppression par balayage vers l\'arrière</string>
     <string name="typing_settings_backspace_swipe_on">Balayez vers la gauche sur la touche retour arrière pour supprimer un mot.</string>
     <string name="typing_settings_backspace_swipe_off">Suppression par balayage de la touche Retour arrière désactivée</string>
-    <string name="typing_settings_long_press_punctuation">Long Press Punctuation</string>
+    <string name="typing_settings_long_press_punctuation">Appui long pour ponctuation</string>
     <string name="long_press_punctuation_off">Désactivé</string>
     <string name="long_press_punctuation_spacebar">Barre d\'espace</string>
     <string name="long_press_punctuation_period">Touche Point</string>
@@ -153,8 +153,8 @@
     <string name="layout_mapper_reset_title">Réinitialiser tous les mappages ?</string>
     <string name="layout_mapper_reset_message">Cela supprimera tous les raccourcis clavier personnalisés. Cette action ne peut pas être annulée.</string>
     <string name="layout_mapper_reset_confirm">Réinitialiser</string>
-    <string name="layout_mapper_saved">Mappage Sauvegardé</string>
-    <string name="layout_mapper_removed">Mappage Supprimé</string>
+    <string name="layout_mapper_saved">Mappage sauvegardé</string>
+    <string name="layout_mapper_removed">Mappage supprimé</string>
     <string name="layout_mapper_cleared">Tous les mappages ont été effacés</string>
     <string name="layout_mapper_save_failed">Échec de l\'enregistrement du mappage</string>
     <string name="layout_mapper_remove_failed">Échec de la suppression du mappage</string>
