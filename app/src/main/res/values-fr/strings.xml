@@ -15,11 +15,11 @@
     <string name="about_version">Version</string>
     <string name="about_copyright">Copyright © 2025 Urik Development</string>
     <string name="about_license">License: GNU GPL v3.0</string>
-    <string name="about_source_code">Source Code</string>
-    <string name="about_release_notes">Release Notes</string>
-    <string name="about_report_bug">Reporter un Bug</string>
+    <string name="about_source_code">Code source</string>
+    <string name="about_release_notes">Notes de version</string>
+    <string name="about_report_bug">Signaler un bug</string>
     <string name="about_privacy_policy">Politique de confidentialité</string>
-    <string name="about_support">Supporter le Developement</string>
+    <string name="about_support">Soutenir le développement</string>
     <string name="autocorrect_settings_title">Paramètres d\'auto-correction</string>
     <string name="autocorrect_settings_description">Orthographe et suggestions</string>
     <string name="language_settings_title">Paramètres linguistiques</string>
@@ -38,7 +38,7 @@
     <string name="dictionary_attribution_title">Données du dictionnaire</string>
     <string name="theme_picker_title">Thème du Clavier</string>
     <string name="dictionary_attribution_summary">Licence et attribution FrequencyWords</string>
-    <string name="test_field_hint">Modifications des tests</string>
+    <string name="test_field_hint">Test des modifications</string>
 
     <!-- Settings Enums -->
     <!-- Key Size -->
@@ -117,7 +117,7 @@
     <string name="typing_settings_long_press_punctuation">Long Press Punctuation</string>
     <string name="long_press_punctuation_off">Désactivé</string>
     <string name="long_press_punctuation_spacebar">Barre d\'espace</string>
-    <string name="long_press_punctuation_period">Period Key</string>
+    <string name="long_press_punctuation_period">Touche Point</string>
     <string name="typing_settings_long_press_duration">Durée de la pression longue</string>
 
     <!-- Layout & Input Settings -->
