@@ -12,6 +12,7 @@ import com.urik.keyboard.settings.SettingsRepository
 import com.urik.keyboard.utils.CacheMemoryManager
 import com.urik.keyboard.utils.ErrorLogger
 import com.urik.keyboard.utils.ManagedCache
+import com.urik.keyboard.utils.MemoryPressureSubscriber
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -69,7 +70,7 @@ class WordLearningEngine
         private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
         private val defaultDispatcher: CoroutineDispatcher = Dispatchers.Default,
         mainDispatcher: CoroutineDispatcher = Dispatchers.Main,
-    ) {
+    ) : MemoryPressureSubscriber {
         private val config = LearningConfig()
 
         private val lastDatabaseError = AtomicLong(0L)
@@ -81,6 +82,8 @@ class WordLearningEngine
                 name = "learned_words_cache",
                 maxSize = LEARNED_WORDS_CACHE_SIZE,
             )
+
+        private val hotFrequencyBuffer = ConcurrentHashMap<String, ConcurrentHashMap<String, Int>>()
 
         private val cacheLock = Any()
 
@@ -102,6 +105,27 @@ class WordLearningEngine
                 .onEach { newSettings ->
                     currentSettings = newSettings
                 }.launchIn(engineScope)
+            cacheMemoryManager.registerPressureSubscriber(this)
+        }
+
+        override fun onMemoryPressure(level: Int) {
+            when (level) {
+                android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL,
+                android.content.ComponentCallbacks2.TRIM_MEMORY_COMPLETE,
+                -> {
+                    hotFrequencyBuffer.clear()
+                    swipeWordsCache = emptyList()
+                    swipeWordsCacheLanguage = ""
+                }
+
+                android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_MODERATE,
+                android.content.ComponentCallbacks2.TRIM_MEMORY_MODERATE,
+                -> {
+                    val currentLang = languageManager.currentLanguage.value
+                    val toEvict = hotFrequencyBuffer.keys.filter { it != currentLang }
+                    toEvict.forEach { hotFrequencyBuffer.remove(it) }
+                }
+            }
         }
 
         /**
@@ -120,6 +144,15 @@ class WordLearningEngine
                         learnedWords.forEach { normalizedSet.add(it.wordNormalized) }
                         learnedWordsCache.put(languageTag, normalizedSet)
                     }
+
+                    val freqMap = ConcurrentHashMap<String, Int>(
+                        minOf(learnedWords.size, HOT_BUFFER_MAX_SIZE),
+                    )
+                    learnedWords
+                        .sortedByDescending { it.frequency }
+                        .take(HOT_BUFFER_MAX_SIZE)
+                        .forEach { freqMap[it.wordNormalized] = it.frequency }
+                    hotFrequencyBuffer[languageTag] = freqMap
 
                     Result.success(Unit)
                 } catch (e: SQLiteException) {
@@ -218,6 +251,11 @@ class WordLearningEngine
                                     ?: ConcurrentHashMap.newKeySet()
                             cacheSet.add(normalized)
                             learnedWordsCache.put(currentLanguage, cacheSet)
+
+                            hotFrequencyBuffer[currentLanguage]?.let { freqMap ->
+                                val current = freqMap[normalized] ?: 0
+                                freqMap[normalized] = current + 1
+                            }
 
                             if (currentLanguage == swipeWordsCacheLanguage) {
                                 swipeWordsCache = emptyList()
@@ -376,16 +414,42 @@ class WordLearningEngine
                         com.urik.keyboard.utils.TextMatchingUtils
                             .stripWordPunctuation(normalized)
 
-                    try {
-                        val exactMatch =
-                            learnedWordDao.findExactWord(
-                                languageTag = languageCode,
-                                normalizedWord = normalized,
-                            )
-                        if (exactMatch != null) {
-                            results[exactMatch.word] = exactMatch.frequency
+                    val hotBuffer = hotFrequencyBuffer[languageCode]
+
+                    if (hotBuffer != null) {
+                        hotBuffer[normalized]?.let { freq ->
+                            results[normalized] = freq
                         }
-                    } catch (_: Exception) {
+
+                        if (results.size < maxResults && normalized.length >= MIN_PREFIX_MATCH_LENGTH) {
+                            hotBuffer.entries
+                                .filter { (w, _) ->
+                                    w.startsWith(normalized) && w != normalized
+                                }.sortedByDescending { it.value }
+                                .take(maxResults - results.size)
+                                .forEach { (w, f) -> results[w] = f }
+                        }
+
+                        if (results.size >= maxResults) {
+                            onSuccessfulOperation()
+                            return@withContext results.toList()
+                                .sortedByDescending { it.second }
+                                .take(maxResults)
+                        }
+                    }
+
+                    if (!results.containsKey(normalized)) {
+                        try {
+                            val exactMatch =
+                                learnedWordDao.findExactWord(
+                                    languageTag = languageCode,
+                                    normalizedWord = normalized,
+                                )
+                            if (exactMatch != null) {
+                                results[exactMatch.word] = exactMatch.frequency
+                            }
+                        } catch (_: Exception) {
+                        }
                     }
 
                     if (results.size < maxResults && normalized.length >= MIN_PREFIX_MATCH_LENGTH) {
@@ -522,6 +586,7 @@ class WordLearningEngine
 
                         if (removed > 0) {
                             learnedWordsCache.getIfPresent(currentLanguage)?.remove(normalized)
+                            hotFrequencyBuffer[currentLanguage]?.remove(normalized)
 
                             if (currentLanguage == swipeWordsCacheLanguage) {
                                 swipeWordsCache = emptyList()
@@ -633,13 +698,22 @@ class WordLearningEngine
                 }
             }
 
-            val allWords = learnedWordDao.getAllLearnedWordsForLanguage(languageTag).map { it.wordNormalized }.toSet()
+            val allWords = learnedWordDao.getAllLearnedWordsForLanguage(languageTag)
             val cacheSet = ConcurrentHashMap.newKeySet<String>()
-            cacheSet.addAll(allWords)
+            allWords.forEach { cacheSet.add(it.wordNormalized) }
+
+            val freqMap = ConcurrentHashMap<String, Int>(
+                minOf(allWords.size, HOT_BUFFER_MAX_SIZE),
+            )
+            allWords
+                .sortedByDescending { it.frequency }
+                .take(HOT_BUFFER_MAX_SIZE)
+                .forEach { freqMap[it.wordNormalized] = it.frequency }
 
             synchronized(cacheLock) {
                 learnedWordsCache.put(languageTag, cacheSet)
             }
+            hotFrequencyBuffer[languageTag] = freqMap
         }
 
         suspend fun areWordsLearned(words: List<String>): Map<String, Boolean> =
@@ -843,6 +917,7 @@ class WordLearningEngine
         fun clearCurrentLanguageCache() {
             val currentLanguage = languageManager.currentLanguage.value
             learnedWordsCache.invalidate(currentLanguage)
+            hotFrequencyBuffer.remove(currentLanguage)
 
             if (currentLanguage == swipeWordsCacheLanguage) {
                 swipeWordsCache = emptyList()
@@ -902,6 +977,7 @@ class WordLearningEngine
 
         private companion object {
             const val LEARNED_WORDS_CACHE_SIZE = 100
+            const val HOT_BUFFER_MAX_SIZE = 1000
 
             const val MAX_SIMILAR_WORD_LENGTH = 50
             const val MAX_NORMALIZED_WORD_LENGTH = 50

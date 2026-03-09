@@ -136,6 +136,10 @@ class KeyboardLayoutManager(
     private val cachedDimensions = mutableMapOf<String, Int>()
     private var cacheValid = false
 
+    private var cachedCornerRadius = 0f
+    private var cachedStrokeWidth = 0
+    private var cachedStrokeWidthThick = 0
+
     private var backspaceHandler: Handler? = null
     private var backspaceRunnable: Runnable? = null
     private var backspaceVibrationJob: Job? = null
@@ -780,6 +784,7 @@ class KeyboardLayoutManager(
         cachedTextSizes.clear()
         cachedDimensions.clear()
         cacheValid = false
+        cachedCornerRadius = 0f
     }
 
     private fun ensureCacheValid() {
@@ -2025,56 +2030,56 @@ class KeyboardLayoutManager(
             }
         }
 
+    private fun ensureDimensionCacheValid() {
+        if (cachedCornerRadius > 0f) return
+        val density = context.resources.displayMetrics.density
+        cachedCornerRadius = 8f * density
+        cachedStrokeWidth = (1 * density).toInt()
+        cachedStrokeWidthThick = (2 * density).toInt()
+    }
+
     private fun getKeyBackground(key: KeyboardKey): Drawable {
+        ensureDimensionCacheValid()
         val theme = themeManager.currentTheme.value
+
         val backgroundColor =
             when (key) {
-                is KeyboardKey.Character -> {
-                    theme.colors.keyBackgroundCharacter
-                }
-
+                is KeyboardKey.Character -> theme.colors.keyBackgroundCharacter
                 is KeyboardKey.Action -> {
                     when (key.action) {
                         KeyboardKey.ActionType.SPACE -> theme.colors.keyBackgroundSpace
                         else -> theme.colors.keyBackgroundAction
                     }
                 }
-
-                KeyboardKey.Spacer -> {
-                    android.graphics.Color.TRANSPARENT
-                }
+                KeyboardKey.Spacer -> android.graphics.Color.TRANSPARENT
             }
-
-        val cornerRadius = 8f * context.resources.displayMetrics.density
-        val strokeWidth = (1 * context.resources.displayMetrics.density).toInt()
-        val strokeWidthThick = (2 * context.resources.displayMetrics.density).toInt()
 
         val normalDrawable =
             GradientDrawable().apply {
                 setColor(backgroundColor)
-                this.cornerRadius = cornerRadius
-                setStroke(strokeWidth, theme.colors.keyBorder)
+                cornerRadius = cachedCornerRadius
+                setStroke(cachedStrokeWidth, theme.colors.keyBorder)
             }
 
         val pressedDrawable =
             GradientDrawable().apply {
                 setColor(theme.colors.statePressed)
-                this.cornerRadius = cornerRadius
-                setStroke(strokeWidth, theme.colors.keyBorderPressed)
+                cornerRadius = cachedCornerRadius
+                setStroke(cachedStrokeWidth, theme.colors.keyBorderPressed)
             }
 
         val focusedDrawable =
             GradientDrawable().apply {
                 setColor(backgroundColor)
-                this.cornerRadius = cornerRadius
-                setStroke(strokeWidthThick, theme.colors.keyBorderFocused)
+                cornerRadius = cachedCornerRadius
+                setStroke(cachedStrokeWidthThick, theme.colors.keyBorderFocused)
             }
 
         val activatedDrawable =
             GradientDrawable().apply {
                 setColor(theme.colors.stateActivated)
-                this.cornerRadius = cornerRadius
-                setStroke(strokeWidthThick, theme.colors.keyBorderFocused)
+                cornerRadius = cachedCornerRadius
+                setStroke(cachedStrokeWidthThick, theme.colors.keyBorderFocused)
             }
 
         val stateListDrawable = StateListDrawable()
