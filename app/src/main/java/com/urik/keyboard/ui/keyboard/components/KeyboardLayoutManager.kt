@@ -22,7 +22,9 @@ import android.view.accessibility.AccessibilityManager
 import android.widget.Button
 import android.widget.LinearLayout
 import androidx.core.content.ContextCompat
+import androidx.core.widget.TextViewCompat
 import com.urik.keyboard.R
+import com.urik.keyboard.model.KeyboardMode
 import com.urik.keyboard.model.KeyboardKey
 import com.urik.keyboard.model.KeyboardLayout
 import com.urik.keyboard.model.KeyboardState
@@ -802,6 +804,7 @@ class KeyboardLayoutManager(
         cachedDimensions["horizontalPadding"] = basePadding
         cachedDimensions["verticalPadding"] = (basePadding * 0.5f * keySizeMultiplier).toInt()
         cachedDimensions["horizontalMargin"] = baseHorizontalMargin
+        cachedDimensions["numberRowGutter"] = context.resources.getDimensionPixelSize(R.dimen.number_row_gutter)
 
         cacheValid = true
     }
@@ -862,8 +865,9 @@ class KeyboardLayoutManager(
                 contentDescription = context.getString(R.string.keyboard_description)
             }
 
-        processedRows.forEach { row ->
-            val rowView = createRowView(row, state)
+        processedRows.forEachIndexed { index, row ->
+            val hasNumberRowGutter = index == 0 && isTopNumberRow(row) && processedRows.size > 1
+            val rowView = createRowView(row, state, hasNumberRowGutter)
             keyboardContainer.addView(rowView)
         }
 
@@ -887,6 +891,7 @@ class KeyboardLayoutManager(
     private fun createRowView(
         keys: List<KeyboardKey>,
         state: KeyboardState,
+        hasNumberRowGutter: Boolean = false,
     ): LinearLayout {
         val is9LetterRow = is9CharacterLetterRow(keys)
         val shouldSplit = splitGapPx > 0 && !containsSpacebar(keys)
@@ -901,7 +906,14 @@ class KeyboardLayoutManager(
                             LinearLayout.LayoutParams.WRAP_CONTENT,
                         ).apply {
                             val verticalMargin = context.resources.getDimensionPixelSize(R.dimen.key_margin_vertical)
-                            setMargins(0, 0, 0, verticalMargin)
+                            val gutterMargin =
+                                if (hasNumberRowGutter) {
+                                    ensureCacheValid()
+                                    cachedDimensions["numberRowGutter"]!!
+                                } else {
+                                    0
+                                }
+                            setMargins(0, 0, 0, verticalMargin + gutterMargin)
                         }
 
                 isBaselineAligned = false
@@ -1034,8 +1046,11 @@ class KeyboardLayoutManager(
 
             val minTarget = cachedDimensions["minTarget"]!!
             val keyHeight = cachedDimensions["keyHeight"]!!
-            val visualHeight = keyHeight + 2
-            val verticalMargin = (minTarget - visualHeight) / 2
+            val gutterReduction = if (isTopNumberRow(rowKeys)) cachedDimensions["numberRowGutter"]!! else 0
+            val adjustedKeyHeight = (keyHeight - gutterReduction).coerceAtLeast(keyHeight / 2)
+            val adjustedMinTarget = (minTarget - gutterReduction).coerceAtLeast(minTarget / 2)
+            val visualHeight = adjustedKeyHeight + 2
+            val verticalMargin = ((adjustedMinTarget - visualHeight) / 2).coerceAtLeast(0)
 
             layoutParams =
                 LinearLayout
@@ -1050,7 +1065,7 @@ class KeyboardLayoutManager(
 
             text = getKeyLabel(key, state)
 
-            val finalTextSize = getCachedTextSize(keyHeight)
+            val finalTextSize = getCachedTextSize(adjustedKeyHeight)
 
             setTextAppearance(
                 when (key) {
@@ -1071,6 +1086,27 @@ class KeyboardLayoutManager(
             val horizontalPadding = cachedDimensions["horizontalPadding"]!!
             val verticalPadding = cachedDimensions["verticalPadding"]!!
             setPadding(horizontalPadding, verticalPadding, horizontalPadding, verticalPadding)
+
+            if (key is KeyboardKey.Action && key.action in setOf(
+                    KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS,
+                    KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS_SECONDARY,
+                    KeyboardKey.ActionType.MODE_SWITCH_LETTERS,
+                    KeyboardKey.ActionType.MODE_SWITCH_NUMBERS,
+                )
+            ) {
+                TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(
+                    this,
+                    8,
+                    finalTextSize.toInt(),
+                    1,
+                    TypedValue.COMPLEX_UNIT_SP,
+                )
+            } else {
+                TextViewCompat.setAutoSizeTextTypeWithDefaults(
+                    this,
+                    TextViewCompat.AUTO_SIZE_TEXT_TYPE_NONE,
+                )
+            }
 
             val keyBackground = getKeyBackground(key)
             val supportsCustomMapping =
@@ -1175,7 +1211,7 @@ class KeyboardLayoutManager(
                         background = layerDrawable
                         text = ""
                     }
-                } else if (key.action == KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS && clipboardEnabled) {
+                } else if (key.action == KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS && clipboardEnabled && effectiveLayout?.mode == KeyboardMode.LETTERS) {
                     val keyBackground = getKeyBackground(key)
                     val clipboardIcon = ContextCompat.getDrawable(context, R.drawable.ic_clipboard)
 
@@ -1342,6 +1378,7 @@ class KeyboardLayoutManager(
                     KeyboardKey.ActionType.MODE_SWITCH_LETTERS -> context.getString(R.string.letters_mode_label)
                     KeyboardKey.ActionType.MODE_SWITCH_NUMBERS -> context.getString(R.string.numbers_mode_label)
                     KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS -> context.getString(R.string.symbols_mode_label)
+                    KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS_SECONDARY -> context.getString(R.string.symbols_secondary_mode_label)
                     KeyboardKey.ActionType.LANGUAGE_SWITCH -> ""
                     else -> "?"
                 }
@@ -1434,6 +1471,10 @@ class KeyboardLayoutManager(
 
                     KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS -> {
                         context.getString(R.string.symbols_mode_description)
+                    }
+
+                    KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS_SECONDARY -> {
+                        context.getString(R.string.symbols_secondary_mode_description)
                     }
 
                     KeyboardKey.ActionType.CAPS_LOCK -> {
@@ -1966,8 +2007,18 @@ class KeyboardLayoutManager(
                                 return currentSpaceBarSize.widthMultiplier
                             }
 
-                            KeyboardKey.ActionType.SHIFT -> {
+                            KeyboardKey.ActionType.SHIFT,
+                            KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS_SECONDARY,
+                            -> {
                                 if (characterKeyCount >= 10) STANDARD_KEY_WEIGHT else SHIFT_KEY_WEIGHT
+                            }
+
+                            KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS -> {
+                                if (effectiveLayout?.mode == KeyboardMode.SYMBOLS_SECONDARY && characterKeyCount < 10) {
+                                    SHIFT_KEY_WEIGHT
+                                } else {
+                                    STANDARD_KEY_WEIGHT
+                                }
                             }
 
                             KeyboardKey.ActionType.BACKSPACE -> {
@@ -1999,6 +2050,11 @@ class KeyboardLayoutManager(
                 KeyboardKey.Spacer -> false
             }
         }
+    }
+
+    private fun isTopNumberRow(rowKeys: List<KeyboardKey>): Boolean {
+        val characterKeys = rowKeys.filterIsInstance<KeyboardKey.Character>()
+        return characterKeys.size == 10 && characterKeys.all { it.type == KeyboardKey.KeyType.NUMBER }
     }
 
     private fun shouldCapitalize(state: KeyboardState): Boolean = state.isShiftPressed || state.isCapsLockOn

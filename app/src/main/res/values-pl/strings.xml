@@ -217,6 +217,7 @@
    <string name="letters_mode_description">Przełącz na klawiaturę literową</string>
     <string name="numbers_mode_description">Przełącz na klawiaturę numeryczną</string>
     <string name="symbols_mode_description">Przełącz na klawiaturę symboli</string>
+    <string name="symbols_secondary_mode_description">Przełącz na rozszerzoną klawiaturę symboli</string>
     <string name="language_switch_description">Przełącz język klawiatury</string>
     <string name="ime_prediction_description">Przewidywanie: %1$s</string>
 

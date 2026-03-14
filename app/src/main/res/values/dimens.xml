@@ -9,5 +9,7 @@
 
     <dimen name="minimum_touch_target">44dp</dimen>
 
+    <dimen name="number_row_gutter">2dp</dimen>
+
     <dimen name="key_corner_radius">6dp</dimen>
 </resources>

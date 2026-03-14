@@ -6,133 +6,668 @@
     "letters": {
       "rows": [
         [
-          {"type": "character", "char": "1", "keyType": "number"},
-          {"type": "character", "char": "2", "keyType": "number"},
-          {"type": "character", "char": "3", "keyType": "number"},
-          {"type": "character", "char": "4", "keyType": "number"},
-          {"type": "character", "char": "5", "keyType": "number"},
-          {"type": "character", "char": "6", "keyType": "number"},
-          {"type": "character", "char": "7", "keyType": "number"},
-          {"type": "character", "char": "8", "keyType": "number"},
-          {"type": "character", "char": "9", "keyType": "number"},
-          {"type": "character", "char": "0", "keyType": "number"}
+          {
+            "type": "character",
+            "char": "1",
+            "keyType": "number"
+          },
+          {
+            "type": "character",
+            "char": "2",
+            "keyType": "number"
+          },
+          {
+            "type": "character",
+            "char": "3",
+            "keyType": "number"
+          },
+          {
+            "type": "character",
+            "char": "4",
+            "keyType": "number"
+          },
+          {
+            "type": "character",
+            "char": "5",
+            "keyType": "number"
+          },
+          {
+            "type": "character",
+            "char": "6",
+            "keyType": "number"
+          },
+          {
+            "type": "character",
+            "char": "7",
+            "keyType": "number"
+          },
+          {
+            "type": "character",
+            "char": "8",
+            "keyType": "number"
+          },
+          {
+            "type": "character",
+            "char": "9",
+            "keyType": "number"
+          },
+          {
+            "type": "character",
+            "char": "0",
+            "keyType": "number"
+          }
         ],
         [
-          {"type": "character", "char": ";", "keyType": "letter"},
-          {"type": "character", "char": "ς", "keyType": "letter"},
-          {"type": "character", "char": "ε", "keyType": "letter"},
-          {"type": "character", "char": "ρ", "keyType": "letter"},
-          {"type": "character", "char": "τ", "keyType": "letter"},
-          {"type": "character", "char": "υ", "keyType": "letter"},
-          {"type": "character", "char": "θ", "keyType": "letter"},
-          {"type": "character", "char": "ι", "keyType": "letter"},
-          {"type": "character", "char": "ο", "keyType": "letter"},
-          {"type": "character", "char": "π", "keyType": "letter"}
+          {
+            "type": "character",
+            "char": ";",
+            "keyType": "letter"
+          },
+          {
+            "type": "character",
+            "char": "ς",
+            "keyType": "letter"
+          },
+          {
+            "type": "character",
+            "char": "ε",
+            "keyType": "letter"
+          },
+          {
+            "type": "character",
+            "char": "ρ",
+            "keyType": "letter"
+          },
+          {
+            "type": "character",
+            "char": "τ",
+            "keyType": "letter"
+          },
+          {
+            "type": "character",
+            "char": "υ",
+            "keyType": "letter"
+          },
+          {
+            "type": "character",
+            "char": "θ",
+            "keyType": "letter"
+          },
+          {
+            "type": "character",
+            "char": "ι",
+            "keyType": "letter"
+          },
+          {
+            "type": "character",
+            "char": "ο",
+            "keyType": "letter"
+          },
+          {
+            "type": "character",
+            "char": "π",
+            "keyType": "letter"
+          }
         ],
         [
-          {"type": "character", "char": "α", "keyType": "letter"},
-          {"type": "character", "char": "σ", "keyType": "letter"},
-          {"type": "character", "char": "δ", "keyType": "letter"},
-          {"type": "character", "char": "φ", "keyType": "letter"},
-          {"type": "character", "char": "γ", "keyType": "letter"},
-          {"type": "character", "char": "η", "keyType": "letter"},
-          {"type": "character", "char": "ξ", "keyType": "letter"},
-          {"type": "character", "char": "κ", "keyType": "letter"},
-          {"type": "character", "char": "λ", "keyType": "letter"}
+          {
+            "type": "character",
+            "char": "α",
+            "keyType": "letter"
+          },
+          {
+            "type": "character",
+            "char": "σ",
+            "keyType": "letter"
+          },
+          {
+            "type": "character",
+            "char": "δ",
+            "keyType": "letter"
+          },
+          {
+            "type": "character",
+            "char": "φ",
+            "keyType": "letter"
+          },
+          {
+            "type": "character",
+            "char": "γ",
+            "keyType": "letter"
+          },
+          {
+            "type": "character",
+            "char": "η",
+            "keyType": "letter"
+          },
+          {
+            "type": "character",
+            "char": "ξ",
+            "keyType": "letter"
+          },
+          {
+            "type": "character",
+            "char": "κ",
+            "keyType": "letter"
+          },
+          {
+            "type": "character",
+            "char": "λ",
+            "keyType": "letter"
+          }
         ],
         [
-          {"type": "action", "action": "shift"},
-          {"type": "character", "char": "ζ", "keyType": "letter"},
-          {"type": "character", "char": "χ", "keyType": "letter"},
-          {"type": "character", "char": "ψ", "keyType": "letter"},
-          {"type": "character", "char": "ω", "keyType": "letter"},
-          {"type": "character", "char": "β", "keyType": "letter"},
-          {"type": "character", "char": "ν", "keyType": "letter"},
-          {"type": "character", "char": "μ", "keyType": "letter"},
-          {"type": "action", "action": "backspace"}
+          {
+            "type": "action",
+            "action": "shift"
+          },
+          {
+            "type": "character",
+            "char": "ζ",
+            "keyType": "letter"
+          },
+          {
+            "type": "character",
+            "char": "χ",
+            "keyType": "letter"
+          },
+          {
+            "type": "character",
+            "char": "ψ",
+            "keyType": "letter"
+          },
+          {
+            "type": "character",
+            "char": "ω",
+            "keyType": "letter"
+          },
+          {
+            "type": "character",
+            "char": "β",
+            "keyType": "letter"
+          },
+          {
+            "type": "character",
+            "char": "ν",
+            "keyType": "letter"
+          },
+          {
+            "type": "character",
+            "char": "μ",
+            "keyType": "letter"
+          },
+          {
+            "type": "action",
+            "action": "backspace"
+          }
         ],
         [
-          {"type": "action", "action": "mode_switch_symbols"},
-          {"type": "character", "char": ",", "keyType": "punctuation"},
-          {"type": "action", "action": "space"},
-          {"type": "character", "char": ".", "keyType": "punctuation"},
-          {"type": "action", "action": "dynamic_action"}
+          {
+            "type": "action",
+            "action": "mode_switch_symbols"
+          },
+          {
+            "type": "character",
+            "char": ",",
+            "keyType": "punctuation"
+          },
+          {
+            "type": "action",
+            "action": "space"
+          },
+          {
+            "type": "character",
+            "char": ".",
+            "keyType": "punctuation"
+          },
+          {
+            "type": "action",
+            "action": "dynamic_action"
+          }
         ]
       ]
     },
     "numbers": {
       "rows": [
         [
-          {"type": "character", "char": "1", "keyType": "number"},
-          {"type": "character", "char": "2", "keyType": "number"},
-          {"type": "character", "char": "3", "keyType": "number"}
+          {
+            "type": "character",
+            "char": "1",
+            "keyType": "number"
+          },
+          {
+            "type": "character",
+            "char": "2",
+            "keyType": "number"
+          },
+          {
+            "type": "character",
+            "char": "3",
+            "keyType": "number"
+          }
         ],
         [
-          {"type": "character", "char": "4", "keyType": "number"},
-          {"type": "character", "char": "5", "keyType": "number"},
-          {"type": "character", "char": "6", "keyType": "number"}
+          {
+            "type": "character",
+            "char": "4",
+            "keyType": "number"
+          },
+          {
+            "type": "character",
+            "char": "5",
+            "keyType": "number"
+          },
+          {
+            "type": "character",
+            "char": "6",
+            "keyType": "number"
+          }
         ],
         [
-          {"type": "character", "char": "7", "keyType": "number"},
-          {"type": "character", "char": "8", "keyType": "number"},
-          {"type": "character", "char": "9", "keyType": "number"}
+          {
+            "type": "character",
+            "char": "7",
+            "keyType": "number"
+          },
+          {
+            "type": "character",
+            "char": "8",
+            "keyType": "number"
+          },
+          {
+            "type": "character",
+            "char": "9",
+            "keyType": "number"
+          }
         ],
         [
-          {"type": "character", "char": ",", "keyType": "punctuation"},
-          {"type": "character", "char": "0", "keyType": "number"},
-          {"type": "action", "action": "backspace"}
+          {
+            "type": "character",
+            "char": ",",
+            "keyType": "punctuation"
+          },
+          {
+            "type": "character",
+            "char": "0",
+            "keyType": "number"
+          },
+          {
+            "type": "action",
+            "action": "backspace"
+          }
         ],
         [
-          {"type": "action", "action": "mode_switch_letters"},
-          {"type": "character", "char": ".", "keyType": "punctuation"},
-          {"type": "action", "action": "space"},
-          {"type": "character", "char": "-", "keyType": "symbol"},
-          {"type": "action", "action": "dynamic_action"}
+          {
+            "type": "action",
+            "action": "mode_switch_letters"
+          },
+          {
+            "type": "character",
+            "char": ".",
+            "keyType": "punctuation"
+          },
+          {
+            "type": "action",
+            "action": "space"
+          },
+          {
+            "type": "character",
+            "char": "-",
+            "keyType": "symbol"
+          },
+          {
+            "type": "action",
+            "action": "dynamic_action"
+          }
         ]
       ]
     },
     "symbols": {
       "rows": [
         [
-          {"type": "character", "char": "!", "keyType": "symbol"},
-          {"type": "character", "char": "@", "keyType": "symbol"},
-          {"type": "character", "char": "#", "keyType": "symbol"},
-          {"type": "character", "char": "€", "keyType": "symbol"},
-          {"type": "character", "char": "%", "keyType": "symbol"},
-          {"type": "character", "char": "^", "keyType": "symbol"},
-          {"type": "character", "char": "&", "keyType": "symbol"},
-          {"type": "character", "char": "*", "keyType": "symbol"},
-          {"type": "character", "char": "(", "keyType": "symbol"},
-          {"type": "character", "char": ")", "keyType": "symbol"}
+          {
+            "type": "character",
+            "char": "!",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "@",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "#",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "€",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "%",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "^",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "&",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "*",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "(",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": ")",
+            "keyType": "symbol"
+          }
         ],
         [
-          {"type": "character", "char": "-", "keyType": "symbol"},
-          {"type": "character", "char": "_", "keyType": "symbol"},
-          {"type": "character", "char": "=", "keyType": "symbol"},
-          {"type": "character", "char": "+", "keyType": "symbol"},
-          {"type": "character", "char": "[", "keyType": "symbol"},
-          {"type": "character", "char": "]", "keyType": "symbol"},
-          {"type": "character", "char": "{", "keyType": "symbol"},
-          {"type": "character", "char": "}", "keyType": "symbol"},
-          {"type": "character", "char": "\\", "keyType": "symbol"},
-          {"type": "character", "char": "|", "keyType": "symbol"}
+          {
+            "type": "character",
+            "char": "-",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "_",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "=",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "+",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "[",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "]",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "{",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "}",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "\\",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "|",
+            "keyType": "symbol"
+          }
         ],
         [
-          {"type": "character", "char": "«", "keyType": "symbol"},
-          {"type": "character", "char": "»", "keyType": "symbol"},
-          {"type": "character", "char": "'", "keyType": "symbol"},
-          {"type": "character", "char": "\"", "keyType": "symbol"},
-          {"type": "character", "char": ":", "keyType": "symbol"},
-          {"type": "character", "char": "<", "keyType": "symbol"},
-          {"type": "character", "char": ">", "keyType": "symbol"},
-          {"type": "character", "char": "/", "keyType": "symbol"},
-          {"type": "character", "char": "?", "keyType": "symbol"},
-          {"type": "action", "action": "backspace"}
+          {
+            "type": "action",
+            "action": "mode_switch_symbols_secondary"
+          },
+          {
+            "type": "character",
+            "char": "«",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "»",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": ";",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "\"",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": ":",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "<",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": ">",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "/",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "?",
+            "keyType": "symbol"
+          },
+          {
+            "type": "action",
+            "action": "backspace"
+          }
         ],
         [
-          {"type": "action", "action": "mode_switch_letters"},
-          {"type": "action", "action": "space"},
-          {"type": "action", "action": "dynamic_action"}
+          {
+            "type": "action",
+            "action": "mode_switch_letters"
+          },
+          {
+            "type": "action",
+            "action": "space"
+          },
+          {
+            "type": "action",
+            "action": "dynamic_action"
+          }
+        ]
+      ]
+    },
+    "symbols_secondary": {
+      "rows": [
+        [
+          {
+            "type": "character",
+            "char": "~",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "`",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "•",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "—",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "–",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "·",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "π",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "÷",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "×",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "±",
+            "keyType": "symbol"
+          }
+        ],
+        [
+          {
+            "type": "character",
+            "char": "£",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "¥",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "€",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "¢",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "°",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "®",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "©",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "™",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "∞",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "§",
+            "keyType": "symbol"
+          }
+        ],
+        [
+          {
+            "type": "action",
+            "action": "mode_switch_symbols"
+          },
+          {
+            "type": "character",
+            "char": "“",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "”",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "«",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "»",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "‹",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "›",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "„",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "…",
+            "keyType": "symbol"
+          },
+          {
+            "type": "action",
+            "action": "backspace"
+          }
+        ],
+        [
+          {
+            "type": "action",
+            "action": "mode_switch_letters"
+          },
+          {
+            "type": "action",
+            "action": "space"
+          },
+          {
+            "type": "action",
+            "action": "dynamic_action"
+          }
         ]
       ]
     }

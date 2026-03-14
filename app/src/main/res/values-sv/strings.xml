@@ -150,6 +150,7 @@
     <string name="letters_mode_description">Växla till bokstavstangentbord</string>
     <string name="numbers_mode_description">Växla till siffertangentbord</string>
     <string name="symbols_mode_description">Växla till symboltangentbord</string>
+    <string name="symbols_secondary_mode_description">Växla till utökat symboltangentbord</string>
     <string name="language_switch_description">Byt tangentbordsspråk</string>
     <string name="ime_prediction_description">Förutsägelse: %1$s</string>
     <string name="action_enter_description">Tryck enter</string>

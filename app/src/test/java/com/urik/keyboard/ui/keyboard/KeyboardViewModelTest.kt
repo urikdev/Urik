@@ -475,6 +475,50 @@ class KeyboardViewModelTest {
         }
 
     @Test
+    fun `ModeChanged switches to SYMBOLS_SECONDARY`() =
+        runTest {
+            whenever(repository.getLayoutForMode(eq(KeyboardMode.SYMBOLS), any(), any()))
+                .thenReturn(Result.success(createMockLayout(KeyboardMode.SYMBOLS)))
+            whenever(repository.getLayoutForMode(eq(KeyboardMode.SYMBOLS_SECONDARY), any(), any()))
+                .thenReturn(Result.success(createMockLayout(KeyboardMode.SYMBOLS_SECONDARY)))
+
+            viewModel.onEvent(KeyboardEvent.ModeChanged(KeyboardMode.SYMBOLS))
+            viewModel.onEvent(KeyboardEvent.ModeChanged(KeyboardMode.SYMBOLS_SECONDARY))
+
+            assertEquals(KeyboardMode.SYMBOLS_SECONDARY, viewModel.state.value.currentMode)
+            assertEquals(KeyboardMode.SYMBOLS_SECONDARY, viewModel.layout.value?.mode)
+        }
+
+    @Test
+    fun `ModeChanged from SYMBOLS_SECONDARY back to SYMBOLS`() =
+        runTest {
+            whenever(repository.getLayoutForMode(eq(KeyboardMode.SYMBOLS), any(), any()))
+                .thenReturn(Result.success(createMockLayout(KeyboardMode.SYMBOLS)))
+            whenever(repository.getLayoutForMode(eq(KeyboardMode.SYMBOLS_SECONDARY), any(), any()))
+                .thenReturn(Result.success(createMockLayout(KeyboardMode.SYMBOLS_SECONDARY)))
+
+            viewModel.onEvent(KeyboardEvent.ModeChanged(KeyboardMode.SYMBOLS))
+            viewModel.onEvent(KeyboardEvent.ModeChanged(KeyboardMode.SYMBOLS_SECONDARY))
+            viewModel.onEvent(KeyboardEvent.ModeChanged(KeyboardMode.SYMBOLS))
+
+            assertEquals(KeyboardMode.SYMBOLS, viewModel.state.value.currentMode)
+        }
+
+    @Test
+    fun `MODE_SWITCH_LETTERS exits SYMBOLS_SECONDARY to LETTERS`() =
+        runTest {
+            whenever(repository.getLayoutForMode(eq(KeyboardMode.SYMBOLS_SECONDARY), any(), any()))
+                .thenReturn(Result.success(createMockLayout(KeyboardMode.SYMBOLS_SECONDARY)))
+            whenever(repository.getLayoutForMode(eq(KeyboardMode.LETTERS), any(), any()))
+                .thenReturn(Result.success(createMockLayout(KeyboardMode.LETTERS)))
+
+            viewModel.onEvent(KeyboardEvent.ModeChanged(KeyboardMode.SYMBOLS_SECONDARY))
+            viewModel.onEvent(KeyboardEvent.ModeChanged(KeyboardMode.LETTERS))
+
+            assertEquals(KeyboardMode.LETTERS, viewModel.state.value.currentMode)
+        }
+
+    @Test
     fun `ModeChanged back to LETTERS`() =
         runTest {
             whenever(repository.getLayoutForMode(eq(KeyboardMode.NUMBERS), any(), any()))
@@ -637,6 +681,46 @@ class KeyboardViewModelTest {
             val result = viewModel.getCharacterForInput(key)
 
             assertEquals("\u0636", result)
+        }
+
+    @Test
+    fun `SYMBOLS_SECONDARY mode loads correct layout`() =
+        runTest {
+            whenever(repository.getLayoutForMode(eq(KeyboardMode.SYMBOLS_SECONDARY), any(), any()))
+                .thenReturn(Result.success(createMockLayout(KeyboardMode.SYMBOLS_SECONDARY)))
+
+            viewModel.onEvent(KeyboardEvent.ModeChanged(KeyboardMode.SYMBOLS_SECONDARY))
+
+            assertEquals(KeyboardMode.SYMBOLS_SECONDARY, viewModel.state.value.currentMode)
+            assertNotNull(viewModel.layout.value)
+            assertFalse(viewModel.state.value.isLoading)
+        }
+
+    @Test
+    fun `SYMBOLS_SECONDARY layout loading handles failure`() =
+        runTest {
+            whenever(repository.getLayoutForMode(eq(KeyboardMode.SYMBOLS_SECONDARY), any(), any()))
+                .thenReturn(Result.failure(Exception("Test error")))
+
+            viewModel.onEvent(KeyboardEvent.ModeChanged(KeyboardMode.SYMBOLS_SECONDARY))
+
+            assertFalse(viewModel.state.value.isLoading)
+            assertNotNull(viewModel.state.value.error)
+        }
+
+    @Test
+    fun `rapid mode cycling SYMBOLS to SECONDARY and back`() =
+        runTest {
+            whenever(repository.getLayoutForMode(eq(KeyboardMode.SYMBOLS), any(), any()))
+                .thenReturn(Result.success(createMockLayout(KeyboardMode.SYMBOLS)))
+            whenever(repository.getLayoutForMode(eq(KeyboardMode.SYMBOLS_SECONDARY), any(), any()))
+                .thenReturn(Result.success(createMockLayout(KeyboardMode.SYMBOLS_SECONDARY)))
+
+            viewModel.onEvent(KeyboardEvent.ModeChanged(KeyboardMode.SYMBOLS))
+            viewModel.onEvent(KeyboardEvent.ModeChanged(KeyboardMode.SYMBOLS_SECONDARY))
+            viewModel.onEvent(KeyboardEvent.ModeChanged(KeyboardMode.SYMBOLS))
+
+            assertEquals(KeyboardMode.SYMBOLS, viewModel.state.value.currentMode)
         }
 
     private fun createMockLayout(mode: KeyboardMode): KeyboardLayout =

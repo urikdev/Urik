@@ -936,8 +936,7 @@ class UrikInputMethodService :
                             layout.copy(rows = layout.rows.drop(1))
                         }
 
-                        currentSettings.showNumberRow &&
-                            layout.mode == KeyboardMode.SYMBOLS &&
+                        layout.mode in listOf(KeyboardMode.SYMBOLS, KeyboardMode.SYMBOLS_SECONDARY) &&
                             layout.rows.isNotEmpty() -> {
                             val numberRow =
                                 listOf(
@@ -1606,6 +1605,10 @@ class UrikInputMethodService :
 
             KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS -> {
                 viewModel.onEvent(KeyboardEvent.ModeChanged(KeyboardMode.SYMBOLS))
+            }
+
+            KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS_SECONDARY -> {
+                viewModel.onEvent(KeyboardEvent.ModeChanged(KeyboardMode.SYMBOLS_SECONDARY))
             }
 
             KeyboardKey.ActionType.SHIFT -> {

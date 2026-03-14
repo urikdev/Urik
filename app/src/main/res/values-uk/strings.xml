@@ -217,6 +217,7 @@
     <string name="letters_mode_description">Переключитися на клавіатуру з літерами</string>
     <string name="numbers_mode_description">Переключитися на клавіатуру з цифрами</string>
     <string name="symbols_mode_description">Переключитися на клавіатуру з символами</string>
+    <string name="symbols_secondary_mode_description">Перейти до розширеної клавіатури символів</string>
     <string name="language_switch_description">Переключити мову клавіатури</string>
     <string name="ime_prediction_description">Пропозиція: %1$s</string>
 

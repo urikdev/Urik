@@ -233,6 +233,7 @@
     <string name="letters_mode_description">Passer au clavier alphabétique</string>
     <string name="numbers_mode_description">Passer au clavier numérique</string>
     <string name="symbols_mode_description">Passer au clavier symbolique</string>
+    <string name="symbols_secondary_mode_description">Basculer vers le clavier de symboles étendu</string>
     <string name="language_switch_description">Changer la langue du clavier</string>
     <string name="ime_prediction_description">Prédiction: %1$s</string>
 

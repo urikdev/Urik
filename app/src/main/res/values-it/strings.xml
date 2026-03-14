@@ -233,6 +233,7 @@
     <string name="letters_mode_description">Passa alla tastiera alfabetica</string>
     <string name="numbers_mode_description">Passa alla tastiera numerica</string>
     <string name="symbols_mode_description">Passa alla tastiera dei simboli</string>
+    <string name="symbols_secondary_mode_description">Passa alla tastiera dei simboli estesi</string>
     <string name="language_switch_description">Cambia lingua tastiera</string>
     <string name="ime_prediction_description">Previsione: %1$s</string>
 

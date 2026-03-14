@@ -216,6 +216,7 @@
     <string name="letters_mode_description">Přepnout na písmennou klávesnici</string>
     <string name="numbers_mode_description">Přepnout na číselnou klávesnici</string>
     <string name="symbols_mode_description">Přepnout na symbolovou klávesnici</string>
+    <string name="symbols_secondary_mode_description">Přepnout na rozšířenou klávesnici symbolů</string>
     <string name="language_switch_description">Přepnout jazyk klávesnice</string>
     <string name="ime_prediction_description">Předpověď: %1$s</string>
 

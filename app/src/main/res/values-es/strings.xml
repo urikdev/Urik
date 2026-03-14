@@ -216,6 +216,7 @@
     <string name="letters_mode_description">Cambiar a teclado de letras</string>
     <string name="numbers_mode_description">Cambiar a teclado numérico</string>
     <string name="symbols_mode_description">Cambiar al teclado de símbolos</string>
+    <string name="symbols_secondary_mode_description">Cambiar al teclado de símbolos extendido</string>
     <string name="language_switch_description">Cambiar idioma del teclado</string>
     <string name="ime_prediction_description">Predicción: %1$s</string>
 
