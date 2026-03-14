@@ -83,6 +83,12 @@
     <string name="autocorrect_settings_learn_new_words">Learn New Words</string>
     <string name="autocorrect_settings_learn_new_words_on">Learning enabled</string>
     <string name="autocorrect_settings_learn_new_words_off">Learning disabled</string>
+    <string name="autocorrect_settings_pause_on_misspelled">Pause on Misspelled Word</string>
+    <string name="autocorrect_settings_pause_on_misspelled_on">On</string>
+    <string name="autocorrect_settings_pause_on_misspelled_off">Off</string>
+    <string name="autocorrect_settings_autocorrection">Autocorrection</string>
+    <string name="autocorrect_settings_autocorrection_on">On</string>
+    <string name="autocorrect_settings_autocorrection_off">Off</string>
 
     <!-- Language Settings -->
     <string name="max_languages_reached">Maximum 3 languages allowed</string>
@@ -214,6 +220,8 @@
     <string name="error_dictionary_export">Failed to export dictionary</string>
     <string name="error_dictionary_import">Failed to import dictionary</string>
     <string name="error_update_merged_dictionaries">Failed to update dictionary mode</string>
+    <string name="error_update_pause_on_misspelled">Failed to update pause setting</string>
+    <string name="error_update_autocorrection">Failed to update autocorrection setting</string>
 
     <!-- Success Messages -->
     <string name="success_learned_words_cleared">Learned words cleared</string>

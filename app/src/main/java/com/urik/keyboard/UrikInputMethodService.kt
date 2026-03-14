@@ -3,6 +3,7 @@ package com.urik.keyboard
 import android.annotation.SuppressLint
 import android.inputmethodservice.InputMethodService
 import android.os.Build
+import android.util.Log
 import android.util.Size
 import android.view.Gravity
 import android.view.KeyEvent
@@ -42,6 +43,7 @@ import com.urik.keyboard.service.InputMethod
 import com.urik.keyboard.service.InputStateManager
 import com.urik.keyboard.service.LanguageManager
 import com.urik.keyboard.service.OutputBridge
+import com.urik.keyboard.service.PostCommitReplacementState
 import com.urik.keyboard.service.ProcessingResult
 import com.urik.keyboard.service.SpellCheckManager
 import com.urik.keyboard.service.SpellConfirmationState
@@ -1143,6 +1145,8 @@ class UrikInputMethodService :
                 outputBridge.clearSpellConfirmationState()
             }
 
+            inputState.postCommitReplacementState = null
+
             inputState.isActivelyEditing = true
 
             if (inputState.composingRegionStart != -1 && inputState.displayBuffer.isNotEmpty()) {
@@ -1253,6 +1257,11 @@ class UrikInputMethodService :
                     }
                 }
 
+                if (inputState.postCommitReplacementState != null) {
+                    inputState.postCommitReplacementState = null
+                    swipeKeyboardView?.clearSuggestions()
+                }
+
                 if (inputState.spellConfirmationState == SpellConfirmationState.AWAITING_CONFIRMATION) {
                     outputBridge.beginBatchEdit()
                     try {
@@ -1314,7 +1323,7 @@ class UrikInputMethodService :
                                         outputBridge.endBatchEdit()
                                     }
                                     return@launch
-                                } else {
+                                } else if (currentSettings.pauseOnMisspelledWord) {
                                     inputState.spellConfirmationState = SpellConfirmationState.AWAITING_CONFIRMATION
                                     inputState.pendingWordForLearning = inputState.displayBuffer
                                     outputBridge.highlightCurrentWord()
@@ -1536,6 +1545,16 @@ class UrikInputMethodService :
     private fun handleSuggestionSelected(suggestion: String) {
         serviceScope.launch {
             if (inputState.requiresDirectCommit) {
+                return@launch
+            }
+
+            val replacementState = inputState.postCommitReplacementState
+            if (replacementState != null) {
+                suggestionPipeline.coordinatePostCommitReplacement(
+                    suggestion,
+                    replacementState,
+                    ::checkAutoCapitalization,
+                )
                 return@launch
             }
 
@@ -1787,6 +1806,11 @@ class UrikInputMethodService :
 
             if (inputState.spellConfirmationState == SpellConfirmationState.AWAITING_CONFIRMATION) {
                 inputState.clearSpellConfirmationFields()
+            }
+
+            if (inputState.postCommitReplacementState != null) {
+                inputState.postCommitReplacementState = null
+                swipeKeyboardView?.clearSuggestions()
             }
 
             if (inputState.displayBuffer.isNotEmpty() && inputState.composingRegionStart != -1) {
@@ -2076,6 +2100,34 @@ class UrikInputMethodService :
                 inputState.lastSpaceTime = currentTime
 
                 if (inputState.spellConfirmationState == SpellConfirmationState.AWAITING_CONFIRMATION) {
+                    if (currentSettings.autocorrectionEnabled && inputState.pendingSuggestions.isNotEmpty()) {
+                        val topSuggestion = inputState.pendingSuggestions.first()
+                        if (isSafeForAutocorrect(topSuggestion)) {
+                            val originalWord = inputState.displayBuffer
+                            inputState.isActivelyEditing = true
+                            suggestionPipeline.recordWordUsage(topSuggestion)
+                            outputBridge.beginBatchEdit()
+                            try {
+                                outputBridge.autoCapitalizePronounI { languageManager.currentLanguage.value }
+                                swipeDetector.updateLastCommittedWord(topSuggestion)
+                                outputBridge.commitText("$topSuggestion ", 1)
+                                inputState.clearInternalStateOnly()
+                                inputState.postCommitReplacementState =
+                                    PostCommitReplacementState(
+                                        originalWord = originalWord,
+                                        committedWord = topSuggestion,
+                                    )
+                                inputState.pendingSuggestions = listOf(originalWord)
+                                swipeKeyboardView?.updateSuggestions(listOf(originalWord))
+
+                                val textBefore = outputBridge.safeGetTextBeforeCursor(50)
+                                checkAutoCapitalization(textBefore)
+                            } finally {
+                                outputBridge.endBatchEdit()
+                            }
+                            return@launch
+                        }
+                    }
                     suggestionPipeline.confirmAndLearnWord(::checkAutoCapitalization)
                     return@launch
                 }
@@ -2117,23 +2169,82 @@ class UrikInputMethodService :
 
                             val suggestions =
                                 textInputProcessor.getSuggestions(inputState.displayBuffer)
-
-                            inputState.spellConfirmationState = SpellConfirmationState.AWAITING_CONFIRMATION
-                            inputState.pendingWordForLearning = inputState.displayBuffer
-
-                            outputBridge.highlightCurrentWord()
                             val displaySuggestions =
                                 suggestionPipeline.storeAndCapitalizeSuggestions(
                                     suggestions,
                                     inputState.isCurrentWordAtSentenceStart,
                                 )
-                            inputState.pendingSuggestions = displaySuggestions
-                            if (displaySuggestions.isNotEmpty()) {
-                                swipeKeyboardView?.updateSuggestions(displaySuggestions)
-                            } else {
-                                swipeKeyboardView?.clearSuggestions()
+
+                            if (currentSettings.pauseOnMisspelledWord) {
+                                inputState.spellConfirmationState = SpellConfirmationState.AWAITING_CONFIRMATION
+                                inputState.pendingWordForLearning = inputState.displayBuffer
+                                outputBridge.highlightCurrentWord()
+                                inputState.pendingSuggestions = displaySuggestions
+                                if (displaySuggestions.isNotEmpty()) {
+                                    swipeKeyboardView?.updateSuggestions(displaySuggestions)
+                                } else {
+                                    swipeKeyboardView?.clearSuggestions()
+                                }
+                                return@launch
                             }
 
+                            if (currentSettings.autocorrectionEnabled && displaySuggestions.isNotEmpty()) {
+                                val topSuggestion = displaySuggestions.first()
+                                if (isSafeForAutocorrect(topSuggestion)) {
+                                    val originalWord = inputState.displayBuffer
+                                    inputState.isActivelyEditing = true
+                                    suggestionPipeline.recordWordUsage(topSuggestion)
+                                    outputBridge.beginBatchEdit()
+                                    try {
+                                        outputBridge.autoCapitalizePronounI { languageManager.currentLanguage.value }
+                                        outputBridge.commitText("$topSuggestion ", 1)
+                                        swipeDetector.updateLastCommittedWord(topSuggestion)
+                                        inputState.clearInternalStateOnly()
+                                        inputState.postCommitReplacementState =
+                                            PostCommitReplacementState(
+                                                originalWord = originalWord,
+                                                committedWord = topSuggestion,
+                                            )
+                                        inputState.pendingSuggestions = displaySuggestions.drop(1) + listOf(originalWord)
+                                        swipeKeyboardView?.updateSuggestions(inputState.pendingSuggestions)
+
+                                        val textBefore = outputBridge.safeGetTextBeforeCursor(50)
+                                        checkAutoCapitalization(textBefore)
+                                    } finally {
+                                        outputBridge.endBatchEdit()
+                                    }
+                                    return@launch
+                                }
+                            }
+
+                            val originalWord = inputState.displayBuffer
+                            inputState.isActivelyEditing = true
+                            suggestionPipeline.learnWordAndInvalidateCache(originalWord, InputMethod.TYPED)
+                            outputBridge.beginBatchEdit()
+                            try {
+                                outputBridge.autoCapitalizePronounI { languageManager.currentLanguage.value }
+                                swipeDetector.updateLastCommittedWord(originalWord)
+                                outputBridge.finishComposingText()
+                                outputBridge.commitText(" ", 1)
+                                inputState.clearInternalStateOnly()
+
+                                if (displaySuggestions.isNotEmpty()) {
+                                    inputState.postCommitReplacementState =
+                                        PostCommitReplacementState(
+                                            originalWord = originalWord,
+                                            committedWord = originalWord,
+                                        )
+                                    inputState.pendingSuggestions = displaySuggestions
+                                    swipeKeyboardView?.updateSuggestions(displaySuggestions)
+                                } else {
+                                    suggestionPipeline.showBigramPredictions()
+                                }
+
+                                val textBefore = outputBridge.safeGetTextBeforeCursor(50)
+                                checkAutoCapitalization(textBefore)
+                            } finally {
+                                outputBridge.endBatchEdit()
+                            }
                             return@launch
                         }
                     }
@@ -2702,6 +2813,9 @@ class UrikInputMethodService :
         lifecycleRegistry.currentState = Lifecycle.State.DESTROYED
         super.onDestroy()
     }
+
+    private fun isSafeForAutocorrect(word: String): Boolean =
+        word.all { it.isLetter() || it == '\'' || it == '-' }
 
     private companion object {
         const val DOUBLE_TAP_SPACE_THRESHOLD_MS = 250L

@@ -81,6 +81,12 @@
     <string name="autocorrect_settings_learn_new_words">Запоминать Новые Слова</string>
     <string name="autocorrect_settings_learn_new_words_on">Запоминание включено</string>
     <string name="autocorrect_settings_learn_new_words_off">Запоминание отключено</string>
+    <string name="autocorrect_settings_pause_on_misspelled">Пауза при неверном слове</string>
+    <string name="autocorrect_settings_pause_on_misspelled_on">Включено</string>
+    <string name="autocorrect_settings_pause_on_misspelled_off">Выключено</string>
+    <string name="autocorrect_settings_autocorrection">Автокоррекция</string>
+    <string name="autocorrect_settings_autocorrection_on">Включено</string>
+    <string name="autocorrect_settings_autocorrection_off">Выключено</string>
 
     <!-- Language Settings -->
     <string name="select_active_language">Выберите активный язык</string>
@@ -192,6 +198,8 @@
     <string name="error_dictionary_export">Не удалось экспортировать словарь</string>
     <string name="error_dictionary_import">Не удалось импортировать словарь</string>
     <string name="error_update_merged_dictionaries">Не удалось обновить режим словаря</string>
+    <string name="error_update_pause_on_misspelled">Не удалось обновить настройку паузы</string>
+    <string name="error_update_autocorrection">Не удалось обновить настройку автокоррекции</string>
 
     <!-- Success Messages -->
     <string name="success_learned_words_cleared">Запомненные слова удалены</string>

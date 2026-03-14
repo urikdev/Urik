@@ -80,6 +80,12 @@
     <string name="autocorrect_settings_learn_new_words">Neue Wörter automatisch lernen</string>
     <string name="autocorrect_settings_learn_new_words_on">Wörter werden automatisch gelernt</string>
     <string name="autocorrect_settings_learn_new_words_off">Wörter werden nicht automatisch gelernt</string>
+    <string name="autocorrect_settings_pause_on_misspelled">Bei falsch geschriebenem Wort pausieren</string>
+    <string name="autocorrect_settings_pause_on_misspelled_on">Ein</string>
+    <string name="autocorrect_settings_pause_on_misspelled_off">Aus</string>
+    <string name="autocorrect_settings_autocorrection">Autokorrektur</string>
+    <string name="autocorrect_settings_autocorrection_on">Ein</string>
+    <string name="autocorrect_settings_autocorrection_off">Aus</string>
 
     <!-- Language Settings -->
     <string name="select_active_language">Aktive Sprache auswählen</string>
@@ -188,6 +194,8 @@
     <string name="error_dictionary_export">Wörterbuch konnte nicht exportiert werden</string>
     <string name="error_dictionary_import">Wörterbuch konnte nicht importiert werden</string>
     <string name="error_update_merged_dictionaries">Wörterbuchmodus konnte nicht aktualisiert werden</string>
+    <string name="error_update_pause_on_misspelled">Pause-Einstellung konnte nicht aktualisiert werden</string>
+    <string name="error_update_autocorrection">Autokorrektur-Einstellung konnte nicht aktualisiert werden</string>
 
     <!-- Success Messages -->
     <string name="success_learned_words_cleared">Wörterbuch wurde geleert</string>

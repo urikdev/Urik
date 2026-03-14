@@ -75,6 +75,12 @@
     <string name="autocorrect_settings_learn_new_words">Aprendre noves paraules</string>
     <string name="autocorrect_settings_learn_new_words_on">Aprenentatge activat</string>
     <string name="autocorrect_settings_learn_new_words_off">Aprenentatge desactivat</string>
+    <string name="autocorrect_settings_pause_on_misspelled">Pausar en paraula mal escrita</string>
+    <string name="autocorrect_settings_pause_on_misspelled_on">Activat</string>
+    <string name="autocorrect_settings_pause_on_misspelled_off">Desactivat</string>
+    <string name="autocorrect_settings_autocorrection">Autocorrecció</string>
+    <string name="autocorrect_settings_autocorrection_on">Activat</string>
+    <string name="autocorrect_settings_autocorrection_off">Desactivat</string>
     <!-- Language Settings -->
     <string name="max_languages_reached">Es permeten un màxim de 3 idiomes</string>
     <string name="primary_layout_language">Disseny actual</string>
@@ -188,6 +194,8 @@
     <string name="error_update_space_bar_size">Ha fallat l\'actualització de la mida de la barra espaiadora</string>
     <string name="error_update_alternative_layout">Ha fallat l\'actualització del disseny del teclat</string>
     <string name="error_update_merged_dictionaries">Ha fallat l\'actualització del mode de diccionari</string>
+    <string name="error_update_pause_on_misspelled">Ha fallat l\'actualització del paràmetre de pausa</string>
+    <string name="error_update_autocorrection">Ha fallat l\'actualització del paràmetre d\'autocorrecció</string>
     <string name="error_clear_learned_words">No s\'han esborrat les paraules apreses</string>
     <string name="error_reset_to_defaults">Ha fallat el restabliment de la configuració</string>
     <string name="error_dictionary_export">No s\'ha pogut exportar el diccionari</string>

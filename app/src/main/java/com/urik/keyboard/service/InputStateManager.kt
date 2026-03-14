@@ -7,6 +7,11 @@ enum class SpellConfirmationState {
     AWAITING_CONFIRMATION,
 }
 
+data class PostCommitReplacementState(
+    val originalWord: String,
+    val committedWord: String,
+)
+
 interface ViewCallback {
     fun clearSuggestions()
     fun updateSuggestions(suggestions: List<String>)
@@ -106,6 +111,10 @@ class InputStateManager(
     var isAcceleratedDeletion = false
         internal set
 
+    @Volatile
+    var postCommitReplacementState: PostCommitReplacementState? = null
+        internal set
+
     val selectionStateTracker = SelectionStateTracker()
 
     val requiresDirectCommit: Boolean
@@ -172,6 +181,7 @@ class InputStateManager(
         isShowingBigramPredictions = false
         spellConfirmationState = SpellConfirmationState.NORMAL
         pendingWordForLearning = null
+        postCommitReplacementState = null
         viewCallback.clearSuggestions()
         composingRegionStart = -1
         composingReassertionCount = 0
@@ -210,6 +220,7 @@ class InputStateManager(
         isShowingBigramPredictions = false
         spellConfirmationState = SpellConfirmationState.NORMAL
         pendingWordForLearning = null
+        postCommitReplacementState = null
         viewCallback.clearSuggestions()
         composingRegionStart = -1
         lastKnownCursorPosition = -1

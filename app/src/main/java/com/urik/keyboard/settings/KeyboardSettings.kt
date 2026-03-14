@@ -136,6 +136,8 @@ data class KeyboardSettings(
     val oneHandedModeEnabled: Boolean = false,
     val showLanguageSwitchKey: Boolean = false,
     val mergedDictionaries: Boolean = true,
+    val pauseOnMisspelledWord: Boolean = true,
+    val autocorrectionEnabled: Boolean = false,
 ) {
     /**
      * Returns validated copy with constraints enforced.

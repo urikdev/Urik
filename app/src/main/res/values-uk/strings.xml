@@ -81,6 +81,12 @@
     <string name="autocorrect_settings_learn_new_words">Запам\'ятовувати Нові Слова</string>
     <string name="autocorrect_settings_learn_new_words_on">Запам\'ятовування увімкнено</string>
     <string name="autocorrect_settings_learn_new_words_off">Запам\'ятовування вимкнено</string>
+    <string name="autocorrect_settings_pause_on_misspelled">Пауза при неправильному слові</string>
+    <string name="autocorrect_settings_pause_on_misspelled_on">Увімкнено</string>
+    <string name="autocorrect_settings_pause_on_misspelled_off">Вимкнено</string>
+    <string name="autocorrect_settings_autocorrection">Автокорекція</string>
+    <string name="autocorrect_settings_autocorrection_on">Увімкнено</string>
+    <string name="autocorrect_settings_autocorrection_off">Вимкнено</string>
 
     <!-- Language Settings -->
     <string name="select_active_language">Оберіть активну мову</string>
@@ -190,6 +196,8 @@
     <string name="error_dictionary_export">Не вдалося експортувати словник</string>
     <string name="error_dictionary_import">Не вдалося імпортувати словник</string>
     <string name="error_update_merged_dictionaries">Не вдалося оновити режим словника</string>
+    <string name="error_update_pause_on_misspelled">Не вдалося оновити налаштування паузи</string>
+    <string name="error_update_autocorrection">Не вдалося оновити налаштування автокорекції</string>
 
     <!-- Success Messages -->
     <string name="success_learned_words_cleared">Запам\'ятовані слова видалені</string>

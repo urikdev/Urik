@@ -640,4 +640,54 @@ class KeyboardSettingsTest {
 
         assertTrue(validated.mergedDictionaries)
     }
+
+    @Test
+    fun `pauseOnMisspelledWord defaults to true`() {
+        val settings = KeyboardSettings()
+
+        assertTrue(settings.pauseOnMisspelledWord)
+    }
+
+    @Test
+    fun `validated preserves pauseOnMisspelledWord when true`() {
+        val settings = KeyboardSettings(pauseOnMisspelledWord = true)
+
+        val validated = settings.validated()
+
+        assertTrue(validated.pauseOnMisspelledWord)
+    }
+
+    @Test
+    fun `validated preserves pauseOnMisspelledWord when false`() {
+        val settings = KeyboardSettings(pauseOnMisspelledWord = false)
+
+        val validated = settings.validated()
+
+        assertFalse(validated.pauseOnMisspelledWord)
+    }
+
+    @Test
+    fun `autocorrectionEnabled defaults to false`() {
+        val settings = KeyboardSettings()
+
+        assertFalse(settings.autocorrectionEnabled)
+    }
+
+    @Test
+    fun `validated preserves autocorrectionEnabled when true`() {
+        val settings = KeyboardSettings(autocorrectionEnabled = true)
+
+        val validated = settings.validated()
+
+        assertTrue(validated.autocorrectionEnabled)
+    }
+
+    @Test
+    fun `validated preserves autocorrectionEnabled when false`() {
+        val settings = KeyboardSettings(autocorrectionEnabled = false)
+
+        val validated = settings.validated()
+
+        assertFalse(validated.autocorrectionEnabled)
+    }
 }

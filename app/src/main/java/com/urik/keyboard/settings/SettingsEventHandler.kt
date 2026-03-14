@@ -121,6 +121,14 @@ class SettingsEventHandler(
                     context.getString(R.string.error_update_merged_dictionaries)
                 }
 
+                is SettingsEvent.Error.PauseOnMisspelledToggleFailed -> {
+                    context.getString(R.string.error_update_pause_on_misspelled)
+                }
+
+                is SettingsEvent.Error.AutocorrectionToggleFailed -> {
+                    context.getString(R.string.error_update_autocorrection)
+                }
+
                 is SettingsEvent.Success.LearnedWordsCleared -> {
                     context.getString(R.string.success_learned_words_cleared)
                 }

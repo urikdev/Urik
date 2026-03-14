@@ -76,6 +76,8 @@ class SettingsRepository
             val ONE_HANDED_MODE_ENABLED = booleanPreferencesKey("one_handed_mode_enabled")
             val SHOW_LANGUAGE_SWITCH_KEY = booleanPreferencesKey("show_language_switch_key")
             val MERGED_DICTIONARIES = booleanPreferencesKey("merged_dictionaries")
+            val PAUSE_ON_MISSPELLED_WORD = booleanPreferencesKey("pause_on_misspelled_word")
+            val AUTOCORRECTION_ENABLED = booleanPreferencesKey("autocorrection_enabled")
         }
 
         /**
@@ -229,6 +231,8 @@ class SettingsRepository
                         oneHandedModeEnabled = preferences[PreferenceKeys.ONE_HANDED_MODE_ENABLED] ?: false,
                         showLanguageSwitchKey = preferences[PreferenceKeys.SHOW_LANGUAGE_SWITCH_KEY] ?: false,
                         mergedDictionaries = preferences[PreferenceKeys.MERGED_DICTIONARIES] ?: true,
+                        pauseOnMisspelledWord = preferences[PreferenceKeys.PAUSE_ON_MISSPELLED_WORD] ?: true,
+                        autocorrectionEnabled = preferences[PreferenceKeys.AUTOCORRECTION_ENABLED] ?: false,
                     ).validated()
                 }.catch { e ->
                     ErrorLogger.logException(
@@ -616,6 +620,22 @@ class SettingsRepository
         suspend fun updateMergedDictionaries(enabled: Boolean): Result<Unit> =
             try {
                 dataStore.edit { it[PreferenceKeys.MERGED_DICTIONARIES] = enabled }
+                Result.success(Unit)
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+
+        suspend fun updatePauseOnMisspelledWord(enabled: Boolean): Result<Unit> =
+            try {
+                dataStore.edit { it[PreferenceKeys.PAUSE_ON_MISSPELLED_WORD] = enabled }
+                Result.success(Unit)
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+
+        suspend fun updateAutocorrectionEnabled(enabled: Boolean): Result<Unit> =
+            try {
+                dataStore.edit { it[PreferenceKeys.AUTOCORRECTION_ENABLED] = enabled }
                 Result.success(Unit)
             } catch (e: Exception) {
                 Result.failure(e)

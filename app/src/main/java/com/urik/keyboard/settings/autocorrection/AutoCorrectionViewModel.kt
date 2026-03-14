@@ -35,6 +35,8 @@ class AutoCorrectionViewModel
                         showSuggestions = settings.showSuggestions,
                         suggestionCount = settings.suggestionCount,
                         learnNewWords = settings.learnNewWords,
+                        pauseOnMisspelledWord = settings.pauseOnMisspelledWord,
+                        autocorrectionEnabled = settings.autocorrectionEnabled,
                     )
                 }.stateIn(
                     scope = viewModelScope,
@@ -74,6 +76,22 @@ class AutoCorrectionViewModel
             }
         }
 
+        fun updatePauseOnMisspelledWord(enabled: Boolean) {
+            viewModelScope.launch {
+                settingsRepository
+                    .updatePauseOnMisspelledWord(enabled)
+                    .onFailure { _events.emit(SettingsEvent.Error.PauseOnMisspelledToggleFailed) }
+            }
+        }
+
+        fun updateAutocorrectionEnabled(enabled: Boolean) {
+            viewModelScope.launch {
+                settingsRepository
+                    .updateAutocorrectionEnabled(enabled)
+                    .onFailure { _events.emit(SettingsEvent.Error.AutocorrectionToggleFailed) }
+            }
+        }
+
         private companion object {
             const val STOP_TIMEOUT_MILLIS = 5000L
         }
@@ -87,4 +105,6 @@ data class AutoCorrectionUiState(
     val showSuggestions: Boolean = true,
     val suggestionCount: Int = 3,
     val learnNewWords: Boolean = true,
+    val pauseOnMisspelledWord: Boolean = true,
+    val autocorrectionEnabled: Boolean = false,
 )
