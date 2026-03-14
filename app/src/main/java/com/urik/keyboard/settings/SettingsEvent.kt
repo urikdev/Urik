@@ -59,6 +59,10 @@ sealed interface SettingsEvent {
         data object DictionaryImportFailed : Error
 
         data object MergedDictionariesToggleFailed : Error
+
+        data object PauseOnMisspelledToggleFailed : Error
+
+        data object AutocorrectionToggleFailed : Error
     }
 
     /**

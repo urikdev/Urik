@@ -81,6 +81,12 @@
     <string name="autocorrect_settings_learn_new_words">Ucz się nowych słów</string>
     <string name="autocorrect_settings_learn_new_words_on">Nauka włączona</string>
     <string name="autocorrect_settings_learn_new_words_off">Nauka wyłączona</string>
+    <string name="autocorrect_settings_pause_on_misspelled">Pauza przy błędnie napisanym słowie</string>
+    <string name="autocorrect_settings_pause_on_misspelled_on">Włączone</string>
+    <string name="autocorrect_settings_pause_on_misspelled_off">Wyłączone</string>
+    <string name="autocorrect_settings_autocorrection">Autokorekta</string>
+    <string name="autocorrect_settings_autocorrection_on">Włączone</string>
+    <string name="autocorrect_settings_autocorrection_off">Wyłączone</string>
 
     <!-- Language Settings -->
     <string name="select_active_language">Wybierz aktywny język</string>
@@ -190,6 +196,8 @@
     <string name="error_dictionary_export">Nie udało się wyeksportować słownika</string>
     <string name="error_dictionary_import">Nie udało się zaimportować słownika</string>
     <string name="error_update_merged_dictionaries">Nie udało się zaktualizować trybu słownika</string>
+    <string name="error_update_pause_on_misspelled">Nie udało się zaktualizować ustawienia pauzy</string>
+    <string name="error_update_autocorrection">Nie udało się zaktualizować ustawienia autokorekty</string>
 
     <!-- Success Messages -->
     <string name="success_learned_words_cleared">Nauczone słowa wyczyszczone</string>

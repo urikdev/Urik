@@ -81,6 +81,12 @@
     <string name="autocorrect_settings_learn_new_words">Aprende nuevas palabras</string>
     <string name="autocorrect_settings_learn_new_words_on">El aprendizaje habilitado</string>
     <string name="autocorrect_settings_learn_new_words_off">Aprendizaje desactivado</string>
+    <string name="autocorrect_settings_pause_on_misspelled">Pausar en palabra mal escrita</string>
+    <string name="autocorrect_settings_pause_on_misspelled_on">Activado</string>
+    <string name="autocorrect_settings_pause_on_misspelled_off">Desactivado</string>
+    <string name="autocorrect_settings_autocorrection">Autocorrección</string>
+    <string name="autocorrect_settings_autocorrection_on">Activado</string>
+    <string name="autocorrect_settings_autocorrection_off">Desactivado</string>
 
     <!-- Language Settings -->
     <string name="select_active_language">Seleccionar idioma activo</string>
@@ -189,6 +195,8 @@
     <string name="error_dictionary_export">No se pudo exportar el diccionario</string>
     <string name="error_dictionary_import">No se pudo importar el diccionario</string>
     <string name="error_update_merged_dictionaries">Error al actualizar el modo de diccionario</string>
+    <string name="error_update_pause_on_misspelled">Error al actualizar la configuración de pausa</string>
+    <string name="error_update_autocorrection">Error al actualizar la configuración de autocorrección</string>
 
     <!-- Success Messages -->
     <string name="success_learned_words_cleared">Palabras aprendidas borradas</string>

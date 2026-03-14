@@ -288,6 +288,56 @@ class SuggestionPipeline(
         }
     }
 
+    suspend fun coordinatePostCommitReplacement(
+        selectedSuggestion: String,
+        replacementState: PostCommitReplacementState,
+        checkAutoCapitalization: (String) -> Unit,
+    ) {
+        withContext(Dispatchers.Main) {
+            try {
+                val deleteLength = replacementState.committedWord.length + 1
+                val textBefore = outputBridge.safeGetTextBeforeCursor(deleteLength)
+                val expectedText = replacementState.committedWord + " "
+                if (textBefore != expectedText) {
+                    state.postCommitReplacementState = null
+                    state.clearSuggestionDisplay()
+                    return@withContext
+                }
+
+                state.isActivelyEditing = true
+
+                outputBridge.beginBatchEdit()
+                try {
+                    outputBridge.deleteSurroundingText(deleteLength, 0)
+                    outputBridge.commitText("$selectedSuggestion ", 1)
+
+                    val isAutocorrectUndo = replacementState.committedWord != replacementState.originalWord
+                    if (isAutocorrectUndo) {
+                        learnWordAndInvalidateCache(selectedSuggestion, InputMethod.TYPED)
+                        val currentLanguage = languageManager.currentLanguage.value
+                        wordFrequencyRepository.incrementFrequency(selectedSuggestion, currentLanguage)
+                        wordFrequencyRepository.incrementFrequency(selectedSuggestion, currentLanguage)
+                    } else {
+                        recordWordUsage(selectedSuggestion)
+                    }
+                    outputBridge.updateLastCommittedWord(selectedSuggestion)
+                    state.postCommitReplacementState = null
+                    state.pendingSuggestions = emptyList()
+                    state.clearSuggestionDisplay()
+                    showBigramPredictions()
+
+                    val textBefore = outputBridge.safeGetTextBeforeCursor(50)
+                    checkAutoCapitalization(textBefore)
+                } finally {
+                    outputBridge.endBatchEdit()
+                }
+            } catch (_: Exception) {
+                state.postCommitReplacementState = null
+                state.clearSuggestionDisplay()
+            }
+        }
+    }
+
     suspend fun coordinateWordCompletion() {
         withContext(Dispatchers.Main) {
             try {
