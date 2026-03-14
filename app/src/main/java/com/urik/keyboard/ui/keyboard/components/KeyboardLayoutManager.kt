@@ -1187,14 +1187,13 @@ class KeyboardLayoutManager(
                         activeLanguages.size >= 2 &&
                         !showLanguageSwitchKey
                     ) {
-                        val globeIcon = ContextCompat.getDrawable(context, R.drawable.ic_globe)
-                        globeIcon?.setTint(getKeyTextColor(key))
-
                         val iconSize = (10 * context.resources.displayMetrics.density).toInt()
                         val leftInset = (5 * context.resources.displayMetrics.density).toInt()
                         val topInset = (4 * context.resources.displayMetrics.density).toInt()
+                        val shortcode = languageManager.currentLayoutLanguage.value.take(2).uppercase(java.util.Locale.ROOT)
+                        val langBadge = createLangBadgeDrawable(shortcode, getKeyTextColor(key))
 
-                        val layerDrawable = LayerDrawable(arrayOf(keyBackground, iconDrawable, globeIcon))
+                        val layerDrawable = LayerDrawable(arrayOf(keyBackground, iconDrawable, langBadge))
                         layerDrawable.setLayerInset(1, 12, 12, 12, 12)
                         layerDrawable.setLayerGravity(1, Gravity.CENTER)
                         layerDrawable.setLayerSize(2, iconSize, iconSize)
@@ -1228,17 +1227,7 @@ class KeyboardLayoutManager(
 
                     background = layerDrawable
                 } else if (key.action == KeyboardKey.ActionType.LANGUAGE_SWITCH) {
-                    val keyBackground = getKeyBackground(key)
-                    val globeIcon = ContextCompat.getDrawable(context, R.drawable.ic_globe)
-
-                    globeIcon?.setTint(getKeyTextColor(key))
-
-                    val layerDrawable = LayerDrawable(arrayOf(keyBackground, globeIcon))
-                    layerDrawable.setLayerInset(1, 12, 12, 12, 12)
-                    layerDrawable.setLayerGravity(1, Gravity.CENTER)
-
-                    background = layerDrawable
-                    text = ""
+                    background = getKeyBackground(key)
                 } else {
                     background = getKeyBackground(key)
                 }
@@ -1379,7 +1368,7 @@ class KeyboardLayoutManager(
                     KeyboardKey.ActionType.MODE_SWITCH_NUMBERS -> context.getString(R.string.numbers_mode_label)
                     KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS -> context.getString(R.string.symbols_mode_label)
                     KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS_SECONDARY -> context.getString(R.string.symbols_secondary_mode_label)
-                    KeyboardKey.ActionType.LANGUAGE_SWITCH -> ""
+                    KeyboardKey.ActionType.LANGUAGE_SWITCH -> languageManager.currentLayoutLanguage.value.take(2).uppercase(java.util.Locale.ROOT)
                     else -> "?"
                 }
             }
@@ -2158,6 +2147,21 @@ class KeyboardLayoutManager(
             is KeyboardKey.Action -> themeManager.currentTheme.value.colors.keyTextAction
             KeyboardKey.Spacer -> android.graphics.Color.TRANSPARENT
         }
+
+    private fun createLangBadgeDrawable(text: String, color: Int): android.graphics.drawable.BitmapDrawable {
+        val density = context.resources.displayMetrics.density
+        val sizePx = (10 * density).toInt().coerceAtLeast(1)
+        val bitmap = android.graphics.Bitmap.createBitmap(sizePx, sizePx, android.graphics.Bitmap.Config.ARGB_8888)
+        val canvas = android.graphics.Canvas(bitmap)
+        val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
+            this.color = color
+            textAlign = android.graphics.Paint.Align.CENTER
+            textSize = sizePx * 0.75f
+            typeface = Typeface.DEFAULT_BOLD
+        }
+        canvas.drawText(text, sizePx / 2f, (sizePx - paint.descent() - paint.ascent()) / 2f, paint)
+        return android.graphics.drawable.BitmapDrawable(context.resources, bitmap)
+    }
 
     fun cleanup() {
         backgroundJob.cancel()
