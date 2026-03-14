@@ -219,6 +219,7 @@
     <string name="letters_mode_description">Переключиться на клавиатуру с буквами</string>
     <string name="numbers_mode_description">Переключиться на клавиатуру с цифрами</string>
     <string name="symbols_mode_description">Переключиться на клавиатуру с символами</string>
+    <string name="symbols_secondary_mode_description">Переключиться на расширенную клавиатуру символов</string>
     <string name="language_switch_description">Переключить язык клавиатуры</string>
     <string name="ime_prediction_description">Предложение: %1$s</string>
 

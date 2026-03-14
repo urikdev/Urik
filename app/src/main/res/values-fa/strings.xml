@@ -232,6 +232,7 @@
     <string name="letters_mode_description">تغییر به کیبورد حروف</string>
     <string name="numbers_mode_description">تغییر به کیبورد اعداد</string>
     <string name="symbols_mode_description">تغییر به کیبورد نمادها</string>
+    <string name="symbols_secondary_mode_description">تغییر به صفحه‌کلید نمادهای گسترده</string>
     <string name="language_switch_description">تغییر زبان کیبورد</string>
     <string name="ime_prediction_description">پیشنهاد: %1$s</string>
 

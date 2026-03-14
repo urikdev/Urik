@@ -215,6 +215,7 @@
     <string name="letters_mode_description">Zur Buchstabeneingabe wechseln</string>
     <string name="numbers_mode_description">Zur Zahleneingabe wechseln</string>
     <string name="symbols_mode_description">Zur Symboleingabe wechseln</string>
+    <string name="symbols_secondary_mode_description">Zur erweiterten Symboltastatur wechseln</string>
     <string name="language_switch_description">Tastatursprache wechseln</string>
     <string name="ime_prediction_description">Vorhersage: %1$s</string>
 

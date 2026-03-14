@@ -214,6 +214,7 @@
     <string name="letters_mode_description">Εναλλαγή στο αλφαβητικό πληκτρολόγιο</string>
     <string name="numbers_mode_description">Εναλλαγή σε αριθμητικό πληκτρολόγιο</string>
     <string name="symbols_mode_description">Εναλλαγή σε πληκτρολόγιο συμβόλων</string>
+    <string name="symbols_secondary_mode_description">Εναλλαγή σε εκτεταμένο πληκτρολόγιο συμβόλων</string>
     <string name="language_switch_description">Εναλλαγή γλώσσας πληκτρολογίου</string>
     <string name="ime_prediction_description">Πρόβλεψη: %1$s</string>
     <!-- Action button accessibility descriptions -->

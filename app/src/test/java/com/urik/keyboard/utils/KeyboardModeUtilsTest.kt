@@ -353,4 +353,40 @@ class KeyboardModeUtilsTest {
             KeyboardModeUtils.shouldResetToLettersOnEnter(KeyboardMode.SYMBOLS, editorInfo),
         )
     }
+
+    @Test
+    fun `determineTargetMode switches from SYMBOLS_SECONDARY to NUMBERS for number input`() {
+        val editorInfo =
+            EditorInfo().apply {
+                inputType = InputType.TYPE_CLASS_NUMBER
+            }
+
+        val targetMode = KeyboardModeUtils.determineTargetMode(editorInfo, KeyboardMode.SYMBOLS_SECONDARY)
+
+        assertEquals(KeyboardMode.NUMBERS, targetMode)
+    }
+
+    @Test
+    fun `determineTargetMode maintains SYMBOLS_SECONDARY for text input`() {
+        val editorInfo =
+            EditorInfo().apply {
+                inputType = InputType.TYPE_CLASS_TEXT
+            }
+
+        val targetMode = KeyboardModeUtils.determineTargetMode(editorInfo, KeyboardMode.SYMBOLS_SECONDARY)
+
+        assertEquals(KeyboardMode.SYMBOLS_SECONDARY, targetMode)
+    }
+
+    @Test
+    fun `shouldResetToLettersOnEnter returns true from SYMBOLS_SECONDARY in text field`() {
+        val editorInfo =
+            EditorInfo().apply {
+                inputType = InputType.TYPE_CLASS_TEXT
+            }
+
+        assertTrue(
+            KeyboardModeUtils.shouldResetToLettersOnEnter(KeyboardMode.SYMBOLS_SECONDARY, editorInfo),
+        )
+    }
 }

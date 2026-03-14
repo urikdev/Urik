@@ -228,6 +228,7 @@
     <string name="letters_mode_label">ABC</string>
     <string name="numbers_mode_label">123</string>
     <string name="symbols_mode_label">+=&lt;</string>
+    <string name="symbols_secondary_mode_label" translatable="false">SYM</string>
 
     <!-- Accessibility descriptions -->
     <string name="key_character_description">Type %1$s</string>
@@ -241,6 +242,7 @@
     <string name="letters_mode_description">Switch to letter keyboard</string>
     <string name="numbers_mode_description">Switch to number keyboard</string>
     <string name="symbols_mode_description">Switch to symbol keyboard</string>
+    <string name="symbols_secondary_mode_description">Switch to extended symbol keyboard</string>
     <string name="language_switch_description">Switch keyboard language</string>
     <string name="ime_prediction_description">Prediction: %1$s</string>
 

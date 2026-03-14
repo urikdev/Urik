@@ -7,6 +7,7 @@ enum class KeyboardMode {
     LETTERS,
     NUMBERS,
     SYMBOLS,
+    SYMBOLS_SECONDARY,
 }
 
 /**
@@ -87,6 +88,7 @@ sealed class KeyboardKey {
         MODE_SWITCH_LETTERS,
         MODE_SWITCH_NUMBERS,
         MODE_SWITCH_SYMBOLS,
+        MODE_SWITCH_SYMBOLS_SECONDARY,
         CAPS_LOCK,
         LANGUAGE_SWITCH,
     }

@@ -285,6 +285,7 @@ class KeyboardRepository
                             "mode_switch_numbers" -> KeyboardKey.ActionType.MODE_SWITCH_NUMBERS
                             "mode_switch_letters" -> KeyboardKey.ActionType.MODE_SWITCH_LETTERS
                             "mode_switch_symbols" -> KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS
+                            "mode_switch_symbols_secondary" -> KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS_SECONDARY
                             "caps_lock" -> KeyboardKey.ActionType.CAPS_LOCK
                             "dynamic_action" -> currentAction
                             else -> KeyboardKey.ActionType.ENTER
@@ -343,6 +344,7 @@ class KeyboardRepository
                     KeyboardMode.LETTERS -> getFallbackLettersLayout(currentAction)
                     KeyboardMode.NUMBERS -> getFallbackNumbersLayout(currentAction)
                     KeyboardMode.SYMBOLS -> getFallbackSymbolsLayout(currentAction)
+                    KeyboardMode.SYMBOLS_SECONDARY -> getFallbackSymbolsSecondaryLayout(currentAction)
                 }
             return KeyboardLayout(mode = mode, rows = rows)
         }
@@ -417,6 +419,33 @@ class KeyboardRepository
                     KeyboardKey.Action(KeyboardKey.ActionType.MODE_SWITCH_NUMBERS),
                     KeyboardKey.Action(KeyboardKey.ActionType.SPACE),
                     KeyboardKey.Action(KeyboardKey.ActionType.BACKSPACE),
+                    KeyboardKey.Action(actionType),
+                ),
+            )
+
+        private fun getFallbackSymbolsSecondaryLayout(actionType: KeyboardKey.ActionType): List<List<KeyboardKey>> =
+            listOf(
+                listOf("~", "`", "\u2022", "\u2014", "\u2013", "\u00B7", "\u03C0", "\u00F7", "\u00D7", "\u00B1").map {
+                    KeyboardKey.Character(it, KeyboardKey.KeyType.SYMBOL)
+                },
+                listOf("\u00A3", "\u00A5", "\u20AC", "\u00A2", "\u00B0", "\u00AE", "\u00A9", "\u2122", "\u221E", "\u00A7").map {
+                    KeyboardKey.Character(it, KeyboardKey.KeyType.SYMBOL)
+                },
+                listOf(
+                    KeyboardKey.Action(KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS),
+                    KeyboardKey.Character("\u201C", KeyboardKey.KeyType.SYMBOL),
+                    KeyboardKey.Character("\u201D", KeyboardKey.KeyType.SYMBOL),
+                    KeyboardKey.Character("\u00AB", KeyboardKey.KeyType.SYMBOL),
+                    KeyboardKey.Character("\u00BB", KeyboardKey.KeyType.SYMBOL),
+                    KeyboardKey.Character("\u2039", KeyboardKey.KeyType.SYMBOL),
+                    KeyboardKey.Character("\u203A", KeyboardKey.KeyType.SYMBOL),
+                    KeyboardKey.Character("\u201E", KeyboardKey.KeyType.SYMBOL),
+                    KeyboardKey.Character("\u2026", KeyboardKey.KeyType.SYMBOL),
+                    KeyboardKey.Action(KeyboardKey.ActionType.BACKSPACE),
+                ),
+                listOf<KeyboardKey>(
+                    KeyboardKey.Action(KeyboardKey.ActionType.MODE_SWITCH_LETTERS),
+                    KeyboardKey.Action(KeyboardKey.ActionType.SPACE),
                     KeyboardKey.Action(actionType),
                 ),
             )

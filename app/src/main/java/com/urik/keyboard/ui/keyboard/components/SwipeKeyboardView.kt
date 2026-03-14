@@ -84,6 +84,8 @@ class SwipeKeyboardView
         private val keyPositions = mutableMapOf<Button, Rect>()
         private val keyMapping = mutableMapOf<Button, KeyboardKey>()
         private val keyCharacterPositions = mutableMapOf<KeyboardKey.Character, PointF>()
+        private var numberRowBoundaryY: Float = -1f
+        private val numberRowButtons = mutableSetOf<Button>()
 
         private var popupActive = false
 
@@ -1662,6 +1664,7 @@ class SwipeKeyboardView
                 }
             }
 
+            computeNumberRowBoundary()
             expandEdgeKeyHitAreas()
 
             swipeDetector?.updateKeyPositions(keyCharacterPositions)
@@ -1675,6 +1678,31 @@ class SwipeKeyboardView
             languageManager?.updateKeyPositions(charToPosition)
         }
 
+        private fun computeNumberRowBoundary() {
+            numberRowButtons.clear()
+            numberRowBoundaryY = -1f
+            val layout = currentLayout ?: return
+            if (layout.rows.size <= 1) return
+
+            val firstRow = layout.rows[0]
+            val charKeys = firstRow.filterIsInstance<KeyboardKey.Character>()
+            if (charKeys.size != 10 || !charKeys.all { it.type == KeyboardKey.KeyType.NUMBER }) return
+
+            var maxBottom = 0f
+            keyMapping.forEach { (button, key) ->
+                if (key is KeyboardKey.Character && key.type == KeyboardKey.KeyType.NUMBER) {
+                    numberRowButtons.add(button)
+                    val rect = keyPositions[button]
+                    if (rect != null) {
+                        maxBottom = maxOf(maxBottom, rect.bottom.toFloat())
+                    }
+                }
+            }
+            if (maxBottom > 0f) {
+                numberRowBoundaryY = maxBottom
+            }
+        }
+
         private fun expandEdgeKeyHitAreas() {
             if (isDestroyed || keyViews.isEmpty()) return
 
@@ -1685,6 +1713,7 @@ class SwipeKeyboardView
             if (viewWidth <= 0 || viewHeight <= 0) return
 
             val minTouchTargetPx = (48 * resources.displayMetrics.density).toInt()
+            val hasTopNumberRow = numberRowBoundaryY > 0
 
             layout.rows.forEachIndexed { rowIndex, row ->
                 row.forEachIndexed { colIndex, key ->
@@ -1694,13 +1723,17 @@ class SwipeKeyboardView
                     val isBottomRow = rowIndex == layout.rows.size - 1
                     val isFirstCol = colIndex == 0
                     val isLastCol = colIndex == row.size - 1
+                    val isAlphaRowBelowNumberRow = hasTopNumberRow && rowIndex == 1
 
-                    if (!isBottomRow && !isFirstCol && !isLastCol) return@forEachIndexed
+                    if (!isBottomRow && !isFirstCol && !isLastCol && !isAlphaRowBelowNumberRow) return@forEachIndexed
 
                     val expandedRect = Rect(rect)
 
                     if (isBottomRow) {
                         expandedRect.bottom = viewHeight
+                    }
+                    if (isAlphaRowBelowNumberRow) {
+                        expandedRect.top = numberRowBoundaryY.toInt()
                     }
                     if (isFirstCol) {
                         val maxExpansion = rect.left.coerceAtMost(minTouchTargetPx / 2)
@@ -2017,8 +2050,11 @@ class SwipeKeyboardView
 
             var closestButton: Button? = null
             var closestDistance = Float.MAX_VALUE
+            val isInAlphaRegion = numberRowBoundaryY > 0 && ny > numberRowBoundaryY
 
             keyPositions.forEach { (button, rect) ->
+                if (isInAlphaRegion && button in numberRowButtons) return@forEach
+
                 val centerX = rect.centerX().toFloat()
                 val centerY = rect.centerY().toFloat()
                 val distance = kotlin.math.sqrt((nx - centerX) * (nx - centerX) + (ny - centerY) * (ny - centerY))
@@ -2142,6 +2178,8 @@ class SwipeKeyboardView
             keyPositions.clear()
             keyMapping.clear()
             keyCharacterPositions.clear()
+            numberRowButtons.clear()
+            numberRowBoundaryY = -1f
 
             activeSuggestionViews.clear()
             suggestionViewPool.clear()

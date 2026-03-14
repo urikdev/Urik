@@ -230,6 +230,7 @@
     <string name="letters_mode_description">حول إلى لوحة مفاتيح الأحرف</string>
     <string name="numbers_mode_description">حول إلى لوحة مفاتيح الأرقام</string>
     <string name="symbols_mode_description">حول إلى لوحة مفاتيح الرموز</string>
+    <string name="symbols_secondary_mode_description">التبديل إلى لوحة الرموز الموسعة</string>
     <string name="language_switch_description">غير لغة لوحة المفاتيح</string>
     <string name="ime_prediction_description">التوقع: %1$s</string>
 

@@ -233,6 +233,7 @@
     <string name="letters_mode_description">Schakel naar lettertoetsenbord</string>
     <string name="numbers_mode_description">Schakel naar cijfertoetsenbord</string>
     <string name="symbols_mode_description">Schakel naar symbooltoetsenbord</string>
+    <string name="symbols_secondary_mode_description">Overschakelen naar uitgebreid symbooltoetsenbord</string>
     <string name="language_switch_description">Toetsenbordtaal wisselen</string>
     <string name="ime_prediction_description">Voorspelling: %1$s</string>
 

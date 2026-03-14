@@ -214,6 +214,7 @@
     <string name="letters_mode_description">Canviar el teclat amb lletres</string>
     <string name="numbers_mode_description">Canviar al teclat amb números</string>
     <string name="symbols_mode_description">Canviar al teclat amb símbols</string>
+    <string name="symbols_secondary_mode_description">Canviar al teclat de símbols estesos</string>
     <string name="language_switch_description">Canviar l\'idioma del teclat</string>
     <string name="ime_prediction_description">Predicció: %1$s</string>
     <!-- Action button accessibility descriptions -->

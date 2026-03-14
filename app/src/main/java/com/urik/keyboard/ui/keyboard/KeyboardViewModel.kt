@@ -240,6 +240,7 @@ class KeyboardViewModel
                 KeyboardKey.ActionType.MODE_SWITCH_LETTERS -> switchMode(KeyboardMode.LETTERS)
                 KeyboardKey.ActionType.MODE_SWITCH_NUMBERS -> switchMode(KeyboardMode.NUMBERS)
                 KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS -> switchMode(KeyboardMode.SYMBOLS)
+                KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS_SECONDARY -> switchMode(KeyboardMode.SYMBOLS_SECONDARY)
                 else -> { }
             }
         }
