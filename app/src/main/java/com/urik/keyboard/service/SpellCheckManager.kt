@@ -823,25 +823,11 @@ class SpellCheckManager
                                                 (SYMSPELL_DISTANCE_WEIGHT * distanceScore) +
                                                     (SYMSPELL_FREQUENCY_WEIGHT * freqScore)
 
-                                            if (editDistance == 1.0 && normalizedWord.length == result.term.length) {
-                                                baseConfidence += SAME_LENGTH_BONUS
-
-                                                if (normalizedWord.firstOrNull() == result.term.firstOrNull()) {
-                                                    baseConfidence += SAME_FIRST_LETTER_BONUS
-                                                }
-
-                                                if (normalizedWord.length > 1 && normalizedWord.lastOrNull() == result.term.lastOrNull()) {
-                                                    baseConfidence += SAME_LAST_LETTER_BONUS
-                                                }
-
-                                                for (i in normalizedWord.indices) {
-                                                    if (normalizedWord[i] != result.term[i]) {
-                                                        val proximityBonus = calculateProximityBonus(normalizedWord[i], result.term[i])
-                                                        baseConfidence += proximityBonus
-                                                        break
-                                                    }
-                                                }
-                                            }
+                                            val spatialScore = calculateFullWordSpatialScore(
+                                                normalizedWord,
+                                                result.term.lowercase(),
+                                            )
+                                            baseConfidence += spatialScore * SPATIAL_PROXIMITY_WEIGHT
 
                                             val strippedResult =
                                                 com.urik.keyboard.utils.TextMatchingUtils
@@ -1219,29 +1205,116 @@ class SpellCheckManager
                 .toList()
         }
 
-        private fun calculateProximityBonus(
-            char1: Char,
-            char2: Char,
+        private fun calculateFullWordSpatialScore(
+            input: String,
+            candidate: String,
         ): Double {
-            if (char1 == char2) return 0.0
-
             val keyPositions = cachedKeyPositions
             if (keyPositions.isEmpty()) return 0.0
 
             val avgKeySpacing = cachedAverageKeySpacing
             if (avgKeySpacing <= 0.0) return 0.0
 
-            val pos1 = keyPositions[char1.lowercaseChar()] ?: return 0.0
-            val pos2 = keyPositions[char2.lowercaseChar()] ?: return 0.0
+            val sigma = avgKeySpacing * PROXIMITY_SIGMA_MULTIPLIER
+            val twoSigmaSquared = 2.0 * sigma * sigma
 
-            val dx = pos1.x - pos2.x
-            val dy = pos1.y - pos2.y
+            if (input.length == candidate.length) {
+                return scoreSameLengthAlignment(input, candidate, keyPositions, twoSigmaSquared)
+            }
+
+            return scoreDifferentLengthAlignment(input, candidate, keyPositions, twoSigmaSquared)
+        }
+
+        private fun scoreSameLengthAlignment(
+            input: String,
+            candidate: String,
+            keyPositions: Map<Char, android.graphics.PointF>,
+            twoSigmaSquared: Double,
+        ): Double {
+            var totalScore = 0.0
+            for (i in input.indices) {
+                totalScore += scoreCharPair(input[i], candidate[i], keyPositions, twoSigmaSquared)
+            }
+            return totalScore / input.length
+        }
+
+        private fun scoreDifferentLengthAlignment(
+            input: String,
+            candidate: String,
+            keyPositions: Map<Char, android.graphics.PointF>,
+            twoSigmaSquared: Double,
+        ): Double {
+            val shorter: String
+            val longer: String
+            if (input.length < candidate.length) {
+                shorter = input
+                longer = candidate
+            } else {
+                shorter = candidate
+                longer = input
+            }
+
+            val skipBudget = longer.length - shorter.length
+            var bestScore = 0.0
+
+            if (skipBudget == 1) {
+                for (skipPos in 0 until longer.length) {
+                    val score = scoreWithSkips(shorter, longer, keyPositions, twoSigmaSquared, skipPos, -1)
+                    if (score > bestScore) bestScore = score
+                }
+            } else if (skipBudget == 2) {
+                val totalLength = shorter.length + skipBudget
+                for (i in 0 until totalLength) {
+                    for (j in i + 1 until totalLength) {
+                        val score = scoreWithSkips(shorter, longer, keyPositions, twoSigmaSquared, i, j)
+                        if (score > bestScore) bestScore = score
+                    }
+                }
+            }
+
+            return bestScore
+        }
+
+        private fun scoreWithSkips(
+            shorter: String,
+            longer: String,
+            keyPositions: Map<Char, android.graphics.PointF>,
+            twoSigmaSquared: Double,
+            skip1: Int,
+            skip2: Int,
+        ): Double {
+            var totalScore = 0.0
+            var shortIdx = 0
+            for (longIdx in longer.indices) {
+                if (longIdx == skip1 || longIdx == skip2) continue
+                if (shortIdx >= shorter.length) break
+                totalScore += scoreCharPair(shorter[shortIdx], longer[longIdx], keyPositions, twoSigmaSquared)
+                shortIdx++
+            }
+            return if (shorter.isNotEmpty()) totalScore / shorter.length else 0.0
+        }
+
+        private fun scoreCharPair(
+            inputChar: Char,
+            candidateChar: Char,
+            keyPositions: Map<Char, android.graphics.PointF>,
+            twoSigmaSquared: Double,
+        ): Double {
+            val ic = inputChar.lowercaseChar()
+            val cc = candidateChar.lowercaseChar()
+
+            if (ic == cc) return 1.0
+
+            if (ic.isDigit() || cc.isDigit()) return 0.0
+
+            val pos1 = keyPositions[ic] ?: return 0.0
+            val pos2 = keyPositions[cc] ?: return 0.0
+
+            val dx = (pos1.x - pos2.x).toDouble()
+            val dy = (pos1.y - pos2.y).toDouble()
             val distanceSquared = dx * dx + dy * dy
 
-            val sigma = avgKeySpacing * PROXIMITY_SIGMA_MULTIPLIER
-            val proximityScore = kotlin.math.exp(-distanceSquared / (2 * sigma * sigma))
-
-            return proximityScore * PROXIMITY_MAX_BONUS
+            return kotlin.math.exp(-distanceSquared / twoSigmaSquared)
         }
 
         private fun calculateAverageKeySpacing(keyPositions: Map<Char, android.graphics.PointF>): Double {
@@ -1320,11 +1393,7 @@ class SpellCheckManager
             const val SYMSPELL_CONFIDENCE_MIN = 0.0
             const val MAX_DICT_FREQUENCY = 30_000_000.0
 
-            const val SAME_LENGTH_BONUS = 0.10
-            const val SAME_FIRST_LETTER_BONUS = 0.15
-            const val SAME_LAST_LETTER_BONUS = 0.10
-
-            const val PROXIMITY_MAX_BONUS = 0.20
+            const val SPATIAL_PROXIMITY_WEIGHT = 0.35
             const val PROXIMITY_SIGMA_MULTIPLIER = 2.0
 
             const val MAX_PREFIX_COMPLETION_RESULTS = 10
