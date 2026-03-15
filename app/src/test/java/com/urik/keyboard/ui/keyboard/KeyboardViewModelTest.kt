@@ -71,7 +71,7 @@ class KeyboardViewModelTest {
                 .thenReturn(Result.success(createMockLayout(KeyboardMode.LETTERS)))
         }
 
-        viewModel = KeyboardViewModel(repository, languageManager, themeManager)
+        viewModel = KeyboardViewModel(repository, languageManager)
     }
 
     @Test

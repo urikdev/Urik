@@ -115,7 +115,6 @@
     <string name="privacy_settings_reset_to_defaults">Återställ till standardinställningar</string>
     <string name="privacy_settings_reset_to_defaults_confirm">Återställa alla inställningar till standardinställningarna?</string>
     <string name="error_title">Fel</string>
-    <string name="error_update_theme">Misslyckades med att uppdatera temat</string>
     <string name="error_update_key_size">Misslyckades med att uppdatera nyckelstorleken</string>
     <string name="error_update_key_label_size">Misslyckades med att uppdatera etikettstorleken</string>
     <string name="error_update_spell_check">Misslyckades med att uppdatera stavningskontroll</string>
@@ -221,7 +220,6 @@
     <string name="tip_4_title">Ta bort ord</string>
     <string name="tip_4_description">Tryck länge på ett förslag för att ta bort det från din ordlista.</string>
     <string name="tip_5_description">Långt tryck på symbolknappen för att öppna Urklippshanteraren.</string>
-    <string name="clipboard_panel_title">Urklipp</string>
     <string name="clipboard_panel_pinned">Fästa</string>
     <string name="clipboard_panel_recent">Senaste</string>
     <string name="clipboard_panel_empty">Ingen urklippshistorik</string>

@@ -823,10 +823,11 @@ class SpellCheckManager
                                                 (SYMSPELL_DISTANCE_WEIGHT * distanceScore) +
                                                     (SYMSPELL_FREQUENCY_WEIGHT * freqScore)
 
-                                            val spatialScore = calculateFullWordSpatialScore(
-                                                normalizedWord,
-                                                result.term.lowercase(),
-                                            )
+                                            val spatialScore =
+                                                calculateFullWordSpatialScore(
+                                                    normalizedWord,
+                                                    result.term.lowercase(),
+                                                )
                                             baseConfidence += spatialScore * SPATIAL_PROXIMITY_WEIGHT
 
                                             val strippedResult =
@@ -870,8 +871,6 @@ class SpellCheckManager
                     }
                 } catch (_: Exception) {
                 }
-
-
 
                 return allSuggestions.sortedByDescending { it.confidence }
             } catch (_: Exception) {
@@ -1184,26 +1183,6 @@ class SpellCheckManager
                     return@withContext emptyMap()
                 }
             }
-
-        suspend fun getWordsByPrefix(
-            prefix: String,
-            languages: List<String>,
-            maxResults: Int,
-        ): List<Pair<String, Int>> {
-            if (prefix.length < 2) return emptyList()
-
-            val dictionary = getCommonWordsForLanguages(languages)
-            val lowerPrefix = prefix.lowercase()
-
-            return dictionary.entries
-                .asSequence()
-                .filter { (word, _) ->
-                    word.startsWith(lowerPrefix) && word.length > prefix.length
-                }.sortedByDescending { it.value }
-                .take(maxResults)
-                .map { it.key to it.value }
-                .toList()
-        }
 
         private fun calculateFullWordSpatialScore(
             input: String,

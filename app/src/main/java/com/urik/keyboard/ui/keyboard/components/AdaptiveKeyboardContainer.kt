@@ -189,7 +189,7 @@ class AdaptiveKeyboardContainer
                 LinearLayout(context).apply {
                     orientation = LinearLayout.VERTICAL
                     gravity = Gravity.CENTER
-                    importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+                    importantForAccessibility = IMPORTANT_FOR_ACCESSIBILITY_NO
                     layoutParams =
                         LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT).apply {
                             gravity = Gravity.CENTER_VERTICAL
@@ -255,11 +255,13 @@ class AdaptiveKeyboardContainer
                     params.marginEnd = 0
                     params.marginStart = 0
                 }
+
                 KeyboardDisplayMode.ONE_HANDED_RIGHT -> {
                     params.gravity = Gravity.START or Gravity.CENTER_VERTICAL
                     params.marginStart = 0
                     params.marginEnd = 0
                 }
+
                 else -> {}
             }
 
@@ -278,11 +280,13 @@ class AdaptiveKeyboardContainer
                     setButtonBackground(centerButton, inactiveColor, colors)
                     setButtonBackground(rightButton, inactiveColor, colors)
                 }
+
                 KeyboardDisplayMode.ONE_HANDED_RIGHT -> {
                     setButtonBackground(leftButton, inactiveColor, colors)
                     setButtonBackground(centerButton, inactiveColor, colors)
                     setButtonBackground(rightButton, activeColor, colors)
                 }
+
                 else -> {
                     setButtonBackground(leftButton, inactiveColor, colors)
                     setButtonBackground(centerButton, inactiveColor, colors)

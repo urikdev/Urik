@@ -3,7 +3,6 @@ package com.urik.keyboard
 import android.annotation.SuppressLint
 import android.inputmethodservice.InputMethodService
 import android.os.Build
-import android.util.Log
 import android.util.Size
 import android.view.Gravity
 import android.view.KeyEvent
@@ -279,7 +278,7 @@ class UrikInputMethodService :
 
     private fun initializeCoreComponents() {
         try {
-            viewModel = KeyboardViewModel(repository, languageManager, themeManager)
+            viewModel = KeyboardViewModel(repository, languageManager)
 
             inputState =
                 InputStateManager(
@@ -2786,8 +2785,7 @@ class UrikInputMethodService :
         super.onDestroy()
     }
 
-    private fun isSafeForAutocorrect(word: String): Boolean =
-        word.all { it.isLetter() || it == '\'' || it == '-' }
+    private fun isSafeForAutocorrect(word: String): Boolean = word.all { it.isLetter() || it == '\'' || it == '-' }
 
     private companion object {
         const val DOUBLE_TAP_SPACE_THRESHOLD_MS = 250L

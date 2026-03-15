@@ -172,7 +172,6 @@
 
     <!-- Error Messages -->
     <string name="error_title">Erro</string>
-    <string name="error_update_theme">Não foi possível atualizar o tema</string>
     <string name="error_update_key_size">Erro ao atualizar o tamanho da tecla</string>
     <string name="error_update_key_label_size">Não foi possível atualizar o tamanho do rótulo</string>
     <string name="error_update_spell_check">Não foi possível atualizar a correção ortográfica</string>
@@ -271,7 +270,6 @@
 
     <!-- Clipboard Panel -->
     <string name="tip_5_description">Pressione e mantenha pressionada a tecla com o símbolo para abrir o Gestor da Área de Transferência.</string>
-    <string name="clipboard_panel_title">Área de transferência</string>
     <string name="clipboard_panel_pinned">Fixados</string>
     <string name="clipboard_panel_recent">Recentes</string>
     <string name="clipboard_panel_empty">Sem histórico da área de transferência</string>

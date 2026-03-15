@@ -2,7 +2,6 @@ package com.urik.keyboard.ui.keyboard.components
 
 /** Fixed-capacity ring buffer for swipe touch coordinates. */
 class SwipePointRingBuffer {
-
     class Slot {
         var x: Float = 0f
         var y: Float = 0f
@@ -34,7 +33,13 @@ class SwipePointRingBuffer {
 
     val size: Int get() = count
 
-    fun write(x: Float, y: Float, timestamp: Long, pressure: Float, velocity: Float) {
+    fun write(
+        x: Float,
+        y: Float,
+        timestamp: Long,
+        pressure: Float,
+        velocity: Float,
+    ) {
         val slot = slots[head]
         slot.x = x
         slot.y = y

@@ -14,6 +14,7 @@ data class PostCommitReplacementState(
 
 interface ViewCallback {
     fun clearSuggestions()
+
     fun updateSuggestions(suggestions: List<String>)
 }
 
@@ -120,11 +121,6 @@ class InputStateManager(
     val requiresDirectCommit: Boolean
         get() = isSecureField || isDirectCommitField
 
-    fun incrementSequence(): Long =
-        synchronized(processingLock) {
-            ++processingSequence
-        }
-
     fun getSequenceAndBuffer(): Pair<Long, String> =
         synchronized(processingLock) {
             ++processingSequence to displayBuffer
@@ -143,7 +139,10 @@ class InputStateManager(
         isActivelyEditing = true
     }
 
-    fun onRecompositionSucceeded(word: String, wordStart: Int) {
+    fun onRecompositionSucceeded(
+        word: String,
+        wordStart: Int,
+    ) {
         displayBuffer = word
         composingRegionStart = wordStart
     }

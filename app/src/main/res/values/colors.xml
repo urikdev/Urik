@@ -13,7 +13,6 @@
     <!-- ============================================ -->
     <color name="surface_primary">@color/delft_blue</color>
     <color name="surface_secondary">@color/wenge</color>
-    <color name="surface_accent">@color/wenge</color>
     <color name="surface_background">#2a2d3e</color>
 
     <!-- ============================================ -->
@@ -26,9 +25,6 @@
     <!-- ============================================ -->
     <!-- INTERACTIVE STATES -->
     <!-- ============================================ -->
-    <color name="state_pressed">@color/battleship_gray</color>
-    <color name="state_activated">@color/battleship_gray</color>
-    <color name="state_caps_lock">@color/wenge</color>
 
     <!-- ============================================ -->
     <!-- KEYBOARD COLORS -->
@@ -38,7 +34,6 @@
     <color name="keyboard_background">@color/surface_background</color>
     <color name="key_background_character">@color/surface_primary</color>
     <color name="key_background_action">@color/surface_secondary</color>
-    <color name="key_background_space">@color/surface_primary</color>
 
     <!-- Text Colors -->
     <color name="key_text_character">@color/content_primary</color>
@@ -46,24 +41,16 @@
 
     <!-- Borders -->
     <color name="key_border">@color/battleship_gray</color>
-    <color name="key_border_focused">@color/sage</color>
-    <color name="key_border_pressed">@color/light_orange</color>
 
     <!-- ============================================ -->
     <!-- SUGGESTION BAR -->
     <!-- ============================================ -->
-    <color name="suggestion_bar_background">@color/surface_accent</color>
-    <color name="suggestion_text">@color/content_primary</color>
 
     <!-- ============================================ -->
     <!-- ACCESSIBILITY & SHADOWS -->
     <!-- ============================================ -->
-    <color name="focus_indicator">@color/light_orange</color>
-    <color name="key_shadow">#1AFFFFFF</color>
 
     <!-- ============================================ -->
     <!-- LEGACY COMPATIBILITY -->
     <!-- ============================================ -->
-    <color name="primary">@color/battleship_gray</color>
-    <color name="secondary">@color/sage</color>
 </resources>

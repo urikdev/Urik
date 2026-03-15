@@ -197,12 +197,10 @@ class DatabaseSecurityManager(
                     null,
                 )
 
-            try {
+            unencryptedDb.use { unencryptedDb ->
                 unencryptedDb.execSQL("ATTACH DATABASE '${tempDbPath.absolutePath}' AS encrypted KEY \"x'$passphraseString'\"")
                 unencryptedDb.rawQuery("SELECT sqlcipher_export('encrypted')", null)?.use { }
                 unencryptedDb.execSQL("DETACH DATABASE encrypted")
-            } finally {
-                unencryptedDb.close()
             }
 
             unencryptedDbPath.delete()

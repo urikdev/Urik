@@ -350,7 +350,7 @@ class SwipeKeyboardView
                     rowCount = 2
                     columnCount = GridLayout.UNDEFINED
                     orientation = GridLayout.HORIZONTAL
-                    importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+                    importantForAccessibility = IMPORTANT_FOR_ACCESSIBILITY_NO
                     val gridPadding = (basePadding * 0.5f).toInt()
                     setPadding(0, gridPadding, 0, gridPadding)
                 }
@@ -443,7 +443,7 @@ class SwipeKeyboardView
                 LinearLayout(baseContext).apply {
                     orientation = LinearLayout.HORIZONTAL
                     gravity = Gravity.CENTER_VERTICAL
-                    importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+                    importantForAccessibility = IMPORTANT_FOR_ACCESSIBILITY_NO
                     val horizontalPadding = (basePadding * 0.8f).toInt()
                     val verticalPadding = (basePadding * 0.3f).toInt()
                     setPadding(horizontalPadding, verticalPadding, 0, verticalPadding)
@@ -460,7 +460,7 @@ class SwipeKeyboardView
                     isFillViewport = true
                     clipChildren = true
                     clipToPadding = true
-                    importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+                    importantForAccessibility = IMPORTANT_FOR_ACCESSIBILITY_NO
                     ViewCompat.setAccessibilityDelegate(
                         this,
                         object : AccessibilityDelegateCompat() {
@@ -533,7 +533,7 @@ class SwipeKeyboardView
                 LinearLayout(baseContext).apply {
                     orientation = LinearLayout.HORIZONTAL
                     gravity = Gravity.CENTER_VERTICAL
-                    importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+                    importantForAccessibility = IMPORTANT_FOR_ACCESSIBILITY_NO
                     val verticalPadding = (basePadding * 0.3f).toInt()
                     setPadding(basePadding, verticalPadding, 0, verticalPadding)
                     minimumHeight = minTouchTarget
@@ -992,8 +992,9 @@ class SwipeKeyboardView
         ) {
             val capped = suggestions.take(3)
             val emojiWidth = emojiButton?.let { it.measuredWidth.takeIf { w -> w > 0 } } ?: 0
-            val barWidth = bar.width.takeIf { it > 0 }
-                ?: context.resources.displayMetrics.widthPixels
+            val barWidth =
+                bar.width.takeIf { it > 0 }
+                    ?: context.resources.displayMetrics.widthPixels
             val cellWidth = (barWidth - emojiWidth - suggestionDividerWidth * (capped.size - 1).coerceAtLeast(0)) / capped.size
 
             capped.forEachIndexed { index, suggestion ->
@@ -1022,7 +1023,15 @@ class SwipeKeyboardView
 
                 suggestionMeasurePaint.letterSpacing = 0f
                 val isCenterCandidate = capped.size >= 3 && index == 1
-                val fitted = fitSuggestionText(suggestionMeasurePaint, suggestion, cellWidth, suggestionMaxPadding, suggestionMinPadding, isCenterCandidate)
+                val fitted =
+                    fitSuggestionText(
+                        suggestionMeasurePaint,
+                        suggestion,
+                        cellWidth,
+                        suggestionMaxPadding,
+                        suggestionMinPadding,
+                        isCenterCandidate,
+                    )
                 btn.setPadding(fitted.horizontalPadding, suggestionVerticalPadding, fitted.horizontalPadding, suggestionVerticalPadding)
                 btn.letterSpacing = fitted.letterSpacing
                 btn.ellipsize = fitted.ellipsize
@@ -1151,13 +1160,13 @@ class SwipeKeyboardView
                 FrameLayout(context).apply {
                     setBackgroundColor(ContextCompat.getColor(context, android.R.color.black))
                     alpha = 0.8f
-                    importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+                    importantForAccessibility = IMPORTANT_FOR_ACCESSIBILITY_NO
 
                     val container =
                         LinearLayout(context).apply {
                             orientation = LinearLayout.VERTICAL
                             gravity = Gravity.CENTER
-                            importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+                            importantForAccessibility = IMPORTANT_FOR_ACCESSIBILITY_NO
                             setBackgroundColor(
                                 themeManager!!
                                     .currentTheme.value.colors.keyboardBackground,
@@ -1499,7 +1508,7 @@ class SwipeKeyboardView
                     LinearLayout(context).apply {
                         orientation = LinearLayout.HORIZONTAL
                         gravity = Gravity.CENTER_VERTICAL
-                        importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+                        importantForAccessibility = IMPORTANT_FOR_ACCESSIBILITY_NO
 
                         val basePadding = context.resources.getDimensionPixelSize(R.dimen.key_margin_horizontal)
                         val verticalPadding = (basePadding * 0.3f).toInt()
@@ -1784,12 +1793,13 @@ class SwipeKeyboardView
                     gesturePrevTime = now
 
                     val velocityDpPerMs = velocityPxPerMs / gestureDensity
-                    val accelerationMultiplier = when {
-                        velocityDpPerMs > 1.5f -> 3.0f
-                        velocityDpPerMs > 0.8f -> 2.0f
-                        velocityDpPerMs > 0.4f -> 1.4f
-                        else -> 1.0f
-                    }
+                    val accelerationMultiplier =
+                        when {
+                            velocityDpPerMs > 1.5f -> 3.0f
+                            velocityDpPerMs > 0.8f -> 2.0f
+                            velocityDpPerMs > 0.4f -> 1.4f
+                            else -> 1.0f
+                        }
 
                     val baseSensitivity = currentCursorSpeed.sensitivityDp * gestureDensity
                     val sensitivity = baseSensitivity / accelerationMultiplier
