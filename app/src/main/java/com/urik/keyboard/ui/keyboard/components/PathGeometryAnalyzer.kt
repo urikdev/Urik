@@ -231,29 +231,6 @@ class PathGeometryAnalyzer
         ): Boolean = analysis.traversedKeys.containsKey(key)
 
         /**
-         * Finds inflection boost for a letter based on nearby intentional corners.
-         */
-        fun getInflectionBoost(
-            key: Char,
-            analysis: GeometricAnalysis,
-        ): Float {
-            val nearbyInflection =
-                analysis.inflectionPoints.find { inflection ->
-                    inflection.nearestKey == key &&
-                        inflection.isIntentional &&
-                        inflection.distanceToKey < INFLECTION_BOOST_RADIUS
-                }
-
-            return nearbyInflection?.let { inflection ->
-                val angleBoost =
-                    (inflection.angle / MAX_EXPECTED_ANGLE)
-                        .coerceIn(0.5f, 1.0f)
-                INFLECTION_BOOST_BASE +
-                    (INFLECTION_BOOST_MAX - INFLECTION_BOOST_BASE) * angleBoost
-            } ?: 1.0f
-        }
-
-        /**
          * Calculates dynamic spatial/frequency weights based on path confidence.
          */
         fun calculateDynamicWeights(pathConfidence: Float): Pair<Float, Float> =
@@ -445,9 +422,7 @@ class PathGeometryAnalyzer
                     val velocity = if (i < velocityProfile.size) velocityProfile[i] else 0f
 
                     val compensated =
-                        if (velocity > CORNER_COMPENSATION_VELOCITY_THRESHOLD &&
-                            i > 0 && i < path.size - 1
-                        ) {
+                        if (velocity > CORNER_COMPENSATION_VELOCITY_THRESHOLD && i < path.size - 1) {
                             computeCornerCompensation(path, i, velocity)
                         } else {
                             null
@@ -496,8 +471,9 @@ class PathGeometryAnalyzer
 
             if (bisectLen < 0.001f) return PointF(curr.x, curr.y)
 
-            val offset = (velocity * CORNER_COMPENSATION_VELOCITY_SCALE)
-                .coerceAtMost(CORNER_COMPENSATION_MAX_OFFSET_PX)
+            val offset =
+                (velocity * CORNER_COMPENSATION_VELOCITY_SCALE)
+                    .coerceAtMost(CORNER_COMPENSATION_MAX_OFFSET_PX)
 
             return PointF(
                 curr.x - (bisectX / bisectLen) * offset,
@@ -1151,10 +1127,11 @@ class PathGeometryAnalyzer
                     val t = ((px * segDx + py * segDy) / (segLen * segLen)).coerceIn(0.1f, 0.9f)
                     val projX = p1.x + t * segDx
                     val projY = p1.y + t * segDy
-                    val distToSeg = sqrt(
-                        (keyPos.x - projX) * (keyPos.x - projX) +
-                            (keyPos.y - projY) * (keyPos.y - projY),
-                    )
+                    val distToSeg =
+                        sqrt(
+                            (keyPos.x - projX) * (keyPos.x - projX) +
+                                (keyPos.y - projY) * (keyPos.y - projY),
+                        )
                     if (distToSeg > keyRadius) return@forEach
 
                     val inDx = keyPos.x - prev.x
@@ -1504,18 +1481,21 @@ class PathGeometryAnalyzer
                 val dx = keyPosition.x - vertex.position.x
                 val dy = keyPosition.y - vertex.position.y
                 val distToKey = sqrt(dx * dx + dy * dy)
-                val effectiveRadius = if (vertex.angleChange > VERTEX_WIDE_ANGLE_THRESHOLD_RAD) {
-                    VERTEX_WIDE_ANGLE_RADIUS
-                } else {
-                    INFLECTION_BOOST_RADIUS
-                }
+                val effectiveRadius =
+                    if (vertex.angleChange > VERTEX_WIDE_ANGLE_THRESHOLD_RAD) {
+                        VERTEX_WIDE_ANGLE_RADIUS
+                    } else {
+                        INFLECTION_BOOST_RADIUS
+                    }
                 val positionMatch = distToKey < effectiveRadius
 
                 if (keyMatch || positionMatch) {
                     val normalizedAngle = vertex.angleChange / VERTEX_ANGLE_THRESHOLD_RAD
-                    val boost = (INFLECTION_BOOST_BASE +
-                        normalizedAngle * (INFLECTION_BOOST_MAX - INFLECTION_BOOST_BASE))
-                        .coerceAtMost(INFLECTION_BOOST_MAX)
+                    val boost =
+                        (
+                            INFLECTION_BOOST_BASE +
+                                normalizedAngle * (INFLECTION_BOOST_MAX - INFLECTION_BOOST_BASE)
+                        ).coerceAtMost(INFLECTION_BOOST_MAX)
                     if (boost > bestBoost) bestBoost = boost
                 }
             }
@@ -1524,10 +1504,12 @@ class PathGeometryAnalyzer
                 for (inflection in analysis.inflectionPoints) {
                     if (!inflection.isIntentional || inflection.nearestKey != key) continue
                     if (inflection.distanceToKey >= INFLECTION_BOOST_RADIUS) continue
-                    val angleBoost = (inflection.angle / MAX_EXPECTED_ANGLE)
-                        .coerceIn(0.5f, 1.0f)
-                    val boost = INFLECTION_BOOST_BASE +
-                        (INFLECTION_BOOST_MAX - INFLECTION_BOOST_BASE) * angleBoost
+                    val angleBoost =
+                        (inflection.angle / MAX_EXPECTED_ANGLE)
+                            .coerceIn(0.5f, 1.0f)
+                    val boost =
+                        INFLECTION_BOOST_BASE +
+                            (INFLECTION_BOOST_MAX - INFLECTION_BOOST_BASE) * angleBoost
                     if (boost > bestBoost) bestBoost = boost
                 }
             }

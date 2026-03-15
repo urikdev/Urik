@@ -12,7 +12,6 @@ import com.urik.keyboard.model.KeyboardLayout
 import com.urik.keyboard.model.KeyboardMode
 import com.urik.keyboard.model.KeyboardState
 import com.urik.keyboard.service.LanguageManager
-import com.urik.keyboard.theme.ThemeManager
 import com.urik.keyboard.utils.ErrorLogger
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -34,7 +33,6 @@ class KeyboardViewModel
     constructor(
         private val repository: KeyboardRepository,
         private val languageManager: LanguageManager,
-        private val themeManager: ThemeManager,
     ) : ViewModel() {
         private val _state = MutableStateFlow(KeyboardState())
         val state: StateFlow<KeyboardState> = _state.asStateFlow()
@@ -88,7 +86,6 @@ class KeyboardViewModel
                         startLoadLayout(_state.value.currentMode)
                     }
             }
-
         }
 
         fun onEvent(event: KeyboardEvent) {
@@ -116,6 +113,7 @@ class KeyboardViewModel
                         key.value.uppercase(getCurrentLocale().toLocale())
                     }
                 }
+
                 else -> {
                     key.value
                 }
@@ -199,6 +197,7 @@ class KeyboardViewModel
                 is KeyboardKey.Character -> {
                     // Shift clearing happens after getCharacterForInput() is called
                 }
+
                 is KeyboardKey.Action -> {
                     viewModelScope.launch {
                         handleActionKey(key.action)
@@ -227,6 +226,7 @@ class KeyboardViewModel
                     val newShiftState = !_state.value.isShiftPressed
                     updateState { it.copy(isShiftPressed = newShiftState, isAutoShift = false) }
                 }
+
                 KeyboardKey.ActionType.CAPS_LOCK -> {
                     val newCapsState = !_state.value.isCapsLockOn
                     updateState {
@@ -237,10 +237,23 @@ class KeyboardViewModel
                         )
                     }
                 }
-                KeyboardKey.ActionType.MODE_SWITCH_LETTERS -> switchMode(KeyboardMode.LETTERS)
-                KeyboardKey.ActionType.MODE_SWITCH_NUMBERS -> switchMode(KeyboardMode.NUMBERS)
-                KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS -> switchMode(KeyboardMode.SYMBOLS)
-                KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS_SECONDARY -> switchMode(KeyboardMode.SYMBOLS_SECONDARY)
+
+                KeyboardKey.ActionType.MODE_SWITCH_LETTERS -> {
+                    switchMode(KeyboardMode.LETTERS)
+                }
+
+                KeyboardKey.ActionType.MODE_SWITCH_NUMBERS -> {
+                    switchMode(KeyboardMode.NUMBERS)
+                }
+
+                KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS -> {
+                    switchMode(KeyboardMode.SYMBOLS)
+                }
+
+                KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS_SECONDARY -> {
+                    switchMode(KeyboardMode.SYMBOLS_SECONDARY)
+                }
+
                 else -> { }
             }
         }

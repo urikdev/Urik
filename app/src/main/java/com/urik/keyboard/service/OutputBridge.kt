@@ -25,7 +25,8 @@ class OutputBridge(
         flags: Int = 0,
     ): String =
         try {
-            ic?.getTextBeforeCursor(length, flags)
+            ic
+                ?.getTextBeforeCursor(length, flags)
                 ?.toString()
                 ?.take(length)
                 ?: ""
@@ -38,7 +39,8 @@ class OutputBridge(
         flags: Int = 0,
     ): String =
         try {
-            ic?.getTextAfterCursor(length, flags)
+            ic
+                ?.getTextAfterCursor(length, flags)
                 ?.toString()
                 ?.take(length)
                 ?: ""
@@ -52,7 +54,8 @@ class OutputBridge(
             if (extracted != null && extracted.startOffset >= 0 && extracted.selectionStart >= 0) {
                 extracted.startOffset + extracted.selectionStart
             } else {
-                ic?.getTextBeforeCursor(maxChars, 0)
+                ic
+                    ?.getTextBeforeCursor(maxChars, 0)
                     ?.take(maxChars)
                     ?.length
                     ?: 0
@@ -97,7 +100,7 @@ class OutputBridge(
 
         val expectedStart = state.composingRegionStart
         val expectedEnd = state.composingRegionStart + state.displayBuffer.length
-        if (newSelStart < expectedStart || newSelStart > expectedEnd) return false
+        if (newSelStart !in expectedStart..expectedEnd) return false
 
         state.onComposingReasserted()
 
@@ -216,24 +219,35 @@ class OutputBridge(
         ic?.endBatchEdit()
     }
 
-    fun setComposingText(text: CharSequence, newCursorPosition: Int = 1) {
+    fun setComposingText(
+        text: CharSequence,
+        newCursorPosition: Int = 1,
+    ) {
         ic?.setComposingText(text, newCursorPosition)
     }
 
-    fun setComposingRegion(start: Int, end: Int) {
+    fun setComposingRegion(
+        start: Int,
+        end: Int,
+    ) {
         ic?.setComposingRegion(start, end)
     }
 
-    fun deleteSurroundingText(beforeLength: Int, afterLength: Int) {
+    fun deleteSurroundingText(
+        beforeLength: Int,
+        afterLength: Int,
+    ) {
         ic?.deleteSurroundingText(beforeLength, afterLength)
     }
 
-    fun setSelection(start: Int, end: Int) {
+    fun setSelection(
+        start: Int,
+        end: Int,
+    ) {
         ic?.setSelection(start, end)
     }
 
-    fun performEditorAction(actionCode: Int): Boolean =
-        ic?.performEditorAction(actionCode) ?: false
+    fun performEditorAction(actionCode: Int): Boolean = ic?.performEditorAction(actionCode) ?: false
 
     fun getSelectedText(flags: Int = 0): CharSequence? =
         try {

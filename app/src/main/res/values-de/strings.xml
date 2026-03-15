@@ -171,7 +171,6 @@
 
     <!-- Error Messages -->
     <string name="error_title">Fehler</string>
-    <string name="error_update_theme">Thema konnte nicht geändert werden</string>
     <string name="error_update_key_size">Tastengröße konnte nicht geändert werden</string>
     <string name="error_update_key_label_size">Beschriftungsgröße konnte nicht geändert werden</string>
     <string name="error_update_spell_check">Rechtschreibprüfung konnte nicht geändert werden</string>
@@ -270,7 +269,6 @@
 
     <!-- Clipboard Panel -->
     <string name="tip_5_description">Durch langes Drücken der Symboltaste wird der Zwischenablage-Manager geöffnet.</string>
-    <string name="clipboard_panel_title">Zwischenablage</string>
     <string name="clipboard_panel_pinned">Angeheftet</string>
     <string name="clipboard_panel_recent">Kürzlich</string>
     <string name="clipboard_panel_empty">Kein Zwischenablage-Verlauf</string>

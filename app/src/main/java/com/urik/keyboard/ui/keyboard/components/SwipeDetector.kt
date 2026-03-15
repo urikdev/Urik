@@ -70,15 +70,17 @@ class SwipeDetector
             TOP_100,
             TOP_1000,
             TOP_5000,
-            COMMON;
+            COMMON,
+            ;
 
             companion object {
-                fun fromRank(rank: Int): FrequencyTier = when {
-                    rank < 100 -> TOP_100
-                    rank < 1000 -> TOP_1000
-                    rank < 5000 -> TOP_5000
-                    else -> COMMON
-                }
+                fun fromRank(rank: Int): FrequencyTier =
+                    when {
+                        rank < 100 -> TOP_100
+                        rank < 1000 -> TOP_1000
+                        rank < 5000 -> TOP_5000
+                        else -> COMMON
+                    }
             }
         }
 
@@ -274,7 +276,7 @@ class SwipeDetector
 
                     MotionEvent.ACTION_UP -> {
                         val duration = System.currentTimeMillis() - startTime
-                        if (duration > 0 && duration <= TAP_DURATION_THRESHOLD_MS) {
+                        if (duration in 1..TAP_DURATION_THRESHOLD_MS) {
                             val tappedKey = keyAt(event.x, event.y)
                             if (tappedKey != null) {
                                 _swipeListener?.onTap(tappedKey)
@@ -348,8 +350,11 @@ class SwipeDetector
             firstPointY = transformed.y
 
             interpolator.onRawPoint(
-                transformed.x, transformed.y, event.eventTime,
-                event.pressure, 0f,
+                transformed.x,
+                transformed.y,
+                event.eventTime,
+                event.pressure,
+                0f,
             )
             lastCheckX = transformed.x
         }
@@ -401,8 +406,11 @@ class SwipeDetector
 
                 if (histDist > 4f) {
                     interpolator.onRawPoint(
-                        histTransformed.x, histTransformed.y, histTime,
-                        event.getHistoricalPressure(h), histVelocity,
+                        histTransformed.x,
+                        histTransformed.y,
+                        histTime,
+                        event.getHistoricalPressure(h),
+                        histVelocity,
                     )
                 }
             }
@@ -427,8 +435,11 @@ class SwipeDetector
 
             if (distFromLast > 4f) {
                 interpolator.onRawPoint(
-                    transformed.x, transformed.y, event.eventTime,
-                    event.pressure, velocityFromLast,
+                    transformed.x,
+                    transformed.y,
+                    event.eventTime,
+                    event.pressure,
+                    velocityFromLast,
                 )
             }
 
@@ -679,8 +690,11 @@ class SwipeDetector
 
                 if (shouldSamplePoint(histTransformed.x, histTransformed.y, pointCounter, histVelocity)) {
                     interpolator.onRawPoint(
-                        histTransformed.x, histTransformed.y, histTime,
-                        event.getHistoricalPressure(h), histVelocity,
+                        histTransformed.x,
+                        histTransformed.y,
+                        histTime,
+                        event.getHistoricalPressure(h),
+                        histVelocity,
                     )
                 }
             }
@@ -691,8 +705,11 @@ class SwipeDetector
 
             if (shouldSamplePoint(transformed.x, transformed.y, pointCounter, velocity)) {
                 interpolator.onRawPoint(
-                    transformed.x, transformed.y, event.eventTime,
-                    event.pressure, velocity,
+                    transformed.x,
+                    transformed.y,
+                    event.eventTime,
+                    event.pressure,
+                    velocity,
                 )
             }
 
@@ -710,8 +727,10 @@ class SwipeDetector
             if (isSwiping) {
                 val transformed = transformTouchCoordinate(event.x, event.y)
                 interpolator.onRawPoint(
-                    transformed.x, transformed.y,
-                    event.eventTime, event.pressure,
+                    transformed.x,
+                    transformed.y,
+                    event.eventTime,
+                    event.pressure,
                     calculateVelocity(event),
                 )
 
@@ -751,7 +770,6 @@ class SwipeDetector
                 return false
             }
         }
-
 
         private fun calculateVelocity(event: MotionEvent): Float {
             if (ringBuffer.size < 2) return 0.0f

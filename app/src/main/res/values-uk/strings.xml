@@ -173,7 +173,6 @@
 
     <!-- Error Messages -->
     <string name="error_title">Помилка</string>
-    <string name="error_update_theme">Не вдалося оновити тему</string>
     <string name="error_update_key_size">Не вдалося оновити розмір клавіш</string>
     <string name="error_update_key_label_size">Не вдалося оновити розмір підписів</string>
     <string name="error_update_spell_check">Не вдалося оновити перевірку орфографії</string>
@@ -274,7 +273,6 @@
     <string name="tip_5_description">Натисніть та тримайте клавішу символів, щоб відкрити Менеджер Буфера Обміну.</string>
 
     <!-- Clipboard Panel -->
-    <string name="clipboard_panel_title">Буфер Обміну</string>
     <string name="clipboard_panel_pinned">Закріплені</string>
     <string name="clipboard_panel_recent">Нещодавні</string>
     <string name="clipboard_panel_empty">Історія буфера обміну порожня</string>

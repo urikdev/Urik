@@ -22,11 +22,13 @@ import android.view.accessibility.AccessibilityManager
 import android.widget.Button
 import android.widget.LinearLayout
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.createBitmap
+import androidx.core.graphics.drawable.toDrawable
 import androidx.core.widget.TextViewCompat
 import com.urik.keyboard.R
-import com.urik.keyboard.model.KeyboardMode
 import com.urik.keyboard.model.KeyboardKey
 import com.urik.keyboard.model.KeyboardLayout
+import com.urik.keyboard.model.KeyboardMode
 import com.urik.keyboard.model.KeyboardState
 import com.urik.keyboard.service.CharacterVariationService
 import com.urik.keyboard.service.LanguageManager
@@ -175,7 +177,7 @@ class KeyboardLayoutManager(
 
     private val keyClickListener =
         View.OnClickListener { view ->
-            if (longPressConsumedButtons.remove(view as? Button) == true) return@OnClickListener
+            if (longPressConsumedButtons.remove(view as? Button)) return@OnClickListener
 
             val key = view.getTag(R.id.key_data) as? KeyboardKey ?: return@OnClickListener
             performContextualHaptic(key)
@@ -249,8 +251,9 @@ class KeyboardLayoutManager(
                         pending.handler.removeCallbacks(pending.runnable)
                     }
 
-                    val longPressConsumed = characterLongPressFired.remove(button) ||
-                        longPressConsumedButtons.contains(button)
+                    val longPressConsumed =
+                        characterLongPressFired.remove(button) ||
+                            longPressConsumedButtons.contains(button)
 
                     if (popupSelectionMode && variationPopup?.isShowing == true) {
                         val selectedChar = variationPopup?.getHighlightedCharacter()
@@ -282,8 +285,9 @@ class KeyboardLayoutManager(
                         pending.handler.removeCallbacks(pending.runnable)
                     }
 
-                    val longPressConsumed = characterLongPressFired.remove(button) ||
-                        longPressConsumedButtons.contains(button)
+                    val longPressConsumed =
+                        characterLongPressFired.remove(button) ||
+                            longPressConsumedButtons.contains(button)
 
                     if (popupSelectionMode && variationPopup?.isShowing == true) {
                         variationPopup?.dismiss()
@@ -496,8 +500,9 @@ class KeyboardLayoutManager(
                     buttonPendingCallbacks.remove(view as Button)?.let { pending ->
                         pending.handler.removeCallbacks(pending.runnable)
                     }
-                    val shouldConsume = shiftLongPressFired ||
-                        longPressConsumedButtons.contains(view)
+                    val shouldConsume =
+                        shiftLongPressFired ||
+                            longPressConsumedButtons.contains(view)
                     shiftLongPressFired = false
                     shouldConsume
                 }
@@ -1087,7 +1092,8 @@ class KeyboardLayoutManager(
             val verticalPadding = cachedDimensions["verticalPadding"]!!
             setPadding(horizontalPadding, verticalPadding, horizontalPadding, verticalPadding)
 
-            if (key is KeyboardKey.Action && key.action in setOf(
+            if (key is KeyboardKey.Action && key.action in
+                setOf(
                     KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS,
                     KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS_SECONDARY,
                     KeyboardKey.ActionType.MODE_SWITCH_LETTERS,
@@ -1190,7 +1196,10 @@ class KeyboardLayoutManager(
                         val iconSize = (10 * context.resources.displayMetrics.density).toInt()
                         val leftInset = (5 * context.resources.displayMetrics.density).toInt()
                         val topInset = (4 * context.resources.displayMetrics.density).toInt()
-                        val shortcode = languageManager.currentLayoutLanguage.value.take(2).uppercase(java.util.Locale.ROOT)
+                        val shortcode =
+                            languageManager.currentLayoutLanguage.value
+                                .take(2)
+                                .uppercase(java.util.Locale.ROOT)
                         val langBadge = createLangBadgeDrawable(shortcode, getKeyTextColor(key))
 
                         val layerDrawable = LayerDrawable(arrayOf(keyBackground, iconDrawable, langBadge))
@@ -1210,7 +1219,9 @@ class KeyboardLayoutManager(
                         background = layerDrawable
                         text = ""
                     }
-                } else if (key.action == KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS && clipboardEnabled && effectiveLayout?.mode == KeyboardMode.LETTERS) {
+                } else if (key.action == KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS && clipboardEnabled &&
+                    effectiveLayout?.mode == KeyboardMode.LETTERS
+                ) {
                     val keyBackground = getKeyBackground(key)
                     val clipboardIcon = ContextCompat.getDrawable(context, R.drawable.ic_clipboard)
 
@@ -1334,7 +1345,10 @@ class KeyboardLayoutManager(
         }
 
     private fun getCurrentLocale(): java.util.Locale {
-        val lang = languageManager.currentLayoutLanguage.value.split("-").first()
+        val lang =
+            languageManager.currentLayoutLanguage.value
+                .split("-")
+                .first()
         return java.util.Locale.forLanguageTag(lang)
     }
 
@@ -1364,12 +1378,32 @@ class KeyboardLayoutManager(
 
             is KeyboardKey.Action -> {
                 when (key.action) {
-                    KeyboardKey.ActionType.MODE_SWITCH_LETTERS -> context.getString(R.string.letters_mode_label)
-                    KeyboardKey.ActionType.MODE_SWITCH_NUMBERS -> context.getString(R.string.numbers_mode_label)
-                    KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS -> context.getString(R.string.symbols_mode_label)
-                    KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS_SECONDARY -> context.getString(R.string.symbols_secondary_mode_label)
-                    KeyboardKey.ActionType.LANGUAGE_SWITCH -> languageManager.currentLayoutLanguage.value.take(2).uppercase(java.util.Locale.ROOT)
-                    else -> "?"
+                    KeyboardKey.ActionType.MODE_SWITCH_LETTERS -> {
+                        context.getString(R.string.letters_mode_label)
+                    }
+
+                    KeyboardKey.ActionType.MODE_SWITCH_NUMBERS -> {
+                        context.getString(R.string.numbers_mode_label)
+                    }
+
+                    KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS -> {
+                        context.getString(R.string.symbols_mode_label)
+                    }
+
+                    KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS_SECONDARY -> {
+                        context.getString(R.string.symbols_secondary_mode_label)
+                    }
+
+                    KeyboardKey.ActionType.LANGUAGE_SWITCH -> {
+                        languageManager.currentLayoutLanguage.value
+                            .take(
+                                2,
+                            ).uppercase(java.util.Locale.ROOT)
+                    }
+
+                    else -> {
+                        "?"
+                    }
                 }
             }
 
@@ -1864,11 +1898,12 @@ class KeyboardLayoutManager(
                             val phaseProgress = elapsed / 500f
                             val intervalMs = (80 - phaseProgress * 20).toLong().coerceAtLeast(60)
                             val intensity = 0.4f + phaseProgress * 0.3f
-                            val amplitude = if (supportsAmplitudeControl) {
-                                (hapticAmplitude * intensity).toInt().coerceIn(1, 255)
-                            } else {
-                                android.os.VibrationEffect.DEFAULT_AMPLITUDE
-                            }
+                            val amplitude =
+                                if (supportsAmplitudeControl) {
+                                    (hapticAmplitude * intensity).toInt().coerceIn(1, 255)
+                                } else {
+                                    android.os.VibrationEffect.DEFAULT_AMPLITUDE
+                                }
 
                             withContext(Dispatchers.Main) {
                                 vibrateEffect(
@@ -1889,11 +1924,12 @@ class KeyboardLayoutManager(
                             val phaseProgress = (elapsed - 500) / 1000f
                             val intervalMs = (60 - phaseProgress * 30).toLong().coerceAtLeast(30)
                             val intensity = 0.7f + phaseProgress * 0.3f
-                            val amplitude = if (supportsAmplitudeControl) {
-                                (hapticAmplitude * intensity).toInt().coerceIn(1, 255)
-                            } else {
-                                android.os.VibrationEffect.DEFAULT_AMPLITUDE
-                            }
+                            val amplitude =
+                                if (supportsAmplitudeControl) {
+                                    (hapticAmplitude * intensity).toInt().coerceIn(1, 255)
+                                } else {
+                                    android.os.VibrationEffect.DEFAULT_AMPLITUDE
+                                }
 
                             withContext(Dispatchers.Main) {
                                 vibrateEffect(
@@ -2089,14 +2125,20 @@ class KeyboardLayoutManager(
 
         val backgroundColor =
             when (key) {
-                is KeyboardKey.Character -> theme.colors.keyBackgroundCharacter
+                is KeyboardKey.Character -> {
+                    theme.colors.keyBackgroundCharacter
+                }
+
                 is KeyboardKey.Action -> {
                     when (key.action) {
                         KeyboardKey.ActionType.SPACE -> theme.colors.keyBackgroundSpace
                         else -> theme.colors.keyBackgroundAction
                     }
                 }
-                KeyboardKey.Spacer -> android.graphics.Color.TRANSPARENT
+
+                KeyboardKey.Spacer -> {
+                    android.graphics.Color.TRANSPARENT
+                }
             }
 
         val normalDrawable =
@@ -2148,19 +2190,23 @@ class KeyboardLayoutManager(
             KeyboardKey.Spacer -> android.graphics.Color.TRANSPARENT
         }
 
-    private fun createLangBadgeDrawable(text: String, color: Int): android.graphics.drawable.BitmapDrawable {
+    private fun createLangBadgeDrawable(
+        text: String,
+        color: Int,
+    ): android.graphics.drawable.BitmapDrawable {
         val density = context.resources.displayMetrics.density
         val sizePx = (10 * density).toInt().coerceAtLeast(1)
-        val bitmap = android.graphics.Bitmap.createBitmap(sizePx, sizePx, android.graphics.Bitmap.Config.ARGB_8888)
+        val bitmap = createBitmap(sizePx, sizePx)
         val canvas = android.graphics.Canvas(bitmap)
-        val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
-            this.color = color
-            textAlign = android.graphics.Paint.Align.CENTER
-            textSize = sizePx * 0.75f
-            typeface = Typeface.DEFAULT_BOLD
-        }
+        val paint =
+            android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
+                this.color = color
+                textAlign = android.graphics.Paint.Align.CENTER
+                textSize = sizePx * 0.75f
+                typeface = Typeface.DEFAULT_BOLD
+            }
         canvas.drawText(text, sizePx / 2f, (sizePx - paint.descent() - paint.ascent()) / 2f, paint)
-        return android.graphics.drawable.BitmapDrawable(context.resources, bitmap)
+        return bitmap.toDrawable(context.resources)
     }
 
     fun cleanup() {

@@ -82,7 +82,7 @@ class ClipboardPanel(
     private val pinnedListContainer: ScrollView =
         ScrollView(context).apply {
             isVisible = false
-            importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+            importantForAccessibility = IMPORTANT_FOR_ACCESSIBILITY_NO
             ViewCompat.setAccessibilityDelegate(
                 this,
                 transientOverlayA11yDelegate,
@@ -92,7 +92,7 @@ class ClipboardPanel(
     private val recentListContainer: ScrollView =
         ScrollView(context).apply {
             isVisible = true
-            importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+            importantForAccessibility = IMPORTANT_FOR_ACCESSIBILITY_NO
             ViewCompat.setAccessibilityDelegate(
                 this,
                 transientOverlayA11yDelegate,
@@ -102,13 +102,13 @@ class ClipboardPanel(
     private val pinnedList: LinearLayout =
         LinearLayout(context).apply {
             orientation = LinearLayout.VERTICAL
-            importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+            importantForAccessibility = IMPORTANT_FOR_ACCESSIBILITY_NO
         }
 
     private val recentList: LinearLayout =
         LinearLayout(context).apply {
             orientation = LinearLayout.VERTICAL
-            importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+            importantForAccessibility = IMPORTANT_FOR_ACCESSIBILITY_NO
         }
 
     private val emptyStateText: TextView =
@@ -424,7 +424,7 @@ class ClipboardPanel(
             LinearLayout(context).apply {
                 orientation = LinearLayout.HORIZONTAL
                 gravity = Gravity.CENTER_VERTICAL or Gravity.END
-                importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+                importantForAccessibility = IMPORTANT_FOR_ACCESSIBILITY_NO
                 layoutParams =
                     LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -533,14 +533,14 @@ class ClipboardPanel(
             FrameLayout(context).apply {
                 setBackgroundColor(ContextCompat.getColor(context, android.R.color.black))
                 alpha = 0.8f
-                importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+                importantForAccessibility = IMPORTANT_FOR_ACCESSIBILITY_NO
 
                 val container =
                     LinearLayout(context).apply {
                         orientation = LinearLayout.VERTICAL
                         gravity = Gravity.CENTER
                         setBackgroundColor(themeManager.currentTheme.value.colors.keyboardBackground)
-                        importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+                        importantForAccessibility = IMPORTANT_FOR_ACCESSIBILITY_NO
 
                         val padding = (16 * density).toInt()
                         setPadding(padding, padding, padding, padding)

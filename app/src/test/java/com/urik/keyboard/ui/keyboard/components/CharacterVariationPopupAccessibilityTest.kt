@@ -40,7 +40,7 @@ class CharacterVariationPopupAccessibilityTest {
         whenever(themeManager.currentTheme).thenReturn(themeFlow)
 
         popup = CharacterVariationPopup(context, themeManager)
-        popup.setCharacterVariations(".", listOf("!", "?", ","), {})
+        popup.setCharacterVariations(".", listOf("!", "?", ",")) {}
 
         scrollView = popup.contentView as HorizontalScrollView
         variationContainer = scrollView.getChildAt(0) as LinearLayout
@@ -84,9 +84,10 @@ class CharacterVariationPopupAccessibilityTest {
     @Test
     fun `scrollView node has no ACTION_SET_TEXT`() {
         val nodeInfo = AccessibilityNodeInfoCompat.wrap(scrollView.createAccessibilityNodeInfo())
-        val hasSetText = nodeInfo.actionList.any {
-            it.id == AccessibilityNodeInfoCompat.ACTION_SET_TEXT
-        }
+        val hasSetText =
+            nodeInfo.actionList.any {
+                it.id == AccessibilityNodeInfoCompat.ACTION_SET_TEXT
+            }
 
         assertFalse(
             "ScrollView node must not expose ACTION_SET_TEXT",
@@ -140,9 +141,10 @@ class CharacterVariationPopupAccessibilityTest {
         for (i in 0 until variationContainer.childCount) {
             val button = variationContainer.getChildAt(i) as Button
             val nodeInfo = AccessibilityNodeInfoCompat.wrap(button.createAccessibilityNodeInfo())
-            val hasSetText = nodeInfo.actionList.any {
-                it.id == AccessibilityNodeInfoCompat.ACTION_SET_TEXT
-            }
+            val hasSetText =
+                nodeInfo.actionList.any {
+                    it.id == AccessibilityNodeInfoCompat.ACTION_SET_TEXT
+                }
 
             assertFalse(
                 "Button '${button.text}' must not expose ACTION_SET_TEXT",
@@ -216,7 +218,7 @@ class CharacterVariationPopupAccessibilityTest {
         whenever(themeManager.currentTheme).thenReturn(themeFlow)
 
         val emptyBasePopup = CharacterVariationPopup(context, themeManager)
-        emptyBasePopup.setCharacterVariations("", listOf("!", "?"), {})
+        emptyBasePopup.setCharacterVariations("", listOf("!", "?")) {}
 
         val container = (emptyBasePopup.contentView as ViewGroup).getChildAt(0) as LinearLayout
 

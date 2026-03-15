@@ -193,7 +193,6 @@
 
     <!-- Error Messages -->
     <string name="error_title">Error</string>
-    <string name="error_update_theme">Failed to update theme</string>
     <string name="error_update_key_size">Failed to update key size</string>
     <string name="error_update_key_label_size">Failed to update label size</string>
     <string name="error_update_spell_check">Failed to update spell check</string>
@@ -299,7 +298,6 @@
     <string name="tip_5_description">Long press on the symbol key to open the Clipboard Manager.</string>
 
     <!-- Clipboard Panel -->
-    <string name="clipboard_panel_title">Clipboard</string>
     <string name="clipboard_panel_pinned">Pinned</string>
     <string name="clipboard_panel_recent">Recent</string>
     <string name="clipboard_panel_empty">No clipboard history</string>

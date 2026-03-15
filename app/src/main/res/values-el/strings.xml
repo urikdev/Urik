@@ -171,7 +171,6 @@
     <string name="privacy_settings_import_dictionary_summary">Επαναφορά μαθημένων λέξεων από αρχείο</string>
     <!-- Error Messages -->
     <string name="error_title">Σφάλμα</string>
-    <string name="error_update_theme">Αποτυχία ενημέρωσης θέματος</string>
     <string name="error_update_key_size">Αποτυχία ενημέρωσης μεγέθους πλήκτρου</string>
     <string name="error_update_key_label_size">Αποτυχία ενημέρωσης μεγέθους χαρακτήρα πλήκτρου</string>
     <string name="error_update_spell_check">Αποτυχία ενημέρωσης ορθογραφικού ελέγχου</string>
@@ -260,7 +259,6 @@
     <string name="tip_5_title">Διαχείριση προχείρου</string>
     <string name="tip_5_description">Πατήστε παρατεταμένα το πλήκτρο συμβόλων για να ανοίξετε τον διαχειριστή προχείρου.</string>
     <!-- Clipboard Panel -->
-    <string name="clipboard_panel_title">Πρόχειρο</string>
     <string name="clipboard_panel_pinned">Καρφιτσωμένο</string>
     <string name="clipboard_panel_recent">Πρόσφατα</string>
     <string name="clipboard_panel_empty">Δεν υπάρχει ιστορικό προχείρου</string>

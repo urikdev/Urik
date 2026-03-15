@@ -18,20 +18,16 @@ import kotlin.math.sqrt
 class SwipeSignal private constructor(
     val path: List<SwipeDetector.SwipePoint>,
     val pathLength: Float,
-    val bounds: PathBounds,
     val charsInBounds: Set<Char>,
     val geometricAnalysis: PathGeometryAnalyzer.GeometricAnalysis,
-    val averageVelocity: Float,
     val startAnchor: StartAnchor,
     val endAnchor: EndAnchor,
     val traversedKeys: Set<Char>,
     val passthroughKeys: Set<Char>,
-    val intentionalInflectionCount: Int,
     val expectedWordLength: Int,
     val offRowKeys: Set<Char>,
     val spatialWeight: Float,
     val frequencyWeight: Float,
-    val pointZeroDominant: Boolean,
     val rawPointCount: Int,
 ) {
     data class PathBounds(
@@ -145,20 +141,16 @@ class SwipeSignal private constructor(
             return SwipeSignal(
                 path = interpolatedPath,
                 pathLength = pathLength,
-                bounds = bounds,
                 charsInBounds = charsInBounds,
                 geometricAnalysis = geometricAnalysis,
-                averageVelocity = vAvg,
                 startAnchor = startAnchor,
                 endAnchor = endAnchor,
                 traversedKeys = traversedKeys,
                 passthroughKeys = passthroughKeys,
-                intentionalInflectionCount = intentionalInflectionCount,
                 expectedWordLength = expectedWordLength,
                 offRowKeys = offRowKeys,
                 spatialWeight = baselineSpatialWeight,
                 frequencyWeight = baselineFreqWeight,
-                pointZeroDominant = pointZeroDominant,
                 rawPointCount = rawPointCount,
             )
         }
@@ -418,6 +410,7 @@ class SwipeSignal private constructor(
 
             val centroidKeys =
                 keyPositions.entries
+                    .asSequence()
                     .map { (char, pos) ->
                         val dx = pos.x - centroid.x
                         val dy = pos.y - centroid.y
@@ -431,6 +424,7 @@ class SwipeSignal private constructor(
             val firstPoint = path[0]
             val pointZeroKeys =
                 keyPositions.entries
+                    .asSequence()
                     .map { (char, pos) ->
                         val dx = pos.x - firstPoint.x
                         val dy = pos.y - firstPoint.y
@@ -443,6 +437,7 @@ class SwipeSignal private constructor(
             val backprojKeys =
                 if (backprojectedStart != null) {
                     keyPositions.entries
+                        .asSequence()
                         .map { (char, pos) ->
                             val dx = pos.x - backprojectedStart.x
                             val dy = pos.y - backprojectedStart.y

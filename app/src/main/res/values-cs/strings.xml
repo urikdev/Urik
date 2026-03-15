@@ -172,7 +172,6 @@
 
     <!-- Error Messages -->
     <string name="error_title">Chyba</string>
-    <string name="error_update_theme">Nepodařilo se aktualizovat téma</string>
     <string name="error_update_key_size">Nepodařilo se změnit velikost kláves</string>
     <string name="error_update_key_label_size">Nepodařilo se aktualizovat velikost popisů</string>
     <string name="error_update_spell_check">Nepodařilo se aktualizovat kontrolu pravopisu</string>
@@ -271,7 +270,6 @@
 
     <!-- Clipboard Panel -->
     <string name="tip_5_description">Dlouhým stisknutím klávesy se symbolem otevřete Správce schránky.</string>
-    <string name="clipboard_panel_title">Schránka</string>
     <string name="clipboard_panel_pinned">Připnuté</string>
     <string name="clipboard_panel_recent">Nedávné</string>
     <string name="clipboard_panel_empty">Žádná historie schránky</string>
