@@ -1021,7 +1021,8 @@ class SwipeKeyboardView
                 btn.contentDescription = context.getString(R.string.ime_prediction_description, suggestion)
 
                 suggestionMeasurePaint.letterSpacing = 0f
-                val fitted = fitSuggestionText(suggestionMeasurePaint, suggestion, cellWidth, suggestionMaxPadding, suggestionMinPadding)
+                val isCenterCandidate = capped.size >= 3 && index == 1
+                val fitted = fitSuggestionText(suggestionMeasurePaint, suggestion, cellWidth, suggestionMaxPadding, suggestionMinPadding, isCenterCandidate)
                 btn.setPadding(fitted.horizontalPadding, suggestionVerticalPadding, fitted.horizontalPadding, suggestionVerticalPadding)
                 btn.letterSpacing = fitted.letterSpacing
                 btn.ellipsize = fitted.ellipsize
@@ -1074,6 +1075,7 @@ class SwipeKeyboardView
             cellWidth: Int,
             maxPadding: Int,
             minPadding: Int,
+            isCenterCandidate: Boolean = false,
         ): SuggestionFit {
             if (text.isEmpty() || cellWidth <= 0) return SuggestionFit(maxPadding, 0f, null)
 
@@ -1090,7 +1092,7 @@ class SwipeKeyboardView
             }
 
             val availableAtMinPad = cellWidth - minPadding * 2
-            val minSpacing = -0.15f
+            val minSpacing = if (isCenterCandidate) MIN_LETTER_SPACING_CENTER else MIN_LETTER_SPACING_PERIPHERAL
             val gaps = (text.length - 1).coerceAtLeast(1)
             val neededSpacing = (availableAtMinPad - textWidth) / (paint.textSize * gaps)
             val clamped = neededSpacing.coerceIn(minSpacing, 0f)
@@ -1101,7 +1103,7 @@ class SwipeKeyboardView
 
             if (verifiedWidth <= availableAtMinPad) return SuggestionFit(minPadding, clamped, null)
 
-            return SuggestionFit(minPadding, minSpacing, android.text.TextUtils.TruncateAt.END)
+            return SuggestionFit(minPadding, minSpacing, android.text.TextUtils.TruncateAt.MIDDLE)
         }
 
         private fun getOrCreateSuggestionView(): TextView =
@@ -2299,5 +2301,7 @@ class SwipeKeyboardView
 
         companion object {
             private const val SEARCH_DEBOUNCE_MS = 300L
+            private const val MIN_LETTER_SPACING_CENTER = -0.02f
+            private const val MIN_LETTER_SPACING_PERIPHERAL = -0.03f
         }
     }
