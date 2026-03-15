@@ -145,9 +145,10 @@ class WordLearningEngine
                         learnedWordsCache.put(languageTag, normalizedSet)
                     }
 
-                    val freqMap = ConcurrentHashMap<String, Int>(
-                        minOf(learnedWords.size, HOT_BUFFER_MAX_SIZE),
-                    )
+                    val freqMap =
+                        ConcurrentHashMap<String, Int>(
+                            minOf(learnedWords.size, HOT_BUFFER_MAX_SIZE),
+                        )
                     learnedWords
                         .sortedByDescending { it.frequency }
                         .take(HOT_BUFFER_MAX_SIZE)
@@ -432,7 +433,8 @@ class WordLearningEngine
 
                         if (results.size >= maxResults) {
                             onSuccessfulOperation()
-                            return@withContext results.toList()
+                            return@withContext results
+                                .toList()
                                 .sortedByDescending { it.second }
                                 .take(maxResults)
                         }
@@ -702,9 +704,10 @@ class WordLearningEngine
             val cacheSet = ConcurrentHashMap.newKeySet<String>()
             allWords.forEach { cacheSet.add(it.wordNormalized) }
 
-            val freqMap = ConcurrentHashMap<String, Int>(
-                minOf(allWords.size, HOT_BUFFER_MAX_SIZE),
-            )
+            val freqMap =
+                ConcurrentHashMap<String, Int>(
+                    minOf(allWords.size, HOT_BUFFER_MAX_SIZE),
+                )
             allWords
                 .sortedByDescending { it.frequency }
                 .take(HOT_BUFFER_MAX_SIZE)

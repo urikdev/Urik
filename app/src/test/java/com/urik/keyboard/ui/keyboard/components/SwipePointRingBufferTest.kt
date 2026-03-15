@@ -7,7 +7,6 @@ import org.junit.Before
 import org.junit.Test
 
 class SwipePointRingBufferTest {
-
     private lateinit var buffer: SwipePointRingBuffer
 
     @Before

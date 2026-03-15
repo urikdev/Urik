@@ -205,9 +205,7 @@ class SuggestionPipeline(
         }
     }
 
-    suspend fun confirmAndLearnWord(
-        checkAutoCapitalization: (String) -> Unit,
-    ) {
+    suspend fun confirmAndLearnWord(checkAutoCapitalization: (String) -> Unit) {
         withContext(Dispatchers.Main) {
             val wordToLearn = state.pendingWordForLearning
 

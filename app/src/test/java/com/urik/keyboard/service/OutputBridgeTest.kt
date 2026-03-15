@@ -32,20 +32,22 @@ class OutputBridgeTest {
         mockState = mock()
         mockSwipeDetector = mock()
         mockSwipeSpaceManager = mock()
-        outputBridge = OutputBridge(
-            state = mockState,
-            swipeDetector = mockSwipeDetector,
-            swipeSpaceManager = mockSwipeSpaceManager,
-            icProvider = { mockIc },
-        )
+        outputBridge =
+            OutputBridge(
+                state = mockState,
+                swipeDetector = mockSwipeDetector,
+                swipeSpaceManager = mockSwipeSpaceManager,
+                icProvider = { mockIc },
+            )
     }
 
     @Test
     fun `safeGetCursorPosition returns correct position from ExtractedText`() {
-        val extracted = ExtractedText().apply {
-            startOffset = 0
-            selectionStart = 42
-        }
+        val extracted =
+            ExtractedText().apply {
+                startOffset = 0
+                selectionStart = 42
+            }
         whenever(mockIc.getExtractedText(any<ExtractedTextRequest>(), eq(0))).thenReturn(extracted)
 
         assertEquals(42, outputBridge.safeGetCursorPosition())
@@ -53,10 +55,11 @@ class OutputBridgeTest {
 
     @Test
     fun `safeGetCursorPosition returns correct position beyond 1000 chars`() {
-        val extracted = ExtractedText().apply {
-            startOffset = 0
-            selectionStart = 1500
-        }
+        val extracted =
+            ExtractedText().apply {
+                startOffset = 0
+                selectionStart = 1500
+            }
         whenever(mockIc.getExtractedText(any<ExtractedTextRequest>(), eq(0))).thenReturn(extracted)
 
         assertEquals(1500, outputBridge.safeGetCursorPosition())
@@ -64,10 +67,11 @@ class OutputBridgeTest {
 
     @Test
     fun `safeGetCursorPosition handles non-zero startOffset`() {
-        val extracted = ExtractedText().apply {
-            startOffset = 500
-            selectionStart = 200
-        }
+        val extracted =
+            ExtractedText().apply {
+                startOffset = 500
+                selectionStart = 200
+            }
         whenever(mockIc.getExtractedText(any<ExtractedTextRequest>(), eq(0))).thenReturn(extracted)
 
         assertEquals(700, outputBridge.safeGetCursorPosition())
@@ -83,10 +87,11 @@ class OutputBridgeTest {
 
     @Test
     fun `safeGetCursorPosition falls back when selectionStart is negative`() {
-        val extracted = ExtractedText().apply {
-            startOffset = 0
-            selectionStart = -1
-        }
+        val extracted =
+            ExtractedText().apply {
+                startOffset = 0
+                selectionStart = -1
+            }
         whenever(mockIc.getExtractedText(any<ExtractedTextRequest>(), eq(0))).thenReturn(extracted)
         whenever(mockIc.getTextBeforeCursor(eq(1000), eq(0))).thenReturn("test")
 
@@ -95,10 +100,11 @@ class OutputBridgeTest {
 
     @Test
     fun `safeGetCursorPosition falls back when startOffset is negative`() {
-        val extracted = ExtractedText().apply {
-            startOffset = -1
-            selectionStart = 10
-        }
+        val extracted =
+            ExtractedText().apply {
+                startOffset = -1
+                selectionStart = 10
+            }
         whenever(mockIc.getExtractedText(any<ExtractedTextRequest>(), eq(0))).thenReturn(extracted)
         whenever(mockIc.getTextBeforeCursor(eq(1000), eq(0))).thenReturn("test")
 
@@ -115,22 +121,24 @@ class OutputBridgeTest {
 
     @Test
     fun `safeGetCursorPosition returns zero when IC is null`() {
-        val nullIcBridge = OutputBridge(
-            state = mockState,
-            swipeDetector = mockSwipeDetector,
-            swipeSpaceManager = mockSwipeSpaceManager,
-            icProvider = { null },
-        )
+        val nullIcBridge =
+            OutputBridge(
+                state = mockState,
+                swipeDetector = mockSwipeDetector,
+                swipeSpaceManager = mockSwipeSpaceManager,
+                icProvider = { null },
+            )
 
         assertEquals(0, nullIcBridge.safeGetCursorPosition())
     }
 
     @Test
     fun `calculateParagraphBoundedComposingRegion correct indices at high cursor position`() {
-        val result = outputBridge.calculateParagraphBoundedComposingRegion(
-            textBeforeCursor = "the quick brown fox jumps over the lazy world",
-            cursorPosition = 1500,
-        )
+        val result =
+            outputBridge.calculateParagraphBoundedComposingRegion(
+                textBeforeCursor = "the quick brown fox jumps over the lazy world",
+                cursorPosition = 1500,
+            )
 
         assertNotNull(result)
         val (wordStart, wordEnd, word) = result!!
@@ -141,10 +149,11 @@ class OutputBridgeTest {
 
     @Test
     fun `calculateParagraphBoundedComposingRegion respects paragraph boundary at high position`() {
-        val result = outputBridge.calculateParagraphBoundedComposingRegion(
-            textBeforeCursor = "paragraph one\nword",
-            cursorPosition = 2000,
-        )
+        val result =
+            outputBridge.calculateParagraphBoundedComposingRegion(
+                textBeforeCursor = "paragraph one\nword",
+                cursorPosition = 2000,
+            )
 
         assertNotNull(result)
         val (wordStart, wordEnd, word) = result!!
@@ -155,20 +164,22 @@ class OutputBridgeTest {
 
     @Test
     fun `calculateParagraphBoundedComposingRegion returns null when ending at newline`() {
-        val result = outputBridge.calculateParagraphBoundedComposingRegion(
-            textBeforeCursor = "text\n",
-            cursorPosition = 100,
-        )
+        val result =
+            outputBridge.calculateParagraphBoundedComposingRegion(
+                textBeforeCursor = "text\n",
+                cursorPosition = 100,
+            )
 
         assertNull(result)
     }
 
     @Test
     fun `calculateParagraphBoundedComposingRegion returns null for empty text`() {
-        val result = outputBridge.calculateParagraphBoundedComposingRegion(
-            textBeforeCursor = "",
-            cursorPosition = 100,
-        )
+        val result =
+            outputBridge.calculateParagraphBoundedComposingRegion(
+                textBeforeCursor = "",
+                cursorPosition = 100,
+            )
 
         assertNull(result)
     }
@@ -176,10 +187,11 @@ class OutputBridgeTest {
     @Test
     fun `safeGetCursorPosition with long buffer does not cap at MAX_CURSOR_POSITION_CHARS`() {
         val actualPosition = 5000
-        val extracted = ExtractedText().apply {
-            startOffset = 0
-            selectionStart = actualPosition
-        }
+        val extracted =
+            ExtractedText().apply {
+                startOffset = 0
+                selectionStart = actualPosition
+            }
         whenever(mockIc.getExtractedText(any<ExtractedTextRequest>(), eq(0))).thenReturn(extracted)
 
         val result = outputBridge.safeGetCursorPosition()
@@ -196,15 +208,17 @@ class OutputBridgeTest {
         val composingWord = "world"
         val composingRegionStart = cursorPos - composingWord.length
 
-        val extracted = ExtractedText().apply {
-            startOffset = 0
-            selectionStart = cursorPos
-        }
+        val extracted =
+            ExtractedText().apply {
+                startOffset = 0
+                selectionStart = cursorPos
+            }
         whenever(mockIc.getExtractedText(any<ExtractedTextRequest>(), eq(0))).thenReturn(extracted)
 
         val absoluteCursorPos = outputBridge.safeGetCursorPosition()
-        val cursorPosInWord = (absoluteCursorPos - composingRegionStart)
-            .coerceIn(0, composingWord.length)
+        val cursorPosInWord =
+            (absoluteCursorPos - composingRegionStart)
+                .coerceIn(0, composingWord.length)
 
         assertEquals(composingWord.length, cursorPosInWord)
         assertEquals(cursorPos, absoluteCursorPos)
@@ -217,10 +231,11 @@ class OutputBridgeTest {
         val expectedNewPosition = cursorBeforeDeletion - graphemeLength
         val remainingText = "some context before the world"
 
-        val result = outputBridge.calculateParagraphBoundedComposingRegion(
-            textBeforeCursor = remainingText,
-            cursorPosition = expectedNewPosition,
-        )
+        val result =
+            outputBridge.calculateParagraphBoundedComposingRegion(
+                textBeforeCursor = remainingText,
+                cursorPosition = expectedNewPosition,
+            )
 
         assertNotNull(result)
         val (wordStart, wordEnd, word) = result!!

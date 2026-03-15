@@ -126,9 +126,7 @@ object KeyboardModule {
 
     @Provides
     @Singleton
-    fun provideSwipeDetector(
-        streamingScoringEngine: StreamingScoringEngine,
-    ): SwipeDetector = SwipeDetector(streamingScoringEngine)
+    fun provideSwipeDetector(streamingScoringEngine: StreamingScoringEngine): SwipeDetector = SwipeDetector(streamingScoringEngine)
 
     @Provides
     @Singleton

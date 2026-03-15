@@ -631,10 +631,11 @@ class CaseTransformerTest {
 
     @Test
     fun `re-casing suggestions after shift toggle produces title case`() {
-        val suggestions = listOf(
-            SpellingSuggestion("car", 0.9, 0, "symspell", preserveCase = false),
-            SpellingSuggestion("can", 0.8, 1, "symspell", preserveCase = false),
-        )
+        val suggestions =
+            listOf(
+                SpellingSuggestion("car", 0.9, 0, "symspell", preserveCase = false),
+                SpellingSuggestion("can", 0.8, 1, "symspell", preserveCase = false),
+            )
         val noShift = KeyboardState(isShiftPressed = false)
         val manualShift = KeyboardState(isShiftPressed = true, isAutoShift = false)
 
@@ -647,10 +648,11 @@ class CaseTransformerTest {
 
     @Test
     fun `re-casing suggestions after caps lock toggle produces all uppercase`() {
-        val suggestions = listOf(
-            SpellingSuggestion("car", 0.9, 0, "symspell", preserveCase = false),
-            SpellingSuggestion("can", 0.8, 1, "symspell", preserveCase = false),
-        )
+        val suggestions =
+            listOf(
+                SpellingSuggestion("car", 0.9, 0, "symspell", preserveCase = false),
+                SpellingSuggestion("can", 0.8, 1, "symspell", preserveCase = false),
+            )
         val noShift = KeyboardState(isShiftPressed = false)
         val capsLock = KeyboardState(isCapsLockOn = true)
 
@@ -663,10 +665,11 @@ class CaseTransformerTest {
 
     @Test
     fun `learned word iPhone preserved under auto-shift but uppercased under caps lock`() {
-        val suggestions = listOf(
-            SpellingSuggestion("iPhone", 0.95, 0, "learned", preserveCase = true),
-            SpellingSuggestion("idea", 0.8, 1, "symspell", preserveCase = false),
-        )
+        val suggestions =
+            listOf(
+                SpellingSuggestion("iPhone", 0.95, 0, "learned", preserveCase = true),
+                SpellingSuggestion("idea", 0.8, 1, "symspell", preserveCase = false),
+            )
         val autoShift = KeyboardState(isShiftPressed = true, isAutoShift = true)
         val capsLock = KeyboardState(isCapsLockOn = true)
 
@@ -679,10 +682,11 @@ class CaseTransformerTest {
 
     @Test
     fun `toggling shift off reverts suggestions to lowercase`() {
-        val suggestions = listOf(
-            SpellingSuggestion("hello", 0.9, 0, "symspell", preserveCase = false),
-            SpellingSuggestion("help", 0.8, 1, "symspell", preserveCase = false),
-        )
+        val suggestions =
+            listOf(
+                SpellingSuggestion("hello", 0.9, 0, "symspell", preserveCase = false),
+                SpellingSuggestion("help", 0.8, 1, "symspell", preserveCase = false),
+            )
         val manualShift = KeyboardState(isShiftPressed = true, isAutoShift = false)
         val noShift = KeyboardState(isShiftPressed = false)
 

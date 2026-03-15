@@ -110,11 +110,12 @@ sealed class HapticSignature {
         override val durationMs = 25L
 
         override fun createEffect(baseAmplitude: Int): VibrationEffect {
-            val amplitude = if (baseAmplitude == VibrationEffect.DEFAULT_AMPLITUDE) {
-                VibrationEffect.DEFAULT_AMPLITUDE
-            } else {
-                (baseAmplitude * 0.85).toInt().coerceIn(1, 255)
-            }
+            val amplitude =
+                if (baseAmplitude == VibrationEffect.DEFAULT_AMPLITUDE) {
+                    VibrationEffect.DEFAULT_AMPLITUDE
+                } else {
+                    (baseAmplitude * 0.85).toInt().coerceIn(1, 255)
+                }
             return VibrationEffect.createOneShot(25L, amplitude)
         }
     }

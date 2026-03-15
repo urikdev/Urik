@@ -425,5 +425,4 @@ class WordFrequencyRepository
             languageTag: String,
             normalizedWordA: String,
         ): String = "bigram_${languageTag}_$normalizedWordA"
-
     }

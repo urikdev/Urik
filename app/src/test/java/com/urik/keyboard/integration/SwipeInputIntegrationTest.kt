@@ -156,15 +156,16 @@ class SwipeInputIntegrationTest {
             val pathGeometryAnalyzer = PathGeometryAnalyzer()
             val residualScorer = ResidualScorer(pathGeometryAnalyzer)
             val zipfCheck = ZipfCheck(spellCheckManager)
-            val streamingScoringEngine = StreamingScoringEngine(
-                spellCheckManager,
-                wordLearningEngine,
-                pathGeometryAnalyzer,
-                wordFrequencyRepository,
-                residualScorer,
-                zipfCheck,
-                wordNormalizer,
-            )
+            val streamingScoringEngine =
+                StreamingScoringEngine(
+                    spellCheckManager,
+                    wordLearningEngine,
+                    pathGeometryAnalyzer,
+                    wordFrequencyRepository,
+                    residualScorer,
+                    zipfCheck,
+                    wordNormalizer,
+                )
             swipeDetector = SwipeDetector(streamingScoringEngine)
         }
 
