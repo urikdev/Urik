@@ -679,6 +679,9 @@ class UrikInputMethodService :
                 onDeleteAll = {
                     handleClipboardDeleteAll()
                 },
+                onClose = {
+                    dismissClipboardPanel()
+                }
             )
         }
     }

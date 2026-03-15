@@ -2,6 +2,7 @@ package com.urik.keyboard.ui.keyboard.components
 
 import android.content.Context
 import android.graphics.drawable.GradientDrawable
+import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
 import android.widget.Button
@@ -31,6 +32,8 @@ class ClipboardPanel(
     private var onItemPinToggled: ((ClipboardItem) -> Unit)? = null
     private var onItemDeleted: ((ClipboardItem) -> Unit)? = null
     private var onDeleteAllUnpinned: (() -> Unit)? = null
+
+    private var onClose: (() -> Unit)? = null
 
     private val transientOverlayA11yDelegate =
         object : AccessibilityDelegateCompat() {
@@ -281,11 +284,13 @@ class ClipboardPanel(
         onPinToggle: (ClipboardItem) -> Unit,
         onDelete: (ClipboardItem) -> Unit,
         onDeleteAll: () -> Unit,
+        onClose: () -> Unit,
     ) {
         this.onItemSelected = onItemClick
         this.onItemPinToggled = onPinToggle
         this.onItemDeleted = onDelete
         this.onDeleteAllUnpinned = onDeleteAll
+        this.onClose = onClose
 
         consentScreen.isVisible = false
         clipboardContentScreen.isVisible = true
