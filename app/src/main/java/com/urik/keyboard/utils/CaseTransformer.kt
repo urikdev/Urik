@@ -55,7 +55,10 @@ class CaseTransformer
             locale: java.util.Locale = java.util.Locale.ROOT,
         ): List<String> = suggestions.map { applyCasing(it, keyboardState, isSentenceStart, locale) }
 
-        private fun capitalizeFirstLetter(word: String, locale: java.util.Locale = java.util.Locale.ROOT): String {
+        private fun capitalizeFirstLetter(
+            word: String,
+            locale: java.util.Locale = java.util.Locale.ROOT,
+        ): String {
             if (word.isEmpty()) return word
 
             val firstChar = word[0]

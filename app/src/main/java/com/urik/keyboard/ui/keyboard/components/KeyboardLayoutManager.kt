@@ -1092,7 +1092,8 @@ class KeyboardLayoutManager(
             val verticalPadding = cachedDimensions["verticalPadding"]!!
             setPadding(horizontalPadding, verticalPadding, horizontalPadding, verticalPadding)
 
-            if (key is KeyboardKey.Action && key.action in
+            if (key is KeyboardKey.Action &&
+                key.action in
                 setOf(
                     KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS,
                     KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS_SECONDARY,
@@ -1219,7 +1220,8 @@ class KeyboardLayoutManager(
                         background = layerDrawable
                         text = ""
                     }
-                } else if (key.action == KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS && clipboardEnabled &&
+                } else if (key.action == KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS &&
+                    clipboardEnabled &&
                     effectiveLayout?.mode == KeyboardMode.LETTERS
                 ) {
                     val keyBackground = getKeyBackground(key)

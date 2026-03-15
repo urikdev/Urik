@@ -9,22 +9,38 @@ import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class ResidualScorerShortWordTest {
-
     private lateinit var pathGeometryAnalyzer: PathGeometryAnalyzer
     private lateinit var scorer: ResidualScorer
 
-    private val colemakKeyPositions = mapOf(
-        'q' to PointF(30f, 50f), 'w' to PointF(80f, 50f), 'f' to PointF(130f, 50f),
-        'p' to PointF(180f, 50f), 'g' to PointF(230f, 50f), 'j' to PointF(280f, 50f),
-        'l' to PointF(330f, 50f), 'u' to PointF(380f, 50f), 'y' to PointF(430f, 50f),
-        'a' to PointF(40f, 130f), 'r' to PointF(90f, 130f), 's' to PointF(140f, 130f),
-        't' to PointF(190f, 130f), 'd' to PointF(240f, 130f), 'h' to PointF(290f, 130f),
-        'n' to PointF(340f, 130f), 'e' to PointF(390f, 130f), 'i' to PointF(440f, 130f),
-        'o' to PointF(490f, 130f),
-        'z' to PointF(90f, 210f), 'x' to PointF(140f, 210f), 'c' to PointF(190f, 210f),
-        'v' to PointF(240f, 210f), 'b' to PointF(290f, 210f), 'k' to PointF(340f, 210f),
-        'm' to PointF(390f, 210f),
-    )
+    private val colemakKeyPositions =
+        mapOf(
+            'q' to PointF(30f, 50f),
+            'w' to PointF(80f, 50f),
+            'f' to PointF(130f, 50f),
+            'p' to PointF(180f, 50f),
+            'g' to PointF(230f, 50f),
+            'j' to PointF(280f, 50f),
+            'l' to PointF(330f, 50f),
+            'u' to PointF(380f, 50f),
+            'y' to PointF(430f, 50f),
+            'a' to PointF(40f, 130f),
+            'r' to PointF(90f, 130f),
+            's' to PointF(140f, 130f),
+            't' to PointF(190f, 130f),
+            'd' to PointF(240f, 130f),
+            'h' to PointF(290f, 130f),
+            'n' to PointF(340f, 130f),
+            'e' to PointF(390f, 130f),
+            'i' to PointF(440f, 130f),
+            'o' to PointF(490f, 130f),
+            'z' to PointF(90f, 210f),
+            'x' to PointF(140f, 210f),
+            'c' to PointF(190f, 210f),
+            'v' to PointF(240f, 210f),
+            'b' to PointF(290f, 210f),
+            'k' to PointF(340f, 210f),
+            'm' to PointF(390f, 210f),
+        )
 
     @Before
     fun setup() {
@@ -34,29 +50,47 @@ class ResidualScorerShortWordTest {
 
     @Test
     fun `short word aid scores higher than arrested on short Colemak path`() {
-        val shortPath = generateLinearPath(
-            colemakKeyPositions['a']!!,
-            colemakKeyPositions['i']!!,
-            colemakKeyPositions['d']!!,
-            pointsPerSegment = 5,
-        )
+        val shortPath =
+            generateLinearPath(
+                colemakKeyPositions['a']!!,
+                colemakKeyPositions['i']!!,
+                colemakKeyPositions['d']!!,
+                pointsPerSegment = 5,
+            )
 
         val sigmaCache = buildSigmaCache(colemakKeyPositions)
         val neighborhoodCache = pathGeometryAnalyzer.computeKeyNeighborhoods(colemakKeyPositions)
 
-        val signal = SwipeSignal.extract(
-            shortPath, colemakKeyPositions, pathGeometryAnalyzer, sigmaCache, shortPath.size,
-        )
+        val signal =
+            SwipeSignal.extract(
+                shortPath,
+                colemakKeyPositions,
+                pathGeometryAnalyzer,
+                sigmaCache,
+                shortPath.size,
+            )
 
         val aidEntry = makeEntry("aid", 50_000)
         val arrestedEntry = makeEntry("arrested", 80_000_000)
 
-        val aidResult = scorer.scoreCandidate(
-            aidEntry, signal, colemakKeyPositions, sigmaCache, neighborhoodCache, 80_000_000L,
-        )
-        val arrestedResult = scorer.scoreCandidate(
-            arrestedEntry, signal, colemakKeyPositions, sigmaCache, neighborhoodCache, 80_000_000L,
-        )
+        val aidResult =
+            scorer.scoreCandidate(
+                aidEntry,
+                signal,
+                colemakKeyPositions,
+                sigmaCache,
+                neighborhoodCache,
+                80_000_000L,
+            )
+        val arrestedResult =
+            scorer.scoreCandidate(
+                arrestedEntry,
+                signal,
+                colemakKeyPositions,
+                sigmaCache,
+                neighborhoodCache,
+                80_000_000L,
+            )
 
         assertTrue(
             "aid (${aidResult?.combinedScore}) should outscore arrested (${arrestedResult?.combinedScore}) on a short a→i→d path",
@@ -66,29 +100,47 @@ class ResidualScorerShortWordTest {
 
     @Test
     fun `short word the scores higher than together on short path`() {
-        val shortPath = generateLinearPath(
-            colemakKeyPositions['t']!!,
-            colemakKeyPositions['h']!!,
-            colemakKeyPositions['e']!!,
-            pointsPerSegment = 5,
-        )
+        val shortPath =
+            generateLinearPath(
+                colemakKeyPositions['t']!!,
+                colemakKeyPositions['h']!!,
+                colemakKeyPositions['e']!!,
+                pointsPerSegment = 5,
+            )
 
         val sigmaCache = buildSigmaCache(colemakKeyPositions)
         val neighborhoodCache = pathGeometryAnalyzer.computeKeyNeighborhoods(colemakKeyPositions)
 
-        val signal = SwipeSignal.extract(
-            shortPath, colemakKeyPositions, pathGeometryAnalyzer, sigmaCache, shortPath.size,
-        )
+        val signal =
+            SwipeSignal.extract(
+                shortPath,
+                colemakKeyPositions,
+                pathGeometryAnalyzer,
+                sigmaCache,
+                shortPath.size,
+            )
 
         val theEntry = makeEntry("the", 500_000_000)
         val togetherEntry = makeEntry("together", 20_000_000)
 
-        val theResult = scorer.scoreCandidate(
-            theEntry, signal, colemakKeyPositions, sigmaCache, neighborhoodCache, 500_000_000L,
-        )
-        val togetherResult = scorer.scoreCandidate(
-            togetherEntry, signal, colemakKeyPositions, sigmaCache, neighborhoodCache, 500_000_000L,
-        )
+        val theResult =
+            scorer.scoreCandidate(
+                theEntry,
+                signal,
+                colemakKeyPositions,
+                sigmaCache,
+                neighborhoodCache,
+                500_000_000L,
+            )
+        val togetherResult =
+            scorer.scoreCandidate(
+                togetherEntry,
+                signal,
+                colemakKeyPositions,
+                sigmaCache,
+                neighborhoodCache,
+                500_000_000L,
+            )
 
         assertTrue(
             "the (${theResult?.combinedScore}) should outscore together (${togetherResult?.combinedScore}) on a short t→h→e path",
@@ -98,26 +150,38 @@ class ResidualScorerShortWordTest {
 
     @Test
     fun `dogs still scores well on appropriate-length Colemak path`() {
-        val path = generateLinearPath(
-            colemakKeyPositions['d']!!,
-            colemakKeyPositions['o']!!,
-            colemakKeyPositions['g']!!,
-            colemakKeyPositions['s']!!,
-            pointsPerSegment = 8,
-        )
+        val path =
+            generateLinearPath(
+                colemakKeyPositions['d']!!,
+                colemakKeyPositions['o']!!,
+                colemakKeyPositions['g']!!,
+                colemakKeyPositions['s']!!,
+                pointsPerSegment = 8,
+            )
 
         val sigmaCache = buildSigmaCache(colemakKeyPositions)
         val neighborhoodCache = pathGeometryAnalyzer.computeKeyNeighborhoods(colemakKeyPositions)
 
-        val signal = SwipeSignal.extract(
-            path, colemakKeyPositions, pathGeometryAnalyzer, sigmaCache, path.size,
-        )
+        val signal =
+            SwipeSignal.extract(
+                path,
+                colemakKeyPositions,
+                pathGeometryAnalyzer,
+                sigmaCache,
+                path.size,
+            )
 
         val dogsEntry = makeEntry("dogs", 10_000_000)
 
-        val dogsResult = scorer.scoreCandidate(
-            dogsEntry, signal, colemakKeyPositions, sigmaCache, neighborhoodCache, 10_000_000L,
-        )
+        val dogsResult =
+            scorer.scoreCandidate(
+                dogsEntry,
+                signal,
+                colemakKeyPositions,
+                sigmaCache,
+                neighborhoodCache,
+                10_000_000L,
+            )
 
         assertTrue(
             "dogs should score reasonably (got ${dogsResult?.combinedScore})",
@@ -127,30 +191,42 @@ class ResidualScorerShortWordTest {
 
     @Test
     fun `long word bonus does not regress for legitimate long gestures`() {
-        val longPath = generateLinearPath(
-            colemakKeyPositions['t']!!,
-            colemakKeyPositions['o']!!,
-            colemakKeyPositions['g']!!,
-            colemakKeyPositions['e']!!,
-            colemakKeyPositions['t']!!,
-            colemakKeyPositions['h']!!,
-            colemakKeyPositions['e']!!,
-            colemakKeyPositions['r']!!,
-            pointsPerSegment = 8,
-        )
+        val longPath =
+            generateLinearPath(
+                colemakKeyPositions['t']!!,
+                colemakKeyPositions['o']!!,
+                colemakKeyPositions['g']!!,
+                colemakKeyPositions['e']!!,
+                colemakKeyPositions['t']!!,
+                colemakKeyPositions['h']!!,
+                colemakKeyPositions['e']!!,
+                colemakKeyPositions['r']!!,
+                pointsPerSegment = 8,
+            )
 
         val sigmaCache = buildSigmaCache(colemakKeyPositions)
         val neighborhoodCache = pathGeometryAnalyzer.computeKeyNeighborhoods(colemakKeyPositions)
 
-        val signal = SwipeSignal.extract(
-            longPath, colemakKeyPositions, pathGeometryAnalyzer, sigmaCache, longPath.size,
-        )
+        val signal =
+            SwipeSignal.extract(
+                longPath,
+                colemakKeyPositions,
+                pathGeometryAnalyzer,
+                sigmaCache,
+                longPath.size,
+            )
 
         val togetherEntry = makeEntry("together", 20_000_000)
 
-        val result = scorer.scoreCandidate(
-            togetherEntry, signal, colemakKeyPositions, sigmaCache, neighborhoodCache, 20_000_000L,
-        )
+        val result =
+            scorer.scoreCandidate(
+                togetherEntry,
+                signal,
+                colemakKeyPositions,
+                sigmaCache,
+                neighborhoodCache,
+                20_000_000L,
+            )
 
         assertTrue(
             "together should score well on a full-length path (got ${result?.combinedScore})",
@@ -191,9 +267,7 @@ class ResidualScorerShortWordTest {
         return result
     }
 
-    private fun buildSigmaCache(
-        positions: Map<Char, PointF>,
-    ): Map<Char, PathGeometryAnalyzer.AdaptiveSigma> =
+    private fun buildSigmaCache(positions: Map<Char, PointF>): Map<Char, PathGeometryAnalyzer.AdaptiveSigma> =
         positions.keys.associateWith { char ->
             pathGeometryAnalyzer.calculateAdaptiveSigma(char, positions)
         }
@@ -208,11 +282,17 @@ class ResidualScorerShortWordTest {
             rawFrequency = frequency,
             firstChar = word.first().lowercaseChar(),
             uniqueLetterCount = word.toSet().size,
-            frequencyTier = SwipeDetector.FrequencyTier.fromRank(
-                if (frequency > 100_000_000) 0
-                else if (frequency > 10_000_000) 500
-                else if (frequency > 1_000_000) 3000
-                else 10000,
-            ),
+            frequencyTier =
+                SwipeDetector.FrequencyTier.fromRank(
+                    if (frequency > 100_000_000) {
+                        0
+                    } else if (frequency > 10_000_000) {
+                        500
+                    } else if (frequency > 1_000_000) {
+                        3000
+                    } else {
+                        10000
+                    },
+                ),
         )
 }

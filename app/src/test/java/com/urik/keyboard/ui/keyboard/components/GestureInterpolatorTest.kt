@@ -8,7 +8,6 @@ import org.junit.Test
 import kotlin.math.sqrt
 
 class GestureInterpolatorTest {
-
     private lateinit var interpolator: GestureInterpolator
     private lateinit var ringBuffer: SwipePointRingBuffer
 

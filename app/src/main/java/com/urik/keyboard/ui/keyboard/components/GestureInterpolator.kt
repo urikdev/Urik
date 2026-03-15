@@ -3,8 +3,9 @@ package com.urik.keyboard.ui.keyboard.components
 import kotlin.math.sqrt
 
 /** Catmull-Rom spline interpolation for raw touch input. */
-class GestureInterpolator(private val ringBuffer: SwipePointRingBuffer) {
-
+class GestureInterpolator(
+    private val ringBuffer: SwipePointRingBuffer,
+) {
     private val windowX = FloatArray(WINDOW_SIZE)
     private val windowY = FloatArray(WINDOW_SIZE)
     private val windowTimestamp = LongArray(WINDOW_SIZE)
@@ -14,7 +15,13 @@ class GestureInterpolator(private val ringBuffer: SwipePointRingBuffer) {
     private var rawPointIndex = 0
     val rawPointCount: Int get() = rawPointIndex
 
-    fun onRawPoint(x: Float, y: Float, timestamp: Long, pressure: Float, velocity: Float) {
+    fun onRawPoint(
+        x: Float,
+        y: Float,
+        timestamp: Long,
+        pressure: Float,
+        velocity: Float,
+    ) {
         rawPointIndex++
         if (windowCount < WINDOW_SIZE) {
             val i = windowCount
@@ -71,14 +78,18 @@ class GestureInterpolator(private val ringBuffer: SwipePointRingBuffer) {
             return
         }
 
-        val pointCount = ((segmentLength / TARGET_DENSITY_PX).toInt() - 1)
-            .coerceIn(0, MAX_INTERPOLATED_PER_SEGMENT)
+        val pointCount =
+            ((segmentLength / TARGET_DENSITY_PX).toInt() - 1)
+                .coerceIn(0, MAX_INTERPOLATED_PER_SEGMENT)
 
         if (pointCount <= 0) return
 
-        val p1x = windowX[1]; val p1y = windowY[1]
-        val p2x = windowX[2]; val p2y = windowY[2]
-        val p3x = windowX[3]; val p3y = windowY[3]
+        val p1x = windowX[1]
+        val p1y = windowY[1]
+        val p2x = windowX[2]
+        val p2y = windowY[2]
+        val p3x = windowX[3]
+        val p3y = windowY[3]
 
         val t1 = windowTimestamp[2]
         val t2 = windowTimestamp[3]
@@ -92,19 +103,21 @@ class GestureInterpolator(private val ringBuffer: SwipePointRingBuffer) {
             val t2f = t * t
             val t3f = t2f * t
 
-            val interpX = ALPHA * (
-                (-p1x + 2f * p2x - p3x) * t3f +
-                (2f * p1x - 4f * p2x + 2f * p3x) * t2f +
-                (-p1x + p3x) * t +
-                2f * p2x
-            )
+            val interpX =
+                ALPHA * (
+                    (-p1x + 2f * p2x - p3x) * t3f +
+                        (2f * p1x - 4f * p2x + 2f * p3x) * t2f +
+                        (-p1x + p3x) * t +
+                        2f * p2x
+                )
 
-            val interpY = ALPHA * (
-                (-p1y + 2f * p2y - p3y) * t3f +
-                (2f * p1y - 4f * p2y + 2f * p3y) * t2f +
-                (-p1y + p3y) * t +
-                2f * p2y
-            )
+            val interpY =
+                ALPHA * (
+                    (-p1y + 2f * p2y - p3y) * t3f +
+                        (2f * p1y - 4f * p2y + 2f * p3y) * t2f +
+                        (-p1y + p3y) * t +
+                        2f * p2y
+                )
 
             val interpTimestamp = t1 + ((t2 - t1) * t).toLong()
             val interpPressure = pr1 + (pr2 - pr1) * t

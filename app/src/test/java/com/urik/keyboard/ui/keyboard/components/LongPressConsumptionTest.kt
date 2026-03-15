@@ -32,8 +32,7 @@ class LongPressConsumptionTest {
         characterLongPressFired.remove(button)
     }
 
-    private fun resolveConsumed(): Boolean =
-        characterLongPressFired.remove(button) || longPressConsumedButtons.contains(button)
+    private fun resolveConsumed(): Boolean = characterLongPressFired.remove(button) || longPressConsumedButtons.contains(button)
 
     @Test
     fun `long press consumed on normal ACTION_UP`() {
