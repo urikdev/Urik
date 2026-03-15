@@ -627,7 +627,10 @@ class SettingsRepository
 
         suspend fun updatePauseOnMisspelledWord(enabled: Boolean): Result<Unit> =
             try {
-                dataStore.edit { it[PreferenceKeys.PAUSE_ON_MISSPELLED_WORD] = enabled }
+                dataStore.edit {
+                    it[PreferenceKeys.PAUSE_ON_MISSPELLED_WORD] = enabled
+                    if (enabled) it[PreferenceKeys.AUTOCORRECTION_ENABLED] = false
+                }
                 Result.success(Unit)
             } catch (e: Exception) {
                 Result.failure(e)
@@ -635,7 +638,10 @@ class SettingsRepository
 
         suspend fun updateAutocorrectionEnabled(enabled: Boolean): Result<Unit> =
             try {
-                dataStore.edit { it[PreferenceKeys.AUTOCORRECTION_ENABLED] = enabled }
+                dataStore.edit {
+                    it[PreferenceKeys.AUTOCORRECTION_ENABLED] = enabled
+                    if (enabled) it[PreferenceKeys.PAUSE_ON_MISSPELLED_WORD] = false
+                }
                 Result.success(Unit)
             } catch (e: Exception) {
                 Result.failure(e)

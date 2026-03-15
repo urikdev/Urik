@@ -2100,34 +2100,6 @@ class UrikInputMethodService :
                 inputState.lastSpaceTime = currentTime
 
                 if (inputState.spellConfirmationState == SpellConfirmationState.AWAITING_CONFIRMATION) {
-                    if (currentSettings.autocorrectionEnabled && inputState.pendingSuggestions.isNotEmpty()) {
-                        val topSuggestion = inputState.pendingSuggestions.first()
-                        if (isSafeForAutocorrect(topSuggestion)) {
-                            val originalWord = inputState.displayBuffer
-                            inputState.isActivelyEditing = true
-                            suggestionPipeline.recordWordUsage(topSuggestion)
-                            outputBridge.beginBatchEdit()
-                            try {
-                                outputBridge.autoCapitalizePronounI { languageManager.currentLanguage.value }
-                                swipeDetector.updateLastCommittedWord(topSuggestion)
-                                outputBridge.commitText("$topSuggestion ", 1)
-                                inputState.clearInternalStateOnly()
-                                inputState.postCommitReplacementState =
-                                    PostCommitReplacementState(
-                                        originalWord = originalWord,
-                                        committedWord = topSuggestion,
-                                    )
-                                inputState.pendingSuggestions = listOf(originalWord)
-                                swipeKeyboardView?.updateSuggestions(listOf(originalWord))
-
-                                val textBefore = outputBridge.safeGetTextBeforeCursor(50)
-                                checkAutoCapitalization(textBefore)
-                            } finally {
-                                outputBridge.endBatchEdit()
-                            }
-                            return@launch
-                        }
-                    }
                     suggestionPipeline.confirmAndLearnWord(::checkAutoCapitalization)
                     return@launch
                 }
