@@ -16,7 +16,7 @@ class KeyboardSettingsTest {
         val settings =
             KeyboardSettings(
                 activeLanguages = listOf("en", "sv"),
-                primaryLanguage = "en",
+                primaryLanguage = "en"
             )
 
         val validated = settings.validated()
@@ -29,7 +29,7 @@ class KeyboardSettingsTest {
         val settings =
             KeyboardSettings(
                 activeLanguages = listOf("de", "en", "ja"),
-                primaryLanguage = "de",
+                primaryLanguage = "de"
             )
 
         val validated = settings.validated()
@@ -43,7 +43,7 @@ class KeyboardSettingsTest {
         val settings =
             KeyboardSettings(
                 activeLanguages = listOf("cs", "en", "ja"),
-                primaryLanguage = "cs",
+                primaryLanguage = "cs"
             )
 
         val validated = settings.validated()
@@ -57,7 +57,7 @@ class KeyboardSettingsTest {
         val settings =
             KeyboardSettings(
                 activeLanguages = listOf("pt", "en", "ja"),
-                primaryLanguage = "pt",
+                primaryLanguage = "pt"
             )
 
         val validated = settings.validated()
@@ -71,7 +71,7 @@ class KeyboardSettingsTest {
         val settings =
             KeyboardSettings(
                 activeLanguages = listOf("ja", "zh", "ko"),
-                primaryLanguage = "ja",
+                primaryLanguage = "ja"
             )
 
         val validated = settings.validated()
@@ -85,7 +85,7 @@ class KeyboardSettingsTest {
         val settings =
             KeyboardSettings(
                 activeLanguages = listOf("en", "sv"),
-                primaryLanguage = "ja",
+                primaryLanguage = "ja"
             )
 
         val validated = settings.validated()
@@ -98,7 +98,7 @@ class KeyboardSettingsTest {
         val settings =
             KeyboardSettings(
                 activeLanguages = listOf("en", "sv"),
-                primaryLanguage = "sv",
+                primaryLanguage = "sv"
             )
 
         val validated = settings.validated()
@@ -149,7 +149,7 @@ class KeyboardSettingsTest {
             KeyboardSettings(
                 spellCheckEnabled = true,
                 showSuggestions = true,
-                suggestionCount = 3,
+                suggestionCount = 3
             )
 
         assertEquals(3, settings.effectiveSuggestionCount)
@@ -161,7 +161,7 @@ class KeyboardSettingsTest {
             KeyboardSettings(
                 spellCheckEnabled = false,
                 showSuggestions = true,
-                suggestionCount = 3,
+                suggestionCount = 3
             )
 
         assertEquals(3, settings.effectiveSuggestionCount)
@@ -173,7 +173,7 @@ class KeyboardSettingsTest {
             KeyboardSettings(
                 spellCheckEnabled = true,
                 showSuggestions = false,
-                suggestionCount = 3,
+                suggestionCount = 3
             )
 
         assertEquals(0, settings.effectiveSuggestionCount)
@@ -185,7 +185,7 @@ class KeyboardSettingsTest {
             KeyboardSettings(
                 spellCheckEnabled = false,
                 showSuggestions = false,
-                suggestionCount = 3,
+                suggestionCount = 3
             )
 
         assertEquals(0, settings.effectiveSuggestionCount)
@@ -196,7 +196,7 @@ class KeyboardSettingsTest {
         val settings =
             KeyboardSettings(
                 hapticFeedback = true,
-                vibrationStrength = 255,
+                vibrationStrength = 255
             )
 
         assertEquals(255, settings.effectiveVibrationAmplitude)
@@ -207,7 +207,7 @@ class KeyboardSettingsTest {
         val settings =
             KeyboardSettings(
                 hapticFeedback = false,
-                vibrationStrength = 255,
+                vibrationStrength = 255
             )
 
         assertEquals(0, settings.effectiveVibrationAmplitude)
@@ -267,7 +267,7 @@ class KeyboardSettingsTest {
         val settings =
             KeyboardSettings(
                 activeLanguages = listOf("ru", "en", "ja"),
-                primaryLanguage = "ru",
+                primaryLanguage = "ru"
             )
 
         val validated = settings.validated()
@@ -289,7 +289,7 @@ class KeyboardSettingsTest {
         val settings =
             KeyboardSettings(
                 activeLanguages = listOf("uk", "en", "ja"),
-                primaryLanguage = "uk",
+                primaryLanguage = "uk"
             )
 
         val validated = settings.validated()
@@ -319,7 +319,7 @@ class KeyboardSettingsTest {
         val settings =
             KeyboardSettings(
                 activeLanguages = listOf("fa", "en", "ja"),
-                primaryLanguage = "fa",
+                primaryLanguage = "fa"
             )
 
         val validated = settings.validated()
@@ -341,7 +341,7 @@ class KeyboardSettingsTest {
         val settings =
             KeyboardSettings(
                 activeLanguages = listOf("it", "en", "ja"),
-                primaryLanguage = "it",
+                primaryLanguage = "it"
             )
 
         val validated = settings.validated()
@@ -363,7 +363,7 @@ class KeyboardSettingsTest {
         val settings =
             KeyboardSettings(
                 activeLanguages = listOf("nl", "en", "ja"),
-                primaryLanguage = "nl",
+                primaryLanguage = "nl"
             )
 
         val validated = settings.validated()
@@ -377,7 +377,7 @@ class KeyboardSettingsTest {
         val settings =
             KeyboardSettings(
                 activeLanguages = listOf("pl", "en", "ja"),
-                primaryLanguage = "pl",
+                primaryLanguage = "pl"
             )
 
         val validated = settings.validated()
@@ -399,7 +399,7 @@ class KeyboardSettingsTest {
         val settings =
             KeyboardSettings(
                 activeLanguages = listOf("fr", "en", "ja"),
-                primaryLanguage = "fr",
+                primaryLanguage = "fr"
             )
 
         val validated = settings.validated()
@@ -421,7 +421,7 @@ class KeyboardSettingsTest {
         val settings =
             KeyboardSettings(
                 activeLanguages = listOf("ar", "en", "ja"),
-                primaryLanguage = "ar",
+                primaryLanguage = "ar"
             )
 
         val validated = settings.validated()
@@ -451,7 +451,7 @@ class KeyboardSettingsTest {
         val settings =
             KeyboardSettings(
                 activeLanguages = emptyList(),
-                primaryLanguage = "",
+                primaryLanguage = ""
             )
 
         val validated = settings.validated()
@@ -466,7 +466,7 @@ class KeyboardSettingsTest {
             KeyboardSettings(
                 activeLanguages = listOf("en", "fr", "ja"),
                 primaryLanguage = "ja",
-                suggestionCount = 10,
+                suggestionCount = 10
             )
 
         val validated1 = settings.validated()
@@ -481,7 +481,7 @@ class KeyboardSettingsTest {
             KeyboardSettings(
                 activeLanguages = listOf("en", "sv", "fr", "ja"),
                 primaryLanguage = "ja",
-                suggestionCount = -1,
+                suggestionCount = -1
             )
 
         val result1 = settings.validated()
@@ -499,7 +499,7 @@ class KeyboardSettingsTest {
             KeyboardSettings(
                 activeLanguages = listOf("en", "fr"),
                 primaryLanguage = "en",
-                favoriteThemes = favorites,
+                favoriteThemes = favorites
             )
 
         val validated = settings.validated()
@@ -519,7 +519,7 @@ class KeyboardSettingsTest {
         val settings =
             KeyboardSettings(
                 activeLanguages = listOf("en", "es", "de", "fr", "it"),
-                primaryLanguage = "en",
+                primaryLanguage = "en"
             )
 
         val validated = settings.validated()
@@ -534,7 +534,7 @@ class KeyboardSettingsTest {
             KeyboardSettings(
                 activeLanguages = listOf("en", "es"),
                 primaryLanguage = "en",
-                primaryLayoutLanguage = "de",
+                primaryLayoutLanguage = "de"
             )
 
         val validated = settings.validated()
@@ -548,7 +548,7 @@ class KeyboardSettingsTest {
         val settings =
             KeyboardSettings(
                 activeLanguages = listOf("es", "en", "de"),
-                primaryLanguage = "es",
+                primaryLanguage = "es"
             )
 
         val validated = settings.validated()
@@ -562,7 +562,7 @@ class KeyboardSettingsTest {
             KeyboardSettings(
                 activeLanguages = listOf("ja", "zh", "ko"),
                 primaryLanguage = "ja",
-                primaryLayoutLanguage = "zh",
+                primaryLayoutLanguage = "zh"
             )
 
         val validated = settings.validated()
@@ -583,7 +583,7 @@ class KeyboardSettingsTest {
     fun `validated should preserve alternativeKeyboardLayout`() {
         val settings =
             KeyboardSettings(
-                alternativeKeyboardLayout = AlternativeKeyboardLayout.DVORAK,
+                alternativeKeyboardLayout = AlternativeKeyboardLayout.DVORAK
             )
 
         val validated = settings.validated()

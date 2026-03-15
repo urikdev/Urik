@@ -14,24 +14,18 @@ interface UserWordFrequencyDao {
         WHERE language_tag = :languageTag
         AND word_normalized = :normalizedWord
         LIMIT 1
-        """,
+        """
     )
-    suspend fun findWord(
-        languageTag: String,
-        normalizedWord: String,
-    ): UserWordFrequency?
+    suspend fun findWord(languageTag: String, normalizedWord: String): UserWordFrequency?
 
     @Query(
         """
         SELECT * FROM user_word_frequency
         WHERE language_tag = :languageTag
         AND word_normalized IN (:normalizedWords)
-        """,
+        """
     )
-    suspend fun findWords(
-        languageTag: String,
-        normalizedWords: List<String>,
-    ): List<UserWordFrequency>
+    suspend fun findWords(languageTag: String, normalizedWords: List<String>): List<UserWordFrequency>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertWord(word: UserWordFrequency): Long
@@ -47,13 +41,9 @@ interface UserWordFrequencyDao {
         DO UPDATE SET
             frequency = frequency + 1,
             last_used = :lastUsed
-        """,
+        """
     )
-    suspend fun incrementFrequency(
-        languageTag: String,
-        wordNormalized: String,
-        lastUsed: Long,
-    )
+    suspend fun incrementFrequency(languageTag: String, wordNormalized: String, lastUsed: Long)
 
     @Query(
         """
@@ -63,14 +53,9 @@ interface UserWordFrequencyDao {
         DO UPDATE SET
             frequency = frequency + :amount,
             last_used = :lastUsed
-        """,
+        """
     )
-    suspend fun incrementFrequencyBy(
-        languageTag: String,
-        wordNormalized: String,
-        amount: Int,
-        lastUsed: Long,
-    )
+    suspend fun incrementFrequencyBy(languageTag: String, wordNormalized: String, amount: Int, lastUsed: Long)
 
     @Query("DELETE FROM user_word_frequency WHERE language_tag = :languageTag")
     suspend fun clearLanguage(languageTag: String): Int
@@ -87,12 +72,9 @@ interface UserWordFrequencyDao {
         WHERE language_tag = :languageTag
         ORDER BY frequency DESC
         LIMIT :limit
-        """,
+        """
     )
-    suspend fun getMostFrequentWords(
-        languageTag: String,
-        limit: Int = 100,
-    ): List<UserWordFrequency>
+    suspend fun getMostFrequentWords(languageTag: String, limit: Int = 100): List<UserWordFrequency>
 
     @Query("DELETE FROM user_word_frequency WHERE frequency = 1 AND last_used < :cutoff")
     suspend fun pruneStaleEntries(cutoff: Long): Int
@@ -104,7 +86,7 @@ interface UserWordFrequencyDao {
             ORDER BY frequency ASC, last_used ASC
             LIMIT MAX(0, (SELECT COUNT(*) FROM user_word_frequency) - :maxRows)
         )
-        """,
+        """
     )
     suspend fun enforceMaxRows(maxRows: Int): Int
 }

@@ -9,11 +9,7 @@ object UrlEmailDetector {
      * @param nextChar Character about to be typed (may be null)
      * @return true if in URL/email context, false otherwise
      */
-    fun isUrlOrEmailContext(
-        currentWord: String,
-        textBeforeCursor: String,
-        nextChar: String? = null,
-    ): Boolean {
+    fun isUrlOrEmailContext(currentWord: String, textBeforeCursor: String, nextChar: String? = null): Boolean {
         if (nextChar == "@") {
             return true
         }
@@ -34,10 +30,10 @@ object UrlEmailDetector {
             return true
         }
 
-        if (currentWord.startsWith("http") || currentWord.startsWith("ftp")) {
-            if (nextChar == ":" || currentWord.contains(":")) {
-                return true
-            }
+        if ((currentWord.startsWith("http") || currentWord.startsWith("ftp")) &&
+            (nextChar == ":" || currentWord.contains(":"))
+        ) {
+            return true
         }
 
         if (currentWord.equals("www", ignoreCase = true) && nextChar == ".") {

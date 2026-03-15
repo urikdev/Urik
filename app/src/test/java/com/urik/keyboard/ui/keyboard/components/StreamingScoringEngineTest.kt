@@ -64,7 +64,7 @@ class StreamingScoringEngineTest {
             'v' to PointF(240f, 210f),
             'b' to PointF(290f, 210f),
             'n' to PointF(340f, 210f),
-            'm' to PointF(390f, 210f),
+            'm' to PointF(390f, 210f)
         )
 
     @Before
@@ -78,7 +78,7 @@ class StreamingScoringEngineTest {
                 wordFrequencyRepository = wordFrequencyRepository,
                 residualScorer = residualScorer,
                 zipfCheck = zipfCheck,
-                wordNormalizer = wordNormalizer,
+                wordNormalizer = wordNormalizer
             )
     }
 
@@ -89,27 +89,25 @@ class StreamingScoringEngineTest {
     }
 
     @Test
-    fun `cancelActiveGesture clears live candidate set`() =
-        runTest {
-            engine.startGesture(qwertyKeyPositions, listOf("en"), "en")
-            engine.cancelActiveGesture()
+    fun `cancelActiveGesture clears live candidate set`() = runTest {
+        engine.startGesture(qwertyKeyPositions, listOf("en"), "en")
+        engine.cancelActiveGesture()
 
-            val results = engine.finalize(emptyList(), 0)
-            assertTrue("Cancelled gesture should produce no results", results.isEmpty())
-        }
+        val results = engine.finalize(emptyList(), 0)
+        assertTrue("Cancelled gesture should produce no results", results.isEmpty())
+    }
 
     @Test
-    fun `startGesture resets state from previous gesture`() =
-        runTest {
-            engine.startGesture(qwertyKeyPositions, listOf("en"), "en")
-            engine.cancelActiveGesture()
+    fun `startGesture resets state from previous gesture`() = runTest {
+        engine.startGesture(qwertyKeyPositions, listOf("en"), "en")
+        engine.cancelActiveGesture()
 
-            engine.startGesture(qwertyKeyPositions, listOf("en"), "en")
-            engine.cancelActiveGesture()
+        engine.startGesture(qwertyKeyPositions, listOf("en"), "en")
+        engine.cancelActiveGesture()
 
-            val results = engine.finalize(emptyList(), 0)
-            assertTrue(results.isEmpty())
-        }
+        val results = engine.finalize(emptyList(), 0)
+        assertTrue(results.isEmpty())
+    }
 
     @Test
     fun `pruneByStartAnchor removes candidates with wrong first letter`() {
@@ -117,7 +115,7 @@ class StreamingScoringEngineTest {
             listOf(
                 makeDictionaryEntry("hello", 'h', 1000),
                 makeDictionaryEntry("world", 'w', 900),
-                makeDictionaryEntry("zebra", 'z', 800),
+                makeDictionaryEntry("zebra", 'z', 800)
             )
 
         val startKeys = setOf('h', 'j')
@@ -132,7 +130,7 @@ class StreamingScoringEngineTest {
         val candidates =
             listOf(
                 makeDictionaryEntry("hello", 'h', 1000),
-                makeDictionaryEntry("zebra", 'z', 800),
+                makeDictionaryEntry("zebra", 'z', 800)
             )
 
         val charsInBounds = setOf('h', 'e', 'l', 'o', 'w', 'r', 't')
@@ -146,7 +144,7 @@ class StreamingScoringEngineTest {
     fun `pruneByBounds applies fingertip safety margin`() {
         val candidates =
             listOf(
-                makeDictionaryEntry("hello", 'h', 1000),
+                makeDictionaryEntry("hello", 'h', 1000)
             )
 
         val charsInBounds = setOf('h', 'e', 'l', 'o')
@@ -155,7 +153,7 @@ class StreamingScoringEngineTest {
         assertEquals(
             "All letters within bounds should survive",
             1,
-            pruned.size,
+            pruned.size
         )
     }
 
@@ -163,7 +161,7 @@ class StreamingScoringEngineTest {
     fun `pruneByBounds allows one out-of-bounds letter as safety margin`() {
         val candidates =
             listOf(
-                makeDictionaryEntry("hello", 'h', 1000),
+                makeDictionaryEntry("hello", 'h', 1000)
             )
 
         val charsInBounds = setOf('h', 'e', 'l')
@@ -172,7 +170,7 @@ class StreamingScoringEngineTest {
         assertEquals(
             "One out-of-bounds letter should be tolerated",
             1,
-            pruned.size,
+            pruned.size
         )
     }
 
@@ -182,7 +180,7 @@ class StreamingScoringEngineTest {
             listOf(
                 makeDictionaryEntry("hello", 'h', 1000),
                 makeDictionaryEntry("world", 'w', 900),
-                makeDictionaryEntry("zebra", 'z', 800),
+                makeDictionaryEntry("zebra", 'z', 800)
             )
 
         val afterStart = engine.pruneByStartAnchor(full, setOf('h', 'w'))
@@ -199,7 +197,7 @@ class StreamingScoringEngineTest {
             listOf(
                 makeDictionaryEntry("hello", 'h', 1000),
                 makeDictionaryEntry("world", 'w', 900),
-                makeDictionaryEntry("help", 'h', 800),
+                makeDictionaryEntry("help", 'h', 800)
             )
 
         val traversedKeys = setOf('h', 'e', 'l', 'o', 'w', 'r')
@@ -216,7 +214,7 @@ class StreamingScoringEngineTest {
         val candidates =
             listOf(
                 makeDictionaryEntry("hello", 'h', 1000),
-                makeDictionaryEntry("pizza", 'p', 500),
+                makeDictionaryEntry("pizza", 'p', 500)
             )
 
         val traversedKeys = setOf('h', 'e', 'l', 'o')
@@ -230,7 +228,7 @@ class StreamingScoringEngineTest {
     fun `bounds pruning tolerates one out-of-bounds char for long words`() {
         val candidates =
             listOf(
-                makeDictionaryEntry("together", 't', 5000),
+                makeDictionaryEntry("together", 't', 5000)
             )
 
         val charsInBounds = setOf('t', 'o', 'g', 'e', 'h', 'r')
@@ -239,7 +237,7 @@ class StreamingScoringEngineTest {
         assertEquals(
             "together should survive with 1 out-of-bounds char",
             1,
-            pruned.size,
+            pruned.size
         )
     }
 
@@ -247,7 +245,7 @@ class StreamingScoringEngineTest {
     fun `bounds pruning rejects word with 2 plus out-of-bounds chars`() {
         val candidates =
             listOf(
-                makeDictionaryEntry("together", 't', 5000),
+                makeDictionaryEntry("together", 't', 5000)
             )
 
         val charsInBounds = setOf('t', 'o', 'g')
@@ -256,7 +254,7 @@ class StreamingScoringEngineTest {
         assertEquals(
             "together should be rejected with many out-of-bounds chars",
             0,
-            pruned.size,
+            pruned.size
         )
     }
 
@@ -266,7 +264,7 @@ class StreamingScoringEngineTest {
             listOf(
                 makeDictionaryEntry("another", 'a', 2000),
                 makeDictionaryEntry("seven", 's', 1500),
-                makeDictionaryEntry("together", 't', 1000),
+                makeDictionaryEntry("together", 't', 1000)
             )
 
         val startKeys = setOf('a', 's')
@@ -289,14 +287,14 @@ class StreamingScoringEngineTest {
                 makeDictionaryEntry("together", 't', 8_000_000),
                 makeDictionaryEntry("another", 'a', 5_000_000),
                 makeDictionaryEntry("proctor", 'p', 100),
-                makeDictionaryEntry("zebra", 'z', 50),
+                makeDictionaryEntry("zebra", 'z', 50)
             )
 
         val startKeys = setOf('h', 'p', 't', 'w', 'a')
         val afterAnchor = engine.pruneByStartAnchor(commonWords, startKeys)
         assertTrue(
             "Anchor prune should keep most common words",
-            afterAnchor.size >= 6,
+            afterAnchor.size >= 6
         )
 
         val charsInBounds = setOf('h', 'e', 'l', 'o', 'p', 'i', 'c', 't', 'u', 'r')
@@ -305,11 +303,11 @@ class StreamingScoringEngineTest {
 
         assertTrue(
             "hello should survive full cascade",
-            "hello" in survivingWords,
+            "hello" in survivingWords
         )
         assertTrue(
             "picture should survive full cascade",
-            "picture" in survivingWords,
+            "picture" in survivingWords
         )
     }
 
@@ -318,7 +316,7 @@ class StreamingScoringEngineTest {
         val candidates =
             listOf(
                 makeDictionaryEntry("hello", 'h', 1000),
-                makeDictionaryEntry("world", 'w', 900),
+                makeDictionaryEntry("world", 'w', 900)
             )
 
         val sparseKeys = setOf('h')
@@ -327,20 +325,16 @@ class StreamingScoringEngineTest {
         assertEquals(
             "Sparse traversed keys (size < 2) should skip pruning entirely",
             2,
-            pruned.size,
+            pruned.size
         )
     }
 
-    private fun makeDictionaryEntry(
-        word: String,
-        firstChar: Char,
-        frequency: Long,
-    ): SwipeDetector.DictionaryEntry =
+    private fun makeDictionaryEntry(word: String, firstChar: Char, frequency: Long): SwipeDetector.DictionaryEntry =
         SwipeDetector.DictionaryEntry(
             word = word,
             frequencyScore = 0.5f,
             rawFrequency = frequency,
             firstChar = firstChar,
-            uniqueLetterCount = word.toSet().size,
+            uniqueLetterCount = word.toSet().size
         )
 }

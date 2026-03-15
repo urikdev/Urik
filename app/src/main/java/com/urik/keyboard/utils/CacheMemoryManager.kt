@@ -5,14 +5,14 @@ import android.content.ComponentCallbacks2
 import android.content.Context
 import android.content.res.Configuration
 import com.urik.keyboard.KeyboardConstants.MemoryConstants
+import java.util.concurrent.ConcurrentHashMap
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.util.concurrent.ConcurrentHashMap
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * Subscriber interface for components holding non-cache memory
@@ -30,210 +30,208 @@ interface MemoryPressureSubscriber {
 @Suppress("DEPRECATION")
 @Singleton
 class CacheMemoryManager
-    @Inject
-    constructor(
-        private val context: Context,
-    ) : ComponentCallbacks2 {
-        private companion object {
-            const val CRITICAL_MEMORY_THRESHOLD_MB = 20L
-            const val MEMORY_CHECK_INTERVAL_MS = 30000L
-            const val MEMORY_CHECK_ERROR_DELAY_MS = 60000L
-            const val CRITICAL_TRIM_RATIO = 0.25
-            const val MODERATE_CRITICAL_TRIM_RATIO = 0.7
-            const val MODERATE_NON_CRITICAL_TRIM_RATIO = 0.5
-            const val LOW_MEMORY_NON_CRITICAL_TRIM_RATIO = 0.8
-            const val UI_HIDDEN_TRIM_RATIO = 0.9
-            const val DEFAULT_CACHE_MAX_SIZE = 100
-        }
+@Inject
+constructor(private val context: Context) : ComponentCallbacks2 {
+    private val managedCaches = ConcurrentHashMap<String, ManagedCache<*, *>>()
+    private val pressureSubscribers = ConcurrentHashMap.newKeySet<MemoryPressureSubscriber>()
+    private val memoryMonitoringScope = CoroutineScope(Dispatchers.Default)
+    private var memoryMonitoringJob: Job? = null
 
-        private val managedCaches = ConcurrentHashMap<String, ManagedCache<*, *>>()
-        private val pressureSubscribers = ConcurrentHashMap.newKeySet<MemoryPressureSubscriber>()
-        private val memoryMonitoringScope = CoroutineScope(Dispatchers.Default)
-        private var memoryMonitoringJob: Job? = null
+    private val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+    private val memoryInfo = ActivityManager.MemoryInfo()
+    private val lowMemoryThresholdMb = MemoryConstants.LOW_MEMORY_THRESHOLD_MB
+    private val criticalMemoryThresholdMb = CRITICAL_MEMORY_THRESHOLD_MB
 
-        private val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
-        private val memoryInfo = ActivityManager.MemoryInfo()
-        private val lowMemoryThresholdMb = MemoryConstants.LOW_MEMORY_THRESHOLD_MB
-        private val criticalMemoryThresholdMb = CRITICAL_MEMORY_THRESHOLD_MB
+    private val defaultMaxSize = DEFAULT_CACHE_MAX_SIZE
 
-        private val defaultMaxSize = DEFAULT_CACHE_MAX_SIZE
+    init {
+        context.registerComponentCallbacks(this)
+        startMemoryMonitoring()
+    }
 
-        init {
-            context.registerComponentCallbacks(this)
-            startMemoryMonitoring()
-        }
+    /**
+     * Critical caches preserved during memory pressure.
+     *
+     * These caches contain user data or core functionality that should survive
+     * moderate memory pressure:
+     * - dictionary_cache: Spell check lookups
+     * - spell_suggestions: Suggestion generation
+     * - learned_words: User's learned vocabulary
+     * - suggestion_cache: Historical suggestions
+     * - generation_cache: Layout generation state
+     */
+    private val criticalCacheNames =
+        setOf(
+            "dictionary_cache",
+            "generation_cache",
+            "suggestion_cache",
+            "learned_words",
+            "learned_words_cache",
+            "spell_suggestions"
+        )
 
-        /**
-         * Creates managed LRU cache with automatic memory pressure handling.
-         *
-         * Created cache is automatically registered for memory trimming based on
-         * [criticalCacheNames] classification.
-         *
-         * @param name Unique cache identifier for memory pressure classification
-         * @param maxSize Maximum entries before LRU eviction (must be > 0)
-         * @param onEvict Optional callback invoked when entry evicted (for cleanup)
-         * @return Thread-safe LRU cache with hit/miss tracking
-         * @throws IllegalArgumentException if maxSize <= 0
-         */
-        fun <K : Any, V : Any> createCache(
-            name: String,
-            maxSize: Int = defaultMaxSize,
-            onEvict: ((K, V) -> Unit)? = null,
-        ): ManagedCache<K, V> {
-            require(maxSize > 0) { "Cache maxSize must be positive, got: $maxSize" }
-            val cache = ManagedCache(name, maxSize, onEvict)
-            managedCaches[name] = cache
-            return cache
-        }
+    /**
+     * Creates managed LRU cache with automatic memory pressure handling.
+     *
+     * Created cache is automatically registered for memory trimming based on
+     * [criticalCacheNames] classification.
+     *
+     * @param name Unique cache identifier for memory pressure classification
+     * @param maxSize Maximum entries before LRU eviction (must be > 0)
+     * @param onEvict Optional callback invoked when entry evicted (for cleanup)
+     * @return Thread-safe LRU cache with hit/miss tracking
+     * @throws IllegalArgumentException if maxSize <= 0
+     */
+    fun <K : Any, V : Any> createCache(
+        name: String,
+        maxSize: Int = defaultMaxSize,
+        onEvict: ((K, V) -> Unit)? = null
+    ): ManagedCache<K, V> {
+        require(maxSize > 0) { "Cache maxSize must be positive, got: $maxSize" }
+        val cache = ManagedCache(name, maxSize, onEvict)
+        managedCaches[name] = cache
+        return cache
+    }
 
-        /**
-         * Registers a subscriber for memory pressure callbacks.
-         *
-         * Subscribers receive the same trim level as [onTrimMemory] after
-         * managed caches have been trimmed.
-         */
-        fun registerPressureSubscriber(subscriber: MemoryPressureSubscriber) {
-            pressureSubscribers.add(subscriber)
-        }
+    /**
+     * Registers a subscriber for memory pressure callbacks.
+     *
+     * Subscribers receive the same trim level as [onTrimMemory] after
+     * managed caches have been trimmed.
+     */
+    fun registerPressureSubscriber(subscriber: MemoryPressureSubscriber) {
+        pressureSubscribers.add(subscriber)
+    }
 
-        private fun startMemoryMonitoring() {
-            memoryMonitoringJob?.cancel()
-            memoryMonitoringJob =
-                memoryMonitoringScope.launch {
-                    while (true) {
-                        try {
-                            checkMemoryPressure()
-                            delay(MEMORY_CHECK_INTERVAL_MS)
-                        } catch (e: Exception) {
-                            delay(MEMORY_CHECK_ERROR_DELAY_MS)
-                        }
-                    }
-                }
-        }
-
-        private fun checkMemoryPressure() {
-            activityManager.getMemoryInfo(memoryInfo)
-            val availableMemoryMb = memoryInfo.availMem / (1024 * 1024)
-
-            when {
-                availableMemoryMb < criticalMemoryThresholdMb -> {
-                    onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL)
-                }
-
-                availableMemoryMb < lowMemoryThresholdMb -> {
-                    onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_RUNNING_MODERATE)
-                }
-            }
-        }
-
-        /**
-         * Critical caches preserved during memory pressure.
-         *
-         * These caches contain user data or core functionality that should survive
-         * moderate memory pressure:
-         * - dictionary_cache: Spell check lookups
-         * - spell_suggestions: Suggestion generation
-         * - learned_words: User's learned vocabulary
-         * - suggestion_cache: Historical suggestions
-         * - generation_cache: Layout generation state
-         */
-        private val criticalCacheNames =
-            setOf(
-                "dictionary_cache",
-                "generation_cache",
-                "suggestion_cache",
-                "learned_words",
-                "learned_words_cache",
-                "spell_suggestions",
-            )
-
-        @Suppress("DEPRECATION")
-        override fun onTrimMemory(level: Int) {
-            when (level) {
-                ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL,
-                ComponentCallbacks2.TRIM_MEMORY_COMPLETE,
-                -> {
-                    managedCaches.values.forEach { cache ->
-                        cache.trimToSize((cache.maxSize * CRITICAL_TRIM_RATIO).toInt())
-                    }
-                }
-
-                ComponentCallbacks2.TRIM_MEMORY_RUNNING_MODERATE,
-                ComponentCallbacks2.TRIM_MEMORY_MODERATE,
-                -> {
-                    managedCaches.forEach { (name, cache) ->
-                        if (name in criticalCacheNames) {
-                            cache.trimToSize((cache.maxSize * MODERATE_CRITICAL_TRIM_RATIO).toInt())
-                        } else {
-                            cache.trimToSize((cache.maxSize * MODERATE_NON_CRITICAL_TRIM_RATIO).toInt())
-                        }
-                    }
-                }
-
-                ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW,
-                ComponentCallbacks2.TRIM_MEMORY_BACKGROUND,
-                -> {
-                    managedCaches.forEach { (name, cache) ->
-                        if (name !in criticalCacheNames) {
-                            cache.trimToSize((cache.maxSize * LOW_MEMORY_NON_CRITICAL_TRIM_RATIO).toInt())
-                        }
-                    }
-                }
-
-                ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN -> {
-                    managedCaches.forEach { (name, cache) ->
-                        if (name !in criticalCacheNames &&
-                            cache.size() > cache.maxSize * MODERATE_NON_CRITICAL_TRIM_RATIO
-                        ) {
-                            cache.trimToSize((cache.maxSize * UI_HIDDEN_TRIM_RATIO).toInt())
-                        }
+    private fun startMemoryMonitoring() {
+        memoryMonitoringJob?.cancel()
+        memoryMonitoringJob =
+            memoryMonitoringScope.launch {
+                while (true) {
+                    try {
+                        checkMemoryPressure()
+                        delay(MEMORY_CHECK_INTERVAL_MS)
+                    } catch (_: Exception) {
+                        delay(MEMORY_CHECK_ERROR_DELAY_MS)
                     }
                 }
             }
+    }
 
-            notifyPressureSubscribers(level)
-        }
+    private fun checkMemoryPressure() {
+        activityManager.getMemoryInfo(memoryInfo)
+        val availableMemoryMb = memoryInfo.availMem / (1024 * 1024)
 
-        private fun notifyPressureSubscribers(level: Int) {
-            pressureSubscribers.forEach { subscriber ->
-                try {
-                    subscriber.onMemoryPressure(level)
-                } catch (_: Exception) {
-                }
+        when {
+            availableMemoryMb < criticalMemoryThresholdMb -> {
+                onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL)
             }
-        }
 
-        override fun onConfigurationChanged(newConfig: Configuration) {
-        }
-
-        @Deprecated("Use onTrimMemory instead")
-        override fun onLowMemory() {
-            onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL)
-        }
-
-        /**
-         * Immediately clears all managed caches.
-         *
-         * Used by SettingsRepository for "Clear All Data" privacy operation.
-         * Triggers onEvict callbacks for all entries.
-         */
-        fun forceCleanup() {
-            managedCaches.values.forEach { it.invalidateAll() }
-        }
-
-        /**
-         * Cleans up resources and unregisters callbacks.
-         *
-         * Call when keyboard service destroyed.
-         */
-        fun cleanup() {
-            memoryMonitoringJob?.cancel()
-            context.unregisterComponentCallbacks(this)
-            managedCaches.values.forEach { it.invalidateAll() }
-            managedCaches.clear()
-            pressureSubscribers.clear()
+            availableMemoryMb < lowMemoryThresholdMb -> {
+                onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_RUNNING_MODERATE)
+            }
         }
     }
+
+    @Suppress("DEPRECATION")
+    override fun onTrimMemory(level: Int) {
+        when (level) {
+            ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL,
+            ComponentCallbacks2.TRIM_MEMORY_COMPLETE
+            -> {
+                managedCaches.values.forEach { cache ->
+                    cache.trimToSize((cache.maxSize * CRITICAL_TRIM_RATIO).toInt())
+                }
+            }
+
+            ComponentCallbacks2.TRIM_MEMORY_RUNNING_MODERATE,
+            ComponentCallbacks2.TRIM_MEMORY_MODERATE
+            -> {
+                managedCaches.forEach { (name, cache) ->
+                    if (name in criticalCacheNames) {
+                        cache.trimToSize((cache.maxSize * MODERATE_CRITICAL_TRIM_RATIO).toInt())
+                    } else {
+                        cache.trimToSize((cache.maxSize * MODERATE_NON_CRITICAL_TRIM_RATIO).toInt())
+                    }
+                }
+            }
+
+            ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW,
+            ComponentCallbacks2.TRIM_MEMORY_BACKGROUND
+            -> {
+                managedCaches.forEach { (name, cache) ->
+                    if (name !in criticalCacheNames) {
+                        cache.trimToSize((cache.maxSize * LOW_MEMORY_NON_CRITICAL_TRIM_RATIO).toInt())
+                    }
+                }
+            }
+
+            ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN -> {
+                managedCaches.forEach { (name, cache) ->
+                    if (name !in criticalCacheNames &&
+                        cache.size() > cache.maxSize * MODERATE_NON_CRITICAL_TRIM_RATIO
+                    ) {
+                        cache.trimToSize((cache.maxSize * UI_HIDDEN_TRIM_RATIO).toInt())
+                    }
+                }
+            }
+        }
+
+        notifyPressureSubscribers(level)
+    }
+
+    private fun notifyPressureSubscribers(level: Int) {
+        pressureSubscribers.forEach { subscriber ->
+            try {
+                subscriber.onMemoryPressure(level)
+            } catch (_: Exception) {
+            }
+        }
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+    }
+
+    @Deprecated("Use onTrimMemory instead")
+    override fun onLowMemory() {
+        onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL)
+    }
+
+    /**
+     * Immediately clears all managed caches.
+     *
+     * Used by SettingsRepository for "Clear All Data" privacy operation.
+     * Triggers onEvict callbacks for all entries.
+     */
+    fun forceCleanup() {
+        managedCaches.values.forEach { it.invalidateAll() }
+    }
+
+    /**
+     * Cleans up resources and unregisters callbacks.
+     *
+     * Call when keyboard service destroyed.
+     */
+    fun cleanup() {
+        memoryMonitoringJob?.cancel()
+        context.unregisterComponentCallbacks(this)
+        managedCaches.values.forEach { it.invalidateAll() }
+        managedCaches.clear()
+        pressureSubscribers.clear()
+    }
+
+    private companion object {
+        const val CRITICAL_MEMORY_THRESHOLD_MB = 20L
+        const val MEMORY_CHECK_INTERVAL_MS = 30000L
+        const val MEMORY_CHECK_ERROR_DELAY_MS = 60000L
+        const val CRITICAL_TRIM_RATIO = 0.25
+        const val MODERATE_CRITICAL_TRIM_RATIO = 0.7
+        const val MODERATE_NON_CRITICAL_TRIM_RATIO = 0.5
+        const val LOW_MEMORY_NON_CRITICAL_TRIM_RATIO = 0.8
+        const val UI_HIDDEN_TRIM_RATIO = 0.9
+        const val DEFAULT_CACHE_MAX_SIZE = 100
+    }
+}
 
 /**
  * Thread-safe LRU cache with hit/miss tracking and eviction callbacks.
@@ -244,11 +242,7 @@ class CacheMemoryManager
  * @param maxSize Maximum entries before LRU eviction
  * @param onEvict Optional callback for cleanup when entry removed
  */
-class ManagedCache<K : Any, V : Any>(
-    val name: String,
-    val maxSize: Int,
-    private val onEvict: ((K, V) -> Unit)?,
-) {
+class ManagedCache<K : Any, V : Any>(val name: String, val maxSize: Int, private val onEvict: ((K, V) -> Unit)?) {
     private val cache =
         object : LinkedHashMap<K, V>(maxSize + 1, 0.75f, true) {
             override fun removeEldestEntry(eldest: MutableMap.MutableEntry<K, V>?): Boolean {
@@ -297,10 +291,7 @@ class ManagedCache<K : Any, V : Any>(
      * @return Previous value if key existed, null otherwise
      */
     @Synchronized
-    fun put(
-        key: K,
-        value: V,
-    ): V? = cache.put(key, value)
+    fun put(key: K, value: V): V? = cache.put(key, value)
 
     /**
      * Removes entry from cache.
@@ -358,7 +349,7 @@ class ManagedCache<K : Any, V : Any>(
     @Synchronized
     fun hitRate(): Int {
         val total = hits + misses
-        return if (total > 0) ((hits * 100) / total).toInt() else 0
+        return if (total > 0) (hits * 100 / total).toInt() else 0
     }
 
     /**

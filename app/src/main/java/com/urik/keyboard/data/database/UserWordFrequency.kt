@@ -11,13 +11,13 @@ import androidx.room.PrimaryKey
         Index(
             value = ["language_tag", "word_normalized"],
             name = "idx_user_freq_lookup",
-            unique = true,
+            unique = true
         ),
         Index(
             value = ["language_tag", "frequency"],
-            name = "idx_user_freq_ranking",
-        ),
-    ],
+            name = "idx_user_freq_ranking"
+        )
+    ]
 )
 data class UserWordFrequency(
     @PrimaryKey(autoGenerate = true)
@@ -29,5 +29,5 @@ data class UserWordFrequency(
     @ColumnInfo(name = "frequency")
     val frequency: Int = 1,
     @ColumnInfo(name = "last_used")
-    val lastUsed: Long = System.currentTimeMillis(),
+    val lastUsed: Long = System.currentTimeMillis()
 )

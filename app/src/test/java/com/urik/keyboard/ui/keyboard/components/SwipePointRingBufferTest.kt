@@ -63,7 +63,7 @@ class SwipePointRingBufferTest {
         for (i in 1 until snapshot.size) {
             assertTrue(
                 "Points must be chronological",
-                snapshot[i].timestamp > snapshot[i - 1].timestamp,
+                snapshot[i].timestamp > snapshot[i - 1].timestamp
             )
         }
     }
@@ -127,8 +127,8 @@ class SwipePointRingBufferTest {
                 i.toFloat(),
                 (i * 2).toFloat(),
                 (i * 10).toLong(),
-                0.5f + (i % 10) * 0.05f,
-                i.toFloat() * 0.1f,
+                0.5f + i % 10 * 0.05f,
+                i.toFloat() * 0.1f
             )
         }
 
@@ -154,7 +154,7 @@ class SwipePointRingBufferTest {
         for (i in 1 until snapshot.size) {
             assertTrue(
                 "Points must be chronological after multiple wraps",
-                snapshot[i].x > snapshot[i - 1].x,
+                snapshot[i].x > snapshot[i - 1].x
             )
         }
 

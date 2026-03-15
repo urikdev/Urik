@@ -19,12 +19,7 @@ class AutofillStateTracker {
     private var lastFieldIdentityHash: Int = 0
     private var clearJob: Job? = null
 
-    fun onFieldChanged(
-        inputType: Int,
-        imeOptions: Int,
-        fieldId: Int,
-        packageHash: Int,
-    ): Boolean {
+    fun onFieldChanged(inputType: Int, imeOptions: Int, fieldId: Int, packageHash: Int): Boolean {
         var identityHash = inputType
         identityHash = 31 * identityHash + imeOptions
         identityHash = 31 * identityHash + fieldId
@@ -53,10 +48,7 @@ class AutofillStateTracker {
 
     fun isDismissed(): Boolean = userDismissed
 
-    fun scheduleClear(
-        scope: CoroutineScope,
-        block: suspend () -> Unit,
-    ) {
+    fun scheduleClear(scope: CoroutineScope, block: suspend () -> Unit) {
         clearJob?.cancel()
         clearJob =
             scope.launch {

@@ -25,6 +25,6 @@ data object Lavender : KeyboardTheme {
             focusIndicator = "#e8d4ff".toColorInt(),
             swipePrimary = "#d4b5ff".toColorInt(),
             swipeSecondary = "#e8d4ff".toColorInt(),
-            swipeCurrent = "#5c4f6b".toColorInt(),
+            swipeCurrent = "#5c4f6b".toColorInt()
         )
 }

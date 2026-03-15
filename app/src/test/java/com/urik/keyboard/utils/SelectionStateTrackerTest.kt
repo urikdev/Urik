@@ -21,7 +21,7 @@ class SelectionStateTrackerTest {
                 newSelStart = 10,
                 newSelEnd = 10,
                 candidatesStart = -1,
-                candidatesEnd = -1,
+                candidatesEnd = -1
             )
 
         assertEquals(SelectionChangeResult.Initial, result)
@@ -36,7 +36,7 @@ class SelectionStateTrackerTest {
                 newSelStart = 11,
                 newSelEnd = 11,
                 candidatesStart = -1,
-                candidatesEnd = -1,
+                candidatesEnd = -1
             )
 
         assertEquals(SelectionChangeResult.Sequential, result)
@@ -51,7 +51,7 @@ class SelectionStateTrackerTest {
                 newSelStart = 100,
                 newSelEnd = 100,
                 candidatesStart = -1,
-                candidatesEnd = -1,
+                candidatesEnd = -1
             )
 
         assertTrue(result is SelectionChangeResult.NonSequentialJump)
@@ -70,7 +70,7 @@ class SelectionStateTrackerTest {
                 newSelStart = 5,
                 newSelEnd = 5,
                 candidatesStart = 10,
-                candidatesEnd = 20,
+                candidatesEnd = 20
             )
 
         assertTrue(result is SelectionChangeResult.CursorLeftComposingRegion)
@@ -85,7 +85,7 @@ class SelectionStateTrackerTest {
                 newSelStart = 15,
                 newSelEnd = 15,
                 candidatesStart = -1,
-                candidatesEnd = -1,
+                candidatesEnd = -1
             )
 
         assertEquals(SelectionChangeResult.ComposingRegionLost, result)
@@ -100,7 +100,7 @@ class SelectionStateTrackerTest {
                 newSelStart = 10,
                 newSelEnd = 20,
                 candidatesStart = -1,
-                candidatesEnd = -1,
+                candidatesEnd = -1
             )
 
         assertTrue(result is SelectionChangeResult.AppSelectionExtended)
@@ -118,7 +118,7 @@ class SelectionStateTrackerTest {
                 newSelStart = 5,
                 newSelEnd = 10,
                 candidatesStart = -1,
-                candidatesEnd = -1,
+                candidatesEnd = -1
             )
 
         assertEquals(SelectionChangeResult.SelectionChanged, result)
@@ -181,7 +181,7 @@ class SelectionStateTrackerTest {
                 newSelStart = 50,
                 newSelEnd = 50,
                 candidatesStart = -1,
-                candidatesEnd = -1,
+                candidatesEnd = -1
             )
 
         assertEquals(SelectionChangeResult.ComposingRegionLost, result)
@@ -258,7 +258,7 @@ class SelectionStateTrackerTest {
                 newSelStart = 18,
                 newSelEnd = 18,
                 candidatesStart = 10,
-                candidatesEnd = 20,
+                candidatesEnd = 20
             )
 
         assertEquals(SelectionChangeResult.Sequential, result)
@@ -282,7 +282,7 @@ class SelectionStateTrackerTest {
                 newSelStart = 1,
                 newSelEnd = 7,
                 candidatesStart = -1,
-                candidatesEnd = -1,
+                candidatesEnd = -1
             )
 
         assertTrue(result is SelectionChangeResult.AppSelectionExtended)
@@ -300,7 +300,7 @@ class SelectionStateTrackerTest {
                 newSelStart = 5,
                 newSelEnd = 12,
                 candidatesStart = 5,
-                candidatesEnd = 12,
+                candidatesEnd = 12
             )
 
         assertEquals(SelectionChangeResult.SelectionChanged, result)
@@ -315,7 +315,7 @@ class SelectionStateTrackerTest {
                 newSelStart = 3,
                 newSelEnd = 10,
                 candidatesStart = -1,
-                candidatesEnd = -1,
+                candidatesEnd = -1
             )
 
         assertEquals(SelectionChangeResult.SelectionChanged, result)
@@ -331,7 +331,7 @@ class SelectionStateTrackerTest {
                 newSelStart = 1,
                 newSelEnd = 7,
                 candidatesStart = -1,
-                candidatesEnd = -1,
+                candidatesEnd = -1
             )
         assertTrue(first is SelectionChangeResult.AppSelectionExtended)
 
@@ -342,7 +342,7 @@ class SelectionStateTrackerTest {
                 newSelStart = 2,
                 newSelEnd = 7,
                 candidatesStart = -1,
-                candidatesEnd = -1,
+                candidatesEnd = -1
             )
         assertTrue(second is SelectionChangeResult.AppSelectionExtended)
     }

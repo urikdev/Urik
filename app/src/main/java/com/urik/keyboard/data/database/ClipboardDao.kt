@@ -17,7 +17,9 @@ import com.urik.keyboard.KeyboardConstants
 @Dao
 interface ClipboardDao {
     @Query("SELECT * FROM clipboard_items WHERE is_pinned = 0 ORDER BY timestamp DESC LIMIT :limit")
-    suspend fun getRecentItems(limit: Int = KeyboardConstants.DatabaseConstants.MAX_CLIPBOARD_ITEMS): List<ClipboardItem>
+    suspend fun getRecentItems(
+        limit: Int = KeyboardConstants.DatabaseConstants.MAX_CLIPBOARD_ITEMS
+    ): List<ClipboardItem>
 
     @Query("SELECT * FROM clipboard_items WHERE is_pinned = 1 ORDER BY timestamp DESC")
     suspend fun getPinnedItems(): List<ClipboardItem>
@@ -26,10 +28,7 @@ interface ClipboardDao {
     suspend fun insert(item: ClipboardItem): Long
 
     @Query("UPDATE clipboard_items SET is_pinned = :pinned WHERE id = :id")
-    suspend fun updatePinned(
-        id: Long,
-        pinned: Boolean,
-    )
+    suspend fun updatePinned(id: Long, pinned: Boolean)
 
     @Query("DELETE FROM clipboard_items WHERE id = :id")
     suspend fun delete(id: Long)
@@ -58,7 +57,7 @@ interface ClipboardDao {
             ORDER BY timestamp DESC
             LIMIT -1 OFFSET :maxItems
         )
-    """,
+    """
     )
     suspend fun enforceMaxItems(maxItems: Int = KeyboardConstants.DatabaseConstants.MAX_CLIPBOARD_ITEMS)
 }

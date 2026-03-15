@@ -11,13 +11,12 @@ sealed class HapticSignature {
         timings: LongArray,
         amplitudes: IntArray,
         totalDurationMs: Long,
-        baseAmplitude: Int,
-    ): VibrationEffect =
-        if (baseAmplitude == VibrationEffect.DEFAULT_AMPLITUDE) {
-            VibrationEffect.createOneShot(totalDurationMs, VibrationEffect.DEFAULT_AMPLITUDE)
-        } else {
-            VibrationEffect.createWaveform(timings, amplitudes, -1)
-        }
+        baseAmplitude: Int
+    ): VibrationEffect = if (baseAmplitude == VibrationEffect.DEFAULT_AMPLITUDE) {
+        VibrationEffect.createOneShot(totalDurationMs, VibrationEffect.DEFAULT_AMPLITUDE)
+    } else {
+        VibrationEffect.createWaveform(timings, amplitudes, -1)
+    }
 
     data object LetterClick : HapticSignature() {
         override val durationMs = 25L
@@ -28,7 +27,7 @@ sealed class HapticSignature {
                 longArrayOf(0, 25),
                 intArrayOf(0, amplitude),
                 durationMs,
-                baseAmplitude,
+                baseAmplitude
             )
         }
     }
@@ -43,7 +42,7 @@ sealed class HapticSignature {
                 longArrayOf(0, 15, 20),
                 intArrayOf(0, startAmplitude, peakAmplitude),
                 durationMs,
-                baseAmplitude,
+                baseAmplitude
             )
         }
     }
@@ -58,7 +57,7 @@ sealed class HapticSignature {
                 longArrayOf(0, 14, 14),
                 intArrayOf(0, startAmplitude, endAmplitude),
                 durationMs,
-                baseAmplitude,
+                baseAmplitude
             )
         }
     }
@@ -72,7 +71,7 @@ sealed class HapticSignature {
                 longArrayOf(0, 15, 12, 15),
                 intArrayOf(0, amplitude, 0, amplitude),
                 durationMs,
-                baseAmplitude,
+                baseAmplitude
             )
         }
     }
@@ -87,7 +86,7 @@ sealed class HapticSignature {
                 longArrayOf(0, 12, 25, 14),
                 intArrayOf(0, midAmplitude, peakAmplitude, midAmplitude),
                 durationMs,
-                baseAmplitude,
+                baseAmplitude
             )
         }
     }
@@ -101,7 +100,7 @@ sealed class HapticSignature {
                 longArrayOf(0, 18),
                 intArrayOf(0, amplitude),
                 durationMs,
-                baseAmplitude,
+                baseAmplitude
             )
         }
     }

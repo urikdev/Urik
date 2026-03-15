@@ -25,6 +25,6 @@ data object Default : KeyboardTheme {
             focusIndicator = "#fcdebe".toColorInt(),
             swipePrimary = "#d4d2a5".toColorInt(),
             swipeSecondary = "#fcdebe".toColorInt(),
-            swipeCurrent = "#928779".toColorInt(),
+            swipeCurrent = "#928779".toColorInt()
         )
 }

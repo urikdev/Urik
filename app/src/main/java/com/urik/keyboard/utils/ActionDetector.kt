@@ -32,7 +32,7 @@ object ActionDetector {
 
         val options = info.imeOptions
         val action = options and EditorInfo.IME_MASK_ACTION
-        if ((options and EditorInfo.IME_FLAG_NO_ENTER_ACTION) != 0) {
+        if (options and EditorInfo.IME_FLAG_NO_ENTER_ACTION != 0) {
             return KeyboardKey.ActionType.ENTER
         }
 

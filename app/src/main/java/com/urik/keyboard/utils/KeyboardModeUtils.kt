@@ -17,15 +17,10 @@ object KeyboardModeUtils {
         return inputClass == InputType.TYPE_CLASS_TEXT
     }
 
-    fun shouldResetToLettersOnEnter(
-        currentMode: KeyboardMode,
-        editorInfo: EditorInfo?,
-    ): Boolean = currentMode != KeyboardMode.LETTERS && isTextClassInput(editorInfo)
+    fun shouldResetToLettersOnEnter(currentMode: KeyboardMode, editorInfo: EditorInfo?): Boolean =
+        currentMode != KeyboardMode.LETTERS && isTextClassInput(editorInfo)
 
-    fun determineTargetMode(
-        editorInfo: EditorInfo?,
-        currentMode: KeyboardMode,
-    ): KeyboardMode {
+    fun determineTargetMode(editorInfo: EditorInfo?, currentMode: KeyboardMode): KeyboardMode {
         val isNumberInput = isNumberInputType(editorInfo)
 
         return when {

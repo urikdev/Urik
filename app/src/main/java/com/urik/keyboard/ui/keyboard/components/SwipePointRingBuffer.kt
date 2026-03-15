@@ -17,14 +17,13 @@ class SwipePointRingBuffer {
             velocity = 0f
         }
 
-        fun toSwipePoint(): SwipeDetector.SwipePoint =
-            SwipeDetector.SwipePoint(
-                x = x,
-                y = y,
-                timestamp = timestamp,
-                pressure = pressure,
-                velocity = velocity,
-            )
+        fun toSwipePoint(): SwipeDetector.SwipePoint = SwipeDetector.SwipePoint(
+            x = x,
+            y = y,
+            timestamp = timestamp,
+            pressure = pressure,
+            velocity = velocity
+        )
     }
 
     private val slots = Array(CAPACITY) { Slot() }
@@ -33,13 +32,7 @@ class SwipePointRingBuffer {
 
     val size: Int get() = count
 
-    fun write(
-        x: Float,
-        y: Float,
-        timestamp: Long,
-        pressure: Float,
-        velocity: Float,
-    ) {
+    fun write(x: Float, y: Float, timestamp: Long, pressure: Float, velocity: Float) {
         val slot = slots[head]
         slot.x = x
         slot.y = y
@@ -47,13 +40,13 @@ class SwipePointRingBuffer {
         slot.pressure = pressure
         slot.velocity = velocity
 
-        head = (head + 1) and MASK
+        head = head + 1 and MASK
         if (count < CAPACITY) count++
     }
 
     fun peekLast(): SwipeDetector.SwipePoint? {
         if (count == 0) return null
-        val index = (head - 1 + CAPACITY) and MASK
+        val index = head - 1 + CAPACITY and MASK
         return slots[index].toSwipePoint()
     }
 
@@ -61,9 +54,9 @@ class SwipePointRingBuffer {
         if (count == 0) return emptyList()
 
         val result = ArrayList<SwipeDetector.SwipePoint>(count)
-        val tail = (head - count + CAPACITY) and MASK
+        val tail = head - count + CAPACITY and MASK
         for (i in 0 until count) {
-            val index = (tail + i) and MASK
+            val index = tail + i and MASK
             result.add(slots[index].toSwipePoint())
         }
 

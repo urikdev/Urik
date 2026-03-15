@@ -11,13 +11,13 @@ import androidx.room.PrimaryKey
         Index(
             value = ["language_tag", "word_a_normalized", "word_b_normalized"],
             name = "idx_bigram_lookup",
-            unique = true,
+            unique = true
         ),
         Index(
             value = ["language_tag", "word_a_normalized", "frequency"],
-            name = "idx_bigram_predictions",
-        ),
-    ],
+            name = "idx_bigram_predictions"
+        )
+    ]
 )
 data class UserWordBigram(
     @PrimaryKey(autoGenerate = true)
@@ -31,5 +31,5 @@ data class UserWordBigram(
     @ColumnInfo(name = "frequency")
     val frequency: Int = 1,
     @ColumnInfo(name = "last_used")
-    val lastUsed: Long = System.currentTimeMillis(),
+    val lastUsed: Long = System.currentTimeMillis()
 )

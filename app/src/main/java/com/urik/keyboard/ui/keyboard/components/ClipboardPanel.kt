@@ -22,10 +22,7 @@ import com.urik.keyboard.theme.ThemeManager
  * Clipboard history panel with consent screen and item management.
  *
  */
-class ClipboardPanel(
-    context: Context,
-    private val themeManager: ThemeManager,
-) : FrameLayout(context) {
+class ClipboardPanel(context: Context, private val themeManager: ThemeManager) : FrameLayout(context) {
     private var onConsentAccepted: (() -> Unit)? = null
     private var onItemSelected: ((String) -> Unit)? = null
     private var onItemPinToggled: ((ClipboardItem) -> Unit)? = null
@@ -34,13 +31,10 @@ class ClipboardPanel(
 
     private val transientOverlayA11yDelegate =
         object : AccessibilityDelegateCompat() {
-            override fun onInitializeAccessibilityNodeInfo(
-                host: View,
-                info: AccessibilityNodeInfoCompat,
-            ) {
+            override fun onInitializeAccessibilityNodeInfo(host: View, info: AccessibilityNodeInfoCompat) {
                 super.onInitializeAccessibilityNodeInfo(host, info)
                 info.removeAction(
-                    AccessibilityNodeInfoCompat.AccessibilityActionCompat.ACTION_SET_TEXT,
+                    AccessibilityNodeInfoCompat.AccessibilityActionCompat.ACTION_SET_TEXT
                 )
                 info.isEditable = false
             }
@@ -85,7 +79,7 @@ class ClipboardPanel(
             importantForAccessibility = IMPORTANT_FOR_ACCESSIBILITY_NO
             ViewCompat.setAccessibilityDelegate(
                 this,
-                transientOverlayA11yDelegate,
+                transientOverlayA11yDelegate
             )
         }
 
@@ -95,7 +89,7 @@ class ClipboardPanel(
             importantForAccessibility = IMPORTANT_FOR_ACCESSIBILITY_NO
             ViewCompat.setAccessibilityDelegate(
                 this,
-                transientOverlayA11yDelegate,
+                transientOverlayA11yDelegate
             )
         }
 
@@ -127,9 +121,12 @@ class ClipboardPanel(
 
     private var currentTab: Tab = Tab.RECENT
 
+    val isShowing: Boolean
+        get() = isVisible
+
     private enum class Tab {
         PINNED,
-        RECENT,
+        RECENT
     }
 
     init {
@@ -152,7 +149,7 @@ class ClipboardPanel(
                     LinearLayout.LayoutParams(
                         0,
                         LinearLayout.LayoutParams.WRAP_CONTENT,
-                        1f,
+                        1f
                     )
             }
 
@@ -169,7 +166,7 @@ class ClipboardPanel(
                     LinearLayout.LayoutParams(
                         0,
                         LinearLayout.LayoutParams.WRAP_CONTENT,
-                        1f,
+                        1f
                     )
             }
 
@@ -225,7 +222,7 @@ class ClipboardPanel(
                     themeManager.currentTheme.value.colors.keyBackgroundCharacter
                 } else {
                     themeManager.currentTheme.value.colors.keyBackgroundAction
-                },
+                }
             )
         }
     }
@@ -280,7 +277,7 @@ class ClipboardPanel(
         onItemClick: (String) -> Unit,
         onPinToggle: (ClipboardItem) -> Unit,
         onDelete: (ClipboardItem) -> Unit,
-        onDeleteAll: () -> Unit,
+        onDeleteAll: () -> Unit
     ) {
         this.onItemSelected = onItemClick
         this.onItemPinToggled = onPinToggle
@@ -305,13 +302,7 @@ class ClipboardPanel(
         onDeleteAllUnpinned = null
     }
 
-    val isShowing: Boolean
-        get() = isVisible
-
-    fun refreshContent(
-        pinnedItems: List<ClipboardItem>,
-        recentItems: List<ClipboardItem>,
-    ) {
+    fun refreshContent(pinnedItems: List<ClipboardItem>, recentItems: List<ClipboardItem>) {
         returnItemViewsToPool()
         updatePinnedList(pinnedItems)
         updateRecentList(recentItems)
@@ -359,7 +350,7 @@ class ClipboardPanel(
                 LinearLayout
                     .LayoutParams(
                         LinearLayout.LayoutParams.MATCH_PARENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
                     ).apply {
                         setMargins(margin, margin, margin, margin)
                     }
@@ -369,14 +360,13 @@ class ClipboardPanel(
         }
     }
 
-    private fun getOrCreateItemView(): LinearLayout =
-        if (itemViewPool.isNotEmpty()) {
-            itemViewPool.removeAt(itemViewPool.size - 1).apply {
-                (parent as? LinearLayout)?.removeView(this)
-            }
-        } else {
-            createEmptyItemView()
+    private fun getOrCreateItemView(): LinearLayout = if (itemViewPool.isNotEmpty()) {
+        itemViewPool.removeAt(itemViewPool.size - 1).apply {
+            (parent as? LinearLayout)?.removeView(this)
         }
+    } else {
+        createEmptyItemView()
+    }
 
     private fun createEmptyItemView(): LinearLayout {
         val density = context.resources.displayMetrics.density
@@ -396,7 +386,7 @@ class ClipboardPanel(
                     LinearLayout
                         .LayoutParams(
                             LinearLayout.LayoutParams.MATCH_PARENT,
-                            LinearLayout.LayoutParams.WRAP_CONTENT,
+                            LinearLayout.LayoutParams.WRAP_CONTENT
                         ).apply {
                             setMargins(margin, margin, margin, margin)
                         }
@@ -415,7 +405,7 @@ class ClipboardPanel(
                     LinearLayout.LayoutParams(
                         0,
                         LinearLayout.LayoutParams.WRAP_CONTENT,
-                        1f,
+                        1f
                     )
                 tag = "content_text"
             }
@@ -428,7 +418,7 @@ class ClipboardPanel(
                 layoutParams =
                     LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.WRAP_CONTENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
                     )
             }
 
@@ -443,7 +433,7 @@ class ClipboardPanel(
                     LinearLayout
                         .LayoutParams(
                             LinearLayout.LayoutParams.WRAP_CONTENT,
-                            LinearLayout.LayoutParams.WRAP_CONTENT,
+                            LinearLayout.LayoutParams.WRAP_CONTENT
                         ).apply {
                             val a11yMargin = (8 * density).toInt()
                             marginEnd = a11yMargin
@@ -472,10 +462,7 @@ class ClipboardPanel(
         return container
     }
 
-    private fun updateItemView(
-        view: LinearLayout,
-        item: ClipboardItem,
-    ) {
+    private fun updateItemView(view: LinearLayout, item: ClipboardItem) {
         val contentText = view.findViewWithTag<TextView>("content_text")
         val buttonContainer = view.getChildAt(1) as LinearLayout
         val pinButton = buttonContainer.findViewWithTag<Button>("pin_button")
@@ -571,7 +558,9 @@ class ClipboardPanel(
                                     Button(context).apply {
                                         text = context.getString(R.string.clipboard_panel_delete_all)
                                         setTextColor(ContextCompat.getColor(context, android.R.color.white))
-                                        setBackgroundColor(ContextCompat.getColor(context, android.R.color.holo_red_dark))
+                                        setBackgroundColor(
+                                            ContextCompat.getColor(context, android.R.color.holo_red_dark)
+                                        )
                                         setOnClickListener { confirmDeleteAll() }
                                     }
 
@@ -580,13 +569,13 @@ class ClipboardPanel(
                                     cancelBtn,
                                     LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply {
                                         marginEnd = margin
-                                    },
+                                    }
                                 )
                                 addView(
                                     deleteBtn,
                                     LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply {
                                         marginStart = margin
-                                    },
+                                    }
                                 )
                             }
                         addView(buttonsContainer)
@@ -597,8 +586,8 @@ class ClipboardPanel(
                     LayoutParams(
                         LayoutParams.WRAP_CONTENT,
                         LayoutParams.WRAP_CONTENT,
-                        Gravity.CENTER,
-                    ),
+                        Gravity.CENTER
+                    )
                 )
             }
 
@@ -606,8 +595,8 @@ class ClipboardPanel(
             deleteAllConfirmationOverlay,
             LayoutParams(
                 LayoutParams.MATCH_PARENT,
-                LayoutParams.MATCH_PARENT,
-            ),
+                LayoutParams.MATCH_PARENT
+            )
         )
     }
 

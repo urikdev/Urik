@@ -25,6 +25,6 @@ data object Peach : KeyboardTheme {
             focusIndicator = "#ffd9bf".toColorInt(),
             swipePrimary = "#ffc4a3".toColorInt(),
             swipeSecondary = "#ffd9bf".toColorInt(),
-            swipeCurrent = "#6b4f3d".toColorInt(),
+            swipeCurrent = "#6b4f3d".toColorInt()
         )
 }

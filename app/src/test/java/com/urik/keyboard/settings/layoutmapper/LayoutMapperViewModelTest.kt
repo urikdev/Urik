@@ -57,20 +57,19 @@ class LayoutMapperViewModelTest {
     }
 
     @Test
-    fun `mappings updates when repository emits`() =
-        runTest {
-            mappingsFlow.value =
-                listOf(
-                    CustomKeyMapping.create("a", "@"),
-                    CustomKeyMapping.create("b", "#"),
-                )
+    fun `mappings updates when repository emits`() = runTest {
+        mappingsFlow.value =
+            listOf(
+                CustomKeyMapping.create("a", "@"),
+                CustomKeyMapping.create("b", "#")
+            )
 
-            val result = viewModel.mappings.first()
+        val result = viewModel.mappings.first()
 
-            assertEquals(2, result.size)
-            assertEquals("@", result["a"])
-            assertEquals("#", result["b"])
-        }
+        assertEquals(2, result.size)
+        assertEquals("@", result["a"])
+        assertEquals("#", result["b"])
+    }
 
     @Test
     fun `selectedKey is null initially`() {
@@ -93,153 +92,140 @@ class LayoutMapperViewModelTest {
     }
 
     @Test
-    fun `getMappingForKey returns mapping from state`() =
-        runTest {
-            mappingsFlow.value = listOf(CustomKeyMapping.create("a", "@"))
-            viewModel.mappings.first()
+    fun `getMappingForKey returns mapping from state`() = runTest {
+        mappingsFlow.value = listOf(CustomKeyMapping.create("a", "@"))
+        viewModel.mappings.first()
 
-            val result = viewModel.getMappingForKey("a")
+        val result = viewModel.getMappingForKey("a")
 
-            assertEquals("@", result)
-        }
-
-    @Test
-    fun `getMappingForKey is case insensitive`() =
-        runTest {
-            mappingsFlow.value = listOf(CustomKeyMapping.create("a", "@"))
-            viewModel.mappings.first()
-
-            val result = viewModel.getMappingForKey("A")
-
-            assertEquals("@", result)
-        }
+        assertEquals("@", result)
+    }
 
     @Test
-    fun `getMappingForKey returns null for unmapped key`() =
-        runTest {
-            mappingsFlow.value = listOf(CustomKeyMapping.create("a", "@"))
-            viewModel.mappings.first()
+    fun `getMappingForKey is case insensitive`() = runTest {
+        mappingsFlow.value = listOf(CustomKeyMapping.create("a", "@"))
+        viewModel.mappings.first()
 
-            val result = viewModel.getMappingForKey("b")
+        val result = viewModel.getMappingForKey("A")
 
-            assertNull(result)
-        }
-
-    @Test
-    fun `saveMapping calls repository setMapping`() =
-        runTest {
-            whenever(repository.setMapping(any(), any())).thenReturn(Result.success(Unit))
-
-            viewModel.saveMapping("a", "@")
-            testDispatcher.scheduler.advanceUntilIdle()
-
-            verify(repository).setMapping("a", "@")
-        }
+        assertEquals("@", result)
+    }
 
     @Test
-    fun `saveMapping trims whitespace`() =
-        runTest {
-            whenever(repository.setMapping(any(), any())).thenReturn(Result.success(Unit))
+    fun `getMappingForKey returns null for unmapped key`() = runTest {
+        mappingsFlow.value = listOf(CustomKeyMapping.create("a", "@"))
+        viewModel.mappings.first()
 
-            viewModel.saveMapping("a", "  @  ")
-            testDispatcher.scheduler.advanceUntilIdle()
+        val result = viewModel.getMappingForKey("b")
 
-            verify(repository).setMapping("a", "@")
-        }
-
-    @Test
-    fun `saveMapping clears selection on success`() =
-        runTest {
-            whenever(repository.setMapping(any(), any())).thenReturn(Result.success(Unit))
-            viewModel.selectKey("a")
-
-            viewModel.saveMapping("a", "@")
-            testDispatcher.scheduler.advanceUntilIdle()
-
-            assertNull(viewModel.selectedKey.value)
-        }
+        assertNull(result)
+    }
 
     @Test
-    fun `saveMapping does not clear selection on failure`() =
-        runTest {
-            whenever(repository.setMapping(any(), any()))
-                .thenReturn(Result.failure(Exception("Test error")))
-            viewModel.selectKey("a")
+    fun `saveMapping calls repository setMapping`() = runTest {
+        whenever(repository.setMapping(any(), any())).thenReturn(Result.success(Unit))
 
-            viewModel.saveMapping("a", "@")
-            testDispatcher.scheduler.advanceUntilIdle()
+        viewModel.saveMapping("a", "@")
+        testDispatcher.scheduler.advanceUntilIdle()
 
-            assertEquals("a", viewModel.selectedKey.value)
-        }
+        verify(repository).setMapping("a", "@")
+    }
 
     @Test
-    fun `saveMapping with blank symbol calls removeMapping instead`() =
-        runTest {
-            whenever(repository.removeMapping(any())).thenReturn(Result.success(true))
+    fun `saveMapping trims whitespace`() = runTest {
+        whenever(repository.setMapping(any(), any())).thenReturn(Result.success(Unit))
 
-            viewModel.saveMapping("a", "   ")
-            testDispatcher.scheduler.advanceUntilIdle()
+        viewModel.saveMapping("a", "  @  ")
+        testDispatcher.scheduler.advanceUntilIdle()
 
-            verify(repository).removeMapping("a")
-            verify(repository, never()).setMapping(any(), any())
-        }
+        verify(repository).setMapping("a", "@")
+    }
 
     @Test
-    fun `saveMapping with empty symbol calls removeMapping instead`() =
-        runTest {
-            whenever(repository.removeMapping(any())).thenReturn(Result.success(true))
+    fun `saveMapping clears selection on success`() = runTest {
+        whenever(repository.setMapping(any(), any())).thenReturn(Result.success(Unit))
+        viewModel.selectKey("a")
 
-            viewModel.saveMapping("a", "")
-            testDispatcher.scheduler.advanceUntilIdle()
+        viewModel.saveMapping("a", "@")
+        testDispatcher.scheduler.advanceUntilIdle()
 
-            verify(repository).removeMapping("a")
-            verify(repository, never()).setMapping(any(), any())
-        }
-
-    @Test
-    fun `removeMapping calls repository removeMapping`() =
-        runTest {
-            whenever(repository.removeMapping(any())).thenReturn(Result.success(true))
-
-            viewModel.removeMapping("a")
-            testDispatcher.scheduler.advanceUntilIdle()
-
-            verify(repository).removeMapping("a")
-        }
+        assertNull(viewModel.selectedKey.value)
+    }
 
     @Test
-    fun `removeMapping clears selection on success`() =
-        runTest {
-            whenever(repository.removeMapping(any())).thenReturn(Result.success(true))
-            viewModel.selectKey("a")
+    fun `saveMapping does not clear selection on failure`() = runTest {
+        whenever(repository.setMapping(any(), any()))
+            .thenReturn(Result.failure(Exception("Test error")))
+        viewModel.selectKey("a")
 
-            viewModel.removeMapping("a")
-            testDispatcher.scheduler.advanceUntilIdle()
+        viewModel.saveMapping("a", "@")
+        testDispatcher.scheduler.advanceUntilIdle()
 
-            assertNull(viewModel.selectedKey.value)
-        }
-
-    @Test
-    fun `removeMapping does not clear selection on failure`() =
-        runTest {
-            whenever(repository.removeMapping(any()))
-                .thenReturn(Result.failure(Exception("Test error")))
-            viewModel.selectKey("a")
-
-            viewModel.removeMapping("a")
-            testDispatcher.scheduler.advanceUntilIdle()
-
-            assertEquals("a", viewModel.selectedKey.value)
-        }
+        assertEquals("a", viewModel.selectedKey.value)
+    }
 
     @Test
-    fun `clearAllMappings calls repository clearAllMappings`() =
-        runTest {
-            whenever(repository.clearAllMappings()).thenReturn(Result.success(5))
+    fun `saveMapping with blank symbol calls removeMapping instead`() = runTest {
+        whenever(repository.removeMapping(any())).thenReturn(Result.success(true))
 
-            viewModel.clearAllMappings()
-            testDispatcher.scheduler.advanceUntilIdle()
+        viewModel.saveMapping("a", "   ")
+        testDispatcher.scheduler.advanceUntilIdle()
 
-            verify(repository).clearAllMappings()
-        }
+        verify(repository).removeMapping("a")
+        verify(repository, never()).setMapping(any(), any())
+    }
+
+    @Test
+    fun `saveMapping with empty symbol calls removeMapping instead`() = runTest {
+        whenever(repository.removeMapping(any())).thenReturn(Result.success(true))
+
+        viewModel.saveMapping("a", "")
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        verify(repository).removeMapping("a")
+        verify(repository, never()).setMapping(any(), any())
+    }
+
+    @Test
+    fun `removeMapping calls repository removeMapping`() = runTest {
+        whenever(repository.removeMapping(any())).thenReturn(Result.success(true))
+
+        viewModel.removeMapping("a")
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        verify(repository).removeMapping("a")
+    }
+
+    @Test
+    fun `removeMapping clears selection on success`() = runTest {
+        whenever(repository.removeMapping(any())).thenReturn(Result.success(true))
+        viewModel.selectKey("a")
+
+        viewModel.removeMapping("a")
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        assertNull(viewModel.selectedKey.value)
+    }
+
+    @Test
+    fun `removeMapping does not clear selection on failure`() = runTest {
+        whenever(repository.removeMapping(any()))
+            .thenReturn(Result.failure(Exception("Test error")))
+        viewModel.selectKey("a")
+
+        viewModel.removeMapping("a")
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        assertEquals("a", viewModel.selectedKey.value)
+    }
+
+    @Test
+    fun `clearAllMappings calls repository clearAllMappings`() = runTest {
+        whenever(repository.clearAllMappings()).thenReturn(Result.success(5))
+
+        viewModel.clearAllMappings()
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        verify(repository).clearAllMappings()
+    }
 }

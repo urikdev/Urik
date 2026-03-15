@@ -17,9 +17,7 @@ import com.urik.keyboard.theme.ThemeColors
  *
  * Creates drawable overlays that display custom mapping hints.
  */
-class KeyHintRenderer(
-    context: Context,
-) {
+class KeyHintRenderer(context: Context) {
     private val density = context.resources.displayMetrics.density
 
     /**
@@ -30,11 +28,7 @@ class KeyHintRenderer(
      * @param colors Theme colors for styling
      * @return LayerDrawable with hint overlay
      */
-    fun createKeyWithHint(
-        keyBackground: Drawable,
-        hintText: String,
-        colors: ThemeColors,
-    ): Drawable {
+    fun createKeyWithHint(keyBackground: Drawable, hintText: String, colors: ThemeColors): Drawable {
         val hintDrawable = HintDrawable(hintText, colors.keyTextCharacter, density)
 
         val layers = arrayOf(keyBackground, hintDrawable)
@@ -54,7 +48,7 @@ class KeyHintRenderer(
     private class HintDrawable(
         private val text: String,
         @ColorInt private val textColor: Int,
-        private val density: Float,
+        private val density: Float
     ) : Drawable() {
         private val paint =
             Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -77,7 +71,7 @@ class KeyHintRenderer(
             paint.getTextBounds(text, 0, text.length, textBounds)
 
             val x = bounds.centerX().toFloat()
-            val y = bounds.centerY() + (textBounds.height() / 2f)
+            val y = bounds.centerY() + textBounds.height() / 2f
 
             canvas.drawText(text, x, y, paint)
         }

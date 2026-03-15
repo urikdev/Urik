@@ -35,48 +35,47 @@ class DictionaryAttributionActivity : AppCompatActivity() {
         applyWindowInsets(rootLayout)
     }
 
-    private fun createLayout(): LinearLayout =
-        LinearLayout(this).apply {
-            id = View.generateViewId()
-            orientation = LinearLayout.VERTICAL
-            layoutParams =
-                LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                )
+    private fun createLayout(): LinearLayout = LinearLayout(this).apply {
+        id = View.generateViewId()
+        orientation = LinearLayout.VERTICAL
+        layoutParams =
+            LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.MATCH_PARENT
+            )
 
-            val toolbar =
-                MaterialToolbar(context).apply {
-                    id = R.id.attribution_toolbar
-                    layoutParams =
-                        LinearLayout.LayoutParams(
-                            LinearLayout.LayoutParams.MATCH_PARENT,
-                            resources.getDimensionPixelSize(
-                                androidx.appcompat.R.dimen.abc_action_bar_default_height_material,
-                            ),
+        val toolbar =
+            MaterialToolbar(context).apply {
+                id = R.id.attribution_toolbar
+                layoutParams =
+                    LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        resources.getDimensionPixelSize(
+                            androidx.appcompat.R.dimen.abc_action_bar_default_height_material
                         )
-                }
-            addView(toolbar)
+                    )
+            }
+        addView(toolbar)
 
-            val scrollView =
-                ScrollView(context).apply {
-                    layoutParams =
-                        LinearLayout.LayoutParams(
-                            LinearLayout.LayoutParams.MATCH_PARENT,
-                            0,
-                            1f,
-                        )
+        val scrollView =
+            ScrollView(context).apply {
+                layoutParams =
+                    LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        0,
+                        1f
+                    )
 
-                    val textView =
-                        TextView(context).apply {
-                            id = R.id.attribution_text
-                            textSize = 14f
-                            setTextIsSelectable(true)
-                        }
-                    addView(textView)
-                }
-            addView(scrollView)
-        }
+                val textView =
+                    TextView(context).apply {
+                        id = R.id.attribution_text
+                        textSize = 14f
+                        setTextIsSelectable(true)
+                    }
+                addView(textView)
+            }
+        addView(scrollView)
+    }
 
     private fun applyWindowInsets(rootLayout: LinearLayout) {
         val scrollView = rootLayout.getChildAt(1) as ScrollView
@@ -91,7 +90,7 @@ class DictionaryAttributionActivity : AppCompatActivity() {
                 basePadding,
                 basePadding,
                 basePadding,
-                basePadding + insets.bottom,
+                basePadding + insets.bottom
             )
             windowInsets
         }
@@ -128,14 +127,13 @@ class DictionaryAttributionActivity : AppCompatActivity() {
         return builder.toString()
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean =
-        when (item.itemId) {
-            android.R.id.home -> {
-                finish()
-                true
-            }
-            else -> super.onOptionsItemSelected(item)
+    override fun onOptionsItemSelected(item: MenuItem): Boolean = when (item.itemId) {
+        android.R.id.home -> {
+            finish()
+            true
         }
+        else -> super.onOptionsItemSelected(item)
+    }
 
     companion object {
         private const val BASE_PADDING_DP = 16

@@ -53,13 +53,13 @@ object SecureFieldDetector {
         val inputVariation = inputType and EditorInfo.TYPE_MASK_VARIATION
 
         when (inputClass) {
-            EditorInfo.TYPE_CLASS_TEXT if (
-                inputVariation == EditorInfo.TYPE_TEXT_VARIATION_PASSWORD ||
-                    inputVariation == EditorInfo.TYPE_TEXT_VARIATION_WEB_PASSWORD ||
-                    inputVariation == EditorInfo.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD ||
-                    inputVariation == EditorInfo.TYPE_TEXT_VARIATION_EMAIL_ADDRESS ||
-                    inputVariation == EditorInfo.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS
-            ) -> return true
+            EditorInfo.TYPE_CLASS_TEXT if
+            inputVariation == EditorInfo.TYPE_TEXT_VARIATION_PASSWORD ||
+                inputVariation == EditorInfo.TYPE_TEXT_VARIATION_WEB_PASSWORD ||
+                inputVariation == EditorInfo.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD ||
+                inputVariation == EditorInfo.TYPE_TEXT_VARIATION_EMAIL_ADDRESS ||
+                inputVariation == EditorInfo.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS
+            -> return true
 
             EditorInfo.TYPE_CLASS_NUMBER if inputVariation == EditorInfo.TYPE_NUMBER_VARIATION_PASSWORD -> return true
         }
@@ -94,10 +94,10 @@ object SecureFieldDetector {
 
         val flags = inputType and InputType.TYPE_MASK_FLAGS
         val variation = inputType and InputType.TYPE_MASK_VARIATION
-        val hasNoSuggestions = (flags and InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS) != 0
+        val hasNoSuggestions = flags and InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS != 0
 
         if (hasNoSuggestions && variation == InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD) return true
-        if (hasNoSuggestions && (info.imeOptions and EditorInfo.IME_FLAG_NO_EXTRACT_UI) != 0) return true
+        if (hasNoSuggestions && info.imeOptions and EditorInfo.IME_FLAG_NO_EXTRACT_UI != 0) return true
 
         return false
     }

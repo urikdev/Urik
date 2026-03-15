@@ -42,504 +42,461 @@ class LearnedWordDaoTest {
     }
 
     @Test
-    fun `insertWord inserts new word`() =
-        runTest {
-            val word = createTestWord("hello", "hello", "en")
+    fun `insertWord inserts new word`() = runTest {
+        val word = createTestWord("hello", "hello", "en")
 
-            val id = dao.insertWord(word)
+        val id = dao.insertWord(word)
 
-            assertTrue(id > 0)
-            val retrieved = dao.findExactWord("en", "hello")
-            assertNotNull(retrieved)
-            assertEquals("hello", retrieved?.word)
-        }
-
-    @Test
-    fun `insertWord with IGNORE strategy skips duplicate`() =
-        runTest {
-            val word1 = createTestWord("hello", "hello", "en")
-            val word2 = createTestWord("HELLO", "hello", "en")
-
-            dao.insertWord(word1)
-            val id2 = dao.insertWord(word2)
-
-            assertEquals(-1L, id2)
-            assertEquals(1, dao.getWordCount("en"))
-        }
+        assertTrue(id > 0)
+        val retrieved = dao.findExactWord("en", "hello")
+        assertNotNull(retrieved)
+        assertEquals("hello", retrieved?.word)
+    }
 
     @Test
-    fun `updateWord modifies existing word`() =
-        runTest {
-            val word = createTestWord("hello", "hello", "en", frequency = 1)
-            dao.insertWord(word)
+    fun `insertWord with IGNORE strategy skips duplicate`() = runTest {
+        val word1 = createTestWord("hello", "hello", "en")
+        val word2 = createTestWord("HELLO", "hello", "en")
 
-            val existing = dao.findExactWord("en", "hello")!!
-            val updated = existing.copy(frequency = 5)
-            dao.updateWord(updated)
+        dao.insertWord(word1)
+        val id2 = dao.insertWord(word2)
 
-            val retrieved = dao.findExactWord("en", "hello")
-            assertEquals(5, retrieved?.frequency)
-        }
+        assertEquals(-1L, id2)
+        assertEquals(1, dao.getWordCount("en"))
+    }
 
     @Test
-    fun `upsertWord inserts new word`() =
-        runTest {
-            val word = createTestWord("hello", "hello", "en")
+    fun `updateWord modifies existing word`() = runTest {
+        val word = createTestWord("hello", "hello", "en", frequency = 1)
+        dao.insertWord(word)
 
-            dao.upsertWord(word)
+        val existing = dao.findExactWord("en", "hello")!!
+        val updated = existing.copy(frequency = 5)
+        dao.updateWord(updated)
 
-            val retrieved = dao.findExactWord("en", "hello")
-            assertNotNull(retrieved)
-            assertEquals(1, retrieved?.frequency)
-        }
-
-    @Test
-    fun `upsertWord updates existing word`() =
-        runTest {
-            val word = createTestWord("hello", "hello", "en", frequency = 1)
-            dao.insertWord(word)
-
-            val existing = dao.findExactWord("en", "hello")!!
-            val updated = existing.copy(frequency = 5)
-            dao.upsertWord(updated)
-
-            val retrieved = dao.findExactWord("en", "hello")
-            assertEquals(5, retrieved?.frequency)
-        }
+        val retrieved = dao.findExactWord("en", "hello")
+        assertEquals(5, retrieved?.frequency)
+    }
 
     @Test
-    fun `learnWord inserts new word with FTS`() =
-        runTest {
-            val word = createTestWord("hello", "hello", "en")
+    fun `upsertWord inserts new word`() = runTest {
+        val word = createTestWord("hello", "hello", "en")
 
-            dao.learnWord(word)
+        dao.upsertWord(word)
 
-            val retrieved = dao.findExactWord("en", "hello")
-            assertNotNull(retrieved)
-            assertEquals(1, retrieved?.frequency)
-        }
-
-    @Test
-    fun `learnWord increments frequency for existing word`() =
-        runTest {
-            val word = createTestWord("hello", "hello", "en", frequency = 1)
-            dao.learnWord(word)
-
-            dao.learnWord(word)
-
-            val retrieved = dao.findExactWord("en", "hello")
-            assertEquals(2, retrieved?.frequency)
-        }
+        val retrieved = dao.findExactWord("en", "hello")
+        assertNotNull(retrieved)
+        assertEquals(1, retrieved?.frequency)
+    }
 
     @Test
-    fun `learnWord updates last_used timestamp`() =
-        runTest {
-            val word = createTestWord("hello", "hello", "en")
-            dao.learnWord(word)
+    fun `upsertWord updates existing word`() = runTest {
+        val word = createTestWord("hello", "hello", "en", frequency = 1)
+        dao.insertWord(word)
 
-            Thread.sleep(10)
-            dao.learnWord(word)
+        val existing = dao.findExactWord("en", "hello")!!
+        val updated = existing.copy(frequency = 5)
+        dao.upsertWord(updated)
 
-            val retrieved = dao.findExactWord("en", "hello")!!
-            assertTrue(retrieved.lastUsed > word.lastUsed)
-        }
-
-    @Test
-    fun `learnWord preserves source field when incrementing`() =
-        runTest {
-            val word = createTestWord("hello", "hello", "en", source = WordSource.SWIPE_LEARNED)
-            dao.learnWord(word)
-
-            dao.learnWord(word)
-
-            val retrieved = dao.findExactWord("en", "hello")!!
-            assertEquals(WordSource.SWIPE_LEARNED, retrieved.source)
-        }
+        val retrieved = dao.findExactWord("en", "hello")
+        assertEquals(5, retrieved?.frequency)
+    }
 
     @Test
-    fun `findExactWord returns matching word`() =
-        runTest {
-            dao.insertWord(createTestWord("hello", "hello", "en"))
-            dao.insertWord(createTestWord("world", "world", "en"))
+    fun `learnWord inserts new word with FTS`() = runTest {
+        val word = createTestWord("hello", "hello", "en")
 
-            val result = dao.findExactWord("en", "hello")
+        dao.learnWord(word)
 
-            assertNotNull(result)
-            assertEquals("hello", result?.word)
-        }
-
-    @Test
-    fun `findExactWord returns null for missing word`() =
-        runTest {
-            val result = dao.findExactWord("en", "missing")
-
-            assertNull(result)
-        }
+        val retrieved = dao.findExactWord("en", "hello")
+        assertNotNull(retrieved)
+        assertEquals(1, retrieved?.frequency)
+    }
 
     @Test
-    fun `findExactWord is case sensitive for normalized`() =
-        runTest {
-            dao.insertWord(createTestWord("Hello", "hello", "en"))
+    fun `learnWord increments frequency for existing word`() = runTest {
+        val word = createTestWord("hello", "hello", "en", frequency = 1)
+        dao.learnWord(word)
 
-            val result = dao.findExactWord("en", "Hello")
+        dao.learnWord(word)
 
-            assertNull(result)
-        }
-
-    @Test
-    fun `findWordsWithPrefix returns matching words`() =
-        runTest {
-            dao.insertWord(createTestWord("hello", "hello", "en", frequency = 5))
-            dao.insertWord(createTestWord("help", "help", "en", frequency = 3))
-            dao.insertWord(createTestWord("world", "world", "en", frequency = 4))
-
-            val results = dao.findWordsWithPrefix("en", "hel", 10)
-
-            assertEquals(2, results.size)
-            assertTrue(results.any { it.word == "hello" })
-            assertTrue(results.any { it.word == "help" })
-        }
+        val retrieved = dao.findExactWord("en", "hello")
+        assertEquals(2, retrieved?.frequency)
+    }
 
     @Test
-    fun `findWordsWithPrefix orders by frequency`() =
-        runTest {
-            dao.insertWord(createTestWord("help", "help", "en", frequency = 3))
-            dao.insertWord(createTestWord("hello", "hello", "en", frequency = 5))
+    fun `learnWord updates last_used timestamp`() = runTest {
+        val word = createTestWord("hello", "hello", "en")
+        dao.learnWord(word)
 
-            val results = dao.findWordsWithPrefix("en", "hel", 10)
+        Thread.sleep(10)
+        dao.learnWord(word)
 
-            assertEquals("hello", results[0].word)
-            assertEquals("help", results[1].word)
-        }
-
-    @Test
-    fun `findWordsWithPrefix respects limit`() =
-        runTest {
-            dao.insertWord(createTestWord("hello", "hello", "en"))
-            dao.insertWord(createTestWord("help", "help", "en"))
-            dao.insertWord(createTestWord("helpful", "helpful", "en"))
-
-            val results = dao.findWordsWithPrefix("en", "hel", 2)
-
-            assertEquals(2, results.size)
-        }
+        val retrieved = dao.findExactWord("en", "hello")!!
+        assertTrue(retrieved.lastUsed > word.lastUsed)
+    }
 
     @Test
-    fun `findWordsWithPrefix filters by language`() =
-        runTest {
-            dao.insertWord(createTestWord("hello", "hello", "en"))
-            dao.insertWord(createTestWord("hej", "hej", "sv"))
+    fun `learnWord preserves source field when incrementing`() = runTest {
+        val word = createTestWord("hello", "hello", "en", source = WordSource.SWIPE_LEARNED)
+        dao.learnWord(word)
 
-            val results = dao.findWordsWithPrefix("en", "he", 10)
+        dao.learnWord(word)
 
-            assertEquals(1, results.size)
-            assertEquals("hello", results[0].word)
-        }
-
-    @Test
-    fun `getFastSuggestions returns only high frequency words`() =
-        runTest {
-            dao.insertWord(createTestWord("hello", "hello", "en", frequency = 5))
-            dao.insertWord(createTestWord("help", "help", "en", frequency = 1))
-
-            val results = dao.getFastSuggestions("hel", "en", 10)
-
-            assertEquals(1, results.size)
-            assertEquals("hello", results[0].word)
-        }
+        val retrieved = dao.findExactWord("en", "hello")!!
+        assertEquals(WordSource.SWIPE_LEARNED, retrieved.source)
+    }
 
     @Test
-    fun `getFastSuggestions orders by frequency and last_used`() =
-        runTest {
-            dao.insertWord(createTestWord("hello", "hello", "en", frequency = 5, lastUsed = 100))
-            dao.insertWord(createTestWord("help", "help", "en", frequency = 5, lastUsed = 200))
+    fun `findExactWord returns matching word`() = runTest {
+        dao.insertWord(createTestWord("hello", "hello", "en"))
+        dao.insertWord(createTestWord("world", "world", "en"))
 
-            val results = dao.getFastSuggestions("hel", "en", 10)
+        val result = dao.findExactWord("en", "hello")
 
-            assertEquals("help", results[0].word)
-            assertEquals("hello", results[1].word)
-        }
-
-    @Test
-    fun `findExistingWords returns only existing words`() =
-        runTest {
-            dao.insertWord(createTestWord("hello", "hello", "en"))
-            dao.insertWord(createTestWord("world", "world", "en"))
-
-            val results = dao.findExistingWords("en", listOf("hello", "missing", "world"))
-
-            assertEquals(2, results.size)
-            assertTrue(results.contains("hello"))
-            assertTrue(results.contains("world"))
-            assertFalse(results.contains("missing"))
-        }
+        assertNotNull(result)
+        assertEquals("hello", result?.word)
+    }
 
     @Test
-    fun `findExistingWords handles empty list`() =
-        runTest {
-            val results = dao.findExistingWords("en", emptyList())
+    fun `findExactWord returns null for missing word`() = runTest {
+        val result = dao.findExactWord("en", "missing")
 
-            assertTrue(results.isEmpty())
-        }
-
-    @Test
-    fun `findExistingWords filters by language`() =
-        runTest {
-            dao.insertWord(createTestWord("hello", "hello", "en"))
-            dao.insertWord(createTestWord("hej", "hej", "sv"))
-
-            val results = dao.findExistingWords("en", listOf("hello", "hej"))
-
-            assertEquals(1, results.size)
-            assertEquals("hello", results[0])
-        }
+        assertNull(result)
+    }
 
     @Test
-    fun `wordExists returns true for existing word`() =
-        runTest {
-            dao.insertWord(createTestWord("hello", "hello", "en"))
+    fun `findExactWord is case sensitive for normalized`() = runTest {
+        dao.insertWord(createTestWord("Hello", "hello", "en"))
 
-            assertTrue(dao.wordExists("hello", "en"))
-        }
+        val result = dao.findExactWord("en", "Hello")
 
-    @Test
-    fun `wordExists returns false for missing word`() =
-        runTest {
-            assertFalse(dao.wordExists("missing", "en"))
-        }
+        assertNull(result)
+    }
 
     @Test
-    fun `removeWord deletes word`() =
-        runTest {
-            dao.insertWord(createTestWord("hello", "hello", "en"))
+    fun `findWordsWithPrefix returns matching words`() = runTest {
+        dao.insertWord(createTestWord("hello", "hello", "en", frequency = 5))
+        dao.insertWord(createTestWord("help", "help", "en", frequency = 3))
+        dao.insertWord(createTestWord("world", "world", "en", frequency = 4))
 
-            val rowsAffected = dao.removeWord("en", "hello")
+        val results = dao.findWordsWithPrefix("en", "hel", 10)
 
-            assertEquals(1, rowsAffected)
-            assertNull(dao.findExactWord("en", "hello"))
-        }
-
-    @Test
-    fun `removeWord returns 0 for missing word`() =
-        runTest {
-            val rowsAffected = dao.removeWord("en", "missing")
-
-            assertEquals(0, rowsAffected)
-        }
+        assertEquals(2, results.size)
+        assertTrue(results.any { it.word == "hello" })
+        assertTrue(results.any { it.word == "help" })
+    }
 
     @Test
-    fun `removeWordComplete removes from both tables`() =
-        runTest {
-            val word = createTestWord("hello", "hello", "en")
-            dao.learnWord(word)
+    fun `findWordsWithPrefix orders by frequency`() = runTest {
+        dao.insertWord(createTestWord("help", "help", "en", frequency = 3))
+        dao.insertWord(createTestWord("hello", "hello", "en", frequency = 5))
 
-            val rowsAffected = dao.removeWordComplete("en", "hello")
+        val results = dao.findWordsWithPrefix("en", "hel", 10)
 
-            assertEquals(1, rowsAffected)
-            assertNull(dao.findExactWord("en", "hello"))
-        }
-
-    @Test
-    fun `clearLanguage removes all words for language`() =
-        runTest {
-            dao.insertWord(createTestWord("hello", "hello", "en"))
-            dao.insertWord(createTestWord("world", "world", "en"))
-            dao.insertWord(createTestWord("hej", "hej", "sv"))
-
-            val rowsAffected = dao.clearLanguage("en")
-
-            assertEquals(2, rowsAffected)
-            assertEquals(0, dao.getWordCount("en"))
-            assertEquals(1, dao.getWordCount("sv"))
-        }
+        assertEquals("hello", results[0].word)
+        assertEquals("help", results[1].word)
+    }
 
     @Test
-    fun `cleanupLowFrequencyWords removes old single-use words`() =
-        runTest {
-            val old = System.currentTimeMillis() - 100000
-            val recent = System.currentTimeMillis()
+    fun `findWordsWithPrefix respects limit`() = runTest {
+        dao.insertWord(createTestWord("hello", "hello", "en"))
+        dao.insertWord(createTestWord("help", "help", "en"))
+        dao.insertWord(createTestWord("helpful", "helpful", "en"))
 
-            dao.insertWord(createTestWord("old", "old", "en", frequency = 1, lastUsed = old))
-            dao.insertWord(createTestWord("recent", "recent", "en", frequency = 1, lastUsed = recent))
-            dao.insertWord(createTestWord("frequent", "frequent", "en", frequency = 5, lastUsed = old))
+        val results = dao.findWordsWithPrefix("en", "hel", 2)
 
-            val cutoff = System.currentTimeMillis() - 50000
-            val rowsAffected = dao.cleanupLowFrequencyWords(cutoff)
-
-            assertEquals(1, rowsAffected)
-            assertNull(dao.findExactWord("en", "old"))
-            assertNotNull(dao.findExactWord("en", "recent"))
-            assertNotNull(dao.findExactWord("en", "frequent"))
-        }
+        assertEquals(2, results.size)
+    }
 
     @Test
-    fun `getWordCount returns correct count`() =
-        runTest {
-            dao.insertWord(createTestWord("hello", "hello", "en"))
-            dao.insertWord(createTestWord("world", "world", "en"))
+    fun `findWordsWithPrefix filters by language`() = runTest {
+        dao.insertWord(createTestWord("hello", "hello", "en"))
+        dao.insertWord(createTestWord("hej", "hej", "sv"))
 
-            assertEquals(2, dao.getWordCount("en"))
-        }
+        val results = dao.findWordsWithPrefix("en", "he", 10)
 
-    @Test
-    fun `getTotalWordCount returns all words`() =
-        runTest {
-            dao.insertWord(createTestWord("hello", "hello", "en"))
-            dao.insertWord(createTestWord("hej", "hej", "sv"))
-
-            assertEquals(2, dao.getTotalWordCount())
-        }
+        assertEquals(1, results.size)
+        assertEquals("hello", results[0].word)
+    }
 
     @Test
-    fun `getMostFrequentWords returns top words`() =
-        runTest {
-            dao.insertWord(createTestWord("rare", "rare", "en", frequency = 1))
-            dao.insertWord(createTestWord("common", "common", "en", frequency = 10))
-            dao.insertWord(createTestWord("medium", "medium", "en", frequency = 5))
+    fun `getFastSuggestions returns only high frequency words`() = runTest {
+        dao.insertWord(createTestWord("hello", "hello", "en", frequency = 5))
+        dao.insertWord(createTestWord("help", "help", "en", frequency = 1))
 
-            val results = dao.getMostFrequentWords("en", 2)
+        val results = dao.getFastSuggestions("hel", "en", 10)
 
-            assertEquals(2, results.size)
-            assertEquals("common", results[0].word)
-            assertEquals("medium", results[1].word)
-        }
+        assertEquals(1, results.size)
+        assertEquals("hello", results[0].word)
+    }
 
     @Test
-    fun `getWordCountsBySource groups correctly`() =
-        runTest {
-            dao.insertWord(createTestWord("typed1", "typed1", "en", source = WordSource.USER_TYPED))
-            dao.insertWord(createTestWord("typed2", "typed2", "en", source = WordSource.USER_TYPED))
-            dao.insertWord(createTestWord("swiped1", "swiped1", "en", source = WordSource.SWIPE_LEARNED))
+    fun `getFastSuggestions orders by frequency and last_used`() = runTest {
+        dao.insertWord(createTestWord("hello", "hello", "en", frequency = 5, lastUsed = 100))
+        dao.insertWord(createTestWord("help", "help", "en", frequency = 5, lastUsed = 200))
 
-            val results = dao.getWordCountsBySource()
+        val results = dao.getFastSuggestions("hel", "en", 10)
 
-            assertEquals(2, results.size)
-            val typedCount = results.find { it.source == WordSource.USER_TYPED }?.count
-            val swipedCount = results.find { it.source == WordSource.SWIPE_LEARNED }?.count
-            assertEquals(2, typedCount)
-            assertEquals(1, swipedCount)
-        }
+        assertEquals("help", results[0].word)
+        assertEquals("hello", results[1].word)
+    }
 
     @Test
-    fun `learnWord promotes camelCase over lowercase`() =
-        runTest {
-            dao.learnWord(createTestWord("iphone", "iphone", "en"))
-            dao.learnWord(createTestWord("iPhone", "iphone", "en"))
+    fun `findExistingWords returns only existing words`() = runTest {
+        dao.insertWord(createTestWord("hello", "hello", "en"))
+        dao.insertWord(createTestWord("world", "world", "en"))
 
-            val retrieved = dao.findExactWord("en", "iphone")
-            assertEquals("iPhone", retrieved?.word)
-            assertEquals(2, retrieved?.frequency)
-        }
+        val results = dao.findExistingWords("en", listOf("hello", "missing", "world"))
 
-    @Test
-    fun `learnWord promotes title case over lowercase`() =
-        runTest {
-            dao.learnWord(createTestWord("maryland", "maryland", "en"))
-            dao.learnWord(createTestWord("Maryland", "maryland", "en"))
-
-            val retrieved = dao.findExactWord("en", "maryland")
-            assertEquals("Maryland", retrieved?.word)
-            assertEquals(2, retrieved?.frequency)
-        }
+        assertEquals(2, results.size)
+        assertTrue(results.contains("hello"))
+        assertTrue(results.contains("world"))
+        assertFalse(results.contains("missing"))
+    }
 
     @Test
-    fun `learnWord does not demote camelCase to lowercase`() =
-        runTest {
-            dao.learnWord(createTestWord("iPhone", "iphone", "en"))
-            dao.learnWord(createTestWord("iphone", "iphone", "en"))
+    fun `findExistingWords handles empty list`() = runTest {
+        val results = dao.findExistingWords("en", emptyList())
 
-            val retrieved = dao.findExactWord("en", "iphone")
-            assertEquals("iPhone", retrieved?.word)
-            assertEquals(2, retrieved?.frequency)
-        }
+        assertTrue(results.isEmpty())
+    }
 
     @Test
-    fun `learnWord does not demote McLaren to lowercase`() =
-        runTest {
-            dao.learnWord(createTestWord("McLaren", "mclaren", "en"))
-            repeat(5) {
-                dao.learnWord(createTestWord("mclaren", "mclaren", "en"))
-            }
+    fun `findExistingWords filters by language`() = runTest {
+        dao.insertWord(createTestWord("hello", "hello", "en"))
+        dao.insertWord(createTestWord("hej", "hej", "sv"))
 
-            val retrieved = dao.findExactWord("en", "mclaren")
-            assertEquals("McLaren", retrieved?.word)
-            assertEquals(6, retrieved?.frequency)
-        }
+        val results = dao.findExistingWords("en", listOf("hello", "hej"))
+
+        assertEquals(1, results.size)
+        assertEquals("hello", results[0])
+    }
 
     @Test
-    fun `learnWord promotes short acronym over lowercase`() =
-        runTest {
-            dao.learnWord(createTestWord("api", "api", "en"))
-            dao.learnWord(createTestWord("API", "api", "en"))
+    fun `wordExists returns true for existing word`() = runTest {
+        dao.insertWord(createTestWord("hello", "hello", "en"))
 
-            val retrieved = dao.findExactWord("en", "api")
-            assertEquals("API", retrieved?.word)
-        }
+        assertTrue(dao.wordExists("hello", "en"))
+    }
 
     @Test
-    fun `learnWord promotes long ALL CAPS over lowercase`() =
-        runTest {
-            dao.learnWord(createTestWord("guhh", "guhh", "en"))
-            dao.learnWord(createTestWord("GUHH", "guhh", "en"))
-
-            val retrieved = dao.findExactWord("en", "guhh")
-            assertEquals("GUHH", retrieved?.word)
-        }
+    fun `wordExists returns false for missing word`() = runTest {
+        assertFalse(dao.wordExists("missing", "en"))
+    }
 
     @Test
-    fun `learnWord does not demote ALL CAPS to lowercase`() =
-        runTest {
-            dao.learnWord(createTestWord("NASA", "nasa", "en"))
-            dao.learnWord(createTestWord("nasa", "nasa", "en"))
+    fun `removeWord deletes word`() = runTest {
+        dao.insertWord(createTestWord("hello", "hello", "en"))
 
-            val retrieved = dao.findExactWord("en", "nasa")
-            assertEquals("NASA", retrieved?.word)
-        }
+        val rowsAffected = dao.removeWord("en", "hello")
 
-    @Test
-    fun `learnWord promotes camelCase over ALL CAPS`() =
-        runTest {
-            dao.learnWord(createTestWord("IPHONE", "iphone", "en"))
-            dao.learnWord(createTestWord("iPhone", "iphone", "en"))
-
-            val retrieved = dao.findExactWord("en", "iphone")
-            assertEquals("iPhone", retrieved?.word)
-        }
+        assertEquals(1, rowsAffected)
+        assertNull(dao.findExactWord("en", "hello"))
+    }
 
     @Test
-    fun `learnWord promotes camelCase over title case`() =
-        runTest {
-            dao.learnWord(createTestWord("Iphone", "iphone", "en"))
-            dao.learnWord(createTestWord("iPhone", "iphone", "en"))
+    fun `removeWord returns 0 for missing word`() = runTest {
+        val rowsAffected = dao.removeWord("en", "missing")
 
-            val retrieved = dao.findExactWord("en", "iphone")
-            assertEquals("iPhone", retrieved?.word)
-        }
+        assertEquals(0, rowsAffected)
+    }
 
     @Test
-    fun `learnWord keeps same casing stable across repeated learns`() =
-        runTest {
-            repeat(10) {
-                dao.learnWord(createTestWord("hello", "hello", "en"))
-            }
+    fun `removeWordComplete removes from both tables`() = runTest {
+        val word = createTestWord("hello", "hello", "en")
+        dao.learnWord(word)
 
-            val retrieved = dao.findExactWord("en", "hello")
-            assertEquals("hello", retrieved?.word)
-            assertEquals(10, retrieved?.frequency)
-        }
+        val rowsAffected = dao.removeWordComplete("en", "hello")
+
+        assertEquals(1, rowsAffected)
+        assertNull(dao.findExactWord("en", "hello"))
+    }
 
     @Test
-    fun `importWordWithMerge promotes camelCase casing`() =
-        runTest {
-            dao.insertWord(createTestWord("iphone", "iphone", "en", frequency = 50))
+    fun `clearLanguage removes all words for language`() = runTest {
+        dao.insertWord(createTestWord("hello", "hello", "en"))
+        dao.insertWord(createTestWord("world", "world", "en"))
+        dao.insertWord(createTestWord("hej", "hej", "sv"))
 
-            val imported = createTestWord("iPhone", "iphone", "en", frequency = 3)
-            dao.importWordWithMerge(imported)
+        val rowsAffected = dao.clearLanguage("en")
 
-            val retrieved = dao.findExactWord("en", "iphone")
-            assertEquals("iPhone", retrieved?.word)
-            assertEquals(53, retrieved?.frequency)
+        assertEquals(2, rowsAffected)
+        assertEquals(0, dao.getWordCount("en"))
+        assertEquals(1, dao.getWordCount("sv"))
+    }
+
+    @Test
+    fun `cleanupLowFrequencyWords removes old single-use words`() = runTest {
+        val old = System.currentTimeMillis() - 100000
+        val recent = System.currentTimeMillis()
+
+        dao.insertWord(createTestWord("old", "old", "en", frequency = 1, lastUsed = old))
+        dao.insertWord(createTestWord("recent", "recent", "en", frequency = 1, lastUsed = recent))
+        dao.insertWord(createTestWord("frequent", "frequent", "en", frequency = 5, lastUsed = old))
+
+        val cutoff = System.currentTimeMillis() - 50000
+        val rowsAffected = dao.cleanupLowFrequencyWords(cutoff)
+
+        assertEquals(1, rowsAffected)
+        assertNull(dao.findExactWord("en", "old"))
+        assertNotNull(dao.findExactWord("en", "recent"))
+        assertNotNull(dao.findExactWord("en", "frequent"))
+    }
+
+    @Test
+    fun `getWordCount returns correct count`() = runTest {
+        dao.insertWord(createTestWord("hello", "hello", "en"))
+        dao.insertWord(createTestWord("world", "world", "en"))
+
+        assertEquals(2, dao.getWordCount("en"))
+    }
+
+    @Test
+    fun `getTotalWordCount returns all words`() = runTest {
+        dao.insertWord(createTestWord("hello", "hello", "en"))
+        dao.insertWord(createTestWord("hej", "hej", "sv"))
+
+        assertEquals(2, dao.getTotalWordCount())
+    }
+
+    @Test
+    fun `getMostFrequentWords returns top words`() = runTest {
+        dao.insertWord(createTestWord("rare", "rare", "en", frequency = 1))
+        dao.insertWord(createTestWord("common", "common", "en", frequency = 10))
+        dao.insertWord(createTestWord("medium", "medium", "en", frequency = 5))
+
+        val results = dao.getMostFrequentWords("en", 2)
+
+        assertEquals(2, results.size)
+        assertEquals("common", results[0].word)
+        assertEquals("medium", results[1].word)
+    }
+
+    @Test
+    fun `getWordCountsBySource groups correctly`() = runTest {
+        dao.insertWord(createTestWord("typed1", "typed1", "en", source = WordSource.USER_TYPED))
+        dao.insertWord(createTestWord("typed2", "typed2", "en", source = WordSource.USER_TYPED))
+        dao.insertWord(createTestWord("swiped1", "swiped1", "en", source = WordSource.SWIPE_LEARNED))
+
+        val results = dao.getWordCountsBySource()
+
+        assertEquals(2, results.size)
+        val typedCount = results.find { it.source == WordSource.USER_TYPED }?.count
+        val swipedCount = results.find { it.source == WordSource.SWIPE_LEARNED }?.count
+        assertEquals(2, typedCount)
+        assertEquals(1, swipedCount)
+    }
+
+    @Test
+    fun `learnWord promotes camelCase over lowercase`() = runTest {
+        dao.learnWord(createTestWord("iphone", "iphone", "en"))
+        dao.learnWord(createTestWord("iPhone", "iphone", "en"))
+
+        val retrieved = dao.findExactWord("en", "iphone")
+        assertEquals("iPhone", retrieved?.word)
+        assertEquals(2, retrieved?.frequency)
+    }
+
+    @Test
+    fun `learnWord promotes title case over lowercase`() = runTest {
+        dao.learnWord(createTestWord("maryland", "maryland", "en"))
+        dao.learnWord(createTestWord("Maryland", "maryland", "en"))
+
+        val retrieved = dao.findExactWord("en", "maryland")
+        assertEquals("Maryland", retrieved?.word)
+        assertEquals(2, retrieved?.frequency)
+    }
+
+    @Test
+    fun `learnWord does not demote camelCase to lowercase`() = runTest {
+        dao.learnWord(createTestWord("iPhone", "iphone", "en"))
+        dao.learnWord(createTestWord("iphone", "iphone", "en"))
+
+        val retrieved = dao.findExactWord("en", "iphone")
+        assertEquals("iPhone", retrieved?.word)
+        assertEquals(2, retrieved?.frequency)
+    }
+
+    @Test
+    fun `learnWord does not demote McLaren to lowercase`() = runTest {
+        dao.learnWord(createTestWord("McLaren", "mclaren", "en"))
+        repeat(5) {
+            dao.learnWord(createTestWord("mclaren", "mclaren", "en"))
         }
+
+        val retrieved = dao.findExactWord("en", "mclaren")
+        assertEquals("McLaren", retrieved?.word)
+        assertEquals(6, retrieved?.frequency)
+    }
+
+    @Test
+    fun `learnWord promotes short acronym over lowercase`() = runTest {
+        dao.learnWord(createTestWord("api", "api", "en"))
+        dao.learnWord(createTestWord("API", "api", "en"))
+
+        val retrieved = dao.findExactWord("en", "api")
+        assertEquals("API", retrieved?.word)
+    }
+
+    @Test
+    fun `learnWord promotes long ALL CAPS over lowercase`() = runTest {
+        dao.learnWord(createTestWord("guhh", "guhh", "en"))
+        dao.learnWord(createTestWord("GUHH", "guhh", "en"))
+
+        val retrieved = dao.findExactWord("en", "guhh")
+        assertEquals("GUHH", retrieved?.word)
+    }
+
+    @Test
+    fun `learnWord does not demote ALL CAPS to lowercase`() = runTest {
+        dao.learnWord(createTestWord("NASA", "nasa", "en"))
+        dao.learnWord(createTestWord("nasa", "nasa", "en"))
+
+        val retrieved = dao.findExactWord("en", "nasa")
+        assertEquals("NASA", retrieved?.word)
+    }
+
+    @Test
+    fun `learnWord promotes camelCase over ALL CAPS`() = runTest {
+        dao.learnWord(createTestWord("IPHONE", "iphone", "en"))
+        dao.learnWord(createTestWord("iPhone", "iphone", "en"))
+
+        val retrieved = dao.findExactWord("en", "iphone")
+        assertEquals("iPhone", retrieved?.word)
+    }
+
+    @Test
+    fun `learnWord promotes camelCase over title case`() = runTest {
+        dao.learnWord(createTestWord("Iphone", "iphone", "en"))
+        dao.learnWord(createTestWord("iPhone", "iphone", "en"))
+
+        val retrieved = dao.findExactWord("en", "iphone")
+        assertEquals("iPhone", retrieved?.word)
+    }
+
+    @Test
+    fun `learnWord keeps same casing stable across repeated learns`() = runTest {
+        repeat(10) {
+            dao.learnWord(createTestWord("hello", "hello", "en"))
+        }
+
+        val retrieved = dao.findExactWord("en", "hello")
+        assertEquals("hello", retrieved?.word)
+        assertEquals(10, retrieved?.frequency)
+    }
+
+    @Test
+    fun `importWordWithMerge promotes camelCase casing`() = runTest {
+        dao.insertWord(createTestWord("iphone", "iphone", "en", frequency = 50))
+
+        val imported = createTestWord("iPhone", "iphone", "en", frequency = 3)
+        dao.importWordWithMerge(imported)
+
+        val retrieved = dao.findExactWord("en", "iphone")
+        assertEquals("iPhone", retrieved?.word)
+        assertEquals(53, retrieved?.frequency)
+    }
 
     @Test
     fun `casingIntentScore scores lowercase as 0`() {
@@ -622,17 +579,16 @@ class LearnedWordDaoTest {
     }
 
     @Test
-    fun `importWordWithMerge does not demote camelCase`() =
-        runTest {
-            dao.insertWord(createTestWord("iPhone", "iphone", "en", frequency = 50))
+    fun `importWordWithMerge does not demote camelCase`() = runTest {
+        dao.insertWord(createTestWord("iPhone", "iphone", "en", frequency = 50))
 
-            val imported = createTestWord("iphone", "iphone", "en", frequency = 100)
-            dao.importWordWithMerge(imported)
+        val imported = createTestWord("iphone", "iphone", "en", frequency = 100)
+        dao.importWordWithMerge(imported)
 
-            val retrieved = dao.findExactWord("en", "iphone")
-            assertEquals("iPhone", retrieved?.word)
-            assertEquals(150, retrieved?.frequency)
-        }
+        val retrieved = dao.findExactWord("en", "iphone")
+        assertEquals("iPhone", retrieved?.word)
+        assertEquals(150, retrieved?.frequency)
+    }
 
     /**
      * Creates test word with defaults for frequency, source, and timestamps.
@@ -643,15 +599,14 @@ class LearnedWordDaoTest {
         languageTag: String,
         frequency: Int = 1,
         source: WordSource = WordSource.USER_TYPED,
-        lastUsed: Long = System.currentTimeMillis(),
-    ): LearnedWord =
-        LearnedWord.create(
-            word = word,
-            wordNormalized = wordNormalized,
-            languageTag = languageTag,
-            frequency = frequency,
-            source = source,
-            createdAt = System.currentTimeMillis(),
-            lastUsed = lastUsed,
-        )
+        lastUsed: Long = System.currentTimeMillis()
+    ): LearnedWord = LearnedWord.create(
+        word = word,
+        wordNormalized = wordNormalized,
+        languageTag = languageTag,
+        frequency = frequency,
+        source = source,
+        createdAt = System.currentTimeMillis(),
+        lastUsed = lastUsed
+    )
 }

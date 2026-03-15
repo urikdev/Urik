@@ -17,6 +17,7 @@ import com.urik.keyboard.service.WordNormalizer
 import com.urik.keyboard.settings.KeyboardSettings
 import com.urik.keyboard.settings.SettingsRepository
 import com.urik.keyboard.utils.CacheMemoryManager
+import java.io.ByteArrayInputStream
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -38,7 +39,6 @@ import org.mockito.kotlin.spy
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
-import java.io.ByteArrayInputStream
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
@@ -61,85 +61,84 @@ class InputProcessingIntegrationTest {
         """.trimIndent()
 
     @Before
-    fun setup() =
-        runTest(testDispatcher) {
-            Dispatchers.setMain(testDispatcher)
+    fun setup() = runTest(testDispatcher) {
+        Dispatchers.setMain(testDispatcher)
 
-            context = RuntimeEnvironment.getApplication()
+        context = RuntimeEnvironment.getApplication()
 
-            val mockAssets = mock<AssetManager>()
-            whenever(mockAssets.open(any())).thenAnswer {
-                when {
-                    it.getArgument<String>(0).contains("_symspell.txt") -> {
-                        ByteArrayInputStream(testDictionary.toByteArray())
-                    }
+        val mockAssets = mock<AssetManager>()
+        whenever(mockAssets.open(any())).thenAnswer {
+            when {
+                it.getArgument<String>(0).contains("_symspell.txt") -> {
+                    ByteArrayInputStream(testDictionary.toByteArray())
+                }
 
-                    else -> {
-                        throw java.io.FileNotFoundException()
-                    }
+                else -> {
+                    throw java.io.FileNotFoundException()
                 }
             }
-            val mockContext = spy(context)
-            whenever(mockContext.assets).thenReturn(mockAssets)
-
-            database =
-                Room
-                    .inMemoryDatabaseBuilder(context, KeyboardDatabase::class.java)
-                    .allowMainThreadQueries()
-                    .setTransactionExecutor { it.run() }
-                    .setQueryExecutor { it.run() }
-                    .build()
-
-            cacheMemoryManager = CacheMemoryManager(context)
-
-            val settingsFlow = MutableStateFlow(KeyboardSettings())
-            settingsRepository = mock()
-            whenever(settingsRepository.settings).thenReturn(settingsFlow)
-
-            languageManager = LanguageManager(settingsRepository)
-            languageManager.initialize()
-
-            val wordNormalizer = WordNormalizer()
-            val wordFrequencyRepository =
-                WordFrequencyRepository(
-                    database.userWordFrequencyDao(),
-                    database.userWordBigramDao(),
-                    wordNormalizer,
-                    cacheMemoryManager,
-                    testDispatcher,
-                    testDispatcher,
-                )
-
-            wordLearningEngine =
-                WordLearningEngine(
-                    database.learnedWordDao(),
-                    languageManager,
-                    wordNormalizer,
-                    settingsRepository,
-                    cacheMemoryManager,
-                    testDispatcher,
-                    testDispatcher,
-                    testDispatcher,
-                )
-
-            spellCheckManager =
-                SpellCheckManager(
-                    mockContext,
-                    languageManager,
-                    wordLearningEngine,
-                    wordFrequencyRepository,
-                    wordNormalizer,
-                    cacheMemoryManager,
-                    testDispatcher,
-                )
-
-            textInputProcessor =
-                TextInputProcessor(
-                    spellCheckManager,
-                    settingsRepository,
-                    cacheMemoryManager,
-                )
         }
+        val mockContext = spy(context)
+        whenever(mockContext.assets).thenReturn(mockAssets)
+
+        database =
+            Room
+                .inMemoryDatabaseBuilder(context, KeyboardDatabase::class.java)
+                .allowMainThreadQueries()
+                .setTransactionExecutor { it.run() }
+                .setQueryExecutor { it.run() }
+                .build()
+
+        cacheMemoryManager = CacheMemoryManager(context)
+
+        val settingsFlow = MutableStateFlow(KeyboardSettings())
+        settingsRepository = mock()
+        whenever(settingsRepository.settings).thenReturn(settingsFlow)
+
+        languageManager = LanguageManager(settingsRepository)
+        languageManager.initialize()
+
+        val wordNormalizer = WordNormalizer()
+        val wordFrequencyRepository =
+            WordFrequencyRepository(
+                database.userWordFrequencyDao(),
+                database.userWordBigramDao(),
+                wordNormalizer,
+                cacheMemoryManager,
+                testDispatcher,
+                testDispatcher
+            )
+
+        wordLearningEngine =
+            WordLearningEngine(
+                database.learnedWordDao(),
+                languageManager,
+                wordNormalizer,
+                settingsRepository,
+                cacheMemoryManager,
+                testDispatcher,
+                testDispatcher,
+                testDispatcher
+            )
+
+        spellCheckManager =
+            SpellCheckManager(
+                mockContext,
+                languageManager,
+                wordLearningEngine,
+                wordFrequencyRepository,
+                wordNormalizer,
+                cacheMemoryManager,
+                testDispatcher
+            )
+
+        textInputProcessor =
+            TextInputProcessor(
+                spellCheckManager,
+                settingsRepository,
+                cacheMemoryManager
+            )
+    }
 
     @After
     fun teardown() {
@@ -149,213 +148,198 @@ class InputProcessingIntegrationTest {
     }
 
     @Test
-    fun `learned word immediately available in spell check without manual cache clear`() =
-        runTest(testDispatcher) {
-            assertFalse(spellCheckManager.isWordInDictionary("custom"))
+    fun `learned word immediately available in spell check without manual cache clear`() = runTest(testDispatcher) {
+        assertFalse(spellCheckManager.isWordInDictionary("custom"))
 
-            wordLearningEngine.learnWord("custom", InputMethod.TYPED)
+        wordLearningEngine.learnWord("custom", InputMethod.TYPED)
 
+        assertTrue(
+            "Learned word should be immediately found via cache invalidation",
+            spellCheckManager.isWordInDictionary("custom")
+        )
+    }
+
+    @Test
+    fun `learned word appears in suggestions without manual cache clear`() = runTest(testDispatcher) {
+        wordLearningEngine.learnWord("customword", InputMethod.TYPED)
+        wordLearningEngine.learnWord("customword", InputMethod.TYPED)
+        wordLearningEngine.learnWord("customword", InputMethod.TYPED)
+
+        val suggestions = spellCheckManager.generateSuggestions("custom", 5)
+
+        assertTrue(
+            "Cache should auto-invalidate, learned word should appear",
+            suggestions.contains("customword")
+        )
+    }
+
+    @Test
+    fun `normalization consistent between WordLearningEngine and SpellCheckManager`() = runTest(testDispatcher) {
+        wordLearningEngine.learnWord("TestWord", InputMethod.TYPED)
+
+        assertTrue(spellCheckManager.isWordInDictionary("testword"))
+        assertTrue(spellCheckManager.isWordInDictionary("TESTWORD"))
+        assertTrue(spellCheckManager.isWordInDictionary("TestWord"))
+    }
+
+    @Test
+    fun `whitespace handling consistent across all components`() = runTest(testDispatcher) {
+        wordLearningEngine.learnWord("  spaced  ", InputMethod.TYPED)
+
+        assertTrue(spellCheckManager.isWordInDictionary("spaced"))
+        assertTrue(wordLearningEngine.isWordLearned("  spaced  "))
+    }
+
+    @Test
+    fun `rapid sequential operations coordinate without races`() = runTest(testDispatcher) {
+        val words = listOf("rapid1", "rapid2", "rapid3", "rapid4", "rapid5")
+
+        words.forEach { wordLearningEngine.learnWord(it, InputMethod.TYPED) }
+
+        val results = spellCheckManager.areWordsInDictionary(words)
+
+        assertTrue(
+            "All rapidly learned words should be immediately queryable",
+            results.all { it.value }
+        )
+    }
+
+    @Test
+    fun `concurrent write and read operations dont race`() = runTest(testDispatcher) {
+        wordLearningEngine.learnWord("concurrent", InputMethod.TYPED)
+
+        val suggestions = spellCheckManager.generateSuggestions("concur", 3)
+
+        assertNotNull("Concurrent operations should complete without race", suggestions)
+    }
+
+    @Test
+    fun `learned word with high frequency beats dictionary word in confidence`() = runTest(testDispatcher) {
+        wordLearningEngine.learnWord("helloworld", InputMethod.TYPED)
+        repeat(10) { wordLearningEngine.learnWord("helloworld", InputMethod.TYPED) }
+
+        val suggestions = spellCheckManager.getSpellingSuggestionsWithConfidence("hello")
+
+        val learned = suggestions.find { it.word == "helloworld" && it.source == "learned" }
+        val dictionary = suggestions.find { it.word == "hello" && it.source == "symspell" }
+
+        assertNotNull(learned)
+        assertNotNull(dictionary)
+
+        if (learned != null && dictionary != null) {
             assertTrue(
-                "Learned word should be immediately found via cache invalidation",
-                spellCheckManager.isWordInDictionary("custom"),
+                "Learned word confidence (${learned.confidence}) > dictionary (${dictionary.confidence})",
+                learned.confidence > dictionary.confidence
             )
         }
+    }
 
     @Test
-    fun `learned word appears in suggestions without manual cache clear`() =
-        runTest(testDispatcher) {
-            wordLearningEngine.learnWord("customword", InputMethod.TYPED)
-            wordLearningEngine.learnWord("customword", InputMethod.TYPED)
-            wordLearningEngine.learnWord("customword", InputMethod.TYPED)
+    fun `frequency affects ranking with real Room data`() = runTest(testDispatcher) {
+        wordLearningEngine.learnWord("freq1", InputMethod.TYPED)
+        wordLearningEngine.learnWord("freq1", InputMethod.TYPED)
 
-            val suggestions = spellCheckManager.generateSuggestions("custom", 5)
+        wordLearningEngine.learnWord("freq2", InputMethod.TYPED)
+        repeat(20) { wordLearningEngine.learnWord("freq2", InputMethod.TYPED) }
 
-            assertTrue(
-                "Cache should auto-invalidate, learned word should appear",
-                suggestions.contains("customword"),
-            )
-        }
+        val suggestions = spellCheckManager.getSpellingSuggestionsWithConfidence("fre")
 
-    @Test
-    fun `normalization consistent between WordLearningEngine and SpellCheckManager`() =
-        runTest(testDispatcher) {
-            wordLearningEngine.learnWord("TestWord", InputMethod.TYPED)
+        val freq1Idx = suggestions.indexOfFirst { it.word == "freq1" }
+        val freq2Idx = suggestions.indexOfFirst { it.word == "freq2" }
 
-            assertTrue(spellCheckManager.isWordInDictionary("testword"))
-            assertTrue(spellCheckManager.isWordInDictionary("TESTWORD"))
-            assertTrue(spellCheckManager.isWordInDictionary("TestWord"))
-        }
+        assertTrue(
+            "Higher frequency word ranks higher ($freq2Idx < $freq1Idx)",
+            freq2Idx < freq1Idx
+        )
+    }
 
     @Test
-    fun `whitespace handling consistent across all components`() =
-        runTest(testDispatcher) {
-            wordLearningEngine.learnWord("  spaced  ", InputMethod.TYPED)
+    fun `full pipeline - misspelling corrected with learned word`() = runTest(testDispatcher) {
+        wordLearningEngine.learnWord("correct", InputMethod.TYPED)
+        wordLearningEngine.learnWord("correct", InputMethod.TYPED)
 
-            assertTrue(spellCheckManager.isWordInDictionary("spaced"))
-            assertTrue(wordLearningEngine.isWordLearned("  spaced  "))
-        }
+        val result = textInputProcessor.processCharacterInput("t", "corect", InputMethod.TYPED)
 
-    @Test
-    fun `rapid sequential operations coordinate without races`() =
-        runTest(testDispatcher) {
-            val words = listOf("rapid1", "rapid2", "rapid3", "rapid4", "rapid5")
-
-            words.forEach { wordLearningEngine.learnWord(it, InputMethod.TYPED) }
-
-            val results = spellCheckManager.areWordsInDictionary(words)
-
-            assertTrue(
-                "All rapidly learned words should be immediately queryable",
-                results.all { it.value },
-            )
-        }
+        assertTrue(result is ProcessingResult.Success)
+        val success = result as ProcessingResult.Success
+        assertFalse(success.wordState.isValid)
+        assertTrue(
+            "Pipeline should surface learned word as suggestion",
+            success.wordState.suggestions.any { it.word == "correct" }
+        )
+    }
 
     @Test
-    fun `concurrent write and read operations dont race`() =
-        runTest(testDispatcher) {
-            wordLearningEngine.learnWord("concurrent", InputMethod.TYPED)
+    fun `full pipeline - learned word validates during typing`() = runTest(testDispatcher) {
+        wordLearningEngine.learnWord("learned", InputMethod.TYPED)
 
-            val suggestions = spellCheckManager.generateSuggestions("concur", 3)
+        val result = textInputProcessor.processCharacterInput("d", "learned", InputMethod.TYPED)
 
-            assertNotNull("Concurrent operations should complete without race", suggestions)
-        }
-
-    @Test
-    fun `learned word with high frequency beats dictionary word in confidence`() =
-        runTest(testDispatcher) {
-            wordLearningEngine.learnWord("helloworld", InputMethod.TYPED)
-            repeat(10) { wordLearningEngine.learnWord("helloworld", InputMethod.TYPED) }
-
-            val suggestions = spellCheckManager.getSpellingSuggestionsWithConfidence("hello")
-
-            val learned = suggestions.find { it.word == "helloworld" && it.source == "learned" }
-            val dictionary = suggestions.find { it.word == "hello" && it.source == "symspell" }
-
-            assertNotNull(learned)
-            assertNotNull(dictionary)
-
-            if (learned != null && dictionary != null) {
-                assertTrue(
-                    "Learned word confidence (${learned.confidence}) > dictionary (${dictionary.confidence})",
-                    learned.confidence > dictionary.confidence,
-                )
-            }
-        }
+        assertTrue(result is ProcessingResult.Success)
+        val success = result as ProcessingResult.Success
+        assertTrue(
+            "Learned word should validate through full pipeline",
+            success.wordState.isValid
+        )
+    }
 
     @Test
-    fun `frequency affects ranking with real Room data`() =
-        runTest(testDispatcher) {
-            wordLearningEngine.learnWord("freq1", InputMethod.TYPED)
-            wordLearningEngine.learnWord("freq1", InputMethod.TYPED)
+    fun `Room transaction commits immediately - no lag`() = runTest(testDispatcher) {
+        val word = "immediate"
 
-            wordLearningEngine.learnWord("freq2", InputMethod.TYPED)
-            repeat(20) { wordLearningEngine.learnWord("freq2", InputMethod.TYPED) }
+        wordLearningEngine.learnWord(word, InputMethod.TYPED)
+        val found = wordLearningEngine.isWordLearned(word)
 
-            val suggestions = spellCheckManager.getSpellingSuggestionsWithConfidence("fre")
-
-            val freq1Idx = suggestions.indexOfFirst { it.word == "freq1" }
-            val freq2Idx = suggestions.indexOfFirst { it.word == "freq2" }
-
-            assertTrue(
-                "Higher frequency word ranks higher ($freq2Idx < $freq1Idx)",
-                freq2Idx < freq1Idx,
-            )
-        }
+        assertTrue("Word available immediately, no commit lag", found)
+    }
 
     @Test
-    fun `full pipeline - misspelling corrected with learned word`() =
-        runTest(testDispatcher) {
-            wordLearningEngine.learnWord("correct", InputMethod.TYPED)
-            wordLearningEngine.learnWord("correct", InputMethod.TYPED)
+    fun `batch operations maintain transactional consistency`() = runTest(testDispatcher) {
+        val words = listOf("batch1", "batch2", "batch3")
 
-            val result = textInputProcessor.processCharacterInput("t", "corect", InputMethod.TYPED)
+        words.forEach { wordLearningEngine.learnWord(it, InputMethod.TYPED) }
 
-            assertTrue(result is ProcessingResult.Success)
-            val success = result as ProcessingResult.Success
-            assertFalse(success.wordState.isValid)
-            assertTrue(
-                "Pipeline should surface learned word as suggestion",
-                success.wordState.suggestions.any { it.word == "correct" },
-            )
-        }
+        val results = wordLearningEngine.areWordsLearned(words)
+
+        assertEquals(3, results.size)
+        assertTrue("All batch words committed consistently", results.all { it.value })
+    }
 
     @Test
-    fun `full pipeline - learned word validates during typing`() =
-        runTest(testDispatcher) {
-            wordLearningEngine.learnWord("learned", InputMethod.TYPED)
+    fun `SpellCheckManager and WordLearningEngine agree on word existence`() = runTest(testDispatcher) {
+        val input = "  MiXeD CaSe  "
 
-            val result = textInputProcessor.processCharacterInput("d", "learned", InputMethod.TYPED)
+        wordLearningEngine.learnWord(input, InputMethod.TYPED)
 
-            assertTrue(result is ProcessingResult.Success)
-            val success = result as ProcessingResult.Success
-            assertTrue(
-                "Learned word should validate through full pipeline",
-                success.wordState.isValid,
-            )
-        }
+        val normalized = input.trim().lowercase()
+        val spellCheckSays = spellCheckManager.isWordInDictionary(normalized)
+        val learningSays = wordLearningEngine.isWordLearned(normalized)
+
+        assertEquals("Components must agree on word existence", spellCheckSays, learningSays)
+    }
 
     @Test
-    fun `Room transaction commits immediately - no lag`() =
-        runTest(testDispatcher) {
-            val word = "immediate"
+    fun `DAO learnWord transaction increments frequency on duplicate`() = runTest(testDispatcher) {
+        wordLearningEngine.learnWord("repeated", InputMethod.TYPED)
+        wordLearningEngine.learnWord("repeated", InputMethod.TYPED)
+        wordLearningEngine.learnWord("repeated", InputMethod.TYPED)
 
-            wordLearningEngine.learnWord(word, InputMethod.TYPED)
-            val found = wordLearningEngine.isWordLearned(word)
+        val word = database.learnedWordDao().findExactWord("en", "repeated")
 
-            assertTrue("Word available immediately, no commit lag", found)
-        }
-
-    @Test
-    fun `batch operations maintain transactional consistency`() =
-        runTest(testDispatcher) {
-            val words = listOf("batch1", "batch2", "batch3")
-
-            words.forEach { wordLearningEngine.learnWord(it, InputMethod.TYPED) }
-
-            val results = wordLearningEngine.areWordsLearned(words)
-
-            assertEquals(3, results.size)
-            assertTrue("All batch words committed consistently", results.all { it.value })
-        }
+        assertNotNull(word)
+        assertTrue("Frequency should increment through DAO transaction", word!!.frequency > 1)
+    }
 
     @Test
-    fun `SpellCheckManager and WordLearningEngine agree on word existence`() =
-        runTest(testDispatcher) {
-            val input = "  MiXeD CaSe  "
+    fun `database errors propagate gracefully through all layers`() = runTest(testDispatcher) {
+        database.close()
 
-            wordLearningEngine.learnWord(input, InputMethod.TYPED)
+        val dictResult = spellCheckManager.isWordInDictionary("test")
+        val learnResult = wordLearningEngine.learnWord("test", InputMethod.TYPED)
+        val processResult = textInputProcessor.processCharacterInput("t", "test", InputMethod.TYPED)
 
-            val normalized = input.trim().lowercase()
-            val spellCheckSays = spellCheckManager.isWordInDictionary(normalized)
-            val learningSays = wordLearningEngine.isWordLearned(normalized)
-
-            assertEquals("Components must agree on word existence", spellCheckSays, learningSays)
-        }
-
-    @Test
-    fun `DAO learnWord transaction increments frequency on duplicate`() =
-        runTest(testDispatcher) {
-            wordLearningEngine.learnWord("repeated", InputMethod.TYPED)
-            wordLearningEngine.learnWord("repeated", InputMethod.TYPED)
-            wordLearningEngine.learnWord("repeated", InputMethod.TYPED)
-
-            val word = database.learnedWordDao().findExactWord("en", "repeated")
-
-            assertNotNull(word)
-            assertTrue("Frequency should increment through DAO transaction", word!!.frequency > 1)
-        }
-
-    @Test
-    fun `database errors propagate gracefully through all layers`() =
-        runTest(testDispatcher) {
-            database.close()
-
-            val dictResult = spellCheckManager.isWordInDictionary("test")
-            val learnResult = wordLearningEngine.learnWord("test", InputMethod.TYPED)
-            val processResult = textInputProcessor.processCharacterInput("t", "test", InputMethod.TYPED)
-
-            assertNotNull("All operations complete despite DB errors", dictResult)
-            assertNotNull(learnResult)
-            assertNotNull(processResult)
-        }
+        assertNotNull("All operations complete despite DB errors", dictResult)
+        assertNotNull(learnResult)
+        assertNotNull(processResult)
+    }
 }

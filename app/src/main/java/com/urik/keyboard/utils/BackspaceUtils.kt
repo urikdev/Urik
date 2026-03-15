@@ -23,10 +23,7 @@ object BackspaceUtils {
         return text.length - previousBoundary
     }
 
-    fun deleteGraphemeClusterBeforePosition(
-        text: String,
-        codeUnitPosition: Int,
-    ): String {
+    fun deleteGraphemeClusterBeforePosition(text: String, codeUnitPosition: Int): String {
         if (text.isEmpty() || codeUnitPosition <= 0 || codeUnitPosition > text.length) return text
 
         val textBeforePosition = text.take(codeUnitPosition)
@@ -59,25 +56,20 @@ object BackspaceUtils {
         return Pair(wordBeforeCursor, lastWordBoundary)
     }
 
-    fun shouldDeleteTrailingSpace(
-        textBeforeCursor: String,
-        wordLength: Int,
-    ): Boolean {
+    fun shouldDeleteTrailingSpace(textBeforeCursor: String, wordLength: Int): Boolean {
         if (textBeforeCursor.length <= wordLength) return false
 
         val charBeforeWord = textBeforeCursor[textBeforeCursor.length - wordLength - 1]
         return charBeforeWord.isWhitespace() && charBeforeWord != '\n'
     }
 
-    fun calculateDeleteLength(
-        wordLength: Int,
-        shouldDeleteSpace: Boolean,
-    ): Int = if (shouldDeleteSpace) wordLength + 1 else wordLength
+    fun calculateDeleteLength(wordLength: Int, shouldDeleteSpace: Boolean): Int =
+        if (shouldDeleteSpace) wordLength + 1 else wordLength
 
     fun calculateComposingRegionAfterDeletion(
         textBeforeCursor: String,
         graphemeLength: Int,
-        cursorPositionBeforeDeletion: Int,
+        cursorPositionBeforeDeletion: Int
     ): Triple<Int, Int, String>? {
         if (textBeforeCursor.length < graphemeLength) return null
 

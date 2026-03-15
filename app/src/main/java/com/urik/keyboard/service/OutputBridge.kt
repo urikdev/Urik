@@ -15,54 +15,45 @@ class OutputBridge(
     private val state: InputStateManager,
     private val swipeDetector: SwipeDetector,
     private val swipeSpaceManager: SwipeSpaceManager,
-    private val icProvider: () -> InputConnection?,
+    private val icProvider: () -> InputConnection?
 ) {
     private val ic: InputConnection?
         get() = icProvider()
 
-    fun safeGetTextBeforeCursor(
-        length: Int,
-        flags: Int = 0,
-    ): String =
-        try {
-            ic
-                ?.getTextBeforeCursor(length, flags)
-                ?.toString()
-                ?.take(length)
-                ?: ""
-        } catch (_: Exception) {
-            ""
-        }
+    fun safeGetTextBeforeCursor(length: Int, flags: Int = 0): String = try {
+        ic
+            ?.getTextBeforeCursor(length, flags)
+            ?.toString()
+            ?.take(length)
+            ?: ""
+    } catch (_: Exception) {
+        ""
+    }
 
-    fun safeGetTextAfterCursor(
-        length: Int,
-        flags: Int = 0,
-    ): String =
-        try {
-            ic
-                ?.getTextAfterCursor(length, flags)
-                ?.toString()
-                ?.take(length)
-                ?: ""
-        } catch (_: Exception) {
-            ""
-        }
+    fun safeGetTextAfterCursor(length: Int, flags: Int = 0): String = try {
+        ic
+            ?.getTextAfterCursor(length, flags)
+            ?.toString()
+            ?.take(length)
+            ?: ""
+    } catch (_: Exception) {
+        ""
+    }
 
-    fun safeGetCursorPosition(maxChars: Int = MAX_CURSOR_POSITION_CHARS): Int =
-        try {
-            val extracted = ic?.getExtractedText(ExtractedTextRequest(), 0)
-            if (extracted != null && extracted.startOffset >= 0 && extracted.selectionStart >= 0) {
-                extracted.startOffset + extracted.selectionStart
-            } else {
-                ic
-                    ?.getTextBeforeCursor(maxChars, 0)
-                    ?.take(maxChars)
-                    ?.length
-                    ?: 0
-            }
-        } catch (_: Exception) {
-            0
+    fun safeGetCursorPosition(maxChars: Int = MAX_CURSOR_POSITION_CHARS): Int = try {
+        val extracted = ic?.getExtractedText(ExtractedTextRequest(), 0)
+        if (extracted != null && extracted.startOffset >= 0 && extracted.selectionStart >= 0) {
+            extracted.startOffset + extracted.selectionStart
+        } else {
+            ic
+                ?.getTextBeforeCursor(maxChars, 0)
+                ?.take(maxChars)
+                ?.length
+                ?: 0
         }
+    } catch (_: Exception) {
+        0
+    }
 
     fun highlightCurrentWord() {
         try {
@@ -73,14 +64,14 @@ class OutputBridge(
                     BackgroundColorSpan(Color.RED),
                     0,
                     state.displayBuffer.length,
-                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE,
+                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
                 )
 
                 spannableString.setSpan(
                     ForegroundColorSpan(Color.WHITE),
                     0,
                     state.displayBuffer.length,
-                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE,
+                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
                 )
 
                 ic?.beginBatchEdit()
@@ -140,7 +131,13 @@ class OutputBridge(
                     char.isWhitespace() || char == '\n' || CursorEditingUtils.isPunctuation(char)
                 }
             val wordAfter = if (wordAfterStart >= 0) textAfter.take(wordAfterStart) else textAfter
-            val trimmedWordAfter = if (wordAfter.isNotEmpty() && CursorEditingUtils.isValidTextInput(wordAfter)) wordAfter else ""
+            val trimmedWordAfter = if (wordAfter.isNotEmpty() &&
+                CursorEditingUtils.isValidTextInput(wordAfter)
+            ) {
+                wordAfter
+            } else {
+                ""
+            }
 
             val fullWord = wordBeforeInfo.first + trimmedWordAfter
             val wordStart = cursorPosition - wordBeforeInfo.first.length
@@ -204,10 +201,7 @@ class OutputBridge(
         ic?.finishComposingText()
     }
 
-    fun commitText(
-        text: String,
-        cursorPosition: Int = 1,
-    ) {
+    fun commitText(text: String, cursorPosition: Int = 1) {
         ic?.commitText(text, cursorPosition)
     }
 
@@ -219,42 +213,29 @@ class OutputBridge(
         ic?.endBatchEdit()
     }
 
-    fun setComposingText(
-        text: CharSequence,
-        newCursorPosition: Int = 1,
-    ) {
+    fun setComposingText(text: CharSequence, newCursorPosition: Int = 1) {
         ic?.setComposingText(text, newCursorPosition)
     }
 
-    fun setComposingRegion(
-        start: Int,
-        end: Int,
-    ) {
+    fun setComposingRegion(start: Int, end: Int) {
         ic?.setComposingRegion(start, end)
     }
 
-    fun deleteSurroundingText(
-        beforeLength: Int,
-        afterLength: Int,
-    ) {
+    fun deleteSurroundingText(beforeLength: Int, afterLength: Int) {
         ic?.deleteSurroundingText(beforeLength, afterLength)
     }
 
-    fun setSelection(
-        start: Int,
-        end: Int,
-    ) {
+    fun setSelection(start: Int, end: Int) {
         ic?.setSelection(start, end)
     }
 
     fun performEditorAction(actionCode: Int): Boolean = ic?.performEditorAction(actionCode) ?: false
 
-    fun getSelectedText(flags: Int = 0): CharSequence? =
-        try {
-            ic?.getSelectedText(flags)
-        } catch (_: Exception) {
-            null
-        }
+    fun getSelectedText(flags: Int = 0): CharSequence? = try {
+        ic?.getSelectedText(flags)
+    } catch (_: Exception) {
+        null
+    }
 
     fun updateLastCommittedWord(word: String) {
         swipeDetector.updateLastCommittedWord(word)
@@ -272,7 +253,7 @@ class OutputBridge(
 
     fun calculateParagraphBoundedComposingRegion(
         textBeforeCursor: String,
-        cursorPosition: Int,
+        cursorPosition: Int
     ): Triple<Int, Int, String>? {
         if (textBeforeCursor.isEmpty()) return null
 
@@ -312,13 +293,12 @@ class OutputBridge(
 }
 
 object EnglishPronounI {
-    fun capitalize(lowercaseWord: String): String? =
-        when (lowercaseWord) {
-            "i" -> "I"
-            "i'm" -> "I'm"
-            "i'll" -> "I'll"
-            "i've" -> "I've"
-            "i'd" -> "I'd"
-            else -> null
-        }
+    fun capitalize(lowercaseWord: String): String? = when (lowercaseWord) {
+        "i" -> "I"
+        "i'm" -> "I'm"
+        "i'll" -> "I'll"
+        "i've" -> "I've"
+        "i'd" -> "I'd"
+        else -> null
+    }
 }

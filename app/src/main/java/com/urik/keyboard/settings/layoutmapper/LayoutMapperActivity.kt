@@ -32,9 +32,9 @@ import com.urik.keyboard.model.KeyboardMode
 import com.urik.keyboard.settings.SettingsRepository
 import com.urik.keyboard.theme.ThemeManager
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class LayoutMapperActivity : AppCompatActivity() {
@@ -77,95 +77,96 @@ class LayoutMapperActivity : AppCompatActivity() {
         observeState()
     }
 
-    private fun createLayout(): LinearLayout =
-        LinearLayout(this).apply {
-            id = View.generateViewId()
-            orientation = LinearLayout.VERTICAL
-            layoutParams =
-                LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                )
+    private fun createLayout(): LinearLayout = LinearLayout(this).apply {
+        id = View.generateViewId()
+        orientation = LinearLayout.VERTICAL
+        layoutParams =
+            LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.MATCH_PARENT
+            )
 
-            val toolbar =
-                MaterialToolbar(context).apply {
-                    id = R.id.layout_mapper_toolbar
-                    layoutParams =
-                        LinearLayout.LayoutParams(
-                            LinearLayout.LayoutParams.MATCH_PARENT,
-                            resources.getDimensionPixelSize(
-                                androidx.appcompat.R.dimen.abc_action_bar_default_height_material,
-                            ),
+        val toolbar =
+            MaterialToolbar(context).apply {
+                id = R.id.layout_mapper_toolbar
+                layoutParams =
+                    LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        resources.getDimensionPixelSize(
+                            androidx.appcompat.R.dimen.abc_action_bar_default_height_material
                         )
-                }
-            addView(toolbar)
+                    )
+            }
+        addView(toolbar)
 
-            val scrollView =
-                ScrollView(context).apply {
-                    layoutParams =
-                        LinearLayout.LayoutParams(
-                            LinearLayout.LayoutParams.MATCH_PARENT,
-                            0,
-                            1f,
-                        )
+        val scrollView =
+            ScrollView(context).apply {
+                layoutParams =
+                    LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        0,
+                        1f
+                    )
 
-                    val contentLayout =
-                        LinearLayout(context).apply {
-                            orientation = LinearLayout.VERTICAL
-                            layoutParams =
-                                LinearLayout.LayoutParams(
-                                    LinearLayout.LayoutParams.MATCH_PARENT,
-                                    LinearLayout.LayoutParams.WRAP_CONTENT,
-                                )
-                            val padding = (16 * resources.displayMetrics.density).toInt()
-                            setPadding(padding, padding, padding, padding)
+                val contentLayout =
+                    LinearLayout(context).apply {
+                        orientation = LinearLayout.VERTICAL
+                        layoutParams =
+                            LinearLayout.LayoutParams(
+                                LinearLayout.LayoutParams.MATCH_PARENT,
+                                LinearLayout.LayoutParams.WRAP_CONTENT
+                            )
+                        val padding = (16 * resources.displayMetrics.density).toInt()
+                        setPadding(padding, padding, padding, padding)
 
-                            val instructionText =
-                                TextView(context).apply {
-                                    text = getString(R.string.layout_mapper_instructions)
-                                    textSize = 14f
-                                    layoutParams =
-                                        LinearLayout
-                                            .LayoutParams(
-                                                LinearLayout.LayoutParams.MATCH_PARENT,
-                                                LinearLayout.LayoutParams.WRAP_CONTENT,
-                                            ).apply {
-                                                bottomMargin = (16 * resources.displayMetrics.density).toInt()
-                                            }
-                                }
-                            addView(instructionText)
-
-                            keyboardContainer =
-                                FrameLayout(context).apply {
-                                    layoutParams =
-                                        LinearLayout.LayoutParams(
+                        val instructionText =
+                            TextView(context).apply {
+                                text = getString(R.string.layout_mapper_instructions)
+                                textSize = 14f
+                                layoutParams =
+                                    LinearLayout
+                                        .LayoutParams(
                                             LinearLayout.LayoutParams.MATCH_PARENT,
-                                            LinearLayout.LayoutParams.WRAP_CONTENT,
-                                        )
-                                }
-                            addView(keyboardContainer)
+                                            LinearLayout.LayoutParams.WRAP_CONTENT
+                                        ).apply {
+                                            bottomMargin = (16 * resources.displayMetrics.density).toInt()
+                                        }
+                            }
+                        addView(instructionText)
 
-                            val resetButton =
-                                MaterialButton(context).apply {
-                                    text = getString(R.string.layout_mapper_reset_all)
-                                    setTextColor(getThemeColor(com.google.android.material.R.attr.colorOnPrimaryContainer))
-                                    layoutParams =
-                                        LinearLayout
-                                            .LayoutParams(
-                                                LinearLayout.LayoutParams.WRAP_CONTENT,
-                                                LinearLayout.LayoutParams.WRAP_CONTENT,
-                                            ).apply {
-                                                topMargin = (24 * resources.displayMetrics.density).toInt()
-                                                gravity = Gravity.CENTER_HORIZONTAL
-                                            }
-                                    setOnClickListener { showResetConfirmation() }
-                                }
-                            addView(resetButton)
-                        }
-                    addView(contentLayout)
-                }
-            addView(scrollView)
-        }
+                        keyboardContainer =
+                            FrameLayout(context).apply {
+                                layoutParams =
+                                    LinearLayout.LayoutParams(
+                                        LinearLayout.LayoutParams.MATCH_PARENT,
+                                        LinearLayout.LayoutParams.WRAP_CONTENT
+                                    )
+                            }
+                        addView(keyboardContainer)
+
+                        val resetButton =
+                            MaterialButton(context).apply {
+                                text = getString(R.string.layout_mapper_reset_all)
+                                setTextColor(
+                                    getThemeColor(com.google.android.material.R.attr.colorOnPrimaryContainer)
+                                )
+                                layoutParams =
+                                    LinearLayout
+                                        .LayoutParams(
+                                            LinearLayout.LayoutParams.WRAP_CONTENT,
+                                            LinearLayout.LayoutParams.WRAP_CONTENT
+                                        ).apply {
+                                            topMargin = (24 * resources.displayMetrics.density).toInt()
+                                            gravity = Gravity.CENTER_HORIZONTAL
+                                        }
+                                setOnClickListener { showResetConfirmation() }
+                            }
+                        addView(resetButton)
+                    }
+                addView(contentLayout)
+            }
+        addView(scrollView)
+    }
 
     private suspend fun loadKeyboardLayout() {
         showNumberRow = settingsRepository.settings.first().showNumberRow
@@ -175,7 +176,7 @@ class LayoutMapperActivity : AppCompatActivity() {
                 .getLayoutForMode(
                     KeyboardMode.LETTERS,
                     ULocale.forLanguageTag("en"),
-                    KeyboardKey.ActionType.ENTER,
+                    KeyboardKey.ActionType.ENTER
                 ).getOrNull()
 
         if (layout != null) {
@@ -202,7 +203,7 @@ class LayoutMapperActivity : AppCompatActivity() {
                 onKeyClick = { keyValue ->
                     viewModel.selectKey(keyValue)
                     showMappingBottomSheet(keyValue)
-                },
+                }
             )
 
         keyboardContainer?.addView(keyboardView)
@@ -211,7 +212,7 @@ class LayoutMapperActivity : AppCompatActivity() {
     private fun updateKeyStates() {
         keyboardRenderer.updateMappings(
             mappings = viewModel.mappings.value,
-            theme = themeManager.currentTheme.value,
+            theme = themeManager.currentTheme.value
         )
     }
 
@@ -239,7 +240,7 @@ class LayoutMapperActivity : AppCompatActivity() {
                             LinearLayout
                                 .LayoutParams(
                                     LinearLayout.LayoutParams.MATCH_PARENT,
-                                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                                    LinearLayout.LayoutParams.WRAP_CONTENT
                                 ).apply {
                                     bottomMargin = (16 * density).toInt()
                                 }
@@ -252,7 +253,7 @@ class LayoutMapperActivity : AppCompatActivity() {
                             LinearLayout
                                 .LayoutParams(
                                     LinearLayout.LayoutParams.MATCH_PARENT,
-                                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                                    LinearLayout.LayoutParams.WRAP_CONTENT
                                 ).apply {
                                     bottomMargin = (16 * density).toInt()
                                 }
@@ -280,14 +281,16 @@ class LayoutMapperActivity : AppCompatActivity() {
                         layoutParams =
                             LinearLayout.LayoutParams(
                                 LinearLayout.LayoutParams.MATCH_PARENT,
-                                LinearLayout.LayoutParams.WRAP_CONTENT,
+                                LinearLayout.LayoutParams.WRAP_CONTENT
                             )
 
                         if (currentMapping != null) {
                             val removeButton =
                                 MaterialButton(context).apply {
                                     text = getString(R.string.layout_mapper_remove)
-                                    setTextColor(getThemeColor(com.google.android.material.R.attr.colorOnPrimaryContainer))
+                                    setTextColor(
+                                        getThemeColor(com.google.android.material.R.attr.colorOnPrimaryContainer)
+                                    )
                                     setOnClickListener {
                                         viewModel.removeMapping(keyValue)
                                         bottomSheet.dismiss()
@@ -304,7 +307,7 @@ class LayoutMapperActivity : AppCompatActivity() {
                                     LinearLayout
                                         .LayoutParams(
                                             LinearLayout.LayoutParams.WRAP_CONTENT,
-                                            LinearLayout.LayoutParams.WRAP_CONTENT,
+                                            LinearLayout.LayoutParams.WRAP_CONTENT
                                         ).apply {
                                             marginStart = (8 * density).toInt()
                                         }
@@ -374,27 +377,51 @@ class LayoutMapperActivity : AppCompatActivity() {
                     viewModel.events.collect { event ->
                         when (event) {
                             is LayoutMapperEvent.MappingSaved -> {
-                                Toast.makeText(this@LayoutMapperActivity, R.string.layout_mapper_saved, Toast.LENGTH_SHORT).show()
+                                Toast.makeText(
+                                    this@LayoutMapperActivity,
+                                    R.string.layout_mapper_saved,
+                                    Toast.LENGTH_SHORT
+                                ).show()
                             }
 
                             is LayoutMapperEvent.MappingRemoved -> {
-                                Toast.makeText(this@LayoutMapperActivity, R.string.layout_mapper_removed, Toast.LENGTH_SHORT).show()
+                                Toast.makeText(
+                                    this@LayoutMapperActivity,
+                                    R.string.layout_mapper_removed,
+                                    Toast.LENGTH_SHORT
+                                ).show()
                             }
 
                             is LayoutMapperEvent.AllMappingsCleared -> {
-                                Toast.makeText(this@LayoutMapperActivity, R.string.layout_mapper_cleared, Toast.LENGTH_SHORT).show()
+                                Toast.makeText(
+                                    this@LayoutMapperActivity,
+                                    R.string.layout_mapper_cleared,
+                                    Toast.LENGTH_SHORT
+                                ).show()
                             }
 
                             is LayoutMapperEvent.SaveFailed -> {
-                                Toast.makeText(this@LayoutMapperActivity, R.string.layout_mapper_save_failed, Toast.LENGTH_SHORT).show()
+                                Toast.makeText(
+                                    this@LayoutMapperActivity,
+                                    R.string.layout_mapper_save_failed,
+                                    Toast.LENGTH_SHORT
+                                ).show()
                             }
 
                             is LayoutMapperEvent.RemoveFailed -> {
-                                Toast.makeText(this@LayoutMapperActivity, R.string.layout_mapper_remove_failed, Toast.LENGTH_SHORT).show()
+                                Toast.makeText(
+                                    this@LayoutMapperActivity,
+                                    R.string.layout_mapper_remove_failed,
+                                    Toast.LENGTH_SHORT
+                                ).show()
                             }
 
                             is LayoutMapperEvent.ClearFailed -> {
-                                Toast.makeText(this@LayoutMapperActivity, R.string.layout_mapper_clear_failed, Toast.LENGTH_SHORT).show()
+                                Toast.makeText(
+                                    this@LayoutMapperActivity,
+                                    R.string.layout_mapper_clear_failed,
+                                    Toast.LENGTH_SHORT
+                                ).show()
                             }
                         }
                     }
@@ -411,17 +438,16 @@ class LayoutMapperActivity : AppCompatActivity() {
         }
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean =
-        when (item.itemId) {
-            android.R.id.home -> {
-                finish()
-                true
-            }
-
-            else -> {
-                super.onOptionsItemSelected(item)
-            }
+    override fun onOptionsItemSelected(item: MenuItem): Boolean = when (item.itemId) {
+        android.R.id.home -> {
+            finish()
+            true
         }
+
+        else -> {
+            super.onOptionsItemSelected(item)
+        }
+    }
 
     private fun getThemeColor(attr: Int): Int {
         val typedValue = android.util.TypedValue()
@@ -436,7 +462,7 @@ class LayoutMapperActivity : AppCompatActivity() {
             end: Int,
             dest: android.text.Spanned,
             dstart: Int,
-            dend: Int,
+            dend: Int
         ): CharSequence? {
             val resultText = dest.substring(0, dstart) + source.subSequence(start, end) + dest.substring(dend)
             val graphemeCount = countGraphemes(resultText)

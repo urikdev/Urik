@@ -19,5 +19,5 @@ data class ThemeColors(
     val focusIndicator: Int,
     val swipePrimary: Int,
     val swipeSecondary: Int,
-    val swipeCurrent: Int,
+    val swipeCurrent: Int
 )

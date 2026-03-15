@@ -21,13 +21,7 @@ import javax.crypto.spec.GCMParameterSpec
  * - Device lock screen required (enforces device-level security)
  *
  */
-class DatabaseSecurityManager(
-    private val context: Context,
-) {
-    companion object {
-        private val secureRandom = java.security.SecureRandom()
-    }
-
+class DatabaseSecurityManager(private val context: Context) {
     private val keyAlias = "urik_database_master_key"
     private val prefsFile = "urik_db_prefs"
     private val passphraseKey = "encrypted_passphrase"
@@ -75,7 +69,7 @@ class DatabaseSecurityManager(
                 component = "DatabaseSecurityManager",
                 severity = ErrorLogger.Severity.CRITICAL,
                 exception = e,
-                context = mapOf("operation" to "getDatabasePassphrase"),
+                context = mapOf("operation" to "getDatabasePassphrase")
             )
             null
         }
@@ -127,7 +121,7 @@ class DatabaseSecurityManager(
                 component = "DatabaseSecurityManager",
                 severity = ErrorLogger.Severity.CRITICAL,
                 exception = e,
-                context = mapOf("operation" to "retrieveStoredPassphrase"),
+                context = mapOf("operation" to "retrieveStoredPassphrase")
             )
             null
         }
@@ -137,14 +131,14 @@ class DatabaseSecurityManager(
         val keyGenerator =
             KeyGenerator.getInstance(
                 KeyProperties.KEY_ALGORITHM_AES,
-                "AndroidKeyStore",
+                "AndroidKeyStore"
             )
 
         val keyGenParameterSpec =
             KeyGenParameterSpec
                 .Builder(
                     keyAlias,
-                    KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT,
+                    KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
                 ).apply {
                     setBlockModes(KeyProperties.BLOCK_MODE_GCM)
                     setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
@@ -194,11 +188,13 @@ class DatabaseSecurityManager(
                     null,
                     net.zetetic.database.sqlcipher.SQLiteDatabase.OPEN_READWRITE,
                     null,
-                    null,
+                    null
                 )
 
             unencryptedDb.use { unencryptedDb ->
-                unencryptedDb.execSQL("ATTACH DATABASE '${tempDbPath.absolutePath}' AS encrypted KEY \"x'$passphraseString'\"")
+                unencryptedDb.execSQL(
+                    "ATTACH DATABASE '${tempDbPath.absolutePath}' AS encrypted KEY \"x'$passphraseString'\""
+                )
                 unencryptedDb.rawQuery("SELECT sqlcipher_export('encrypted')", null)?.use { }
                 unencryptedDb.execSQL("DETACH DATABASE encrypted")
             }
@@ -212,10 +208,14 @@ class DatabaseSecurityManager(
                 component = "DatabaseSecurityManager",
                 severity = ErrorLogger.Severity.CRITICAL,
                 exception = e,
-                context = mapOf("operation" to "migrateToEncryptedDatabase"),
+                context = mapOf("operation" to "migrateToEncryptedDatabase")
             )
             tempDbPath.delete()
             false
         }
+    }
+
+    companion object {
+        private val secureRandom = java.security.SecureRandom()
     }
 }

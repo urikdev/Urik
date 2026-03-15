@@ -20,10 +20,7 @@ import com.urik.keyboard.theme.ThemeManager
  * Character variation popup for long-press key menu.
  *
  */
-class CharacterVariationPopup(
-    private val context: Context,
-    private val themeManager: ThemeManager,
-) : PopupWindow() {
+class CharacterVariationPopup(private val context: Context, private val themeManager: ThemeManager) : PopupWindow() {
     private var onVariationSelected: ((String) -> Unit)? = null
     private val characterButtons = mutableListOf<Button>()
     private var highlightedButton: Button? = null
@@ -38,17 +35,14 @@ class CharacterVariationPopup(
             ViewCompat.setAccessibilityDelegate(
                 this,
                 object : AccessibilityDelegateCompat() {
-                    override fun onInitializeAccessibilityNodeInfo(
-                        host: View,
-                        info: AccessibilityNodeInfoCompat,
-                    ) {
+                    override fun onInitializeAccessibilityNodeInfo(host: View, info: AccessibilityNodeInfoCompat) {
                         super.onInitializeAccessibilityNodeInfo(host, info)
                         info.removeAction(
-                            AccessibilityNodeInfoCompat.AccessibilityActionCompat.ACTION_SET_TEXT,
+                            AccessibilityNodeInfoCompat.AccessibilityActionCompat.ACTION_SET_TEXT
                         )
                         info.isEditable = false
                     }
-                },
+                }
             )
         }
 
@@ -87,11 +81,7 @@ class CharacterVariationPopup(
      * @param variations Available variations (e.g., ["á", "à", "â"])
      * @param onSelected Callback when variation selected
      */
-    fun setCharacterVariations(
-        baseChar: String,
-        variations: List<String>,
-        onSelected: (String) -> Unit,
-    ) {
+    fun setCharacterVariations(baseChar: String, variations: List<String>, onSelected: (String) -> Unit) {
         this.onVariationSelected = onSelected
 
         variationContainer.removeAllViews()
@@ -121,12 +111,7 @@ class CharacterVariationPopup(
         height = popupHeight
     }
 
-    private fun addCharacterView(
-        char: String,
-        isBase: Boolean,
-        index: Int,
-        totalCount: Int,
-    ) {
+    private fun addCharacterView(char: String, isBase: Boolean, index: Int, totalCount: Int) {
         val button =
             Button(context).apply {
                 text = char
@@ -146,7 +131,7 @@ class CharacterVariationPopup(
                         theme.colors.keyTextAction
                     } else {
                         theme.colors.keyTextCharacter
-                    },
+                    }
                 )
 
                 val backgroundColor =
@@ -181,25 +166,22 @@ class CharacterVariationPopup(
                         R.string.character_variation_position,
                         index + 1,
                         totalCount,
-                        char,
+                        char
                     )
 
                 ViewCompat.setAccessibilityDelegate(
                     this,
                     object : AccessibilityDelegateCompat() {
-                        override fun onInitializeAccessibilityNodeInfo(
-                            host: View,
-                            info: AccessibilityNodeInfoCompat,
-                        ) {
+                        override fun onInitializeAccessibilityNodeInfo(host: View, info: AccessibilityNodeInfoCompat) {
                             super.onInitializeAccessibilityNodeInfo(host, info)
                             info.roleDescription =
                                 context.getString(R.string.character_option_role)
                             info.removeAction(
-                                AccessibilityNodeInfoCompat.AccessibilityActionCompat.ACTION_SET_TEXT,
+                                AccessibilityNodeInfoCompat.AccessibilityActionCompat.ACTION_SET_TEXT
                             )
                             info.isEditable = false
                         }
-                    },
+                    }
                 )
             }
 
@@ -238,7 +220,7 @@ class CharacterVariationPopup(
 
         val spaceBelow = screenHeight - (anchorY + anchorHeight)
 
-        val showAbove = anchorY >= (height + gap) || anchorY > spaceBelow
+        val showAbove = anchorY >= height + gap || anchorY > spaceBelow
 
         val verticalOffset =
             if (showAbove) {
@@ -255,7 +237,7 @@ class CharacterVariationPopup(
         if (popupLeft < 0) {
             horizontalOffset -= popupLeft
         } else if (popupRight > screenWidth) {
-            horizontalOffset -= (popupRight - screenWidth)
+            horizontalOffset -= popupRight - screenWidth
         }
 
         super.showAsDropDown(anchorView, horizontalOffset, verticalOffset)
@@ -272,10 +254,7 @@ class CharacterVariationPopup(
         }
     }
 
-    fun getCharacterAt(
-        rawX: Float,
-        rawY: Float,
-    ): String? {
+    fun getCharacterAt(rawX: Float, rawY: Float): String? {
         if (!isShowing) {
             return null
         }

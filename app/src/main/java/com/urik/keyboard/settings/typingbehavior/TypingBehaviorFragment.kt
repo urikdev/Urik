@@ -62,11 +62,7 @@ class TypingBehaviorFragment : PreferenceFragmentCompat() {
         viewModel = ViewModelProvider(this)[TypingBehaviorViewModel::class.java]
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?,
-    ): View {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val preferenceView = super.onCreateView(inflater, container, savedInstanceState)
         val wrapper = inflater.inflate(R.layout.preference_fragment_with_test_field, container, false)
         val preferenceContainer = wrapper.findViewById<ViewGroup>(R.id.preference_container)
@@ -75,10 +71,7 @@ class TypingBehaviorFragment : PreferenceFragmentCompat() {
         return wrapper
     }
 
-    override fun onCreatePreferences(
-        savedInstanceState: Bundle?,
-        rootKey: String?,
-    ) {
+    override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         val context = preferenceManager.context
         val screen = preferenceManager.createPreferenceScreen(context)
 
@@ -193,10 +186,7 @@ class TypingBehaviorFragment : PreferenceFragmentCompat() {
         preferenceScreen = screen
     }
 
-    override fun onViewCreated(
-        view: View,
-        savedInstanceState: Bundle?,
-    ) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         doubleSpacePref.setOnPreferenceChangeListener { _, newValue ->

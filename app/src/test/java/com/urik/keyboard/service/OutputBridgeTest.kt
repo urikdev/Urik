@@ -37,7 +37,7 @@ class OutputBridgeTest {
                 state = mockState,
                 swipeDetector = mockSwipeDetector,
                 swipeSpaceManager = mockSwipeSpaceManager,
-                icProvider = { mockIc },
+                icProvider = { mockIc }
             )
     }
 
@@ -126,7 +126,7 @@ class OutputBridgeTest {
                 state = mockState,
                 swipeDetector = mockSwipeDetector,
                 swipeSpaceManager = mockSwipeSpaceManager,
-                icProvider = { null },
+                icProvider = { null }
             )
 
         assertEquals(0, nullIcBridge.safeGetCursorPosition())
@@ -137,7 +137,7 @@ class OutputBridgeTest {
         val result =
             outputBridge.calculateParagraphBoundedComposingRegion(
                 textBeforeCursor = "the quick brown fox jumps over the lazy world",
-                cursorPosition = 1500,
+                cursorPosition = 1500
             )
 
         assertNotNull(result)
@@ -152,7 +152,7 @@ class OutputBridgeTest {
         val result =
             outputBridge.calculateParagraphBoundedComposingRegion(
                 textBeforeCursor = "paragraph one\nword",
-                cursorPosition = 2000,
+                cursorPosition = 2000
             )
 
         assertNotNull(result)
@@ -167,7 +167,7 @@ class OutputBridgeTest {
         val result =
             outputBridge.calculateParagraphBoundedComposingRegion(
                 textBeforeCursor = "text\n",
-                cursorPosition = 100,
+                cursorPosition = 100
             )
 
         assertNull(result)
@@ -178,7 +178,7 @@ class OutputBridgeTest {
         val result =
             outputBridge.calculateParagraphBoundedComposingRegion(
                 textBeforeCursor = "",
-                cursorPosition = 100,
+                cursorPosition = 100
             )
 
         assertNull(result)
@@ -234,7 +234,7 @@ class OutputBridgeTest {
         val result =
             outputBridge.calculateParagraphBoundedComposingRegion(
                 textBeforeCursor = remainingText,
-                cursorPosition = expectedNewPosition,
+                cursorPosition = expectedNewPosition
             )
 
         assertNotNull(result)

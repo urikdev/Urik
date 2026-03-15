@@ -22,13 +22,8 @@ import com.urik.keyboard.theme.KeyboardTheme
  * Renders non-interactive keyboard preview for theme selection.
  * Uses same dimension calculations as KeyboardLayoutManager for consistency.
  */
-class KeyboardPreviewRenderer(
-    private val context: Context,
-) {
-    fun createPreviewView(
-        layout: KeyboardLayout,
-        theme: KeyboardTheme,
-    ): View {
+class KeyboardPreviewRenderer(private val context: Context) {
+    fun createPreviewView(layout: KeyboardLayout, theme: KeyboardTheme): View {
         val rowsToRender = layout.rows.takeLast(2)
 
         val keySize = KeySize.MEDIUM
@@ -54,7 +49,7 @@ class KeyboardPreviewRenderer(
                 layoutParams =
                     ViewGroup.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT
                     )
 
                 val kbHorizontalPadding = context.resources.getDimensionPixelSize(R.dimen.keyboard_padding)
@@ -76,7 +71,7 @@ class KeyboardPreviewRenderer(
                     verticalMargin,
                     horizontalPadding,
                     verticalPadding,
-                    textSize,
+                    textSize
                 )
             keyboardContainer.addView(rowView)
         }
@@ -86,7 +81,7 @@ class KeyboardPreviewRenderer(
                 layoutParams =
                     ViewGroup.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT
                     )
                 addView(keyboardContainer)
 
@@ -109,17 +104,14 @@ class KeyboardPreviewRenderer(
                                 requestLayout()
                             }
                         }
-                    },
+                    }
                 )
             }
 
         return scaledContainer
     }
 
-    private fun calculateTextSize(
-        keyHeight: Int,
-        keySize: KeySize,
-    ): Float {
+    private fun calculateTextSize(keyHeight: Int, keySize: KeySize): Float {
         val baseTextSize = keyHeight * 0.38f / context.resources.displayMetrics.density
         val minSize = 12f
         val maxSize =
@@ -138,7 +130,7 @@ class KeyboardPreviewRenderer(
         verticalMargin: Int,
         horizontalPadding: Int,
         verticalPadding: Int,
-        textSize: Float,
+        textSize: Float
     ): LinearLayout {
         val rowLayout =
             LinearLayout(context).apply {
@@ -147,7 +139,7 @@ class KeyboardPreviewRenderer(
                     LinearLayout
                         .LayoutParams(
                             LinearLayout.LayoutParams.MATCH_PARENT,
-                            LinearLayout.LayoutParams.WRAP_CONTENT,
+                            LinearLayout.LayoutParams.WRAP_CONTENT
                         ).apply {
                             val rowVerticalMargin = context.resources.getDimensionPixelSize(R.dimen.key_margin_vertical)
                             setMargins(0, 0, 0, rowVerticalMargin)
@@ -174,7 +166,7 @@ class KeyboardPreviewRenderer(
                     verticalMargin,
                     horizontalPadding,
                     verticalPadding,
-                    textSize,
+                    textSize
                 )
             rowLayout.addView(keyButton)
         }
@@ -205,7 +197,7 @@ class KeyboardPreviewRenderer(
         verticalMargin: Int,
         horizontalPadding: Int,
         verticalPadding: Int,
-        textSize: Float,
+        textSize: Float
     ): Button {
         val state = KeyboardState()
         val button = Button(context)
@@ -216,7 +208,7 @@ class KeyboardPreviewRenderer(
                     .LayoutParams(
                         0,
                         visualHeight,
-                        getKeyWeight(key),
+                        getKeyWeight(key)
                     ).apply {
                         setMargins(horizontalMargin, verticalMargin, horizontalMargin, verticalMargin)
                     }
@@ -267,39 +259,31 @@ class KeyboardPreviewRenderer(
         return button
     }
 
-    private fun getKeyWeight(key: KeyboardKey): Float =
-        when (key) {
-            is KeyboardKey.Action -> {
-                when (key.action) {
-                    KeyboardKey.ActionType.SHIFT -> 1.5f
+    private fun getKeyWeight(key: KeyboardKey): Float = when (key) {
+        is KeyboardKey.Action -> {
+            when (key.action) {
+                KeyboardKey.ActionType.SHIFT -> 1.5f
 
-                    KeyboardKey.ActionType.BACKSPACE -> 1.5f
+                KeyboardKey.ActionType.BACKSPACE -> 1.5f
 
-                    KeyboardKey.ActionType.SPACE -> 4.0f
+                KeyboardKey.ActionType.SPACE -> 4.0f
 
-                    // Default SpaceBarSize.STANDARD
-                    else -> 1.5f
-                }
-            }
-
-            else -> {
-                1f
+                // Default SpaceBarSize.STANDARD
+                else -> 1.5f
             }
         }
 
-    private fun getKeyTextColor(
-        key: KeyboardKey,
-        theme: KeyboardTheme,
-    ): Int =
-        when (key) {
-            is KeyboardKey.Action -> theme.colors.keyTextAction
-            else -> theme.colors.keyTextCharacter
+        else -> {
+            1f
         }
+    }
 
-    private fun getKeyBackgroundDrawable(
-        key: KeyboardKey,
-        theme: KeyboardTheme,
-    ): GradientDrawable {
+    private fun getKeyTextColor(key: KeyboardKey, theme: KeyboardTheme): Int = when (key) {
+        is KeyboardKey.Action -> theme.colors.keyTextAction
+        else -> theme.colors.keyTextCharacter
+    }
+
+    private fun getKeyBackgroundDrawable(key: KeyboardKey, theme: KeyboardTheme): GradientDrawable {
         val backgroundColor =
             when (key) {
                 is KeyboardKey.Action -> {
@@ -321,54 +305,49 @@ class KeyboardPreviewRenderer(
             this.cornerRadius = cornerRadius
             setStroke(
                 (1 * context.resources.displayMetrics.density).toInt(),
-                theme.colors.keyBorder,
+                theme.colors.keyBorder
             )
         }
     }
 
-    private fun getActionIconRes(key: KeyboardKey.Action): Int =
-        when (key.action) {
-            KeyboardKey.ActionType.SHIFT -> R.drawable.shift_48px
-            KeyboardKey.ActionType.SPACE -> R.drawable.space_bar_48px
-            KeyboardKey.ActionType.BACKSPACE -> R.drawable.backspace_48px
-            KeyboardKey.ActionType.ENTER -> R.drawable.keyboard_return_48px
-            KeyboardKey.ActionType.SEARCH -> R.drawable.search_48px
-            KeyboardKey.ActionType.SEND -> R.drawable.send_48px
-            KeyboardKey.ActionType.DONE -> R.drawable.done_48px
-            KeyboardKey.ActionType.GO -> R.drawable.arrow_forward_48px
-            KeyboardKey.ActionType.NEXT -> R.drawable.arrow_forward_48px
-            KeyboardKey.ActionType.PREVIOUS -> R.drawable.arrow_back_48px
-            else -> 0
-        }
+    private fun getActionIconRes(key: KeyboardKey.Action): Int = when (key.action) {
+        KeyboardKey.ActionType.SHIFT -> R.drawable.shift_48px
+        KeyboardKey.ActionType.SPACE -> R.drawable.space_bar_48px
+        KeyboardKey.ActionType.BACKSPACE -> R.drawable.backspace_48px
+        KeyboardKey.ActionType.ENTER -> R.drawable.keyboard_return_48px
+        KeyboardKey.ActionType.SEARCH -> R.drawable.search_48px
+        KeyboardKey.ActionType.SEND -> R.drawable.send_48px
+        KeyboardKey.ActionType.DONE -> R.drawable.done_48px
+        KeyboardKey.ActionType.GO -> R.drawable.arrow_forward_48px
+        KeyboardKey.ActionType.NEXT -> R.drawable.arrow_forward_48px
+        KeyboardKey.ActionType.PREVIOUS -> R.drawable.arrow_back_48px
+        else -> 0
+    }
 
-    private fun getKeyLabel(
-        key: KeyboardKey,
-        state: KeyboardState,
-    ): String =
-        when (key) {
-            is KeyboardKey.Character -> {
-                when {
-                    key.type == KeyboardKey.KeyType.LETTER && (state.isShiftPressed || state.isCapsLockOn) -> {
-                        key.value.uppercase()
-                    }
+    private fun getKeyLabel(key: KeyboardKey, state: KeyboardState): String = when (key) {
+        is KeyboardKey.Character -> {
+            when {
+                key.type == KeyboardKey.KeyType.LETTER && (state.isShiftPressed || state.isCapsLockOn) -> {
+                    key.value.uppercase()
+                }
 
-                    else -> {
-                        key.value
-                    }
+                else -> {
+                    key.value
                 }
             }
+        }
 
-            is KeyboardKey.Action -> {
-                when (key.action) {
-                    KeyboardKey.ActionType.MODE_SWITCH_LETTERS -> context.getString(R.string.letters_mode_label)
-                    KeyboardKey.ActionType.MODE_SWITCH_NUMBERS -> context.getString(R.string.numbers_mode_label)
-                    KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS -> context.getString(R.string.symbols_mode_label)
-                    else -> ""
-                }
-            }
-
-            KeyboardKey.Spacer -> {
-                ""
+        is KeyboardKey.Action -> {
+            when (key.action) {
+                KeyboardKey.ActionType.MODE_SWITCH_LETTERS -> context.getString(R.string.letters_mode_label)
+                KeyboardKey.ActionType.MODE_SWITCH_NUMBERS -> context.getString(R.string.numbers_mode_label)
+                KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS -> context.getString(R.string.symbols_mode_label)
+                else -> ""
             }
         }
+
+        KeyboardKey.Spacer -> {
+            ""
+        }
+    }
 }

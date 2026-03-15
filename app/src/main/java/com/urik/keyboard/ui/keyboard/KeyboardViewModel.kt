@@ -14,6 +14,7 @@ import com.urik.keyboard.model.KeyboardState
 import com.urik.keyboard.service.LanguageManager
 import com.urik.keyboard.utils.ErrorLogger
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,7 +22,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 /**
  * Keyboard UI state and layout management.
@@ -29,325 +29,323 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class KeyboardViewModel
-    @Inject
-    constructor(
-        private val repository: KeyboardRepository,
-        private val languageManager: LanguageManager,
-    ) : ViewModel() {
-        private val _state = MutableStateFlow(KeyboardState())
-        val state: StateFlow<KeyboardState> = _state.asStateFlow()
+@Inject
+constructor(
+    private val repository: KeyboardRepository,
+    private val languageManager: LanguageManager
+) : ViewModel() {
+    private val _state = MutableStateFlow(KeyboardState())
+    val state: StateFlow<KeyboardState> = _state.asStateFlow()
 
-        private val _layout = MutableStateFlow<KeyboardLayout?>(null)
-        val layout: StateFlow<KeyboardLayout?> = _layout.asStateFlow()
+    private val _layout = MutableStateFlow<KeyboardLayout?>(null)
+    val layout: StateFlow<KeyboardLayout?> = _layout.asStateFlow()
 
-        @Suppress("ktlint:standard:backing-property-naming")
-        private val _events = MutableSharedFlow<KeyboardEvent>()
+    @Suppress("ktlint:standard:backing-property-naming")
+    private val _events = MutableSharedFlow<KeyboardEvent>()
 
-        private var currentActionType: KeyboardKey.ActionType = KeyboardKey.ActionType.ENTER
-        private var loadJob: Job? = null
+    private var currentActionType: KeyboardKey.ActionType = KeyboardKey.ActionType.ENTER
+    private var loadJob: Job? = null
 
-        /**
-         * Updates action key type (enter/search/done/go/etc).
-         *
-         * Cancels in-flight layout load, reloads current mode with new action.
-         * Called when input field type changes (text → URL → email).
-         */
-        fun updateActionType(actionType: KeyboardKey.ActionType) {
-            if (actionType != currentActionType) {
-                currentActionType = actionType
-                startLoadLayout(_state.value.currentMode)
+    init {
+        viewModelScope.launch {
+            loadLayout(KeyboardMode.LETTERS)
+        }
+
+        viewModelScope.launch {
+            _events.collect { event ->
+                handleEvent(event)
             }
         }
 
-        /**
-         * Reloads the current keyboard layout.
-         *
-         * Called when alternative layout setting changes.
-         */
-        fun reloadLayout() {
+        viewModelScope.launch {
+            languageManager.currentLayoutLanguage
+                .drop(1)
+                .collect { language ->
+                    startLoadLayout(_state.value.currentMode)
+                }
+        }
+    }
+
+    /**
+     * Updates action key type (enter/search/done/go/etc).
+     *
+     * Cancels in-flight layout load, reloads current mode with new action.
+     * Called when input field type changes (text → URL → email).
+     */
+    fun updateActionType(actionType: KeyboardKey.ActionType) {
+        if (actionType != currentActionType) {
+            currentActionType = actionType
             startLoadLayout(_state.value.currentMode)
         }
+    }
 
-        init {
-            viewModelScope.launch {
-                loadLayout(KeyboardMode.LETTERS)
-            }
+    /**
+     * Reloads the current keyboard layout.
+     *
+     * Called when alternative layout setting changes.
+     */
+    fun reloadLayout() {
+        startLoadLayout(_state.value.currentMode)
+    }
 
-            viewModelScope.launch {
-                _events.collect { event ->
-                    handleEvent(event)
-                }
-            }
-
-            viewModelScope.launch {
-                languageManager.currentLayoutLanguage
-                    .drop(1)
-                    .collect { language ->
-                        startLoadLayout(_state.value.currentMode)
-                    }
-            }
+    fun onEvent(event: KeyboardEvent) {
+        viewModelScope.launch {
+            _events.emit(event)
         }
+    }
 
-        fun onEvent(event: KeyboardEvent) {
-            viewModelScope.launch {
-                _events.emit(event)
-            }
-        }
-
-        /**
-         * Returns character to insert, applying shift/caps lock.
-         *
-         * Capitalization rules:
-         * - Letters: Uppercase if shift OR caps lock active
-         * - Others: No transformation
-         *
-         * Note: Shift cleared by caller after character inserted.
-         */
-        fun getCharacterForInput(key: KeyboardKey.Character): String {
-            val shouldCap = shouldCapitalize()
-            return when {
-                key.type == KeyboardKey.KeyType.LETTER && shouldCap -> {
-                    if (key.value == "ß") {
-                        "ẞ"
-                    } else {
-                        key.value.uppercase(getCurrentLocale().toLocale())
-                    }
-                }
-
-                else -> {
-                    key.value
-                }
-            }
-        }
-
-        private fun shouldCapitalize(): Boolean {
-            val result = _state.value.isShiftPressed || _state.value.isCapsLockOn
-            return result
-        }
-
-        fun enableAutoCapitalization() {
-            updateState { it.copy(isShiftPressed = true, isAutoShift = true) }
-        }
-
-        /**
-         * Checks if auto-capitalization should trigger.
-         */
-        fun shouldAutoCapitalize(textBeforeCursor: String?): Boolean {
-            if (textBeforeCursor.isNullOrBlank()) {
-                return true
-            }
-
-            val trimmed = textBeforeCursor.trim()
-            if (trimmed.isEmpty()) {
-                return true
-            }
-
-            val lastChar = textBeforeCursor.lastOrNull()
-            if (lastChar == '\n') {
-                return true
-            }
-
-            val lastNonWhitespaceIndex = textBeforeCursor.indexOfLast { !it.isWhitespace() }
-            if (lastNonWhitespaceIndex >= 0) {
-                val lastNonWhitespaceChar = textBeforeCursor[lastNonWhitespaceIndex]
-                if (isSentenceEndingPunctuation(lastNonWhitespaceChar)) {
-                    val afterPunctuation = textBeforeCursor.substring(lastNonWhitespaceIndex + 1)
-                    return afterPunctuation.isNotEmpty() && afterPunctuation.all { it.isWhitespace() }
-                }
-            }
-
-            return false
-        }
-
-        private fun isSentenceEndingPunctuation(char: Char): Boolean = UCharacter.hasBinaryProperty(char.code, UProperty.S_TERM)
-
-        fun checkAndApplyAutoCapitalization(
-            textBeforeCursor: String?,
-            autoCapEnabled: Boolean = true,
-        ) {
-            if (!autoCapEnabled) return
-            if (shouldAutoCapitalize(textBeforeCursor) && !_state.value.isCapsLockOn) {
-                enableAutoCapitalization()
-            } else if (_state.value.isAutoShift) {
-                updateState { it.copy(isShiftPressed = false, isAutoShift = false) }
-            }
-        }
-
-        fun disableCapsLockAfterPunctuation() {
-            if (_state.value.isCapsLockOn) {
-                updateState { it.copy(isCapsLockOn = false, isShiftPressed = true) }
-            }
-        }
-
-        fun clearShiftAndCapsState() {
-            updateState { it.copy(isShiftPressed = false, isCapsLockOn = false, isAutoShift = false) }
-        }
-
-        private fun handleEvent(event: KeyboardEvent) {
-            when (event) {
-                is KeyboardEvent.KeyPressed -> handleKeyPress(event.key)
-                is KeyboardEvent.ModeChanged -> switchMode(event.mode)
-                is KeyboardEvent.ShiftStateChanged -> handleShiftStateChange(event.isPressed)
-                is KeyboardEvent.CapsLockToggled -> handleCapsLockToggle()
-            }
-        }
-
-        private fun handleKeyPress(key: KeyboardKey) {
-            when (key) {
-                is KeyboardKey.Character -> {
-                    // Shift clearing happens after getCharacterForInput() is called
-                }
-
-                is KeyboardKey.Action -> {
-                    viewModelScope.launch {
-                        handleActionKey(key.action)
-                    }
-                }
-
-                KeyboardKey.Spacer -> {}
-            }
-        }
-
-        /**
-         * Clears shift state after letter insertion.
-         *
-         * Only clears if shift (not caps lock) was active.
-         * Call after character inserted to editor.
-         */
-        fun clearShiftAfterCharacter(key: KeyboardKey.Character) {
-            if (key.type == KeyboardKey.KeyType.LETTER && _state.value.isShiftPressed && !_state.value.isCapsLockOn) {
-                updateState { it.copy(isShiftPressed = false, isAutoShift = false) }
-            }
-        }
-
-        private fun handleActionKey(action: KeyboardKey.ActionType) {
-            when (action) {
-                KeyboardKey.ActionType.SHIFT -> {
-                    val newShiftState = !_state.value.isShiftPressed
-                    updateState { it.copy(isShiftPressed = newShiftState, isAutoShift = false) }
-                }
-
-                KeyboardKey.ActionType.CAPS_LOCK -> {
-                    val newCapsState = !_state.value.isCapsLockOn
-                    updateState {
-                        it.copy(
-                            isCapsLockOn = newCapsState,
-                            isShiftPressed = false,
-                            isAutoShift = false,
-                        )
-                    }
-                }
-
-                KeyboardKey.ActionType.MODE_SWITCH_LETTERS -> {
-                    switchMode(KeyboardMode.LETTERS)
-                }
-
-                KeyboardKey.ActionType.MODE_SWITCH_NUMBERS -> {
-                    switchMode(KeyboardMode.NUMBERS)
-                }
-
-                KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS -> {
-                    switchMode(KeyboardMode.SYMBOLS)
-                }
-
-                KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS_SECONDARY -> {
-                    switchMode(KeyboardMode.SYMBOLS_SECONDARY)
-                }
-
-                else -> { }
-            }
-        }
-
-        private fun handleShiftStateChange(isPressed: Boolean) {
-            updateState { it.copy(isShiftPressed = isPressed) }
-        }
-
-        private fun handleCapsLockToggle() {
-            updateState {
-                it.copy(
-                    isCapsLockOn = !it.isCapsLockOn,
-                    isShiftPressed = false,
-                )
-            }
-        }
-
-        private fun switchMode(mode: KeyboardMode) {
-            if (mode != _state.value.currentMode) {
-                startLoadLayout(mode)
-                updateState { it.copy(currentMode = mode) }
-            }
-        }
-
-        /**
-         * Cancels in-flight layout load and starts new load.
-         *
-         * Prevents race conditions when mode/language/action changes rapidly.
-         * Only one layout load active at a time.
-         */
-        private fun startLoadLayout(mode: KeyboardMode) {
-            loadJob?.cancel()
-            loadJob =
-                viewModelScope.launch {
-                    loadLayout(mode)
-                }
-        }
-
-        private suspend fun loadLayout(mode: KeyboardMode) {
-            updateState { it.copy(isLoading = true, error = null) }
-
-            try {
-                val currentLocale = getCurrentLocale()
-
-                val result = repository.getLayoutForMode(mode, currentLocale, currentActionType)
-
-                if (result.isSuccess) {
-                    _layout.value = result.getOrNull()
-                    updateState { it.copy(isLoading = false) }
+    /**
+     * Returns character to insert, applying shift/caps lock.
+     *
+     * Capitalization rules:
+     * - Letters: Uppercase if shift OR caps lock active
+     * - Others: No transformation
+     *
+     * Note: Shift cleared by caller after character inserted.
+     */
+    fun getCharacterForInput(key: KeyboardKey.Character): String {
+        val shouldCap = shouldCapitalize()
+        return when {
+            key.type == KeyboardKey.KeyType.LETTER && shouldCap -> {
+                if (key.value == "ß") {
+                    "ẞ"
                 } else {
-                    val exception = result.exceptionOrNull()
-                    ErrorLogger.logException(
-                        component = "KeyboardViewModel",
-                        severity = ErrorLogger.Severity.HIGH,
-                        exception = exception ?: Exception("Layout loading failed"),
-                        context =
-                            mapOf(
-                                "mode" to mode.name,
-                                "locale" to currentLocale.toString(),
-                            ),
-                    )
-                    updateState {
-                        it.copy(
-                            isLoading = false,
-                            error = exception?.message ?: "Unknown error loading layout",
-                        )
-                    }
+                    key.value.uppercase(getCurrentLocale().toLocale())
                 }
-            } catch (e: Exception) {
+            }
+
+            else -> {
+                key.value
+            }
+        }
+    }
+
+    private fun shouldCapitalize(): Boolean {
+        val result = _state.value.isShiftPressed || _state.value.isCapsLockOn
+        return result
+    }
+
+    fun enableAutoCapitalization() {
+        updateState { it.copy(isShiftPressed = true, isAutoShift = true) }
+    }
+
+    /**
+     * Checks if auto-capitalization should trigger.
+     */
+    fun shouldAutoCapitalize(textBeforeCursor: String?): Boolean {
+        if (textBeforeCursor.isNullOrBlank()) {
+            return true
+        }
+
+        val trimmed = textBeforeCursor.trim()
+        if (trimmed.isEmpty()) {
+            return true
+        }
+
+        val lastChar = textBeforeCursor.lastOrNull()
+        if (lastChar == '\n') {
+            return true
+        }
+
+        val lastNonWhitespaceIndex = textBeforeCursor.indexOfLast { !it.isWhitespace() }
+        if (lastNonWhitespaceIndex >= 0) {
+            val lastNonWhitespaceChar = textBeforeCursor[lastNonWhitespaceIndex]
+            if (isSentenceEndingPunctuation(lastNonWhitespaceChar)) {
+                val afterPunctuation = textBeforeCursor.substring(lastNonWhitespaceIndex + 1)
+                return afterPunctuation.isNotEmpty() && afterPunctuation.all { it.isWhitespace() }
+            }
+        }
+
+        return false
+    }
+
+    private fun isSentenceEndingPunctuation(char: Char): Boolean =
+        UCharacter.hasBinaryProperty(char.code, UProperty.S_TERM)
+
+    fun checkAndApplyAutoCapitalization(textBeforeCursor: String?, autoCapEnabled: Boolean = true) {
+        if (!autoCapEnabled) return
+        if (shouldAutoCapitalize(textBeforeCursor) && !_state.value.isCapsLockOn) {
+            enableAutoCapitalization()
+        } else if (_state.value.isAutoShift) {
+            updateState { it.copy(isShiftPressed = false, isAutoShift = false) }
+        }
+    }
+
+    fun disableCapsLockAfterPunctuation() {
+        if (_state.value.isCapsLockOn) {
+            updateState { it.copy(isCapsLockOn = false, isShiftPressed = true) }
+        }
+    }
+
+    fun clearShiftAndCapsState() {
+        updateState { it.copy(isShiftPressed = false, isCapsLockOn = false, isAutoShift = false) }
+    }
+
+    private fun handleEvent(event: KeyboardEvent) {
+        when (event) {
+            is KeyboardEvent.KeyPressed -> handleKeyPress(event.key)
+            is KeyboardEvent.ModeChanged -> switchMode(event.mode)
+            is KeyboardEvent.ShiftStateChanged -> handleShiftStateChange(event.isPressed)
+            is KeyboardEvent.CapsLockToggled -> handleCapsLockToggle()
+        }
+    }
+
+    private fun handleKeyPress(key: KeyboardKey) {
+        when (key) {
+            is KeyboardKey.Character -> {
+                // Shift clearing happens after getCharacterForInput() is called
+            }
+
+            is KeyboardKey.Action -> {
+                viewModelScope.launch {
+                    handleActionKey(key.action)
+                }
+            }
+
+            KeyboardKey.Spacer -> {}
+        }
+    }
+
+    /**
+     * Clears shift state after letter insertion.
+     *
+     * Only clears if shift (not caps lock) was active.
+     * Call after character inserted to editor.
+     */
+    fun clearShiftAfterCharacter(key: KeyboardKey.Character) {
+        if (key.type == KeyboardKey.KeyType.LETTER && _state.value.isShiftPressed && !_state.value.isCapsLockOn) {
+            updateState { it.copy(isShiftPressed = false, isAutoShift = false) }
+        }
+    }
+
+    private fun handleActionKey(action: KeyboardKey.ActionType) {
+        when (action) {
+            KeyboardKey.ActionType.SHIFT -> {
+                val newShiftState = !_state.value.isShiftPressed
+                updateState { it.copy(isShiftPressed = newShiftState, isAutoShift = false) }
+            }
+
+            KeyboardKey.ActionType.CAPS_LOCK -> {
+                val newCapsState = !_state.value.isCapsLockOn
+                updateState {
+                    it.copy(
+                        isCapsLockOn = newCapsState,
+                        isShiftPressed = false,
+                        isAutoShift = false
+                    )
+                }
+            }
+
+            KeyboardKey.ActionType.MODE_SWITCH_LETTERS -> {
+                switchMode(KeyboardMode.LETTERS)
+            }
+
+            KeyboardKey.ActionType.MODE_SWITCH_NUMBERS -> {
+                switchMode(KeyboardMode.NUMBERS)
+            }
+
+            KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS -> {
+                switchMode(KeyboardMode.SYMBOLS)
+            }
+
+            KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS_SECONDARY -> {
+                switchMode(KeyboardMode.SYMBOLS_SECONDARY)
+            }
+
+            else -> { }
+        }
+    }
+
+    private fun handleShiftStateChange(isPressed: Boolean) {
+        updateState { it.copy(isShiftPressed = isPressed) }
+    }
+
+    private fun handleCapsLockToggle() {
+        updateState {
+            it.copy(
+                isCapsLockOn = !it.isCapsLockOn,
+                isShiftPressed = false
+            )
+        }
+    }
+
+    private fun switchMode(mode: KeyboardMode) {
+        if (mode != _state.value.currentMode) {
+            startLoadLayout(mode)
+            updateState { it.copy(currentMode = mode) }
+        }
+    }
+
+    /**
+     * Cancels in-flight layout load and starts new load.
+     *
+     * Prevents race conditions when mode/language/action changes rapidly.
+     * Only one layout load active at a time.
+     */
+    private fun startLoadLayout(mode: KeyboardMode) {
+        loadJob?.cancel()
+        loadJob =
+            viewModelScope.launch {
+                loadLayout(mode)
+            }
+    }
+
+    private suspend fun loadLayout(mode: KeyboardMode) {
+        updateState { it.copy(isLoading = true, error = null) }
+
+        try {
+            val currentLocale = getCurrentLocale()
+
+            val result = repository.getLayoutForMode(mode, currentLocale, currentActionType)
+
+            if (result.isSuccess) {
+                _layout.value = result.getOrNull()
+                updateState { it.copy(isLoading = false) }
+            } else {
+                val exception = result.exceptionOrNull()
                 ErrorLogger.logException(
                     component = "KeyboardViewModel",
                     severity = ErrorLogger.Severity.HIGH,
-                    exception = e,
+                    exception = exception ?: Exception("Layout loading failed"),
                     context =
-                        mapOf(
-                            "mode" to mode.name,
-                        ),
+                    mapOf(
+                        "mode" to mode.name,
+                        "locale" to currentLocale.toString()
+                    )
                 )
                 updateState {
                     it.copy(
                         isLoading = false,
-                        error = e.message ?: "Failed to load keyboard layout",
+                        error = exception?.message ?: "Unknown error loading layout"
                     )
                 }
             }
-        }
-
-        private fun getCurrentLocale(): ULocale {
-            val currentLayoutLang = languageManager.currentLayoutLanguage.value
-            val languageOnly = currentLayoutLang.split("-").first()
-            return ULocale.forLanguageTag(languageOnly)
-        }
-
-        private fun updateState(update: (KeyboardState) -> KeyboardState) {
-            _state.value = update(_state.value)
+        } catch (e: Exception) {
+            ErrorLogger.logException(
+                component = "KeyboardViewModel",
+                severity = ErrorLogger.Severity.HIGH,
+                exception = e,
+                context =
+                mapOf(
+                    "mode" to mode.name
+                )
+            )
+            updateState {
+                it.copy(
+                    isLoading = false,
+                    error = e.message ?: "Failed to load keyboard layout"
+                )
+            }
         }
     }
+
+    private fun getCurrentLocale(): ULocale {
+        val currentLayoutLang = languageManager.currentLayoutLanguage.value
+        val languageOnly = currentLayoutLang.split("-").first()
+        return ULocale.forLanguageTag(languageOnly)
+    }
+
+    private fun updateState(update: (KeyboardState) -> KeyboardState) {
+        _state.value = update(_state.value)
+    }
+}

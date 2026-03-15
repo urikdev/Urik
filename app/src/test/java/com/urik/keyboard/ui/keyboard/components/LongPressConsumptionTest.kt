@@ -1,6 +1,7 @@
 package com.urik.keyboard.ui.keyboard.components
 
 import android.widget.Button
+import java.util.concurrent.ConcurrentHashMap
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -8,7 +9,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
-import java.util.concurrent.ConcurrentHashMap
 
 @RunWith(RobolectricTestRunner::class)
 class LongPressConsumptionTest {
@@ -32,7 +32,8 @@ class LongPressConsumptionTest {
         characterLongPressFired.remove(button)
     }
 
-    private fun resolveConsumed(): Boolean = characterLongPressFired.remove(button) || longPressConsumedButtons.contains(button)
+    private fun resolveConsumed(): Boolean =
+        characterLongPressFired.remove(button) || longPressConsumedButtons.contains(button)
 
     @Test
     fun `long press consumed on normal ACTION_UP`() {

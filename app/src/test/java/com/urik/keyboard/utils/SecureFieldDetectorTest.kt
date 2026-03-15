@@ -18,7 +18,7 @@ class SecureFieldDetectorTest {
         inputFlags: Int = 0,
         imeOptions: Int = 0,
         hintText: String? = null,
-        label: String? = null,
+        label: String? = null
     ): EditorInfo {
         val editorInfo = EditorInfo()
         editorInfo.inputType = inputClass or inputVariation or inputFlags
@@ -33,31 +33,31 @@ class SecureFieldDetectorTest {
         val passwordField =
             createEditorInfo(
                 inputClass = EditorInfo.TYPE_CLASS_TEXT,
-                inputVariation = EditorInfo.TYPE_TEXT_VARIATION_PASSWORD,
+                inputVariation = EditorInfo.TYPE_TEXT_VARIATION_PASSWORD
             )
         Assert.assertTrue(
             "Real Android password field should be detected",
-            SecureFieldDetector.isSecure(passwordField),
+            SecureFieldDetector.isSecure(passwordField)
         )
 
         val webPasswordField =
             createEditorInfo(
                 inputClass = EditorInfo.TYPE_CLASS_TEXT,
-                inputVariation = EditorInfo.TYPE_TEXT_VARIATION_WEB_PASSWORD,
+                inputVariation = EditorInfo.TYPE_TEXT_VARIATION_WEB_PASSWORD
             )
         Assert.assertTrue(
             "Real Android web password field should be detected",
-            SecureFieldDetector.isSecure(webPasswordField),
+            SecureFieldDetector.isSecure(webPasswordField)
         )
 
         val pinField =
             createEditorInfo(
                 inputClass = EditorInfo.TYPE_CLASS_NUMBER,
-                inputVariation = EditorInfo.TYPE_NUMBER_VARIATION_PASSWORD,
+                inputVariation = EditorInfo.TYPE_NUMBER_VARIATION_PASSWORD
             )
         Assert.assertTrue(
             "Real Android PIN field should be detected",
-            SecureFieldDetector.isSecure(pinField),
+            SecureFieldDetector.isSecure(pinField)
         )
     }
 
@@ -66,11 +66,11 @@ class SecureFieldDetectorTest {
         val normalField =
             createEditorInfo(
                 inputClass = EditorInfo.TYPE_CLASS_TEXT,
-                inputVariation = EditorInfo.TYPE_TEXT_VARIATION_NORMAL,
+                inputVariation = EditorInfo.TYPE_TEXT_VARIATION_NORMAL
             )
         Assert.assertFalse(
             "Normal text field should not be detected",
-            SecureFieldDetector.isSecure(normalField),
+            SecureFieldDetector.isSecure(normalField)
         )
     }
 
@@ -79,21 +79,21 @@ class SecureFieldDetectorTest {
         val emailField =
             createEditorInfo(
                 inputClass = EditorInfo.TYPE_CLASS_TEXT,
-                inputVariation = EditorInfo.TYPE_TEXT_VARIATION_EMAIL_ADDRESS,
+                inputVariation = EditorInfo.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
             )
         Assert.assertTrue(
             "Email field should be detected as secure",
-            SecureFieldDetector.isSecure(emailField),
+            SecureFieldDetector.isSecure(emailField)
         )
 
         val webEmailField =
             createEditorInfo(
                 inputClass = EditorInfo.TYPE_CLASS_TEXT,
-                inputVariation = EditorInfo.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS,
+                inputVariation = EditorInfo.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS
             )
         Assert.assertTrue(
             "Web email field should be detected as secure",
-            SecureFieldDetector.isSecure(webEmailField),
+            SecureFieldDetector.isSecure(webEmailField)
         )
     }
 
@@ -101,13 +101,13 @@ class SecureFieldDetectorTest {
     fun `test null handling`() {
         Assert.assertFalse(
             "Null EditorInfo should not be detected",
-            SecureFieldDetector.isSecure(null),
+            SecureFieldDetector.isSecure(null)
         )
 
         val emptyField = createEditorInfo()
         Assert.assertFalse(
             "Empty EditorInfo should not be detected",
-            SecureFieldDetector.isSecure(emptyField),
+            SecureFieldDetector.isSecure(emptyField)
         )
     }
 
@@ -117,11 +117,11 @@ class SecureFieldDetectorTest {
             createEditorInfo(
                 inputClass = EditorInfo.TYPE_CLASS_TEXT,
                 inputVariation = EditorInfo.TYPE_TEXT_VARIATION_PASSWORD,
-                hintText = "Enter username",
+                hintText = "Enter username"
             )
         Assert.assertTrue(
             "Password field type should override non-password hint",
-            SecureFieldDetector.isSecure(field),
+            SecureFieldDetector.isSecure(field)
         )
     }
 
@@ -137,7 +137,7 @@ class SecureFieldDetectorTest {
 
         Assert.assertTrue(
             "Combined field should be detected as secure",
-            SecureFieldDetector.isSecure(field),
+            SecureFieldDetector.isSecure(field)
         )
     }
 
@@ -148,11 +148,11 @@ class SecureFieldDetectorTest {
 
         Assert.assertTrue(
             "TYPE_NULL should be detected as direct commit",
-            SecureFieldDetector.isDirectCommit(field),
+            SecureFieldDetector.isDirectCommit(field)
         )
         Assert.assertFalse(
             "TYPE_NULL should not be detected as secure",
-            SecureFieldDetector.isSecure(field),
+            SecureFieldDetector.isSecure(field)
         )
     }
 
@@ -162,12 +162,12 @@ class SecureFieldDetectorTest {
             createEditorInfo(
                 inputClass = EditorInfo.TYPE_CLASS_TEXT,
                 inputVariation = InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD,
-                inputFlags = InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS,
+                inputFlags = InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
             )
 
         Assert.assertTrue(
             "NO_SUGGESTIONS + VISIBLE_PASSWORD should be detected as direct commit",
-            SecureFieldDetector.isDirectCommit(field),
+            SecureFieldDetector.isDirectCommit(field)
         )
     }
 
@@ -178,12 +178,12 @@ class SecureFieldDetectorTest {
                 inputClass = EditorInfo.TYPE_CLASS_TEXT,
                 inputVariation = EditorInfo.TYPE_TEXT_VARIATION_NORMAL,
                 inputFlags = InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS,
-                imeOptions = EditorInfo.IME_FLAG_NO_EXTRACT_UI,
+                imeOptions = EditorInfo.IME_FLAG_NO_EXTRACT_UI
             )
 
         Assert.assertTrue(
             "NO_SUGGESTIONS + NO_EXTRACT_UI should be detected as direct commit",
-            SecureFieldDetector.isDirectCommit(field),
+            SecureFieldDetector.isDirectCommit(field)
         )
     }
 
@@ -192,12 +192,12 @@ class SecureFieldDetectorTest {
         val field =
             createEditorInfo(
                 inputClass = EditorInfo.TYPE_CLASS_TEXT,
-                inputVariation = EditorInfo.TYPE_TEXT_VARIATION_NORMAL,
+                inputVariation = EditorInfo.TYPE_TEXT_VARIATION_NORMAL
             )
 
         Assert.assertFalse(
             "Normal text field should not be detected as direct commit",
-            SecureFieldDetector.isDirectCommit(field),
+            SecureFieldDetector.isDirectCommit(field)
         )
     }
 
@@ -207,12 +207,12 @@ class SecureFieldDetectorTest {
             createEditorInfo(
                 inputClass = EditorInfo.TYPE_CLASS_TEXT,
                 inputVariation = EditorInfo.TYPE_TEXT_VARIATION_NORMAL,
-                inputFlags = InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS,
+                inputFlags = InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
             )
 
         Assert.assertFalse(
             "NO_SUGGESTIONS alone should not trigger direct commit",
-            SecureFieldDetector.isDirectCommit(field),
+            SecureFieldDetector.isDirectCommit(field)
         )
     }
 
@@ -221,12 +221,12 @@ class SecureFieldDetectorTest {
         val field =
             createEditorInfo(
                 inputClass = EditorInfo.TYPE_CLASS_TEXT,
-                inputVariation = InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD,
+                inputVariation = InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
             )
 
         Assert.assertFalse(
             "VISIBLE_PASSWORD without NO_SUGGESTIONS should not trigger direct commit",
-            SecureFieldDetector.isDirectCommit(field),
+            SecureFieldDetector.isDirectCommit(field)
         )
     }
 
@@ -235,12 +235,12 @@ class SecureFieldDetectorTest {
         val field =
             createEditorInfo(
                 inputClass = EditorInfo.TYPE_CLASS_NUMBER,
-                inputVariation = EditorInfo.TYPE_NUMBER_VARIATION_NORMAL,
+                inputVariation = EditorInfo.TYPE_NUMBER_VARIATION_NORMAL
             )
 
         Assert.assertTrue(
             "Number class should be detected as direct commit",
-            SecureFieldDetector.isDirectCommit(field),
+            SecureFieldDetector.isDirectCommit(field)
         )
     }
 
@@ -252,7 +252,7 @@ class SecureFieldDetectorTest {
 
         Assert.assertTrue(
             "Number class with decimal flag should be detected as direct commit",
-            SecureFieldDetector.isDirectCommit(field),
+            SecureFieldDetector.isDirectCommit(field)
         )
     }
 
@@ -264,7 +264,7 @@ class SecureFieldDetectorTest {
 
         Assert.assertTrue(
             "Number class with signed flag should be detected as direct commit",
-            SecureFieldDetector.isDirectCommit(field),
+            SecureFieldDetector.isDirectCommit(field)
         )
     }
 
@@ -273,16 +273,16 @@ class SecureFieldDetectorTest {
         val field =
             createEditorInfo(
                 inputClass = EditorInfo.TYPE_CLASS_NUMBER,
-                inputVariation = EditorInfo.TYPE_NUMBER_VARIATION_PASSWORD,
+                inputVariation = EditorInfo.TYPE_NUMBER_VARIATION_PASSWORD
             )
 
         Assert.assertFalse(
             "Number password should not be detected as direct commit",
-            SecureFieldDetector.isDirectCommit(field),
+            SecureFieldDetector.isDirectCommit(field)
         )
         Assert.assertTrue(
             "Number password should be detected as secure",
-            SecureFieldDetector.isSecure(field),
+            SecureFieldDetector.isSecure(field)
         )
     }
 
@@ -290,7 +290,7 @@ class SecureFieldDetectorTest {
     fun `test null returns false for direct commit`() {
         Assert.assertFalse(
             "Null EditorInfo should not be detected as direct commit",
-            SecureFieldDetector.isDirectCommit(null),
+            SecureFieldDetector.isDirectCommit(null)
         )
     }
 
@@ -299,12 +299,12 @@ class SecureFieldDetectorTest {
         val passwordField =
             createEditorInfo(
                 inputClass = EditorInfo.TYPE_CLASS_TEXT,
-                inputVariation = EditorInfo.TYPE_TEXT_VARIATION_PASSWORD,
+                inputVariation = EditorInfo.TYPE_TEXT_VARIATION_PASSWORD
             )
 
         Assert.assertFalse(
             "Password field should not be detected as direct commit",
-            SecureFieldDetector.isDirectCommit(passwordField),
+            SecureFieldDetector.isDirectCommit(passwordField)
         )
     }
 }

@@ -24,17 +24,13 @@ class SuggestionPipeline(
     private val effectiveSuggestionCount: () -> Int,
     private val getKeyboardState: () -> KeyboardState,
     private val shouldAutoCapitalize: (String) -> Boolean,
-    private val currentLanguageProvider: () -> String,
+    private val currentLanguageProvider: () -> String
 ) {
     private var suggestionDebounceJob: Job? = null
     private val suggestionDebounceDelay = SUGGESTION_DEBOUNCE_MS
 
-    fun requestSuggestions(
-        buffer: String,
-        inputMethod: InputMethod,
-        isCharacterInput: Boolean,
-        char: String? = null,
-    ) {
+    @Suppress("UnusedParameter")
+    fun requestSuggestions(buffer: String, inputMethod: InputMethod, isCharacterInput: Boolean, char: String? = null) {
         val (currentSequence, bufferSnapshot) = state.getSequenceAndBuffer()
 
         suggestionDebounceJob?.cancel()
@@ -59,7 +55,7 @@ class SuggestionPipeline(
                                         val displaySuggestions =
                                             storeAndCapitalizeSuggestions(
                                                 result.wordState.suggestions,
-                                                state.isCurrentWordAtSentenceStart,
+                                                state.isCurrentWordAtSentenceStart
                                             )
                                         state.pendingSuggestions = displaySuggestions
                                         state.updateSuggestionDisplay(displaySuggestions)
@@ -90,7 +86,8 @@ class SuggestionPipeline(
                     suggestion.word.equals(state.displayBuffer, ignoreCase = true)
                 }
 
-            val displaySuggestions = storeAndCapitalizeSuggestions(filteredSuggestions, state.isCurrentWordAtSentenceStart)
+            val displaySuggestions =
+                storeAndCapitalizeSuggestions(filteredSuggestions, state.isCurrentWordAtSentenceStart)
             state.pendingSuggestions = displaySuggestions
             state.updateSuggestionDisplay(displaySuggestions)
         } else {
@@ -101,16 +98,13 @@ class SuggestionPipeline(
 
     fun storeAndCapitalizeSuggestions(
         suggestions: List<SpellingSuggestion>,
-        isSentenceStart: Boolean = false,
+        isSentenceStart: Boolean = false
     ): List<String> {
         state.currentRawSuggestions = suggestions
         return capitalizeSuggestions(suggestions, isSentenceStart)
     }
 
-    fun capitalizeSuggestions(
-        suggestions: List<SpellingSuggestion>,
-        isSentenceStart: Boolean = false,
-    ): List<String> {
+    fun capitalizeSuggestions(suggestions: List<SpellingSuggestion>, isSentenceStart: Boolean = false): List<String> {
         var keyboardState = getKeyboardState()
         if (state.isCurrentWordManualShifted && !keyboardState.isShiftPressed && !keyboardState.isCapsLockOn) {
             keyboardState = keyboardState.copy(isShiftPressed = true, isAutoShift = false)
@@ -130,7 +124,7 @@ class SuggestionPipeline(
                     wordFrequencyRepository.getBigramPredictions(
                         state.lastCommittedWord,
                         currentLanguage,
-                        effectiveSuggestionCount(),
+                        effectiveSuggestionCount()
                     )
 
                 val predictions = allPredictions.filter { !spellCheckManager.isWordBlacklisted(it) }
@@ -140,10 +134,10 @@ class SuggestionPipeline(
                         predictions.mapIndexed { index, word ->
                             SpellingSuggestion(
                                 word = word,
-                                confidence = 0.85 - (index * 0.02),
+                                confidence = 0.85 - index * 0.02,
                                 ranking = index,
                                 source = "bigram",
-                                preserveCase = false,
+                                preserveCase = false
                             )
                         }
                     val textBefore = outputBridge.safeGetTextBeforeCursor(50)
@@ -162,35 +156,31 @@ class SuggestionPipeline(
         }
     }
 
-    suspend fun learnWordAndInvalidateCache(
-        word: String,
-        inputMethod: InputMethod,
-    ): Boolean =
-        try {
-            val settings = textInputProcessor.getCurrentSettings()
-            if (!settings.isWordLearningEnabled) {
-                return true
-            }
+    suspend fun learnWordAndInvalidateCache(word: String, inputMethod: InputMethod): Boolean = try {
+        val settings = textInputProcessor.getCurrentSettings()
+        if (!settings.isWordLearningEnabled) {
+            return true
+        }
 
-            recordWordUsage(word)
+        recordWordUsage(word)
 
-            val isInDictionary = spellCheckManager.isWordInSymSpellDictionary(word)
-            if (isInDictionary) {
-                return true
-            }
+        val isInDictionary = spellCheckManager.isWordInSymSpellDictionary(word)
+        if (isInDictionary) {
+            return true
+        }
 
-            val learnResult = wordLearningEngine.learnWord(word, inputMethod)
-            if (learnResult.isSuccess) {
-                spellCheckManager.invalidateWordCache(word)
-                spellCheckManager.removeFromBlacklist(word)
-                textInputProcessor.invalidateWord(word)
-                true
-            } else {
-                false
-            }
-        } catch (_: Exception) {
+        val learnResult = wordLearningEngine.learnWord(word, inputMethod)
+        if (learnResult.isSuccess) {
+            spellCheckManager.invalidateWordCache(word)
+            spellCheckManager.removeFromBlacklist(word)
+            textInputProcessor.invalidateWord(word)
+            true
+        } else {
             false
         }
+    } catch (_: Exception) {
+        false
+    }
 
     internal fun recordWordUsage(word: String) {
         try {
@@ -238,15 +228,13 @@ class SuggestionPipeline(
         }
     }
 
-    suspend fun coordinateSuggestionSelection(
-        suggestion: String,
-        checkAutoCapitalization: (String) -> Unit,
-    ) {
+    suspend fun coordinateSuggestionSelection(suggestion: String, checkAutoCapitalization: (String) -> Unit) {
         withContext(Dispatchers.Main) {
             try {
                 val actualCursorPos = outputBridge.safeGetCursorPosition()
 
                 if (state.composingRegionStart != -1 && state.displayBuffer.isNotEmpty()) {
+                    @Suppress("UnnecessaryParentheses")
                     val expectedCursorRange =
                         state.composingRegionStart..(state.composingRegionStart + state.displayBuffer.length)
                     if (actualCursorPos !in expectedCursorRange) {
@@ -289,7 +277,7 @@ class SuggestionPipeline(
     suspend fun coordinatePostCommitReplacement(
         selectedSuggestion: String,
         replacementState: PostCommitReplacementState,
-        checkAutoCapitalization: (String) -> Unit,
+        checkAutoCapitalization: (String) -> Unit
     ) {
         withContext(Dispatchers.Main) {
             try {
