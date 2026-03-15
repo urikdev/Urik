@@ -5,6 +5,7 @@ import android.text.SpannableString
 import android.text.Spanned
 import android.text.style.BackgroundColorSpan
 import android.text.style.ForegroundColorSpan
+import android.view.inputmethod.ExtractedTextRequest
 import android.view.inputmethod.InputConnection
 import com.urik.keyboard.ui.keyboard.components.SwipeDetector
 import com.urik.keyboard.utils.BackspaceUtils
@@ -47,10 +48,15 @@ class OutputBridge(
 
     fun safeGetCursorPosition(maxChars: Int = MAX_CURSOR_POSITION_CHARS): Int =
         try {
-            ic?.getTextBeforeCursor(maxChars, 0)
-                ?.take(maxChars)
-                ?.length
-                ?: 0
+            val extracted = ic?.getExtractedText(ExtractedTextRequest(), 0)
+            if (extracted != null && extracted.startOffset >= 0 && extracted.selectionStart >= 0) {
+                extracted.startOffset + extracted.selectionStart
+            } else {
+                ic?.getTextBeforeCursor(maxChars, 0)
+                    ?.take(maxChars)
+                    ?.length
+                    ?: 0
+            }
         } catch (_: Exception) {
             0
         }
