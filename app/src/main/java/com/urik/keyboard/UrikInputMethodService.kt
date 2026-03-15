@@ -286,15 +286,15 @@ class UrikInputMethodService :
             inputState =
                 InputStateManager(
                     viewCallback =
-                    object : ViewCallback {
-                        override fun clearSuggestions() {
-                            swipeKeyboardView?.clearSuggestions()
-                        }
+                        object : ViewCallback {
+                            override fun clearSuggestions() {
+                                swipeKeyboardView?.clearSuggestions()
+                            }
 
-                        override fun updateSuggestions(suggestions: List<String>) {
-                            swipeKeyboardView?.updateSuggestions(suggestions)
-                        }
-                    },
+                            override fun updateSuggestions(suggestions: List<String>) {
+                                swipeKeyboardView?.updateSuggestions(suggestions)
+                            }
+                        },
                     onShiftStateChanged = { pressed ->
                         viewModel.onEvent(KeyboardEvent.ShiftStateChanged(pressed))
                     },
@@ -366,8 +366,8 @@ class UrikInputMethodService :
                     component = "UrikInputMethodService",
                     severity = ErrorLogger.Severity.CRITICAL,
                     exception =
-                    result.exceptionOrNull()
-                        ?: Exception("Language manager initialization failed"),
+                        result.exceptionOrNull()
+                            ?: Exception("Language manager initialization failed"),
                     context = mapOf("phase" to "language_init")
                 )
                 return
@@ -392,10 +392,10 @@ class UrikInputMethodService :
                     severity = ErrorLogger.Severity.HIGH,
                     exception = e,
                     context =
-                    mapOf(
-                        "phase" to "word_learning_init",
-                        "language" to currentLanguage
-                    )
+                        mapOf(
+                            "phase" to "word_learning_init",
+                            "language" to currentLanguage
+                        )
                 )
             }
 

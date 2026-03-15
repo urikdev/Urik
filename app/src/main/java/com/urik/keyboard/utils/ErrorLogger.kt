@@ -346,6 +346,7 @@ object ErrorLogger {
                 while (end < errorsSection.length) {
                     when (errorsSection[end]) {
                         '{' -> braceCount++
+
                         '}' -> {
                             braceCount--
                             if (braceCount == 0) {

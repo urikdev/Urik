@@ -55,6 +55,7 @@ constructor(
             return when (settings.keyboardDisplayMode) {
                 KeyboardDisplayMode.ONE_HANDED_RIGHT ->
                     KeyboardModeConfig.oneHandedRight(postureInfo.screenWidthPx)
+
                 else -> KeyboardModeConfig.oneHandedLeft()
             }
         }
@@ -82,9 +83,12 @@ constructor(
         _currentMode.value =
             when (mode) {
                 KeyboardDisplayMode.STANDARD -> KeyboardModeConfig.standard()
+
                 KeyboardDisplayMode.ONE_HANDED_LEFT -> KeyboardModeConfig.oneHandedLeft()
+
                 KeyboardDisplayMode.ONE_HANDED_RIGHT ->
                     KeyboardModeConfig.oneHandedRight(postureInfo.screenWidthPx)
+
                 KeyboardDisplayMode.SPLIT ->
                     KeyboardModeConfig.split(postureInfo.hingeBounds, density)
             }
@@ -94,12 +98,14 @@ constructor(
                 KeyboardDisplayMode.STANDARD -> {
                     settingsRepository.updateOneHandedModeEnabled(false)
                 }
+
                 KeyboardDisplayMode.ONE_HANDED_LEFT,
                 KeyboardDisplayMode.ONE_HANDED_RIGHT
                 -> {
                     settingsRepository.updateKeyboardDisplayMode(mode)
                     settingsRepository.updateOneHandedModeEnabled(true)
                 }
+
                 KeyboardDisplayMode.SPLIT -> {
                     settingsRepository.updateKeyboardDisplayMode(mode)
                 }

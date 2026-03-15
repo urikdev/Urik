@@ -244,6 +244,7 @@ constructor(
                     getMinimalFallbackVariations()
                 }
             }
+
             else -> {
                 getMinimalFallbackVariations()
             }

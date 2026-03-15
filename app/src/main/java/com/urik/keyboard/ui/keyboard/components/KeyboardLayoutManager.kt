@@ -1146,15 +1146,25 @@ class KeyboardLayoutManager(
                         } else {
                             R.drawable.shift_48px
                         }
+
                         KeyboardKey.ActionType.SPACE -> R.drawable.space_bar_48px
+
                         KeyboardKey.ActionType.BACKSPACE -> R.drawable.backspace_48px
+
                         KeyboardKey.ActionType.ENTER -> R.drawable.keyboard_return_48px
+
                         KeyboardKey.ActionType.SEARCH -> R.drawable.search_48px
+
                         KeyboardKey.ActionType.SEND -> R.drawable.send_48px
+
                         KeyboardKey.ActionType.DONE -> R.drawable.done_48px
+
                         KeyboardKey.ActionType.GO -> R.drawable.arrow_forward_48px
+
                         KeyboardKey.ActionType.NEXT -> R.drawable.arrow_forward_48px
+
                         KeyboardKey.ActionType.PREVIOUS -> R.drawable.arrow_back_48px
+
                         else -> 0
                     }
 
@@ -2023,7 +2033,9 @@ class KeyboardLayoutManager(
                 is KeyboardKey.Character ->
                     key.type == KeyboardKey.KeyType.NUMBER ||
                         key.type == KeyboardKey.KeyType.PUNCTUATION
+
                 is KeyboardKey.Action -> key.action == KeyboardKey.ActionType.BACKSPACE
+
                 KeyboardKey.Spacer -> false
             }
         }

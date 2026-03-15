@@ -189,6 +189,7 @@ class ThemePickerActivity : AppCompatActivity() {
             finish()
             true
         }
+
         else -> super.onOptionsItemSelected(item)
     }
 

@@ -308,10 +308,10 @@ constructor(
                     severity = ErrorLogger.Severity.HIGH,
                     exception = exception ?: Exception("Layout loading failed"),
                     context =
-                    mapOf(
-                        "mode" to mode.name,
-                        "locale" to currentLocale.toString()
-                    )
+                        mapOf(
+                            "mode" to mode.name,
+                            "locale" to currentLocale.toString()
+                        )
                 )
                 updateState {
                     it.copy(
@@ -326,9 +326,9 @@ constructor(
                 severity = ErrorLogger.Severity.HIGH,
                 exception = e,
                 context =
-                mapOf(
-                    "mode" to mode.name
-                )
+                    mapOf(
+                        "mode" to mode.name
+                    )
             )
             updateState {
                 it.copy(

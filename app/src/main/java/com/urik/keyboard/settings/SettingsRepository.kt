@@ -120,116 +120,116 @@ constructor(
                     spacebarCursorControl = preferences[PreferenceKeys.SPACEBAR_CURSOR_CONTROL] ?: true,
                     backspaceSwipeDelete = preferences[PreferenceKeys.BACKSPACE_SWIPE_DELETE] ?: true,
                     longPressPunctuationMode =
-                    preferences[PreferenceKeys.LONG_PRESS_PUNCTUATION_MODE]?.let {
-                        try {
-                            LongPressPunctuationMode.valueOf(it)
-                        } catch (e: IllegalArgumentException) {
-                            ErrorLogger.logException(
-                                component = "SettingsRepository",
-                                severity = ErrorLogger.Severity.HIGH,
-                                exception = e,
-                                context = mapOf("key" to "LONG_PRESS_PUNCTUATION_MODE", "value" to it)
-                            )
-                            LongPressPunctuationMode.PERIOD
-                        }
-                    } ?: LongPressPunctuationMode.PERIOD,
+                        preferences[PreferenceKeys.LONG_PRESS_PUNCTUATION_MODE]?.let {
+                            try {
+                                LongPressPunctuationMode.valueOf(it)
+                            } catch (e: IllegalArgumentException) {
+                                ErrorLogger.logException(
+                                    component = "SettingsRepository",
+                                    severity = ErrorLogger.Severity.HIGH,
+                                    exception = e,
+                                    context = mapOf("key" to "LONG_PRESS_PUNCTUATION_MODE", "value" to it)
+                                )
+                                LongPressPunctuationMode.PERIOD
+                            }
+                        } ?: LongPressPunctuationMode.PERIOD,
                     longPressDuration =
-                    preferences[PreferenceKeys.LONG_PRESS_DURATION]?.let {
-                        try {
-                            LongPressDuration.valueOf(it)
-                        } catch (e: IllegalArgumentException) {
-                            ErrorLogger.logException(
-                                component = "SettingsRepository",
-                                severity = ErrorLogger.Severity.HIGH,
-                                exception = e,
-                                context = mapOf("key" to "LONG_PRESS_DURATION", "value" to it)
-                            )
-                            LongPressDuration.MEDIUM
-                        }
-                    } ?: LongPressDuration.MEDIUM,
+                        preferences[PreferenceKeys.LONG_PRESS_DURATION]?.let {
+                            try {
+                                LongPressDuration.valueOf(it)
+                            } catch (e: IllegalArgumentException) {
+                                ErrorLogger.logException(
+                                    component = "SettingsRepository",
+                                    severity = ErrorLogger.Severity.HIGH,
+                                    exception = e,
+                                    context = mapOf("key" to "LONG_PRESS_DURATION", "value" to it)
+                                )
+                                LongPressDuration.MEDIUM
+                            }
+                        } ?: LongPressDuration.MEDIUM,
                     showNumberRow = preferences[PreferenceKeys.SHOW_NUMBER_ROW] ?: true,
                     spaceBarSize =
-                    preferences[PreferenceKeys.SPACE_BAR_SIZE]?.let {
-                        try {
-                            SpaceBarSize.valueOf(it)
-                        } catch (e: IllegalArgumentException) {
-                            ErrorLogger.logException(
-                                component = "SettingsRepository",
-                                severity = ErrorLogger.Severity.HIGH,
-                                exception = e,
-                                context = mapOf("key" to "SPACE_BAR_SIZE", "value" to it)
-                            )
-                            SpaceBarSize.STANDARD
-                        }
-                    } ?: SpaceBarSize.STANDARD,
+                        preferences[PreferenceKeys.SPACE_BAR_SIZE]?.let {
+                            try {
+                                SpaceBarSize.valueOf(it)
+                            } catch (e: IllegalArgumentException) {
+                                ErrorLogger.logException(
+                                    component = "SettingsRepository",
+                                    severity = ErrorLogger.Severity.HIGH,
+                                    exception = e,
+                                    context = mapOf("key" to "SPACE_BAR_SIZE", "value" to it)
+                                )
+                                SpaceBarSize.STANDARD
+                            }
+                        } ?: SpaceBarSize.STANDARD,
                     keySize =
-                    preferences[PreferenceKeys.KEY_SIZE]?.let {
-                        try {
-                            KeySize.valueOf(it)
-                        } catch (e: IllegalArgumentException) {
-                            ErrorLogger.logException(
-                                component = "SettingsRepository",
-                                severity = ErrorLogger.Severity.HIGH,
-                                exception = e,
-                                context = mapOf("key" to "KEY_SIZE", "value" to it)
-                            )
-                            KeySize.MEDIUM
-                        }
-                    } ?: KeySize.MEDIUM,
+                        preferences[PreferenceKeys.KEY_SIZE]?.let {
+                            try {
+                                KeySize.valueOf(it)
+                            } catch (e: IllegalArgumentException) {
+                                ErrorLogger.logException(
+                                    component = "SettingsRepository",
+                                    severity = ErrorLogger.Severity.HIGH,
+                                    exception = e,
+                                    context = mapOf("key" to "KEY_SIZE", "value" to it)
+                                )
+                                KeySize.MEDIUM
+                            }
+                        } ?: KeySize.MEDIUM,
                     keyLabelSize =
-                    preferences[PreferenceKeys.KEY_LABEL_SIZE]?.let {
-                        try {
-                            KeyLabelSize.valueOf(it)
-                        } catch (e: IllegalArgumentException) {
-                            ErrorLogger.logException(
-                                component = "SettingsRepository",
-                                severity = ErrorLogger.Severity.HIGH,
-                                exception = e,
-                                context = mapOf("key" to "KEY_LABEL_SIZE", "value" to it)
-                            )
-                            KeyLabelSize.MEDIUM
-                        }
-                    } ?: KeyLabelSize.MEDIUM,
+                        preferences[PreferenceKeys.KEY_LABEL_SIZE]?.let {
+                            try {
+                                KeyLabelSize.valueOf(it)
+                            } catch (e: IllegalArgumentException) {
+                                ErrorLogger.logException(
+                                    component = "SettingsRepository",
+                                    severity = ErrorLogger.Severity.HIGH,
+                                    exception = e,
+                                    context = mapOf("key" to "KEY_LABEL_SIZE", "value" to it)
+                                )
+                                KeyLabelSize.MEDIUM
+                            }
+                        } ?: KeyLabelSize.MEDIUM,
                     cursorSpeed =
-                    preferences[PreferenceKeys.CURSOR_SPEED]?.let {
-                        try {
-                            CursorSpeed.valueOf(it)
-                        } catch (e: IllegalArgumentException) {
-                            ErrorLogger.logException(
-                                component = "SettingsRepository",
-                                severity = ErrorLogger.Severity.HIGH,
-                                exception = e,
-                                context = mapOf("key" to "CURSOR_SPEED", "value" to it)
-                            )
-                            CursorSpeed.MEDIUM
-                        }
-                    } ?: CursorSpeed.MEDIUM,
+                        preferences[PreferenceKeys.CURSOR_SPEED]?.let {
+                            try {
+                                CursorSpeed.valueOf(it)
+                            } catch (e: IllegalArgumentException) {
+                                ErrorLogger.logException(
+                                    component = "SettingsRepository",
+                                    severity = ErrorLogger.Severity.HIGH,
+                                    exception = e,
+                                    context = mapOf("key" to "CURSOR_SPEED", "value" to it)
+                                )
+                                CursorSpeed.MEDIUM
+                            }
+                        } ?: CursorSpeed.MEDIUM,
                     keyboardTheme = preferences[PreferenceKeys.KEYBOARD_THEME] ?: "default",
                     favoriteThemes = preferences[PreferenceKeys.FAVORITE_THEMES] ?: emptySet(),
                     alternativeKeyboardLayout =
-                    preferences[PreferenceKeys.ALTERNATIVE_KEYBOARD_LAYOUT]?.let {
-                        try {
-                            AlternativeKeyboardLayout.valueOf(it)
-                        } catch (e: IllegalArgumentException) {
-                            ErrorLogger.logException(
-                                component = "SettingsRepository",
-                                severity = ErrorLogger.Severity.HIGH,
-                                exception = e,
-                                context = mapOf("key" to "ALTERNATIVE_KEYBOARD_LAYOUT", "value" to it)
-                            )
-                            AlternativeKeyboardLayout.DEFAULT
-                        }
-                    } ?: AlternativeKeyboardLayout.DEFAULT,
+                        preferences[PreferenceKeys.ALTERNATIVE_KEYBOARD_LAYOUT]?.let {
+                            try {
+                                AlternativeKeyboardLayout.valueOf(it)
+                            } catch (e: IllegalArgumentException) {
+                                ErrorLogger.logException(
+                                    component = "SettingsRepository",
+                                    severity = ErrorLogger.Severity.HIGH,
+                                    exception = e,
+                                    context = mapOf("key" to "ALTERNATIVE_KEYBOARD_LAYOUT", "value" to it)
+                                )
+                                AlternativeKeyboardLayout.DEFAULT
+                            }
+                        } ?: AlternativeKeyboardLayout.DEFAULT,
                     adaptiveKeyboardModesEnabled =
-                    preferences[PreferenceKeys.ADAPTIVE_KEYBOARD_MODES_ENABLED] ?: true,
+                        preferences[PreferenceKeys.ADAPTIVE_KEYBOARD_MODES_ENABLED] ?: true,
                     keyboardDisplayMode =
-                    preferences[PreferenceKeys.KEYBOARD_DISPLAY_MODE]?.let {
-                        try {
-                            KeyboardDisplayMode.valueOf(it)
-                        } catch (_: IllegalArgumentException) {
-                            null
-                        }
-                    },
+                        preferences[PreferenceKeys.KEYBOARD_DISPLAY_MODE]?.let {
+                            try {
+                                KeyboardDisplayMode.valueOf(it)
+                            } catch (_: IllegalArgumentException) {
+                                null
+                            }
+                        },
                     oneHandedModeEnabled = preferences[PreferenceKeys.ONE_HANDED_MODE_ENABLED] ?: false,
                     showLanguageSwitchKey = preferences[PreferenceKeys.SHOW_LANGUAGE_SWITCH_KEY] ?: false,
                     mergedDictionaries = preferences[PreferenceKeys.MERGED_DICTIONARIES] ?: true,
