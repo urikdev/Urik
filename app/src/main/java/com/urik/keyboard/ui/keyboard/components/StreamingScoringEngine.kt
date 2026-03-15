@@ -392,11 +392,11 @@ constructor(
                 frequencyScore = ln(frequency.toFloat() + 1f) / 20f,
                 rawFrequency = frequency.toLong(),
                 firstChar =
-                    wordNormalizer
-                        .stripDiacritics(
-                            word.first().toString()
-                        ).first()
-                        .lowercaseChar(),
+                wordNormalizer
+                    .stripDiacritics(
+                        word.first().toString()
+                    ).first()
+                    .lowercaseChar(),
                 uniqueLetterCount = word.toSet().size,
                 frequencyTier = SwipeDetector.FrequencyTier.fromRank(rank)
             )

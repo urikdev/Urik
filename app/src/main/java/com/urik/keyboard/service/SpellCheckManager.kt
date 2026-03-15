@@ -311,8 +311,8 @@ constructor(
                             word = word,
                             frequency = freq,
                             strippedWord =
-                                com.urik.keyboard.utils.TextMatchingUtils
-                                    .stripWordPunctuation(word),
+                            com.urik.keyboard.utils.TextMatchingUtils
+                                .stripWordPunctuation(word),
                             accentStrippedWord = wordNormalizer.stripDiacritics(word).lowercase()
                         )
                     }
@@ -330,10 +330,10 @@ constructor(
                 severity = ErrorLogger.Severity.HIGH,
                 exception = e,
                 context =
-                    mapOf(
-                        "phase" to "dictionary_load",
-                        "language" to languageCode
-                    )
+                mapOf(
+                    "phase" to "dictionary_load",
+                    "language" to languageCode
+                )
             )
             null
         } catch (e: Exception) {
@@ -342,10 +342,10 @@ constructor(
                 severity = ErrorLogger.Severity.HIGH,
                 exception = e,
                 context =
-                    mapOf(
-                        "phase" to "spell_checker_creation",
-                        "language" to languageCode
-                    )
+                mapOf(
+                    "phase" to "spell_checker_creation",
+                    "language" to languageCode
+                )
             )
             null
         }
