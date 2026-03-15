@@ -295,6 +295,7 @@
     <string name="clipboard_panel_delete_all">Supprimer tout</string>
     <string name="clipboard_panel_delete_all_confirm">Supprimer tous les éléments non épinglés du presse-papiers ?</string>
     <string name="clipboard_consent_message">Urik peut lire et stocker indéfiniment le contenu du presse-papiers. Si vous ne le souhaitez pas, rendez-vous dans les paramètres et désactivez l\'historique du presse-papiers.</string>
+    <string name="clipboard_panel_close">Fermer le presse-papier</string>
 
     <!-- Clipboard Accessibility -->
     <string name="clipboard_item_description">Élément du presse-papiers : %1$s</string>
