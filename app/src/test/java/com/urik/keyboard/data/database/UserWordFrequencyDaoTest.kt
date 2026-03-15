@@ -37,239 +37,223 @@ class UserWordFrequencyDaoTest {
     }
 
     @Test
-    fun `incrementFrequency inserts new word on first call`() =
-        runTest {
-            dao.incrementFrequency("en", "hello", System.currentTimeMillis())
+    fun `incrementFrequency inserts new word on first call`() = runTest {
+        dao.incrementFrequency("en", "hello", System.currentTimeMillis())
 
-            val word = dao.findWord("en", "hello")
-            assertNotNull(word)
-            assertEquals(1, word?.frequency)
-            assertEquals("hello", word?.wordNormalized)
-        }
-
-    @Test
-    fun `incrementFrequency increments existing word`() =
-        runTest {
-            val timestamp = System.currentTimeMillis()
-
-            dao.incrementFrequency("en", "hello", timestamp)
-            dao.incrementFrequency("en", "hello", timestamp + 1000)
-            dao.incrementFrequency("en", "hello", timestamp + 2000)
-
-            val word = dao.findWord("en", "hello")
-            assertNotNull(word)
-            assertEquals(3, word?.frequency)
-        }
+        val word = dao.findWord("en", "hello")
+        assertNotNull(word)
+        assertEquals(1, word?.frequency)
+        assertEquals("hello", word?.wordNormalized)
+    }
 
     @Test
-    fun `incrementFrequency updates lastUsed timestamp`() =
-        runTest {
-            val firstTime = 1000L
-            val secondTime = 5000L
+    fun `incrementFrequency increments existing word`() = runTest {
+        val timestamp = System.currentTimeMillis()
 
-            dao.incrementFrequency("en", "test", firstTime)
-            dao.incrementFrequency("en", "test", secondTime)
+        dao.incrementFrequency("en", "hello", timestamp)
+        dao.incrementFrequency("en", "hello", timestamp + 1000)
+        dao.incrementFrequency("en", "hello", timestamp + 2000)
 
-            val word = dao.findWord("en", "test")
-            assertEquals(secondTime, word?.lastUsed)
-        }
-
-    @Test
-    fun `incrementFrequency is language-specific`() =
-        runTest {
-            val timestamp = System.currentTimeMillis()
-
-            dao.incrementFrequency("en", "hello", timestamp)
-            dao.incrementFrequency("de", "hello", timestamp)
-
-            val enWord = dao.findWord("en", "hello")
-            val deWord = dao.findWord("de", "hello")
-
-            assertEquals(1, enWord?.frequency)
-            assertEquals(1, deWord?.frequency)
-        }
+        val word = dao.findWord("en", "hello")
+        assertNotNull(word)
+        assertEquals(3, word?.frequency)
+    }
 
     @Test
-    fun `findWords returns frequencies for multiple words`() =
-        runTest {
-            val timestamp = System.currentTimeMillis()
+    fun `incrementFrequency updates lastUsed timestamp`() = runTest {
+        val firstTime = 1000L
+        val secondTime = 5000L
 
-            dao.incrementFrequency("en", "hello", timestamp)
-            dao.incrementFrequency("en", "hello", timestamp)
-            dao.incrementFrequency("en", "world", timestamp)
-            dao.incrementFrequency("en", "test", timestamp)
-            dao.incrementFrequency("en", "test", timestamp)
-            dao.incrementFrequency("en", "test", timestamp)
+        dao.incrementFrequency("en", "test", firstTime)
+        dao.incrementFrequency("en", "test", secondTime)
 
-            val words = dao.findWords("en", listOf("hello", "world", "test", "missing"))
-
-            assertEquals(3, words.size)
-            val freqMap = words.associate { it.wordNormalized to it.frequency }
-            assertEquals(2, freqMap["hello"])
-            assertEquals(1, freqMap["world"])
-            assertEquals(3, freqMap["test"])
-        }
+        val word = dao.findWord("en", "test")
+        assertEquals(secondTime, word?.lastUsed)
+    }
 
     @Test
-    fun `findWord returns null for nonexistent word`() =
-        runTest {
-            val word = dao.findWord("en", "nonexistent")
-            assertNull(word)
-        }
+    fun `incrementFrequency is language-specific`() = runTest {
+        val timestamp = System.currentTimeMillis()
+
+        dao.incrementFrequency("en", "hello", timestamp)
+        dao.incrementFrequency("de", "hello", timestamp)
+
+        val enWord = dao.findWord("en", "hello")
+        val deWord = dao.findWord("de", "hello")
+
+        assertEquals(1, enWord?.frequency)
+        assertEquals(1, deWord?.frequency)
+    }
 
     @Test
-    fun `clearLanguage removes all words for language`() =
-        runTest {
-            val timestamp = System.currentTimeMillis()
+    fun `findWords returns frequencies for multiple words`() = runTest {
+        val timestamp = System.currentTimeMillis()
 
-            dao.incrementFrequency("en", "hello", timestamp)
-            dao.incrementFrequency("en", "world", timestamp)
-            dao.incrementFrequency("de", "hallo", timestamp)
+        dao.incrementFrequency("en", "hello", timestamp)
+        dao.incrementFrequency("en", "hello", timestamp)
+        dao.incrementFrequency("en", "world", timestamp)
+        dao.incrementFrequency("en", "test", timestamp)
+        dao.incrementFrequency("en", "test", timestamp)
+        dao.incrementFrequency("en", "test", timestamp)
 
-            val deleted = dao.clearLanguage("en")
+        val words = dao.findWords("en", listOf("hello", "world", "test", "missing"))
 
-            assertEquals(2, deleted)
-            assertNull(dao.findWord("en", "hello"))
-            assertNull(dao.findWord("en", "world"))
-            assertNotNull(dao.findWord("de", "hallo"))
-        }
-
-    @Test
-    fun `clearAll removes all words`() =
-        runTest {
-            val timestamp = System.currentTimeMillis()
-
-            dao.incrementFrequency("en", "hello", timestamp)
-            dao.incrementFrequency("de", "hallo", timestamp)
-            dao.incrementFrequency("es", "hola", timestamp)
-
-            val deleted = dao.clearAll()
-
-            assertEquals(3, deleted)
-            assertEquals(0, dao.getTotalCount())
-        }
+        assertEquals(3, words.size)
+        val freqMap = words.associate { it.wordNormalized to it.frequency }
+        assertEquals(2, freqMap["hello"])
+        assertEquals(1, freqMap["world"])
+        assertEquals(3, freqMap["test"])
+    }
 
     @Test
-    fun `getMostFrequentWords returns top N by frequency`() =
-        runTest {
-            val timestamp = System.currentTimeMillis()
-
-            dao.incrementFrequency("en", "common", timestamp)
-            dao.incrementFrequency("en", "common", timestamp)
-            dao.incrementFrequency("en", "common", timestamp)
-            dao.incrementFrequency("en", "medium", timestamp)
-            dao.incrementFrequency("en", "medium", timestamp)
-            dao.incrementFrequency("en", "rare", timestamp)
-
-            val top2 = dao.getMostFrequentWords("en", 2)
-
-            assertEquals(2, top2.size)
-            assertEquals("common", top2[0].wordNormalized)
-            assertEquals(3, top2[0].frequency)
-            assertEquals("medium", top2[1].wordNormalized)
-            assertEquals(2, top2[1].frequency)
-        }
+    fun `findWord returns null for nonexistent word`() = runTest {
+        val word = dao.findWord("en", "nonexistent")
+        assertNull(word)
+    }
 
     @Test
-    fun `getTotalCount returns correct count`() =
-        runTest {
-            val timestamp = System.currentTimeMillis()
+    fun `clearLanguage removes all words for language`() = runTest {
+        val timestamp = System.currentTimeMillis()
 
-            dao.incrementFrequency("en", "one", timestamp)
-            dao.incrementFrequency("en", "two", timestamp)
-            dao.incrementFrequency("de", "drei", timestamp)
+        dao.incrementFrequency("en", "hello", timestamp)
+        dao.incrementFrequency("en", "world", timestamp)
+        dao.incrementFrequency("de", "hallo", timestamp)
 
-            assertEquals(3, dao.getTotalCount())
-        }
+        val deleted = dao.clearLanguage("en")
 
-    @Test
-    fun `unique index prevents duplicate language-word pairs`() =
-        runTest {
-            val word1 =
-                UserWordFrequency(
-                    languageTag = "en",
-                    wordNormalized = "test",
-                    frequency = 1,
-                    lastUsed = 1000L,
-                )
-
-            dao.insertWord(word1)
-            val result = dao.insertWord(word1)
-
-            assertEquals(-1L, result)
-            assertEquals(1, dao.getTotalCount())
-        }
+        assertEquals(2, deleted)
+        assertNull(dao.findWord("en", "hello"))
+        assertNull(dao.findWord("en", "world"))
+        assertNotNull(dao.findWord("de", "hallo"))
+    }
 
     @Test
-    fun `incrementFrequencyBy inserts new word with amount`() =
-        runTest {
-            dao.incrementFrequencyBy("en", "batch", 5, System.currentTimeMillis())
+    fun `clearAll removes all words`() = runTest {
+        val timestamp = System.currentTimeMillis()
 
-            val word = dao.findWord("en", "batch")
-            assertNotNull(word)
-            assertEquals(5, word?.frequency)
-        }
+        dao.incrementFrequency("en", "hello", timestamp)
+        dao.incrementFrequency("de", "hallo", timestamp)
+        dao.incrementFrequency("es", "hola", timestamp)
 
-    @Test
-    fun `incrementFrequencyBy adds to existing frequency`() =
-        runTest {
-            val timestamp = System.currentTimeMillis()
+        val deleted = dao.clearAll()
 
-            dao.incrementFrequency("en", "hello", timestamp)
-            dao.incrementFrequencyBy("en", "hello", 3, timestamp + 1000)
-
-            val word = dao.findWord("en", "hello")
-            assertEquals(4, word?.frequency)
-        }
+        assertEquals(3, deleted)
+        assertEquals(0, dao.getTotalCount())
+    }
 
     @Test
-    fun `pruneStaleEntries removes frequency-1 entries older than cutoff`() =
-        runTest {
-            val now = System.currentTimeMillis()
-            val old = now - 60 * 24 * 60 * 60 * 1000L
+    fun `getMostFrequentWords returns top N by frequency`() = runTest {
+        val timestamp = System.currentTimeMillis()
 
-            dao.incrementFrequency("en", "stale", old)
-            dao.incrementFrequency("en", "fresh", now)
-            dao.incrementFrequency("en", "frequent", old)
-            dao.incrementFrequency("en", "frequent", old)
+        dao.incrementFrequency("en", "common", timestamp)
+        dao.incrementFrequency("en", "common", timestamp)
+        dao.incrementFrequency("en", "common", timestamp)
+        dao.incrementFrequency("en", "medium", timestamp)
+        dao.incrementFrequency("en", "medium", timestamp)
+        dao.incrementFrequency("en", "rare", timestamp)
 
-            val pruned = dao.pruneStaleEntries(now - 30L * 24 * 60 * 60 * 1000)
+        val top2 = dao.getMostFrequentWords("en", 2)
 
-            assertEquals(1, pruned)
-            assertNull(dao.findWord("en", "stale"))
-            assertNotNull(dao.findWord("en", "fresh"))
-            assertNotNull(dao.findWord("en", "frequent"))
-        }
-
-    @Test
-    fun `enforceMaxRows removes lowest frequency entries`() =
-        runTest {
-            val timestamp = System.currentTimeMillis()
-
-            dao.incrementFrequencyBy("en", "rare", 1, timestamp)
-            dao.incrementFrequencyBy("en", "medium", 5, timestamp)
-            dao.incrementFrequencyBy("en", "common", 10, timestamp)
-            dao.incrementFrequencyBy("en", "popular", 20, timestamp)
-
-            dao.enforceMaxRows(2)
-
-            assertEquals(2, dao.getTotalCount())
-            assertNull(dao.findWord("en", "rare"))
-            assertNull(dao.findWord("en", "medium"))
-            assertNotNull(dao.findWord("en", "common"))
-            assertNotNull(dao.findWord("en", "popular"))
-        }
+        assertEquals(2, top2.size)
+        assertEquals("common", top2[0].wordNormalized)
+        assertEquals(3, top2[0].frequency)
+        assertEquals("medium", top2[1].wordNormalized)
+        assertEquals(2, top2[1].frequency)
+    }
 
     @Test
-    fun `enforceMaxRows is no-op when below limit`() =
-        runTest {
-            val timestamp = System.currentTimeMillis()
+    fun `getTotalCount returns correct count`() = runTest {
+        val timestamp = System.currentTimeMillis()
 
-            dao.incrementFrequency("en", "one", timestamp)
-            dao.incrementFrequency("en", "two", timestamp)
+        dao.incrementFrequency("en", "one", timestamp)
+        dao.incrementFrequency("en", "two", timestamp)
+        dao.incrementFrequency("de", "drei", timestamp)
 
-            dao.enforceMaxRows(100)
+        assertEquals(3, dao.getTotalCount())
+    }
 
-            assertEquals(2, dao.getTotalCount())
-        }
+    @Test
+    fun `unique index prevents duplicate language-word pairs`() = runTest {
+        val word1 =
+            UserWordFrequency(
+                languageTag = "en",
+                wordNormalized = "test",
+                frequency = 1,
+                lastUsed = 1000L
+            )
+
+        dao.insertWord(word1)
+        val result = dao.insertWord(word1)
+
+        assertEquals(-1L, result)
+        assertEquals(1, dao.getTotalCount())
+    }
+
+    @Test
+    fun `incrementFrequencyBy inserts new word with amount`() = runTest {
+        dao.incrementFrequencyBy("en", "batch", 5, System.currentTimeMillis())
+
+        val word = dao.findWord("en", "batch")
+        assertNotNull(word)
+        assertEquals(5, word?.frequency)
+    }
+
+    @Test
+    fun `incrementFrequencyBy adds to existing frequency`() = runTest {
+        val timestamp = System.currentTimeMillis()
+
+        dao.incrementFrequency("en", "hello", timestamp)
+        dao.incrementFrequencyBy("en", "hello", 3, timestamp + 1000)
+
+        val word = dao.findWord("en", "hello")
+        assertEquals(4, word?.frequency)
+    }
+
+    @Test
+    fun `pruneStaleEntries removes frequency-1 entries older than cutoff`() = runTest {
+        val now = System.currentTimeMillis()
+        val old = now - 60 * 24 * 60 * 60 * 1000L
+
+        dao.incrementFrequency("en", "stale", old)
+        dao.incrementFrequency("en", "fresh", now)
+        dao.incrementFrequency("en", "frequent", old)
+        dao.incrementFrequency("en", "frequent", old)
+
+        val pruned = dao.pruneStaleEntries(now - 30L * 24 * 60 * 60 * 1000)
+
+        assertEquals(1, pruned)
+        assertNull(dao.findWord("en", "stale"))
+        assertNotNull(dao.findWord("en", "fresh"))
+        assertNotNull(dao.findWord("en", "frequent"))
+    }
+
+    @Test
+    fun `enforceMaxRows removes lowest frequency entries`() = runTest {
+        val timestamp = System.currentTimeMillis()
+
+        dao.incrementFrequencyBy("en", "rare", 1, timestamp)
+        dao.incrementFrequencyBy("en", "medium", 5, timestamp)
+        dao.incrementFrequencyBy("en", "common", 10, timestamp)
+        dao.incrementFrequencyBy("en", "popular", 20, timestamp)
+
+        dao.enforceMaxRows(2)
+
+        assertEquals(2, dao.getTotalCount())
+        assertNull(dao.findWord("en", "rare"))
+        assertNull(dao.findWord("en", "medium"))
+        assertNotNull(dao.findWord("en", "common"))
+        assertNotNull(dao.findWord("en", "popular"))
+    }
+
+    @Test
+    fun `enforceMaxRows is no-op when below limit`() = runTest {
+        val timestamp = System.currentTimeMillis()
+
+        dao.incrementFrequency("en", "one", timestamp)
+        dao.incrementFrequency("en", "two", timestamp)
+
+        dao.enforceMaxRows(100)
+
+        assertEquals(2, dao.getTotalCount())
+    }
 }

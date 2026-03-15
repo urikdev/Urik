@@ -28,14 +28,9 @@ class SwipeSignal private constructor(
     val offRowKeys: Set<Char>,
     val spatialWeight: Float,
     val frequencyWeight: Float,
-    val rawPointCount: Int,
+    val rawPointCount: Int
 ) {
-    data class PathBounds(
-        val minX: Float,
-        val maxX: Float,
-        val minY: Float,
-        val maxY: Float,
-    )
+    data class PathBounds(val minX: Float, val maxX: Float, val minY: Float, val maxY: Float)
 
     data class StartAnchor(
         val centroid: PointF,
@@ -46,14 +41,10 @@ class SwipeSignal private constructor(
         val pointZeroNearest: Char?,
         val pointZeroSecond: Char?,
         val isAmbiguous: Boolean,
-        val isAnchorLocked: Boolean,
+        val isAnchorLocked: Boolean
     )
 
-    data class EndAnchor(
-        val centroid: PointF,
-        val keyDistances: Map<Char, Float>,
-        val closestKey: Char?,
-    )
+    data class EndAnchor(val centroid: PointF, val keyDistances: Map<Char, Float>, val closestKey: Char?)
 
     companion object {
         private const val PATH_BOUNDS_MARGIN_PX = 50f
@@ -78,12 +69,13 @@ class SwipeSignal private constructor(
          *
          * Called once per swipe, before the candidate scoring loop.
          */
+        @Suppress("UnusedParameter")
         fun extract(
             interpolatedPath: List<SwipeDetector.SwipePoint>,
             keyPositions: Map<Char, PointF>,
             pathGeometryAnalyzer: PathGeometryAnalyzer,
             cachedAdaptiveSigmas: Map<Char, PathGeometryAnalyzer.AdaptiveSigma>,
-            rawPointCount: Int = interpolatedPath.size,
+            rawPointCount: Int = interpolatedPath.size
         ): SwipeSignal {
             val geometricAnalysis = pathGeometryAnalyzer.analyze(interpolatedPath, keyPositions)
 
@@ -127,14 +119,14 @@ class SwipeSignal private constructor(
             val expectedWordLength =
                 calculateExpectedWordLength(
                     intentionalInflectionCount,
-                    rawPointCount,
+                    rawPointCount
                 )
 
             val startAnchor =
                 buildStartAnchor(
                     interpolatedPath,
                     keyPositions,
-                    pointZeroDominant,
+                    pointZeroDominant
                 )
             val endAnchor = buildEndAnchor(interpolatedPath, keyPositions)
 
@@ -151,7 +143,7 @@ class SwipeSignal private constructor(
                 offRowKeys = offRowKeys,
                 spatialWeight = baselineSpatialWeight,
                 frequencyWeight = baselineFreqWeight,
-                rawPointCount = rawPointCount,
+                rawPointCount = rawPointCount
             )
         }
 
@@ -169,10 +161,7 @@ class SwipeSignal private constructor(
             return PathBounds(minX, maxX, minY, maxY)
         }
 
-        private fun filterCharsByBounds(
-            keyPositions: Map<Char, PointF>,
-            bounds: PathBounds,
-        ): Set<Char> {
+        private fun filterCharsByBounds(keyPositions: Map<Char, PointF>, bounds: PathBounds): Set<Char> {
             val margin = PATH_BOUNDS_MARGIN_PX
             return keyPositions.keys.filterTo(mutableSetOf()) { char ->
                 val pos = keyPositions[char]!!
@@ -193,10 +182,7 @@ class SwipeSignal private constructor(
             return totalLength
         }
 
-        private fun detectOffRowKeys(
-            vAvg: Float,
-            keyPositions: Map<Char, PointF>,
-        ): Set<Char> {
+        private fun detectOffRowKeys(vAvg: Float, keyPositions: Map<Char, PointF>): Set<Char> {
             if (vAvg <= GeometricScoringConstants.NORMAL_VELOCITY_THRESHOLD * 15f) {
                 return emptySet()
             }
@@ -218,10 +204,7 @@ class SwipeSignal private constructor(
             return result
         }
 
-        private fun calculateExpectedWordLength(
-            intentionalInflectionCount: Int,
-            pathSize: Int,
-        ): Int {
+        private fun calculateExpectedWordLength(intentionalInflectionCount: Int, pathSize: Int): Int {
             val maxInflectionLength =
                 when {
                     pathSize < 35 -> 3
@@ -240,7 +223,7 @@ class SwipeSignal private constructor(
         private fun buildStartAnchor(
             path: List<SwipeDetector.SwipePoint>,
             keyPositions: Map<Char, PointF>,
-            pointZeroDominant: Boolean,
+            pointZeroDominant: Boolean
         ): StartAnchor {
             val centroid = computeStartCentroid(path)
             val backprojected = computeBackprojectedStart(path)
@@ -296,7 +279,7 @@ class SwipeSignal private constructor(
                     GeometricScoringConstants.VERTEX_MIN_SEGMENT_LENGTH_PX
             val isAmbiguous =
                 pointZeroSecond != null &&
-                    (pointZeroSecondDistSq - pointZeroMinDistSq) < anchorThresholdSq
+                    pointZeroSecondDistSq - pointZeroMinDistSq < anchorThresholdSq
             val isAnchorLocked = pointZeroMinDistSq < anchorThresholdSq
 
             return StartAnchor(
@@ -308,7 +291,7 @@ class SwipeSignal private constructor(
                 pointZeroNearest = pointZeroNearest,
                 pointZeroSecond = pointZeroSecond,
                 isAmbiguous = isAmbiguous,
-                isAnchorLocked = isAnchorLocked,
+                isAnchorLocked = isAnchorLocked
             )
         }
 
@@ -365,7 +348,7 @@ class SwipeSignal private constructor(
                 minOf(
                     BACKPROJECTION_BASE_PX +
                         BACKPROJECTION_LOG_SCALE * ln(startVelocity),
-                    BACKPROJECTION_MAX_PX,
+                    BACKPROJECTION_MAX_PX
                 )
             return PointF(p0.x - normX * projectionDist, p0.y - normY * projectionDist)
         }
@@ -374,7 +357,7 @@ class SwipeSignal private constructor(
             centroid: PointF,
             path: List<SwipeDetector.SwipePoint>,
             keyPositions: Map<Char, PointF>,
-            backprojectedStart: PointF?,
+            backprojectedStart: PointF?
         ): Set<Char> {
             if (path.isEmpty()) return emptySet()
 
@@ -414,7 +397,7 @@ class SwipeSignal private constructor(
                     .map { (char, pos) ->
                         val dx = pos.x - centroid.x
                         val dy = pos.y - centroid.y
-                        char to (dx * dx + dy * dy)
+                        char to dx * dx + dy * dy
                     }.sortedBy { it.second }
                     .take(8)
                     .filter { it.second < effectiveThresholdSq }
@@ -428,7 +411,7 @@ class SwipeSignal private constructor(
                     .map { (char, pos) ->
                         val dx = pos.x - firstPoint.x
                         val dy = pos.y - firstPoint.y
-                        char to (dx * dx + dy * dy)
+                        char to dx * dx + dy * dy
                     }.sortedBy { it.second }
                     .take(POINT_ZERO_PROXIMITY_COUNT)
                     .map { it.first }
@@ -441,7 +424,7 @@ class SwipeSignal private constructor(
                         .map { (char, pos) ->
                             val dx = pos.x - backprojectedStart.x
                             val dy = pos.y - backprojectedStart.y
-                            char to (dx * dx + dy * dy)
+                            char to dx * dx + dy * dy
                         }.sortedBy { it.second }
                         .take(POINT_ZERO_PROXIMITY_COUNT)
                         .map { it.first }
@@ -453,10 +436,7 @@ class SwipeSignal private constructor(
             return centroidKeys + pointZeroKeys + backprojKeys
         }
 
-        private fun buildEndAnchor(
-            path: List<SwipeDetector.SwipePoint>,
-            keyPositions: Map<Char, PointF>,
-        ): EndAnchor {
+        private fun buildEndAnchor(path: List<SwipeDetector.SwipePoint>, keyPositions: Map<Char, PointF>): EndAnchor {
             val endN = minOf(END_CENTROID_POINTS, path.size)
             var endCentroidX = 0f
             var endCentroidY = 0f
@@ -479,7 +459,7 @@ class SwipeSignal private constructor(
             return EndAnchor(
                 centroid = centroid,
                 keyDistances = keyDistances,
-                closestKey = closestKey,
+                closestKey = closestKey
             )
         }
     }

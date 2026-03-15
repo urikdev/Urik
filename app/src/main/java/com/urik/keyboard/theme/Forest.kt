@@ -25,6 +25,6 @@ data object Forest : KeyboardTheme {
             focusIndicator = "#f5d99b".toColorInt(),
             swipePrimary = "#c4d9a8".toColorInt(),
             swipeSecondary = "#f5d99b".toColorInt(),
-            swipeCurrent = "#4a5c48".toColorInt(),
+            swipeCurrent = "#4a5c48".toColorInt()
         )
 }

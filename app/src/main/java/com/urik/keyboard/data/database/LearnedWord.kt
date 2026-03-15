@@ -21,17 +21,17 @@ import kotlinx.serialization.Serializable
         Index(
             value = ["language_tag", "word_normalized"],
             name = "idx_exact_lookup",
-            unique = true,
+            unique = true
         ),
         Index(
             value = ["language_tag", "frequency", "last_used"],
-            name = "idx_frequency_recent",
+            name = "idx_frequency_recent"
         ),
         Index(
             value = ["frequency", "last_used"],
-            name = "idx_cleanup",
-        ),
-    ],
+            name = "idx_cleanup"
+        )
+    ]
 )
 @Serializable
 data class LearnedWord(
@@ -52,16 +52,15 @@ data class LearnedWord(
     @ColumnInfo(name = "created_at")
     val createdAt: Long = System.currentTimeMillis(),
     @ColumnInfo(name = "last_used")
-    val lastUsed: Long = System.currentTimeMillis(),
+    val lastUsed: Long = System.currentTimeMillis()
 ) {
     /**
      * Returns new instance with incremented frequency and updated timestamp.
      */
-    fun incrementFrequency(): LearnedWord =
-        copy(
-            frequency = frequency + 1,
-            lastUsed = System.currentTimeMillis(),
-        )
+    fun incrementFrequency(): LearnedWord = copy(
+        frequency = frequency + 1,
+        lastUsed = System.currentTimeMillis()
+    )
 
     /**
      * Increments frequency and promotes casing when the new variant
@@ -92,19 +91,18 @@ data class LearnedWord(
             frequency: Int = 1,
             source: WordSource = WordSource.USER_TYPED,
             createdAt: Long = System.currentTimeMillis(),
-            lastUsed: Long = System.currentTimeMillis(),
-        ): LearnedWord =
-            LearnedWord(
-                id = 0,
-                word = word,
-                wordNormalized = wordNormalized,
-                languageTag = languageTag,
-                frequency = frequency,
-                source = source,
-                characterCount = calculateGraphemeCount(word),
-                createdAt = createdAt,
-                lastUsed = lastUsed,
-            )
+            lastUsed: Long = System.currentTimeMillis()
+        ): LearnedWord = LearnedWord(
+            id = 0,
+            word = word,
+            wordNormalized = wordNormalized,
+            languageTag = languageTag,
+            frequency = frequency,
+            source = source,
+            characterCount = calculateGraphemeCount(word),
+            createdAt = createdAt,
+            lastUsed = lastUsed
+        )
 
         fun calculateGraphemeCount(text: String): Int {
             val iterator = BreakIterator.getCharacterInstance()
@@ -144,7 +142,7 @@ data class LearnedWordFts(
     @ColumnInfo(name = "word")
     val word: String,
     @ColumnInfo(name = "word_normalized")
-    val wordNormalized: String,
+    val wordNormalized: String
 )
 
 /**
@@ -167,5 +165,5 @@ enum class WordSource {
     IMPORTED,
 
     /** Pre-loaded common word */
-    SYSTEM_DEFAULT,
+    SYSTEM_DEFAULT
 }

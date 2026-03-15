@@ -25,6 +25,6 @@ data object Ocean : KeyboardTheme {
             focusIndicator = "#b4f0f5".toColorInt(),
             swipePrimary = "#87d6db".toColorInt(),
             swipeSecondary = "#b4f0f5".toColorInt(),
-            swipeCurrent = "#2d5a6b".toColorInt(),
+            swipeCurrent = "#2d5a6b".toColorInt()
         )
 }

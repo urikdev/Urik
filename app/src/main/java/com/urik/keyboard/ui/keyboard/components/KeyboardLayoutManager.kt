@@ -40,6 +40,7 @@ import com.urik.keyboard.settings.SpaceBarSize
 import com.urik.keyboard.theme.ThemeManager
 import com.urik.keyboard.utils.CacheMemoryManager
 import com.urik.keyboard.utils.ManagedCache
+import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -50,12 +51,8 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONException
-import java.util.concurrent.ConcurrentHashMap
 
-private data class PendingCallbacks(
-    val handler: Handler,
-    val runnable: Runnable,
-)
+private data class PendingCallbacks(val handler: Handler, val runnable: Runnable)
 
 class KeyboardLayoutManager(
     private val context: Context,
@@ -67,7 +64,7 @@ class KeyboardLayoutManager(
     private val characterVariationService: CharacterVariationService,
     private val languageManager: LanguageManager,
     private val themeManager: ThemeManager,
-    cacheMemoryManager: CacheMemoryManager,
+    cacheMemoryManager: CacheMemoryManager
 ) {
     private var clipboardEnabled = false
     private var activeLanguages: List<String> = emptyList()
@@ -80,17 +77,6 @@ class KeyboardLayoutManager(
     @Volatile
     private var customKeyMappings: Map<String, String> = emptyMap()
     private val keyHintRenderer = KeyHintRenderer(context)
-
-    companion object {
-        private const val STANDARD_KEY_WEIGHT = 1f
-        private const val SHIFT_KEY_WEIGHT = 1.5f
-        private const val BACKSPACE_KEY_WEIGHT = 1.5f
-        private const val MAX_BUTTON_POOL_SIZE = 40
-        private const val MAX_ERROR_TRACKING_SIZE = 20
-        private const val ERROR_CLEANUP_INTERVAL_MS = 300000L
-        private const val ERROR_TRACKING_RETENTION_SECONDS = 60
-        private val DEFAULT_PUNCTUATION = listOf(".", ",", "?", "!", "'", "\"", ";", ":")
-    }
 
     private val vibrator =
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
@@ -627,7 +613,7 @@ class KeyboardLayoutManager(
     private val punctuationCache: ManagedCache<String, List<String>> =
         cacheMemoryManager.createCache(
             name = "punctuation_cache",
-            maxSize = 20,
+            maxSize = 20
         )
 
     private val failedPunctuationLanguages = ConcurrentHashMap.newKeySet<String>()
@@ -706,10 +692,7 @@ class KeyboardLayoutManager(
         invalidateCalculationCache()
     }
 
-    fun updateHapticSettings(
-        enabled: Boolean,
-        amplitude: Int,
-    ) {
+    fun updateHapticSettings(enabled: Boolean, amplitude: Int) {
         hapticEnabled = enabled
         hapticAmplitude = amplitude
     }
@@ -737,7 +720,9 @@ class KeyboardLayoutManager(
     private fun vibrateEffect(effect: android.os.VibrationEffect) {
         val v = vibrator ?: return
         try {
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU && vibrationAttributes != null) {
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU &&
+                vibrationAttributes != null
+            ) {
                 v.vibrate(effect, vibrationAttributes)
             } else {
                 v.vibrate(effect)
@@ -780,7 +765,11 @@ class KeyboardLayoutManager(
                     }
                 }
 
-            val amplitude = if (supportsAmplitudeControl) hapticAmplitude else android.os.VibrationEffect.DEFAULT_AMPLITUDE
+            val amplitude = if (supportsAmplitudeControl) {
+                hapticAmplitude
+            } else {
+                android.os.VibrationEffect.DEFAULT_AMPLITUDE
+            }
             val effect = signature.createEffect(amplitude)
             vibrateEffect(effect)
         } catch (_: Exception) {
@@ -814,23 +803,19 @@ class KeyboardLayoutManager(
         cacheValid = true
     }
 
-    private fun getCachedTextSize(keyHeight: Int): Float =
-        cachedTextSizes.getOrPut(keyHeight) {
-            val baseTextSize = keyHeight * 0.38f / context.resources.displayMetrics.density
-            val minSize = 12f
-            val maxSize =
-                when (currentKeySize) {
-                    KeySize.EXTRA_LARGE -> 16f
-                    else -> 24f
-                }
-            val adjusted = baseTextSize.coerceIn(minSize, maxSize)
-            adjusted * currentKeyLabelSize.scaleFactor
-        }
+    private fun getCachedTextSize(keyHeight: Int): Float = cachedTextSizes.getOrPut(keyHeight) {
+        val baseTextSize = keyHeight * 0.38f / context.resources.displayMetrics.density
+        val minSize = 12f
+        val maxSize =
+            when (currentKeySize) {
+                KeySize.EXTRA_LARGE -> 16f
+                else -> 24f
+            }
+        val adjusted = baseTextSize.coerceIn(minSize, maxSize)
+        adjusted * currentKeyLabelSize.scaleFactor
+    }
 
-    fun createKeyboardView(
-        layout: KeyboardLayout,
-        state: KeyboardState,
-    ): View {
+    fun createKeyboardView(layout: KeyboardLayout, state: KeyboardState): View {
         lastKeyboardState = state
         returnActiveButtonsToPool()
 
@@ -848,7 +833,7 @@ class KeyboardLayoutManager(
                 mode = layout.mode,
                 rows = processedRows,
                 isRTL = layout.isRTL,
-                script = layout.script,
+                script = layout.script
             )
 
         val keyboardContainer =
@@ -857,7 +842,7 @@ class KeyboardLayoutManager(
                 layoutParams =
                     ViewGroup.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT
                     )
 
                 val horizontalPadding = context.resources.getDimensionPixelSize(R.dimen.keyboard_padding)
@@ -879,24 +864,22 @@ class KeyboardLayoutManager(
         return keyboardContainer
     }
 
-    private fun shouldInjectGlobeButton(row: List<KeyboardKey>): Boolean =
-        showLanguageSwitchKey &&
-            activeLanguages.size > 1 &&
-            row.any { it is KeyboardKey.Action && it.action == KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS }
+    private fun shouldInjectGlobeButton(row: List<KeyboardKey>): Boolean = showLanguageSwitchKey &&
+        activeLanguages.size > 1 &&
+        row.any { it is KeyboardKey.Action && it.action == KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS }
 
-    private fun injectGlobeButton(row: List<KeyboardKey>): List<KeyboardKey> =
-        row.flatMap { key ->
-            if (key is KeyboardKey.Action && key.action == KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS) {
-                listOf(key, KeyboardKey.Action(KeyboardKey.ActionType.LANGUAGE_SWITCH))
-            } else {
-                listOf(key)
-            }
+    private fun injectGlobeButton(row: List<KeyboardKey>): List<KeyboardKey> = row.flatMap { key ->
+        if (key is KeyboardKey.Action && key.action == KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS) {
+            listOf(key, KeyboardKey.Action(KeyboardKey.ActionType.LANGUAGE_SWITCH))
+        } else {
+            listOf(key)
         }
+    }
 
     private fun createRowView(
         keys: List<KeyboardKey>,
         state: KeyboardState,
-        hasNumberRowGutter: Boolean = false,
+        hasNumberRowGutter: Boolean = false
     ): LinearLayout {
         val is9LetterRow = is9CharacterLetterRow(keys)
         val shouldSplit = splitGapPx > 0 && !containsSpacebar(keys)
@@ -908,7 +891,7 @@ class KeyboardLayoutManager(
                     LinearLayout
                         .LayoutParams(
                             LinearLayout.LayoutParams.MATCH_PARENT,
-                            LinearLayout.LayoutParams.WRAP_CONTENT,
+                            LinearLayout.LayoutParams.WRAP_CONTENT
                         ).apply {
                             val verticalMargin = context.resources.getDimensionPixelSize(R.dimen.key_margin_vertical)
                             val gutterMargin =
@@ -980,10 +963,7 @@ class KeyboardLayoutManager(
         return rowLayout
     }
 
-    private fun createHalfRowContainer(
-        keys: List<KeyboardKey>,
-        state: KeyboardState,
-    ): LinearLayout =
+    private fun createHalfRowContainer(keys: List<KeyboardKey>, state: KeyboardState): LinearLayout =
         LinearLayout(context).apply {
             orientation = LinearLayout.HORIZONTAL
             layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
@@ -1015,11 +995,7 @@ class KeyboardLayoutManager(
         }
     }
 
-    private fun getOrCreateKeyButton(
-        key: KeyboardKey,
-        state: KeyboardState,
-        rowKeys: List<KeyboardKey>,
-    ): Button {
+    private fun getOrCreateKeyButton(key: KeyboardKey, state: KeyboardState, rowKeys: List<KeyboardKey>): Button {
         val button =
             if (buttonPool.isNotEmpty()) {
                 buttonPool.removeAt(buttonPool.size - 1).apply {
@@ -1036,12 +1012,7 @@ class KeyboardLayoutManager(
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    private fun configureButton(
-        button: Button,
-        key: KeyboardKey,
-        state: KeyboardState,
-        rowKeys: List<KeyboardKey>,
-    ) {
+    private fun configureButton(button: Button, key: KeyboardKey, state: KeyboardState, rowKeys: List<KeyboardKey>) {
         ensureCacheValid()
 
         button.apply {
@@ -1062,7 +1033,7 @@ class KeyboardLayoutManager(
                     .LayoutParams(
                         0,
                         visualHeight,
-                        getKeyWeight(key, rowKeys),
+                        getKeyWeight(key, rowKeys)
                     ).apply {
                         val horizontalMargin = cachedDimensions["horizontalMargin"]!!
                         setMargins(horizontalMargin, verticalMargin, horizontalMargin, verticalMargin)
@@ -1076,7 +1047,7 @@ class KeyboardLayoutManager(
                 when (key) {
                     is KeyboardKey.Action -> R.style.KeyTextAppearance_Action
                     else -> R.style.KeyTextAppearance
-                },
+                }
             )
 
             setTextSize(TypedValue.COMPLEX_UNIT_SP, finalTextSize)
@@ -1098,7 +1069,7 @@ class KeyboardLayoutManager(
                     KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS,
                     KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS_SECONDARY,
                     KeyboardKey.ActionType.MODE_SWITCH_LETTERS,
-                    KeyboardKey.ActionType.MODE_SWITCH_NUMBERS,
+                    KeyboardKey.ActionType.MODE_SWITCH_NUMBERS
                 )
             ) {
                 TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(
@@ -1106,12 +1077,12 @@ class KeyboardLayoutManager(
                     8,
                     finalTextSize.toInt(),
                     1,
-                    TypedValue.COMPLEX_UNIT_SP,
+                    TypedValue.COMPLEX_UNIT_SP
                 )
             } else {
                 TextViewCompat.setAutoSizeTextTypeWithDefaults(
                     this,
-                    TextViewCompat.AUTO_SIZE_TEXT_TYPE_NONE,
+                    TextViewCompat.AUTO_SIZE_TEXT_TYPE_NONE
                 )
             }
 
@@ -1147,7 +1118,7 @@ class KeyboardLayoutManager(
                         keyHintRenderer.createKeyWithHint(
                             keyBackground,
                             customSymbol,
-                            themeManager.currentTheme.value.colors,
+                            themeManager.currentTheme.value.colors
                         )
                     } else {
                         keyBackground
@@ -1170,16 +1141,30 @@ class KeyboardLayoutManager(
             if (key is KeyboardKey.Action) {
                 val iconRes =
                     when (key.action) {
-                        KeyboardKey.ActionType.SHIFT -> if (state.isCapsLockOn) R.drawable.shift_lock_48px else R.drawable.shift_48px
+                        KeyboardKey.ActionType.SHIFT -> if (state.isCapsLockOn) {
+                            R.drawable.shift_lock_48px
+                        } else {
+                            R.drawable.shift_48px
+                        }
+
                         KeyboardKey.ActionType.SPACE -> R.drawable.space_bar_48px
+
                         KeyboardKey.ActionType.BACKSPACE -> R.drawable.backspace_48px
+
                         KeyboardKey.ActionType.ENTER -> R.drawable.keyboard_return_48px
+
                         KeyboardKey.ActionType.SEARCH -> R.drawable.search_48px
+
                         KeyboardKey.ActionType.SEND -> R.drawable.send_48px
+
                         KeyboardKey.ActionType.DONE -> R.drawable.done_48px
+
                         KeyboardKey.ActionType.GO -> R.drawable.arrow_forward_48px
+
                         KeyboardKey.ActionType.NEXT -> R.drawable.arrow_forward_48px
+
                         KeyboardKey.ActionType.PREVIOUS -> R.drawable.arrow_back_48px
+
                         else -> 0
                     }
 
@@ -1251,7 +1236,7 @@ class KeyboardLayoutManager(
                     key.type == KeyboardKey.KeyType.LETTER ||
                         key.type == KeyboardKey.KeyType.NUMBER ||
                         key.type == KeyboardKey.KeyType.SYMBOL
-                )
+                    )
             ) {
                 setOnTouchListener(characterLongPressTouchListener)
             }
@@ -1264,16 +1249,19 @@ class KeyboardLayoutManager(
                 }
             }
 
-            if (key is KeyboardKey.Action && key.action == KeyboardKey.ActionType.SPACE) {
-                if (longPressPunctuationMode == LongPressPunctuationMode.SPACEBAR) {
-                    setOnTouchListener(spaceLongPressTouchListener)
-                }
+            if (key is KeyboardKey.Action &&
+                key.action == KeyboardKey.ActionType.SPACE &&
+                longPressPunctuationMode == LongPressPunctuationMode.SPACEBAR
+            ) {
+                setOnTouchListener(spaceLongPressTouchListener)
             }
 
-            if (key is KeyboardKey.Action && key.action == KeyboardKey.ActionType.SHIFT) {
-                if (!showLanguageSwitchKey && activeLanguages.size > 1) {
-                    setOnTouchListener(shiftLongPressTouchListener)
-                }
+            if (key is KeyboardKey.Action &&
+                key.action == KeyboardKey.ActionType.SHIFT &&
+                !showLanguageSwitchKey &&
+                activeLanguages.size > 1
+            ) {
+                setOnTouchListener(shiftLongPressTouchListener)
             }
 
             if (key is KeyboardKey.Action && key.action == KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS) {
@@ -1340,11 +1328,10 @@ class KeyboardLayoutManager(
         activeButtons.clear()
     }
 
-    private fun isBicameralScript(script: String): Boolean =
-        when (script) {
-            "Latn", "Cyrl", "Grek" -> true
-            else -> false
-        }
+    private fun isBicameralScript(script: String): Boolean = when (script) {
+        "Latn", "Cyrl", "Grek" -> true
+        else -> false
+    }
 
     private fun getCurrentLocale(): java.util.Locale {
         val lang =
@@ -1354,13 +1341,66 @@ class KeyboardLayoutManager(
         return java.util.Locale.forLanguageTag(lang)
     }
 
-    private fun getKeyLabel(
-        key: KeyboardKey,
-        state: KeyboardState,
-    ): String =
-        when (key) {
-            is KeyboardKey.Character -> {
-                val script = effectiveLayout?.script ?: "Latn"
+    private fun getKeyLabel(key: KeyboardKey, state: KeyboardState): String = when (key) {
+        is KeyboardKey.Character -> {
+            val script = effectiveLayout?.script ?: "Latn"
+            when {
+                key.type == KeyboardKey.KeyType.LETTER &&
+                    isBicameralScript(script) &&
+                    shouldCapitalize(state) -> {
+                    if (key.value == "ß") {
+                        "ẞ"
+                    } else {
+                        key.value.uppercase(getCurrentLocale())
+                    }
+                }
+
+                else -> {
+                    key.value
+                }
+            }
+        }
+
+        is KeyboardKey.Action -> {
+            when (key.action) {
+                KeyboardKey.ActionType.MODE_SWITCH_LETTERS -> {
+                    context.getString(R.string.letters_mode_label)
+                }
+
+                KeyboardKey.ActionType.MODE_SWITCH_NUMBERS -> {
+                    context.getString(R.string.numbers_mode_label)
+                }
+
+                KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS -> {
+                    context.getString(R.string.symbols_mode_label)
+                }
+
+                KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS_SECONDARY -> {
+                    context.getString(R.string.symbols_secondary_mode_label)
+                }
+
+                KeyboardKey.ActionType.LANGUAGE_SWITCH -> {
+                    languageManager.currentLayoutLanguage.value
+                        .take(
+                            2
+                        ).uppercase(java.util.Locale.ROOT)
+                }
+
+                else -> {
+                    "?"
+                }
+            }
+        }
+
+        KeyboardKey.Spacer -> {
+            ""
+        }
+    }
+
+    private fun getKeyContentDescription(key: KeyboardKey, state: KeyboardState): String = when (key) {
+        is KeyboardKey.Character -> {
+            val script = effectiveLayout?.script ?: "Latn"
+            val char =
                 when {
                     key.type == KeyboardKey.KeyType.LETTER &&
                         isBicameralScript(script) &&
@@ -1376,146 +1416,85 @@ class KeyboardLayoutManager(
                         key.value
                     }
                 }
-            }
-
-            is KeyboardKey.Action -> {
-                when (key.action) {
-                    KeyboardKey.ActionType.MODE_SWITCH_LETTERS -> {
-                        context.getString(R.string.letters_mode_label)
-                    }
-
-                    KeyboardKey.ActionType.MODE_SWITCH_NUMBERS -> {
-                        context.getString(R.string.numbers_mode_label)
-                    }
-
-                    KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS -> {
-                        context.getString(R.string.symbols_mode_label)
-                    }
-
-                    KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS_SECONDARY -> {
-                        context.getString(R.string.symbols_secondary_mode_label)
-                    }
-
-                    KeyboardKey.ActionType.LANGUAGE_SWITCH -> {
-                        languageManager.currentLayoutLanguage.value
-                            .take(
-                                2,
-                            ).uppercase(java.util.Locale.ROOT)
-                    }
-
-                    else -> {
-                        "?"
-                    }
-                }
-            }
-
-            KeyboardKey.Spacer -> {
-                ""
-            }
+            context.getString(R.string.key_character_description, char)
         }
 
-    private fun getKeyContentDescription(
-        key: KeyboardKey,
-        state: KeyboardState,
-    ): String =
-        when (key) {
-            is KeyboardKey.Character -> {
-                val script = effectiveLayout?.script ?: "Latn"
-                val char =
+        is KeyboardKey.Action -> {
+            when (key.action) {
+                KeyboardKey.ActionType.SHIFT -> {
                     when {
-                        key.type == KeyboardKey.KeyType.LETTER &&
-                            isBicameralScript(script) &&
-                            shouldCapitalize(state) -> {
-                            if (key.value == "ß") {
-                                "ẞ"
-                            } else {
-                                key.value.uppercase(getCurrentLocale())
-                            }
-                        }
-
-                        else -> {
-                            key.value
-                        }
-                    }
-                context.getString(R.string.key_character_description, char)
-            }
-
-            is KeyboardKey.Action -> {
-                when (key.action) {
-                    KeyboardKey.ActionType.SHIFT -> {
-                        when {
-                            state.isCapsLockOn -> context.getString(R.string.caps_lock_on_description)
-                            state.isShiftPressed -> context.getString(R.string.shift_active_description)
-                            else -> context.getString(R.string.shift_key_description)
-                        }
-                    }
-
-                    KeyboardKey.ActionType.BACKSPACE -> {
-                        context.getString(R.string.backspace_key_description)
-                    }
-
-                    KeyboardKey.ActionType.SPACE -> {
-                        context.getString(R.string.space_key_description)
-                    }
-
-                    KeyboardKey.ActionType.ENTER -> {
-                        context.getString(R.string.action_enter_description)
-                    }
-
-                    KeyboardKey.ActionType.SEARCH -> {
-                        context.getString(R.string.action_search_description)
-                    }
-
-                    KeyboardKey.ActionType.SEND -> {
-                        context.getString(R.string.action_send_description)
-                    }
-
-                    KeyboardKey.ActionType.DONE -> {
-                        context.getString(R.string.action_done_description)
-                    }
-
-                    KeyboardKey.ActionType.GO -> {
-                        context.getString(R.string.action_go_description)
-                    }
-
-                    KeyboardKey.ActionType.NEXT -> {
-                        context.getString(R.string.action_next_description)
-                    }
-
-                    KeyboardKey.ActionType.PREVIOUS -> {
-                        context.getString(R.string.action_previous_description)
-                    }
-
-                    KeyboardKey.ActionType.MODE_SWITCH_LETTERS -> {
-                        context.getString(R.string.letters_mode_description)
-                    }
-
-                    KeyboardKey.ActionType.MODE_SWITCH_NUMBERS -> {
-                        context.getString(R.string.numbers_mode_description)
-                    }
-
-                    KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS -> {
-                        context.getString(R.string.symbols_mode_description)
-                    }
-
-                    KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS_SECONDARY -> {
-                        context.getString(R.string.symbols_secondary_mode_description)
-                    }
-
-                    KeyboardKey.ActionType.CAPS_LOCK -> {
-                        context.getString(R.string.caps_lock_description)
-                    }
-
-                    KeyboardKey.ActionType.LANGUAGE_SWITCH -> {
-                        context.getString(R.string.language_switch_description)
+                        state.isCapsLockOn -> context.getString(R.string.caps_lock_on_description)
+                        state.isShiftPressed -> context.getString(R.string.shift_active_description)
+                        else -> context.getString(R.string.shift_key_description)
                     }
                 }
-            }
 
-            KeyboardKey.Spacer -> {
-                ""
+                KeyboardKey.ActionType.BACKSPACE -> {
+                    context.getString(R.string.backspace_key_description)
+                }
+
+                KeyboardKey.ActionType.SPACE -> {
+                    context.getString(R.string.space_key_description)
+                }
+
+                KeyboardKey.ActionType.ENTER -> {
+                    context.getString(R.string.action_enter_description)
+                }
+
+                KeyboardKey.ActionType.SEARCH -> {
+                    context.getString(R.string.action_search_description)
+                }
+
+                KeyboardKey.ActionType.SEND -> {
+                    context.getString(R.string.action_send_description)
+                }
+
+                KeyboardKey.ActionType.DONE -> {
+                    context.getString(R.string.action_done_description)
+                }
+
+                KeyboardKey.ActionType.GO -> {
+                    context.getString(R.string.action_go_description)
+                }
+
+                KeyboardKey.ActionType.NEXT -> {
+                    context.getString(R.string.action_next_description)
+                }
+
+                KeyboardKey.ActionType.PREVIOUS -> {
+                    context.getString(R.string.action_previous_description)
+                }
+
+                KeyboardKey.ActionType.MODE_SWITCH_LETTERS -> {
+                    context.getString(R.string.letters_mode_description)
+                }
+
+                KeyboardKey.ActionType.MODE_SWITCH_NUMBERS -> {
+                    context.getString(R.string.numbers_mode_description)
+                }
+
+                KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS -> {
+                    context.getString(R.string.symbols_mode_description)
+                }
+
+                KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS_SECONDARY -> {
+                    context.getString(R.string.symbols_secondary_mode_description)
+                }
+
+                KeyboardKey.ActionType.CAPS_LOCK -> {
+                    context.getString(R.string.caps_lock_description)
+                }
+
+                KeyboardKey.ActionType.LANGUAGE_SWITCH -> {
+                    context.getString(R.string.language_switch_description)
+                }
             }
         }
+
+        KeyboardKey.Spacer -> {
+            ""
+        }
+    }
 
     private fun handleSpaceLongPress(view: View) {
         if (longPressPunctuationMode != LongPressPunctuationMode.SPACEBAR) {
@@ -1541,10 +1520,7 @@ class KeyboardLayoutManager(
         }
     }
 
-    private fun handlePunctuationLongPress(
-        key: KeyboardKey.Character,
-        view: View,
-    ) {
+    private fun handlePunctuationLongPress(key: KeyboardKey.Character, view: View) {
         performContextualHaptic(key)
 
         val currentLayoutLang = languageManager.currentLayoutLanguage.value
@@ -1574,10 +1550,7 @@ class KeyboardLayoutManager(
         showLanguagePickerPopup(view, activeLanguages)
     }
 
-    private fun showLanguagePickerPopup(
-        anchorView: View,
-        languages: List<String>,
-    ) {
+    private fun showLanguagePickerPopup(anchorView: View, languages: List<String>) {
         languagePickerPopup?.dismiss()
 
         val popup = LanguagePickerPopup(context, themeManager)
@@ -1596,16 +1569,13 @@ class KeyboardLayoutManager(
                 android.widget.Toast
                     .makeText(context, displayName, android.widget.Toast.LENGTH_SHORT)
                     .show()
-            },
+            }
         )
         popup.showAboveAnchor()
         languagePickerPopup = popup
     }
 
-    private fun showPunctuationPopup(
-        anchorView: View,
-        punctuationList: List<String>,
-    ) {
+    private fun showPunctuationPopup(anchorView: View, punctuationList: List<String>) {
         if (!anchorView.isAttachedToWindow || anchorView.windowToken == null) {
             return
         }
@@ -1690,7 +1660,7 @@ class KeyboardLayoutManager(
 
         lastErrorCleanupTime = currentTime
 
-        val cutoffTime = currentTime - (ERROR_TRACKING_RETENTION_SECONDS * 1000L)
+        val cutoffTime = currentTime - ERROR_TRACKING_RETENTION_SECONDS * 1000L
 
         val expiredLanguages =
             lastPunctuationErrors.entries
@@ -1711,7 +1681,7 @@ class KeyboardLayoutManager(
         return context.assets.open("punctuation/$filename").bufferedReader().use { reader ->
             val jsonContent = reader.readText()
             if (jsonContent.isBlank()) {
-                throw IllegalStateException("Punctuation file $filename is empty")
+                error("Punctuation file $filename is empty")
             }
             parsePunctuationJson(jsonContent)
         }
@@ -1734,43 +1704,38 @@ class KeyboardLayoutManager(
         }
 
         if (result.isEmpty()) {
-            throw IllegalStateException("No valid punctuation marks found in file")
+            error("No valid punctuation marks found in file")
         }
 
         return result
     }
 
-    private fun getFallbackPunctuation(languageCode: String): List<String> =
-        when {
-            languageCode != "en" && !failedPunctuationLanguages.contains("en") -> {
-                try {
-                    loadPunctuationFromAssets("en").also { punctuation ->
-                        punctuationCache.put("en", punctuation)
-                    }
-                } catch (_: Exception) {
-                    failedPunctuationLanguages.add("en")
-                    DEFAULT_PUNCTUATION
+    private fun getFallbackPunctuation(languageCode: String): List<String> = when {
+        languageCode != "en" && !failedPunctuationLanguages.contains("en") -> {
+            try {
+                loadPunctuationFromAssets("en").also { punctuation ->
+                    punctuationCache.put("en", punctuation)
                 }
-            }
-
-            else -> {
+            } catch (_: Exception) {
+                failedPunctuationLanguages.add("en")
                 DEFAULT_PUNCTUATION
             }
         }
+
+        else -> {
+            DEFAULT_PUNCTUATION
+        }
+    }
 
     private fun shouldSkipPunctuationLoading(languageCode: String): Boolean {
         val errorCount = punctuationErrorCounts.getOrDefault(languageCode, 0)
         val lastError = lastPunctuationErrors.getOrDefault(languageCode, 0)
         val now = System.currentTimeMillis()
 
-        return errorCount >= maxPunctuationRetries && (now - lastError) < punctuationErrorCooldownMs
+        return errorCount >= maxPunctuationRetries && now - lastError < punctuationErrorCooldownMs
     }
 
-    private fun handleCharacterLongPress(
-        key: KeyboardKey.Character,
-        view: View,
-        button: Button,
-    ) {
+    private fun handleCharacterLongPress(key: KeyboardKey.Character, view: View, button: Button) {
         val customSymbol = customKeyMappings[key.value.lowercase()]
         if (customSymbol != null) {
             customMappingLongPressFired.add(button)
@@ -1804,11 +1769,7 @@ class KeyboardLayoutManager(
         }
     }
 
-    private fun showCharacterVariationPopup(
-        key: KeyboardKey.Character,
-        anchorView: View,
-        variations: List<String>,
-    ) {
+    private fun showCharacterVariationPopup(key: KeyboardKey.Character, anchorView: View, variations: List<String>) {
         if (!anchorView.isAttachedToWindow || anchorView.windowToken == null) {
             return
         }
@@ -1909,7 +1870,7 @@ class KeyboardLayoutManager(
 
                             withContext(Dispatchers.Main) {
                                 vibrateEffect(
-                                    android.os.VibrationEffect.createOneShot(intervalMs / 2, amplitude),
+                                    android.os.VibrationEffect.createOneShot(intervalMs / 2, amplitude)
                                 )
                             }
                             delay(intervalMs)
@@ -1935,7 +1896,7 @@ class KeyboardLayoutManager(
 
                             withContext(Dispatchers.Main) {
                                 vibrateEffect(
-                                    android.os.VibrationEffect.createOneShot(intervalMs / 2, amplitude),
+                                    android.os.VibrationEffect.createOneShot(intervalMs / 2, amplitude)
                                 )
                             }
                             delay(intervalMs)
@@ -1985,8 +1946,8 @@ class KeyboardLayoutManager(
                     android.os.VibrationEffect.createWaveform(
                         timings,
                         amplitudes,
-                        rampSteps + 2,
-                    ),
+                        rampSteps + 2
+                    )
                 )
             }
         }
@@ -2011,10 +1972,7 @@ class KeyboardLayoutManager(
         return (startSpeed - (startSpeed - endSpeed) * progress).toLong()
     }
 
-    private fun getKeyWeight(
-        key: KeyboardKey,
-        rowKeys: List<KeyboardKey>,
-    ): Float {
+    private fun getKeyWeight(key: KeyboardKey, rowKeys: List<KeyboardKey>): Float {
         val isNumberModeRow = isNumberModeRow(rowKeys)
         val characterKeyCount = rowKeys.count { it is KeyboardKey.Character }
         val isSplitMode = splitGapPx > 0 && !containsSpacebar(rowKeys)
@@ -2035,7 +1993,7 @@ class KeyboardLayoutManager(
                             }
 
                             KeyboardKey.ActionType.SHIFT,
-                            KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS_SECONDARY,
+                            KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS_SECONDARY
                             -> {
                                 if (characterKeyCount >= 10) STANDARD_KEY_WEIGHT else SHIFT_KEY_WEIGHT
                             }
@@ -2072,8 +2030,12 @@ class KeyboardLayoutManager(
 
         return rowKeys.all { key ->
             when (key) {
-                is KeyboardKey.Character -> key.type == KeyboardKey.KeyType.NUMBER || key.type == KeyboardKey.KeyType.PUNCTUATION
+                is KeyboardKey.Character ->
+                    key.type == KeyboardKey.KeyType.NUMBER ||
+                        key.type == KeyboardKey.KeyType.PUNCTUATION
+
                 is KeyboardKey.Action -> key.action == KeyboardKey.ActionType.BACKSPACE
+
                 KeyboardKey.Spacer -> false
             }
         }
@@ -2095,23 +2057,19 @@ class KeyboardLayoutManager(
         return variations.map { it.uppercase(locale) }
     }
 
-    private fun getKeyActivatedState(
-        key: KeyboardKey,
-        state: KeyboardState,
-    ): Boolean =
-        when (key) {
-            is KeyboardKey.Action -> {
-                when (key.action) {
-                    KeyboardKey.ActionType.SHIFT -> state.isShiftPressed && !state.isCapsLockOn
-                    KeyboardKey.ActionType.CAPS_LOCK -> state.isCapsLockOn
-                    else -> false
-                }
-            }
-
-            else -> {
-                false
+    private fun getKeyActivatedState(key: KeyboardKey, state: KeyboardState): Boolean = when (key) {
+        is KeyboardKey.Action -> {
+            when (key.action) {
+                KeyboardKey.ActionType.SHIFT -> state.isShiftPressed && !state.isCapsLockOn
+                KeyboardKey.ActionType.CAPS_LOCK -> state.isCapsLockOn
+                else -> false
             }
         }
+
+        else -> {
+            false
+        }
+    }
 
     private fun ensureDimensionCacheValid() {
         if (cachedCornerRadius > 0f) return
@@ -2181,21 +2139,17 @@ class KeyboardLayoutManager(
             android.content.res.ColorStateList
                 .valueOf(theme.colors.statePressed),
             stateListDrawable,
-            null,
+            null
         )
     }
 
-    private fun getKeyTextColor(key: KeyboardKey): Int =
-        when (key) {
-            is KeyboardKey.Character -> themeManager.currentTheme.value.colors.keyTextCharacter
-            is KeyboardKey.Action -> themeManager.currentTheme.value.colors.keyTextAction
-            KeyboardKey.Spacer -> android.graphics.Color.TRANSPARENT
-        }
+    private fun getKeyTextColor(key: KeyboardKey): Int = when (key) {
+        is KeyboardKey.Character -> themeManager.currentTheme.value.colors.keyTextCharacter
+        is KeyboardKey.Action -> themeManager.currentTheme.value.colors.keyTextAction
+        KeyboardKey.Spacer -> android.graphics.Color.TRANSPARENT
+    }
 
-    private fun createLangBadgeDrawable(
-        text: String,
-        color: Int,
-    ): android.graphics.drawable.BitmapDrawable {
+    private fun createLangBadgeDrawable(text: String, color: Int): android.graphics.drawable.BitmapDrawable {
         val density = context.resources.displayMetrics.density
         val sizePx = (10 * density).toInt().coerceAtLeast(1)
         val bitmap = createBitmap(sizePx, sizePx)
@@ -2229,5 +2183,16 @@ class KeyboardLayoutManager(
         languagePickerPopup?.dismiss()
         languagePickerPopup = null
         punctuationCache.invalidateAll()
+    }
+
+    companion object {
+        private const val STANDARD_KEY_WEIGHT = 1f
+        private const val SHIFT_KEY_WEIGHT = 1.5f
+        private const val BACKSPACE_KEY_WEIGHT = 1.5f
+        private const val MAX_BUTTON_POOL_SIZE = 40
+        private const val MAX_ERROR_TRACKING_SIZE = 20
+        private const val ERROR_CLEANUP_INTERVAL_MS = 300000L
+        private const val ERROR_TRACKING_RETENTION_SECONDS = 60
+        private val DEFAULT_PUNCTUATION = listOf(".", ",", "?", "!", "'", "\"", ";", ":")
     }
 }

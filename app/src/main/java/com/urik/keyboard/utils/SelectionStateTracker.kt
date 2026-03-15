@@ -8,7 +8,7 @@ data class SelectionState(
     val selectionEnd: Int,
     val composingStart: Int,
     val composingEnd: Int,
-    val sequence: Long,
+    val sequence: Long
 ) {
     val hasSelection: Boolean get() = selectionStart != selectionEnd
 
@@ -21,7 +21,7 @@ data class SelectionState(
                 selectionEnd = -1,
                 composingStart = -1,
                 composingEnd = -1,
-                sequence = -1L,
+                sequence = -1L
             )
     }
 }
@@ -40,7 +40,7 @@ class SelectionStateTracker {
         newSelStart: Int,
         newSelEnd: Int,
         candidatesStart: Int,
-        candidatesEnd: Int,
+        candidatesEnd: Int
     ): SelectionChangeResult {
         val previousState = currentState.get()
         val newSequence = sequenceCounter.incrementAndGet()
@@ -51,7 +51,7 @@ class SelectionStateTracker {
                 selectionEnd = newSelEnd,
                 composingStart = candidatesStart,
                 composingEnd = candidatesEnd,
-                sequence = newSequence,
+                sequence = newSequence
             )
 
         currentState.set(newState)
@@ -69,7 +69,7 @@ class SelectionStateTracker {
                 lastKnownValidPosition = newSelStart
                 return SelectionChangeResult.AppSelectionExtended(
                     anchorPosition = newSelStart,
-                    selectionEnd = newSelEnd,
+                    selectionEnd = newSelEnd
                 )
             }
             lastKnownValidPosition = newSelStart
@@ -83,7 +83,7 @@ class SelectionStateTracker {
                 SelectionChangeResult.NonSequentialJump(
                     previousPosition = previousCursor,
                     newPosition = newCursor,
-                    distance = distance,
+                    distance = distance
                 )
             lastKnownValidPosition = newCursor
             return result
@@ -100,7 +100,7 @@ class SelectionStateTracker {
             lastKnownValidPosition = newCursor
             return SelectionChangeResult.CursorLeftComposingRegion(
                 composingStart = previousState.composingStart,
-                composingEnd = previousState.composingEnd,
+                composingEnd = previousState.composingEnd
             )
         }
 
@@ -112,7 +112,7 @@ class SelectionStateTracker {
         previousCursor: Int,
         newCursor: Int,
         composingStart: Int,
-        composingEnd: Int,
+        composingEnd: Int
     ): Boolean {
         val distance = kotlin.math.abs(newCursor - previousCursor)
 
@@ -135,10 +135,7 @@ class SelectionStateTracker {
         return distance > JUMP_THRESHOLD
     }
 
-    private fun isAppSelectionExtension(
-        previousState: SelectionState,
-        newState: SelectionState,
-    ): Boolean {
+    private fun isAppSelectionExtension(previousState: SelectionState, newState: SelectionState): Boolean {
         if (previousState.hasSelection) return false
 
         val previousCursor = previousState.selectionStart
@@ -156,11 +153,7 @@ class SelectionStateTracker {
 
     fun getCurrentSequence(): Long = sequenceCounter.get()
 
-    fun validateOperationPosition(
-        expectedStart: Int,
-        expectedEnd: Int,
-        tolerance: Int = 0,
-    ): Boolean {
+    fun validateOperationPosition(expectedStart: Int, expectedEnd: Int, tolerance: Int = 0): Boolean {
         val state = currentState.get()
         if (state == SelectionState.INVALID) return false
 
@@ -171,10 +164,7 @@ class SelectionStateTracker {
             kotlin.math.abs(actualEnd - expectedEnd) <= tolerance
     }
 
-    fun validateComposingRegionIntegrity(
-        expectedComposingStart: Int,
-        expectedComposingEnd: Int,
-    ): Boolean {
+    fun validateComposingRegionIntegrity(expectedComposingStart: Int, expectedComposingEnd: Int): Boolean {
         val state = currentState.get()
 
         if (expectedComposingStart == -1 || expectedComposingEnd == -1) {
@@ -205,10 +195,7 @@ class SelectionStateTracker {
         return textBeforeCursor.lastOrNull() == '\n'
     }
 
-    fun findParagraphBoundaryBefore(
-        textBeforeCursor: String,
-        maxLookback: Int = MAX_PARAGRAPH_LOOKBACK,
-    ): Int {
+    fun findParagraphBoundaryBefore(textBeforeCursor: String, maxLookback: Int = MAX_PARAGRAPH_LOOKBACK): Int {
         if (textBeforeCursor.isEmpty()) return 0
 
         val searchText =
@@ -249,27 +236,17 @@ sealed class SelectionChangeResult {
 
     data object ComposingRegionLost : SelectionChangeResult()
 
-    data class CursorLeftComposingRegion(
-        val composingStart: Int,
-        val composingEnd: Int,
-    ) : SelectionChangeResult()
+    data class CursorLeftComposingRegion(val composingStart: Int, val composingEnd: Int) : SelectionChangeResult()
 
-    data class NonSequentialJump(
-        val previousPosition: Int,
-        val newPosition: Int,
-        val distance: Int,
-    ) : SelectionChangeResult()
+    data class NonSequentialJump(val previousPosition: Int, val newPosition: Int, val distance: Int) :
+        SelectionChangeResult()
 
-    data class AppSelectionExtended(
-        val anchorPosition: Int,
-        val selectionEnd: Int,
-    ) : SelectionChangeResult()
+    data class AppSelectionExtended(val anchorPosition: Int, val selectionEnd: Int) : SelectionChangeResult()
 
-    fun requiresStateInvalidation(): Boolean =
-        when (this) {
-            is NonSequentialJump -> true
-            is ComposingRegionLost -> true
-            is CursorLeftComposingRegion -> true
-            else -> false
-        }
+    fun requiresStateInvalidation(): Boolean = when (this) {
+        is NonSequentialJump -> true
+        is ComposingRegionLost -> true
+        is CursorLeftComposingRegion -> true
+        else -> false
+    }
 }

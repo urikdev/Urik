@@ -372,7 +372,7 @@ class BackspaceUtilsTest {
             BackspaceUtils.calculateComposingRegionAfterDeletion(
                 textBeforeCursor = "Test ",
                 graphemeLength = 1,
-                cursorPositionBeforeDeletion = 5,
+                cursorPositionBeforeDeletion = 5
             )
 
         assertNotNull(result)
@@ -387,7 +387,7 @@ class BackspaceUtilsTest {
             BackspaceUtils.calculateComposingRegionAfterDeletion(
                 textBeforeCursor = "hello world ",
                 graphemeLength = 1,
-                cursorPositionBeforeDeletion = 12,
+                cursorPositionBeforeDeletion = 12
             )
 
         assertNotNull(result)
@@ -402,7 +402,7 @@ class BackspaceUtilsTest {
             BackspaceUtils.calculateComposingRegionAfterDeletion(
                 textBeforeCursor = " ",
                 graphemeLength = 1,
-                cursorPositionBeforeDeletion = 1,
+                cursorPositionBeforeDeletion = 1
             )
 
         assertNull(result)
@@ -414,7 +414,7 @@ class BackspaceUtilsTest {
             BackspaceUtils.calculateComposingRegionAfterDeletion(
                 textBeforeCursor = "Test😀",
                 graphemeLength = 2,
-                cursorPositionBeforeDeletion = 6,
+                cursorPositionBeforeDeletion = 6
             )
 
         assertNotNull(result)
@@ -429,7 +429,7 @@ class BackspaceUtilsTest {
             BackspaceUtils.calculateComposingRegionAfterDeletion(
                 textBeforeCursor = "a",
                 graphemeLength = 2,
-                cursorPositionBeforeDeletion = 1,
+                cursorPositionBeforeDeletion = 1
             )
 
         assertNull(result)
@@ -441,7 +441,7 @@ class BackspaceUtilsTest {
             BackspaceUtils.calculateComposingRegionAfterDeletion(
                 textBeforeCursor = "Test ",
                 graphemeLength = 1,
-                cursorPositionBeforeDeletion = 5,
+                cursorPositionBeforeDeletion = 5
             )
 
         assertNotNull(result)

@@ -13,14 +13,9 @@ interface UserWordBigramDao {
         DO UPDATE SET
             frequency = frequency + 1,
             last_used = :lastUsed
-        """,
+        """
     )
-    suspend fun incrementBigram(
-        languageTag: String,
-        wordANormalized: String,
-        wordBNormalized: String,
-        lastUsed: Long,
-    )
+    suspend fun incrementBigram(languageTag: String, wordANormalized: String, wordBNormalized: String, lastUsed: Long)
 
     @Query(
         """
@@ -30,14 +25,14 @@ interface UserWordBigramDao {
         DO UPDATE SET
             frequency = frequency + :amount,
             last_used = :lastUsed
-        """,
+        """
     )
     suspend fun incrementBigramBy(
         languageTag: String,
         wordANormalized: String,
         wordBNormalized: String,
         amount: Int,
-        lastUsed: Long,
+        lastUsed: Long
     )
 
     @Query(
@@ -47,13 +42,9 @@ interface UserWordBigramDao {
         AND word_a_normalized = :wordANormalized
         ORDER BY frequency DESC
         LIMIT :limit
-        """,
+        """
     )
-    suspend fun getPredictions(
-        languageTag: String,
-        wordANormalized: String,
-        limit: Int,
-    ): List<String>
+    suspend fun getPredictions(languageTag: String, wordANormalized: String, limit: Int): List<String>
 
     @Query(
         """
@@ -61,12 +52,9 @@ interface UserWordBigramDao {
         WHERE language_tag = :languageTag
         ORDER BY frequency DESC
         LIMIT :limit
-        """,
+        """
     )
-    suspend fun getTopBigrams(
-        languageTag: String,
-        limit: Int = 100,
-    ): List<UserWordBigram>
+    suspend fun getTopBigrams(languageTag: String, limit: Int = 100): List<UserWordBigram>
 
     @Query("DELETE FROM user_word_bigram WHERE language_tag = :languageTag")
     suspend fun clearLanguage(languageTag: String): Int
@@ -87,7 +75,7 @@ interface UserWordBigramDao {
             ORDER BY frequency ASC, last_used ASC
             LIMIT MAX(0, (SELECT COUNT(*) FROM user_word_bigram) - :maxRows)
         )
-        """,
+        """
     )
     suspend fun enforceMaxRows(maxRows: Int): Int
 }

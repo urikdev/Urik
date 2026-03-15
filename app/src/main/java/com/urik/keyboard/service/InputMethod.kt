@@ -11,5 +11,5 @@ enum class InputMethod {
     SWIPED,
 
     /** Selected from suggestion bar */
-    SELECTED_FROM_SUGGESTION,
+    SELECTED_FROM_SUGGESTION
 }

@@ -19,18 +19,10 @@ import com.urik.keyboard.R
 import com.urik.keyboard.settings.KeyboardSettings
 import com.urik.keyboard.theme.ThemeManager
 
-class LanguagePickerPopup(
-    private val context: Context,
-    private val themeManager: ThemeManager,
-) {
+class LanguagePickerPopup(private val context: Context, private val themeManager: ThemeManager) {
     private var dialog: BottomSheetDialog? = null
 
-    fun setLanguages(
-        languages: List<String>,
-        currentLanguage: String,
-        anchorView: View,
-        onSelected: (String) -> Unit,
-    ) {
+    fun setLanguages(languages: List<String>, currentLanguage: String, anchorView: View, onSelected: (String) -> Unit) {
         val displayNames = KeyboardSettings.getLanguageDisplayNames()
         val languageLabels = languages.map { displayNames[it] ?: it }
         val currentIndex = languages.indexOf(currentLanguage).takeIf { it >= 0 } ?: 0
@@ -48,7 +40,7 @@ class LanguagePickerPopup(
                         layoutParams =
                             ViewGroup.LayoutParams(
                                 ViewGroup.LayoutParams.MATCH_PARENT,
-                                ViewGroup.LayoutParams.WRAP_CONTENT,
+                                ViewGroup.LayoutParams.WRAP_CONTENT
                             )
                     }
 
@@ -62,7 +54,7 @@ class LanguagePickerPopup(
                             (24 * density).toInt(),
                             (20 * density).toInt(),
                             (24 * density).toInt(),
-                            (16 * density).toInt(),
+                            (16 * density).toInt()
                         )
                     }
                 container.addView(titleView)
@@ -75,27 +67,23 @@ class LanguagePickerPopup(
                             object : AccessibilityDelegateCompat() {
                                 override fun onInitializeAccessibilityNodeInfo(
                                     host: View,
-                                    info: AccessibilityNodeInfoCompat,
+                                    info: AccessibilityNodeInfoCompat
                                 ) {
                                     super.onInitializeAccessibilityNodeInfo(host, info)
                                     info.removeAction(
-                                        AccessibilityNodeInfoCompat.AccessibilityActionCompat.ACTION_SET_TEXT,
+                                        AccessibilityNodeInfoCompat.AccessibilityActionCompat.ACTION_SET_TEXT
                                     )
                                     info.isEditable = false
                                 }
-                            },
+                            }
                         )
                         adapter =
                             object : ArrayAdapter<String>(
                                 context,
                                 android.R.layout.select_dialog_singlechoice,
-                                languageLabels,
+                                languageLabels
                             ) {
-                                override fun getView(
-                                    position: Int,
-                                    convertView: View?,
-                                    parent: ViewGroup,
-                                ): View {
+                                override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
                                     val view = super.getView(position, convertView, parent) as CheckedTextView
                                     view.setTextColor(theme.colors.keyTextCharacter)
                                     view.textSize = 16f
@@ -103,7 +91,7 @@ class LanguagePickerPopup(
                                         (24 * density).toInt(),
                                         (16 * density).toInt(),
                                         (24 * density).toInt(),
-                                        (16 * density).toInt(),
+                                        (16 * density).toInt()
                                     )
 
                                     view.checkMarkTintList = ColorStateList.valueOf(theme.colors.keyTextAction)
@@ -122,7 +110,7 @@ class LanguagePickerPopup(
                         layoutParams =
                             LinearLayout.LayoutParams(
                                 LinearLayout.LayoutParams.MATCH_PARENT,
-                                LinearLayout.LayoutParams.WRAP_CONTENT,
+                                LinearLayout.LayoutParams.WRAP_CONTENT
                             )
                     }
                 container.addView(listView)

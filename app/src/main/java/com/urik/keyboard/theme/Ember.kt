@@ -25,6 +25,6 @@ data object Ember : KeyboardTheme {
             focusIndicator = "#ffd4a8".toColorInt(),
             swipePrimary = "#ffb380".toColorInt(),
             swipeSecondary = "#ffd4a8".toColorInt(),
-            swipeCurrent = "#6b3d28".toColorInt(),
+            swipeCurrent = "#6b3d28".toColorInt()
         )
 }

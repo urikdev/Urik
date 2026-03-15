@@ -25,6 +25,6 @@ data object Sunset : KeyboardTheme {
             focusIndicator = "#ffd4a3".toColorInt(),
             swipePrimary = "#ffb8a5".toColorInt(),
             swipeSecondary = "#ffd4a3".toColorInt(),
-            swipeCurrent = "#6b4f7a".toColorInt(),
+            swipeCurrent = "#6b4f7a".toColorInt()
         )
 }

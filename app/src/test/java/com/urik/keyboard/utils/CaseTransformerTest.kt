@@ -22,13 +22,13 @@ class CaseTransformerTest {
                 confidence = 0.95,
                 ranking = 0,
                 source = "learned",
-                preserveCase = true,
+                preserveCase = true
             )
         val state =
             KeyboardState(
                 isCapsLockOn = true,
                 isShiftPressed = false,
-                isAutoShift = false,
+                isAutoShift = false
             )
 
         val result = caseTransformer.applyCasing(suggestion, state)
@@ -44,13 +44,13 @@ class CaseTransformerTest {
                 confidence = 0.95,
                 ranking = 0,
                 source = "learned",
-                preserveCase = true,
+                preserveCase = true
             )
         val state =
             KeyboardState(
                 isCapsLockOn = false,
                 isShiftPressed = true,
-                isAutoShift = false,
+                isAutoShift = false
             )
 
         val result = caseTransformer.applyCasing(suggestion, state)
@@ -66,13 +66,13 @@ class CaseTransformerTest {
                 confidence = 0.95,
                 ranking = 0,
                 source = "learned",
-                preserveCase = true,
+                preserveCase = true
             )
         val state =
             KeyboardState(
                 isCapsLockOn = false,
                 isShiftPressed = true,
-                isAutoShift = true,
+                isAutoShift = true
             )
 
         val result = caseTransformer.applyCasing(suggestion, state)
@@ -88,13 +88,13 @@ class CaseTransformerTest {
                 confidence = 0.80,
                 ranking = 0,
                 source = "symspell",
-                preserveCase = false,
+                preserveCase = false
             )
         val state =
             KeyboardState(
                 isCapsLockOn = false,
                 isShiftPressed = true,
-                isAutoShift = true,
+                isAutoShift = true
             )
 
         val result = caseTransformer.applyCasing(suggestion, state)
@@ -110,13 +110,13 @@ class CaseTransformerTest {
                 confidence = 0.95,
                 ranking = 0,
                 source = "learned",
-                preserveCase = true,
+                preserveCase = true
             )
         val state =
             KeyboardState(
                 isCapsLockOn = false,
                 isShiftPressed = false,
-                isAutoShift = false,
+                isAutoShift = false
             )
 
         val result = caseTransformer.applyCasing(suggestion, state)
@@ -132,13 +132,13 @@ class CaseTransformerTest {
                 confidence = 0.90,
                 ranking = 0,
                 source = "learned",
-                preserveCase = false,
+                preserveCase = false
             )
         val state =
             KeyboardState(
                 isCapsLockOn = false,
                 isShiftPressed = true,
-                isAutoShift = false,
+                isAutoShift = false
             )
 
         val result = caseTransformer.applyCasing(suggestion, state)
@@ -154,13 +154,13 @@ class CaseTransformerTest {
                 confidence = 0.0,
                 ranking = 0,
                 source = "unknown",
-                preserveCase = false,
+                preserveCase = false
             )
         val state =
             KeyboardState(
                 isCapsLockOn = false,
                 isShiftPressed = true,
-                isAutoShift = false,
+                isAutoShift = false
             )
 
         val result = caseTransformer.applyCasing(suggestion, state)
@@ -174,13 +174,13 @@ class CaseTransformerTest {
             listOf(
                 SpellingSuggestion("iPhone", 0.95, 0, "learned", preserveCase = true),
                 SpellingSuggestion("ipad", 0.90, 1, "learned", preserveCase = true),
-                SpellingSuggestion("the", 0.80, 2, "symspell", preserveCase = false),
+                SpellingSuggestion("the", 0.80, 2, "symspell", preserveCase = false)
             )
         val state =
             KeyboardState(
                 isCapsLockOn = false,
                 isShiftPressed = true,
-                isAutoShift = true,
+                isAutoShift = true
             )
 
         val result = caseTransformer.applyCasingToSuggestions(suggestions, state)
@@ -196,13 +196,13 @@ class CaseTransformerTest {
                 confidence = 0.90,
                 ranking = 0,
                 source = "symspell",
-                preserveCase = false,
+                preserveCase = false
             )
         val state =
             KeyboardState(
                 isCapsLockOn = true,
                 isShiftPressed = true,
-                isAutoShift = false,
+                isAutoShift = false
             )
 
         val result = caseTransformer.applyCasing(suggestion, state)
@@ -218,13 +218,13 @@ class CaseTransformerTest {
                 confidence = 0.90,
                 ranking = 0,
                 source = "learned",
-                preserveCase = true,
+                preserveCase = true
             )
         val state =
             KeyboardState(
                 isCapsLockOn = false,
                 isShiftPressed = true,
-                isAutoShift = true,
+                isAutoShift = true
             )
 
         val state2 = state.copy(isAutoShift = false)
@@ -241,13 +241,13 @@ class CaseTransformerTest {
                 confidence = 0.90,
                 ranking = 0,
                 source = "symspell",
-                preserveCase = false,
+                preserveCase = false
             )
         val state =
             KeyboardState(
                 isCapsLockOn = false,
                 isShiftPressed = true,
-                isAutoShift = false,
+                isAutoShift = false
             )
 
         val result = caseTransformer.applyCasing(suggestion, state)
@@ -263,13 +263,13 @@ class CaseTransformerTest {
                 confidence = 0.90,
                 ranking = 0,
                 source = "symspell",
-                preserveCase = false,
+                preserveCase = false
             )
         val state =
             KeyboardState(
                 isCapsLockOn = false,
                 isShiftPressed = true,
-                isAutoShift = false,
+                isAutoShift = false
             )
 
         val result = caseTransformer.applyCasing(suggestion, state)
@@ -285,13 +285,13 @@ class CaseTransformerTest {
                 confidence = 1.0,
                 ranking = 0,
                 source = "swipe",
-                preserveCase = false,
+                preserveCase = false
             )
         val state =
             KeyboardState(
                 isCapsLockOn = false,
                 isShiftPressed = true,
-                isAutoShift = true,
+                isAutoShift = true
             )
 
         val result = caseTransformer.applyCasing(suggestion, state)
@@ -307,13 +307,13 @@ class CaseTransformerTest {
                 confidence = 1.0,
                 ranking = 0,
                 source = "learned",
-                preserveCase = true,
+                preserveCase = true
             )
         val state =
             KeyboardState(
                 isCapsLockOn = false,
                 isShiftPressed = true,
-                isAutoShift = true,
+                isAutoShift = true
             )
 
         val result = caseTransformer.applyCasing(suggestion, state)
@@ -329,13 +329,13 @@ class CaseTransformerTest {
                 confidence = 1.0,
                 ranking = 0,
                 source = "learned",
-                preserveCase = true,
+                preserveCase = true
             )
         val state =
             KeyboardState(
                 isCapsLockOn = false,
                 isShiftPressed = false,
-                isAutoShift = false,
+                isAutoShift = false
             )
 
         val result = caseTransformer.applyCasing(suggestion, state)
@@ -351,13 +351,13 @@ class CaseTransformerTest {
                 confidence = 1.0,
                 ranking = 0,
                 source = "learned",
-                preserveCase = true,
+                preserveCase = true
             )
         val state =
             KeyboardState(
                 isCapsLockOn = false,
                 isShiftPressed = true,
-                isAutoShift = true,
+                isAutoShift = true
             )
 
         val result = caseTransformer.applyCasing(suggestion, state)
@@ -373,13 +373,13 @@ class CaseTransformerTest {
                 confidence = 0.90,
                 ranking = 0,
                 source = "symspell",
-                preserveCase = false,
+                preserveCase = false
             )
         val state =
             KeyboardState(
                 isCapsLockOn = false,
                 isShiftPressed = true,
-                isAutoShift = false,
+                isAutoShift = false
             )
 
         val result = caseTransformer.applyCasing(suggestion, state)
@@ -395,13 +395,13 @@ class CaseTransformerTest {
                 confidence = 0.90,
                 ranking = 0,
                 source = "symspell",
-                preserveCase = false,
+                preserveCase = false
             )
         val state =
             KeyboardState(
                 isCapsLockOn = false,
                 isShiftPressed = true,
-                isAutoShift = false,
+                isAutoShift = false
             )
 
         val result = caseTransformer.applyCasing(suggestion, state)
@@ -417,13 +417,13 @@ class CaseTransformerTest {
                 confidence = 0.90,
                 ranking = 0,
                 source = "symspell",
-                preserveCase = false,
+                preserveCase = false
             )
         val state =
             KeyboardState(
                 isCapsLockOn = false,
                 isShiftPressed = false,
-                isAutoShift = false,
+                isAutoShift = false
             )
 
         val result = caseTransformer.applyCasing(suggestion, state, isSentenceStart = true)
@@ -439,13 +439,13 @@ class CaseTransformerTest {
                 confidence = 0.95,
                 ranking = 0,
                 source = "learned",
-                preserveCase = true,
+                preserveCase = true
             )
         val state =
             KeyboardState(
                 isCapsLockOn = false,
                 isShiftPressed = false,
-                isAutoShift = false,
+                isAutoShift = false
             )
 
         val result = caseTransformer.applyCasing(suggestion, state, isSentenceStart = true)
@@ -461,13 +461,13 @@ class CaseTransformerTest {
                 confidence = 0.90,
                 ranking = 0,
                 source = "symspell",
-                preserveCase = false,
+                preserveCase = false
             )
         val state =
             KeyboardState(
                 isCapsLockOn = true,
                 isShiftPressed = false,
-                isAutoShift = false,
+                isAutoShift = false
             )
 
         val result = caseTransformer.applyCasing(suggestion, state, isSentenceStart = true)
@@ -483,13 +483,13 @@ class CaseTransformerTest {
                 confidence = 0.90,
                 ranking = 0,
                 source = "symspell",
-                preserveCase = false,
+                preserveCase = false
             )
         val state =
             KeyboardState(
                 isCapsLockOn = true,
                 isShiftPressed = false,
-                isAutoShift = false,
+                isAutoShift = false
             )
 
         val result = caseTransformer.applyCasing(suggestion, state, locale = java.util.Locale.GERMAN)
@@ -505,13 +505,13 @@ class CaseTransformerTest {
                 confidence = 0.90,
                 ranking = 0,
                 source = "symspell",
-                preserveCase = false,
+                preserveCase = false
             )
         val state =
             KeyboardState(
                 isCapsLockOn = false,
                 isShiftPressed = true,
-                isAutoShift = false,
+                isAutoShift = false
             )
 
         val result = caseTransformer.applyCasing(suggestion, state, locale = java.util.Locale.GERMAN)
@@ -527,13 +527,13 @@ class CaseTransformerTest {
                 confidence = 0.90,
                 ranking = 0,
                 source = "symspell",
-                preserveCase = false,
+                preserveCase = false
             )
         val state =
             KeyboardState(
                 isCapsLockOn = false,
                 isShiftPressed = false,
-                isAutoShift = false,
+                isAutoShift = false
             )
 
         val result = caseTransformer.applyCasing(suggestion, state, isSentenceStart = false)
@@ -549,13 +549,13 @@ class CaseTransformerTest {
                 confidence = 1.0,
                 ranking = 0,
                 source = "learned",
-                preserveCase = true,
+                preserveCase = true
             )
         val state =
             KeyboardState(
                 isCapsLockOn = false,
                 isShiftPressed = true,
-                isAutoShift = true,
+                isAutoShift = true
             )
 
         val result = caseTransformer.applyCasing(suggestion, state)
@@ -571,13 +571,13 @@ class CaseTransformerTest {
                 confidence = 1.0,
                 ranking = 0,
                 source = "learned",
-                preserveCase = true,
+                preserveCase = true
             )
         val state =
             KeyboardState(
                 isCapsLockOn = false,
                 isShiftPressed = false,
-                isAutoShift = false,
+                isAutoShift = false
             )
 
         val result = caseTransformer.applyCasing(suggestion, state)
@@ -593,13 +593,13 @@ class CaseTransformerTest {
                 confidence = 1.0,
                 ranking = 0,
                 source = "learned",
-                preserveCase = true,
+                preserveCase = true
             )
         val state =
             KeyboardState(
                 isCapsLockOn = false,
                 isShiftPressed = false,
-                isAutoShift = false,
+                isAutoShift = false
             )
 
         val result = caseTransformer.applyCasing(suggestion, state, isSentenceStart = true)
@@ -615,13 +615,13 @@ class CaseTransformerTest {
                 confidence = 1.0,
                 ranking = 0,
                 source = "learned",
-                preserveCase = true,
+                preserveCase = true
             )
         val state =
             KeyboardState(
                 isCapsLockOn = false,
                 isShiftPressed = true,
-                isAutoShift = true,
+                isAutoShift = true
             )
 
         val result = caseTransformer.applyCasing(suggestion, state)
@@ -634,7 +634,7 @@ class CaseTransformerTest {
         val suggestions =
             listOf(
                 SpellingSuggestion("car", 0.9, 0, "symspell", preserveCase = false),
-                SpellingSuggestion("can", 0.8, 1, "symspell", preserveCase = false),
+                SpellingSuggestion("can", 0.8, 1, "symspell", preserveCase = false)
             )
         val noShift = KeyboardState(isShiftPressed = false)
         val manualShift = KeyboardState(isShiftPressed = true, isAutoShift = false)
@@ -651,7 +651,7 @@ class CaseTransformerTest {
         val suggestions =
             listOf(
                 SpellingSuggestion("car", 0.9, 0, "symspell", preserveCase = false),
-                SpellingSuggestion("can", 0.8, 1, "symspell", preserveCase = false),
+                SpellingSuggestion("can", 0.8, 1, "symspell", preserveCase = false)
             )
         val noShift = KeyboardState(isShiftPressed = false)
         val capsLock = KeyboardState(isCapsLockOn = true)
@@ -668,7 +668,7 @@ class CaseTransformerTest {
         val suggestions =
             listOf(
                 SpellingSuggestion("iPhone", 0.95, 0, "learned", preserveCase = true),
-                SpellingSuggestion("idea", 0.8, 1, "symspell", preserveCase = false),
+                SpellingSuggestion("idea", 0.8, 1, "symspell", preserveCase = false)
             )
         val autoShift = KeyboardState(isShiftPressed = true, isAutoShift = true)
         val capsLock = KeyboardState(isCapsLockOn = true)
@@ -685,7 +685,7 @@ class CaseTransformerTest {
         val suggestions =
             listOf(
                 SpellingSuggestion("hello", 0.9, 0, "symspell", preserveCase = false),
-                SpellingSuggestion("help", 0.8, 1, "symspell", preserveCase = false),
+                SpellingSuggestion("help", 0.8, 1, "symspell", preserveCase = false)
             )
         val manualShift = KeyboardState(isShiftPressed = true, isAutoShift = false)
         val noShift = KeyboardState(isShiftPressed = false)

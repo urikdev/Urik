@@ -34,10 +34,7 @@ class LanguagesFragment : PreferenceFragmentCompat() {
         viewModel = ViewModelProvider(this)[LanguagesViewModel::class.java]
     }
 
-    override fun onCreatePreferences(
-        savedInstanceState: Bundle?,
-        rootKey: String?,
-    ) {
+    override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         val context = preferenceManager.context
         val screen = preferenceManager.createPreferenceScreen(context)
 
@@ -79,10 +76,7 @@ class LanguagesFragment : PreferenceFragmentCompat() {
         preferenceScreen = screen
     }
 
-    override fun onViewCreated(
-        view: View,
-        savedInstanceState: Bundle?,
-    ) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         languageRadioButtons.forEach { (languageTag, checkbox) ->
@@ -96,7 +90,7 @@ class LanguagesFragment : PreferenceFragmentCompat() {
                             .makeText(
                                 requireContext(),
                                 R.string.max_languages_reached,
-                                Toast.LENGTH_SHORT,
+                                Toast.LENGTH_SHORT
                             ).show()
                         return@setOnPreferenceChangeListener false
                     }
@@ -117,7 +111,7 @@ class LanguagesFragment : PreferenceFragmentCompat() {
                 launch {
                     viewModel.uiState.collect { state ->
                         languageRadioButtons.forEach { (languageTag, checkbox) ->
-                            checkbox.isChecked = (languageTag in state.activeLanguages)
+                            checkbox.isChecked = languageTag in state.activeLanguages
 
                             if (languageTag == state.primaryLayoutLanguage) {
                                 checkbox.summary = getString(R.string.primary_layout_language)

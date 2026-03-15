@@ -50,7 +50,7 @@ class CharacterVariationPopupAccessibilityTest {
     fun `popup window is not focusable to prevent focus shift`() {
         assertFalse(
             "PopupWindow must not be focusable to avoid triggering a11y node hints",
-            popup.isFocusable,
+            popup.isFocusable
         )
     }
 
@@ -58,7 +58,7 @@ class CharacterVariationPopupAccessibilityTest {
     fun `popup window is outside touchable for dismiss behavior`() {
         assertTrue(
             "PopupWindow must be outside touchable for proper dismiss",
-            popup.isOutsideTouchable,
+            popup.isOutsideTouchable
         )
     }
 
@@ -67,7 +67,7 @@ class CharacterVariationPopupAccessibilityTest {
         assertEquals(
             "ScrollView container must not be reported to accessibility services",
             View.IMPORTANT_FOR_ACCESSIBILITY_NO,
-            scrollView.importantForAccessibility,
+            scrollView.importantForAccessibility
         )
     }
 
@@ -77,7 +77,7 @@ class CharacterVariationPopupAccessibilityTest {
 
         assertFalse(
             "ScrollView node must not be editable to prevent Type hint",
-            nodeInfo.isEditable,
+            nodeInfo.isEditable
         )
     }
 
@@ -91,7 +91,7 @@ class CharacterVariationPopupAccessibilityTest {
 
         assertFalse(
             "ScrollView node must not expose ACTION_SET_TEXT",
-            hasSetText,
+            hasSetText
         )
     }
 
@@ -100,7 +100,7 @@ class CharacterVariationPopupAccessibilityTest {
         assertEquals(
             "Variation container must not be reported to accessibility services",
             View.IMPORTANT_FOR_ACCESSIBILITY_NO,
-            variationContainer.importantForAccessibility,
+            variationContainer.importantForAccessibility
         )
     }
 
@@ -108,7 +108,7 @@ class CharacterVariationPopupAccessibilityTest {
     fun `buttons have character option role description`() {
         assertTrue(
             "Popup must have at least one button",
-            variationContainer.childCount > 0,
+            variationContainer.childCount > 0
         )
 
         for (i in 0 until variationContainer.childCount) {
@@ -118,7 +118,7 @@ class CharacterVariationPopupAccessibilityTest {
             assertEquals(
                 "Button '${ button.text }' must have 'character option' role",
                 "character option",
-                nodeInfo.roleDescription?.toString(),
+                nodeInfo.roleDescription?.toString()
             )
         }
     }
@@ -131,7 +131,7 @@ class CharacterVariationPopupAccessibilityTest {
 
             assertFalse(
                 "Button '${button.text}' must not be editable",
-                nodeInfo.isEditable,
+                nodeInfo.isEditable
             )
         }
     }
@@ -148,7 +148,7 @@ class CharacterVariationPopupAccessibilityTest {
 
             assertFalse(
                 "Button '${button.text}' must not expose ACTION_SET_TEXT",
-                hasSetText,
+                hasSetText
             )
         }
     }
@@ -160,11 +160,11 @@ class CharacterVariationPopupAccessibilityTest {
 
             assertNotNull(
                 "Button '${button.text}' must have content description",
-                button.contentDescription,
+                button.contentDescription
             )
             assertTrue(
                 "Content description must contain position info",
-                button.contentDescription.contains((i + 1).toString()),
+                button.contentDescription.contains((i + 1).toString())
             )
         }
     }
@@ -176,11 +176,11 @@ class CharacterVariationPopupAccessibilityTest {
 
             assertTrue(
                 "Button '${button.text}' must remain clickable",
-                button.isClickable,
+                button.isClickable
             )
             assertTrue(
                 "Button '${button.text}' must remain focusable",
-                button.isFocusable,
+                button.isFocusable
             )
         }
     }
@@ -196,7 +196,7 @@ class CharacterVariationPopupAccessibilityTest {
 
             assertNotNull(
                 "Button '${button.text}' must still produce AccessibilityNodeInfo",
-                nodeInfo,
+                nodeInfo
             )
         }
     }
@@ -206,7 +206,7 @@ class CharacterVariationPopupAccessibilityTest {
         assertEquals(
             "Base char '.' + 3 variations = 4 buttons",
             4,
-            variationContainer.childCount,
+            variationContainer.childCount
         )
     }
 
@@ -225,7 +225,7 @@ class CharacterVariationPopupAccessibilityTest {
         assertEquals(
             "Empty base char should produce only variation buttons",
             2,
-            container.childCount,
+            container.childCount
         )
 
         for (i in 0 until container.childCount) {
@@ -234,7 +234,7 @@ class CharacterVariationPopupAccessibilityTest {
 
             assertEquals(
                 "character option",
-                nodeInfo.roleDescription?.toString(),
+                nodeInfo.roleDescription?.toString()
             )
             assertFalse(nodeInfo.isEditable)
         }

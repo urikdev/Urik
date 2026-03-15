@@ -3,9 +3,7 @@ package com.urik.keyboard.ui.keyboard.components
 import kotlin.math.sqrt
 
 /** Catmull-Rom spline interpolation for raw touch input. */
-class GestureInterpolator(
-    private val ringBuffer: SwipePointRingBuffer,
-) {
+class GestureInterpolator(private val ringBuffer: SwipePointRingBuffer) {
     private val windowX = FloatArray(WINDOW_SIZE)
     private val windowY = FloatArray(WINDOW_SIZE)
     private val windowTimestamp = LongArray(WINDOW_SIZE)
@@ -15,13 +13,7 @@ class GestureInterpolator(
     private var rawPointIndex = 0
     val rawPointCount: Int get() = rawPointIndex
 
-    fun onRawPoint(
-        x: Float,
-        y: Float,
-        timestamp: Long,
-        pressure: Float,
-        velocity: Float,
-    ) {
+    fun onRawPoint(x: Float, y: Float, timestamp: Long, pressure: Float, velocity: Float) {
         rawPointIndex++
         if (windowCount < WINDOW_SIZE) {
             val i = windowCount
@@ -109,7 +101,7 @@ class GestureInterpolator(
                         (2f * p1x - 4f * p2x + 2f * p3x) * t2f +
                         (-p1x + p3x) * t +
                         2f * p2x
-                )
+                    )
 
             val interpY =
                 ALPHA * (
@@ -117,7 +109,7 @@ class GestureInterpolator(
                         (2f * p1y - 4f * p2y + 2f * p3y) * t2f +
                         (-p1y + p3y) * t +
                         2f * p2y
-                )
+                    )
 
             val interpTimestamp = t1 + ((t2 - t1) * t).toLong()
             val interpPressure = pr1 + (pr2 - pr1) * t

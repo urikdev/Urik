@@ -23,10 +23,6 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class SettingsActivity : AppCompatActivity() {
-    companion object {
-        fun createIntent(context: Context): Intent = Intent(context, SettingsActivity::class.java)
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
@@ -86,26 +82,26 @@ class SettingsActivity : AppCompatActivity() {
         }
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean =
-        when (item.itemId) {
-            android.R.id.home -> {
-                if (supportFragmentManager.backStackEntryCount > 0) {
-                    supportFragmentManager.popBackStack()
-                } else {
-                    finish()
-                }
-                true
+    override fun onOptionsItemSelected(item: MenuItem): Boolean = when (item.itemId) {
+        android.R.id.home -> {
+            if (supportFragmentManager.backStackEntryCount > 0) {
+                supportFragmentManager.popBackStack()
+            } else {
+                finish()
             }
-            else -> super.onOptionsItemSelected(item)
+            true
         }
+        else -> super.onOptionsItemSelected(item)
+    }
+
+    companion object {
+        fun createIntent(context: Context): Intent = Intent(context, SettingsActivity::class.java)
+    }
 }
 
 @AndroidEntryPoint
 class MainSettingsFragment : PreferenceFragmentCompat() {
-    override fun onCreatePreferences(
-        savedInstanceState: Bundle?,
-        rootKey: String?,
-    ) {
+    override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         val context = preferenceManager.context
         val screen = preferenceManager.createPreferenceScreen(context)
 
@@ -118,7 +114,7 @@ class MainSettingsFragment : PreferenceFragmentCompat() {
                     navigateToFragment(AutoCorrectionFragment())
                     true
                 }
-            },
+            }
         )
 
         screen.addPreference(
@@ -130,7 +126,7 @@ class MainSettingsFragment : PreferenceFragmentCompat() {
                     navigateToFragment(LanguagesFragment())
                     true
                 }
-            },
+            }
         )
 
         screen.addPreference(
@@ -142,7 +138,7 @@ class MainSettingsFragment : PreferenceFragmentCompat() {
                     navigateToFragment(TypingBehaviorFragment())
                     true
                 }
-            },
+            }
         )
 
         screen.addPreference(
@@ -154,7 +150,7 @@ class MainSettingsFragment : PreferenceFragmentCompat() {
                     navigateToFragment(LayoutInputFragment())
                     true
                 }
-            },
+            }
         )
 
         screen.addPreference(
@@ -166,7 +162,7 @@ class MainSettingsFragment : PreferenceFragmentCompat() {
                     navigateToFragment(AppearanceFragment())
                     true
                 }
-            },
+            }
         )
 
         screen.addPreference(
@@ -178,7 +174,7 @@ class MainSettingsFragment : PreferenceFragmentCompat() {
                     navigateToFragment(PrivacyDataFragment())
                     true
                 }
-            },
+            }
         )
 
         screen.addPreference(
@@ -190,7 +186,7 @@ class MainSettingsFragment : PreferenceFragmentCompat() {
                     startActivity(Intent(context, OssLicensesActivity::class.java))
                     true
                 }
-            },
+            }
         )
 
         screen.addPreference(
@@ -202,7 +198,7 @@ class MainSettingsFragment : PreferenceFragmentCompat() {
                     startActivity(Intent(context, DictionaryAttributionActivity::class.java))
                     true
                 }
-            },
+            }
         )
 
         preferenceScreen = screen

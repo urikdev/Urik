@@ -8,18 +8,15 @@ import com.urik.keyboard.model.KeyboardMode
 import com.urik.keyboard.utils.CacheMemoryManager
 import com.urik.keyboard.utils.ManagedCache
 import dagger.hilt.android.qualifiers.ApplicationContext
+import java.io.FileNotFoundException
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
-import java.io.FileNotFoundException
-import javax.inject.Inject
-import javax.inject.Singleton
 
-private data class LayoutErrorEntry(
-    val count: Int,
-    val lastErrorTime: Long,
-)
+private data class LayoutErrorEntry(val count: Int, val lastErrorTime: Long)
 
 /**
  * Circuit breaker for failed layout loads.
@@ -27,12 +24,11 @@ private data class LayoutErrorEntry(
  * Prevents repeated I/O attempts for missing/corrupt layout files.
  * Evicts oldest entries when capacity exceeded (LRU).
  */
-private class BoundedLayoutErrorTracker(
-    private val maxSize: Int,
-) {
+private class BoundedLayoutErrorTracker(private val maxSize: Int) {
     private val entries =
         object : LinkedHashMap<String, LayoutErrorEntry>(maxSize + 1, 0.75f, true) {
-            override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, LayoutErrorEntry>?): Boolean = size > maxSize
+            override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, LayoutErrorEntry>?): Boolean =
+                size > maxSize
         }
 
     @Synchronized
@@ -61,7 +57,7 @@ private class BoundedLayoutErrorTracker(
         val iterator = entries.iterator()
         while (iterator.hasNext()) {
             val entry = iterator.next()
-            if ((now - entry.value.lastErrorTime) > expiryMs) {
+            if (now - entry.value.lastErrorTime > expiryMs) {
                 iterator.remove()
             }
         }
@@ -74,415 +70,399 @@ private class BoundedLayoutErrorTracker(
  */
 @Singleton
 class KeyboardRepository
-    @Inject
-    constructor(
-        @ApplicationContext private val context: Context,
-        cacheMemoryManager: CacheMemoryManager,
-        private val settingsRepository: com.urik.keyboard.settings.SettingsRepository,
-    ) {
-        private val layoutCache: ManagedCache<String, KeyboardLayout> =
-            cacheMemoryManager.createCache(
-                name = "keyboard_layouts",
-                maxSize = LAYOUT_CACHE_SIZE,
-            )
+@Inject
+constructor(
+    @ApplicationContext private val context: Context,
+    cacheMemoryManager: CacheMemoryManager,
+    private val settingsRepository: com.urik.keyboard.settings.SettingsRepository
+) {
+    private val layoutCache: ManagedCache<String, KeyboardLayout> =
+        cacheMemoryManager.createCache(
+            name = "keyboard_layouts",
+            maxSize = LAYOUT_CACHE_SIZE
+        )
 
-        private val failedLocales = mutableSetOf<String>()
-        private val errorTracker = BoundedLayoutErrorTracker(maxSize = LAYOUT_ERROR_TRACKER_MAX_SIZE)
+    private val failedLocales = mutableSetOf<String>()
+    private val errorTracker = BoundedLayoutErrorTracker(maxSize = LAYOUT_ERROR_TRACKER_MAX_SIZE)
 
-        private val maxLayoutRetries = MAX_LAYOUT_RETRIES
-        private val layoutErrorCooldownMs = LAYOUT_ERROR_COOLDOWN_MS
-        private val errorStateExpiryMs = LAYOUT_ERROR_STATE_EXPIRY_MS
+    private val maxLayoutRetries = MAX_LAYOUT_RETRIES
+    private val layoutErrorCooldownMs = LAYOUT_ERROR_COOLDOWN_MS
+    private val errorStateExpiryMs = LAYOUT_ERROR_STATE_EXPIRY_MS
 
-        private var lastErrorCleanup = System.currentTimeMillis()
+    private var lastErrorCleanup = System.currentTimeMillis()
 
-        private fun cleanupExpiredErrors() {
-            val now = System.currentTimeMillis()
+    private fun cleanupExpiredErrors() {
+        val now = System.currentTimeMillis()
 
-            if ((now - lastErrorCleanup) > LAYOUT_ERROR_CLEANUP_INTERVAL_MS) {
-                errorTracker.cleanExpired(errorStateExpiryMs)
+        if (now - lastErrorCleanup > LAYOUT_ERROR_CLEANUP_INTERVAL_MS) {
+            errorTracker.cleanExpired(errorStateExpiryMs)
 
-                val iterator = failedLocales.iterator()
-                while (iterator.hasNext()) {
-                    val localeTag = iterator.next()
-                    val lastError = errorTracker.getLastErrorTime(localeTag)
-                    if (lastError > 0 && (now - lastError) > errorStateExpiryMs) {
-                        iterator.remove()
-                    }
-                }
-
-                lastErrorCleanup = now
-            }
-        }
-
-        /**
-         * Loads keyboard layout for given mode and locale.
-         *
-         * Fallback cascade on missing assets:
-         * 1. Full locale (en-US) → 2. Language only (en) → 3. Hardcoded QWERTY
-         *
-         * Circuit breaker skips known-broken locales (3 failures, 60s cooldown).
-         *
-         * @param mode Letters/Numbers/Symbols
-         * @param locale Target locale for layout
-         * @param currentAction Enter key action type (e.g., ENTER, SEARCH, DONE, GO)
-         * @return Layout or failure with exception
-         */
-        suspend fun getLayoutForMode(
-            mode: KeyboardMode,
-            locale: ULocale,
-            currentAction: KeyboardKey.ActionType = KeyboardKey.ActionType.ENTER,
-        ): Result<KeyboardLayout> =
-            withContext(Dispatchers.IO) {
-                val settings = settingsRepository.settings.first()
-                val alternativeLayout = settings.alternativeKeyboardLayout
-
-                val layoutIdentifier =
-                    when (alternativeLayout) {
-                        com.urik.keyboard.settings.AlternativeKeyboardLayout.DEFAULT -> locale.toLanguageTag()
-                        com.urik.keyboard.settings.AlternativeKeyboardLayout.QWERTY -> "en"
-                        com.urik.keyboard.settings.AlternativeKeyboardLayout.AZERTY -> "azerty"
-                        com.urik.keyboard.settings.AlternativeKeyboardLayout.QWERTZ -> "qwertz"
-                        com.urik.keyboard.settings.AlternativeKeyboardLayout.DVORAK -> "dvorak"
-                        com.urik.keyboard.settings.AlternativeKeyboardLayout.COLEMAK -> "colemak"
-                        com.urik.keyboard.settings.AlternativeKeyboardLayout.WORKMAN -> "workman"
-                        com.urik.keyboard.settings.AlternativeKeyboardLayout.HCESAR -> "hcesar"
-                    }
-
-                val cacheKey = "${layoutIdentifier}_${mode.name}_${currentAction.name}"
-
-                layoutCache.getIfPresent(cacheKey)?.let { cachedLayout ->
-                    return@withContext Result.success(cachedLayout)
-                }
-
-                return@withContext try {
-                    val layout = loadLayoutFromAssets(mode, layoutIdentifier, currentAction, locale)
-                    layoutCache.put(cacheKey, layout)
-                    Result.success(layout)
-                } catch (e: Exception) {
-                    Result.failure(e)
+            val iterator = failedLocales.iterator()
+            while (iterator.hasNext()) {
+                val localeTag = iterator.next()
+                val lastError = errorTracker.getLastErrorTime(localeTag)
+                if (lastError > 0 && now - lastError > errorStateExpiryMs) {
+                    iterator.remove()
                 }
             }
 
-        private suspend fun loadLayoutFromAssets(
-            mode: KeyboardMode,
-            layoutIdentifier: String,
-            currentAction: KeyboardKey.ActionType,
-            originalLocale: ULocale,
-        ): KeyboardLayout =
-            withContext(Dispatchers.IO) {
-                cleanupExpiredErrors()
-
-                if (shouldSkipLocale(layoutIdentifier)) {
-                    return@withContext getFallbackLayout(mode, currentAction)
-                }
-
-                return@withContext try {
-                    val layoutData = loadLayoutDataFromAssets(context, layoutIdentifier)
-                    parseLayoutForMode(layoutData, mode, currentAction).also {
-                        errorTracker.remove(layoutIdentifier)
-                        failedLocales.remove(layoutIdentifier)
-                    }
-                } catch (_: FileNotFoundException) {
-                    handleAssetError(layoutIdentifier)
-                    if (layoutIdentifier in setOf("dvorak", "colemak", "workman")) {
-                        tryLoadFallback(context, "en", mode, currentAction)
-                    } else {
-                        tryLanguageFallback(context, originalLocale, mode, currentAction)
-                    }
-                } catch (_: Exception) {
-                    handleAssetError(layoutIdentifier)
-                    getFallbackLayout(mode, currentAction)
-                }
-            }
-
-        private fun loadLayoutDataFromAssets(
-            context: Context,
-            localeTag: String,
-        ): JSONObject {
-            val filename = "$localeTag.json"
-
-            return context.assets.open("layouts/$filename").bufferedReader().use { reader ->
-                val jsonContent = reader.readText()
-
-                if (jsonContent.isBlank()) {
-                    throw IllegalStateException("Layout file $filename is empty")
-                }
-
-                JSONObject(jsonContent)
-            }
-        }
-
-        private fun parseLayoutForMode(
-            layoutData: JSONObject,
-            mode: KeyboardMode,
-            currentAction: KeyboardKey.ActionType,
-        ): KeyboardLayout {
-            if (!layoutData.has("modes")) {
-                throw IllegalStateException("Layout data missing 'modes' section")
-            }
-
-            val isRTL = layoutData.optBoolean("isRTL", false)
-            val script = layoutData.optString("script", "Latn")
-
-            val modes = layoutData.getJSONObject("modes")
-            val modeKey = mode.name.lowercase()
-
-            if (!modes.has(modeKey)) {
-                throw IllegalStateException("Layout data missing mode: $modeKey")
-            }
-
-            val modeData = modes.getJSONObject(modeKey)
-            val rowsArray = modeData.getJSONArray("rows")
-
-            val rows = mutableListOf<List<KeyboardKey>>()
-
-            for (i in 0 until rowsArray.length()) {
-                val rowArray = rowsArray.getJSONArray(i)
-                val row = mutableListOf<KeyboardKey>()
-
-                for (j in 0 until rowArray.length()) {
-                    val keyData = rowArray.getJSONObject(j)
-                    val key = parseKeyFromJson(keyData, currentAction)
-                    row.add(key)
-                }
-
-                rows.add(row)
-            }
-
-            return KeyboardLayout(
-                mode = mode,
-                rows = rows,
-                isRTL = isRTL,
-                script = script,
-            )
-        }
-
-        private fun parseKeyFromJson(
-            keyData: JSONObject,
-            currentAction: KeyboardKey.ActionType,
-        ): KeyboardKey =
-            when (val type = keyData.getString("type")) {
-                "character" -> {
-                    val char = keyData.getString("char")
-                    val keyType =
-                        when (keyData.optString("keyType", "letter")) {
-                            "letter" -> KeyboardKey.KeyType.LETTER
-                            "number" -> KeyboardKey.KeyType.NUMBER
-                            "symbol" -> KeyboardKey.KeyType.SYMBOL
-                            "punctuation" -> KeyboardKey.KeyType.PUNCTUATION
-                            else -> KeyboardKey.KeyType.LETTER
-                        }
-                    KeyboardKey.Character(char, keyType)
-                }
-
-                "action" -> {
-                    val actionName = keyData.getString("action")
-                    val actionType =
-                        when (actionName) {
-                            "shift" -> KeyboardKey.ActionType.SHIFT
-                            "backspace" -> KeyboardKey.ActionType.BACKSPACE
-                            "space" -> KeyboardKey.ActionType.SPACE
-                            "mode_switch_numbers" -> KeyboardKey.ActionType.MODE_SWITCH_NUMBERS
-                            "mode_switch_letters" -> KeyboardKey.ActionType.MODE_SWITCH_LETTERS
-                            "mode_switch_symbols" -> KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS
-                            "mode_switch_symbols_secondary" -> KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS_SECONDARY
-                            "caps_lock" -> KeyboardKey.ActionType.CAPS_LOCK
-                            "dynamic_action" -> currentAction
-                            else -> KeyboardKey.ActionType.ENTER
-                        }
-                    KeyboardKey.Action(actionType)
-                }
-
-                "spacer" -> KeyboardKey.Spacer
-
-                else -> throw IllegalArgumentException("Unknown key type: $type")
-            }
-
-        private suspend fun tryLanguageFallback(
-            context: Context,
-            locale: ULocale,
-            mode: KeyboardMode,
-            currentAction: KeyboardKey.ActionType,
-        ): KeyboardLayout =
-            withContext(Dispatchers.IO) {
-                val languageOnly = locale.language
-
-                if (languageOnly != locale.toLanguageTag() && !shouldSkipLocale(languageOnly)) {
-                    return@withContext try {
-                        val layoutData = loadLayoutDataFromAssets(context, languageOnly)
-                        parseLayoutForMode(layoutData, mode, currentAction)
-                    } catch (_: Exception) {
-                        handleAssetError(languageOnly)
-                        getFallbackLayout(mode, currentAction)
-                    }
-                }
-
-                return@withContext getFallbackLayout(mode, currentAction)
-            }
-
-        private suspend fun tryLoadFallback(
-            context: Context,
-            fallbackIdentifier: String,
-            mode: KeyboardMode,
-            currentAction: KeyboardKey.ActionType,
-        ): KeyboardLayout =
-            withContext(Dispatchers.IO) {
-                return@withContext try {
-                    val layoutData = loadLayoutDataFromAssets(context, fallbackIdentifier)
-                    parseLayoutForMode(layoutData, mode, currentAction)
-                } catch (_: Exception) {
-                    getFallbackLayout(mode, currentAction)
-                }
-            }
-
-        private fun getFallbackLayout(
-            mode: KeyboardMode,
-            currentAction: KeyboardKey.ActionType,
-        ): KeyboardLayout {
-            val rows =
-                when (mode) {
-                    KeyboardMode.LETTERS -> getFallbackLettersLayout(currentAction)
-                    KeyboardMode.NUMBERS -> getFallbackNumbersLayout(currentAction)
-                    KeyboardMode.SYMBOLS -> getFallbackSymbolsLayout(currentAction)
-                    KeyboardMode.SYMBOLS_SECONDARY -> getFallbackSymbolsSecondaryLayout(currentAction)
-                }
-            return KeyboardLayout(mode = mode, rows = rows)
-        }
-
-        private fun getFallbackLettersLayout(actionType: KeyboardKey.ActionType): List<List<KeyboardKey>> =
-            listOf(
-                listOf("1", "2", "3", "4", "5", "6", "7", "8", "9", "0").map {
-                    KeyboardKey.Character(it, KeyboardKey.KeyType.SYMBOL)
-                },
-                listOf("q", "w", "e", "r", "t", "y", "u", "i", "o", "p").map {
-                    KeyboardKey.Character(it, KeyboardKey.KeyType.LETTER)
-                },
-                listOf("a", "s", "d", "f", "g", "h", "j", "k", "l").map {
-                    KeyboardKey.Character(it, KeyboardKey.KeyType.LETTER)
-                },
-                listOf(
-                    KeyboardKey.Action(KeyboardKey.ActionType.SHIFT),
-                    KeyboardKey.Character("z", KeyboardKey.KeyType.LETTER),
-                    KeyboardKey.Character("x", KeyboardKey.KeyType.LETTER),
-                    KeyboardKey.Character("c", KeyboardKey.KeyType.LETTER),
-                    KeyboardKey.Character("v", KeyboardKey.KeyType.LETTER),
-                    KeyboardKey.Character("b", KeyboardKey.KeyType.LETTER),
-                    KeyboardKey.Character("n", KeyboardKey.KeyType.LETTER),
-                    KeyboardKey.Character("m", KeyboardKey.KeyType.LETTER),
-                    KeyboardKey.Action(KeyboardKey.ActionType.BACKSPACE),
-                ),
-                listOf<KeyboardKey>(
-                    KeyboardKey.Action(KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS),
-                    KeyboardKey.Action(KeyboardKey.ActionType.SPACE),
-                    KeyboardKey.Action(actionType),
-                ),
-            )
-
-        private fun getFallbackNumbersLayout(actionType: KeyboardKey.ActionType): List<List<KeyboardKey>> =
-            listOf(
-                listOf("1", "2", "3").map {
-                    KeyboardKey.Character(it, KeyboardKey.KeyType.NUMBER)
-                },
-                listOf("4", "5", "6").map {
-                    KeyboardKey.Character(it, KeyboardKey.KeyType.NUMBER)
-                },
-                listOf("7", "8", "9").map {
-                    KeyboardKey.Character(it, KeyboardKey.KeyType.NUMBER)
-                },
-                listOf(
-                    KeyboardKey.Character(".", KeyboardKey.KeyType.PUNCTUATION),
-                    KeyboardKey.Character("0", KeyboardKey.KeyType.NUMBER),
-                    KeyboardKey.Action(KeyboardKey.ActionType.BACKSPACE),
-                ),
-                listOf<KeyboardKey>(
-                    KeyboardKey.Action(KeyboardKey.ActionType.MODE_SWITCH_LETTERS),
-                    KeyboardKey.Action(KeyboardKey.ActionType.SPACE),
-                    KeyboardKey.Action(actionType),
-                ),
-            )
-
-        private fun getFallbackSymbolsLayout(actionType: KeyboardKey.ActionType): List<List<KeyboardKey>> =
-            listOf(
-                listOf("1", "2", "3", "4", "5", "6", "7", "8", "9", "0").map {
-                    KeyboardKey.Character(it, KeyboardKey.KeyType.SYMBOL)
-                },
-                listOf("!", "@", "#", "$", "%", "^", "&", "*").map {
-                    KeyboardKey.Character(it, KeyboardKey.KeyType.SYMBOL)
-                },
-                listOf("-", "_", "=", "+", "[", "]", "{", "}").map {
-                    KeyboardKey.Character(it, KeyboardKey.KeyType.SYMBOL)
-                },
-                listOf(";", ":", "'", "\"", ",", ".", "<", ">").map {
-                    KeyboardKey.Character(it, KeyboardKey.KeyType.SYMBOL)
-                },
-                listOf<KeyboardKey>(
-                    KeyboardKey.Action(KeyboardKey.ActionType.MODE_SWITCH_NUMBERS),
-                    KeyboardKey.Action(KeyboardKey.ActionType.SPACE),
-                    KeyboardKey.Action(KeyboardKey.ActionType.BACKSPACE),
-                    KeyboardKey.Action(actionType),
-                ),
-            )
-
-        private fun getFallbackSymbolsSecondaryLayout(actionType: KeyboardKey.ActionType): List<List<KeyboardKey>> =
-            listOf(
-                listOf("~", "`", "\u2022", "\u2014", "\u2013", "\u00B7", "\u03C0", "\u00F7", "\u00D7", "\u00B1").map {
-                    KeyboardKey.Character(it, KeyboardKey.KeyType.SYMBOL)
-                },
-                listOf("\u00A3", "\u00A5", "\u20AC", "\u00A2", "\u00B0", "\u00AE", "\u00A9", "\u2122", "\u221E", "\u00A7").map {
-                    KeyboardKey.Character(it, KeyboardKey.KeyType.SYMBOL)
-                },
-                listOf(
-                    KeyboardKey.Action(KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS),
-                    KeyboardKey.Character("\u201C", KeyboardKey.KeyType.SYMBOL),
-                    KeyboardKey.Character("\u201D", KeyboardKey.KeyType.SYMBOL),
-                    KeyboardKey.Character("\u00AB", KeyboardKey.KeyType.SYMBOL),
-                    KeyboardKey.Character("\u00BB", KeyboardKey.KeyType.SYMBOL),
-                    KeyboardKey.Character("\u2039", KeyboardKey.KeyType.SYMBOL),
-                    KeyboardKey.Character("\u203A", KeyboardKey.KeyType.SYMBOL),
-                    KeyboardKey.Character("\u201E", KeyboardKey.KeyType.SYMBOL),
-                    KeyboardKey.Character("\u2026", KeyboardKey.KeyType.SYMBOL),
-                    KeyboardKey.Action(KeyboardKey.ActionType.BACKSPACE),
-                ),
-                listOf<KeyboardKey>(
-                    KeyboardKey.Action(KeyboardKey.ActionType.MODE_SWITCH_LETTERS),
-                    KeyboardKey.Action(KeyboardKey.ActionType.SPACE),
-                    KeyboardKey.Action(actionType),
-                ),
-            )
-
-        private fun shouldSkipLocale(localeTag: String): Boolean {
-            val errorCount = errorTracker.getErrorCount(localeTag)
-            val lastError = errorTracker.getLastErrorTime(localeTag)
-            val now = System.currentTimeMillis()
-
-            return errorCount >= maxLayoutRetries && (now - lastError) < layoutErrorCooldownMs
-        }
-
-        private fun handleAssetError(localeTag: String) {
-            val errorCount = errorTracker.recordError(localeTag)
-
-            if (errorCount >= maxLayoutRetries) {
-                failedLocales.add(localeTag)
-            }
-        }
-
-        /**
-         * Clears all caches and error state.
-         *
-         * Call when changing keyboard settings or on memory pressure.
-         */
-        fun cleanup() {
-            layoutCache.invalidateAll()
-            failedLocales.clear()
-            errorTracker.clear()
-        }
-
-        private companion object {
-            const val LAYOUT_CACHE_SIZE = 20
-            const val MAX_LAYOUT_RETRIES = 3
-            const val LAYOUT_ERROR_COOLDOWN_MS = 60000L
-            const val LAYOUT_ERROR_STATE_EXPIRY_MS = 3600000L
-            const val LAYOUT_ERROR_CLEANUP_INTERVAL_MS = 600000L
-            const val LAYOUT_ERROR_TRACKER_MAX_SIZE = 20
+            lastErrorCleanup = now
         }
     }
+
+    /**
+     * Loads keyboard layout for given mode and locale.
+     *
+     * Fallback cascade on missing assets:
+     * 1. Full locale (en-US) → 2. Language only (en) → 3. Hardcoded QWERTY
+     *
+     * Circuit breaker skips known-broken locales (3 failures, 60s cooldown).
+     *
+     * @param mode Letters/Numbers/Symbols
+     * @param locale Target locale for layout
+     * @param currentAction Enter key action type (e.g., ENTER, SEARCH, DONE, GO)
+     * @return Layout or failure with exception
+     */
+    suspend fun getLayoutForMode(
+        mode: KeyboardMode,
+        locale: ULocale,
+        currentAction: KeyboardKey.ActionType = KeyboardKey.ActionType.ENTER
+    ): Result<KeyboardLayout> = withContext(Dispatchers.IO) {
+        val settings = settingsRepository.settings.first()
+        val alternativeLayout = settings.alternativeKeyboardLayout
+
+        val layoutIdentifier =
+            when (alternativeLayout) {
+                com.urik.keyboard.settings.AlternativeKeyboardLayout.DEFAULT -> locale.toLanguageTag()
+                com.urik.keyboard.settings.AlternativeKeyboardLayout.QWERTY -> "en"
+                com.urik.keyboard.settings.AlternativeKeyboardLayout.AZERTY -> "azerty"
+                com.urik.keyboard.settings.AlternativeKeyboardLayout.QWERTZ -> "qwertz"
+                com.urik.keyboard.settings.AlternativeKeyboardLayout.DVORAK -> "dvorak"
+                com.urik.keyboard.settings.AlternativeKeyboardLayout.COLEMAK -> "colemak"
+                com.urik.keyboard.settings.AlternativeKeyboardLayout.WORKMAN -> "workman"
+                com.urik.keyboard.settings.AlternativeKeyboardLayout.HCESAR -> "hcesar"
+            }
+
+        val cacheKey = "${layoutIdentifier}_${mode.name}_${currentAction.name}"
+
+        layoutCache.getIfPresent(cacheKey)?.let { cachedLayout ->
+            return@withContext Result.success(cachedLayout)
+        }
+
+        return@withContext try {
+            val layout = loadLayoutFromAssets(mode, layoutIdentifier, currentAction, locale)
+            layoutCache.put(cacheKey, layout)
+            Result.success(layout)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    private suspend fun loadLayoutFromAssets(
+        mode: KeyboardMode,
+        layoutIdentifier: String,
+        currentAction: KeyboardKey.ActionType,
+        originalLocale: ULocale
+    ): KeyboardLayout = withContext(Dispatchers.IO) {
+        cleanupExpiredErrors()
+
+        if (shouldSkipLocale(layoutIdentifier)) {
+            return@withContext getFallbackLayout(mode, currentAction)
+        }
+
+        return@withContext try {
+            val layoutData = loadLayoutDataFromAssets(context, layoutIdentifier)
+            parseLayoutForMode(layoutData, mode, currentAction).also {
+                errorTracker.remove(layoutIdentifier)
+                failedLocales.remove(layoutIdentifier)
+            }
+        } catch (_: FileNotFoundException) {
+            handleAssetError(layoutIdentifier)
+            if (layoutIdentifier in setOf("dvorak", "colemak", "workman")) {
+                tryLoadFallback(context, "en", mode, currentAction)
+            } else {
+                tryLanguageFallback(context, originalLocale, mode, currentAction)
+            }
+        } catch (_: Exception) {
+            handleAssetError(layoutIdentifier)
+            getFallbackLayout(mode, currentAction)
+        }
+    }
+
+    private fun loadLayoutDataFromAssets(context: Context, localeTag: String): JSONObject {
+        val filename = "$localeTag.json"
+
+        return context.assets.open("layouts/$filename").bufferedReader().use { reader ->
+            val jsonContent = reader.readText()
+
+            if (jsonContent.isBlank()) {
+                error("Layout file $filename is empty")
+            }
+
+            JSONObject(jsonContent)
+        }
+    }
+
+    private fun parseLayoutForMode(
+        layoutData: JSONObject,
+        mode: KeyboardMode,
+        currentAction: KeyboardKey.ActionType
+    ): KeyboardLayout {
+        if (!layoutData.has("modes")) {
+            error("Layout data missing 'modes' section")
+        }
+
+        val isRTL = layoutData.optBoolean("isRTL", false)
+        val script = layoutData.optString("script", "Latn")
+
+        val modes = layoutData.getJSONObject("modes")
+        val modeKey = mode.name.lowercase()
+
+        if (!modes.has(modeKey)) {
+            error("Layout data missing mode: $modeKey")
+        }
+
+        val modeData = modes.getJSONObject(modeKey)
+        val rowsArray = modeData.getJSONArray("rows")
+
+        val rows = mutableListOf<List<KeyboardKey>>()
+
+        for (i in 0 until rowsArray.length()) {
+            val rowArray = rowsArray.getJSONArray(i)
+            val row = mutableListOf<KeyboardKey>()
+
+            for (j in 0 until rowArray.length()) {
+                val keyData = rowArray.getJSONObject(j)
+                val key = parseKeyFromJson(keyData, currentAction)
+                row.add(key)
+            }
+
+            rows.add(row)
+        }
+
+        return KeyboardLayout(
+            mode = mode,
+            rows = rows,
+            isRTL = isRTL,
+            script = script
+        )
+    }
+
+    private fun parseKeyFromJson(keyData: JSONObject, currentAction: KeyboardKey.ActionType): KeyboardKey =
+        when (val type = keyData.getString("type")) {
+            "character" -> {
+                val char = keyData.getString("char")
+                val keyType =
+                    when (keyData.optString("keyType", "letter")) {
+                        "letter" -> KeyboardKey.KeyType.LETTER
+                        "number" -> KeyboardKey.KeyType.NUMBER
+                        "symbol" -> KeyboardKey.KeyType.SYMBOL
+                        "punctuation" -> KeyboardKey.KeyType.PUNCTUATION
+                        else -> KeyboardKey.KeyType.LETTER
+                    }
+                KeyboardKey.Character(char, keyType)
+            }
+
+            "action" -> {
+                val actionName = keyData.getString("action")
+                val actionType =
+                    when (actionName) {
+                        "shift" -> KeyboardKey.ActionType.SHIFT
+                        "backspace" -> KeyboardKey.ActionType.BACKSPACE
+                        "space" -> KeyboardKey.ActionType.SPACE
+                        "mode_switch_numbers" -> KeyboardKey.ActionType.MODE_SWITCH_NUMBERS
+                        "mode_switch_letters" -> KeyboardKey.ActionType.MODE_SWITCH_LETTERS
+                        "mode_switch_symbols" -> KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS
+                        "mode_switch_symbols_secondary" -> KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS_SECONDARY
+                        "caps_lock" -> KeyboardKey.ActionType.CAPS_LOCK
+                        "dynamic_action" -> currentAction
+                        else -> KeyboardKey.ActionType.ENTER
+                    }
+                KeyboardKey.Action(actionType)
+            }
+
+            "spacer" -> KeyboardKey.Spacer
+
+            else -> throw IllegalArgumentException("Unknown key type: $type")
+        }
+
+    private suspend fun tryLanguageFallback(
+        context: Context,
+        locale: ULocale,
+        mode: KeyboardMode,
+        currentAction: KeyboardKey.ActionType
+    ): KeyboardLayout = withContext(Dispatchers.IO) {
+        val languageOnly = locale.language
+
+        if (languageOnly != locale.toLanguageTag() && !shouldSkipLocale(languageOnly)) {
+            return@withContext try {
+                val layoutData = loadLayoutDataFromAssets(context, languageOnly)
+                parseLayoutForMode(layoutData, mode, currentAction)
+            } catch (_: Exception) {
+                handleAssetError(languageOnly)
+                getFallbackLayout(mode, currentAction)
+            }
+        }
+
+        return@withContext getFallbackLayout(mode, currentAction)
+    }
+
+    private suspend fun tryLoadFallback(
+        context: Context,
+        fallbackIdentifier: String,
+        mode: KeyboardMode,
+        currentAction: KeyboardKey.ActionType
+    ): KeyboardLayout = withContext(Dispatchers.IO) {
+        return@withContext try {
+            val layoutData = loadLayoutDataFromAssets(context, fallbackIdentifier)
+            parseLayoutForMode(layoutData, mode, currentAction)
+        } catch (_: Exception) {
+            getFallbackLayout(mode, currentAction)
+        }
+    }
+
+    private fun getFallbackLayout(mode: KeyboardMode, currentAction: KeyboardKey.ActionType): KeyboardLayout {
+        val rows =
+            when (mode) {
+                KeyboardMode.LETTERS -> getFallbackLettersLayout(currentAction)
+                KeyboardMode.NUMBERS -> getFallbackNumbersLayout(currentAction)
+                KeyboardMode.SYMBOLS -> getFallbackSymbolsLayout(currentAction)
+                KeyboardMode.SYMBOLS_SECONDARY -> getFallbackSymbolsSecondaryLayout(currentAction)
+            }
+        return KeyboardLayout(mode = mode, rows = rows)
+    }
+
+    private fun getFallbackLettersLayout(actionType: KeyboardKey.ActionType): List<List<KeyboardKey>> = listOf(
+        listOf("1", "2", "3", "4", "5", "6", "7", "8", "9", "0").map {
+            KeyboardKey.Character(it, KeyboardKey.KeyType.SYMBOL)
+        },
+        listOf("q", "w", "e", "r", "t", "y", "u", "i", "o", "p").map {
+            KeyboardKey.Character(it, KeyboardKey.KeyType.LETTER)
+        },
+        listOf("a", "s", "d", "f", "g", "h", "j", "k", "l").map {
+            KeyboardKey.Character(it, KeyboardKey.KeyType.LETTER)
+        },
+        listOf(
+            KeyboardKey.Action(KeyboardKey.ActionType.SHIFT),
+            KeyboardKey.Character("z", KeyboardKey.KeyType.LETTER),
+            KeyboardKey.Character("x", KeyboardKey.KeyType.LETTER),
+            KeyboardKey.Character("c", KeyboardKey.KeyType.LETTER),
+            KeyboardKey.Character("v", KeyboardKey.KeyType.LETTER),
+            KeyboardKey.Character("b", KeyboardKey.KeyType.LETTER),
+            KeyboardKey.Character("n", KeyboardKey.KeyType.LETTER),
+            KeyboardKey.Character("m", KeyboardKey.KeyType.LETTER),
+            KeyboardKey.Action(KeyboardKey.ActionType.BACKSPACE)
+        ),
+        listOf<KeyboardKey>(
+            KeyboardKey.Action(KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS),
+            KeyboardKey.Action(KeyboardKey.ActionType.SPACE),
+            KeyboardKey.Action(actionType)
+        )
+    )
+
+    private fun getFallbackNumbersLayout(actionType: KeyboardKey.ActionType): List<List<KeyboardKey>> = listOf(
+        listOf("1", "2", "3").map {
+            KeyboardKey.Character(it, KeyboardKey.KeyType.NUMBER)
+        },
+        listOf("4", "5", "6").map {
+            KeyboardKey.Character(it, KeyboardKey.KeyType.NUMBER)
+        },
+        listOf("7", "8", "9").map {
+            KeyboardKey.Character(it, KeyboardKey.KeyType.NUMBER)
+        },
+        listOf(
+            KeyboardKey.Character(".", KeyboardKey.KeyType.PUNCTUATION),
+            KeyboardKey.Character("0", KeyboardKey.KeyType.NUMBER),
+            KeyboardKey.Action(KeyboardKey.ActionType.BACKSPACE)
+        ),
+        listOf<KeyboardKey>(
+            KeyboardKey.Action(KeyboardKey.ActionType.MODE_SWITCH_LETTERS),
+            KeyboardKey.Action(KeyboardKey.ActionType.SPACE),
+            KeyboardKey.Action(actionType)
+        )
+    )
+
+    private fun getFallbackSymbolsLayout(actionType: KeyboardKey.ActionType): List<List<KeyboardKey>> = listOf(
+        listOf("1", "2", "3", "4", "5", "6", "7", "8", "9", "0").map {
+            KeyboardKey.Character(it, KeyboardKey.KeyType.SYMBOL)
+        },
+        listOf("!", "@", "#", "$", "%", "^", "&", "*").map {
+            KeyboardKey.Character(it, KeyboardKey.KeyType.SYMBOL)
+        },
+        listOf("-", "_", "=", "+", "[", "]", "{", "}").map {
+            KeyboardKey.Character(it, KeyboardKey.KeyType.SYMBOL)
+        },
+        listOf(";", ":", "'", "\"", ",", ".", "<", ">")
+            .map {
+                KeyboardKey.Character(it, KeyboardKey.KeyType.SYMBOL)
+            },
+        listOf<KeyboardKey>(
+            KeyboardKey.Action(KeyboardKey.ActionType.MODE_SWITCH_NUMBERS),
+            KeyboardKey.Action(KeyboardKey.ActionType.SPACE),
+            KeyboardKey.Action(KeyboardKey.ActionType.BACKSPACE),
+            KeyboardKey.Action(actionType)
+        )
+    )
+
+    private fun getFallbackSymbolsSecondaryLayout(actionType: KeyboardKey.ActionType): List<List<KeyboardKey>> = listOf(
+        listOf("~", "`", "\u2022", "\u2014", "\u2013", "\u00B7", "\u03C0", "\u00F7", "\u00D7", "\u00B1").map {
+            KeyboardKey.Character(it, KeyboardKey.KeyType.SYMBOL)
+        },
+        listOf("\u00A3", "\u00A5", "\u20AC", "\u00A2", "\u00B0", "\u00AE", "\u00A9", "\u2122", "\u221E", "\u00A7").map {
+            KeyboardKey.Character(it, KeyboardKey.KeyType.SYMBOL)
+        },
+        listOf(
+            KeyboardKey.Action(KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS),
+            KeyboardKey.Character("\u201C", KeyboardKey.KeyType.SYMBOL),
+            KeyboardKey.Character("\u201D", KeyboardKey.KeyType.SYMBOL),
+            KeyboardKey.Character("\u00AB", KeyboardKey.KeyType.SYMBOL),
+            KeyboardKey.Character("\u00BB", KeyboardKey.KeyType.SYMBOL),
+            KeyboardKey.Character("\u2039", KeyboardKey.KeyType.SYMBOL),
+            KeyboardKey.Character("\u203A", KeyboardKey.KeyType.SYMBOL),
+            KeyboardKey.Character("\u201E", KeyboardKey.KeyType.SYMBOL),
+            KeyboardKey.Character("\u2026", KeyboardKey.KeyType.SYMBOL),
+            KeyboardKey.Action(KeyboardKey.ActionType.BACKSPACE)
+        ),
+        listOf<KeyboardKey>(
+            KeyboardKey.Action(KeyboardKey.ActionType.MODE_SWITCH_LETTERS),
+            KeyboardKey.Action(KeyboardKey.ActionType.SPACE),
+            KeyboardKey.Action(actionType)
+        )
+    )
+
+    private fun shouldSkipLocale(localeTag: String): Boolean {
+        val errorCount = errorTracker.getErrorCount(localeTag)
+        val lastError = errorTracker.getLastErrorTime(localeTag)
+        val now = System.currentTimeMillis()
+
+        return errorCount >= maxLayoutRetries && now - lastError < layoutErrorCooldownMs
+    }
+
+    private fun handleAssetError(localeTag: String) {
+        val errorCount = errorTracker.recordError(localeTag)
+
+        if (errorCount >= maxLayoutRetries) {
+            failedLocales.add(localeTag)
+        }
+    }
+
+    /**
+     * Clears all caches and error state.
+     *
+     * Call when changing keyboard settings or on memory pressure.
+     */
+    fun cleanup() {
+        layoutCache.invalidateAll()
+        failedLocales.clear()
+        errorTracker.clear()
+    }
+
+    private companion object {
+        const val LAYOUT_CACHE_SIZE = 20
+        const val MAX_LAYOUT_RETRIES = 3
+        const val LAYOUT_ERROR_COOLDOWN_MS = 60000L
+        const val LAYOUT_ERROR_STATE_EXPIRY_MS = 3600000L
+        const val LAYOUT_ERROR_CLEANUP_INTERVAL_MS = 600000L
+        const val LAYOUT_ERROR_TRACKER_MAX_SIZE = 20
+    }
+}

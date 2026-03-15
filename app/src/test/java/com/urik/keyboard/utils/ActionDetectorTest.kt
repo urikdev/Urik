@@ -14,7 +14,7 @@ import org.robolectric.RobolectricTestRunner
 class ActionDetectorTest {
     private fun createEditorInfo(
         imeAction: Int = EditorInfo.IME_ACTION_NONE,
-        actionLabel: CharSequence? = null,
+        actionLabel: CharSequence? = null
     ): EditorInfo {
         val editorInfo = EditorInfo()
         editorInfo.imeOptions = imeAction
@@ -99,7 +99,7 @@ class ActionDetectorTest {
         val editorInfo =
             createEditorInfo(
                 imeAction = EditorInfo.IME_ACTION_NONE,
-                actionLabel = "submit",
+                actionLabel = "submit"
             )
 
         val result = ActionDetector.detectAction(editorInfo)
@@ -112,7 +112,7 @@ class ActionDetectorTest {
         val editorInfo =
             createEditorInfo(
                 imeAction = EditorInfo.IME_ACTION_SEARCH,
-                actionLabel = "send",
+                actionLabel = "send"
             )
 
         val result = ActionDetector.detectAction(editorInfo)
@@ -120,7 +120,7 @@ class ActionDetectorTest {
         assertEquals(
             "IME action should win over custom label",
             KeyboardKey.ActionType.SEARCH,
-            result,
+            result
         )
     }
 
@@ -129,7 +129,7 @@ class ActionDetectorTest {
         val editorInfo =
             createEditorInfo(
                 imeAction = EditorInfo.IME_ACTION_DONE,
-                actionLabel = "go",
+                actionLabel = "go"
             )
 
         val result = ActionDetector.detectAction(editorInfo)
@@ -149,7 +149,7 @@ class ActionDetectorTest {
         val editorInfo =
             createEditorInfo(
                 imeAction = EditorInfo.IME_ACTION_NONE,
-                actionLabel = null,
+                actionLabel = null
             )
 
         val result = ActionDetector.detectAction(editorInfo)
@@ -162,7 +162,7 @@ class ActionDetectorTest {
         val editorInfo =
             createEditorInfo(
                 imeAction = EditorInfo.IME_ACTION_NONE,
-                actionLabel = "",
+                actionLabel = ""
             )
 
         val result = ActionDetector.detectAction(editorInfo)
@@ -175,7 +175,7 @@ class ActionDetectorTest {
         val editorInfo =
             createEditorInfo(
                 imeAction = EditorInfo.IME_ACTION_NONE,
-                actionLabel = "   ",
+                actionLabel = "   "
             )
 
         val result = ActionDetector.detectAction(editorInfo)

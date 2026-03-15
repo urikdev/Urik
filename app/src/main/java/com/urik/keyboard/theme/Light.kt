@@ -25,6 +25,6 @@ data object Light : KeyboardTheme {
             focusIndicator = "#5e5768".toColorInt(),
             swipePrimary = "#5e5768".toColorInt(),
             swipeSecondary = "#928779".toColorInt(),
-            swipeCurrent = "#3a445d".toColorInt(),
+            swipeCurrent = "#3a445d".toColorInt()
         )
 }

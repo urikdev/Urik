@@ -8,74 +8,57 @@ import com.urik.keyboard.settings.KeyboardSettings.Companion.DEFAULT_LANGUAGE
 /**
  * Key size scale factors.
  */
-enum class KeySize(
-    val displayNameRes: Int,
-    val scaleFactor: Float,
-) {
+enum class KeySize(val displayNameRes: Int, val scaleFactor: Float) {
     SMALL(R.string.key_size_small, 0.85f),
     MEDIUM(R.string.key_size_medium, 1.0f),
     LARGE(R.string.key_size_large, 1.15f),
-    EXTRA_LARGE(R.string.key_size_extra_large, 1.35f),
+    EXTRA_LARGE(R.string.key_size_extra_large, 1.35f)
 }
 
 /**
  * Long press activation timing in milliseconds.
  */
-enum class LongPressDuration(
-    val displayNameRes: Int,
-    val durationMs: Long,
-) {
+enum class LongPressDuration(val displayNameRes: Int, val durationMs: Long) {
     SHORT(R.string.long_press_duration_short, 300L),
     MEDIUM(R.string.long_press_duration_medium, 500L),
-    LONG(R.string.long_press_duration_long, 800L),
+    LONG(R.string.long_press_duration_long, 800L)
 }
 
 /**
  * Space bar width as key-count multiplier.
  */
-enum class SpaceBarSize(
-    val displayNameRes: Int,
-    val widthMultiplier: Float,
-) {
+enum class SpaceBarSize(val displayNameRes: Int, val widthMultiplier: Float) {
     COMPACT(R.string.space_bar_size_compact, 3.0f),
     STANDARD(R.string.space_bar_size_standard, 4.0f),
-    WIDE(R.string.space_bar_size_wide, 5.0f),
+    WIDE(R.string.space_bar_size_wide, 5.0f)
 }
 
 /**
  * Key label size scale factors.
  */
-enum class KeyLabelSize(
-    val displayNameRes: Int,
-    val scaleFactor: Float,
-) {
+enum class KeyLabelSize(val displayNameRes: Int, val scaleFactor: Float) {
     SMALL(R.string.key_label_size_small, 0.85f),
     MEDIUM(R.string.key_label_size_medium, 1.0f),
-    LARGE(R.string.key_label_size_large, 1.2f),
+    LARGE(R.string.key_label_size_large, 1.2f)
 }
 
 /**
  * Cursor movement speed for spacebar swipe gesture.
  */
-enum class CursorSpeed(
-    val displayNameRes: Int,
-    val sensitivityDp: Float,
-) {
+enum class CursorSpeed(val displayNameRes: Int, val sensitivityDp: Float) {
     SLOW(R.string.cursor_speed_slow, 40f),
     MEDIUM(R.string.cursor_speed_medium, 25f),
     FAST(R.string.cursor_speed_fast, 15f),
-    VERY_FAST(R.string.cursor_speed_very_fast, 8f),
+    VERY_FAST(R.string.cursor_speed_very_fast, 8f)
 }
 
 /**
  * Long press punctuation menu activation mode.
  */
-enum class LongPressPunctuationMode(
-    val displayNameRes: Int,
-) {
+enum class LongPressPunctuationMode(val displayNameRes: Int) {
     OFF(R.string.long_press_punctuation_off),
     SPACEBAR(R.string.long_press_punctuation_spacebar),
-    PERIOD(R.string.long_press_punctuation_period),
+    PERIOD(R.string.long_press_punctuation_period)
 }
 
 /**
@@ -85,9 +68,7 @@ enum class LongPressPunctuationMode(
  * and spell checking always use the user's selected language regardless
  * of layout choice.
  */
-enum class AlternativeKeyboardLayout(
-    val displayNameRes: Int,
-) {
+enum class AlternativeKeyboardLayout(val displayNameRes: Int) {
     DEFAULT(R.string.alternative_layout_default),
     QWERTY(R.string.alternative_layout_qwerty),
     AZERTY(R.string.alternative_layout_azerty),
@@ -95,7 +76,7 @@ enum class AlternativeKeyboardLayout(
     DVORAK(R.string.alternative_layout_dvorak),
     COLEMAK(R.string.alternative_layout_colemak),
     WORKMAN(R.string.alternative_layout_workman),
-    HCESAR(R.string.alternative_layout_hcesar),
+    HCESAR(R.string.alternative_layout_hcesar)
 }
 
 /**
@@ -137,8 +118,34 @@ data class KeyboardSettings(
     val showLanguageSwitchKey: Boolean = false,
     val mergedDictionaries: Boolean = true,
     val pauseOnMisspelledWord: Boolean = true,
-    val autocorrectionEnabled: Boolean = false,
+    val autocorrectionEnabled: Boolean = false
 ) {
+    /**
+     * Whether word learning is enabled via [learnNewWords] flag.
+     */
+    val isWordLearningEnabled: Boolean
+        get() = learnNewWords
+
+    /**
+     * Whether clipboard monitoring is fully active (enabled AND user consented).
+     */
+    val isClipboardFullyActive: Boolean
+        get() = clipboardEnabled && clipboardConsentShown
+
+    /**
+     * Effective suggestion count respecting suggestion toggle.
+     * Returns 0 if suggestions are disabled.
+     */
+    val effectiveSuggestionCount: Int
+        get() = if (showSuggestions) suggestionCount else 0
+
+    /**
+     * Effective vibration amplitude respecting haptic feedback toggle.
+     * Returns 0 if haptic feedback is disabled.
+     */
+    val effectiveVibrationAmplitude: Int
+        get() = if (hapticFeedback) vibrationStrength else 0
+
     /**
      * Returns validated copy with constraints enforced.
      *
@@ -172,35 +179,9 @@ data class KeyboardSettings(
             suggestionCount = suggestionCount.coerceIn(MIN_SUGGESTION_COUNT, MAX_SUGGESTION_COUNT),
             activeLanguages = validActiveLanguages,
             primaryLanguage = validPrimaryLanguage,
-            primaryLayoutLanguage = validPrimaryLayoutLanguage,
+            primaryLayoutLanguage = validPrimaryLayoutLanguage
         )
     }
-
-    /**
-     * Whether word learning is enabled via [learnNewWords] flag.
-     */
-    val isWordLearningEnabled: Boolean
-        get() = learnNewWords
-
-    /**
-     * Whether clipboard monitoring is fully active (enabled AND user consented).
-     */
-    val isClipboardFullyActive: Boolean
-        get() = clipboardEnabled && clipboardConsentShown
-
-    /**
-     * Effective suggestion count respecting suggestion toggle.
-     * Returns 0 if suggestions are disabled.
-     */
-    val effectiveSuggestionCount: Int
-        get() = if (showSuggestions) suggestionCount else 0
-
-    /**
-     * Effective vibration amplitude respecting haptic feedback toggle.
-     * Returns 0 if haptic feedback is disabled.
-     */
-    val effectiveVibrationAmplitude: Int
-        get() = if (hapticFeedback) vibrationStrength else 0
 
     companion object {
         const val MIN_SUGGESTION_COUNT = 1
@@ -215,7 +196,8 @@ data class KeyboardSettings(
         /**
          * Languages with full keyboard layout, dictionary, and localization support.
          */
-        val SUPPORTED_LANGUAGES = setOf("ar", "ca", "cs", "de", "el", "en", "es", "fa", "fr", "it", "nl", "pl", "pt", "ru", "sv", "uk")
+        val SUPPORTED_LANGUAGES =
+            setOf("ar", "ca", "cs", "de", "el", "en", "es", "fa", "fr", "it", "nl", "pl", "pt", "ru", "sv", "uk")
 
         /**
          * Returns localized display names for all supported languages.
@@ -251,7 +233,7 @@ data class KeyboardSettings(
             return KeyboardSettings(
                 activeLanguages = listOf(lang),
                 primaryLanguage = lang,
-                primaryLayoutLanguage = lang,
+                primaryLayoutLanguage = lang
             )
         }
     }

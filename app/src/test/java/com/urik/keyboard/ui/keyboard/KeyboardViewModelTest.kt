@@ -184,104 +184,95 @@ class KeyboardViewModelTest {
     }
 
     @Test
-    fun `getCharacterForInput returns uppercase when shift on`() =
-        runTest {
-            viewModel.onEvent(KeyboardEvent.ShiftStateChanged(true))
-            val key = KeyboardKey.Character("a", KeyboardKey.KeyType.LETTER)
+    fun `getCharacterForInput returns uppercase when shift on`() = runTest {
+        viewModel.onEvent(KeyboardEvent.ShiftStateChanged(true))
+        val key = KeyboardKey.Character("a", KeyboardKey.KeyType.LETTER)
 
-            val result = viewModel.getCharacterForInput(key)
+        val result = viewModel.getCharacterForInput(key)
 
-            assertEquals("A", result)
-        }
-
-    @Test
-    fun `getCharacterForInput returns uppercase when caps lock on`() =
-        runTest {
-            viewModel.onEvent(KeyboardEvent.CapsLockToggled)
-            val key = KeyboardKey.Character("a", KeyboardKey.KeyType.LETTER)
-
-            val result = viewModel.getCharacterForInput(key)
-
-            assertEquals("A", result)
-        }
+        assertEquals("A", result)
+    }
 
     @Test
-    fun `getCharacterForInput returns uppercase when both shift and caps lock on`() =
-        runTest {
-            viewModel.onEvent(KeyboardEvent.CapsLockToggled)
-            viewModel.onEvent(KeyboardEvent.ShiftStateChanged(true))
-            val key = KeyboardKey.Character("a", KeyboardKey.KeyType.LETTER)
+    fun `getCharacterForInput returns uppercase when caps lock on`() = runTest {
+        viewModel.onEvent(KeyboardEvent.CapsLockToggled)
+        val key = KeyboardKey.Character("a", KeyboardKey.KeyType.LETTER)
 
-            val result = viewModel.getCharacterForInput(key)
+        val result = viewModel.getCharacterForInput(key)
 
-            assertEquals("A", result)
-        }
+        assertEquals("A", result)
+    }
 
     @Test
-    fun `getCharacterForInput preserves non-letter characters`() =
-        runTest {
-            viewModel.onEvent(KeyboardEvent.ShiftStateChanged(true))
-            val key = KeyboardKey.Character("1", KeyboardKey.KeyType.NUMBER)
+    fun `getCharacterForInput returns uppercase when both shift and caps lock on`() = runTest {
+        viewModel.onEvent(KeyboardEvent.CapsLockToggled)
+        viewModel.onEvent(KeyboardEvent.ShiftStateChanged(true))
+        val key = KeyboardKey.Character("a", KeyboardKey.KeyType.LETTER)
 
-            val result = viewModel.getCharacterForInput(key)
+        val result = viewModel.getCharacterForInput(key)
 
-            assertEquals("1", result)
-        }
-
-    @Test
-    fun `getCharacterForInput preserves punctuation with shift`() =
-        runTest {
-            viewModel.onEvent(KeyboardEvent.ShiftStateChanged(true))
-            val key = KeyboardKey.Character(".", KeyboardKey.KeyType.PUNCTUATION)
-
-            val result = viewModel.getCharacterForInput(key)
-
-            assertEquals(".", result)
-        }
+        assertEquals("A", result)
+    }
 
     @Test
-    fun `clearShiftAfterCharacter clears shift for letter when shift on`() =
-        runTest {
-            viewModel.onEvent(KeyboardEvent.ShiftStateChanged(true))
-            val key = KeyboardKey.Character("a", KeyboardKey.KeyType.LETTER)
+    fun `getCharacterForInput preserves non-letter characters`() = runTest {
+        viewModel.onEvent(KeyboardEvent.ShiftStateChanged(true))
+        val key = KeyboardKey.Character("1", KeyboardKey.KeyType.NUMBER)
 
-            viewModel.clearShiftAfterCharacter(key)
+        val result = viewModel.getCharacterForInput(key)
 
-            assertFalse(viewModel.state.value.isShiftPressed)
-        }
-
-    @Test
-    fun `clearShiftAfterCharacter does not clear shift when caps lock on`() =
-        runTest {
-            viewModel.onEvent(KeyboardEvent.CapsLockToggled)
-            viewModel.onEvent(KeyboardEvent.ShiftStateChanged(true))
-            val key = KeyboardKey.Character("a", KeyboardKey.KeyType.LETTER)
-
-            viewModel.clearShiftAfterCharacter(key)
-
-            assertTrue(viewModel.state.value.isShiftPressed)
-        }
+        assertEquals("1", result)
+    }
 
     @Test
-    fun `clearShiftAfterCharacter does not affect non-letter keys`() =
-        runTest {
-            viewModel.onEvent(KeyboardEvent.ShiftStateChanged(true))
-            val key = KeyboardKey.Character("1", KeyboardKey.KeyType.NUMBER)
+    fun `getCharacterForInput preserves punctuation with shift`() = runTest {
+        viewModel.onEvent(KeyboardEvent.ShiftStateChanged(true))
+        val key = KeyboardKey.Character(".", KeyboardKey.KeyType.PUNCTUATION)
 
-            viewModel.clearShiftAfterCharacter(key)
+        val result = viewModel.getCharacterForInput(key)
 
-            assertTrue(viewModel.state.value.isShiftPressed)
-        }
+        assertEquals(".", result)
+    }
 
     @Test
-    fun `clearShiftAfterCharacter when shift already off`() =
-        runTest {
-            val key = KeyboardKey.Character("a", KeyboardKey.KeyType.LETTER)
+    fun `clearShiftAfterCharacter clears shift for letter when shift on`() = runTest {
+        viewModel.onEvent(KeyboardEvent.ShiftStateChanged(true))
+        val key = KeyboardKey.Character("a", KeyboardKey.KeyType.LETTER)
 
-            viewModel.clearShiftAfterCharacter(key)
+        viewModel.clearShiftAfterCharacter(key)
 
-            assertFalse(viewModel.state.value.isShiftPressed)
-        }
+        assertFalse(viewModel.state.value.isShiftPressed)
+    }
+
+    @Test
+    fun `clearShiftAfterCharacter does not clear shift when caps lock on`() = runTest {
+        viewModel.onEvent(KeyboardEvent.CapsLockToggled)
+        viewModel.onEvent(KeyboardEvent.ShiftStateChanged(true))
+        val key = KeyboardKey.Character("a", KeyboardKey.KeyType.LETTER)
+
+        viewModel.clearShiftAfterCharacter(key)
+
+        assertTrue(viewModel.state.value.isShiftPressed)
+    }
+
+    @Test
+    fun `clearShiftAfterCharacter does not affect non-letter keys`() = runTest {
+        viewModel.onEvent(KeyboardEvent.ShiftStateChanged(true))
+        val key = KeyboardKey.Character("1", KeyboardKey.KeyType.NUMBER)
+
+        viewModel.clearShiftAfterCharacter(key)
+
+        assertTrue(viewModel.state.value.isShiftPressed)
+    }
+
+    @Test
+    fun `clearShiftAfterCharacter when shift already off`() = runTest {
+        val key = KeyboardKey.Character("a", KeyboardKey.KeyType.LETTER)
+
+        viewModel.clearShiftAfterCharacter(key)
+
+        assertFalse(viewModel.state.value.isShiftPressed)
+    }
 
     @Test
     fun `initial state has shift off`() {
@@ -289,21 +280,19 @@ class KeyboardViewModelTest {
     }
 
     @Test
-    fun `ShiftStateChanged toggles shift on`() =
-        runTest {
-            viewModel.onEvent(KeyboardEvent.ShiftStateChanged(true))
+    fun `ShiftStateChanged toggles shift on`() = runTest {
+        viewModel.onEvent(KeyboardEvent.ShiftStateChanged(true))
 
-            assertTrue(viewModel.state.value.isShiftPressed)
-        }
+        assertTrue(viewModel.state.value.isShiftPressed)
+    }
 
     @Test
-    fun `ShiftStateChanged toggles shift off`() =
-        runTest {
-            viewModel.onEvent(KeyboardEvent.ShiftStateChanged(true))
-            viewModel.onEvent(KeyboardEvent.ShiftStateChanged(false))
+    fun `ShiftStateChanged toggles shift off`() = runTest {
+        viewModel.onEvent(KeyboardEvent.ShiftStateChanged(true))
+        viewModel.onEvent(KeyboardEvent.ShiftStateChanged(false))
 
-            assertFalse(viewModel.state.value.isShiftPressed)
-        }
+        assertFalse(viewModel.state.value.isShiftPressed)
+    }
 
     @Test
     fun `enableAutoCapitalization sets shift on`() {
@@ -318,41 +307,37 @@ class KeyboardViewModelTest {
     }
 
     @Test
-    fun `CapsLockToggled turns caps lock on`() =
-        runTest {
-            viewModel.onEvent(KeyboardEvent.CapsLockToggled)
+    fun `CapsLockToggled turns caps lock on`() = runTest {
+        viewModel.onEvent(KeyboardEvent.CapsLockToggled)
 
-            assertTrue(viewModel.state.value.isCapsLockOn)
-        }
-
-    @Test
-    fun `CapsLockToggled turns caps lock off`() =
-        runTest {
-            viewModel.onEvent(KeyboardEvent.CapsLockToggled)
-            viewModel.onEvent(KeyboardEvent.CapsLockToggled)
-
-            assertFalse(viewModel.state.value.isCapsLockOn)
-        }
+        assertTrue(viewModel.state.value.isCapsLockOn)
+    }
 
     @Test
-    fun `CapsLockToggled clears shift state`() =
-        runTest {
-            viewModel.onEvent(KeyboardEvent.ShiftStateChanged(true))
-            viewModel.onEvent(KeyboardEvent.CapsLockToggled)
+    fun `CapsLockToggled turns caps lock off`() = runTest {
+        viewModel.onEvent(KeyboardEvent.CapsLockToggled)
+        viewModel.onEvent(KeyboardEvent.CapsLockToggled)
 
-            assertFalse(viewModel.state.value.isShiftPressed)
-            assertTrue(viewModel.state.value.isCapsLockOn)
-        }
+        assertFalse(viewModel.state.value.isCapsLockOn)
+    }
 
     @Test
-    fun `caps lock persists across shift toggles`() =
-        runTest {
-            viewModel.onEvent(KeyboardEvent.CapsLockToggled)
-            viewModel.onEvent(KeyboardEvent.ShiftStateChanged(true))
-            viewModel.onEvent(KeyboardEvent.ShiftStateChanged(false))
+    fun `CapsLockToggled clears shift state`() = runTest {
+        viewModel.onEvent(KeyboardEvent.ShiftStateChanged(true))
+        viewModel.onEvent(KeyboardEvent.CapsLockToggled)
 
-            assertTrue(viewModel.state.value.isCapsLockOn)
-        }
+        assertFalse(viewModel.state.value.isShiftPressed)
+        assertTrue(viewModel.state.value.isCapsLockOn)
+    }
+
+    @Test
+    fun `caps lock persists across shift toggles`() = runTest {
+        viewModel.onEvent(KeyboardEvent.CapsLockToggled)
+        viewModel.onEvent(KeyboardEvent.ShiftStateChanged(true))
+        viewModel.onEvent(KeyboardEvent.ShiftStateChanged(false))
+
+        assertTrue(viewModel.state.value.isCapsLockOn)
+    }
 
     @Test
     fun `checkAndApplyAutoCapitalization enables shift after period with space`() {
@@ -383,26 +368,24 @@ class KeyboardViewModelTest {
     }
 
     @Test
-    fun `checkAndApplyAutoCapitalization preserves caps lock after sentence end`() =
-        runTest {
-            viewModel.onEvent(KeyboardEvent.CapsLockToggled)
+    fun `checkAndApplyAutoCapitalization preserves caps lock after sentence end`() = runTest {
+        viewModel.onEvent(KeyboardEvent.CapsLockToggled)
 
-            viewModel.checkAndApplyAutoCapitalization("Hello. ")
+        viewModel.checkAndApplyAutoCapitalization("Hello. ")
 
-            assertTrue(viewModel.state.value.isCapsLockOn)
-            assertFalse(viewModel.state.value.isShiftPressed)
-        }
+        assertTrue(viewModel.state.value.isCapsLockOn)
+        assertFalse(viewModel.state.value.isShiftPressed)
+    }
 
     @Test
-    fun `checkAndApplyAutoCapitalization preserves caps lock mid-sentence`() =
-        runTest {
-            viewModel.onEvent(KeyboardEvent.CapsLockToggled)
+    fun `checkAndApplyAutoCapitalization preserves caps lock mid-sentence`() = runTest {
+        viewModel.onEvent(KeyboardEvent.CapsLockToggled)
 
-            viewModel.checkAndApplyAutoCapitalization("HELLO ")
+        viewModel.checkAndApplyAutoCapitalization("HELLO ")
 
-            assertTrue(viewModel.state.value.isCapsLockOn)
-            assertFalse(viewModel.state.value.isShiftPressed)
-        }
+        assertTrue(viewModel.state.value.isCapsLockOn)
+        assertFalse(viewModel.state.value.isShiftPressed)
+    }
 
     @Test
     fun `checkAndApplyAutoCapitalization does not enable shift when disabled`() {
@@ -426,24 +409,22 @@ class KeyboardViewModelTest {
     }
 
     @Test
-    fun `disableCapsLockAfterPunctuation turns off caps lock and enables shift`() =
-        runTest {
-            viewModel.onEvent(KeyboardEvent.CapsLockToggled)
+    fun `disableCapsLockAfterPunctuation turns off caps lock and enables shift`() = runTest {
+        viewModel.onEvent(KeyboardEvent.CapsLockToggled)
 
-            viewModel.disableCapsLockAfterPunctuation()
+        viewModel.disableCapsLockAfterPunctuation()
 
-            assertFalse(viewModel.state.value.isCapsLockOn)
-            assertTrue(viewModel.state.value.isShiftPressed)
-        }
+        assertFalse(viewModel.state.value.isCapsLockOn)
+        assertTrue(viewModel.state.value.isShiftPressed)
+    }
 
     @Test
-    fun `disableCapsLockAfterPunctuation does nothing when caps lock is off`() =
-        runTest {
-            viewModel.disableCapsLockAfterPunctuation()
+    fun `disableCapsLockAfterPunctuation does nothing when caps lock is off`() = runTest {
+        viewModel.disableCapsLockAfterPunctuation()
 
-            assertFalse(viewModel.state.value.isCapsLockOn)
-            assertFalse(viewModel.state.value.isShiftPressed)
-        }
+        assertFalse(viewModel.state.value.isCapsLockOn)
+        assertFalse(viewModel.state.value.isShiftPressed)
+    }
 
     @Test
     fun `initial mode is LETTERS`() {
@@ -451,96 +432,89 @@ class KeyboardViewModelTest {
     }
 
     @Test
-    fun `ModeChanged switches to NUMBERS`() =
-        runTest {
-            whenever(repository.getLayoutForMode(eq(KeyboardMode.NUMBERS), any(), any()))
-                .thenReturn(Result.success(createMockLayout(KeyboardMode.NUMBERS)))
+    fun `ModeChanged switches to NUMBERS`() = runTest {
+        whenever(repository.getLayoutForMode(eq(KeyboardMode.NUMBERS), any(), any()))
+            .thenReturn(Result.success(createMockLayout(KeyboardMode.NUMBERS)))
 
-            viewModel.onEvent(KeyboardEvent.ModeChanged(KeyboardMode.NUMBERS))
+        viewModel.onEvent(KeyboardEvent.ModeChanged(KeyboardMode.NUMBERS))
 
-            assertEquals(KeyboardMode.NUMBERS, viewModel.state.value.currentMode)
-            assertEquals(KeyboardMode.NUMBERS, viewModel.layout.value?.mode)
-        }
-
-    @Test
-    fun `ModeChanged switches to SYMBOLS`() =
-        runTest {
-            whenever(repository.getLayoutForMode(eq(KeyboardMode.SYMBOLS), any(), any()))
-                .thenReturn(Result.success(createMockLayout(KeyboardMode.SYMBOLS)))
-
-            viewModel.onEvent(KeyboardEvent.ModeChanged(KeyboardMode.SYMBOLS))
-
-            assertEquals(KeyboardMode.SYMBOLS, viewModel.state.value.currentMode)
-            assertEquals(KeyboardMode.SYMBOLS, viewModel.layout.value?.mode)
-        }
+        assertEquals(KeyboardMode.NUMBERS, viewModel.state.value.currentMode)
+        assertEquals(KeyboardMode.NUMBERS, viewModel.layout.value?.mode)
+    }
 
     @Test
-    fun `ModeChanged switches to SYMBOLS_SECONDARY`() =
-        runTest {
-            whenever(repository.getLayoutForMode(eq(KeyboardMode.SYMBOLS), any(), any()))
-                .thenReturn(Result.success(createMockLayout(KeyboardMode.SYMBOLS)))
-            whenever(repository.getLayoutForMode(eq(KeyboardMode.SYMBOLS_SECONDARY), any(), any()))
-                .thenReturn(Result.success(createMockLayout(KeyboardMode.SYMBOLS_SECONDARY)))
+    fun `ModeChanged switches to SYMBOLS`() = runTest {
+        whenever(repository.getLayoutForMode(eq(KeyboardMode.SYMBOLS), any(), any()))
+            .thenReturn(Result.success(createMockLayout(KeyboardMode.SYMBOLS)))
 
-            viewModel.onEvent(KeyboardEvent.ModeChanged(KeyboardMode.SYMBOLS))
-            viewModel.onEvent(KeyboardEvent.ModeChanged(KeyboardMode.SYMBOLS_SECONDARY))
+        viewModel.onEvent(KeyboardEvent.ModeChanged(KeyboardMode.SYMBOLS))
 
-            assertEquals(KeyboardMode.SYMBOLS_SECONDARY, viewModel.state.value.currentMode)
-            assertEquals(KeyboardMode.SYMBOLS_SECONDARY, viewModel.layout.value?.mode)
-        }
+        assertEquals(KeyboardMode.SYMBOLS, viewModel.state.value.currentMode)
+        assertEquals(KeyboardMode.SYMBOLS, viewModel.layout.value?.mode)
+    }
 
     @Test
-    fun `ModeChanged from SYMBOLS_SECONDARY back to SYMBOLS`() =
-        runTest {
-            whenever(repository.getLayoutForMode(eq(KeyboardMode.SYMBOLS), any(), any()))
-                .thenReturn(Result.success(createMockLayout(KeyboardMode.SYMBOLS)))
-            whenever(repository.getLayoutForMode(eq(KeyboardMode.SYMBOLS_SECONDARY), any(), any()))
-                .thenReturn(Result.success(createMockLayout(KeyboardMode.SYMBOLS_SECONDARY)))
+    fun `ModeChanged switches to SYMBOLS_SECONDARY`() = runTest {
+        whenever(repository.getLayoutForMode(eq(KeyboardMode.SYMBOLS), any(), any()))
+            .thenReturn(Result.success(createMockLayout(KeyboardMode.SYMBOLS)))
+        whenever(repository.getLayoutForMode(eq(KeyboardMode.SYMBOLS_SECONDARY), any(), any()))
+            .thenReturn(Result.success(createMockLayout(KeyboardMode.SYMBOLS_SECONDARY)))
 
-            viewModel.onEvent(KeyboardEvent.ModeChanged(KeyboardMode.SYMBOLS))
-            viewModel.onEvent(KeyboardEvent.ModeChanged(KeyboardMode.SYMBOLS_SECONDARY))
-            viewModel.onEvent(KeyboardEvent.ModeChanged(KeyboardMode.SYMBOLS))
+        viewModel.onEvent(KeyboardEvent.ModeChanged(KeyboardMode.SYMBOLS))
+        viewModel.onEvent(KeyboardEvent.ModeChanged(KeyboardMode.SYMBOLS_SECONDARY))
 
-            assertEquals(KeyboardMode.SYMBOLS, viewModel.state.value.currentMode)
-        }
-
-    @Test
-    fun `MODE_SWITCH_LETTERS exits SYMBOLS_SECONDARY to LETTERS`() =
-        runTest {
-            whenever(repository.getLayoutForMode(eq(KeyboardMode.SYMBOLS_SECONDARY), any(), any()))
-                .thenReturn(Result.success(createMockLayout(KeyboardMode.SYMBOLS_SECONDARY)))
-            whenever(repository.getLayoutForMode(eq(KeyboardMode.LETTERS), any(), any()))
-                .thenReturn(Result.success(createMockLayout(KeyboardMode.LETTERS)))
-
-            viewModel.onEvent(KeyboardEvent.ModeChanged(KeyboardMode.SYMBOLS_SECONDARY))
-            viewModel.onEvent(KeyboardEvent.ModeChanged(KeyboardMode.LETTERS))
-
-            assertEquals(KeyboardMode.LETTERS, viewModel.state.value.currentMode)
-        }
+        assertEquals(KeyboardMode.SYMBOLS_SECONDARY, viewModel.state.value.currentMode)
+        assertEquals(KeyboardMode.SYMBOLS_SECONDARY, viewModel.layout.value?.mode)
+    }
 
     @Test
-    fun `ModeChanged back to LETTERS`() =
-        runTest {
-            whenever(repository.getLayoutForMode(eq(KeyboardMode.NUMBERS), any(), any()))
-                .thenReturn(Result.success(createMockLayout(KeyboardMode.NUMBERS)))
-            whenever(repository.getLayoutForMode(eq(KeyboardMode.LETTERS), any(), any()))
-                .thenReturn(Result.success(createMockLayout(KeyboardMode.LETTERS)))
+    fun `ModeChanged from SYMBOLS_SECONDARY back to SYMBOLS`() = runTest {
+        whenever(repository.getLayoutForMode(eq(KeyboardMode.SYMBOLS), any(), any()))
+            .thenReturn(Result.success(createMockLayout(KeyboardMode.SYMBOLS)))
+        whenever(repository.getLayoutForMode(eq(KeyboardMode.SYMBOLS_SECONDARY), any(), any()))
+            .thenReturn(Result.success(createMockLayout(KeyboardMode.SYMBOLS_SECONDARY)))
 
-            viewModel.onEvent(KeyboardEvent.ModeChanged(KeyboardMode.NUMBERS))
-            viewModel.onEvent(KeyboardEvent.ModeChanged(KeyboardMode.LETTERS))
+        viewModel.onEvent(KeyboardEvent.ModeChanged(KeyboardMode.SYMBOLS))
+        viewModel.onEvent(KeyboardEvent.ModeChanged(KeyboardMode.SYMBOLS_SECONDARY))
+        viewModel.onEvent(KeyboardEvent.ModeChanged(KeyboardMode.SYMBOLS))
 
-            assertEquals(KeyboardMode.LETTERS, viewModel.state.value.currentMode)
-        }
+        assertEquals(KeyboardMode.SYMBOLS, viewModel.state.value.currentMode)
+    }
 
     @Test
-    fun `ModeChanged with same mode does not reload`() =
-        runTest {
-            clearInvocations(repository)
+    fun `MODE_SWITCH_LETTERS exits SYMBOLS_SECONDARY to LETTERS`() = runTest {
+        whenever(repository.getLayoutForMode(eq(KeyboardMode.SYMBOLS_SECONDARY), any(), any()))
+            .thenReturn(Result.success(createMockLayout(KeyboardMode.SYMBOLS_SECONDARY)))
+        whenever(repository.getLayoutForMode(eq(KeyboardMode.LETTERS), any(), any()))
+            .thenReturn(Result.success(createMockLayout(KeyboardMode.LETTERS)))
 
-            viewModel.onEvent(KeyboardEvent.ModeChanged(KeyboardMode.LETTERS))
+        viewModel.onEvent(KeyboardEvent.ModeChanged(KeyboardMode.SYMBOLS_SECONDARY))
+        viewModel.onEvent(KeyboardEvent.ModeChanged(KeyboardMode.LETTERS))
 
-            verify(repository, never()).getLayoutForMode(any(), any(), any())
-        }
+        assertEquals(KeyboardMode.LETTERS, viewModel.state.value.currentMode)
+    }
+
+    @Test
+    fun `ModeChanged back to LETTERS`() = runTest {
+        whenever(repository.getLayoutForMode(eq(KeyboardMode.NUMBERS), any(), any()))
+            .thenReturn(Result.success(createMockLayout(KeyboardMode.NUMBERS)))
+        whenever(repository.getLayoutForMode(eq(KeyboardMode.LETTERS), any(), any()))
+            .thenReturn(Result.success(createMockLayout(KeyboardMode.LETTERS)))
+
+        viewModel.onEvent(KeyboardEvent.ModeChanged(KeyboardMode.NUMBERS))
+        viewModel.onEvent(KeyboardEvent.ModeChanged(KeyboardMode.LETTERS))
+
+        assertEquals(KeyboardMode.LETTERS, viewModel.state.value.currentMode)
+    }
+
+    @Test
+    fun `ModeChanged with same mode does not reload`() = runTest {
+        clearInvocations(repository)
+
+        viewModel.onEvent(KeyboardEvent.ModeChanged(KeyboardMode.LETTERS))
+
+        verify(repository, never()).getLayoutForMode(any(), any(), any())
+    }
 
     @Test
     fun `layout loads successfully on init`() {
@@ -551,105 +525,98 @@ class KeyboardViewModelTest {
     }
 
     @Test
-    fun `layout loading handles failure`() =
-        runTest {
-            whenever(repository.getLayoutForMode(eq(KeyboardMode.NUMBERS), any(), any()))
-                .thenReturn(Result.failure(Exception("Test error")))
+    fun `layout loading handles failure`() = runTest {
+        whenever(repository.getLayoutForMode(eq(KeyboardMode.NUMBERS), any(), any()))
+            .thenReturn(Result.failure(Exception("Test error")))
 
-            viewModel.onEvent(KeyboardEvent.ModeChanged(KeyboardMode.NUMBERS))
+        viewModel.onEvent(KeyboardEvent.ModeChanged(KeyboardMode.NUMBERS))
 
-            assertFalse(viewModel.state.value.isLoading)
-            assertNotNull(viewModel.state.value.error)
-            assertTrue(
-                viewModel.state.value.error!!
-                    .contains("Test error"),
-            )
-        }
-
-    @Test
-    fun `layout loading uses current locale`() =
-        runTest {
-            layoutLanguageFlow.value = "sv"
-            whenever(repository.getLayoutForMode(any(), any(), any()))
-                .thenReturn(Result.success(createMockLayout(KeyboardMode.LETTERS)))
-
-            viewModel.onEvent(KeyboardEvent.ModeChanged(KeyboardMode.LETTERS))
-
-            verify(repository).getLayoutForMode(
-                eq(KeyboardMode.LETTERS),
-                eq(ULocale.forLanguageTag("sv")),
-                any(),
-            )
-        }
+        assertFalse(viewModel.state.value.isLoading)
+        assertNotNull(viewModel.state.value.error)
+        assertTrue(
+            viewModel.state.value.error!!
+                .contains("Test error")
+        )
+    }
 
     @Test
-    fun `getCurrentLocale extracts language from en-US`() =
-        runTest {
-            languageFlow.value = "en-US"
-            whenever(repository.getLayoutForMode(any(), any(), any()))
-                .thenReturn(Result.success(createMockLayout(KeyboardMode.LETTERS)))
+    fun `layout loading uses current locale`() = runTest {
+        layoutLanguageFlow.value = "sv"
+        whenever(repository.getLayoutForMode(any(), any(), any()))
+            .thenReturn(Result.success(createMockLayout(KeyboardMode.LETTERS)))
 
-            verify(repository, atLeastOnce()).getLayoutForMode(
-                any(),
-                eq(ULocale.forLanguageTag("en")),
-                any(),
-            )
-        }
+        viewModel.onEvent(KeyboardEvent.ModeChanged(KeyboardMode.LETTERS))
 
-    @Test
-    fun `getCurrentLocale extracts language from sv-SE`() =
-        runTest {
-            layoutLanguageFlow.value = "sv-SE"
-            whenever(repository.getLayoutForMode(any(), any(), any()))
-                .thenReturn(Result.success(createMockLayout(KeyboardMode.LETTERS)))
-
-            verify(repository, atLeastOnce()).getLayoutForMode(
-                any(),
-                eq(ULocale.forLanguageTag("sv")),
-                any(),
-            )
-        }
+        verify(repository).getLayoutForMode(
+            eq(KeyboardMode.LETTERS),
+            eq(ULocale.forLanguageTag("sv")),
+            any()
+        )
+    }
 
     @Test
-    fun `getCurrentLocale handles simple language tag`() =
-        runTest {
-            languageFlow.value = "en"
-            whenever(repository.getLayoutForMode(any(), any(), any()))
-                .thenReturn(Result.success(createMockLayout(KeyboardMode.LETTERS)))
+    fun `getCurrentLocale extracts language from en-US`() = runTest {
+        languageFlow.value = "en-US"
+        whenever(repository.getLayoutForMode(any(), any(), any()))
+            .thenReturn(Result.success(createMockLayout(KeyboardMode.LETTERS)))
 
-            verify(repository, atLeastOnce()).getLayoutForMode(
-                any(),
-                eq(ULocale.forLanguageTag("en")),
-                any(),
-            )
-        }
-
-    @Test
-    fun `updateActionType reloads layout when action changes`() =
-        runTest {
-            clearInvocations(repository)
-            whenever(repository.getLayoutForMode(any(), any(), any()))
-                .thenReturn(Result.success(createMockLayout(KeyboardMode.LETTERS)))
-
-            viewModel.updateActionType(KeyboardKey.ActionType.SEARCH)
-
-            verify(repository).getLayoutForMode(
-                eq(KeyboardMode.LETTERS),
-                any(),
-                eq(KeyboardKey.ActionType.SEARCH),
-            )
-        }
+        verify(repository, atLeastOnce()).getLayoutForMode(
+            any(),
+            eq(ULocale.forLanguageTag("en")),
+            any()
+        )
+    }
 
     @Test
-    fun `updateActionType does not reload when action same`() =
-        runTest {
-            viewModel.updateActionType(KeyboardKey.ActionType.ENTER)
-            clearInvocations(repository)
+    fun `getCurrentLocale extracts language from sv-SE`() = runTest {
+        layoutLanguageFlow.value = "sv-SE"
+        whenever(repository.getLayoutForMode(any(), any(), any()))
+            .thenReturn(Result.success(createMockLayout(KeyboardMode.LETTERS)))
 
-            viewModel.updateActionType(KeyboardKey.ActionType.ENTER)
+        verify(repository, atLeastOnce()).getLayoutForMode(
+            any(),
+            eq(ULocale.forLanguageTag("sv")),
+            any()
+        )
+    }
 
-            verify(repository, never()).getLayoutForMode(any(), any(), any())
-        }
+    @Test
+    fun `getCurrentLocale handles simple language tag`() = runTest {
+        languageFlow.value = "en"
+        whenever(repository.getLayoutForMode(any(), any(), any()))
+            .thenReturn(Result.success(createMockLayout(KeyboardMode.LETTERS)))
+
+        verify(repository, atLeastOnce()).getLayoutForMode(
+            any(),
+            eq(ULocale.forLanguageTag("en")),
+            any()
+        )
+    }
+
+    @Test
+    fun `updateActionType reloads layout when action changes`() = runTest {
+        clearInvocations(repository)
+        whenever(repository.getLayoutForMode(any(), any(), any()))
+            .thenReturn(Result.success(createMockLayout(KeyboardMode.LETTERS)))
+
+        viewModel.updateActionType(KeyboardKey.ActionType.SEARCH)
+
+        verify(repository).getLayoutForMode(
+            eq(KeyboardMode.LETTERS),
+            any(),
+            eq(KeyboardKey.ActionType.SEARCH)
+        )
+    }
+
+    @Test
+    fun `updateActionType does not reload when action same`() = runTest {
+        viewModel.updateActionType(KeyboardKey.ActionType.ENTER)
+        clearInvocations(repository)
+
+        viewModel.updateActionType(KeyboardKey.ActionType.ENTER)
+
+        verify(repository, never()).getLayoutForMode(any(), any(), any())
+    }
 
     @Test
     fun `layout contains RTL and script information for Arabic script`() {
@@ -658,7 +625,7 @@ class KeyboardViewModelTest {
                 mode = KeyboardMode.LETTERS,
                 rows = emptyList(),
                 isRTL = true,
-                script = "Arab",
+                script = "Arab"
             )
 
         runTest {
@@ -673,59 +640,54 @@ class KeyboardViewModelTest {
     }
 
     @Test
-    fun `getCharacterForInput Arabic letter unchanged with shift`() =
-        runTest {
-            viewModel.onEvent(KeyboardEvent.ShiftStateChanged(true))
-            val key = KeyboardKey.Character("\u0636", KeyboardKey.KeyType.LETTER)
+    fun `getCharacterForInput Arabic letter unchanged with shift`() = runTest {
+        viewModel.onEvent(KeyboardEvent.ShiftStateChanged(true))
+        val key = KeyboardKey.Character("\u0636", KeyboardKey.KeyType.LETTER)
 
-            val result = viewModel.getCharacterForInput(key)
+        val result = viewModel.getCharacterForInput(key)
 
-            assertEquals("\u0636", result)
-        }
-
-    @Test
-    fun `SYMBOLS_SECONDARY mode loads correct layout`() =
-        runTest {
-            whenever(repository.getLayoutForMode(eq(KeyboardMode.SYMBOLS_SECONDARY), any(), any()))
-                .thenReturn(Result.success(createMockLayout(KeyboardMode.SYMBOLS_SECONDARY)))
-
-            viewModel.onEvent(KeyboardEvent.ModeChanged(KeyboardMode.SYMBOLS_SECONDARY))
-
-            assertEquals(KeyboardMode.SYMBOLS_SECONDARY, viewModel.state.value.currentMode)
-            assertNotNull(viewModel.layout.value)
-            assertFalse(viewModel.state.value.isLoading)
-        }
+        assertEquals("\u0636", result)
+    }
 
     @Test
-    fun `SYMBOLS_SECONDARY layout loading handles failure`() =
-        runTest {
-            whenever(repository.getLayoutForMode(eq(KeyboardMode.SYMBOLS_SECONDARY), any(), any()))
-                .thenReturn(Result.failure(Exception("Test error")))
+    fun `SYMBOLS_SECONDARY mode loads correct layout`() = runTest {
+        whenever(repository.getLayoutForMode(eq(KeyboardMode.SYMBOLS_SECONDARY), any(), any()))
+            .thenReturn(Result.success(createMockLayout(KeyboardMode.SYMBOLS_SECONDARY)))
 
-            viewModel.onEvent(KeyboardEvent.ModeChanged(KeyboardMode.SYMBOLS_SECONDARY))
+        viewModel.onEvent(KeyboardEvent.ModeChanged(KeyboardMode.SYMBOLS_SECONDARY))
 
-            assertFalse(viewModel.state.value.isLoading)
-            assertNotNull(viewModel.state.value.error)
-        }
+        assertEquals(KeyboardMode.SYMBOLS_SECONDARY, viewModel.state.value.currentMode)
+        assertNotNull(viewModel.layout.value)
+        assertFalse(viewModel.state.value.isLoading)
+    }
 
     @Test
-    fun `rapid mode cycling SYMBOLS to SECONDARY and back`() =
-        runTest {
-            whenever(repository.getLayoutForMode(eq(KeyboardMode.SYMBOLS), any(), any()))
-                .thenReturn(Result.success(createMockLayout(KeyboardMode.SYMBOLS)))
-            whenever(repository.getLayoutForMode(eq(KeyboardMode.SYMBOLS_SECONDARY), any(), any()))
-                .thenReturn(Result.success(createMockLayout(KeyboardMode.SYMBOLS_SECONDARY)))
+    fun `SYMBOLS_SECONDARY layout loading handles failure`() = runTest {
+        whenever(repository.getLayoutForMode(eq(KeyboardMode.SYMBOLS_SECONDARY), any(), any()))
+            .thenReturn(Result.failure(Exception("Test error")))
 
-            viewModel.onEvent(KeyboardEvent.ModeChanged(KeyboardMode.SYMBOLS))
-            viewModel.onEvent(KeyboardEvent.ModeChanged(KeyboardMode.SYMBOLS_SECONDARY))
-            viewModel.onEvent(KeyboardEvent.ModeChanged(KeyboardMode.SYMBOLS))
+        viewModel.onEvent(KeyboardEvent.ModeChanged(KeyboardMode.SYMBOLS_SECONDARY))
 
-            assertEquals(KeyboardMode.SYMBOLS, viewModel.state.value.currentMode)
-        }
+        assertFalse(viewModel.state.value.isLoading)
+        assertNotNull(viewModel.state.value.error)
+    }
 
-    private fun createMockLayout(mode: KeyboardMode): KeyboardLayout =
-        KeyboardLayout(
-            mode = mode,
-            rows = emptyList(),
-        )
+    @Test
+    fun `rapid mode cycling SYMBOLS to SECONDARY and back`() = runTest {
+        whenever(repository.getLayoutForMode(eq(KeyboardMode.SYMBOLS), any(), any()))
+            .thenReturn(Result.success(createMockLayout(KeyboardMode.SYMBOLS)))
+        whenever(repository.getLayoutForMode(eq(KeyboardMode.SYMBOLS_SECONDARY), any(), any()))
+            .thenReturn(Result.success(createMockLayout(KeyboardMode.SYMBOLS_SECONDARY)))
+
+        viewModel.onEvent(KeyboardEvent.ModeChanged(KeyboardMode.SYMBOLS))
+        viewModel.onEvent(KeyboardEvent.ModeChanged(KeyboardMode.SYMBOLS_SECONDARY))
+        viewModel.onEvent(KeyboardEvent.ModeChanged(KeyboardMode.SYMBOLS))
+
+        assertEquals(KeyboardMode.SYMBOLS, viewModel.state.value.currentMode)
+    }
+
+    private fun createMockLayout(mode: KeyboardMode): KeyboardLayout = KeyboardLayout(
+        mode = mode,
+        rows = emptyList()
+    )
 }

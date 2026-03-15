@@ -134,43 +134,40 @@ class AutofillPipelineTest {
     }
 
     @Test
-    fun `scheduleClear executes after grace period`() =
-        testScope.runTest {
-            var cleared = false
-            tracker.scheduleClear(this) { cleared = true }
+    fun `scheduleClear executes after grace period`() = testScope.runTest {
+        var cleared = false
+        tracker.scheduleClear(this) { cleared = true }
 
-            advanceTimeBy(50)
-            assertFalse(cleared)
+        advanceTimeBy(50)
+        assertFalse(cleared)
 
-            advanceTimeBy(60)
-            assertTrue(cleared)
-        }
-
-    @Test
-    fun `cancelPendingClear prevents scheduled clear`() =
-        testScope.runTest {
-            var cleared = false
-            tracker.scheduleClear(this) { cleared = true }
-
-            advanceTimeBy(50)
-            tracker.cancelPendingClear()
-
-            advanceTimeBy(200)
-            assertFalse(cleared)
-        }
+        advanceTimeBy(60)
+        assertTrue(cleared)
+    }
 
     @Test
-    fun `rapid field switch cancels previous clear job`() =
-        testScope.runTest {
-            var clearCount = 0
-            tracker.scheduleClear(this) { clearCount++ }
+    fun `cancelPendingClear prevents scheduled clear`() = testScope.runTest {
+        var cleared = false
+        tracker.scheduleClear(this) { cleared = true }
 
-            advanceTimeBy(50)
-            tracker.scheduleClear(this) { clearCount++ }
+        advanceTimeBy(50)
+        tracker.cancelPendingClear()
 
-            advanceTimeBy(200)
-            assertEquals(1, clearCount)
-        }
+        advanceTimeBy(200)
+        assertFalse(cleared)
+    }
+
+    @Test
+    fun `rapid field switch cancels previous clear job`() = testScope.runTest {
+        var clearCount = 0
+        tracker.scheduleClear(this) { clearCount++ }
+
+        advanceTimeBy(50)
+        tracker.scheduleClear(this) { clearCount++ }
+
+        advanceTimeBy(200)
+        assertEquals(1, clearCount)
+    }
 
     @Test
     fun `cleanup resets all state`() {
@@ -186,14 +183,13 @@ class AutofillPipelineTest {
     }
 
     @Test
-    fun `cleanup cancels pending clear job`() =
-        testScope.runTest {
-            var cleared = false
-            tracker.scheduleClear(this) { cleared = true }
+    fun `cleanup cancels pending clear job`() = testScope.runTest {
+        var cleared = false
+        tracker.scheduleClear(this) { cleared = true }
 
-            tracker.cleanup()
-            advanceUntilIdle()
+        tracker.cleanup()
+        advanceUntilIdle()
 
-            assertFalse(cleared)
-        }
+        assertFalse(cleared)
+    }
 }

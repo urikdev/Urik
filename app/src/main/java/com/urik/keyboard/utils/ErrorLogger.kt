@@ -1,16 +1,16 @@
 package com.urik.keyboard.utils
 
 import android.content.Context
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.launch
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import java.util.concurrent.atomic.AtomicBoolean
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.launch
 
 /**
  * Privacy-first exception logger for critical application failures.
@@ -47,13 +47,16 @@ object ErrorLogger {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val logChannel =
-        Channel<ErrorEntry>(CHANNEL_CAPACITY, onBufferOverflow = kotlinx.coroutines.channels.BufferOverflow.DROP_OLDEST)
+        Channel<ErrorEntry>(
+            CHANNEL_CAPACITY,
+            onBufferOverflow = kotlinx.coroutines.channels.BufferOverflow.DROP_OLDEST
+        )
 
     private val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
 
     enum class Severity {
         CRITICAL,
-        HIGH,
+        HIGH
     }
 
     data class ErrorEntry(
@@ -63,7 +66,7 @@ object ErrorLogger {
         val failurePoint: String,
         val exceptionType: String,
         val message: String,
-        val context: Map<String, String>,
+        val context: Map<String, String>
     )
 
     /**
@@ -107,7 +110,7 @@ object ErrorLogger {
         component: String,
         severity: Severity,
         exception: Throwable,
-        context: Map<String, String> = emptyMap(),
+        context: Map<String, String> = emptyMap()
     ) {
         if (isLoggingException.getAndSet(true)) {
             return
@@ -125,7 +128,7 @@ object ErrorLogger {
                     failurePoint = failurePoint,
                     exceptionType = exception::class.java.simpleName,
                     message = exception.message ?: "No message",
-                    context = sanitizedContext,
+                    context = sanitizedContext
                 )
 
             logChannel.trySend(entry)
@@ -189,10 +192,11 @@ object ErrorLogger {
         }
     }
 
-    private fun isValidJson(content: String): Boolean = content.contains("\"errors\":[") && content.contains("\"metadata\":{")
+    private fun isValidJson(content: String): Boolean =
+        content.contains("\"errors\":[") && content.contains("\"metadata\":{")
 
     private fun createEmptyLogFile(): File {
-        val file = logFile ?: throw IllegalStateException("ErrorLogger not initialized")
+        val file = logFile ?: error("ErrorLogger not initialized")
 
         val emptyLog =
             """
@@ -229,10 +233,8 @@ object ErrorLogger {
         }
     }
 
-    private fun addEntryToJson(
-        json: String,
-        entry: ErrorEntry,
-    ): String {
+    @Suppress("StringShouldBeRawString")
+    private fun addEntryToJson(json: String, entry: ErrorEntry): String {
         val errorsEnd = json.indexOf("]")
         if (errorsEnd == -1) return json
 
@@ -258,21 +260,22 @@ object ErrorLogger {
             after
                 .replace(
                     """"firstError":\s*null""".toRegex(),
-                    "\"firstError\":\"${dateFormat.format(Date(entry.timestamp))}\"",
+                    "\"firstError\":\"${dateFormat.format(Date(entry.timestamp))}\""
                 ).replace(
                     """"lastError":\s*"[^"]*"""".toRegex(),
-                    "\"lastError\":\"${dateFormat.format(Date(entry.timestamp))}\"",
+                    "\"lastError\":\"${dateFormat.format(Date(entry.timestamp))}\""
                 ).replace(
                     """"lastError":\s*null""".toRegex(),
-                    "\"lastError\":\"${dateFormat.format(Date(entry.timestamp))}\"",
+                    "\"lastError\":\"${dateFormat.format(Date(entry.timestamp))}\""
                 ).replace(
                     """"totalErrors":\s*\d+""".toRegex(),
-                    "\"totalErrors\":$newCount",
+                    "\"totalErrors\":$newCount"
                 )
 
         return "$before$separator$entryJson$updatedAfter"
     }
 
+    @Suppress("StringShouldBeRawString")
     private fun buildEntryJson(entry: ErrorEntry): String {
         val contextJson =
             if (entry.context.isEmpty()) {
@@ -293,16 +296,15 @@ object ErrorLogger {
               "message": "${escapeJson(entry.message)}",
               "context": $contextJson
             }
-            """.trimIndent().replace("\n", "")
+        """.trimIndent().replace("\n", "")
     }
 
-    private fun escapeJson(value: String): String =
-        value
-            .replace("\\", "\\\\")
-            .replace("\"", "\\\"")
-            .replace("\n", "\\n")
-            .replace("\r", "\\r")
-            .replace("\t", "\\t")
+    private fun escapeJson(value: String): String = value
+        .replace("\\", "\\\\")
+        .replace("\"", "\\\"")
+        .replace("\n", "\\n")
+        .replace("\r", "\\r")
+        .replace("\t", "\\t")
 
     private fun rotateIfNeeded() {
         val file = logFile ?: return
@@ -344,6 +346,7 @@ object ErrorLogger {
                 while (end < errorsSection.length) {
                     when (errorsSection[end]) {
                         '{' -> braceCount++
+
                         '}' -> {
                             braceCount--
                             if (braceCount == 0) {
@@ -385,10 +388,10 @@ object ErrorLogger {
     private fun writeFallback(entry: ErrorEntry) {
         try {
             val file = fallbackFile ?: return
+            val timestamp = dateFormat.format(Date(entry.timestamp))
             val line =
-                "${dateFormat.format(
-                    Date(entry.timestamp),
-                )} [${entry.severity}] ${entry.component} - ${entry.failurePoint}: ${entry.exceptionType} - ${entry.message}\n"
+                "$timestamp [${entry.severity}] ${entry.component} - " +
+                    "${entry.failurePoint}: ${entry.exceptionType} - ${entry.message}\n"
             file.appendText(line)
         } catch (_: Exception) {
         }
@@ -409,11 +412,10 @@ object ErrorLogger {
         return "$className.$methodName:$lineNumber"
     }
 
-    private fun sanitizeContext(context: Map<String, String>): Map<String, String> =
-        context.mapValues { (_, value) ->
-            value
-                .take(MAX_CONTEXT_VALUE_LENGTH)
-                .replace("\n", " ")
-                .replace("\r", " ")
-        }
+    private fun sanitizeContext(context: Map<String, String>): Map<String, String> = context.mapValues { (_, value) ->
+        value
+            .take(MAX_CONTEXT_VALUE_LENGTH)
+            .replace("\n", " ")
+            .replace("\r", " ")
+    }
 }

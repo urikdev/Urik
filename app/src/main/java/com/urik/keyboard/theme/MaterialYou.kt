@@ -1,8 +1,6 @@
 package com.urik.keyboard.theme
 
-data class MaterialYou(
-    override val colors: ThemeColors,
-) : KeyboardTheme {
+data class MaterialYou(override val colors: ThemeColors) : KeyboardTheme {
     override val id = "material_you"
     override val displayName = "Material You"
 
@@ -28,8 +26,8 @@ data class MaterialYou(
                     focusIndicator = 0,
                     swipePrimary = 0,
                     swipeSecondary = 0,
-                    swipeCurrent = 0,
-                ),
+                    swipeCurrent = 0
+                )
             )
     }
 }

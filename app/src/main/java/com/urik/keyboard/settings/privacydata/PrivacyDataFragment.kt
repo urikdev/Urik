@@ -18,9 +18,9 @@ import com.urik.keyboard.R
 import com.urik.keyboard.settings.SettingsEventHandler
 import com.urik.keyboard.utils.ErrorLogger
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import kotlinx.coroutines.launch
 
 /**
  * Settings fragment for privacy and data management.
@@ -37,7 +37,7 @@ class PrivacyDataFragment : PreferenceFragmentCompat() {
 
     private val exportLauncher =
         registerForActivityResult(
-            ActivityResultContracts.StartActivityForResult(),
+            ActivityResultContracts.StartActivityForResult()
         ) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
                 result.data?.data?.let { uri ->
@@ -48,7 +48,7 @@ class PrivacyDataFragment : PreferenceFragmentCompat() {
 
     private val importLauncher =
         registerForActivityResult(
-            ActivityResultContracts.StartActivityForResult(),
+            ActivityResultContracts.StartActivityForResult()
         ) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
                 result.data?.data?.let { uri ->
@@ -62,10 +62,7 @@ class PrivacyDataFragment : PreferenceFragmentCompat() {
         viewModel = ViewModelProvider(this)[PrivacyDataViewModel::class.java]
     }
 
-    override fun onCreatePreferences(
-        savedInstanceState: Bundle?,
-        rootKey: String?,
-    ) {
+    override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         val context = preferenceManager.context
         val screen = preferenceManager.createPreferenceScreen(context)
 
@@ -89,7 +86,7 @@ class PrivacyDataFragment : PreferenceFragmentCompat() {
                 setOnPreferenceClickListener {
                     showConfirmDialog(
                         resources.getString(R.string.privacy_settings_clear_learned_words),
-                        resources.getString(R.string.privacy_settings_clear_learned_words_confirm),
+                        resources.getString(R.string.privacy_settings_clear_learned_words_confirm)
                     ) {
                         viewModel.clearLearnedWords()
                     }
@@ -130,7 +127,7 @@ class PrivacyDataFragment : PreferenceFragmentCompat() {
                 setOnPreferenceClickListener {
                     showConfirmDialog(
                         resources.getString(R.string.privacy_settings_reset_to_defaults),
-                        resources.getString(R.string.privacy_settings_reset_to_defaults_confirm),
+                        resources.getString(R.string.privacy_settings_reset_to_defaults_confirm)
                     ) {
                         viewModel.resetToDefaults()
                     }
@@ -154,10 +151,7 @@ class PrivacyDataFragment : PreferenceFragmentCompat() {
         preferenceScreen = screen
     }
 
-    override fun onViewCreated(
-        view: View,
-        savedInstanceState: Bundle?,
-    ) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         clipboardPref.setOnPreferenceChangeListener { _, newValue ->
@@ -189,7 +183,7 @@ class PrivacyDataFragment : PreferenceFragmentCompat() {
                 FileProvider.getUriForFile(
                     requireContext(),
                     "${requireContext().packageName}.fileprovider",
-                    logFile,
+                    logFile
                 )
 
             val shareIntent =
@@ -200,7 +194,9 @@ class PrivacyDataFragment : PreferenceFragmentCompat() {
                     addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 }
 
-            startActivity(Intent.createChooser(shareIntent, resources.getString(R.string.privacy_settings_export_error_log)))
+            startActivity(
+                Intent.createChooser(shareIntent, resources.getString(R.string.privacy_settings_export_error_log))
+            )
         } catch (_: Exception) {
             AlertDialog
                 .Builder(requireContext())
@@ -211,11 +207,7 @@ class PrivacyDataFragment : PreferenceFragmentCompat() {
         }
     }
 
-    private fun showConfirmDialog(
-        title: String,
-        message: String,
-        onConfirm: () -> Unit,
-    ) {
+    private fun showConfirmDialog(title: String, message: String, onConfirm: () -> Unit) {
         AlertDialog
             .Builder(requireContext())
             .setTitle(title)

@@ -54,78 +54,71 @@ class RecentEmojiProviderTest {
     }
 
     @Test
-    fun `getRecentEmojiList returns empty list initially`() =
-        runTest {
-            whenever(sharedPreferences.getString(any(), any())).thenReturn("")
+    fun `getRecentEmojiList returns empty list initially`() = runTest {
+        whenever(sharedPreferences.getString(any(), any())).thenReturn("")
 
-            val result = provider.getRecentEmojiList()
+        val result = provider.getRecentEmojiList()
 
-            assertTrue(result.isEmpty())
-        }
-
-    @Test
-    fun `getRecentEmojiList loads from preferences`() =
-        runTest {
-            whenever(sharedPreferences.getString(any(), any())).thenReturn("😀,😁,😂")
-
-            val result = provider.getRecentEmojiList()
-
-            assertEquals(listOf("😀", "😁", "😂"), result)
-        }
+        assertTrue(result.isEmpty())
+    }
 
     @Test
-    fun `recordSelection adds emoji to front of list`() =
-        runTest {
-            whenever(sharedPreferences.getString(any(), any())).thenReturn("")
+    fun `getRecentEmojiList loads from preferences`() = runTest {
+        whenever(sharedPreferences.getString(any(), any())).thenReturn("😀,😁,😂")
 
-            provider.recordSelection("😀")
-            testDispatcher.scheduler.advanceUntilIdle()
+        val result = provider.getRecentEmojiList()
 
-            verify(editor).putString(any(), eq("😀"))
-        }
+        assertEquals(listOf("😀", "😁", "😂"), result)
+    }
 
     @Test
-    fun `recordSelection moves existing emoji to front`() =
-        runTest {
-            whenever(sharedPreferences.getString(any(), any())).thenReturn("😀,😁,😂")
+    fun `recordSelection adds emoji to front of list`() = runTest {
+        whenever(sharedPreferences.getString(any(), any())).thenReturn("")
 
-            provider.recordSelection("😁")
-            testDispatcher.scheduler.advanceUntilIdle()
+        provider.recordSelection("😀")
+        testDispatcher.scheduler.advanceUntilIdle()
 
-            verify(editor).putString(any(), eq("😁,😀,😂"))
-        }
-
-    @Test
-    fun `recordSelection limits list to MAX_RECENT_EMOJIS`() =
-        runTest {
-            val fiftyOneEmojis = (1..51).joinToString(",") { "😀$it" }
-            whenever(sharedPreferences.getString(any(), any())).thenReturn(fiftyOneEmojis)
-
-            provider.recordSelection("🎉")
-            testDispatcher.scheduler.advanceUntilIdle()
-
-            val expected = (listOf("🎉") + (1..49).map { "😀$it" }).joinToString(",")
-            verify(editor).putString(any(), eq(expected))
-        }
+        verify(editor).putString(any(), eq("😀"))
+    }
 
     @Test
-    fun `getRecentEmojiList filters empty strings`() =
-        runTest {
-            whenever(sharedPreferences.getString(any(), any())).thenReturn("😀,,😁,,😂")
+    fun `recordSelection moves existing emoji to front`() = runTest {
+        whenever(sharedPreferences.getString(any(), any())).thenReturn("😀,😁,😂")
 
-            val result = provider.getRecentEmojiList()
+        provider.recordSelection("😁")
+        testDispatcher.scheduler.advanceUntilIdle()
 
-            assertEquals(listOf("😀", "😁", "😂"), result)
-        }
+        verify(editor).putString(any(), eq("😁,😀,😂"))
+    }
 
     @Test
-    fun `getRecentEmojiList limits to MAX_RECENT_EMOJIS on load`() =
-        runTest {
-            val sixtyEmojis = (1..60).joinToString(",") { "😀$it" }
-            whenever(sharedPreferences.getString(any(), any())).thenReturn(sixtyEmojis)
+    fun `recordSelection limits list to MAX_RECENT_EMOJIS`() = runTest {
+        val fiftyOneEmojis = (1..51).joinToString(",") { "😀$it" }
+        whenever(sharedPreferences.getString(any(), any())).thenReturn(fiftyOneEmojis)
 
-            val result = provider.getRecentEmojiList()
+        provider.recordSelection("🎉")
+        testDispatcher.scheduler.advanceUntilIdle()
 
-            assertEquals(50, result.size)
-        }
+        val expected = (listOf("🎉") + (1..49).map { "😀$it" }).joinToString(",")
+        verify(editor).putString(any(), eq(expected))
+    }
+
+    @Test
+    fun `getRecentEmojiList filters empty strings`() = runTest {
+        whenever(sharedPreferences.getString(any(), any())).thenReturn("😀,,😁,,😂")
+
+        val result = provider.getRecentEmojiList()
+
+        assertEquals(listOf("😀", "😁", "😂"), result)
+    }
+
+    @Test
+    fun `getRecentEmojiList limits to MAX_RECENT_EMOJIS on load`() = runTest {
+        val sixtyEmojis = (1..60).joinToString(",") { "😀$it" }
+        whenever(sharedPreferences.getString(any(), any())).thenReturn(sixtyEmojis)
+
+        val result = provider.getRecentEmojiList()
+
+        assertEquals(50, result.size)
+    }
 }

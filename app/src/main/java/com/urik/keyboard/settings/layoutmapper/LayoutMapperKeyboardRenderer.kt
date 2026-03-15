@@ -21,9 +21,7 @@ import com.urik.keyboard.theme.KeyboardTheme
  * Uses identical dimension calculations as KeyboardLayoutManager for 1:1 visual match.
  * Only letter keys are interactive; action keys are displayed but disabled.
  */
-class LayoutMapperKeyboardRenderer(
-    private val context: Context,
-) {
+class LayoutMapperKeyboardRenderer(private val context: Context) {
     private val keyButtons = mutableMapOf<String, Button>()
 
     private val keySize = KeySize.MEDIUM
@@ -51,7 +49,7 @@ class LayoutMapperKeyboardRenderer(
         layout: KeyboardLayout,
         theme: KeyboardTheme,
         mappings: Map<String, String>,
-        onKeyClick: (String) -> Unit,
+        onKeyClick: (String) -> Unit
     ): View {
         keyButtons.clear()
 
@@ -61,7 +59,7 @@ class LayoutMapperKeyboardRenderer(
                 layoutParams =
                     ViewGroup.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT
                     )
                 setPadding(keyboardPadding, keyboardPaddingVertical, keyboardPadding, keyboardPaddingVertical)
                 setBackgroundColor(theme.colors.keyboardBackground)
@@ -79,10 +77,7 @@ class LayoutMapperKeyboardRenderer(
         return container
     }
 
-    fun updateMappings(
-        mappings: Map<String, String>,
-        theme: KeyboardTheme,
-    ) {
+    fun updateMappings(mappings: Map<String, String>, theme: KeyboardTheme) {
         keyButtons.forEach { (keyValue, button) ->
             val customSymbol = mappings[keyValue]
             updateButtonAppearance(button, keyValue, customSymbol, theme)
@@ -101,7 +96,7 @@ class LayoutMapperKeyboardRenderer(
         theme: KeyboardTheme,
         mappings: Map<String, String>,
         textSize: Float,
-        onKeyClick: (String) -> Unit,
+        onKeyClick: (String) -> Unit
     ): LinearLayout {
         val is9LetterRow = is9CharacterLetterRow(keys)
 
@@ -112,7 +107,7 @@ class LayoutMapperKeyboardRenderer(
                     LinearLayout
                         .LayoutParams(
                             LinearLayout.LayoutParams.MATCH_PARENT,
-                            LinearLayout.LayoutParams.WRAP_CONTENT,
+                            LinearLayout.LayoutParams.WRAP_CONTENT
                         ).apply {
                             setMargins(0, 0, 0, keyMarginVertical)
                         }
@@ -146,10 +141,9 @@ class LayoutMapperKeyboardRenderer(
         return rowLayout
     }
 
-    private fun createSpacer(weight: Float): View =
-        View(context).apply {
-            layoutParams = LinearLayout.LayoutParams(0, 0, weight)
-        }
+    private fun createSpacer(weight: Float): View = View(context).apply {
+        layoutParams = LinearLayout.LayoutParams(0, 0, weight)
+    }
 
     private fun createCharacterButton(
         key: KeyboardKey.Character,
@@ -157,7 +151,7 @@ class LayoutMapperKeyboardRenderer(
         theme: KeyboardTheme,
         mappings: Map<String, String>,
         textSize: Float,
-        onKeyClick: (String) -> Unit,
+        onKeyClick: (String) -> Unit
     ): Button {
         val button =
             Button(context).apply {
@@ -195,38 +189,32 @@ class LayoutMapperKeyboardRenderer(
         key: KeyboardKey.Action,
         rowKeys: List<KeyboardKey>,
         theme: KeyboardTheme,
-        textSize: Float,
-    ): Button =
-        Button(context).apply {
-            layoutParams =
-                LinearLayout
-                    .LayoutParams(0, visualHeight, getKeyWeight(key, rowKeys))
-                    .apply { setMargins(horizontalMargin, verticalMargin, horizontalMargin, verticalMargin) }
+        textSize: Float
+    ): Button = Button(context).apply {
+        layoutParams =
+            LinearLayout
+                .LayoutParams(0, visualHeight, getKeyWeight(key, rowKeys))
+                .apply { setMargins(horizontalMargin, verticalMargin, horizontalMargin, verticalMargin) }
 
-            text = getActionLabel(key)
-            setTextAppearance(R.style.KeyTextAppearance_Action)
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, textSize * 0.8f)
-            maxLines = 1
-            gravity = Gravity.CENTER
-            typeface = Typeface.DEFAULT
-            minHeight = 0
-            minimumHeight = 0
-            setPadding(horizontalPadding, verticalPadding, horizontalPadding, verticalPadding)
+        text = getActionLabel(key)
+        setTextAppearance(R.style.KeyTextAppearance_Action)
+        setTextSize(TypedValue.COMPLEX_UNIT_SP, textSize * 0.8f)
+        maxLines = 1
+        gravity = Gravity.CENTER
+        typeface = Typeface.DEFAULT
+        minHeight = 0
+        minimumHeight = 0
+        setPadding(horizontalPadding, verticalPadding, horizontalPadding, verticalPadding)
 
-            background = createKeyBackground(theme.colors.keyBackgroundAction, theme)
-            setTextColor(theme.colors.keyTextAction)
-            alpha = 0.5f
+        background = createKeyBackground(theme.colors.keyBackgroundAction, theme)
+        setTextColor(theme.colors.keyTextAction)
+        alpha = 0.5f
 
-            isClickable = false
-            isFocusable = false
-        }
+        isClickable = false
+        isFocusable = false
+    }
 
-    private fun updateButtonAppearance(
-        button: Button,
-        keyValue: String,
-        customSymbol: String?,
-        theme: KeyboardTheme,
-    ) {
+    private fun updateButtonAppearance(button: Button, keyValue: String, customSymbol: String?, theme: KeyboardTheme) {
         if (customSymbol != null) {
             button.text = "${keyValue.uppercase()}\n$customSymbol"
             button.setTextSize(TypedValue.COMPLEX_UNIT_SP, 11f)
@@ -240,20 +228,14 @@ class LayoutMapperKeyboardRenderer(
         }
     }
 
-    private fun createKeyBackground(
-        backgroundColor: Int,
-        theme: KeyboardTheme,
-    ): GradientDrawable =
+    private fun createKeyBackground(backgroundColor: Int, theme: KeyboardTheme): GradientDrawable =
         GradientDrawable().apply {
             setColor(backgroundColor)
             this.cornerRadius = this@LayoutMapperKeyboardRenderer.cornerRadius
             setStroke((1 * density).toInt(), theme.colors.keyBorder)
         }
 
-    private fun getKeyWeight(
-        key: KeyboardKey,
-        rowKeys: List<KeyboardKey>,
-    ): Float {
+    private fun getKeyWeight(key: KeyboardKey, rowKeys: List<KeyboardKey>): Float {
         val characterKeyCount = rowKeys.count { it is KeyboardKey.Character }
 
         return when (key) {
@@ -271,17 +253,16 @@ class LayoutMapperKeyboardRenderer(
         }
     }
 
-    private fun getActionLabel(key: KeyboardKey.Action): String =
-        when (key.action) {
-            KeyboardKey.ActionType.MODE_SWITCH_LETTERS -> context.getString(R.string.letters_mode_label)
-            KeyboardKey.ActionType.MODE_SWITCH_NUMBERS -> context.getString(R.string.numbers_mode_label)
-            KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS -> context.getString(R.string.symbols_mode_label)
-            KeyboardKey.ActionType.SHIFT -> "⇧"
-            KeyboardKey.ActionType.BACKSPACE -> "⌫"
-            KeyboardKey.ActionType.SPACE -> "␣"
-            KeyboardKey.ActionType.ENTER -> "↵"
-            else -> ""
-        }
+    private fun getActionLabel(key: KeyboardKey.Action): String = when (key.action) {
+        KeyboardKey.ActionType.MODE_SWITCH_LETTERS -> context.getString(R.string.letters_mode_label)
+        KeyboardKey.ActionType.MODE_SWITCH_NUMBERS -> context.getString(R.string.numbers_mode_label)
+        KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS -> context.getString(R.string.symbols_mode_label)
+        KeyboardKey.ActionType.SHIFT -> "⇧"
+        KeyboardKey.ActionType.BACKSPACE -> "⌫"
+        KeyboardKey.ActionType.SPACE -> "␣"
+        KeyboardKey.ActionType.ENTER -> "↵"
+        else -> ""
+    }
 
     private fun is9CharacterLetterRow(rowKeys: List<KeyboardKey>): Boolean {
         val nonSpacerKeys = rowKeys.filter { it !is KeyboardKey.Spacer }

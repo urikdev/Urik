@@ -33,9 +33,8 @@ import javax.inject.Singleton
 object DatabaseModule {
     @Provides
     @Singleton
-    fun provideDatabaseSecurityManager(
-        @ApplicationContext context: Context,
-    ): DatabaseSecurityManager = DatabaseSecurityManager(context)
+    fun provideDatabaseSecurityManager(@ApplicationContext context: Context): DatabaseSecurityManager =
+        DatabaseSecurityManager(context)
 
     /**
      * Provides encrypted Room database with automatic migration and corruption recovery.
@@ -50,9 +49,10 @@ object DatabaseModule {
      */
     @Provides
     @Singleton
+    @Suppress("ThrowsCount")
     fun provideKeyboardDatabase(
         @ApplicationContext context: Context,
-        securityManager: DatabaseSecurityManager,
+        securityManager: DatabaseSecurityManager
     ): KeyboardDatabase {
         var passphrase: ByteArray? = null
         try {
@@ -64,7 +64,7 @@ object DatabaseModule {
                         component = "DatabaseModule",
                         severity = ErrorLogger.Severity.CRITICAL,
                         exception = e,
-                        context = mapOf("phase" to "migration"),
+                        context = mapOf("phase" to "migration")
                     )
                     throw e
                 }
@@ -78,7 +78,7 @@ object DatabaseModule {
                         component = "DatabaseModule",
                         severity = ErrorLogger.Severity.CRITICAL,
                         exception = e,
-                        context = mapOf("phase" to "passphrase_generation"),
+                        context = mapOf("phase" to "passphrase_generation")
                     )
                     throw e
                 }
@@ -93,7 +93,7 @@ object DatabaseModule {
                     component = "DatabaseModule",
                     severity = ErrorLogger.Severity.CRITICAL,
                     exception = e,
-                    context = mapOf("phase" to "corruption_detected", "action" to "deleting_and_recreating"),
+                    context = mapOf("phase" to "corruption_detected", "action" to "deleting_and_recreating")
                 )
 
                 deleteDatabaseFiles(context)
@@ -115,7 +115,7 @@ object DatabaseModule {
                     component = "DatabaseModule",
                     severity = ErrorLogger.Severity.CRITICAL,
                     exception = e,
-                    context = mapOf("phase" to "database_init"),
+                    context = mapOf("phase" to "database_init")
                 )
             }
             throw e

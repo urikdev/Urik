@@ -16,13 +16,13 @@ import kotlinx.coroutines.launch
 enum class DeviceSizeClass {
     COMPACT,
     MEDIUM,
-    EXPANDED,
+    EXPANDED
 }
 
 enum class DevicePosture {
     NORMAL,
     FLAT,
-    HALF_OPENED,
+    HALF_OPENED
 }
 
 data class PostureInfo(
@@ -31,13 +31,10 @@ data class PostureInfo(
     val hingeBounds: Rect? = null,
     val screenWidthPx: Int,
     val screenHeightPx: Int,
-    val isTablet: Boolean = false,
+    val isTablet: Boolean = false
 )
 
-class PostureDetector(
-    private val context: Context,
-    private val scope: CoroutineScope,
-) {
+class PostureDetector(private val context: Context, private val scope: CoroutineScope) {
     private var windowInfoTracker: WindowInfoTracker? = null
     private var windowContext: Context? = null
 
@@ -48,20 +45,12 @@ class PostureDetector(
     private var debounceJob: Job? = null
     private var fallbackJob: Job? = null
 
-    private companion object {
-        const val DEBOUNCE_MS = 150L
-        const val FALLBACK_POLL_MS = 2000L
-        const val COMPACT_WIDTH_DP = 600
-        const val MEDIUM_WIDTH_DP = 840
-        const val TABLET_SMALLEST_WIDTH_DP = 600
-    }
-
     fun attachToWindow(windowCtx: Context) {
         windowContext = windowCtx
         try {
             windowInfoTracker = WindowInfoTracker.getOrCreate(windowCtx)
             startWindowInfoCollection()
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             ensureFallbackPolling()
         }
     }
@@ -154,7 +143,7 @@ class PostureDetector(
                 hingeBounds = hingeBounds,
                 screenWidthPx = widthPx,
                 screenHeightPx = heightPx,
-                isTablet = isTablet,
+                isTablet = isTablet
             )
     }
 
@@ -183,7 +172,15 @@ class PostureDetector(
             hingeBounds = null,
             screenWidthPx = widthPx,
             screenHeightPx = heightPx,
-            isTablet = isTablet,
+            isTablet = isTablet
         )
+    }
+
+    private companion object {
+        const val DEBOUNCE_MS = 150L
+        const val FALLBACK_POLL_MS = 2000L
+        const val COMPACT_WIDTH_DP = 600
+        const val MEDIUM_WIDTH_DP = 840
+        const val TABLET_SMALLEST_WIDTH_DP = 600
     }
 }

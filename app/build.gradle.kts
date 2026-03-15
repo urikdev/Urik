@@ -6,6 +6,7 @@ plugins {
     id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
     id("org.jlleitschuh.gradle.ktlint")
+    id("io.gitlab.arturbosch.detekt")
     id("androidx.room")
     id("org.jetbrains.kotlinx.kover")
 }
@@ -45,7 +46,7 @@ android {
             isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro",
+                "proguard-rules.pro"
             )
             isDebuggable = false
             isJniDebuggable = false
@@ -80,7 +81,7 @@ android {
                 setOf(
                     "/META-INF/{AL2.0,LGPL2.1}",
                     "/META-INF/LICENSE.md",
-                    "/META-INF/LICENSE-notice.md",
+                    "/META-INF/LICENSE-notice.md"
                 )
         }
     }
@@ -100,7 +101,7 @@ android {
             all {
                 it.jvmArgs(
                     "-XX:+EnableDynamicAgentLoading",
-                    "-Djdk.instrument.traceUsage",
+                    "-Djdk.instrument.traceUsage"
                 )
             }
         }
@@ -112,6 +113,22 @@ ktlint {
     ignoreFailures.set(false)
     reporters {
         reporter(org.jlleitschuh.gradle.ktlint.reporter.ReporterType.CHECKSTYLE)
+    }
+}
+
+detekt {
+    buildUponDefaultConfig = true
+    allRules = false
+    config.setFrom("$rootDir/detekt.yml")
+    parallel = true
+    autoCorrect = false
+}
+
+tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
+    reports {
+        html.required.set(true)
+        xml.required.set(true)
+        sarif.required.set(true)
     }
 }
 
@@ -133,7 +150,7 @@ kover {
                     "*_Factory",
                     "*_HiltModules*",
                     "*Hilt_*",
-                    "dagger.hilt.*",
+                    "dagger.hilt.*"
                 )
             }
         }

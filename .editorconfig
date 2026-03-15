@@ -1,0 +1,66 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+indent_size = 4
+indent_style = space
+insert_final_newline = true
+max_line_length = 120
+trim_trailing_whitespace = true
+
+[*.{kt,kts}]
+ktlint_code_style = android_studio
+
+# Enforce trailing commas on multi-line declarations and call sites
+ktlint_standard_trailing-comma-on-declaration-site = enabled
+ktlint_standard_trailing-comma-on-call-site = enabled
+
+# No wildcard imports ever
+ktlint_standard_no-wildcard-imports = enabled
+ij_kotlin_packages_to_use_import_on_demand = unset
+ij_kotlin_name_count_to_use_star_import = 999
+ij_kotlin_name_count_to_use_star_import_for_members = 999
+
+# Blank lines
+ktlint_standard_no-consecutive-blank-lines = enabled
+ktlint_standard_no-blank-line-before-rbrace = enabled
+ktlint_standard_no-blank-line-in-list = enabled
+
+# Spacing
+ktlint_standard_no-multi-spaces = enabled
+ktlint_standard_no-trailing-spaces = enabled
+ktlint_standard_spacing-between-declarations-with-annotations = enabled
+ktlint_standard_spacing-between-declarations-with-comments = enabled
+
+# Wrapping
+ktlint_standard_wrapping = enabled
+ktlint_standard_argument-list-wrapping = enabled
+ktlint_standard_parameter-list-wrapping = enabled
+
+# Import ordering
+ktlint_standard_import-ordering = enabled
+
+# Misc
+ktlint_standard_no-empty-first-line-in-class-body = enabled
+ktlint_standard_no-unused-imports = enabled
+ktlint_standard_multiline-if-else = enabled
+ktlint_standard_string-template = enabled
+ktlint_standard_enum-entry-name-case = enabled
+ktlint_standard_filename = enabled
+ktlint_standard_class-naming = enabled
+ktlint_standard_function-naming = enabled
+ktlint_standard_package-name = enabled
+ktlint_standard_property-naming = enabled
+
+[*.xml]
+indent_size = 4
+
+[*.json]
+indent_size = 2
+
+[*.{yml,yaml}]
+indent_size = 2
+
+[*.md]
+trim_trailing_whitespace = false
