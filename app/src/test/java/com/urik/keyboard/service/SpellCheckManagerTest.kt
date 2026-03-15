@@ -1272,4 +1272,5 @@ class SpellCheckManagerTest {
                 dictionaryCache.getIfPresent("en_hello") == null,
             )
         }
+
 }
