@@ -82,6 +82,8 @@ class ClipboardPanel(
     private val pinnedTab: Button
     private val recentTab: Button
 
+    private val closeButton: TextView
+
     private val pinnedListContainer: ScrollView =
         ScrollView(context).apply {
             isVisible = false
@@ -134,7 +136,14 @@ class ClipboardPanel(
         PINNED,
         RECENT,
     }
+    private fun calculateResponsiveSuggestionTextSize(): Float {
+        val keyHeight = context.resources.getDimensionPixelSize(R.dimen.key_height)
+        val baseTextSize = keyHeight * 0.40f / context.resources.displayMetrics.density
+        val minSize = 15f
+        val maxSize = 19f
 
+        return baseTextSize.coerceIn(minSize, maxSize)
+    }
     init {
         val density = context.resources.displayMetrics.density
 
@@ -175,9 +184,27 @@ class ClipboardPanel(
                         1f,
                     )
             }
+        val emojiTextSize = calculateResponsiveSuggestionTextSize()
+        val minTouchTarget = context.resources.getDimensionPixelSize(R.dimen.minimum_touch_target)
+        closeButton =
+            TextView(context).apply {
+                text = "✕"
+                setTextSize(TypedValue.COMPLEX_UNIT_SP, emojiTextSize)
+                gravity = Gravity.CENTER
+                contentDescription = context.getString(R.string.clipboard_panel_close)
+                setOnClickListener {
+                    onClose?.invoke()
+                }
+                layoutParams =
+                    LinearLayout.LayoutParams(
+                        minTouchTarget,
+                        minTouchTarget,
+                    )
+            }
 
         tabContainer.addView(pinnedTab)
         tabContainer.addView(recentTab)
+        tabContainer.addView(closeButton)
 
         pinnedListContainer.addView(pinnedList)
         recentListContainer.addView(recentList)
@@ -525,6 +552,14 @@ class ClipboardPanel(
             contentDescription = context.getString(R.string.clipboard_item_delete)
             setOnClickListener {
                 onItemDeleted?.invoke(item)
+            }
+        }
+
+        closeButton.apply {
+            setTextColor(themeManager.currentTheme.value.colors.keyTextAction)
+            contentDescription = context.getString(R.string.clipboard_panel_close)
+            setOnClickListener {
+                onClose?.invoke()
             }
         }
     }
