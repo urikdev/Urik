@@ -136,6 +136,7 @@ class ClipboardPanel(
         PINNED,
         RECENT,
     }
+
     private fun calculateResponsiveSuggestionTextSize(): Float {
         val keyHeight = context.resources.getDimensionPixelSize(R.dimen.key_height)
         val baseTextSize = keyHeight * 0.40f / context.resources.displayMetrics.density
@@ -144,6 +145,7 @@ class ClipboardPanel(
 
         return baseTextSize.coerceIn(minSize, maxSize)
     }
+
     init {
         val density = context.resources.displayMetrics.density
 
