@@ -1,10 +1,18 @@
 package com.urik.keyboard.utils
 
 object CursorEditingUtils {
+    private const val NON_SEQUENTIAL_THRESHOLD = 5
+
+    private const val MAX_WORD_BOUNDARY_LOOKBACK = 64
+
+    private const val RECOMPOSITION_TOLERANCE = 1
+
+    private val nonPunctuationChars = setOf('#', '$', '%', '&', '*')
+
     fun isPunctuation(char: Char): Boolean {
         if (char == '\'' || char == '\u2019' || char == '-') return false
 
-        if (char == '#' || char == '$' || char == '%' || char == '&' || char == '*') {
+        if (char in nonPunctuationChars) {
             return false
         }
 
@@ -35,7 +43,7 @@ object CursorEditingUtils {
         textBefore: String?,
         textAfter: String?,
         displayBuffer: String,
-        hasWordStateContent: Boolean,
+        hasWordStateContent: Boolean
     ): Boolean {
         if (newSelStart != 0 || newSelEnd != 0) return false
 
@@ -47,16 +55,14 @@ object CursorEditingUtils {
     fun calculateCursorPositionInWord(
         absoluteCursorPos: Int,
         composingRegionStart: Int,
-        displayBufferLength: Int,
+        displayBufferLength: Int
     ): Int {
         if (composingRegionStart == -1) return displayBufferLength
         return (absoluteCursorPos - composingRegionStart).coerceIn(0, displayBufferLength)
     }
 
-    fun recalculateComposingRegionStart(
-        currentTextLength: Int,
-        displayBufferLength: Int,
-    ): Int = currentTextLength - displayBufferLength
+    fun recalculateComposingRegionStart(currentTextLength: Int, displayBufferLength: Int): Int =
+        currentTextLength - displayBufferLength
 
     fun isNonSequentialCursorMovement(
         oldSelStart: Int,
@@ -64,7 +70,7 @@ object CursorEditingUtils {
         newSelStart: Int,
         newSelEnd: Int,
         composingRegionStart: Int,
-        composingRegionEnd: Int,
+        composingRegionEnd: Int
     ): Boolean {
         val hadSelection = oldSelStart != oldSelEnd
         val hasSelection = newSelStart != newSelEnd
@@ -86,7 +92,7 @@ object CursorEditingUtils {
 
     fun extractWordBoundedByParagraph(
         textBeforeCursor: String,
-        maxWordLength: Int = MAX_WORD_BOUNDARY_LOOKBACK,
+        maxWordLength: Int = MAX_WORD_BOUNDARY_LOOKBACK
     ): Pair<String, Int>? {
         if (textBeforeCursor.isEmpty()) return null
 
@@ -126,13 +132,13 @@ object CursorEditingUtils {
             if (textBeforeCursor.length > maxWordLength) {
                 val offset = textBeforeCursor.length - maxWordLength
                 if (paragraphBoundary >= 0) {
-                    offset + paragraphBoundary + 1 + (if (wordBoundary >= 0) wordBoundary else -1)
+                    offset + paragraphBoundary + 1 + if (wordBoundary >= 0) wordBoundary else -1
                 } else {
-                    offset + (if (wordBoundary >= 0) wordBoundary else -1)
+                    offset + if (wordBoundary >= 0) wordBoundary else -1
                 }
             } else {
                 if (paragraphBoundary >= 0) {
-                    paragraphBoundary + 1 + (if (wordBoundary >= 0) wordBoundary else -1)
+                    paragraphBoundary + 1 + if (wordBoundary >= 0) wordBoundary else -1
                 } else {
                     if (wordBoundary >= 0) wordBoundary else -1
                 }
@@ -146,7 +152,7 @@ object CursorEditingUtils {
         actualCursorPosition: Int,
         expectedComposingStart: Int,
         actualComposingStart: Int,
-        tolerance: Int = RECOMPOSITION_TOLERANCE,
+        tolerance: Int = RECOMPOSITION_TOLERANCE
     ): Boolean {
         val cursorMismatch = kotlin.math.abs(expectedCursorPosition - actualCursorPosition) > tolerance
         val composingMismatch =
@@ -157,26 +163,16 @@ object CursorEditingUtils {
         return cursorMismatch || composingMismatch
     }
 
-    fun crossesParagraphBoundary(
-        startPosition: Int,
-        endPosition: Int,
-        textContext: String,
-    ): Boolean {
+    fun crossesParagraphBoundary(startPosition: Int, endPosition: Int, textContext: String): Boolean {
         if (startPosition < 0 || endPosition < 0) return false
         if (startPosition >= textContext.length || endPosition > textContext.length) return false
 
         val relevantText =
             textContext.substring(
                 kotlin.math.min(startPosition, endPosition),
-                kotlin.math.max(startPosition, endPosition),
+                kotlin.math.max(startPosition, endPosition)
             )
 
         return relevantText.contains('\n')
     }
-
-    private const val NON_SEQUENTIAL_THRESHOLD = 5
-
-    private const val MAX_WORD_BOUNDARY_LOOKBACK = 64
-
-    private const val RECOMPOSITION_TOLERANCE = 1
 }

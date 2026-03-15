@@ -19,13 +19,13 @@ import net.zetetic.database.sqlcipher.SupportOpenHelperFactory
         ClipboardItem::class,
         CustomKeyMapping::class,
         UserWordFrequency::class,
-        UserWordBigram::class,
+        UserWordBigram::class
     ],
     version = 6,
     exportSchema = true,
     autoMigrations = [
-        AutoMigration(from = 2, to = 3),
-    ],
+        AutoMigration(from = 2, to = 3)
+    ]
 )
 abstract class KeyboardDatabase : RoomDatabase() {
     abstract fun learnedWordDao(): LearnedWordDao
@@ -61,7 +61,7 @@ abstract class KeyboardDatabase : RoomDatabase() {
                             FROM learned_words
                         ) WHERE rn = 1
                     )
-                """,
+                        """.trimIndent()
                     )
 
                     db.execSQL("DROP INDEX IF EXISTS idx_prefix_suggestions")
@@ -69,9 +69,15 @@ abstract class KeyboardDatabase : RoomDatabase() {
                     db.execSQL("DROP INDEX IF EXISTS idx_learned_words_normalized")
                     db.execSQL("DROP INDEX IF EXISTS idx_learned_words_language_frequency")
 
-                    db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS idx_exact_lookup ON learned_words(language_tag, word_normalized)")
+                    db.execSQL(
+                        "CREATE UNIQUE INDEX IF NOT EXISTS " +
+                            "idx_exact_lookup ON learned_words(language_tag, word_normalized)"
+                    )
 
-                    db.execSQL("CREATE INDEX IF NOT EXISTS idx_frequency_recent ON learned_words(language_tag, frequency, last_used)")
+                    db.execSQL(
+                        "CREATE INDEX IF NOT EXISTS " +
+                            "idx_frequency_recent ON learned_words(language_tag, frequency, last_used)"
+                    )
 
                     db.execSQL("CREATE INDEX IF NOT EXISTS idx_cleanup ON learned_words(frequency, last_used)")
                 }
@@ -87,7 +93,7 @@ abstract class KeyboardDatabase : RoomDatabase() {
                             custom_symbol TEXT NOT NULL,
                             created_at INTEGER NOT NULL
                         )
-                        """,
+                        """.trimIndent()
                     )
                 }
             }
@@ -104,20 +110,24 @@ abstract class KeyboardDatabase : RoomDatabase() {
                             frequency INTEGER NOT NULL,
                             last_used INTEGER NOT NULL
                         )
-                        """,
+                        """.trimIndent()
                     )
 
                     db.execSQL(
-                        "CREATE UNIQUE INDEX IF NOT EXISTS idx_user_freq_lookup ON user_word_frequency(language_tag, word_normalized)",
+                        "CREATE UNIQUE INDEX IF NOT EXISTS " +
+                            "idx_user_freq_lookup ON user_word_frequency(language_tag, word_normalized)"
                     )
-                    db.execSQL("CREATE INDEX IF NOT EXISTS idx_user_freq_ranking ON user_word_frequency(language_tag, frequency)")
+                    db.execSQL(
+                        "CREATE INDEX IF NOT EXISTS " +
+                            "idx_user_freq_ranking ON user_word_frequency(language_tag, frequency)"
+                    )
 
                     db.execSQL(
                         """
                         INSERT OR IGNORE INTO user_word_frequency (language_tag, word_normalized, frequency, last_used)
                         SELECT language_tag, word_normalized, frequency, last_used
                         FROM learned_words
-                        """,
+                        """.trimIndent()
                     )
                 }
             }
@@ -135,14 +145,16 @@ abstract class KeyboardDatabase : RoomDatabase() {
                             frequency INTEGER NOT NULL,
                             last_used INTEGER NOT NULL
                         )
-                        """,
+                        """.trimIndent()
                     )
 
                     db.execSQL(
-                        "CREATE UNIQUE INDEX IF NOT EXISTS idx_bigram_lookup ON user_word_bigram(language_tag, word_a_normalized, word_b_normalized)",
+                        "CREATE UNIQUE INDEX IF NOT EXISTS " +
+                            "idx_bigram_lookup ON user_word_bigram(language_tag, word_a_normalized, word_b_normalized)"
                     )
                     db.execSQL(
-                        "CREATE INDEX IF NOT EXISTS idx_bigram_predictions ON user_word_bigram(language_tag, word_a_normalized, frequency)",
+                        "CREATE INDEX IF NOT EXISTS " +
+                            "idx_bigram_predictions ON user_word_bigram(language_tag, word_a_normalized, frequency)"
                     )
                 }
             }
@@ -155,26 +167,24 @@ abstract class KeyboardDatabase : RoomDatabase() {
          * @return Database instance
          * @throws IllegalStateException if encryption settings change between calls
          */
-        fun getInstance(
-            context: Context,
-            passphrase: ByteArray? = null,
-        ): KeyboardDatabase =
+        fun getInstance(context: Context, passphrase: ByteArray? = null): KeyboardDatabase =
             instance ?: synchronized(this) {
                 instance?.let {
-                    check((isEncrypted == (passphrase != null))) {
-                        "Encryption mode mismatch: Database instance already created with ${if (isEncrypted == true) "encryption" else "no encryption"}"
+                    check(isEncrypted == (passphrase != null)) {
+                        val mode = if (isEncrypted == true) "encryption" else "no encryption"
+                        "Encryption mode mismatch: Database instance already created with $mode"
                     }
                     return it
                 }
 
-                isEncrypted = (passphrase != null)
+                isEncrypted = passphrase != null
 
                 val builder =
                     Room
                         .databaseBuilder(
                             context.applicationContext,
                             KeyboardDatabase::class.java,
-                            DATABASE_NAME,
+                            DATABASE_NAME
                         ).addMigrations(MIGRATION_1_2, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
 
                 if (passphrase != null) {

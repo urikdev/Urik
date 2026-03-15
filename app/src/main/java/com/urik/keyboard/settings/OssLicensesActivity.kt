@@ -35,48 +35,47 @@ class OssLicensesActivity : AppCompatActivity() {
         applyWindowInsets(rootLayout)
     }
 
-    private fun createLayout(): LinearLayout =
-        LinearLayout(this).apply {
-            id = View.generateViewId()
-            orientation = LinearLayout.VERTICAL
-            layoutParams =
-                LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                )
+    private fun createLayout(): LinearLayout = LinearLayout(this).apply {
+        id = View.generateViewId()
+        orientation = LinearLayout.VERTICAL
+        layoutParams =
+            LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.MATCH_PARENT
+            )
 
-            val toolbar =
-                MaterialToolbar(context).apply {
-                    id = R.id.oss_licenses_toolbar
-                    layoutParams =
-                        LinearLayout.LayoutParams(
-                            LinearLayout.LayoutParams.MATCH_PARENT,
-                            resources.getDimensionPixelSize(
-                                androidx.appcompat.R.dimen.abc_action_bar_default_height_material,
-                            ),
+        val toolbar =
+            MaterialToolbar(context).apply {
+                id = R.id.oss_licenses_toolbar
+                layoutParams =
+                    LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        resources.getDimensionPixelSize(
+                            androidx.appcompat.R.dimen.abc_action_bar_default_height_material
                         )
-                }
-            addView(toolbar)
+                    )
+            }
+        addView(toolbar)
 
-            val scrollView =
-                ScrollView(context).apply {
-                    layoutParams =
-                        LinearLayout.LayoutParams(
-                            LinearLayout.LayoutParams.MATCH_PARENT,
-                            0,
-                            1f,
-                        )
+        val scrollView =
+            ScrollView(context).apply {
+                layoutParams =
+                    LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        0,
+                        1f
+                    )
 
-                    val textView =
-                        TextView(context).apply {
-                            id = R.id.oss_licenses_text
-                            textSize = 14f
-                            setTextIsSelectable(true)
-                        }
-                    addView(textView)
-                }
-            addView(scrollView)
-        }
+                val textView =
+                    TextView(context).apply {
+                        id = R.id.oss_licenses_text
+                        textSize = 14f
+                        setTextIsSelectable(true)
+                    }
+                addView(textView)
+            }
+        addView(scrollView)
+    }
 
     private fun applyWindowInsets(rootLayout: LinearLayout) {
         val scrollView = rootLayout.getChildAt(1) as ScrollView
@@ -91,7 +90,7 @@ class OssLicensesActivity : AppCompatActivity() {
                 basePadding,
                 basePadding,
                 basePadding,
-                basePadding + insets.bottom,
+                basePadding + insets.bottom
             )
             windowInsets
         }
@@ -107,120 +106,117 @@ class OssLicensesActivity : AppCompatActivity() {
             builder,
             "AndroidX Libraries",
             "https://source.android.com",
-            "Apache License 2.0",
+            "Apache License 2.0"
         )
 
         addLicense(
             builder,
             "Kotlin Standard Library",
             "https://kotlinlang.org",
-            "Apache License 2.0",
+            "Apache License 2.0"
         )
 
         addLicense(
             builder,
             "Kotlinx Coroutines",
             "https://github.com/Kotlin/kotlinx.coroutines",
-            "Apache License 2.0",
+            "Apache License 2.0"
         )
 
         addLicense(
             builder,
             "Dagger Hilt",
             "https://github.com/google/dagger",
-            "Apache License 2.0",
+            "Apache License 2.0"
         )
 
         addLicense(
             builder,
             "Material Components for Android",
             "https://github.com/material-components/material-components-android",
-            "Apache License 2.0",
+            "Apache License 2.0"
         )
 
         addLicense(
             builder,
             "Room Persistence Library",
             "https://developer.android.com/jetpack/androidx/releases/room",
-            "Apache License 2.0",
+            "Apache License 2.0"
         )
 
         addLicense(
             builder,
             "DataStore",
             "https://developer.android.com/topic/libraries/architecture/datastore",
-            "Apache License 2.0",
+            "Apache License 2.0"
         )
 
         addLicense(
             builder,
             "SymSpellKt",
             "https://github.com/darkrockstudios/symspellkt",
-            "MIT License",
+            "MIT License"
         )
 
         addLicense(
             builder,
             "SQLCipher for Android",
             "https://github.com/sqlcipher/android-database-sqlcipher",
-            "BSD License",
+            "BSD License"
         )
 
         addLicense(
             builder,
             "ICU4J",
             "https://github.com/unicode-org/icu",
-            "Unicode License",
+            "Unicode License"
         )
 
         addLicense(
             builder,
             "Unicode CLDR Emoji Annotations",
             "https://github.com/unicode-org/cldr-json",
-            "Unicode License",
+            "Unicode License"
         )
 
-        builder.append("\n\n─────────────────────────────────────\n\n")
+        builder.append(SECTION_SEPARATOR)
         builder.append("Apache License 2.0\n\n")
         builder.append(APACHE_2_LICENSE_SUMMARY)
 
-        builder.append("\n\n─────────────────────────────────────\n\n")
+        builder.append(SECTION_SEPARATOR)
         builder.append("MIT License\n\n")
         builder.append(MIT_LICENSE_SUMMARY)
 
-        builder.append("\n\n─────────────────────────────────────\n\n")
+        builder.append(SECTION_SEPARATOR)
         builder.append("BSD License\n\n")
         builder.append(BSD_LICENSE_SUMMARY)
 
-        builder.append("\n\n─────────────────────────────────────\n\n")
+        builder.append(SECTION_SEPARATOR)
         builder.append("Unicode License\n\n")
         builder.append(UNICODE_LICENSE_SUMMARY)
 
         return builder.toString()
     }
 
-    private fun addLicense(
-        builder: StringBuilder,
-        name: String,
-        url: String,
-        license: String,
-    ) {
+    private fun addLicense(builder: StringBuilder, name: String, url: String, license: String) {
         builder.append("• $name\n")
         builder.append("  $url\n")
         builder.append("  License: $license\n\n")
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean =
-        when (item.itemId) {
-            android.R.id.home -> {
-                finish()
-                true
-            }
-            else -> super.onOptionsItemSelected(item)
+    override fun onOptionsItemSelected(item: MenuItem): Boolean = when (item.itemId) {
+        android.R.id.home -> {
+            finish()
+            true
         }
+        else -> super.onOptionsItemSelected(item)
+    }
 
     companion object {
         private const val BASE_PADDING_DP = 16
+
+        @Suppress("StringShouldBeRawString")
+        private const val SECTION_SEPARATOR = "\n\n─────────────────────────────────────\n\n"
 
         private const val APACHE_2_LICENSE_SUMMARY =
             """Licensed under the Apache License, Version 2.0 (the "License");

@@ -38,8 +38,8 @@ class LanguageManagerTest {
             MutableStateFlow(
                 KeyboardSettings(
                     activeLanguages = listOf("en"),
-                    primaryLanguage = "en",
-                ),
+                    primaryLanguage = "en"
+                )
             )
         whenever(settingsRepository.settings).thenReturn(settingsFlow)
 
@@ -53,217 +53,202 @@ class LanguageManagerTest {
     }
 
     @Test
-    fun `initialize sets up language from settings`() =
-        runTest {
-            val result = languageManager.initialize()
+    fun `initialize sets up language from settings`() = runTest {
+        val result = languageManager.initialize()
 
-            assertTrue(result.isSuccess)
-            assertNotNull(languageManager.currentLanguage.value)
-            assertEquals("en", languageManager.currentLanguage.value)
-        }
-
-    @Test
-    fun `initialize is idempotent`() =
-        runTest {
-            languageManager.initialize()
-            val result = languageManager.initialize()
-
-            assertTrue(result.isSuccess)
-        }
+        assertTrue(result.isSuccess)
+        assertNotNull(languageManager.currentLanguage.value)
+        assertEquals("en", languageManager.currentLanguage.value)
+    }
 
     @Test
-    fun `initialize observes settings changes`() =
-        runTest {
-            languageManager.initialize()
+    fun `initialize is idempotent`() = runTest {
+        languageManager.initialize()
+        val result = languageManager.initialize()
 
-            settingsFlow.value =
-                KeyboardSettings(
-                    activeLanguages = listOf("sv"),
-                    primaryLanguage = "sv",
-                )
-
-            assertEquals("sv", languageManager.currentLanguage.value)
-        }
+        assertTrue(result.isSuccess)
+    }
 
     @Test
-    fun `switching language updates current language`() =
-        runTest {
-            languageManager.initialize()
+    fun `initialize observes settings changes`() = runTest {
+        languageManager.initialize()
 
-            assertEquals("en", languageManager.currentLanguage.value)
+        settingsFlow.value =
+            KeyboardSettings(
+                activeLanguages = listOf("sv"),
+                primaryLanguage = "sv"
+            )
 
-            settingsFlow.value =
-                KeyboardSettings(
-                    activeLanguages = listOf("sv"),
-                    primaryLanguage = "sv",
-                )
-
-            assertEquals("sv", languageManager.currentLanguage.value)
-        }
+        assertEquals("sv", languageManager.currentLanguage.value)
+    }
 
     @Test
-    fun `cleanup is idempotent`() =
-        runTest {
-            languageManager.initialize()
+    fun `switching language updates current language`() = runTest {
+        languageManager.initialize()
 
-            languageManager.cleanup()
-            languageManager.cleanup()
+        assertEquals("en", languageManager.currentLanguage.value)
 
-            assertNotNull(languageManager.currentLanguage.value)
-        }
+        settingsFlow.value =
+            KeyboardSettings(
+                activeLanguages = listOf("sv"),
+                primaryLanguage = "sv"
+            )
 
-    @Test
-    fun `switchLayoutLanguage succeeds with valid language`() =
-        runTest {
-            settingsFlow.value =
-                KeyboardSettings(
-                    activeLanguages = listOf("en", "es"),
-                    primaryLanguage = "en",
-                    primaryLayoutLanguage = "en",
-                )
-            languageManager.initialize()
-
-            val result = languageManager.switchLayoutLanguage("es")
-
-            assertTrue(result.isSuccess)
-        }
+        assertEquals("sv", languageManager.currentLanguage.value)
+    }
 
     @Test
-    fun `switchLayoutLanguage fails with invalid language`() =
-        runTest {
-            settingsFlow.value =
-                KeyboardSettings(
-                    activeLanguages = listOf("en", "es"),
-                    primaryLanguage = "en",
-                    primaryLayoutLanguage = "en",
-                )
-            languageManager.initialize()
+    fun `cleanup is idempotent`() = runTest {
+        languageManager.initialize()
 
-            val result = languageManager.switchLayoutLanguage("de")
+        languageManager.cleanup()
+        languageManager.cleanup()
 
-            assertTrue(result.isFailure)
-        }
+        assertNotNull(languageManager.currentLanguage.value)
+    }
 
     @Test
-    fun `getNextLayoutLanguage cycles between two languages`() =
-        runTest {
-            settingsFlow.value =
-                KeyboardSettings(
-                    activeLanguages = listOf("en", "es"),
-                    primaryLanguage = "en",
-                    primaryLayoutLanguage = "en",
-                )
-            languageManager.initialize()
+    fun `switchLayoutLanguage succeeds with valid language`() = runTest {
+        settingsFlow.value =
+            KeyboardSettings(
+                activeLanguages = listOf("en", "es"),
+                primaryLanguage = "en",
+                primaryLayoutLanguage = "en"
+            )
+        languageManager.initialize()
 
-            val next1 = languageManager.getNextLayoutLanguage()
-            assertEquals("es", next1)
-        }
+        val result = languageManager.switchLayoutLanguage("es")
 
-    @Test
-    fun `getNextLayoutLanguage cycles through three languages`() =
-        runTest {
-            settingsFlow.value =
-                KeyboardSettings(
-                    activeLanguages = listOf("en", "es", "de"),
-                    primaryLanguage = "en",
-                    primaryLayoutLanguage = "en",
-                )
-            languageManager.initialize()
-
-            val next1 = languageManager.getNextLayoutLanguage()
-            assertEquals("es", next1)
-        }
+        assertTrue(result.isSuccess)
+    }
 
     @Test
-    fun `getNextLayoutLanguage returns same for single language`() =
-        runTest {
-            settingsFlow.value =
-                KeyboardSettings(
-                    activeLanguages = listOf("en"),
-                    primaryLanguage = "en",
-                    primaryLayoutLanguage = "en",
-                )
-            languageManager.initialize()
+    fun `switchLayoutLanguage fails with invalid language`() = runTest {
+        settingsFlow.value =
+            KeyboardSettings(
+                activeLanguages = listOf("en", "es"),
+                primaryLanguage = "en",
+                primaryLayoutLanguage = "en"
+            )
+        languageManager.initialize()
 
-            val next = languageManager.getNextLayoutLanguage()
-            assertEquals("en", next)
-        }
+        val result = languageManager.switchLayoutLanguage("de")
 
-    @Test
-    fun `effectiveDictionaryLanguages returns all active when merged`() =
-        runTest {
-            settingsFlow.value =
-                KeyboardSettings(
-                    activeLanguages = listOf("en", "es", "fr"),
-                    primaryLanguage = "en",
-                    primaryLayoutLanguage = "en",
-                    mergedDictionaries = true,
-                )
-            languageManager.initialize()
-
-            assertEquals(listOf("en", "es", "fr"), languageManager.effectiveDictionaryLanguages.value)
-        }
+        assertTrue(result.isFailure)
+    }
 
     @Test
-    fun `effectiveDictionaryLanguages returns only layout language when not merged`() =
-        runTest {
-            settingsFlow.value =
-                KeyboardSettings(
-                    activeLanguages = listOf("en", "es", "fr"),
-                    primaryLanguage = "en",
-                    primaryLayoutLanguage = "es",
-                    mergedDictionaries = false,
-                )
-            languageManager.initialize()
+    fun `getNextLayoutLanguage cycles between two languages`() = runTest {
+        settingsFlow.value =
+            KeyboardSettings(
+                activeLanguages = listOf("en", "es"),
+                primaryLanguage = "en",
+                primaryLayoutLanguage = "en"
+            )
+        languageManager.initialize()
 
-            assertEquals(listOf("es"), languageManager.effectiveDictionaryLanguages.value)
-        }
-
-    @Test
-    fun `effectiveDictionaryLanguages updates when mergedDictionaries toggled`() =
-        runTest {
-            settingsFlow.value =
-                KeyboardSettings(
-                    activeLanguages = listOf("en", "es"),
-                    primaryLanguage = "en",
-                    primaryLayoutLanguage = "en",
-                    mergedDictionaries = true,
-                )
-            languageManager.initialize()
-
-            assertEquals(listOf("en", "es"), languageManager.effectiveDictionaryLanguages.value)
-
-            settingsFlow.value =
-                settingsFlow.value.copy(mergedDictionaries = false)
-
-            assertEquals(listOf("en"), languageManager.effectiveDictionaryLanguages.value)
-        }
+        val next1 = languageManager.getNextLayoutLanguage()
+        assertEquals("es", next1)
+    }
 
     @Test
-    fun `effectiveDictionaryLanguages updates when layout language switches while not merged`() =
-        runTest {
-            settingsFlow.value =
-                KeyboardSettings(
-                    activeLanguages = listOf("en", "fr"),
-                    primaryLanguage = "en",
-                    primaryLayoutLanguage = "en",
-                    mergedDictionaries = false,
-                )
-            languageManager.initialize()
+    fun `getNextLayoutLanguage cycles through three languages`() = runTest {
+        settingsFlow.value =
+            KeyboardSettings(
+                activeLanguages = listOf("en", "es", "de"),
+                primaryLanguage = "en",
+                primaryLayoutLanguage = "en"
+            )
+        languageManager.initialize()
 
-            assertEquals(listOf("en"), languageManager.effectiveDictionaryLanguages.value)
-
-            settingsFlow.value =
-                settingsFlow.value.copy(primaryLayoutLanguage = "fr")
-
-            assertEquals(listOf("fr"), languageManager.effectiveDictionaryLanguages.value)
-        }
+        val next1 = languageManager.getNextLayoutLanguage()
+        assertEquals("es", next1)
+    }
 
     @Test
-    fun `mergedDictionaries defaults to true`() =
-        runTest {
-            languageManager.initialize()
+    fun `getNextLayoutLanguage returns same for single language`() = runTest {
+        settingsFlow.value =
+            KeyboardSettings(
+                activeLanguages = listOf("en"),
+                primaryLanguage = "en",
+                primaryLayoutLanguage = "en"
+            )
+        languageManager.initialize()
 
-            assertTrue(languageManager.mergedDictionaries.value)
-        }
+        val next = languageManager.getNextLayoutLanguage()
+        assertEquals("en", next)
+    }
+
+    @Test
+    fun `effectiveDictionaryLanguages returns all active when merged`() = runTest {
+        settingsFlow.value =
+            KeyboardSettings(
+                activeLanguages = listOf("en", "es", "fr"),
+                primaryLanguage = "en",
+                primaryLayoutLanguage = "en",
+                mergedDictionaries = true
+            )
+        languageManager.initialize()
+
+        assertEquals(listOf("en", "es", "fr"), languageManager.effectiveDictionaryLanguages.value)
+    }
+
+    @Test
+    fun `effectiveDictionaryLanguages returns only layout language when not merged`() = runTest {
+        settingsFlow.value =
+            KeyboardSettings(
+                activeLanguages = listOf("en", "es", "fr"),
+                primaryLanguage = "en",
+                primaryLayoutLanguage = "es",
+                mergedDictionaries = false
+            )
+        languageManager.initialize()
+
+        assertEquals(listOf("es"), languageManager.effectiveDictionaryLanguages.value)
+    }
+
+    @Test
+    fun `effectiveDictionaryLanguages updates when mergedDictionaries toggled`() = runTest {
+        settingsFlow.value =
+            KeyboardSettings(
+                activeLanguages = listOf("en", "es"),
+                primaryLanguage = "en",
+                primaryLayoutLanguage = "en",
+                mergedDictionaries = true
+            )
+        languageManager.initialize()
+
+        assertEquals(listOf("en", "es"), languageManager.effectiveDictionaryLanguages.value)
+
+        settingsFlow.value =
+            settingsFlow.value.copy(mergedDictionaries = false)
+
+        assertEquals(listOf("en"), languageManager.effectiveDictionaryLanguages.value)
+    }
+
+    @Test
+    fun `effectiveDictionaryLanguages updates when layout language switches while not merged`() = runTest {
+        settingsFlow.value =
+            KeyboardSettings(
+                activeLanguages = listOf("en", "fr"),
+                primaryLanguage = "en",
+                primaryLayoutLanguage = "en",
+                mergedDictionaries = false
+            )
+        languageManager.initialize()
+
+        assertEquals(listOf("en"), languageManager.effectiveDictionaryLanguages.value)
+
+        settingsFlow.value =
+            settingsFlow.value.copy(primaryLayoutLanguage = "fr")
+
+        assertEquals(listOf("fr"), languageManager.effectiveDictionaryLanguages.value)
+    }
+
+    @Test
+    fun `mergedDictionaries defaults to true`() = runTest {
+        languageManager.initialize()
+
+        assertTrue(languageManager.mergedDictionaries.value)
+    }
 }

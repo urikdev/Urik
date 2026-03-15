@@ -8,6 +8,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
+@Suppress("UnnecessaryParentheses")
 class ResidualScorerShortWordTest {
     private lateinit var pathGeometryAnalyzer: PathGeometryAnalyzer
     private lateinit var scorer: ResidualScorer
@@ -39,7 +40,7 @@ class ResidualScorerShortWordTest {
             'v' to PointF(240f, 210f),
             'b' to PointF(290f, 210f),
             'k' to PointF(340f, 210f),
-            'm' to PointF(390f, 210f),
+            'm' to PointF(390f, 210f)
         )
 
     @Before
@@ -55,7 +56,7 @@ class ResidualScorerShortWordTest {
                 colemakKeyPositions['a']!!,
                 colemakKeyPositions['i']!!,
                 colemakKeyPositions['d']!!,
-                pointsPerSegment = 5,
+                pointsPerSegment = 5
             )
 
         val sigmaCache = buildSigmaCache(colemakKeyPositions)
@@ -67,7 +68,7 @@ class ResidualScorerShortWordTest {
                 colemakKeyPositions,
                 pathGeometryAnalyzer,
                 sigmaCache,
-                shortPath.size,
+                shortPath.size
             )
 
         val aidEntry = makeEntry("aid", 50_000)
@@ -80,7 +81,7 @@ class ResidualScorerShortWordTest {
                 colemakKeyPositions,
                 sigmaCache,
                 neighborhoodCache,
-                80_000_000L,
+                80_000_000L
             )
         val arrestedResult =
             scorer.scoreCandidate(
@@ -89,12 +90,13 @@ class ResidualScorerShortWordTest {
                 colemakKeyPositions,
                 sigmaCache,
                 neighborhoodCache,
-                80_000_000L,
+                80_000_000L
             )
 
         assertTrue(
-            "aid (${aidResult?.combinedScore}) should outscore arrested (${arrestedResult?.combinedScore}) on a short a→i→d path",
-            (aidResult?.combinedScore ?: 0f) > (arrestedResult?.combinedScore ?: 0f),
+            "aid (${aidResult?.combinedScore}) should outscore arrested " +
+                "(${arrestedResult?.combinedScore}) on a short a→i→d path",
+            (aidResult?.combinedScore ?: 0f) > (arrestedResult?.combinedScore ?: 0f)
         )
     }
 
@@ -105,7 +107,7 @@ class ResidualScorerShortWordTest {
                 colemakKeyPositions['t']!!,
                 colemakKeyPositions['h']!!,
                 colemakKeyPositions['e']!!,
-                pointsPerSegment = 5,
+                pointsPerSegment = 5
             )
 
         val sigmaCache = buildSigmaCache(colemakKeyPositions)
@@ -117,7 +119,7 @@ class ResidualScorerShortWordTest {
                 colemakKeyPositions,
                 pathGeometryAnalyzer,
                 sigmaCache,
-                shortPath.size,
+                shortPath.size
             )
 
         val theEntry = makeEntry("the", 500_000_000)
@@ -130,7 +132,7 @@ class ResidualScorerShortWordTest {
                 colemakKeyPositions,
                 sigmaCache,
                 neighborhoodCache,
-                500_000_000L,
+                500_000_000L
             )
         val togetherResult =
             scorer.scoreCandidate(
@@ -139,12 +141,13 @@ class ResidualScorerShortWordTest {
                 colemakKeyPositions,
                 sigmaCache,
                 neighborhoodCache,
-                500_000_000L,
+                500_000_000L
             )
 
         assertTrue(
-            "the (${theResult?.combinedScore}) should outscore together (${togetherResult?.combinedScore}) on a short t→h→e path",
-            (theResult?.combinedScore ?: 0f) > (togetherResult?.combinedScore ?: 0f),
+            "the (${theResult?.combinedScore}) should outscore together " +
+                "(${togetherResult?.combinedScore}) on a short t→h→e path",
+            (theResult?.combinedScore ?: 0f) > (togetherResult?.combinedScore ?: 0f)
         )
     }
 
@@ -156,7 +159,7 @@ class ResidualScorerShortWordTest {
                 colemakKeyPositions['o']!!,
                 colemakKeyPositions['g']!!,
                 colemakKeyPositions['s']!!,
-                pointsPerSegment = 8,
+                pointsPerSegment = 8
             )
 
         val sigmaCache = buildSigmaCache(colemakKeyPositions)
@@ -168,7 +171,7 @@ class ResidualScorerShortWordTest {
                 colemakKeyPositions,
                 pathGeometryAnalyzer,
                 sigmaCache,
-                path.size,
+                path.size
             )
 
         val dogsEntry = makeEntry("dogs", 10_000_000)
@@ -180,12 +183,12 @@ class ResidualScorerShortWordTest {
                 colemakKeyPositions,
                 sigmaCache,
                 neighborhoodCache,
-                10_000_000L,
+                10_000_000L
             )
 
         assertTrue(
             "dogs should score reasonably (got ${dogsResult?.combinedScore})",
-            (dogsResult?.combinedScore ?: 0f) > 0.20f,
+            (dogsResult?.combinedScore ?: 0f) > 0.20f
         )
     }
 
@@ -201,7 +204,7 @@ class ResidualScorerShortWordTest {
                 colemakKeyPositions['h']!!,
                 colemakKeyPositions['e']!!,
                 colemakKeyPositions['r']!!,
-                pointsPerSegment = 8,
+                pointsPerSegment = 8
             )
 
         val sigmaCache = buildSigmaCache(colemakKeyPositions)
@@ -213,7 +216,7 @@ class ResidualScorerShortWordTest {
                 colemakKeyPositions,
                 pathGeometryAnalyzer,
                 sigmaCache,
-                longPath.size,
+                longPath.size
             )
 
         val togetherEntry = makeEntry("together", 20_000_000)
@@ -225,18 +228,18 @@ class ResidualScorerShortWordTest {
                 colemakKeyPositions,
                 sigmaCache,
                 neighborhoodCache,
-                20_000_000L,
+                20_000_000L
             )
 
         assertTrue(
             "together should score well on a full-length path (got ${result?.combinedScore})",
-            (result?.combinedScore ?: 0f) > 0.20f,
+            (result?.combinedScore ?: 0f) > 0.20f
         )
     }
 
     private fun generateLinearPath(
         vararg keyPoints: PointF,
-        pointsPerSegment: Int = 5,
+        pointsPerSegment: Int = 5
     ): List<SwipeDetector.SwipePoint> {
         val result = ArrayList<SwipeDetector.SwipePoint>()
         var timestamp = 0L
@@ -250,8 +253,8 @@ class ResidualScorerShortWordTest {
                         x = from.x + (to.x - from.x) * t,
                         y = from.y + (to.y - from.y) * t,
                         timestamp = timestamp,
-                        velocity = 1.0f,
-                    ),
+                        velocity = 1.0f
+                    )
                 )
                 timestamp += 8L
             }
@@ -261,8 +264,8 @@ class ResidualScorerShortWordTest {
                 x = keyPoints.last().x,
                 y = keyPoints.last().y,
                 timestamp = timestamp,
-                velocity = 0.5f,
-            ),
+                velocity = 0.5f
+            )
         )
         return result
     }
@@ -272,27 +275,23 @@ class ResidualScorerShortWordTest {
             pathGeometryAnalyzer.calculateAdaptiveSigma(char, positions)
         }
 
-    private fun makeEntry(
-        word: String,
-        frequency: Long,
-    ): SwipeDetector.DictionaryEntry =
-        SwipeDetector.DictionaryEntry(
-            word = word,
-            frequencyScore = kotlin.math.ln(frequency.toFloat() + 1f) / 20f,
-            rawFrequency = frequency,
-            firstChar = word.first().lowercaseChar(),
-            uniqueLetterCount = word.toSet().size,
-            frequencyTier =
-                SwipeDetector.FrequencyTier.fromRank(
-                    if (frequency > 100_000_000) {
-                        0
-                    } else if (frequency > 10_000_000) {
-                        500
-                    } else if (frequency > 1_000_000) {
-                        3000
-                    } else {
-                        10000
-                    },
-                ),
+    private fun makeEntry(word: String, frequency: Long): SwipeDetector.DictionaryEntry = SwipeDetector.DictionaryEntry(
+        word = word,
+        frequencyScore = kotlin.math.ln(frequency.toFloat() + 1f) / 20f,
+        rawFrequency = frequency,
+        firstChar = word.first().lowercaseChar(),
+        uniqueLetterCount = word.toSet().size,
+        frequencyTier =
+        SwipeDetector.FrequencyTier.fromRank(
+            if (frequency > 100_000_000) {
+                0
+            } else if (frequency > 10_000_000) {
+                500
+            } else if (frequency > 1_000_000) {
+                3000
+            } else {
+                10000
+            }
         )
+    )
 }

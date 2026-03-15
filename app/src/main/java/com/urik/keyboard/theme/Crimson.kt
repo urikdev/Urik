@@ -25,6 +25,6 @@ data object Crimson : KeyboardTheme {
             focusIndicator = "#ffd4dd".toColorInt(),
             swipePrimary = "#ffb3c1".toColorInt(),
             swipeSecondary = "#ffd4dd".toColorInt(),
-            swipeCurrent = "#ff8899".toColorInt(),
+            swipeCurrent = "#ff8899".toColorInt()
         )
 }

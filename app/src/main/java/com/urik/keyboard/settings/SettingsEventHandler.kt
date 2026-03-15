@@ -9,9 +9,7 @@ import com.urik.keyboard.R
  *
  * Should be instantiated per-Fragment to respect lifecycle.
  */
-class SettingsEventHandler(
-    private val context: Context,
-) {
+class SettingsEventHandler(private val context: Context) {
     fun handle(event: SettingsEvent) {
         val message =
             when (event) {
@@ -81,7 +79,7 @@ class SettingsEventHandler(
 
                 is SettingsEvent.Error.LongPressPunctuationUpdateFailed -> {
                     context.getString(
-                        R.string.error_update_long_press_punctuation,
+                        R.string.error_update_long_press_punctuation
                     )
                 }
 
@@ -145,7 +143,7 @@ class SettingsEventHandler(
                     context.getString(
                         R.string.success_dictionary_imported,
                         event.newWords,
-                        event.updatedWords,
+                        event.updatedWords
                     )
                 }
             }

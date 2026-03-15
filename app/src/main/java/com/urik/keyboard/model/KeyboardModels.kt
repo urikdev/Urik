@@ -7,7 +7,7 @@ enum class KeyboardMode {
     LETTERS,
     NUMBERS,
     SYMBOLS,
-    SYMBOLS_SECONDARY,
+    SYMBOLS_SECONDARY
 }
 
 /**
@@ -21,7 +21,7 @@ data class KeyboardState(
     val isCapsLockOn: Boolean = false,
     val isAutoShift: Boolean = false,
     val isLoading: Boolean = false,
-    val error: String? = null,
+    val error: String? = null
 )
 
 /**
@@ -33,7 +33,7 @@ data class KeyboardLayout(
     val mode: KeyboardMode,
     val rows: List<List<KeyboardKey>>,
     val isRTL: Boolean = false,
-    val script: String = "Latn",
+    val script: String = "Latn"
 )
 
 /**
@@ -48,19 +48,14 @@ sealed class KeyboardKey {
      * @property value Character(s) to insert (can be multi-char for ligatures/emoji)
      * @property type Visual/semantic classification for styling
      */
-    data class Character(
-        val value: String,
-        val type: KeyType,
-    ) : KeyboardKey()
+    data class Character(val value: String, val type: KeyType) : KeyboardKey()
 
     /**
      * Operation key (backspace, enter, mode switch, etc).
      *
      * @property action Operation to perform
      */
-    data class Action(
-        val action: ActionType,
-    ) : KeyboardKey()
+    data class Action(val action: ActionType) : KeyboardKey()
 
     /**
      * Empty spacer for layout alignment.
@@ -71,7 +66,7 @@ sealed class KeyboardKey {
         LETTER,
         NUMBER,
         PUNCTUATION,
-        SYMBOL,
+        SYMBOL
     }
 
     enum class ActionType {
@@ -90,7 +85,7 @@ sealed class KeyboardKey {
         MODE_SWITCH_SYMBOLS,
         MODE_SWITCH_SYMBOLS_SECONDARY,
         CAPS_LOCK,
-        LANGUAGE_SWITCH,
+        LANGUAGE_SWITCH
     }
 }
 
@@ -98,17 +93,11 @@ sealed class KeyboardKey {
  * Keyboard state change events.
  */
 sealed class KeyboardEvent {
-    data class KeyPressed(
-        val key: KeyboardKey,
-    ) : KeyboardEvent()
+    data class KeyPressed(val key: KeyboardKey) : KeyboardEvent()
 
-    data class ModeChanged(
-        val mode: KeyboardMode,
-    ) : KeyboardEvent()
+    data class ModeChanged(val mode: KeyboardMode) : KeyboardEvent()
 
-    data class ShiftStateChanged(
-        val isPressed: Boolean,
-    ) : KeyboardEvent()
+    data class ShiftStateChanged(val isPressed: Boolean) : KeyboardEvent()
 
     data object CapsLockToggled : KeyboardEvent()
 }

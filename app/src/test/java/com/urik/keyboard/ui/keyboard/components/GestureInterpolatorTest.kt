@@ -1,11 +1,11 @@
 package com.urik.keyboard.ui.keyboard.components
 
+import kotlin.math.sqrt
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import kotlin.math.sqrt
 
 class GestureInterpolatorTest {
     private lateinit var interpolator: GestureInterpolator
@@ -47,7 +47,7 @@ class GestureInterpolatorTest {
 
         assertTrue(
             "Spline should produce more points than raw input",
-            ringBuffer.size > 4,
+            ringBuffer.size > 4
         )
     }
 
@@ -61,7 +61,7 @@ class GestureInterpolatorTest {
         assertEquals(
             "Close points should pass through without interpolation",
             4,
-            ringBuffer.size,
+            ringBuffer.size
         )
     }
 
@@ -74,7 +74,7 @@ class GestureInterpolatorTest {
 
         assertTrue(
             "Large gap should interpolate but cap at max density",
-            ringBuffer.size <= 4 + 10 + 10,
+            ringBuffer.size <= 4 + 10 + 10
         )
     }
 
@@ -104,7 +104,7 @@ class GestureInterpolatorTest {
         for (i in 1 until snapshot.size) {
             assertTrue(
                 "Timestamps must be monotonically increasing",
-                snapshot[i].timestamp >= snapshot[i - 1].timestamp,
+                snapshot[i].timestamp >= snapshot[i - 1].timestamp
             )
         }
     }
@@ -138,11 +138,11 @@ class GestureInterpolatorTest {
         for ((i, point) in snapshot.withIndex()) {
             assertTrue(
                 "Point $i overshoots X: ${point.x}",
-                point.x >= -marginPx && point.x <= 100f + marginPx,
+                point.x >= -marginPx && point.x <= 100f + marginPx
             )
             assertTrue(
                 "Point $i overshoots Y: ${point.y}",
-                point.y >= 50f - marginPx && point.y <= 100f + marginPx,
+                point.y >= 50f - marginPx && point.y <= 100f + marginPx
             )
         }
     }
@@ -168,7 +168,7 @@ class GestureInterpolatorTest {
 
         assertFalse(
             "U-turn should not produce large inter-point jumps (loop artifact)",
-            hasBacktrack,
+            hasBacktrack
         )
     }
 
@@ -185,8 +185,9 @@ class GestureInterpolatorTest {
 
         for (i in 1 until snapshot.size) {
             assertTrue(
-                "X should be monotonically increasing for a rightward swipe, but point $i: ${snapshot[i].x} < ${snapshot[i - 1].x}",
-                snapshot[i].x >= snapshot[i - 1].x - 1f,
+                "X should be monotonically increasing for a rightward swipe, " +
+                    "but point $i: ${snapshot[i].x} < ${snapshot[i - 1].x}",
+                snapshot[i].x >= snapshot[i - 1].x - 1f
             )
         }
     }
@@ -200,7 +201,7 @@ class GestureInterpolatorTest {
 
         assertTrue(
             "Even with 260px gap, should not exceed 4 raw + 10 + 10 interpolated",
-            ringBuffer.size <= 24,
+            ringBuffer.size <= 24
         )
     }
 }

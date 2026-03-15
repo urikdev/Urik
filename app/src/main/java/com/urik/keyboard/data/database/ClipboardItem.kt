@@ -19,8 +19,8 @@ import androidx.room.PrimaryKey
     indices = [
         Index(value = ["content_hash"], name = "idx_clipboard_content_hash", unique = true),
         Index(value = ["timestamp"], name = "idx_clipboard_timestamp"),
-        Index(value = ["is_pinned", "timestamp"], name = "idx_clipboard_pinned"),
-    ],
+        Index(value = ["is_pinned", "timestamp"], name = "idx_clipboard_pinned")
+    ]
 )
 data class ClipboardItem(
     @PrimaryKey(autoGenerate = true)
@@ -32,5 +32,5 @@ data class ClipboardItem(
     @ColumnInfo(name = "timestamp")
     val timestamp: Long,
     @ColumnInfo(name = "is_pinned")
-    val isPinned: Boolean = false,
+    val isPinned: Boolean = false
 )

@@ -42,159 +42,145 @@ class CustomKeyMappingDaoTest {
     }
 
     @Test
-    fun `upsertMapping inserts new mapping`() =
-        runTest {
-            val mapping = CustomKeyMapping.create("a", "@")
+    fun `upsertMapping inserts new mapping`() = runTest {
+        val mapping = CustomKeyMapping.create("a", "@")
 
-            dao.upsertMapping(mapping)
+        dao.upsertMapping(mapping)
 
-            val retrieved = dao.getMappingForKey("a")
-            assertNotNull(retrieved)
-            assertEquals("a", retrieved?.baseKey)
-            assertEquals("@", retrieved?.customSymbol)
-        }
-
-    @Test
-    fun `upsertMapping replaces existing mapping`() =
-        runTest {
-            dao.upsertMapping(CustomKeyMapping.create("a", "@"))
-            dao.upsertMapping(CustomKeyMapping.create("a", "#"))
-
-            val retrieved = dao.getMappingForKey("a")
-            assertEquals("#", retrieved?.customSymbol)
-            assertEquals(1, dao.getMappingCount())
-        }
+        val retrieved = dao.getMappingForKey("a")
+        assertNotNull(retrieved)
+        assertEquals("a", retrieved?.baseKey)
+        assertEquals("@", retrieved?.customSymbol)
+    }
 
     @Test
-    fun `getMappingForKey returns null for missing key`() =
-        runTest {
-            val result = dao.getMappingForKey("missing")
+    fun `upsertMapping replaces existing mapping`() = runTest {
+        dao.upsertMapping(CustomKeyMapping.create("a", "@"))
+        dao.upsertMapping(CustomKeyMapping.create("a", "#"))
 
-            assertNull(result)
-        }
-
-    @Test
-    fun `getAllMappings returns all mappings sorted by base key`() =
-        runTest {
-            dao.upsertMapping(CustomKeyMapping.create("z", "1"))
-            dao.upsertMapping(CustomKeyMapping.create("a", "2"))
-            dao.upsertMapping(CustomKeyMapping.create("m", "3"))
-
-            val results = dao.getAllMappings()
-
-            assertEquals(3, results.size)
-            assertEquals("a", results[0].baseKey)
-            assertEquals("m", results[1].baseKey)
-            assertEquals("z", results[2].baseKey)
-        }
+        val retrieved = dao.getMappingForKey("a")
+        assertEquals("#", retrieved?.customSymbol)
+        assertEquals(1, dao.getMappingCount())
+    }
 
     @Test
-    fun `observeAllMappings emits updates`() =
-        runTest {
-            dao.upsertMapping(CustomKeyMapping.create("a", "@"))
+    fun `getMappingForKey returns null for missing key`() = runTest {
+        val result = dao.getMappingForKey("missing")
 
-            val results = dao.observeAllMappings().first()
-
-            assertEquals(1, results.size)
-            assertEquals("a", results[0].baseKey)
-            assertEquals("@", results[0].customSymbol)
-        }
+        assertNull(result)
+    }
 
     @Test
-    fun `removeMapping deletes existing mapping`() =
-        runTest {
-            dao.upsertMapping(CustomKeyMapping.create("a", "@"))
+    fun `getAllMappings returns all mappings sorted by base key`() = runTest {
+        dao.upsertMapping(CustomKeyMapping.create("z", "1"))
+        dao.upsertMapping(CustomKeyMapping.create("a", "2"))
+        dao.upsertMapping(CustomKeyMapping.create("m", "3"))
 
-            val rowsAffected = dao.removeMapping("a")
+        val results = dao.getAllMappings()
 
-            assertEquals(1, rowsAffected)
-            assertNull(dao.getMappingForKey("a"))
-        }
-
-    @Test
-    fun `removeMapping returns 0 for missing key`() =
-        runTest {
-            val rowsAffected = dao.removeMapping("missing")
-
-            assertEquals(0, rowsAffected)
-        }
+        assertEquals(3, results.size)
+        assertEquals("a", results[0].baseKey)
+        assertEquals("m", results[1].baseKey)
+        assertEquals("z", results[2].baseKey)
+    }
 
     @Test
-    fun `clearAllMappings removes all mappings`() =
-        runTest {
-            dao.upsertMapping(CustomKeyMapping.create("a", "@"))
-            dao.upsertMapping(CustomKeyMapping.create("b", "#"))
-            dao.upsertMapping(CustomKeyMapping.create("c", "$"))
+    fun `observeAllMappings emits updates`() = runTest {
+        dao.upsertMapping(CustomKeyMapping.create("a", "@"))
 
-            val rowsAffected = dao.clearAllMappings()
+        val results = dao.observeAllMappings().first()
 
-            assertEquals(3, rowsAffected)
-            assertEquals(0, dao.getMappingCount())
-        }
+        assertEquals(1, results.size)
+        assertEquals("a", results[0].baseKey)
+        assertEquals("@", results[0].customSymbol)
+    }
 
     @Test
-    fun `clearAllMappings returns 0 when empty`() =
-        runTest {
-            val rowsAffected = dao.clearAllMappings()
+    fun `removeMapping deletes existing mapping`() = runTest {
+        dao.upsertMapping(CustomKeyMapping.create("a", "@"))
 
-            assertEquals(0, rowsAffected)
-        }
+        val rowsAffected = dao.removeMapping("a")
 
-    @Test
-    fun `getMappingCount returns correct count`() =
-        runTest {
-            assertEquals(0, dao.getMappingCount())
-
-            dao.upsertMapping(CustomKeyMapping.create("a", "@"))
-            assertEquals(1, dao.getMappingCount())
-
-            dao.upsertMapping(CustomKeyMapping.create("b", "#"))
-            assertEquals(2, dao.getMappingCount())
-        }
+        assertEquals(1, rowsAffected)
+        assertNull(dao.getMappingForKey("a"))
+    }
 
     @Test
-    fun `mapping stores createdAt timestamp`() =
-        runTest {
-            val beforeInsert = System.currentTimeMillis()
-            dao.upsertMapping(CustomKeyMapping.create("a", "@"))
-            val afterInsert = System.currentTimeMillis()
+    fun `removeMapping returns 0 for missing key`() = runTest {
+        val rowsAffected = dao.removeMapping("missing")
 
-            val retrieved = dao.getMappingForKey("a")
-
-            assertNotNull(retrieved)
-            assertTrue(retrieved!!.createdAt >= beforeInsert)
-            assertTrue(retrieved.createdAt <= afterInsert)
-        }
+        assertEquals(0, rowsAffected)
+    }
 
     @Test
-    fun `base key is case sensitive in storage`() =
-        runTest {
-            dao.upsertMapping(CustomKeyMapping.create("a", "@"))
+    fun `clearAllMappings removes all mappings`() = runTest {
+        dao.upsertMapping(CustomKeyMapping.create("a", "@"))
+        dao.upsertMapping(CustomKeyMapping.create("b", "#"))
+        dao.upsertMapping(CustomKeyMapping.create("c", "$"))
 
-            val lowercase = dao.getMappingForKey("a")
-            val uppercase = dao.getMappingForKey("A")
+        val rowsAffected = dao.clearAllMappings()
 
-            assertNotNull(lowercase)
-            assertNull(uppercase)
-        }
-
-    @Test
-    fun `custom symbol can be multi-character`() =
-        runTest {
-            dao.upsertMapping(CustomKeyMapping.create("a", "->"))
-
-            val retrieved = dao.getMappingForKey("a")
-
-            assertEquals("->", retrieved?.customSymbol)
-        }
+        assertEquals(3, rowsAffected)
+        assertEquals(0, dao.getMappingCount())
+    }
 
     @Test
-    fun `custom symbol can be emoji`() =
-        runTest {
-            dao.upsertMapping(CustomKeyMapping.create("a", "😀"))
+    fun `clearAllMappings returns 0 when empty`() = runTest {
+        val rowsAffected = dao.clearAllMappings()
 
-            val retrieved = dao.getMappingForKey("a")
+        assertEquals(0, rowsAffected)
+    }
 
-            assertEquals("😀", retrieved?.customSymbol)
-        }
+    @Test
+    fun `getMappingCount returns correct count`() = runTest {
+        assertEquals(0, dao.getMappingCount())
+
+        dao.upsertMapping(CustomKeyMapping.create("a", "@"))
+        assertEquals(1, dao.getMappingCount())
+
+        dao.upsertMapping(CustomKeyMapping.create("b", "#"))
+        assertEquals(2, dao.getMappingCount())
+    }
+
+    @Test
+    fun `mapping stores createdAt timestamp`() = runTest {
+        val beforeInsert = System.currentTimeMillis()
+        dao.upsertMapping(CustomKeyMapping.create("a", "@"))
+        val afterInsert = System.currentTimeMillis()
+
+        val retrieved = dao.getMappingForKey("a")
+
+        assertNotNull(retrieved)
+        assertTrue(retrieved!!.createdAt >= beforeInsert)
+        assertTrue(retrieved.createdAt <= afterInsert)
+    }
+
+    @Test
+    fun `base key is case sensitive in storage`() = runTest {
+        dao.upsertMapping(CustomKeyMapping.create("a", "@"))
+
+        val lowercase = dao.getMappingForKey("a")
+        val uppercase = dao.getMappingForKey("A")
+
+        assertNotNull(lowercase)
+        assertNull(uppercase)
+    }
+
+    @Test
+    fun `custom symbol can be multi-character`() = runTest {
+        dao.upsertMapping(CustomKeyMapping.create("a", "->"))
+
+        val retrieved = dao.getMappingForKey("a")
+
+        assertEquals("->", retrieved?.customSymbol)
+    }
+
+    @Test
+    fun `custom symbol can be emoji`() = runTest {
+        dao.upsertMapping(CustomKeyMapping.create("a", "😀"))
+
+        val retrieved = dao.getMappingForKey("a")
+
+        assertEquals("😀", retrieved?.customSymbol)
+    }
 }

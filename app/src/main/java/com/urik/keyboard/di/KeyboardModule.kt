@@ -28,10 +28,10 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import javax.inject.Singleton
 
 /**
  * Provides core keyboard services and infrastructure.
@@ -49,16 +49,15 @@ object KeyboardModule {
 
     @Provides
     @Singleton
-    fun provideCacheMemoryManager(
-        @ApplicationContext context: Context,
-    ): CacheMemoryManager = CacheMemoryManager(context)
+    fun provideCacheMemoryManager(@ApplicationContext context: Context): CacheMemoryManager =
+        CacheMemoryManager(context)
 
     @Provides
     @Singleton
     fun provideKeyboardRepository(
         @ApplicationContext context: Context,
         cacheMemoryManager: CacheMemoryManager,
-        settingsRepository: SettingsRepository,
+        settingsRepository: SettingsRepository
     ): KeyboardRepository = KeyboardRepository(context, cacheMemoryManager, settingsRepository)
 
     @Provides
@@ -66,12 +65,13 @@ object KeyboardModule {
     fun provideCharacterVariationService(
         @ApplicationContext context: Context,
         cacheMemoryManager: CacheMemoryManager,
-        languageManager: LanguageManager,
+        languageManager: LanguageManager
     ): CharacterVariationService = CharacterVariationService(context, cacheMemoryManager, languageManager)
 
     @Provides
     @Singleton
-    fun provideLanguageManager(settingsRepository: SettingsRepository): LanguageManager = LanguageManager(settingsRepository)
+    fun provideLanguageManager(settingsRepository: SettingsRepository): LanguageManager =
+        LanguageManager(settingsRepository)
 
     @Provides
     @Singleton
@@ -83,8 +83,9 @@ object KeyboardModule {
         userWordFrequencyDao: UserWordFrequencyDao,
         userWordBigramDao: UserWordBigramDao,
         wordNormalizer: WordNormalizer,
-        cacheMemoryManager: CacheMemoryManager,
-    ): WordFrequencyRepository = WordFrequencyRepository(userWordFrequencyDao, userWordBigramDao, wordNormalizer, cacheMemoryManager)
+        cacheMemoryManager: CacheMemoryManager
+    ): WordFrequencyRepository =
+        WordFrequencyRepository(userWordFrequencyDao, userWordBigramDao, wordNormalizer, cacheMemoryManager)
 
     @Provides
     @Singleton
@@ -93,15 +94,14 @@ object KeyboardModule {
         languageManager: LanguageManager,
         wordNormalizer: WordNormalizer,
         settingsRepository: SettingsRepository,
-        cacheMemoryManager: CacheMemoryManager,
-    ): WordLearningEngine =
-        WordLearningEngine(
-            learnedWordDao,
-            languageManager,
-            wordNormalizer,
-            settingsRepository,
-            cacheMemoryManager,
-        )
+        cacheMemoryManager: CacheMemoryManager
+    ): WordLearningEngine = WordLearningEngine(
+        learnedWordDao,
+        languageManager,
+        wordNormalizer,
+        settingsRepository,
+        cacheMemoryManager
+    )
 
     @Provides
     @Singleton
@@ -112,21 +112,21 @@ object KeyboardModule {
         wordFrequencyRepository: WordFrequencyRepository,
         residualScorer: ResidualScorer,
         zipfCheck: ZipfCheck,
-        wordNormalizer: WordNormalizer,
-    ): StreamingScoringEngine =
-        StreamingScoringEngine(
-            spellCheckManager,
-            wordLearningEngine,
-            pathGeometryAnalyzer,
-            wordFrequencyRepository,
-            residualScorer,
-            zipfCheck,
-            wordNormalizer,
-        )
+        wordNormalizer: WordNormalizer
+    ): StreamingScoringEngine = StreamingScoringEngine(
+        spellCheckManager,
+        wordLearningEngine,
+        pathGeometryAnalyzer,
+        wordFrequencyRepository,
+        residualScorer,
+        zipfCheck,
+        wordNormalizer
+    )
 
     @Provides
     @Singleton
-    fun provideSwipeDetector(streamingScoringEngine: StreamingScoringEngine): SwipeDetector = SwipeDetector(streamingScoringEngine)
+    fun provideSwipeDetector(streamingScoringEngine: StreamingScoringEngine): SwipeDetector =
+        SwipeDetector(streamingScoringEngine)
 
     @Provides
     @Singleton
@@ -136,16 +136,22 @@ object KeyboardModule {
         wordLearningEngine: WordLearningEngine,
         wordFrequencyRepository: WordFrequencyRepository,
         cacheMemoryManager: CacheMemoryManager,
-        wordNormalizer: WordNormalizer,
-    ): SpellCheckManager =
-        SpellCheckManager(context, languageManager, wordLearningEngine, wordFrequencyRepository, wordNormalizer, cacheMemoryManager)
+        wordNormalizer: WordNormalizer
+    ): SpellCheckManager = SpellCheckManager(
+        context,
+        languageManager,
+        wordLearningEngine,
+        wordFrequencyRepository,
+        wordNormalizer,
+        cacheMemoryManager
+    )
 
     @Provides
     @Singleton
     fun provideTextInputProcessor(
         spellCheckManager: SpellCheckManager,
         settingsRepository: SettingsRepository,
-        cacheMemoryManager: CacheMemoryManager,
+        cacheMemoryManager: CacheMemoryManager
     ): TextInputProcessor = TextInputProcessor(spellCheckManager, settingsRepository, cacheMemoryManager)
 
     @Provides
@@ -158,33 +164,31 @@ object KeyboardModule {
         @ApplicationContext context: Context,
         database: KeyboardDatabase,
         cacheMemoryManager: CacheMemoryManager,
-        wordFrequencyRepository: WordFrequencyRepository,
+        wordFrequencyRepository: WordFrequencyRepository
     ): SettingsRepository = SettingsRepository(context, database, cacheMemoryManager, wordFrequencyRepository)
 
     @Provides
     @Singleton
     fun provideThemeManager(
         @ApplicationContext context: Context,
-        settingsRepository: SettingsRepository,
-    ): com.urik.keyboard.theme.ThemeManager =
-        com.urik.keyboard.theme
-            .ThemeManager(context, settingsRepository)
+        settingsRepository: SettingsRepository
+    ): com.urik.keyboard.theme.ThemeManager = com.urik.keyboard.theme
+        .ThemeManager(context, settingsRepository)
 
     @Provides
     @Singleton
     fun provideEmojiSearchManager(
         @ApplicationContext context: Context,
-        languageManager: LanguageManager,
+        languageManager: LanguageManager
     ): EmojiSearchManager = EmojiSearchManager(context, languageManager)
 
     @Provides
     @Singleton
     fun provideRecentEmojiProvider(
         @ApplicationContext context: Context,
-        @ApplicationScope scope: CoroutineScope,
-    ): com.urik.keyboard.service.RecentEmojiProvider =
-        com.urik.keyboard.service
-            .RecentEmojiProvider(context, scope)
+        @ApplicationScope scope: CoroutineScope
+    ): com.urik.keyboard.service.RecentEmojiProvider = com.urik.keyboard.service
+        .RecentEmojiProvider(context, scope)
 
     @Provides
     @Singleton
@@ -192,6 +196,6 @@ object KeyboardModule {
         @ApplicationContext context: Context,
         database: KeyboardDatabase,
         learnedWordDao: LearnedWordDao,
-        cacheMemoryManager: CacheMemoryManager,
+        cacheMemoryManager: CacheMemoryManager
     ): DictionaryBackupManager = DictionaryBackupManager(context, database, learnedWordDao, cacheMemoryManager)
 }

@@ -45,59 +45,58 @@ class AboutActivity : AppCompatActivity() {
         applyWindowInsets(rootLayout)
     }
 
-    private fun createLayout(): LinearLayout =
-        LinearLayout(this).apply {
-            id = View.generateViewId()
-            orientation = LinearLayout.VERTICAL
-            layoutParams =
-                LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                )
+    private fun createLayout(): LinearLayout = LinearLayout(this).apply {
+        id = View.generateViewId()
+        orientation = LinearLayout.VERTICAL
+        layoutParams =
+            LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.MATCH_PARENT
+            )
 
-            val toolbar =
-                MaterialToolbar(context).apply {
-                    id = R.id.about_toolbar
-                    layoutParams =
-                        LinearLayout.LayoutParams(
-                            LinearLayout.LayoutParams.MATCH_PARENT,
-                            resources.getDimensionPixelSize(
-                                androidx.appcompat.R.dimen.abc_action_bar_default_height_material,
-                            ),
+        val toolbar =
+            MaterialToolbar(context).apply {
+                id = R.id.about_toolbar
+                layoutParams =
+                    LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        resources.getDimensionPixelSize(
+                            androidx.appcompat.R.dimen.abc_action_bar_default_height_material
                         )
-                }
-            addView(toolbar)
+                    )
+            }
+        addView(toolbar)
 
-            val scrollView =
-                ScrollView(context).apply {
-                    layoutParams =
-                        LinearLayout.LayoutParams(
-                            LinearLayout.LayoutParams.MATCH_PARENT,
-                            0,
-                            1f,
+        val scrollView =
+            ScrollView(context).apply {
+                layoutParams =
+                    LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        0,
+                        1f
+                    )
+
+                val textView =
+                    TextView(context).apply {
+                        id = R.id.about_text
+                        textSize = 16f
+                        setTextColor(
+                            ContextCompat.getColor(
+                                context,
+                                R.color.content_primary
+                            )
                         )
-
-                    val textView =
-                        TextView(context).apply {
-                            id = R.id.about_text
-                            textSize = 16f
-                            setTextColor(
-                                ContextCompat.getColor(
-                                    context,
-                                    R.color.content_primary,
-                                ),
+                        setLinkTextColor(
+                            ContextCompat.getColor(
+                                context,
+                                R.color.light_orange
                             )
-                            setLinkTextColor(
-                                ContextCompat.getColor(
-                                    context,
-                                    R.color.light_orange,
-                                ),
-                            )
-                        }
-                    addView(textView)
-                }
-            addView(scrollView)
-        }
+                        )
+                    }
+                addView(textView)
+            }
+        addView(scrollView)
+    }
 
     private fun applyWindowInsets(rootLayout: LinearLayout) {
         val scrollView = rootLayout.getChildAt(1) as ScrollView
@@ -112,7 +111,7 @@ class AboutActivity : AppCompatActivity() {
                 basePadding,
                 basePadding,
                 basePadding,
-                basePadding + insets.bottom,
+                basePadding + insets.bottom
             )
             windowInsets
         }
@@ -166,7 +165,7 @@ class AboutActivity : AppCompatActivity() {
                 "https://github.com/urikdev/Urik/releases",
                 "https://github.com/urikdev/Urik/issues",
                 "https://github.com/urikdev/Urik/blob/main/PRIVACY.md",
-                "https://buymeacoffee.com/urikdevelopment",
+                "https://buymeacoffee.com/urikdevelopment"
             )
 
         links.forEach { url ->
@@ -180,7 +179,7 @@ class AboutActivity : AppCompatActivity() {
                     },
                     start,
                     start + url.length,
-                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE,
+                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
                 )
             }
         }
@@ -196,17 +195,16 @@ class AboutActivity : AppCompatActivity() {
         }
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean =
-        when (item.itemId) {
-            android.R.id.home -> {
-                finish()
-                true
-            }
-
-            else -> {
-                super.onOptionsItemSelected(item)
-            }
+    override fun onOptionsItemSelected(item: MenuItem): Boolean = when (item.itemId) {
+        android.R.id.home -> {
+            finish()
+            true
         }
+
+        else -> {
+            super.onOptionsItemSelected(item)
+        }
+    }
 
     companion object {
         private const val BASE_PADDING_DP = 16

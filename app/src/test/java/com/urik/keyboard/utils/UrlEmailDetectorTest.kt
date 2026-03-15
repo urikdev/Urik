@@ -11,7 +11,7 @@ class UrlEmailDetectorTest {
             UrlEmailDetector.isUrlOrEmailContext(
                 currentWord = "example21",
                 textBeforeCursor = "Type your email: ",
-                nextChar = "@",
+                nextChar = "@"
             )
         assertTrue("Should detect email when @ is next character", result)
     }
@@ -22,7 +22,7 @@ class UrlEmailDetectorTest {
             UrlEmailDetector.isUrlOrEmailContext(
                 currentWord = "example",
                 textBeforeCursor = "user@",
-                nextChar = ".",
+                nextChar = "."
             )
         assertTrue("Should detect email when @ is in text before cursor", result)
     }
@@ -33,7 +33,7 @@ class UrlEmailDetectorTest {
             UrlEmailDetector.isUrlOrEmailContext(
                 currentWord = "user@example",
                 textBeforeCursor = "",
-                nextChar = ".",
+                nextChar = "."
             )
         assertTrue("Should detect email when @ is in current word", result)
     }
@@ -44,7 +44,7 @@ class UrlEmailDetectorTest {
             UrlEmailDetector.isUrlOrEmailContext(
                 currentWord = "example",
                 textBeforeCursor = "Visit https://",
-                nextChar = ".",
+                nextChar = "."
             )
         assertTrue("Should detect URL when :// is in text before cursor", result)
     }
@@ -55,7 +55,7 @@ class UrlEmailDetectorTest {
             UrlEmailDetector.isUrlOrEmailContext(
                 currentWord = "www",
                 textBeforeCursor = "Go to ",
-                nextChar = ".",
+                nextChar = "."
             )
         assertTrue("Should detect URL when current word is 'www' and next is '.'", result)
     }
@@ -66,7 +66,7 @@ class UrlEmailDetectorTest {
             UrlEmailDetector.isUrlOrEmailContext(
                 currentWord = "http",
                 textBeforeCursor = "",
-                nextChar = ":",
+                nextChar = ":"
             )
         assertTrue("Should detect URL when typing http:", result)
     }
@@ -77,7 +77,7 @@ class UrlEmailDetectorTest {
             UrlEmailDetector.isUrlOrEmailContext(
                 currentWord = "https",
                 textBeforeCursor = "",
-                nextChar = ":",
+                nextChar = ":"
             )
         assertTrue("Should detect URL when typing https:", result)
     }
@@ -88,7 +88,7 @@ class UrlEmailDetectorTest {
             UrlEmailDetector.isUrlOrEmailContext(
                 currentWord = "ftp",
                 textBeforeCursor = "",
-                nextChar = ":",
+                nextChar = ":"
             )
         assertTrue("Should detect URL when typing ftp:", result)
     }
@@ -99,7 +99,7 @@ class UrlEmailDetectorTest {
             UrlEmailDetector.isUrlOrEmailContext(
                 currentWord = "google",
                 textBeforeCursor = "https://www.",
-                nextChar = ".",
+                nextChar = "."
             )
         assertTrue("Should detect URL when protocol is in combined text", result)
     }
@@ -110,7 +110,7 @@ class UrlEmailDetectorTest {
             UrlEmailDetector.isUrlOrEmailContext(
                 currentWord = "hello",
                 textBeforeCursor = "Say ",
-                nextChar = " ",
+                nextChar = " "
             )
         assertFalse("Should not detect URL/email for normal word", result)
     }
@@ -121,7 +121,7 @@ class UrlEmailDetectorTest {
             UrlEmailDetector.isUrlOrEmailContext(
                 currentWord = "sentence",
                 textBeforeCursor = "End of ",
-                nextChar = ".",
+                nextChar = "."
             )
         assertFalse("Should not detect URL/email for normal sentence ending", result)
     }
@@ -132,7 +132,7 @@ class UrlEmailDetectorTest {
             UrlEmailDetector.isUrlOrEmailContext(
                 currentWord = "thanks",
                 textBeforeCursor = "Send to user@example.com ",
-                nextChar = " ",
+                nextChar = " "
             )
         assertFalse("Should not detect URL/email after completed email with space", result)
     }
@@ -143,7 +143,7 @@ class UrlEmailDetectorTest {
             UrlEmailDetector.isUrlOrEmailContext(
                 currentWord = "google",
                 textBeforeCursor = "www.",
-                nextChar = ".",
+                nextChar = "."
             )
         assertTrue("Should detect URL when www. is in text before cursor", result)
     }
@@ -154,7 +154,7 @@ class UrlEmailDetectorTest {
             UrlEmailDetector.isUrlOrEmailContext(
                 currentWord = "time",
                 textBeforeCursor = "Current ",
-                nextChar = ":",
+                nextChar = ":"
             )
         assertFalse("Should not detect URL for normal colon usage", result)
     }
@@ -165,7 +165,7 @@ class UrlEmailDetectorTest {
             UrlEmailDetector.isUrlOrEmailContext(
                 currentWord = "example",
                 textBeforeCursor = "test@",
-                nextChar = ".",
+                nextChar = "."
             )
         assertTrue("Should detect email context for domain part after @", result)
     }
@@ -176,7 +176,7 @@ class UrlEmailDetectorTest {
             UrlEmailDetector.isUrlOrEmailContext(
                 currentWord = "WWW",
                 textBeforeCursor = "",
-                nextChar = ".",
+                nextChar = "."
             )
         assertTrue("Should detect www in any case", result)
     }
@@ -187,7 +187,7 @@ class UrlEmailDetectorTest {
             UrlEmailDetector.isUrlOrEmailContext(
                 currentWord = "hello",
                 textBeforeCursor = "I emailed user@example.com yesterday. Now I say ",
-                nextChar = " ",
+                nextChar = " "
             )
         assertFalse("Should not detect email context when @ is in different sentence", result)
     }

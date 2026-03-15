@@ -6,20 +6,21 @@ plugins {
     id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
     id("org.jlleitschuh.gradle.ktlint")
+    id("io.gitlab.arturbosch.detekt")
     id("androidx.room")
     id("org.jetbrains.kotlinx.kover")
 }
 
 android {
     namespace = "com.urik.keyboard"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.urik.keyboard"
         minSdk = 26
         targetSdk = 35
-        versionCode = 56
-        versionName = "0.18.0-beta"
+        versionCode = 57
+        versionName = "0.19.0-beta"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -45,7 +46,7 @@ android {
             isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro",
+                "proguard-rules.pro"
             )
             isDebuggable = false
             isJniDebuggable = false
@@ -54,15 +55,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-
-    //noinspection WrongGradleMethod
-    kotlin {
-        compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_17)
-        }
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
 
     buildFeatures {
@@ -80,7 +74,7 @@ android {
                 setOf(
                     "/META-INF/{AL2.0,LGPL2.1}",
                     "/META-INF/LICENSE.md",
-                    "/META-INF/LICENSE-notice.md",
+                    "/META-INF/LICENSE-notice.md"
                 )
         }
     }
@@ -100,10 +94,16 @@ android {
             all {
                 it.jvmArgs(
                     "-XX:+EnableDynamicAgentLoading",
-                    "-Djdk.instrument.traceUsage",
+                    "-Djdk.instrument.traceUsage"
                 )
             }
         }
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_21)
     }
 }
 
@@ -112,6 +112,22 @@ ktlint {
     ignoreFailures.set(false)
     reporters {
         reporter(org.jlleitschuh.gradle.ktlint.reporter.ReporterType.CHECKSTYLE)
+    }
+}
+
+detekt {
+    buildUponDefaultConfig = true
+    allRules = false
+    config.setFrom("$rootDir/detekt.yml")
+    parallel = true
+    autoCorrect = false
+}
+
+tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
+    reports {
+        html.required.set(true)
+        xml.required.set(true)
+        sarif.required.set(true)
     }
 }
 
@@ -133,7 +149,7 @@ kover {
                     "*_Factory",
                     "*_HiltModules*",
                     "*Hilt_*",
-                    "dagger.hilt.*",
+                    "dagger.hilt.*"
                 )
             }
         }
@@ -156,13 +172,12 @@ dependencies {
     implementation(libs.material)
 
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
-    implementation(libs.androidx.lifecycle.viewmodel.savedstate)
 
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.serialization.json)
 
     implementation(libs.hilt.android)
-    implementation(libs.core.ktx)
+    implementation(libs.androidx.core.ktx)
     ksp(libs.hilt.android.compiler)
 
     implementation(libs.icu4j)
@@ -178,7 +193,6 @@ dependencies {
     implementation(libs.androidx.datastore.preferences)
 
     implementation(libs.androidx.emoji2.emojipicker)
-    implementation(libs.androidx.emoji2)
 
     implementation(libs.android.database.sqlcipher)
     implementation(libs.androidx.sqlite.ktx)
@@ -191,10 +205,5 @@ dependencies {
     testImplementation(libs.androidx.core.testing)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.robolectric)
-    testImplementation(libs.androidx.room.testing)
-    testImplementation(libs.androidx.core.ktx)
-
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(libs.androidx.runner)
+    testImplementation(libs.core.ktx)
 }

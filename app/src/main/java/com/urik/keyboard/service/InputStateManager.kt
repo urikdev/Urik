@@ -4,13 +4,10 @@ import com.urik.keyboard.utils.SelectionStateTracker
 
 enum class SpellConfirmationState {
     NORMAL,
-    AWAITING_CONFIRMATION,
+    AWAITING_CONFIRMATION
 }
 
-data class PostCommitReplacementState(
-    val originalWord: String,
-    val committedWord: String,
-)
+data class PostCommitReplacementState(val originalWord: String, val committedWord: String)
 
 interface ViewCallback {
     fun clearSuggestions()
@@ -22,7 +19,7 @@ class InputStateManager(
     private val viewCallback: ViewCallback,
     private val onShiftStateChanged: (Boolean) -> Unit,
     private val isCapsLockOn: () -> Boolean,
-    private val cancelDebounceJob: () -> Unit,
+    private val cancelDebounceJob: () -> Unit
 ) {
     @Volatile
     var displayBuffer = ""
@@ -121,28 +118,20 @@ class InputStateManager(
     val requiresDirectCommit: Boolean
         get() = isSecureField || isDirectCommitField
 
-    fun getSequenceAndBuffer(): Pair<Long, String> =
-        synchronized(processingLock) {
-            ++processingSequence to displayBuffer
-        }
+    fun getSequenceAndBuffer(): Pair<Long, String> = synchronized(processingLock) {
+        ++processingSequence to displayBuffer
+    }
 
-    fun isSequenceCurrent(
-        sequence: Long,
-        bufferSnapshot: String,
-    ): Boolean =
-        synchronized(processingLock) {
-            sequence == processingSequence && displayBuffer == bufferSnapshot
-        }
+    fun isSequenceCurrent(sequence: Long, bufferSnapshot: String): Boolean = synchronized(processingLock) {
+        sequence == processingSequence && displayBuffer == bufferSnapshot
+    }
 
     fun onComposingReasserted() {
         composingReassertionCount++
         isActivelyEditing = true
     }
 
-    fun onRecompositionSucceeded(
-        word: String,
-        wordStart: Int,
-    ) {
+    fun onRecompositionSucceeded(word: String, wordStart: Int) {
         displayBuffer = word
         composingRegionStart = wordStart
     }

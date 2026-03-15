@@ -25,6 +25,6 @@ data object Neon : KeyboardTheme {
             focusIndicator = "#00ffff".toColorInt(),
             swipePrimary = "#00ffff".toColorInt(),
             swipeSecondary = "#ff00ff".toColorInt(),
-            swipeCurrent = "#ffff00".toColorInt(),
+            swipeCurrent = "#ffff00".toColorInt()
         )
 }

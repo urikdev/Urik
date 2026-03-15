@@ -20,16 +20,13 @@ class ThemePickerAdapter(
     private var selectedThemeId: String,
     private var favoriteThemeIds: Set<String>,
     private val onThemeSelected: (KeyboardTheme) -> Unit,
-    private val onFavoriteToggled: (KeyboardTheme) -> Unit,
+    private val onFavoriteToggled: (KeyboardTheme) -> Unit
 ) : RecyclerView.Adapter<ThemePickerAdapter.ThemeViewHolder>() {
     private var previewLayout: KeyboardLayout? = null
     private var previewRenderer: KeyboardPreviewRenderer? = null
     private var themes: List<KeyboardTheme> = sortThemes(allThemes, favoriteThemeIds)
 
-    private fun sortThemes(
-        themes: List<KeyboardTheme>,
-        favorites: Set<String>,
-    ): List<KeyboardTheme> =
+    private fun sortThemes(themes: List<KeyboardTheme>, favorites: Set<String>): List<KeyboardTheme> =
         themes.sortedBy { theme ->
             if (favorites.contains(theme.id)) 0 else 1
         }
@@ -39,20 +36,14 @@ class ThemePickerAdapter(
         notifyItemRangeChanged(0, themes.size, PAYLOAD_PREVIEW_UPDATE)
     }
 
-    override fun onCreateViewHolder(
-        parent: ViewGroup,
-        viewType: Int,
-    ): ThemeViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ThemeViewHolder {
         if (previewRenderer == null) {
             previewRenderer = KeyboardPreviewRenderer(parent.context)
         }
         return ThemeViewHolder.create(parent)
     }
 
-    override fun onBindViewHolder(
-        holder: ThemeViewHolder,
-        position: Int,
-    ) {
+    override fun onBindViewHolder(holder: ThemeViewHolder, position: Int) {
         val theme = themes[position]
         val isSelected = theme.id == selectedThemeId
         val isFavorite = favoriteThemeIds.contains(theme.id)
@@ -63,15 +54,11 @@ class ThemePickerAdapter(
             previewLayout,
             previewRenderer,
             onThemeClick = { onThemeSelected(theme) },
-            onFavoriteClick = { onFavoriteToggled(theme) },
+            onFavoriteClick = { onFavoriteToggled(theme) }
         )
     }
 
-    override fun onBindViewHolder(
-        holder: ThemeViewHolder,
-        position: Int,
-        payloads: MutableList<Any>,
-    ) {
+    override fun onBindViewHolder(holder: ThemeViewHolder, position: Int, payloads: MutableList<Any>) {
         if (payloads.isEmpty()) {
             super.onBindViewHolder(holder, position, payloads)
         } else {
@@ -117,18 +104,14 @@ class ThemePickerAdapter(
 
                     override fun getNewListSize() = newThemes.size
 
-                    override fun areItemsTheSame(
-                        oldPos: Int,
-                        newPos: Int,
-                    ) = oldThemes[oldPos].id == newThemes[newPos].id
+                    override fun areItemsTheSame(oldPos: Int, newPos: Int) =
+                        oldThemes[oldPos].id == newThemes[newPos].id
 
-                    override fun areContentsTheSame(
-                        oldPos: Int,
-                        newPos: Int,
-                    ) = oldThemes[oldPos].id == newThemes[newPos].id &&
-                        oldFavorites.contains(oldThemes[oldPos].id) ==
-                        favoriteThemeIds.contains(newThemes[newPos].id)
-                },
+                    override fun areContentsTheSame(oldPos: Int, newPos: Int) =
+                        oldThemes[oldPos].id == newThemes[newPos].id &&
+                            oldFavorites.contains(oldThemes[oldPos].id) ==
+                            favoriteThemeIds.contains(newThemes[newPos].id)
+                }
             )
 
         themes = newThemes
@@ -141,9 +124,7 @@ class ThemePickerAdapter(
         private const val PAYLOAD_PREVIEW_UPDATE = "preview_update"
     }
 
-    class ThemeViewHolder(
-        private val rootView: FrameLayout,
-    ) : RecyclerView.ViewHolder(rootView) {
+    class ThemeViewHolder(private val rootView: FrameLayout) : RecyclerView.ViewHolder(rootView) {
         private val cardView: MaterialCardView = rootView.findViewById(VIEW_ID_CARD)
         private val previewContainer: FrameLayout = rootView.findViewById(VIEW_ID_PREVIEW_CONTAINER)
         private val themeName: TextView = rootView.findViewById(VIEW_ID_THEME_NAME)
@@ -157,7 +138,7 @@ class ThemePickerAdapter(
             previewLayout: KeyboardLayout?,
             previewRenderer: KeyboardPreviewRenderer?,
             onThemeClick: () -> Unit,
-            onFavoriteClick: () -> Unit,
+            onFavoriteClick: () -> Unit
         ) {
             themeName.text = theme.displayName
 
@@ -173,12 +154,12 @@ class ThemePickerAdapter(
             selectedIndicator.visibility = if (isSelected) View.VISIBLE else View.GONE
 
             favoriteIndicator.setImageResource(
-                if (isFavorite) R.drawable.ic_heart_filled else R.drawable.ic_heart_outline,
+                if (isFavorite) R.drawable.ic_heart_filled else R.drawable.ic_heart_outline
             )
             favoriteIndicator.contentDescription =
                 rootView.context.getString(
                     if (isFavorite) R.string.theme_remove_favorite else R.string.theme_add_favorite,
-                    theme.displayName,
+                    theme.displayName
                 )
             favoriteIndicator.setOnClickListener { onFavoriteClick() }
 
@@ -192,7 +173,7 @@ class ThemePickerAdapter(
             rootView.contentDescription =
                 rootView.context.getString(
                     if (isSelected) R.string.theme_description_selected else R.string.theme_description,
-                    theme.displayName,
+                    theme.displayName
                 )
             rootView.setOnClickListener { onThemeClick() }
         }
@@ -200,7 +181,7 @@ class ThemePickerAdapter(
         fun updatePreview(
             theme: KeyboardTheme,
             previewLayout: KeyboardLayout?,
-            previewRenderer: KeyboardPreviewRenderer?,
+            previewRenderer: KeyboardPreviewRenderer?
         ) {
             previewContainer.removeAllViews()
 
@@ -238,7 +219,7 @@ class ThemePickerAdapter(
                         layoutParams =
                             RecyclerView.LayoutParams(
                                 RecyclerView.LayoutParams.MATCH_PARENT,
-                                RecyclerView.LayoutParams.WRAP_CONTENT,
+                                RecyclerView.LayoutParams.WRAP_CONTENT
                             )
 
                         val cardMargin = (CARD_MARGIN_DP * density).toInt()
@@ -251,7 +232,7 @@ class ThemePickerAdapter(
                         layoutParams =
                             FrameLayout.LayoutParams(
                                 FrameLayout.LayoutParams.MATCH_PARENT,
-                                FrameLayout.LayoutParams.WRAP_CONTENT,
+                                FrameLayout.LayoutParams.WRAP_CONTENT
                             )
                         radius = 12f * density
                         cardElevation = 4f * density
@@ -265,7 +246,7 @@ class ThemePickerAdapter(
                         layoutParams =
                             FrameLayout.LayoutParams(
                                 FrameLayout.LayoutParams.MATCH_PARENT,
-                                FrameLayout.LayoutParams.MATCH_PARENT,
+                                FrameLayout.LayoutParams.MATCH_PARENT
                             )
                         val padding = (12 * density).toInt()
                         setPadding(padding, padding, padding, padding)
@@ -277,7 +258,7 @@ class ThemePickerAdapter(
                         layoutParams =
                             LinearLayout.LayoutParams(
                                 LinearLayout.LayoutParams.MATCH_PARENT,
-                                LinearLayout.LayoutParams.WRAP_CONTENT,
+                                LinearLayout.LayoutParams.WRAP_CONTENT
                             )
                     }
 
@@ -287,7 +268,7 @@ class ThemePickerAdapter(
                         layoutParams =
                             LinearLayout.LayoutParams(
                                 LinearLayout.LayoutParams.MATCH_PARENT,
-                                LinearLayout.LayoutParams.WRAP_CONTENT,
+                                LinearLayout.LayoutParams.WRAP_CONTENT
                             )
                         gravity = Gravity.CENTER_VERTICAL
                         val topMargin = (8 * density).toInt()
@@ -301,7 +282,7 @@ class ThemePickerAdapter(
                             LinearLayout.LayoutParams(
                                 0,
                                 LinearLayout.LayoutParams.WRAP_CONTENT,
-                                1f,
+                                1f
                             )
                         textSize = 16f
                         setTextColor(TEXT_COLOR)
@@ -314,7 +295,7 @@ class ThemePickerAdapter(
                             LinearLayout
                                 .LayoutParams(
                                     (24 * density).toInt(),
-                                    (24 * density).toInt(),
+                                    (24 * density).toInt()
                                 ).apply {
                                     marginEnd = (8 * density).toInt()
                                 }
@@ -329,7 +310,7 @@ class ThemePickerAdapter(
                         layoutParams =
                             LinearLayout.LayoutParams(
                                 (24 * density).toInt(),
-                                (24 * density).toInt(),
+                                (24 * density).toInt()
                             )
                         setImageResource(R.drawable.done_48px)
                         setColorFilter(ICON_COLOR)

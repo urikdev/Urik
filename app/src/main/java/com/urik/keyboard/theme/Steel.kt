@@ -25,6 +25,6 @@ data object Steel : KeyboardTheme {
             focusIndicator = "#e8ecf0".toColorInt(),
             swipePrimary = "#c4c9d1".toColorInt(),
             swipeSecondary = "#e8ecf0".toColorInt(),
-            swipeCurrent = "#3d4145".toColorInt(),
+            swipeCurrent = "#3d4145".toColorInt()
         )
 }

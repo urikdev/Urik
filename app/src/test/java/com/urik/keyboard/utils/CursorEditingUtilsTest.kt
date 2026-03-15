@@ -13,7 +13,7 @@ class CursorEditingUtilsTest {
                 textBefore = "",
                 textAfter = "",
                 displayBuffer = "hello",
-                hasWordStateContent = true,
+                hasWordStateContent = true
             )
 
         Assert.assertTrue(shouldClear)
@@ -28,7 +28,7 @@ class CursorEditingUtilsTest {
                 textBefore = "",
                 textAfter = "world",
                 displayBuffer = "hello",
-                hasWordStateContent = true,
+                hasWordStateContent = true
             )
 
         Assert.assertFalse(shouldClear)
@@ -43,7 +43,7 @@ class CursorEditingUtilsTest {
                 textBefore = "",
                 textAfter = "",
                 displayBuffer = "",
-                hasWordStateContent = false,
+                hasWordStateContent = false
             )
 
         Assert.assertFalse(shouldClear)
@@ -58,7 +58,7 @@ class CursorEditingUtilsTest {
                 textBefore = "",
                 textAfter = "",
                 displayBuffer = "hello",
-                hasWordStateContent = true,
+                hasWordStateContent = true
             )
 
         Assert.assertFalse(shouldClear)
@@ -70,7 +70,7 @@ class CursorEditingUtilsTest {
             CursorEditingUtils.calculateCursorPositionInWord(
                 absoluteCursorPos = 15,
                 composingRegionStart = 10,
-                displayBufferLength = 5,
+                displayBufferLength = 5
             )
 
         Assert.assertEquals(5, cursorPos)
@@ -82,7 +82,7 @@ class CursorEditingUtilsTest {
             CursorEditingUtils.calculateCursorPositionInWord(
                 absoluteCursorPos = 15,
                 composingRegionStart = -1,
-                displayBufferLength = 5,
+                displayBufferLength = 5
             )
 
         Assert.assertEquals(5, cursorPos)
@@ -94,7 +94,7 @@ class CursorEditingUtilsTest {
             CursorEditingUtils.calculateCursorPositionInWord(
                 absoluteCursorPos = 100,
                 composingRegionStart = 10,
-                displayBufferLength = 5,
+                displayBufferLength = 5
             )
 
         Assert.assertEquals(5, cursorPos)
@@ -105,7 +105,7 @@ class CursorEditingUtilsTest {
         val start =
             CursorEditingUtils.recalculateComposingRegionStart(
                 currentTextLength = 15,
-                displayBufferLength = 5,
+                displayBufferLength = 5
             )
 
         Assert.assertEquals(10, start)
@@ -206,8 +206,8 @@ class CursorEditingUtilsTest {
                 newSelStart = 100,
                 newSelEnd = 100,
                 composingRegionStart = -1,
-                composingRegionEnd = -1,
-            ),
+                composingRegionEnd = -1
+            )
         )
     }
 
@@ -220,8 +220,8 @@ class CursorEditingUtilsTest {
                 newSelStart = 11,
                 newSelEnd = 11,
                 composingRegionStart = -1,
-                composingRegionEnd = -1,
-            ),
+                composingRegionEnd = -1
+            )
         )
     }
 
@@ -234,8 +234,8 @@ class CursorEditingUtilsTest {
                 newSelStart = 18,
                 newSelEnd = 18,
                 composingRegionStart = 10,
-                composingRegionEnd = 20,
-            ),
+                composingRegionEnd = 20
+            )
         )
     }
 
@@ -248,8 +248,8 @@ class CursorEditingUtilsTest {
                 newSelStart = 10,
                 newSelEnd = 20,
                 composingRegionStart = -1,
-                composingRegionEnd = -1,
-            ),
+                composingRegionEnd = -1
+            )
         )
     }
 
@@ -290,8 +290,8 @@ class CursorEditingUtilsTest {
                 expectedCursorPosition = 10,
                 actualCursorPosition = 50,
                 expectedComposingStart = 5,
-                actualComposingStart = 5,
-            ),
+                actualComposingStart = 5
+            )
         )
     }
 
@@ -302,8 +302,8 @@ class CursorEditingUtilsTest {
                 expectedCursorPosition = 10,
                 actualCursorPosition = 11,
                 expectedComposingStart = 5,
-                actualComposingStart = 5,
-            ),
+                actualComposingStart = 5
+            )
         )
     }
 
@@ -314,8 +314,8 @@ class CursorEditingUtilsTest {
                 expectedCursorPosition = 10,
                 actualCursorPosition = 10,
                 expectedComposingStart = 5,
-                actualComposingStart = 20,
-            ),
+                actualComposingStart = 20
+            )
         )
     }
 
@@ -324,7 +324,7 @@ class CursorEditingUtilsTest {
         val text = "Hello\nWorld"
 
         Assert.assertTrue(
-            CursorEditingUtils.crossesParagraphBoundary(0, 8, text),
+            CursorEditingUtils.crossesParagraphBoundary(0, 8, text)
         )
     }
 
@@ -333,17 +333,17 @@ class CursorEditingUtilsTest {
         val text = "Hello World"
 
         Assert.assertFalse(
-            CursorEditingUtils.crossesParagraphBoundary(0, 5, text),
+            CursorEditingUtils.crossesParagraphBoundary(0, 5, text)
         )
     }
 
     @Test
     fun `crossesParagraphBoundary handles invalid positions`() {
         Assert.assertFalse(
-            CursorEditingUtils.crossesParagraphBoundary(-1, 5, "Hello"),
+            CursorEditingUtils.crossesParagraphBoundary(-1, 5, "Hello")
         )
         Assert.assertFalse(
-            CursorEditingUtils.crossesParagraphBoundary(0, 100, "Hello"),
+            CursorEditingUtils.crossesParagraphBoundary(0, 100, "Hello")
         )
     }
 }

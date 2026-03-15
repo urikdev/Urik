@@ -25,6 +25,6 @@ data object Mint : KeyboardTheme {
             focusIndicator = "#c4ffeb".toColorInt(),
             swipePrimary = "#a3f5d9".toColorInt(),
             swipeSecondary = "#c4ffeb".toColorInt(),
-            swipeCurrent = "#4a6b58".toColorInt(),
+            swipeCurrent = "#4a6b58".toColorInt()
         )
 }

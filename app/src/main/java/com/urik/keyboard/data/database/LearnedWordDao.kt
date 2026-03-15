@@ -32,13 +32,9 @@ interface LearnedWordDao {
         AND frequency >= 2
         ORDER BY frequency DESC, last_used DESC
         LIMIT :limit
-    """,
+    """
     )
-    suspend fun getFastSuggestions(
-        prefix: String,
-        languageTag: String,
-        limit: Int = 5,
-    ): List<FastSuggestion>
+    suspend fun getFastSuggestions(prefix: String, languageTag: String, limit: Int = 5): List<FastSuggestion>
 
     /**
      * Full-text search for fuzzy word matching.
@@ -54,13 +50,9 @@ interface LearnedWordDao {
         AND learned_words.language_tag = :languageTag
         ORDER BY learned_words.frequency DESC
         LIMIT :limit
-    """,
+    """
     )
-    suspend fun searchWordsWithFts(
-        searchQuery: String,
-        languageTag: String,
-        limit: Int = 10,
-    ): List<LearnedWord>
+    suspend fun searchWordsWithFts(searchQuery: String, languageTag: String, limit: Int = 10): List<LearnedWord>
 
     @Query(
         """
@@ -69,13 +61,9 @@ interface LearnedWordDao {
         AND word_normalized LIKE :prefix || '%'
         ORDER BY frequency DESC, last_used DESC
         LIMIT :limit
-    """,
+    """
     )
-    suspend fun findWordsWithPrefix(
-        languageTag: String,
-        prefix: String,
-        limit: Int = 10,
-    ): List<LearnedWord>
+    suspend fun findWordsWithPrefix(languageTag: String, prefix: String, limit: Int = 10): List<LearnedWord>
 
     @Query(
         """
@@ -83,12 +71,9 @@ interface LearnedWordDao {
         WHERE language_tag = :languageTag 
         AND word_normalized = :normalizedWord
         LIMIT 1
-    """,
+    """
     )
-    suspend fun findExactWord(
-        languageTag: String,
-        normalizedWord: String,
-    ): LearnedWord?
+    suspend fun findExactWord(languageTag: String, normalizedWord: String): LearnedWord?
 
     /**
      * Batch existence check for multiple words.
@@ -98,12 +83,9 @@ interface LearnedWordDao {
         SELECT word_normalized FROM learned_words 
         WHERE language_tag = :languageTag 
         AND word_normalized IN (:normalizedWords)
-    """,
+    """
     )
-    suspend fun findExistingWords(
-        languageTag: String,
-        normalizedWords: List<String>,
-    ): List<String>
+    suspend fun findExistingWords(languageTag: String, normalizedWords: List<String>): List<String>
 
     @Query(
         """
@@ -111,18 +93,15 @@ interface LearnedWordDao {
         WHERE language_tag = :languageTag 
         ORDER BY frequency DESC
         LIMIT :limit
-    """,
+    """
     )
-    suspend fun getMostFrequentWords(
-        languageTag: String,
-        limit: Int = 100,
-    ): List<LearnedWord>
+    suspend fun getMostFrequentWords(languageTag: String, limit: Int = 100): List<LearnedWord>
 
     @Query(
         """
         SELECT COUNT(*) FROM learned_words 
         WHERE language_tag = :languageTag
-    """,
+    """
     )
     suspend fun getWordCount(languageTag: String): Int
 
@@ -132,7 +111,7 @@ interface LearnedWordDao {
         FROM learned_words 
         GROUP BY language_tag
         ORDER BY word_count DESC
-    """,
+    """
     )
     suspend fun getWordCountByLanguageRaw(): List<LanguageWordCount>
 
@@ -146,7 +125,7 @@ interface LearnedWordDao {
         """
         SELECT COUNT(*) FROM learned_words 
         WHERE source = :source
-    """,
+    """
     )
     suspend fun getWordCountBySource(source: WordSource): Int
 
@@ -155,7 +134,7 @@ interface LearnedWordDao {
         SELECT source, COUNT(*) as count
         FROM learned_words 
         GROUP BY source
-    """,
+    """
     )
     suspend fun getWordCountsBySource(): List<WordSourceCount>
 
@@ -166,12 +145,9 @@ interface LearnedWordDao {
             WHERE word_normalized = :normalizedWord 
             AND language_tag = :languageTag
         )
-    """,
+    """
     )
-    suspend fun wordExists(
-        normalizedWord: String,
-        languageTag: String,
-    ): Boolean
+    suspend fun wordExists(normalizedWord: String, languageTag: String): Boolean
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertWord(word: LearnedWord): Long
@@ -206,12 +182,9 @@ interface LearnedWordDao {
     DELETE FROM learned_words 
     WHERE language_tag = :languageTag 
     AND word_normalized = :normalizedWord
-""",
+"""
     )
-    suspend fun removeWord(
-        languageTag: String,
-        normalizedWord: String,
-    ): Int
+    suspend fun removeWord(languageTag: String, normalizedWord: String): Int
 
     /**
      * Removes word from both learned_words and FTS tables.
@@ -219,10 +192,7 @@ interface LearnedWordDao {
      * @return number of rows deleted from learned_words (0 or 1)
      */
     @Transaction
-    suspend fun removeWordComplete(
-        languageTag: String,
-        normalizedWord: String,
-    ): Int {
+    suspend fun removeWordComplete(languageTag: String, normalizedWord: String): Int {
         val wordToRemove = findExactWord(languageTag, normalizedWord)
 
         if (wordToRemove != null) {
@@ -258,7 +228,7 @@ interface LearnedWordDao {
         WHERE language_tag = :languageTag 
         ORDER BY frequency DESC 
         LIMIT 20
-    """,
+    """
     )
     fun observeTopWords(languageTag: String): Flow<List<LearnedWord>>
 
@@ -285,7 +255,7 @@ interface LearnedWordDao {
                 existing.copy(
                     word = preferredWord,
                     frequency = existing.frequency + word.frequency,
-                    lastUsed = maxOf(existing.lastUsed, word.lastUsed),
+                    lastUsed = maxOf(existing.lastUsed, word.lastUsed)
                 )
             updateWord(merged)
         } else {
@@ -294,19 +264,13 @@ interface LearnedWordDao {
     }
 }
 
-data class FastSuggestion(
-    val word: String,
-    val frequency: Int,
-)
+data class FastSuggestion(val word: String, val frequency: Int)
 
 data class LanguageWordCount(
     @ColumnInfo(name = "language_tag")
     val languageTag: String,
     @ColumnInfo(name = "word_count")
-    val wordCount: Int,
+    val wordCount: Int
 )
 
-data class WordSourceCount(
-    val source: WordSource,
-    val count: Int,
-)
+data class WordSourceCount(val source: WordSource, val count: Int)

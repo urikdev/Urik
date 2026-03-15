@@ -20,7 +20,7 @@ object TextMatchingUtils {
             Character.OTHER_PUNCTUATION.toInt(),
             Character.FINAL_QUOTE_PUNCTUATION.toInt(),
             Character.INITIAL_QUOTE_PUNCTUATION.toInt(),
-            Character.MODIFIER_LETTER.toInt(),
+            Character.MODIFIER_LETTER.toInt()
             -> {
                 when (char.code) {
                     0x0027, 0x02BC, 0x055A, 0x05F3, 0x2019, 0x201B, 0x2032 -> true
@@ -43,7 +43,7 @@ object TextMatchingUtils {
             Character.OTHER_PUNCTUATION.toInt(),
             Character.FINAL_QUOTE_PUNCTUATION.toInt(),
             Character.INITIAL_QUOTE_PUNCTUATION.toInt(),
-            Character.MODIFIER_LETTER.toInt(),
+            Character.MODIFIER_LETTER.toInt()
             -> {
                 when (char.code) {
                     0x0027, 0x02BC, 0x055A, 0x05F3, 0x2019, 0x201B, 0x2032 -> true
@@ -77,10 +77,7 @@ object TextMatchingUtils {
      * @param candidate Dictionary/learned word to suggest
      * @return true if candidate is valid contraction suggestion
      */
-    fun isContractionSuggestion(
-        input: String,
-        candidate: String,
-    ): Boolean {
+    fun isContractionSuggestion(input: String, candidate: String): Boolean {
         if (input.isEmpty() || candidate.isEmpty()) return false
 
         val strippedInput = stripWordPunctuation(input)

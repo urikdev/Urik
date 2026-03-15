@@ -283,7 +283,7 @@ class KeyboardModeUtilsTest {
             }
 
         assertTrue(
-            KeyboardModeUtils.shouldResetToLettersOnEnter(KeyboardMode.SYMBOLS, editorInfo),
+            KeyboardModeUtils.shouldResetToLettersOnEnter(KeyboardMode.SYMBOLS, editorInfo)
         )
     }
 
@@ -295,7 +295,7 @@ class KeyboardModeUtilsTest {
             }
 
         assertTrue(
-            KeyboardModeUtils.shouldResetToLettersOnEnter(KeyboardMode.NUMBERS, editorInfo),
+            KeyboardModeUtils.shouldResetToLettersOnEnter(KeyboardMode.NUMBERS, editorInfo)
         )
     }
 
@@ -307,7 +307,7 @@ class KeyboardModeUtilsTest {
             }
 
         assertFalse(
-            KeyboardModeUtils.shouldResetToLettersOnEnter(KeyboardMode.LETTERS, editorInfo),
+            KeyboardModeUtils.shouldResetToLettersOnEnter(KeyboardMode.LETTERS, editorInfo)
         )
     }
 
@@ -319,7 +319,7 @@ class KeyboardModeUtilsTest {
             }
 
         assertFalse(
-            KeyboardModeUtils.shouldResetToLettersOnEnter(KeyboardMode.SYMBOLS, editorInfo),
+            KeyboardModeUtils.shouldResetToLettersOnEnter(KeyboardMode.SYMBOLS, editorInfo)
         )
     }
 
@@ -331,14 +331,14 @@ class KeyboardModeUtilsTest {
             }
 
         assertFalse(
-            KeyboardModeUtils.shouldResetToLettersOnEnter(KeyboardMode.NUMBERS, editorInfo),
+            KeyboardModeUtils.shouldResetToLettersOnEnter(KeyboardMode.NUMBERS, editorInfo)
         )
     }
 
     @Test
     fun `shouldResetToLettersOnEnter returns false for null EditorInfo`() {
         assertFalse(
-            KeyboardModeUtils.shouldResetToLettersOnEnter(KeyboardMode.SYMBOLS, null),
+            KeyboardModeUtils.shouldResetToLettersOnEnter(KeyboardMode.SYMBOLS, null)
         )
     }
 
@@ -350,7 +350,7 @@ class KeyboardModeUtilsTest {
             }
 
         assertTrue(
-            KeyboardModeUtils.shouldResetToLettersOnEnter(KeyboardMode.SYMBOLS, editorInfo),
+            KeyboardModeUtils.shouldResetToLettersOnEnter(KeyboardMode.SYMBOLS, editorInfo)
         )
     }
 
@@ -386,7 +386,7 @@ class KeyboardModeUtilsTest {
             }
 
         assertTrue(
-            KeyboardModeUtils.shouldResetToLettersOnEnter(KeyboardMode.SYMBOLS_SECONDARY, editorInfo),
+            KeyboardModeUtils.shouldResetToLettersOnEnter(KeyboardMode.SYMBOLS_SECONDARY, editorInfo)
         )
     }
 }

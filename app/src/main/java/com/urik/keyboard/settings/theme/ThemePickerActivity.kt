@@ -23,9 +23,9 @@ import com.urik.keyboard.settings.SettingsRepository
 import com.urik.keyboard.theme.KeyboardTheme
 import com.urik.keyboard.theme.ThemeManager
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class ThemePickerActivity : AppCompatActivity() {
@@ -67,7 +67,7 @@ class ThemePickerActivity : AppCompatActivity() {
                     .getLayoutForMode(
                         KeyboardMode.LETTERS,
                         ULocale.forLanguageTag("en"),
-                        KeyboardKey.ActionType.ENTER,
+                        KeyboardKey.ActionType.ENTER
                     ).getOrNull()
 
             if (previewLayout != null) {
@@ -89,42 +89,41 @@ class ThemePickerActivity : AppCompatActivity() {
         }
     }
 
-    private fun createLayout(): LinearLayout =
-        LinearLayout(this).apply {
-            id = View.generateViewId()
-            orientation = LinearLayout.VERTICAL
-            layoutParams =
-                LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                )
+    private fun createLayout(): LinearLayout = LinearLayout(this).apply {
+        id = View.generateViewId()
+        orientation = LinearLayout.VERTICAL
+        layoutParams =
+            LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.MATCH_PARENT
+            )
 
-            val toolbar =
-                MaterialToolbar(context).apply {
-                    id = R.id.theme_picker_toolbar
-                    layoutParams =
-                        LinearLayout.LayoutParams(
-                            LinearLayout.LayoutParams.MATCH_PARENT,
-                            resources.getDimensionPixelSize(
-                                androidx.appcompat.R.dimen.abc_action_bar_default_height_material,
-                            ),
+        val toolbar =
+            MaterialToolbar(context).apply {
+                id = R.id.theme_picker_toolbar
+                layoutParams =
+                    LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        resources.getDimensionPixelSize(
+                            androidx.appcompat.R.dimen.abc_action_bar_default_height_material
                         )
-                }
-            addView(toolbar)
+                    )
+            }
+        addView(toolbar)
 
-            val recyclerView =
-                RecyclerView(context).apply {
-                    id = R.id.theme_picker_recycler
-                    layoutParams =
-                        LinearLayout.LayoutParams(
-                            LinearLayout.LayoutParams.MATCH_PARENT,
-                            0,
-                            1f,
-                        )
-                    layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
-                }
-            addView(recyclerView)
-        }
+        val recyclerView =
+            RecyclerView(context).apply {
+                id = R.id.theme_picker_recycler
+                layoutParams =
+                    LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        0,
+                        1f
+                    )
+                layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
+            }
+        addView(recyclerView)
+    }
 
     private fun setupRecyclerView(recyclerView: RecyclerView) {
         val currentTheme = themeManager.currentTheme.value
@@ -136,7 +135,7 @@ class ThemePickerActivity : AppCompatActivity() {
                 currentTheme.id,
                 favoriteThemeIds,
                 onThemeSelected = { selectedTheme -> onThemeSelected(selectedTheme) },
-                onFavoriteToggled = { theme -> onFavoriteToggled(theme) },
+                onFavoriteToggled = { theme -> onFavoriteToggled(theme) }
             )
 
         recyclerView.adapter = adapter
@@ -178,21 +177,21 @@ class ThemePickerActivity : AppCompatActivity() {
                 basePadding,
                 basePadding,
                 basePadding,
-                basePadding + insets.bottom,
+                basePadding + insets.bottom
             )
             recyclerView.clipToPadding = false
             windowInsets
         }
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean =
-        when (item.itemId) {
-            android.R.id.home -> {
-                finish()
-                true
-            }
-            else -> super.onOptionsItemSelected(item)
+    override fun onOptionsItemSelected(item: MenuItem): Boolean = when (item.itemId) {
+        android.R.id.home -> {
+            finish()
+            true
         }
+
+        else -> super.onOptionsItemSelected(item)
+    }
 
     companion object {
         private const val BASE_PADDING_DP = 16

@@ -25,6 +25,6 @@ data object Abyss : KeyboardTheme {
             focusIndicator = "#00d9ff".toColorInt(),
             swipePrimary = "#00d9ff".toColorInt(),
             swipeSecondary = "#0099ff".toColorInt(),
-            swipeCurrent = "#00ffff".toColorInt(),
+            swipeCurrent = "#00ffff".toColorInt()
         )
 }

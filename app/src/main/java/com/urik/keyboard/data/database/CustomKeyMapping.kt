@@ -18,17 +18,13 @@ data class CustomKeyMapping(
     @ColumnInfo(name = "custom_symbol")
     val customSymbol: String,
     @ColumnInfo(name = "created_at")
-    val createdAt: Long = System.currentTimeMillis(),
+    val createdAt: Long = System.currentTimeMillis()
 ) {
     companion object {
-        fun create(
-            baseKey: String,
-            customSymbol: String,
-        ): CustomKeyMapping =
-            CustomKeyMapping(
-                baseKey = baseKey.lowercase(),
-                customSymbol = customSymbol,
-                createdAt = System.currentTimeMillis(),
-            )
+        fun create(baseKey: String, customSymbol: String): CustomKeyMapping = CustomKeyMapping(
+            baseKey = baseKey.lowercase(),
+            customSymbol = customSymbol,
+            createdAt = System.currentTimeMillis()
+        )
     }
 }

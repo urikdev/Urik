@@ -25,6 +25,6 @@ data object Mocha : KeyboardTheme {
             focusIndicator = "#fff5e6".toColorInt(),
             swipePrimary = "#f5e6d3".toColorInt(),
             swipeSecondary = "#fff5e6".toColorInt(),
-            swipeCurrent = "#ff9966".toColorInt(),
+            swipeCurrent = "#ff9966".toColorInt()
         )
 }

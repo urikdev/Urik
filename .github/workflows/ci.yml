@@ -89,6 +89,9 @@ jobs:
       - name: Run ktlint
         run: ./gradlew ktlintCheck --stacktrace
 
+      - name: Run detekt
+        run: ./gradlew detekt --stacktrace
+
       - name: Run Android Lint
         run: ./gradlew lintDebug --stacktrace
 

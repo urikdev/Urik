@@ -73,13 +73,8 @@ sealed interface SettingsEvent {
 
         data object SettingsReset : Success
 
-        data class DictionaryExported(
-            val wordCount: Int,
-        ) : Success
+        data class DictionaryExported(val wordCount: Int) : Success
 
-        data class DictionaryImported(
-            val newWords: Int,
-            val updatedWords: Int,
-        ) : Success
+        data class DictionaryImported(val newWords: Int, val updatedWords: Int) : Success
     }
 }

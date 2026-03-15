@@ -293,7 +293,7 @@ class ManagedCacheTest {
             ManagedCache<String, String>(
                 "test",
                 maxSize = 2,
-                onEvict = { k, v -> evicted.add(k to v) },
+                onEvict = { k, v -> evicted.add(k to v) }
             )
 
         cacheWithCallback.put("key1", "value1")
@@ -311,7 +311,7 @@ class ManagedCacheTest {
             ManagedCache<String, String>(
                 "test",
                 maxSize = 3,
-                onEvict = { k, v -> evicted.add(k to v) },
+                onEvict = { k, v -> evicted.add(k to v) }
             )
 
         cacheWithCallback.put("key1", "value1")

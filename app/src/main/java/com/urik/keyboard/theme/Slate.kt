@@ -25,6 +25,6 @@ data object Slate : KeyboardTheme {
             focusIndicator = "#c4d4f5".toColorInt(),
             swipePrimary = "#a8b8d4".toColorInt(),
             swipeSecondary = "#c4d4f5".toColorInt(),
-            swipeCurrent = "#4a5361".toColorInt(),
+            swipeCurrent = "#4a5361".toColorInt()
         )
 }

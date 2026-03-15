@@ -6,11 +6,11 @@ import com.urik.keyboard.service.ClipboardMonitorService
 import com.urik.keyboard.settings.SettingsRepository
 import com.urik.keyboard.utils.ErrorLogger
 import dagger.hilt.android.HiltAndroidApp
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 /**
  * Application class for keyboard app initialization and dependency injection.
@@ -50,7 +50,7 @@ class UrikApplication : Application() {
                 component = "Application",
                 severity = ErrorLogger.Severity.CRITICAL,
                 exception = throwable,
-                context = mapOf("thread" to thread.name),
+                context = mapOf("thread" to thread.name)
             )
 
             previousHandler?.uncaughtException(thread, throwable)
@@ -72,7 +72,7 @@ class UrikApplication : Application() {
                     component = "UrikApplication",
                     severity = ErrorLogger.Severity.CRITICAL,
                     exception = e,
-                    context = mapOf("phase" to "sqlcipher_load"),
+                    context = mapOf("phase" to "sqlcipher_load")
                 )
                 throw e
             }

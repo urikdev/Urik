@@ -142,7 +142,7 @@ class SwipeDetectorTest {
             mapOf(
                 KeyboardKey.Character("a", KeyboardKey.KeyType.LETTER) to PointF(10f, 20f),
                 KeyboardKey.Character("b", KeyboardKey.KeyType.LETTER) to PointF(30f, 40f),
-                KeyboardKey.Character("", KeyboardKey.KeyType.LETTER) to PointF(50f, 60f),
+                KeyboardKey.Character("", KeyboardKey.KeyType.LETTER) to PointF(50f, 60f)
             )
 
         swipeDetector.updateKeyPositions(positions)
@@ -243,7 +243,7 @@ class SwipeDetectorTest {
                 floatArrayOf(200f, 204f),
                 floatArrayOf(220f, 200f),
                 floatArrayOf(240f, 202f),
-                floatArrayOf(260f, 204f),
+                floatArrayOf(260f, 204f)
             )
 
         for (step in steps) {
@@ -299,14 +299,13 @@ class SwipeDetectorTest {
         action: Int,
         x: Float,
         y: Float,
-        eventTime: Long = System.currentTimeMillis(),
-    ): MotionEvent =
-        MotionEvent.obtain(
-            eventTime - 100,
-            eventTime,
-            action,
-            x,
-            y,
-            0,
-        )
+        eventTime: Long = System.currentTimeMillis()
+    ): MotionEvent = MotionEvent.obtain(
+        eventTime - 100,
+        eventTime,
+        action,
+        x,
+        y,
+        0
+    )
 }
