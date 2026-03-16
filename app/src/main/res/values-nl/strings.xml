@@ -295,6 +295,7 @@
     <string name="clipboard_panel_delete_all">Alles verwijderen</string>
     <string name="clipboard_panel_delete_all_confirm">Alle niet-vastgezette klemborditems verwijderen?</string>
     <string name="clipboard_consent_message">Urik kan klembordinhoud onbeperkt lezen en opslaan. Als je dit niet wilt, ga dan naar instellingen en schakel de klembordgeschiedenis uit.</string>
+    <string name="clipboard_panel_close">Klembord sluiten</string>
 
     <!-- Clipboard Accessibility -->
     <string name="clipboard_item_description">Klemborditem: %1$s</string>

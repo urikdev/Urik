@@ -265,6 +265,7 @@
     <string name="clipboard_panel_delete_all">Διαγραφή όλων</string>
     <string name="clipboard_panel_delete_all_confirm">Διαγραφή όλων των μη καρφιτσωμένων στοιχείων του προχείρου;</string>
     <string name="clipboard_consent_message">Το Urik μπορεί να διαβάζει και να αποθηκεύει τα περιεχόμενα του προχείρου επ\' αόριστον. Αν δεν το θέλετε, μεταβείτε στις ρυθμίσεις και απενεργοποιήστε το ιστορικό προχείρου.</string>
+    <string name="clipboard_panel_close">Κλείσιμο προχείρου</string>
     <!-- Clipboard Accessibility -->
     <string name="clipboard_item_description">Στοιχείο προχείρου: %1$s</string>
     <string name="clipboard_item_pin">Καρφίτσωμα στοιχείου προχείρου</string>

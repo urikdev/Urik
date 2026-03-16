@@ -278,6 +278,7 @@
 
     <!-- Clipboard Accessibility -->
     <string name="clipboard_consent_message">O Urik pode ler e armazenar o conteúdo da área de transferência indefinidamente. Se não desejar, vá às configurações e desative o histórico da área de transferência.</string>
+    <string name="clipboard_panel_close">Fechar área de transferência</string>
     <string name="clipboard_item_description">Item da área de transferência: %1$s</string>
     <string name="clipboard_item_pin">Fixar item da área de transferência</string>
     <string name="clipboard_item_unpin">Desafixar item da área de transferência</string>

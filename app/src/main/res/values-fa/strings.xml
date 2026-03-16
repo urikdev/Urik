@@ -294,6 +294,7 @@
     <string name="clipboard_panel_delete_all">حذف همه</string>
     <string name="clipboard_panel_delete_all_confirm">همه موارد سنجاق‌نشده کلیپ‌بورد حذف شوند؟</string>
     <string name="clipboard_consent_message">Urikمی‌تواند محتوای کلیپ‌بورد را بخواند و به طور نامحدود ذخیره کند. اگر این را نمی‌خواهید، به تنظیمات بروید و تاریخچه کلیپ‌بورد را خاموش کنید.</string>
+    <string name="clipboard_panel_close">بستن کلیپ‌بورد</string>
 
     <!-- Clipboard Accessibility -->
     <string name="clipboard_item_description">مورد کلیپ‌بورد: %1$s</string>

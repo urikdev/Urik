@@ -279,6 +279,7 @@
     <string name="clipboard_panel_delete_all">Видалити Все</string>
     <string name="clipboard_panel_delete_all_confirm">Видалити всі незакріплені елементи буфера обміну?</string>
     <string name="clipboard_consent_message">Urik може читати та зберігати вміст буфера обміну необмежений час. Якщо ви цього не бажаєте, перейдіть у налаштування та вимкніть історію буфера обміну.</string>
+    <string name="clipboard_panel_close">Закрити буфер обміну</string>
 
     <!-- Clipboard Accessibility -->
     <string name="clipboard_item_description">Елемент буфера обміну: %1$s</string>
