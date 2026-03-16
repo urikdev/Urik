@@ -2,6 +2,7 @@ package com.urik.keyboard.ui.keyboard.components
 
 import android.content.Context
 import android.graphics.drawable.GradientDrawable
+import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
 import android.widget.Button
@@ -28,6 +29,8 @@ class ClipboardPanel(context: Context, private val themeManager: ThemeManager) :
     private var onItemPinToggled: ((ClipboardItem) -> Unit)? = null
     private var onItemDeleted: ((ClipboardItem) -> Unit)? = null
     private var onDeleteAllUnpinned: (() -> Unit)? = null
+
+    private var onClose: (() -> Unit)? = null
 
     private val transientOverlayA11yDelegate =
         object : AccessibilityDelegateCompat() {
@@ -72,6 +75,8 @@ class ClipboardPanel(context: Context, private val themeManager: ThemeManager) :
 
     private val pinnedTab: Button
     private val recentTab: Button
+
+    private val closeButton: TextView
 
     private val pinnedListContainer: ScrollView =
         ScrollView(context).apply {
@@ -169,9 +174,27 @@ class ClipboardPanel(context: Context, private val themeManager: ThemeManager) :
                         1f
                     )
             }
+        val emojiTextSize = calculateResponsiveSuggestionTextSize()
+        val minTouchTarget = context.resources.getDimensionPixelSize(R.dimen.minimum_touch_target)
+        closeButton =
+            TextView(context).apply {
+                text = "✕"
+                setTextSize(TypedValue.COMPLEX_UNIT_SP, emojiTextSize)
+                gravity = Gravity.CENTER
+                contentDescription = context.getString(R.string.clipboard_panel_close)
+                setOnClickListener {
+                    onClose?.invoke()
+                }
+                layoutParams =
+                    LinearLayout.LayoutParams(
+                        minTouchTarget,
+                        minTouchTarget
+                    )
+            }
 
         tabContainer.addView(pinnedTab)
         tabContainer.addView(recentTab)
+        tabContainer.addView(closeButton)
 
         pinnedListContainer.addView(pinnedList)
         recentListContainer.addView(recentList)
@@ -227,6 +250,16 @@ class ClipboardPanel(context: Context, private val themeManager: ThemeManager) :
         }
     }
 
+    // took from SwipeKeyboardView
+    private fun calculateResponsiveSuggestionTextSize(): Float {
+        val keyHeight = context.resources.getDimensionPixelSize(R.dimen.key_height)
+        val baseTextSize = keyHeight * 0.40f / context.resources.displayMetrics.density
+        val minSize = 15f
+        val maxSize = 19f
+
+        return baseTextSize.coerceIn(minSize, maxSize)
+    }
+
     private fun createButtonBackground(): GradientDrawable {
         val density = context.resources.displayMetrics.density
         val cornerRadius = 8 * density
@@ -277,12 +310,14 @@ class ClipboardPanel(context: Context, private val themeManager: ThemeManager) :
         onItemClick: (String) -> Unit,
         onPinToggle: (ClipboardItem) -> Unit,
         onDelete: (ClipboardItem) -> Unit,
-        onDeleteAll: () -> Unit
+        onDeleteAll: () -> Unit,
+        onClose: () -> Unit
     ) {
         this.onItemSelected = onItemClick
         this.onItemPinToggled = onPinToggle
         this.onItemDeleted = onDelete
         this.onDeleteAllUnpinned = onDeleteAll
+        this.onClose = onClose
 
         consentScreen.isVisible = false
         clipboardContentScreen.isVisible = true
@@ -507,6 +542,14 @@ class ClipboardPanel(context: Context, private val themeManager: ThemeManager) :
             contentDescription = context.getString(R.string.clipboard_item_delete)
             setOnClickListener {
                 onItemDeleted?.invoke(item)
+            }
+        }
+
+        closeButton.apply {
+            setTextColor(themeManager.currentTheme.value.colors.keyTextAction)
+            contentDescription = context.getString(R.string.clipboard_panel_close)
+            setOnClickListener {
+                onClose?.invoke()
             }
         }
     }
