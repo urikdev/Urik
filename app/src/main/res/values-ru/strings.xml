@@ -281,6 +281,7 @@
     <string name="clipboard_panel_delete_all">Удалить Все</string>
     <string name="clipboard_panel_delete_all_confirm">Удалить все незакрепленные элементы буфера обмена?</string>
     <string name="clipboard_consent_message">Urik может читать и хранить содержимое буфера обмена неограниченное время. Если вы не хотите этого, перейдите в настройки и отключите историю буфера обмена.</string>
+    <string name="clipboard_panel_close">Закрыть буфер обмена</string>
 
     <!-- Clipboard Accessibility -->
     <string name="clipboard_item_description">Элемент буфера обмена: %1$s</string>

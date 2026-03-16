@@ -292,6 +292,7 @@
     <string name="clipboard_panel_delete_all">حذف الجميع</string>
     <string name="clipboard_panel_delete_all_confirm">إحذف جميع محتويات الحافظة الغير مثبتة؟</string>
     <string name="clipboard_consent_message">يستطيع أوريك من قراءة وحفظ محتويات الحافظة إلى الأبد. إذا كنت لا ترغب ذلك، يمكنك تعطيل المِيزة في الإعدادات.</string>
+    <string name="clipboard_panel_close">إغلاق الحافظة</string>
 
     <!-- Clipboard Accessibility -->
     <string name="clipboard_item_description">محتوى الحافطة: %1$s</string>

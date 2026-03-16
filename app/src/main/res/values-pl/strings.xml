@@ -279,6 +279,7 @@
     <string name="clipboard_panel_delete_all">Usuń Wszystko</string>
     <string name="clipboard_panel_delete_all_confirm">Usunąć wszystkie nieprzypięte elementy schowka?</string>
     <string name="clipboard_consent_message">Urik może odczytywać i przechowywać zawartość schowka w nieskończoność. Jeśli nie chcesz, aby to się działo, przejdź do ustawień i wyłącz historię schowka.</string>
+    <string name="clipboard_panel_close">Zamknij schowek</string>
 
     <!-- Clipboard Accessibility -->
     <string name="clipboard_item_description">Element schowka: %1$s</string>
