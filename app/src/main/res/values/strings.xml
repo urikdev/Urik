@@ -304,6 +304,7 @@
     <string name="clipboard_panel_delete_all">Delete All</string>
     <string name="clipboard_panel_delete_all_confirm">Delete all unpinned clipboard items?</string>
     <string name="clipboard_consent_message">Urik can read and store clipboard contents indefinitely. If you do not want this, go to settings and turn off clipboard history.</string>
+    <string name="clipboard_panel_close">Close clipboard</string>
 
     <!-- Clipboard Accessibility -->
     <string name="clipboard_item_description">Clipboard item: %1$s</string>
