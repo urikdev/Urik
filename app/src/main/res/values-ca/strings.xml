@@ -265,6 +265,7 @@
     <string name="clipboard_panel_delete_all">Esborrar-ho tot</string>
     <string name="clipboard_panel_delete_all_confirm">Esborrar tots els elements del porta-retalls no fixats?</string>
     <string name="clipboard_consent_message">Urik pot llegir i emmagatzemar el contingut del porta-retalls indefinidament. Si no ho desitges, ves a la configuració i desactiva l\'historial del porta-retalls.</string>
+    <string name="clipboard_panel_close">Tanca el porta-retalls</string>
     <!-- Clipboard Accessibility -->
     <string name="clipboard_item_description">Element del porta-retalls %1$s</string>
     <string name="clipboard_item_pin">Fixar element al porta-retalls</string>

@@ -278,6 +278,7 @@
 
     <!-- Clipboard Accessibility -->
     <string name="clipboard_consent_message">Urik puede leer y almacenar el contenido del portapapeles indefinidamente. Si no lo desea, vaya a la configuración y desactive el historial del portapapeles.</string>
+    <string name="clipboard_panel_close">Cerrar portapapeles</string>
     <string name="clipboard_item_description">Elemento del portapapeles: %1$s</string>
     <string name="clipboard_item_pin">Fijar elemento del portapapeles</string>
     <string name="clipboard_item_unpin">Desfijar elemento del portapapeles</string>

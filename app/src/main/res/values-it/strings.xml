@@ -295,6 +295,7 @@
     <string name="clipboard_panel_delete_all">Elimina tutto</string>
     <string name="clipboard_panel_delete_all_confirm">Eliminare tutti gli elementi degli appunti non fissati?</string>
     <string name="clipboard_consent_message">Urik può leggere e memorizzare il contenuto degli appunti indefinitamente. Se non lo desideri, vai nelle impostazioni e disattiva la cronologia appunti.</string>
+    <string name="clipboard_panel_close">Chiudi appunti</string>
 
     <!-- Clipboard Accessibility -->
     <string name="clipboard_item_description">Elemento appunti: %1$s</string>
