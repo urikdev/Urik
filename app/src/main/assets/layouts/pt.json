@@ -60,12 +60,12 @@
         [
           {
             "type": "character",
-            "char": "h",
+            "char": "q",
             "keyType": "letter"
           },
           {
             "type": "character",
-            "char": "c",
+            "char": "w",
             "keyType": "letter"
           },
           {
@@ -75,17 +75,22 @@
           },
           {
             "type": "character",
-            "char": "s",
-            "keyType": "letter"
-          },
-          {
-            "type": "character",
-            "char": "a",
-            "keyType": "letter"
-          },
-          {
-            "type": "character",
             "char": "r",
+            "keyType": "letter"
+          },
+          {
+            "type": "character",
+            "char": "t",
+            "keyType": "letter"
+          },
+          {
+            "type": "character",
+            "char": "y",
+            "keyType": "letter"
+          },
+          {
+            "type": "character",
+            "char": "u",
             "keyType": "letter"
           },
           {
@@ -95,12 +100,7 @@
           },
           {
             "type": "character",
-            "char": "d",
-            "keyType": "letter"
-          },
-          {
-            "type": "character",
-            "char": "l",
+            "char": "o",
             "keyType": "letter"
           },
           {
@@ -110,6 +110,62 @@
           }
         ],
         [
+          {
+            "type": "character",
+            "char": "a",
+            "keyType": "letter"
+          },
+          {
+            "type": "character",
+            "char": "s",
+            "keyType": "letter"
+          },
+          {
+            "type": "character",
+            "char": "d",
+            "keyType": "letter"
+          },
+          {
+            "type": "character",
+            "char": "f",
+            "keyType": "letter"
+          },
+          {
+            "type": "character",
+            "char": "g",
+            "keyType": "letter"
+          },
+          {
+            "type": "character",
+            "char": "h",
+            "keyType": "letter"
+          },
+          {
+            "type": "character",
+            "char": "j",
+            "keyType": "letter"
+          },
+          {
+            "type": "character",
+            "char": "k",
+            "keyType": "letter"
+          },
+          {
+            "type": "character",
+            "char": "l",
+            "keyType": "letter"
+          },
+          {
+            "type": "character",
+            "char": "ç",
+            "keyType": "letter"
+          }
+        ],
+        [
+          {
+            "type": "action",
+            "action": "shift"
+          },
           {
             "type": "character",
             "char": "z",
@@ -122,32 +178,7 @@
           },
           {
             "type": "character",
-            "char": "o",
-            "keyType": "letter"
-          },
-          {
-            "type": "character",
-            "char": "m",
-            "keyType": "letter"
-          },
-          {
-            "type": "character",
-            "char": "n",
-            "keyType": "letter"
-          },
-          {
-            "type": "character",
-            "char": "t",
-            "keyType": "letter"
-          },
-          {
-            "type": "character",
-            "char": "u",
-            "keyType": "letter"
-          },
-          {
-            "type": "character",
-            "char": "g",
+            "char": "c",
             "keyType": "letter"
           },
           {
@@ -157,48 +188,17 @@
           },
           {
             "type": "character",
-            "char": "q",
-            "keyType": "letter"
-          }
-        ],
-        [
-          {
-            "type": "action",
-            "action": "shift"
-          },
-          {
-            "type": "character",
-            "char": "f",
-            "keyType": "letter"
-          },
-          {
-            "type": "character",
             "char": "b",
             "keyType": "letter"
           },
           {
             "type": "character",
-            "char": "j",
+            "char": "n",
             "keyType": "letter"
           },
           {
             "type": "character",
-            "char": "ç",
-            "keyType": "letter"
-          },
-          {
-            "type": "character",
-            "char": "k",
-            "keyType": "letter"
-          },
-          {
-            "type": "character",
-            "char": "w",
-            "keyType": "letter"
-          },
-          {
-            "type": "character",
-            "char": "y",
+            "char": "m",
             "keyType": "letter"
           },
           {

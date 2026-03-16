@@ -90,49 +90,28 @@
           },
           {
             "type": "character",
-            "char": "i",
-            "keyType": "letter"
-          },
-          {
-            "type": "character",
-            "char": "d",
-            "keyType": "letter"
-          },
-          {
-            "type": "character",
-            "char": "l",
+            "char": "o",
             "keyType": "letter"
           },
           {
             "type": "character",
             "char": "p",
             "keyType": "letter"
-          }
-        ],
-        [
+          },
           {
             "type": "character",
             "char": "z",
             "keyType": "letter"
           },
           {
-            "type": "character",
-            "char": "x",
-            "keyType": "letter"
-          },
+            "type": "action",
+            "action": "backspace"
+          }
+        ],
+        [
           {
             "type": "character",
-            "char": "o",
-            "keyType": "letter"
-          },
-          {
-            "type": "character",
-            "char": "m",
-            "keyType": "letter"
-          },
-          {
-            "type": "character",
-            "char": "n",
+            "char": "q",
             "keyType": "letter"
           },
           {
@@ -142,22 +121,37 @@
           },
           {
             "type": "character",
+            "char": "d",
+            "keyType": "letter"
+          },
+          {
+            "type": "character",
+            "char": "i",
+            "keyType": "letter"
+          },
+          {
+            "type": "character",
+            "char": "n",
+            "keyType": "letter"
+          },
+          {
+            "type": "character",
             "char": "u",
             "keyType": "letter"
           },
           {
             "type": "character",
-            "char": "g",
+            "char": "l",
             "keyType": "letter"
           },
           {
             "type": "character",
-            "char": "v",
+            "char": "m",
             "keyType": "letter"
           },
           {
             "type": "character",
-            "char": "q",
+            "char": "x",
             "keyType": "letter"
           }
         ],
@@ -168,12 +162,12 @@
           },
           {
             "type": "character",
-            "char": "f",
+            "char": "y",
             "keyType": "letter"
           },
           {
             "type": "character",
-            "char": "b",
+            "char": "ç",
             "keyType": "letter"
           },
           {
@@ -183,7 +177,22 @@
           },
           {
             "type": "character",
-            "char": "ç",
+            "char": "b",
+            "keyType": "letter"
+          },
+          {
+            "type": "character",
+            "char": "f",
+            "keyType": "letter"
+          },
+          {
+            "type": "character",
+            "char": "v",
+            "keyType": "letter"
+          },
+          {
+            "type": "character",
+            "char": "g",
             "keyType": "letter"
           },
           {
@@ -195,15 +204,6 @@
             "type": "character",
             "char": "w",
             "keyType": "letter"
-          },
-          {
-            "type": "character",
-            "char": "y",
-            "keyType": "letter"
-          },
-          {
-            "type": "action",
-            "action": "backspace"
           }
         ],
         [
