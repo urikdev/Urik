@@ -1,7 +1,7 @@
 # Privacy Policy
 
 **Effective Date:** October 18, 2025
-**Last Updated:** January 25, 2026
+**Last Updated:** March 16, 2026
 
 ## Introduction
 
@@ -36,7 +36,7 @@ For privacy inquiries, contact us at the email above.
 - The word itself (lowercase, normalized)
 - Language code
 - Frequency of use (count)
-- Input method (typed, swiped, or selected from suggestions)
+- Input method (typed, swiped, selected from suggestions, auto-corrected, imported, or system default)
 - Timestamps (when created, last used)
 - Character count
 
@@ -97,7 +97,9 @@ For privacy inquiries, contact us at the email above.
 
 **Technical Implementation:** The bigram model is local-only with no external queries. Predictions are generated using indexed database lookups ordered by frequency. Debounced batch writes (300ms) minimize database operations.
 
-**Data Isolation:** Bigram data is NOT included in dictionary exports. It remains strictly local and is deleted on app uninstall. Standard dictionary words from SymSpell corpus are not tracked in bigrams.
+**Data Isolation:** Bigram data is NOT included in dictionary exports. It remains strictly local and is deleted on app uninstall.
+
+**Scope:** Frequency and bigram tracking applies to all words you commit, including words that already exist in the built-in dictionary. Only the learned words table (section 1) is limited to non-dictionary words.
 
 **Encryption:** Same AES-256 encryption as learned words. Protected by Android Keystore and device lock screen.
 
@@ -111,6 +113,7 @@ For privacy inquiries, contact us at the email above.
 
 **Details Stored:**
 - Text content of clipboard items (truncated to first 100,000 characters if longer)
+- Content hash (used only for duplicate detection)
 - Timestamp when copied
 - Pin status (if you manually pin items)
 
@@ -220,9 +223,10 @@ For privacy inquiries, contact us at the email above.
 **Details Logged:**
 - Component name where error occurred
 - Exception type and message
-- Stack trace (code location)
+- Failure point (top stack frame: class, method, and line number)
 - Timestamp
-- Script/language context
+- Severity level (critical or high)
+- Sanitized context metadata (no user data, values truncated to 200 characters)
 
 **What We Don't Log:**
 - User input or typed text
@@ -239,18 +243,18 @@ For privacy inquiries, contact us at the email above.
 **What:** Recent words and processing data held briefly in RAM for performance.
 
 **Details:**
-- Last ~200 typed words (automatically cleared after 5 minutes)
+- Spell check processing cache (LRU cache, max 200 entries, 5-minute expiry per entry)
 - Spell check results cache
 - Dictionary lookup cache
-- User word frequency cache (LRU cache, max 1000 entries)
-- Bigram prediction cache (LRU cache, max 500 entries)
+- User word frequency cache (LRU cache, max 2000 entries)
+- Bigram prediction cache (LRU cache, max 100 entries)
+- Learned word hot buffer (LRU cache, max 1000 entries)
 - Preloaded top bigrams (in-memory map, cleared on language switch)
 
 **Lifecycle:** Automatically cleared when:
-- Data expires (5-minute time-to-live for typed words)
+- Data expires (5-minute time-to-live per cache entry)
 - Cache size limits exceeded (LRU eviction)
-- You switch languages
-- You switch to a different app
+- You switch languages (language-specific caches)
 - The keyboard service stops
 
 **Secure Fields:** When you type in password fields or other secure inputs, all processing is bypassed. No text is cached, spell-checked, or learned. Bigram predictions are not recorded.
@@ -275,7 +279,7 @@ All data processing occurs locally on your device:
 - Sell or share your data with third parties
 - Build user profiles or track behavior
 - Use analytics or telemetry services
-- Track standard dictionary words in bigram or frequency tables
+- Store typed sentences, conversations, or which app you typed in
 
 ## Data Storage and Security
 
@@ -293,16 +297,19 @@ The Urik keyboard has **no INTERNET permission**. It is technically impossible f
 
 ### Secure Field Detection
 
-The keyboard automatically detects password fields, credit card inputs, email addresses, URL bars, and other secure text fields. In these fields:
+The keyboard automatically detects password fields, PIN inputs, and email address fields. In these fields:
 - No text is processed or cached
 - No suggestions are displayed
 - No words are learned
+- No frequency or bigram data is recorded
 - All processing is bypassed
+
+Number-only fields (e.g., OTP codes, calculators) use a direct-commit mode that also bypasses learning and suggestions.
 
 ## Data Retention
 
 ### Learned Words, Word Frequencies, and Bigram Predictions
-- **Retention:** Indefinite, until you manually delete them or uninstall the app
+- **Retention:** Word frequency and bigram entries unused for 30 days are automatically pruned. Maximum limits are enforced (10,000 frequency entries and 50,000 bigram entries per language). Learned words are retained indefinitely until you manually delete them or uninstall the app.
 - **Management Options:**
     - Export dictionary: Settings → Privacy & Data → Export Dictionary (exports `learned_words` table only; word frequencies and bigrams remain local)
     - Import dictionary: Settings → Privacy & Data → Import Dictionary
@@ -341,7 +348,7 @@ The keyboard automatically detects password fields, credit card inputs, email ad
 - **Export Only:** Settings → Privacy & Data → Export Error Log
 
 ### Temporary Caches
-- **Retention:** Maximum 5 minutes, then automatically cleared
+- **Retention:** Cache entries expire after 5 minutes of non-use. Caches are also subject to LRU eviction when size limits are reached and are fully cleared when the keyboard service stops.
 
 ### On Uninstall
 When you uninstall Urik, Android automatically deletes:
@@ -386,7 +393,7 @@ You have the right to:
 4. **Data Portability**
     - Export learned words: Settings → Privacy & Data → Export Dictionary
     - Import learned words: Settings → Privacy & Data → Import Dictionary
-    - Export format: JSON file containing word, language, frequency, and timestamps
+    - Export format: JSON file containing word, normalized form, language, frequency, input method source, character count, and timestamps
     - Import behavior: Merges with existing dictionary (sums frequencies for duplicates)
     - **Data Isolation:** Word frequency counters and bigram predictions are NOT exported and remain local-only.
     - **Note:** Exported files are not encrypted. Store securely if they contain sensitive words.
