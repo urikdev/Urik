@@ -134,15 +134,6 @@ class ClipboardPanel(context: Context, private val themeManager: ThemeManager) :
         RECENT
     }
 
-    private fun calculateResponsiveSuggestionTextSize(): Float {
-        val keyHeight = context.resources.getDimensionPixelSize(R.dimen.key_height)
-        val baseTextSize = keyHeight * 0.40f / context.resources.displayMetrics.density
-        val minSize = 15f
-        val maxSize = 19f
-
-        return baseTextSize.coerceIn(minSize, maxSize)
-    }
-
     init {
         val density = context.resources.displayMetrics.density
 
@@ -257,6 +248,16 @@ class ClipboardPanel(context: Context, private val themeManager: ThemeManager) :
                 }
             )
         }
+    }
+
+    // took from SwipeKeyboardView
+    private fun calculateResponsiveSuggestionTextSize(): Float {
+        val keyHeight = context.resources.getDimensionPixelSize(R.dimen.key_height)
+        val baseTextSize = keyHeight * 0.40f / context.resources.displayMetrics.density
+        val minSize = 15f
+        val maxSize = 19f
+
+        return baseTextSize.coerceIn(minSize, maxSize)
     }
 
     private fun createButtonBackground(): GradientDrawable {
