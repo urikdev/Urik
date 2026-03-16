@@ -683,7 +683,7 @@ class UrikInputMethodService :
                 },
                 onClose = {
                     dismissClipboardPanel()
-                },
+                }
             )
         }
     }

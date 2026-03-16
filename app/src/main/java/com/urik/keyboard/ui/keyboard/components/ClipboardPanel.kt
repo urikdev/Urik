@@ -197,7 +197,7 @@ class ClipboardPanel(context: Context, private val themeManager: ThemeManager) :
                 layoutParams =
                     LinearLayout.LayoutParams(
                         minTouchTarget,
-                        minTouchTarget,
+                        minTouchTarget
                     )
             }
 
@@ -310,7 +310,7 @@ class ClipboardPanel(context: Context, private val themeManager: ThemeManager) :
         onPinToggle: (ClipboardItem) -> Unit,
         onDelete: (ClipboardItem) -> Unit,
         onDeleteAll: () -> Unit,
-        onClose: () -> Unit,
+        onClose: () -> Unit
     ) {
         this.onItemSelected = onItemClick
         this.onItemPinToggled = onPinToggle
