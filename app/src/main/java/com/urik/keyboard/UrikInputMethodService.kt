@@ -2071,7 +2071,6 @@ class UrikInputMethodService :
                             ) {
                                 outputBridge.setComposingText(autocorrection.originalTypedWord, 1)
                                 inputState.displayBuffer = autocorrection.originalTypedWord
-                                inputState.lastAutocorrection = null
                                 inputState.pendingSuggestions = emptyList()
                                 swipeKeyboardView?.clearSuggestions()
                             } else {
@@ -2207,7 +2206,10 @@ class UrikInputMethodService :
                             return@launch
                         }
 
-                        if (currentSettings.autocorrectionEnabled && displaySuggestions.isNotEmpty()) {
+                        if (currentSettings.autocorrectionEnabled &&
+                            displaySuggestions.isNotEmpty() &&
+                            inputState.lastAutocorrection == null
+                        ) {
                             val topSuggestion = displaySuggestions.first()
                             if (isSafeForAutocorrect(topSuggestion)) {
                                 val originalWord = inputState.displayBuffer
