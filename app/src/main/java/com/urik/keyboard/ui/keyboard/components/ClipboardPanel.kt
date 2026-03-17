@@ -2,7 +2,6 @@ package com.urik.keyboard.ui.keyboard.components
 
 import android.content.Context
 import android.graphics.drawable.GradientDrawable
-import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
 import android.widget.Button
@@ -174,12 +173,11 @@ class ClipboardPanel(context: Context, private val themeManager: ThemeManager) :
                         1f
                     )
             }
-        val emojiTextSize = calculateResponsiveSuggestionTextSize()
         val minTouchTarget = context.resources.getDimensionPixelSize(R.dimen.minimum_touch_target)
         closeButton =
             TextView(context).apply {
                 text = "✕"
-                setTextSize(TypedValue.COMPLEX_UNIT_SP, emojiTextSize)
+                textSize = 18f
                 gravity = Gravity.CENTER
                 contentDescription = context.getString(R.string.clipboard_panel_close)
                 setOnClickListener {
@@ -250,16 +248,6 @@ class ClipboardPanel(context: Context, private val themeManager: ThemeManager) :
         }
     }
 
-    // took from SwipeKeyboardView
-    private fun calculateResponsiveSuggestionTextSize(): Float {
-        val keyHeight = context.resources.getDimensionPixelSize(R.dimen.key_height)
-        val baseTextSize = keyHeight * 0.40f / context.resources.displayMetrics.density
-        val minSize = 15f
-        val maxSize = 19f
-
-        return baseTextSize.coerceIn(minSize, maxSize)
-    }
-
     private fun createButtonBackground(): GradientDrawable {
         val density = context.resources.displayMetrics.density
         val cornerRadius = 8 * density
@@ -319,6 +307,8 @@ class ClipboardPanel(context: Context, private val themeManager: ThemeManager) :
         this.onDeleteAllUnpinned = onDeleteAll
         this.onClose = onClose
 
+        closeButton.setTextColor(themeManager.currentTheme.value.colors.keyTextAction)
+
         consentScreen.isVisible = false
         clipboardContentScreen.isVisible = true
         visibility = VISIBLE
@@ -335,6 +325,7 @@ class ClipboardPanel(context: Context, private val themeManager: ThemeManager) :
         onItemPinToggled = null
         onItemDeleted = null
         onDeleteAllUnpinned = null
+        onClose = null
     }
 
     fun refreshContent(pinnedItems: List<ClipboardItem>, recentItems: List<ClipboardItem>) {
@@ -542,14 +533,6 @@ class ClipboardPanel(context: Context, private val themeManager: ThemeManager) :
             contentDescription = context.getString(R.string.clipboard_item_delete)
             setOnClickListener {
                 onItemDeleted?.invoke(item)
-            }
-        }
-
-        closeButton.apply {
-            setTextColor(themeManager.currentTheme.value.colors.keyTextAction)
-            contentDescription = context.getString(R.string.clipboard_panel_close)
-            setOnClickListener {
-                onClose?.invoke()
             }
         }
     }
