@@ -9,6 +9,8 @@ enum class SpellConfirmationState {
 
 data class PostCommitReplacementState(val originalWord: String, val committedWord: String)
 
+data class LastAutocorrection(val originalTypedWord: String, val correctedWord: String)
+
 interface ViewCallback {
     fun clearSuggestions()
 
@@ -113,6 +115,10 @@ class InputStateManager(
     var postCommitReplacementState: PostCommitReplacementState? = null
         internal set
 
+    @Volatile
+    var lastAutocorrection: LastAutocorrection? = null
+        internal set
+
     val selectionStateTracker = SelectionStateTracker()
 
     val requiresDirectCommit: Boolean
@@ -170,6 +176,7 @@ class InputStateManager(
         spellConfirmationState = SpellConfirmationState.NORMAL
         pendingWordForLearning = null
         postCommitReplacementState = null
+        lastAutocorrection = null
         viewCallback.clearSuggestions()
         composingRegionStart = -1
         composingReassertionCount = 0
@@ -209,6 +216,7 @@ class InputStateManager(
         spellConfirmationState = SpellConfirmationState.NORMAL
         pendingWordForLearning = null
         postCommitReplacementState = null
+        lastAutocorrection = null
         viewCallback.clearSuggestions()
         composingRegionStart = -1
         lastKnownCursorPosition = -1

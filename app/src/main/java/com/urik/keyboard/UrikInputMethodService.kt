@@ -41,6 +41,7 @@ import com.urik.keyboard.service.EnglishPronounI
 import com.urik.keyboard.service.InputMethod
 import com.urik.keyboard.service.InputStateManager
 import com.urik.keyboard.service.LanguageManager
+import com.urik.keyboard.service.LastAutocorrection
 import com.urik.keyboard.service.OutputBridge
 import com.urik.keyboard.service.PostCommitReplacementState
 import com.urik.keyboard.service.ProcessingResult
@@ -1150,6 +1151,7 @@ class UrikInputMethodService :
             }
 
             inputState.postCommitReplacementState = null
+            inputState.lastAutocorrection = null
 
             inputState.isActivelyEditing = true
 
@@ -1272,6 +1274,7 @@ class UrikInputMethodService :
                     inputState.postCommitReplacementState = null
                     swipeKeyboardView?.clearSuggestions()
                 }
+                inputState.lastAutocorrection = null
 
                 if (inputState.spellConfirmationState == SpellConfirmationState.AWAITING_CONFIRMATION) {
                     outputBridge.beginBatchEdit()
@@ -2062,11 +2065,23 @@ class UrikInputMethodService :
                             inputState.displayBuffer = word
                             inputState.composingRegionStart = wordStart
 
-                            suggestionPipeline.requestSuggestions(
-                                buffer = word,
-                                inputMethod = InputMethod.TYPED,
-                                isCharacterInput = false
-                            )
+                            val autocorrection = inputState.lastAutocorrection
+                            if (autocorrection != null &&
+                                word.equals(autocorrection.correctedWord, ignoreCase = true)
+                            ) {
+                                outputBridge.setComposingText(autocorrection.originalTypedWord, 1)
+                                inputState.displayBuffer = autocorrection.originalTypedWord
+                                inputState.lastAutocorrection = null
+                                inputState.pendingSuggestions = emptyList()
+                                swipeKeyboardView?.clearSuggestions()
+                            } else {
+                                inputState.lastAutocorrection = null
+                                suggestionPipeline.requestSuggestions(
+                                    buffer = word,
+                                    inputMethod = InputMethod.TYPED,
+                                    isCharacterInput = false
+                                )
+                            }
                         } else {
                             coordinateStateClear()
                         }
@@ -2209,8 +2224,12 @@ class UrikInputMethodService :
                                             originalWord = originalWord,
                                             committedWord = topSuggestion
                                         )
-                                    inputState.pendingSuggestions =
-                                        displaySuggestions.drop(1) + listOf(originalWord)
+                                    inputState.lastAutocorrection =
+                                        LastAutocorrection(
+                                            originalTypedWord = originalWord,
+                                            correctedWord = topSuggestion
+                                        )
+                                    inputState.pendingSuggestions = listOf(originalWord)
                                     swipeKeyboardView?.updateSuggestions(inputState.pendingSuggestions)
 
                                     val textBefore = outputBridge.safeGetTextBeforeCursor(50)
