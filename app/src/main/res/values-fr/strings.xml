@@ -182,6 +182,14 @@
     <string name="privacy_settings_export_dictionary_summary">Enregistrer les mots appris dans un fichier</string>
     <string name="privacy_settings_import_dictionary">Importer le dictionnaire</string>
     <string name="privacy_settings_import_dictionary_summary">Restaurer les mots appris à partir d\'un fichier</string>
+    <string name="learned_words_title">Mots appris</string>
+    <string name="learned_words_manage">Gérer les mots appris</string>
+    <string name="learned_words_manage_summary">Afficher et supprimer les mots appris</string>
+    <string name="learned_words_empty">Aucun mot appris pour le moment</string>
+    <string name="learned_words_delete_all">Tout supprimer</string>
+    <string name="learned_words_delete_all_confirm">Supprimer tous les mots appris ? Cette action est irréversible.</string>
+    <string name="learned_words_auth_title">Vérifier l\'identité</string>
+    <string name="learned_words_auth_subtitle">Authentifiez-vous pour voir les mots appris</string>
 
     <!-- Error Messages -->
     <string name="error_title">Erreur</string>
@@ -213,12 +221,16 @@
     <string name="error_update_merged_dictionaries">Échec de la mise à jour du mode dictionnaire</string>
     <string name="error_update_pause_on_misspelled">Impossible de mettre à jour le paramètre de pause</string>
     <string name="error_update_autocorrection">Impossible de mettre à jour le paramètre d\'autocorrection</string>
+    <string name="error_delete_word">Impossible de supprimer le mot</string>
+    <string name="error_delete_all_words">Impossible de supprimer les mots appris</string>
 
     <!-- Success Messages -->
     <string name="success_learned_words_cleared">Mots appris effacés</string>
     <string name="success_settings_reset">Réinitialisation des paramètres par défaut</string>
     <string name="success_dictionary_exported">%1$d mots exportés</string>
     <string name="success_dictionary_imported">Ajout de %1$d nouveaux mots, mise à jour de %2$d mots</string>
+    <string name="success_word_deleted">Mot supprimé</string>
+    <string name="success_all_words_deleted">Tous les mots appris supprimés</string>
 
     <!-- Keyboard descriptions -->
     <string name="keyboard_description">Clavier virtuel</string>

@@ -182,6 +182,14 @@
     <string name="privacy_settings_export_dictionary_summary">Salva parole apprese in un file</string>
     <string name="privacy_settings_import_dictionary">Importa dizionario</string>
     <string name="privacy_settings_import_dictionary_summary">Ripristina parole apprese da un file</string>
+    <string name="learned_words_title">Parole apprese</string>
+    <string name="learned_words_manage">Gestisci parole apprese</string>
+    <string name="learned_words_manage_summary">Visualizza ed elimina singole parole apprese</string>
+    <string name="learned_words_empty">Nessuna parola appresa</string>
+    <string name="learned_words_delete_all">Elimina tutto</string>
+    <string name="learned_words_delete_all_confirm">Eliminare tutte le parole apprese? Questa azione non può essere annullata.</string>
+    <string name="learned_words_auth_title">Verifica identità</string>
+    <string name="learned_words_auth_subtitle">Autenticati per visualizzare le parole apprese</string>
 
     <!-- Error Messages -->
     <string name="error_title">Errore</string>
@@ -213,12 +221,16 @@
     <string name="error_update_merged_dictionaries">Impossibile aggiornare la modalità dizionario</string>
     <string name="error_update_pause_on_misspelled">Impossibile aggiornare l\'impostazione pausa</string>
     <string name="error_update_autocorrection">Impossibile aggiornare l\'impostazione autocorrezione</string>
+    <string name="error_delete_word">Impossibile eliminare la parola</string>
+    <string name="error_delete_all_words">Impossibile eliminare le parole apprese</string>
 
     <!-- Success Messages -->
     <string name="success_learned_words_cleared">Parole apprese cancellate</string>
     <string name="success_settings_reset">Impostazioni ripristinate ai valori predefiniti</string>
     <string name="success_dictionary_exported">%1$d parole esportate</string>
     <string name="success_dictionary_imported">%1$d nuove aggiunte, %2$d parole aggiornate</string>
+    <string name="success_word_deleted">Parola rimossa</string>
+    <string name="success_all_words_deleted">Tutte le parole apprese eliminate</string>
 
     <!-- Keyboard descriptions -->
     <string name="keyboard_description">Tastiera virtuale</string>

@@ -170,6 +170,14 @@
     <string name="privacy_settings_export_dictionary_summary">Zapisz nauczone słowa do pliku</string>
     <string name="privacy_settings_import_dictionary">Importuj słownik</string>
     <string name="privacy_settings_import_dictionary_summary">Przywróć nauczone słowa z pliku</string>
+    <string name="learned_words_title">Nauczone słowa</string>
+    <string name="learned_words_manage">Zarządzaj nauczonymi słowami</string>
+    <string name="learned_words_manage_summary">Przeglądaj i usuwaj nauczone słowa</string>
+    <string name="learned_words_empty">Brak nauczonych słów</string>
+    <string name="learned_words_delete_all">Usuń wszystko</string>
+    <string name="learned_words_delete_all_confirm">Usunąć wszystkie nauczone słowa? Tej operacji nie można cofnąć.</string>
+    <string name="learned_words_auth_title">Zweryfikuj tożsamość</string>
+    <string name="learned_words_auth_subtitle">Uwierzytelnij się, aby zobaczyć nauczone słowa</string>
 
     <!-- Error Messages -->
     <string name="error_title">Błąd</string>
@@ -197,12 +205,16 @@
     <string name="error_update_merged_dictionaries">Nie udało się zaktualizować trybu słownika</string>
     <string name="error_update_pause_on_misspelled">Nie udało się zaktualizować ustawienia pauzy</string>
     <string name="error_update_autocorrection">Nie udało się zaktualizować ustawienia autokorekty</string>
+    <string name="error_delete_word">Nie udało się usunąć słowa</string>
+    <string name="error_delete_all_words">Nie udało się usunąć nauczonych słów</string>
 
     <!-- Success Messages -->
     <string name="success_learned_words_cleared">Nauczone słowa wyczyszczone</string>
     <string name="success_settings_reset">Ustawienia przywrócone do domyślnych</string>
     <string name="success_dictionary_exported">Wyeksportowano %1$d słów</string>
     <string name="success_dictionary_imported">Dodano %1$d nowych, zaktualizowano %2$d słów</string>
+    <string name="success_word_deleted">Słowo usunięte</string>
+    <string name="success_all_words_deleted">Wszystkie nauczone słowa usunięte</string>
 
     <!-- Keyboard descriptions -->
     <string name="keyboard_description">Klawiatura wirtualna</string>

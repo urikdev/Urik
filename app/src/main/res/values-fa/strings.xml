@@ -178,6 +178,14 @@
     <string name="privacy_settings_export_dictionary_summary">ذخیره واژگان آموخته‌شده در یک فایل</string>
     <string name="privacy_settings_import_dictionary">وارد کردن فرهنگ لغت</string>
     <string name="privacy_settings_import_dictionary_summary">بارگذاری واژگان از فایل پشتیبان</string>
+    <string name="learned_words_title">کلمات آموخته‌شده</string>
+    <string name="learned_words_manage">مدیریت کلمات آموخته‌شده</string>
+    <string name="learned_words_manage_summary">مشاهده و حذف کلمات آموخته‌شده</string>
+    <string name="learned_words_empty">هنوز کلمه‌ای آموخته نشده</string>
+    <string name="learned_words_delete_all">حذف همه</string>
+    <string name="learned_words_delete_all_confirm">همه کلمات آموخته‌شده حذف شوند؟ این عمل قابل بازگشت نیست.</string>
+    <string name="learned_words_auth_title">تأیید هویت</string>
+    <string name="learned_words_auth_subtitle">برای مشاهده کلمات آموخته‌شده احراز هویت کنید</string>
     <string name="privacy_settings_export_error_log">استخراج گزارش خطا</string>
     <string name="privacy_settings_export_error_log_summary">به اشتراک گذاشتن گزارش‌های تشخیصی برای اشکال‌زدایی</string>
     <string name="privacy_settings_export_error_log_failed">استخراج گزارش خطا ناموفق بود</string>
@@ -212,12 +220,16 @@
     <string name="error_update_merged_dictionaries">به‌روزرسانی حالت فرهنگ لغت ناموفق بود</string>
     <string name="error_update_pause_on_misspelled">به‌روزرسانی تنظیم توقف انجام نشد</string>
     <string name="error_update_autocorrection">به‌روزرسانی تنظیم تصحیح خودکار انجام نشد</string>
+    <string name="error_delete_word">حذف کلمه ناموفق بود</string>
+    <string name="error_delete_all_words">حذف کلمات آموخته‌شده ناموفق بود</string>
 
     <!-- Success Messages -->
     <string name="success_learned_words_cleared">واژه‌های آموخته‌شده پاک شدند</string>
     <string name="success_settings_reset">تنظیمات به حالت پیش‌فرض بازنشانی شدند</string>
     <string name="success_dictionary_exported">%1$d واژه صادر شد</string>
     <string name="success_dictionary_imported">%1$d واژه جدید، %2$d به‌روزرسانی‌شده</string>
+    <string name="success_word_deleted">کلمه حذف شد</string>
+    <string name="success_all_words_deleted">همه کلمات آموخته‌شده حذف شدند</string>
 
     <!-- Keyboard descriptions -->
     <string name="keyboard_description">کیبورد مجازی</string>

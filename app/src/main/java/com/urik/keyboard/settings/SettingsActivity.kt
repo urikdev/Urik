@@ -17,6 +17,7 @@ import com.urik.keyboard.settings.appearance.AppearanceFragment
 import com.urik.keyboard.settings.autocorrection.AutoCorrectionFragment
 import com.urik.keyboard.settings.languages.LanguagesFragment
 import com.urik.keyboard.settings.layoutinput.LayoutInputFragment
+import com.urik.keyboard.settings.learnedwords.LearnedWordsFragment
 import com.urik.keyboard.settings.privacydata.PrivacyDataFragment
 import com.urik.keyboard.settings.typingbehavior.TypingBehaviorFragment
 import dagger.hilt.android.AndroidEntryPoint
@@ -63,6 +64,7 @@ class SettingsActivity : AppCompatActivity() {
                 is LayoutInputFragment -> getString(R.string.layout_settings_title)
                 is AppearanceFragment -> getString(R.string.appearance_settings_title)
                 is PrivacyDataFragment -> getString(R.string.privacy_settings_title)
+                is LearnedWordsFragment -> getString(R.string.learned_words_title)
                 else -> getString(R.string.settings_title)
             }
         supportActionBar?.title = title

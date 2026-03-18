@@ -169,6 +169,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.autofill)
+    implementation(libs.androidx.biometric)
     implementation(libs.material)
 
     implementation(libs.androidx.lifecycle.viewmodel.ktx)

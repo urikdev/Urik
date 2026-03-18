@@ -169,6 +169,14 @@
     <string name="privacy_settings_export_dictionary_summary">Desar les paraules apreses en un arxiu</string>
     <string name="privacy_settings_import_dictionary">Importar diccionari</string>
     <string name="privacy_settings_import_dictionary_summary">Restaurar les paraules apreses des d\'un arxiu</string>
+    <string name="learned_words_title">Paraules apreses</string>
+    <string name="learned_words_manage">Gestionar paraules apreses</string>
+    <string name="learned_words_manage_summary">Veure i eliminar paraules apreses</string>
+    <string name="learned_words_empty">Encara no hi ha paraules apreses</string>
+    <string name="learned_words_delete_all">Eliminar tot</string>
+    <string name="learned_words_delete_all_confirm">Eliminar totes les paraules apreses? Això no es pot desfer.</string>
+    <string name="learned_words_auth_title">Verificar identitat</string>
+    <string name="learned_words_auth_subtitle">Autentiqueu-vos per veure les paraules apreses</string>
     <!-- Error Messages -->
     <string name="error_title">Error</string>
     <string name="error_update_key_size">Ha fallat l\'actualització de la mida de la tecla</string>
@@ -195,6 +203,8 @@
     <string name="error_update_merged_dictionaries">Ha fallat l\'actualització del mode de diccionari</string>
     <string name="error_update_pause_on_misspelled">Ha fallat l\'actualització del paràmetre de pausa</string>
     <string name="error_update_autocorrection">Ha fallat l\'actualització del paràmetre d\'autocorrecció</string>
+    <string name="error_delete_word">No s\'ha pogut eliminar la paraula</string>
+    <string name="error_delete_all_words">No s\'han pogut eliminar les paraules apreses</string>
     <string name="error_clear_learned_words">No s\'han esborrat les paraules apreses</string>
     <string name="error_reset_to_defaults">Ha fallat el restabliment de la configuració</string>
     <string name="error_dictionary_export">No s\'ha pogut exportar el diccionari</string>
@@ -204,6 +214,8 @@
     <string name="success_settings_reset">Configuració reiniciada als valors per defecte</string>
     <string name="success_dictionary_exported">%1$d paraules exportades</string>
     <string name="success_dictionary_imported">%1$d noves afegides, %2$d paraules actualitzades</string>
+    <string name="success_word_deleted">Paraula eliminada</string>
+    <string name="success_all_words_deleted">Totes les paraules apreses eliminades</string>
     <!-- Keyboard descriptions -->
     <string name="keyboard_description">Teclat virtual</string>
     <!-- Default key labels -->

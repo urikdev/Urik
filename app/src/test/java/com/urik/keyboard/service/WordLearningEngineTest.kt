@@ -2,8 +2,11 @@
 
 package com.urik.keyboard.service
 
+import com.urik.keyboard.data.database.KeyboardDatabase
 import com.urik.keyboard.data.database.LearnedWord
 import com.urik.keyboard.data.database.LearnedWordDao
+import com.urik.keyboard.data.database.UserWordBigramDao
+import com.urik.keyboard.data.database.UserWordFrequencyDao
 import com.urik.keyboard.data.database.WordSource
 import com.urik.keyboard.settings.KeyboardSettings
 import com.urik.keyboard.settings.SettingsRepository
@@ -42,6 +45,9 @@ class WordLearningEngineTest {
     private val testDispatcher = UnconfinedTestDispatcher()
 
     private lateinit var learnedWordDao: LearnedWordDao
+    private lateinit var userWordFrequencyDao: UserWordFrequencyDao
+    private lateinit var userWordBigramDao: UserWordBigramDao
+    private lateinit var database: KeyboardDatabase
     private lateinit var languageManager: LanguageManager
     private lateinit var settingsRepository: SettingsRepository
 
@@ -71,6 +77,9 @@ class WordLearningEngineTest {
                 onBlocking { cleanupLowFrequencyWords(any()) } doReturn 0
             }
 
+        userWordFrequencyDao = mock()
+        userWordBigramDao = mock()
+        database = mock()
         languageManager = mock()
         settingsRepository = mock()
         cacheMemoryManager = mock()
@@ -88,6 +97,9 @@ class WordLearningEngineTest {
         wordLearningEngine =
             WordLearningEngine(
                 learnedWordDao = learnedWordDao,
+                userWordFrequencyDao = userWordFrequencyDao,
+                userWordBigramDao = userWordBigramDao,
+                database = database,
                 languageManager = languageManager,
                 wordNormalizer = WordNormalizer(),
                 settingsRepository = settingsRepository,

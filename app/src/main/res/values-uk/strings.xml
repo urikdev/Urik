@@ -170,6 +170,14 @@
     <string name="privacy_settings_export_dictionary_summary">Зберегти вивчені слова у файл</string>
     <string name="privacy_settings_import_dictionary">Імпорт словника</string>
     <string name="privacy_settings_import_dictionary_summary">Відновити вивчені слова з файлу</string>
+    <string name="learned_words_title">Вивчені слова</string>
+    <string name="learned_words_manage">Керування вивченими словами</string>
+    <string name="learned_words_manage_summary">Перегляд і видалення вивчених слів</string>
+    <string name="learned_words_empty">Вивчених слів ще немає</string>
+    <string name="learned_words_delete_all">Видалити все</string>
+    <string name="learned_words_delete_all_confirm">Видалити всі вивчені слова? Цю дію не можна скасувати.</string>
+    <string name="learned_words_auth_title">Підтвердити особу</string>
+    <string name="learned_words_auth_subtitle">Автентифікуйтесь для перегляду вивчених слів</string>
 
     <!-- Error Messages -->
     <string name="error_title">Помилка</string>
@@ -197,12 +205,16 @@
     <string name="error_update_merged_dictionaries">Не вдалося оновити режим словника</string>
     <string name="error_update_pause_on_misspelled">Не вдалося оновити налаштування паузи</string>
     <string name="error_update_autocorrection">Не вдалося оновити налаштування автокорекції</string>
+    <string name="error_delete_word">Не вдалося видалити слово</string>
+    <string name="error_delete_all_words">Не вдалося видалити вивчені слова</string>
 
     <!-- Success Messages -->
     <string name="success_learned_words_cleared">Запам\'ятовані слова видалені</string>
     <string name="success_settings_reset">Налаштування скинуто до стандартних</string>
     <string name="success_dictionary_exported">Експортовано %1$d слів</string>
     <string name="success_dictionary_imported">Додано %1$d нових, оновлено %2$d слів</string>
+    <string name="success_word_deleted">Слово видалено</string>
+    <string name="success_all_words_deleted">Усі вивчені слова видалено</string>
 
     <!-- Keyboard descriptions -->
     <string name="keyboard_description">Віртуальна клавіатура</string>

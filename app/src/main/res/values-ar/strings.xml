@@ -179,6 +179,14 @@
     <string name="privacy_settings_export_dictionary_summary">حفظ الكلمات المتعلمة إلى ملف</string>
     <string name="privacy_settings_import_dictionary">استيراد معجم</string>
     <string name="privacy_settings_import_dictionary_summary">إسترجاع كلمات متعلمة من ملف</string>
+    <string name="learned_words_title">الكلمات المحفوظة</string>
+    <string name="learned_words_manage">إدارة الكلمات المحفوظة</string>
+    <string name="learned_words_manage_summary">عرض وحذف الكلمات المحفوظة</string>
+    <string name="learned_words_empty">لا توجد كلمات محفوظة بعد</string>
+    <string name="learned_words_delete_all">حذف الكل</string>
+    <string name="learned_words_delete_all_confirm">حذف جميع الكلمات المحفوظة؟ لا يمكن التراجع عن هذا.</string>
+    <string name="learned_words_auth_title">التحقق من الهوية</string>
+    <string name="learned_words_auth_subtitle">قم بالمصادقة لعرض الكلمات المحفوظة</string>
 
     <!-- Error Messages -->
     <string name="error_title">خطأ</string>
@@ -212,10 +220,14 @@
     <string name="error_update_merged_dictionaries">فشل تحديث وضع القاموس</string>
     <string name="error_update_pause_on_misspelled">فشل تحديث إعداد التوقف</string>
     <string name="error_update_autocorrection">فشل تحديث إعداد التصحيح التلقائي</string>
+    <string name="error_delete_word">فشل حذف الكلمة</string>
+    <string name="error_delete_all_words">فشل حذف الكلمات المحفوظة</string>
     <string name="success_learned_words_cleared">تم حذف الكلمات المتعلمة</string>
     <string name="success_settings_reset">تم إعادة ضبط الإعدادات</string>
     <string name="success_dictionary_exported">تم تصدير %1$d كلمة</string>
     <string name="success_dictionary_imported">تم إضافة %1$d كلمة جديدة, وتحديث %2$d كلمات</string>
+    <string name="success_word_deleted">تم حذف الكلمة</string>
+    <string name="success_all_words_deleted">تم حذف جميع الكلمات المحفوظة</string>
 
     <!-- Keyboard descriptions -->
     <string name="keyboard_description">لوحة المفاتيح الوهمية</string>

@@ -57,6 +57,9 @@ interface UserWordFrequencyDao {
     )
     suspend fun incrementFrequencyBy(languageTag: String, wordNormalized: String, amount: Int, lastUsed: Long)
 
+    @Query("DELETE FROM user_word_frequency WHERE word_normalized = :normalizedWord")
+    suspend fun deleteByNormalizedWord(normalizedWord: String): Int
+
     @Query("DELETE FROM user_word_frequency WHERE language_tag = :languageTag")
     suspend fun clearLanguage(languageTag: String): Int
 

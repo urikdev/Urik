@@ -190,6 +190,14 @@
     <string name="privacy_settings_export_dictionary_summary">Save learned words to a file</string>
     <string name="privacy_settings_import_dictionary">Import Dictionary</string>
     <string name="privacy_settings_import_dictionary_summary">Restore learned words from a file</string>
+    <string name="learned_words_title">Learned Words</string>
+    <string name="learned_words_manage">Manage Learned Words</string>
+    <string name="learned_words_manage_summary">View and delete individual learned words</string>
+    <string name="learned_words_empty">No learned words yet</string>
+    <string name="learned_words_delete_all">Delete All</string>
+    <string name="learned_words_delete_all_confirm">Delete all learned words? This cannot be undone.</string>
+    <string name="learned_words_auth_title">Verify identity</string>
+    <string name="learned_words_auth_subtitle">Authenticate to view learned words</string>
 
     <!-- Error Messages -->
     <string name="error_title">Error</string>
@@ -221,12 +229,16 @@
     <string name="error_update_merged_dictionaries">Failed to update dictionary mode</string>
     <string name="error_update_pause_on_misspelled">Failed to update pause setting</string>
     <string name="error_update_autocorrection">Failed to update autocorrection setting</string>
+    <string name="error_delete_word">Failed to delete word</string>
+    <string name="error_delete_all_words">Failed to delete learned words</string>
 
     <!-- Success Messages -->
     <string name="success_learned_words_cleared">Learned words cleared</string>
     <string name="success_settings_reset">Settings reset to defaults</string>
     <string name="success_dictionary_exported">Exported %1$d words</string>
     <string name="success_dictionary_imported">Added %1$d new, updated %2$d words</string>
+    <string name="success_word_deleted">Word removed</string>
+    <string name="success_all_words_deleted">All learned words cleared</string>
 
     <!-- Keyboard descriptions -->
     <string name="keyboard_description">Virtual keyboard</string>

@@ -168,6 +168,14 @@
     <string name="privacy_settings_export_dictionary_summary">Erlernte Wörter in eine Datei speichern</string>
     <string name="privacy_settings_import_dictionary">Wörterbuch importieren</string>
     <string name="privacy_settings_import_dictionary_summary">Erlernte Wörter aus einer Datei wiederherstellen</string>
+    <string name="learned_words_title">Erlernte Wörter</string>
+    <string name="learned_words_manage">Erlernte Wörter verwalten</string>
+    <string name="learned_words_manage_summary">Einzelne erlernte Wörter anzeigen und löschen</string>
+    <string name="learned_words_empty">Noch keine erlernten Wörter</string>
+    <string name="learned_words_delete_all">Alle löschen</string>
+    <string name="learned_words_delete_all_confirm">Alle erlernten Wörter löschen? Dies kann nicht rückgängig gemacht werden.</string>
+    <string name="learned_words_auth_title">Identität bestätigen</string>
+    <string name="learned_words_auth_subtitle">Authentifizieren, um erlernte Wörter anzuzeigen</string>
 
     <!-- Error Messages -->
     <string name="error_title">Fehler</string>
@@ -195,12 +203,16 @@
     <string name="error_update_merged_dictionaries">Wörterbuchmodus konnte nicht aktualisiert werden</string>
     <string name="error_update_pause_on_misspelled">Pause-Einstellung konnte nicht aktualisiert werden</string>
     <string name="error_update_autocorrection">Autokorrektur-Einstellung konnte nicht aktualisiert werden</string>
+    <string name="error_delete_word">Wort konnte nicht gelöscht werden</string>
+    <string name="error_delete_all_words">Erlernte Wörter konnten nicht gelöscht werden</string>
 
     <!-- Success Messages -->
     <string name="success_learned_words_cleared">Wörterbuch wurde geleert</string>
     <string name="success_settings_reset">Einstellungen wurden zurückgesetzt</string>
     <string name="success_dictionary_exported">%1$d Wörter exportiert</string>
     <string name="success_dictionary_imported">%1$d neue hinzugefügt, %2$d Wörter aktualisiert</string>
+    <string name="success_word_deleted">Wort entfernt</string>
+    <string name="success_all_words_deleted">Alle erlernten Wörter gelöscht</string>
 
     <!-- Keyboard descriptions -->
     <string name="keyboard_description">Virtuelle Tastatur</string>

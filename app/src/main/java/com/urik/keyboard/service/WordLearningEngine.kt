@@ -4,8 +4,12 @@ import android.database.sqlite.SQLiteDatabaseCorruptException
 import android.database.sqlite.SQLiteDatabaseLockedException
 import android.database.sqlite.SQLiteException
 import android.database.sqlite.SQLiteFullException
+import androidx.room.withTransaction
+import com.urik.keyboard.data.database.KeyboardDatabase
 import com.urik.keyboard.data.database.LearnedWord
 import com.urik.keyboard.data.database.LearnedWordDao
+import com.urik.keyboard.data.database.UserWordBigramDao
+import com.urik.keyboard.data.database.UserWordFrequencyDao
 import com.urik.keyboard.data.database.WordSource
 import com.urik.keyboard.settings.KeyboardSettings
 import com.urik.keyboard.settings.SettingsRepository
@@ -63,6 +67,9 @@ class WordLearningEngine
 @Inject
 constructor(
     private val learnedWordDao: LearnedWordDao,
+    private val userWordFrequencyDao: UserWordFrequencyDao,
+    private val userWordBigramDao: UserWordBigramDao,
+    private val database: KeyboardDatabase,
     private val languageManager: LanguageManager,
     private val wordNormalizer: WordNormalizer,
     settingsRepository: SettingsRepository,
@@ -959,6 +966,90 @@ constructor(
             emptyMap()
         } catch (_: Exception) {
             emptyMap()
+        }
+    }
+
+    suspend fun getAllLearnedWordsUnified(): Result<List<String>> = withContext(ioDispatcher) {
+        try {
+            val learnedWords = learnedWordDao.getAllLearnedWords()
+
+            val displayWords = learnedWords
+                .map { it.word }
+                .distinct()
+                .sortedWith(String.CASE_INSENSITIVE_ORDER)
+
+            Result.success(displayWords)
+        } catch (e: SQLiteException) {
+            ErrorLogger.logException(
+                component = "WordLearningEngine",
+                severity = ErrorLogger.Severity.HIGH,
+                exception = e,
+                context = mapOf("operation" to "getAllLearnedWordsUnified")
+            )
+            Result.failure(e)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun deleteWordCompletely(word: String): Result<Unit> = withContext(ioDispatcher) {
+        try {
+            val normalized = learnedWordDao.findNormalizedByDisplayWord(word)
+                ?: wordNormalizer.normalize(word, languageManager.currentLanguage.value)
+
+            database.withTransaction {
+                val languages = learnedWordDao.findLanguagesForWord(normalized)
+                languages.forEach { lang ->
+                    learnedWordDao.removeWordComplete(lang, normalized)
+                }
+                userWordFrequencyDao.deleteByNormalizedWord(normalized)
+                userWordBigramDao.deleteByWord(normalized)
+            }
+
+            learnedWordsCache.invalidateAll()
+            hotFrequencyBuffer.clear()
+            swipeWordsCache = emptyList()
+            swipeWordsCacheLanguage = ""
+
+            Result.success(Unit)
+        } catch (e: SQLiteException) {
+            ErrorLogger.logException(
+                component = "WordLearningEngine",
+                severity = ErrorLogger.Severity.HIGH,
+                exception = e,
+                context = mapOf("operation" to "deleteWordCompletely")
+            )
+            Result.failure(e)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun deleteAllWordsCompletely(): Result<Unit> = withContext(ioDispatcher) {
+        try {
+            database.withTransaction {
+                learnedWordDao.clearAll()
+                learnedWordDao.clearAllFts()
+                userWordFrequencyDao.clearAll()
+                userWordBigramDao.clearAll()
+            }
+
+            learnedWordsCache.invalidateAll()
+            hotFrequencyBuffer.clear()
+            swipeWordsCache = emptyList()
+            swipeWordsCacheLanguage = ""
+
+            Result.success(Unit)
+        } catch (e: SQLiteException) {
+            ErrorLogger.logException(
+                component = "WordLearningEngine",
+                severity = ErrorLogger.Severity.CRITICAL,
+                exception = e,
+                context = mapOf("operation" to "deleteAllWordsCompletely")
+            )
+            Result.failure(e)
+        } catch (e: Exception) {
+            Result.failure(e)
         }
     }
 

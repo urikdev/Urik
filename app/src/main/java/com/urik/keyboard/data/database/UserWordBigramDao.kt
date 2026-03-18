@@ -56,6 +56,15 @@ interface UserWordBigramDao {
     )
     suspend fun getTopBigrams(languageTag: String, limit: Int = 100): List<UserWordBigram>
 
+    @Query(
+        """
+        DELETE FROM user_word_bigram
+        WHERE word_a_normalized = :normalizedWord
+        OR word_b_normalized = :normalizedWord
+        """
+    )
+    suspend fun deleteByWord(normalizedWord: String): Int
+
     @Query("DELETE FROM user_word_bigram WHERE language_tag = :languageTag")
     suspend fun clearLanguage(languageTag: String): Int
 

@@ -91,12 +91,18 @@ object KeyboardModule {
     @Singleton
     fun provideWordLearningEngine(
         learnedWordDao: LearnedWordDao,
+        userWordFrequencyDao: UserWordFrequencyDao,
+        userWordBigramDao: UserWordBigramDao,
+        database: KeyboardDatabase,
         languageManager: LanguageManager,
         wordNormalizer: WordNormalizer,
         settingsRepository: SettingsRepository,
         cacheMemoryManager: CacheMemoryManager
     ): WordLearningEngine = WordLearningEngine(
         learnedWordDao,
+        userWordFrequencyDao,
+        userWordBigramDao,
+        database,
         languageManager,
         wordNormalizer,
         settingsRepository,

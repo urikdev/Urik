@@ -241,6 +241,18 @@ interface LearnedWordDao {
     @Query("SELECT * FROM learned_words")
     suspend fun getAllLearnedWords(): List<LearnedWord>
 
+    @Query("SELECT word_normalized FROM learned_words WHERE word = :displayWord LIMIT 1")
+    suspend fun findNormalizedByDisplayWord(displayWord: String): String?
+
+    @Query("SELECT DISTINCT language_tag FROM learned_words WHERE word_normalized = :normalizedWord")
+    suspend fun findLanguagesForWord(normalizedWord: String): List<String>
+
+    @Query("DELETE FROM learned_words")
+    suspend fun clearAll(): Int
+
+    @Query("DELETE FROM learned_words_fts")
+    suspend fun clearAllFts(): Int
+
     @Transaction
     suspend fun importWordWithMerge(word: LearnedWord) {
         val existing = findExactWord(word.languageTag, word.wordNormalized)

@@ -169,6 +169,14 @@
     <string name="privacy_settings_export_dictionary_summary">Αποθήκευση μαθημένων λέξεων σε αρχείο</string>
     <string name="privacy_settings_import_dictionary">Εισαγωγή λεξικού</string>
     <string name="privacy_settings_import_dictionary_summary">Επαναφορά μαθημένων λέξεων από αρχείο</string>
+    <string name="learned_words_title">Αποθηκευμένες λέξεις</string>
+    <string name="learned_words_manage">Διαχείριση αποθηκευμένων λέξεων</string>
+    <string name="learned_words_manage_summary">Προβολή και διαγραφή αποθηκευμένων λέξεων</string>
+    <string name="learned_words_empty">Δεν υπάρχουν αποθηκευμένες λέξεις ακόμα</string>
+    <string name="learned_words_delete_all">Διαγραφή όλων</string>
+    <string name="learned_words_delete_all_confirm">Διαγραφή όλων των αποθηκευμένων λέξεων; Αυτό δεν μπορεί να αναιρεθεί.</string>
+    <string name="learned_words_auth_title">Επαλήθευση ταυτότητας</string>
+    <string name="learned_words_auth_subtitle">Πιστοποιηθείτε για να δείτε τις αποθηκευμένες λέξεις</string>
     <!-- Error Messages -->
     <string name="error_title">Σφάλμα</string>
     <string name="error_update_key_size">Αποτυχία ενημέρωσης μεγέθους πλήκτρου</string>
@@ -199,11 +207,15 @@
     <string name="error_update_merged_dictionaries">Αποτυχία ενημέρωσης λειτουργίας λεξικού</string>
     <string name="error_update_pause_on_misspelled">Αποτυχία ενημέρωσης ρύθμισης παύσης</string>
     <string name="error_update_autocorrection">Αποτυχία ενημέρωσης ρύθμισης αυτόματης διόρθωσης</string>
+    <string name="error_delete_word">Αποτυχία διαγραφής λέξης</string>
+    <string name="error_delete_all_words">Αποτυχία διαγραφής αποθηκευμένων λέξεων</string>
     <!-- Success Messages -->
     <string name="success_learned_words_cleared">Οι μαθημένες λέξεις εκκαθαρίστηκαν</string>
     <string name="success_settings_reset">Οι ρυθμίσεις επανήλθαν στις προεπιλογές</string>
     <string name="success_dictionary_exported">Εξάχθηκαν %1$d λέξεις</string>
     <string name="success_dictionary_imported">Προστέθηκαν %1$d νέες λέξεις, ενημερώθηκαν %2$d λέξεις</string>
+    <string name="success_word_deleted">Η λέξη αφαιρέθηκε</string>
+    <string name="success_all_words_deleted">Όλες οι αποθηκευμένες λέξεις διαγράφηκαν</string>
     <!-- Keyboard descriptions -->
     <string name="keyboard_description">Εικονικό πληκτρολόγιο</string>
     <!-- Default key labels -->

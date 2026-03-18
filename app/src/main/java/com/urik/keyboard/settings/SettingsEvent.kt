@@ -63,6 +63,10 @@ sealed interface SettingsEvent {
         data object PauseOnMisspelledToggleFailed : Error
 
         data object AutocorrectionToggleFailed : Error
+
+        data object DeleteWordFailed : Error
+
+        data object DeleteAllWordsFailed : Error
     }
 
     /**
@@ -76,5 +80,9 @@ sealed interface SettingsEvent {
         data class DictionaryExported(val wordCount: Int) : Success
 
         data class DictionaryImported(val newWords: Int, val updatedWords: Int) : Success
+
+        data object WordDeleted : Success
+
+        data object AllWordsDeleted : Success
     }
 }

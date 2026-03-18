@@ -171,6 +171,14 @@
     <string name="privacy_settings_export_dictionary_summary">Сохранить изученные слова в файл</string>
     <string name="privacy_settings_import_dictionary">Импорт словаря</string>
     <string name="privacy_settings_import_dictionary_summary">Восстановить изученные слова из файла</string>
+    <string name="learned_words_title">Выученные слова</string>
+    <string name="learned_words_manage">Управление выученными словами</string>
+    <string name="learned_words_manage_summary">Просмотр и удаление выученных слов</string>
+    <string name="learned_words_empty">Выученных слов пока нет</string>
+    <string name="learned_words_delete_all">Удалить все</string>
+    <string name="learned_words_delete_all_confirm">Удалить все выученные слова? Это действие нельзя отменить.</string>
+    <string name="learned_words_auth_title">Подтвердите личность</string>
+    <string name="learned_words_auth_subtitle">Авторизуйтесь для просмотра выученных слов</string>
 
     <!-- Error Messages -->
     <string name="error_title">Ошибка</string>
@@ -199,12 +207,16 @@
     <string name="error_update_merged_dictionaries">Не удалось обновить режим словаря</string>
     <string name="error_update_pause_on_misspelled">Не удалось обновить настройку паузы</string>
     <string name="error_update_autocorrection">Не удалось обновить настройку автокоррекции</string>
+    <string name="error_delete_word">Не удалось удалить слово</string>
+    <string name="error_delete_all_words">Не удалось удалить выученные слова</string>
 
     <!-- Success Messages -->
     <string name="success_learned_words_cleared">Запомненные слова удалены</string>
     <string name="success_settings_reset">Настройки сброшены до значений по умолчанию</string>
     <string name="success_dictionary_exported">Экспортировано %1$d слов</string>
     <string name="success_dictionary_imported">Добавлено %1$d новых, обновлено %2$d слов</string>
+    <string name="success_word_deleted">Слово удалено</string>
+    <string name="success_all_words_deleted">Все выученные слова удалены</string>
 
     <!-- Keyboard descriptions -->
     <string name="keyboard_description">Виртуальная клавиатура</string>
