@@ -7,10 +7,12 @@ import android.graphics.Paint
 import android.graphics.RectF
 import android.graphics.Typeface
 import android.util.AttributeSet
+import android.util.TypedValue
 import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
 import android.view.View
 import android.view.animation.OvershootInterpolator
+import androidx.annotation.AttrRes
 
 class AlphabetSideBar
 @JvmOverloads
@@ -207,21 +209,22 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
     }
 
     private fun resolveThemeColors() {
-        val typedArray = context.obtainStyledAttributes(
-            intArrayOf(
-                android.R.attr.textColorSecondary,
-                android.R.attr.colorPrimary,
-                android.R.attr.colorControlHighlight
-            )
-        )
-        textColor = typedArray.getColor(0, textColor)
-        selectedTextColor = typedArray.getColor(1, selectedTextColor)
-        val highlight = typedArray.getColor(2, 0x1A000000)
-        typedArray.recycle()
+        textColor = resolveColorAttr(android.R.attr.textColorSecondary, textColor)
+        selectedTextColor = resolveColorAttr(android.R.attr.colorPrimary, selectedTextColor)
+        val highlight = resolveColorAttr(android.R.attr.colorControlHighlight, 0x1A000000)
 
         barBackgroundColor = adjustAlpha(highlight, 0.3f)
         barTouchBackgroundColor = adjustAlpha(highlight, 0.6f)
         selectedCircleColor = adjustAlpha(selectedTextColor, 0.15f)
+    }
+
+    private fun resolveColorAttr(@AttrRes attr: Int, fallback: Int): Int {
+        val typedValue = TypedValue()
+        return if (context.theme.resolveAttribute(attr, typedValue, true)) {
+            typedValue.data
+        } else {
+            fallback
+        }
     }
 
     private fun adjustAlpha(color: Int, factor: Float): Int {
