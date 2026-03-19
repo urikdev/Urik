@@ -169,6 +169,14 @@
     <string name="privacy_settings_export_dictionary_summary">Uložit naučená slova do souboru</string>
     <string name="privacy_settings_import_dictionary">Importovat slovník</string>
     <string name="privacy_settings_import_dictionary_summary">Obnovit naučená slova ze souboru</string>
+    <string name="learned_words_title">Naučená slova</string>
+    <string name="learned_words_manage">Spravovat naučená slova</string>
+    <string name="learned_words_manage_summary">Zobrazit a smazat jednotlivá naučená slova</string>
+    <string name="learned_words_empty">Zatím žádná naučená slova</string>
+    <string name="learned_words_delete_all">Smazat vše</string>
+    <string name="learned_words_delete_all_confirm">Smazat všechna naučená slova? Tuto akci nelze vrátit.</string>
+    <string name="learned_words_auth_title">Ověřit identitu</string>
+    <string name="learned_words_auth_subtitle">Pro zobrazení naučených slov se ověřte</string>
 
     <!-- Error Messages -->
     <string name="error_title">Chyba</string>
@@ -196,12 +204,16 @@
     <string name="error_update_merged_dictionaries">Nepodařilo se aktualizovat režim slovníku</string>
     <string name="error_update_pause_on_misspelled">Nepodařilo se aktualizovat nastavení pauzy</string>
     <string name="error_update_autocorrection">Nepodařilo se aktualizovat nastavení automatické opravy</string>
+    <string name="error_delete_word">Nepodařilo se smazat slovo</string>
+    <string name="error_delete_all_words">Nepodařilo se smazat naučená slova</string>
 
     <!-- Success Messages -->
     <string name="success_learned_words_cleared">Naučená slova smazána</string>
     <string name="success_settings_reset">Obnoveno výchozí nastavení</string>
     <string name="success_dictionary_exported">Exportováno %1$d slov</string>
     <string name="success_dictionary_imported">Přidáno %1$d nových, aktualizováno %2$d slov</string>
+    <string name="success_word_deleted">Slovo odstraněno</string>
+    <string name="success_all_words_deleted">Všechna naučená slova smazána</string>
 
     <!-- Keyboard descriptions -->
     <string name="keyboard_description">Virtuální klávesnice</string>

@@ -126,6 +126,9 @@ class SwipeInputIntegrationTest {
         wordLearningEngine =
             WordLearningEngine(
                 database.learnedWordDao(),
+                database.userWordFrequencyDao(),
+                database.userWordBigramDao(),
+                database,
                 languageManager,
                 wordNormalizer,
                 settingsRepository,

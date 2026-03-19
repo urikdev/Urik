@@ -6,7 +6,11 @@ import android.os.Bundle
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
+import androidx.biometric.BiometricManager
+import androidx.biometric.BiometricPrompt
+import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -16,6 +20,7 @@ import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreferenceCompat
 import com.urik.keyboard.R
 import com.urik.keyboard.settings.SettingsEventHandler
+import com.urik.keyboard.settings.learnedwords.LearnedWordsFragment
 import com.urik.keyboard.utils.ErrorLogger
 import dagger.hilt.android.AndroidEntryPoint
 import java.time.LocalDate
@@ -94,6 +99,18 @@ class PrivacyDataFragment : PreferenceFragmentCompat() {
                 }
             }
         screen.addPreference(clearLearnedPref)
+
+        val manageLearnedWordsPref =
+            Preference(context).apply {
+                key = "manage_learned_words"
+                title = resources.getString(R.string.learned_words_manage)
+                summary = resources.getString(R.string.learned_words_manage_summary)
+                setOnPreferenceClickListener {
+                    handleManageLearnedWordsTap()
+                    true
+                }
+            }
+        screen.addPreference(manageLearnedWordsPref)
 
         val exportDictionaryPref =
             Preference(context).apply {
@@ -237,5 +254,49 @@ class PrivacyDataFragment : PreferenceFragmentCompat() {
                 type = "application/json"
             }
         importLauncher.launch(intent)
+    }
+
+    private fun handleManageLearnedWordsTap() {
+        val biometricManager = BiometricManager.from(requireContext())
+        val canAuthenticate = biometricManager.canAuthenticate(
+            BiometricManager.Authenticators.DEVICE_CREDENTIAL
+        )
+
+        if (canAuthenticate == BiometricManager.BIOMETRIC_SUCCESS) {
+            showBiometricPrompt()
+        } else {
+            navigateToLearnedWords()
+        }
+    }
+
+    private fun showBiometricPrompt() {
+        val activity = requireActivity() as FragmentActivity
+        val executor = ContextCompat.getMainExecutor(requireContext())
+
+        val callback = object : BiometricPrompt.AuthenticationCallback() {
+            override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
+                navigateToLearnedWords()
+            }
+        }
+
+        val promptInfo = BiometricPrompt.PromptInfo.Builder()
+            .setTitle(resources.getString(R.string.learned_words_auth_title))
+            .setSubtitle(resources.getString(R.string.learned_words_auth_subtitle))
+            .setAllowedAuthenticators(
+                BiometricManager.Authenticators.BIOMETRIC_STRONG or
+                    BiometricManager.Authenticators.BIOMETRIC_WEAK or
+                    BiometricManager.Authenticators.DEVICE_CREDENTIAL
+            )
+            .build()
+
+        BiometricPrompt(activity, executor, callback).authenticate(promptInfo)
+    }
+
+    private fun navigateToLearnedWords() {
+        parentFragmentManager
+            .beginTransaction()
+            .replace(R.id.settings_container, LearnedWordsFragment())
+            .addToBackStack(null)
+            .commit()
     }
 }

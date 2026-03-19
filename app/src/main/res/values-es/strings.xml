@@ -169,6 +169,14 @@
     <string name="privacy_settings_export_dictionary_summary">Guardar palabras aprendidas en un archivo</string>
     <string name="privacy_settings_import_dictionary">Importar diccionario</string>
     <string name="privacy_settings_import_dictionary_summary">Restaurar palabras aprendidas desde un archivo</string>
+    <string name="learned_words_title">Palabras aprendidas</string>
+    <string name="learned_words_manage">Gestionar palabras aprendidas</string>
+    <string name="learned_words_manage_summary">Ver y eliminar palabras aprendidas</string>
+    <string name="learned_words_empty">Aún no hay palabras aprendidas</string>
+    <string name="learned_words_delete_all">Eliminar todo</string>
+    <string name="learned_words_delete_all_confirm">¿Eliminar todas las palabras aprendidas? Esto no se puede deshacer.</string>
+    <string name="learned_words_auth_title">Verificar identidad</string>
+    <string name="learned_words_auth_subtitle">Autentícate para ver las palabras aprendidas</string>
 
     <!-- Error Messages -->
     <string name="error_title">Error</string>
@@ -196,12 +204,16 @@
     <string name="error_update_merged_dictionaries">Error al actualizar el modo de diccionario</string>
     <string name="error_update_pause_on_misspelled">Error al actualizar la configuración de pausa</string>
     <string name="error_update_autocorrection">Error al actualizar la configuración de autocorrección</string>
+    <string name="error_delete_word">Error al eliminar la palabra</string>
+    <string name="error_delete_all_words">Error al eliminar las palabras aprendidas</string>
 
     <!-- Success Messages -->
     <string name="success_learned_words_cleared">Palabras aprendidas borradas</string>
     <string name="success_settings_reset">La configuración se ha restablecido a los valores predeterminados.</string>
     <string name="success_dictionary_exported">%1$d palabras exportadas</string>
     <string name="success_dictionary_imported">%1$d nuevas añadidas, %2$d palabras actualizadas</string>
+    <string name="success_word_deleted">Palabra eliminada</string>
+    <string name="success_all_words_deleted">Todas las palabras aprendidas eliminadas</string>
 
     <!-- Keyboard descriptions -->
     <string name="keyboard_description">Teclado virtual</string>

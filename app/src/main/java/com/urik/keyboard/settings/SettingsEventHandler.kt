@@ -127,6 +127,14 @@ class SettingsEventHandler(private val context: Context) {
                     context.getString(R.string.error_update_autocorrection)
                 }
 
+                is SettingsEvent.Error.DeleteWordFailed -> {
+                    context.getString(R.string.error_delete_word)
+                }
+
+                is SettingsEvent.Error.DeleteAllWordsFailed -> {
+                    context.getString(R.string.error_delete_all_words)
+                }
+
                 is SettingsEvent.Success.LearnedWordsCleared -> {
                     context.getString(R.string.success_learned_words_cleared)
                 }
@@ -145,6 +153,14 @@ class SettingsEventHandler(private val context: Context) {
                         event.newWords,
                         event.updatedWords
                     )
+                }
+
+                is SettingsEvent.Success.WordDeleted -> {
+                    context.getString(R.string.success_word_deleted)
+                }
+
+                is SettingsEvent.Success.AllWordsDeleted -> {
+                    context.getString(R.string.success_all_words_deleted)
                 }
             }
 

@@ -1,7 +1,7 @@
 # Privacy Policy
 
 **Effective Date:** October 18, 2025
-**Last Updated:** March 16, 2026
+**Last Updated:** March 18, 2026
 
 ## Introduction
 
@@ -50,6 +50,8 @@ For privacy inquiries, contact us at the email above.
 **Encryption:** Your learned words are encrypted using AES-256 encryption. The encryption key is stored in the Android Keystore, a hardware-backed secure storage system. If your device has a lock screen (PIN, pattern, or biometric), the encryption key is protected by this lock screen. Without your device unlock, your learned words cannot be decrypted.
 
 **Fallback:** If your device does not have a lock screen configured, learned words are stored without encryption, and you will see a warning about this in the app.
+
+**Viewing Learned Words:** You can view all learned words in Settings → Privacy & Data → Manage Learned Words. If your device has a lock screen configured, you will be prompted to authenticate (PIN, pattern, password, or biometric) before the list is shown. This prevents unauthorized access to your personal vocabulary.
 
 ### 1A. Word Frequency Tracking (Encrypted)
 
@@ -311,6 +313,9 @@ Number-only fields (e.g., OTP codes, calculators) use a direct-commit mode that 
 ### Learned Words, Word Frequencies, and Bigram Predictions
 - **Retention:** Word frequency and bigram entries unused for 30 days are automatically pruned. Maximum limits are enforced (10,000 frequency entries and 50,000 bigram entries per language). Learned words are retained indefinitely until you manually delete them or uninstall the app.
 - **Management Options:**
+    - View and manage individual learned words: Settings → Privacy & Data → Manage Learned Words (authentication required if device lock screen is set)
+    - Delete individual learned words: Settings → Privacy & Data → Manage Learned Words → tap delete icon (removes the word from all tables: learned words, word frequencies, and bigram predictions)
+    - Delete all learned words: Settings → Privacy & Data → Manage Learned Words → Delete All (removes all learned words, word frequencies, and bigram predictions)
     - Export dictionary: Settings → Privacy & Data → Export Dictionary (exports `learned_words` table only; word frequencies and bigrams remain local)
     - Import dictionary: Settings → Privacy & Data → Import Dictionary
     - Clear all learned words: Settings → Privacy & Data → Clear Learned Words (also clears frequency and bigram data)
@@ -370,6 +375,7 @@ When you uninstall Urik, Android automatically deletes:
 You have the right to:
 
 1. **Access Your Data**
+    - View learned words: Settings → Privacy & Data → Manage Learned Words (authentication required if device lock screen is set)
     - View clipboard history: Long-press symbols key on keyboard
     - View custom key mappings: Settings → Layout & Input → Customize Keys
     - View error logs: Settings → Privacy & Data → Export Error Logs
@@ -378,6 +384,8 @@ You have the right to:
     - **Note:** Word frequency counters and bigram prediction data are used internally for suggestion ranking and cannot be viewed directly through the UI
 
 2. **Delete Your Data**
+    - Delete individual learned words: Settings → Privacy & Data → Manage Learned Words → tap delete icon (completely removes the word from learned words, word frequencies, and bigram predictions)
+    - Delete all learned words: Settings → Privacy & Data → Manage Learned Words → Delete All
     - Clear specific learned words: Long-press suggestions to remove
     - Clear specific clipboard items: Long-press symbols key → tap × button
     - Clear all clipboard unpinned items: Long-press symbols key → Recent tab → Delete All
@@ -464,7 +472,7 @@ Urik does not knowingly collect personal information from children under 13 year
 - No online interactions
 - No advertising or tracking
 
-Parents can review and delete any learned words through the keyboard settings.
+Parents can view and delete individual or all learned words through Settings → Privacy & Data → Manage Learned Words.
 
 ## Changes to This Privacy Policy
 
