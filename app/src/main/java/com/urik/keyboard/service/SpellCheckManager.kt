@@ -71,6 +71,8 @@ constructor(
     private val spellCheckerAccessOrder = ConcurrentHashMap<String, Long>()
     private var currentLanguage: String = "en"
 
+    @Volatile private var cachedLocale: Locale = Locale.forLanguageTag("en")
+
     private val wordFrequencies = ConcurrentHashMap<String, Long>()
 
     private val parsedDictionaryWords = ConcurrentHashMap<String, List<Pair<String, Int>>>()
@@ -636,7 +638,7 @@ constructor(
             val allLanguageSuggestions =
                 activeLanguages
                     .map { lang ->
-                        async(ioDispatcher) {
+                        async(Dispatchers.Default) {
                             querySingleLanguage(normalizedWord, lang)
                         }
                     }.awaitAll()
@@ -861,12 +863,18 @@ constructor(
     private fun mergeAndRankSuggestions(
         suggestions: List<SpellingSuggestion>,
         maxResults: Int
-    ): List<SpellingSuggestion> = suggestions
-        .groupBy { it.word }
-        .mapValues { (_, dupes) -> dupes.maxBy { it.confidence } }
-        .values
-        .sortedByDescending { it.confidence }
-        .take(maxResults)
+    ): List<SpellingSuggestion> {
+        if (suggestions.size <= maxResults) {
+            val hasDuplicates = suggestions.map { it.word }.toSet().size < suggestions.size
+            if (!hasDuplicates) return suggestions
+        }
+        return suggestions
+            .groupBy { it.word }
+            .mapValues { (_, dupes) -> dupes.maxBy { it.confidence } }
+            .values
+            .sortedByDescending { it.confidence }
+            .take(maxResults)
+    }
 
     private suspend fun getCompletionsForPrefix(prefix: String, languageCode: String): List<Pair<String, Int>> {
         ensureDictionaryParsed(languageCode)
@@ -944,11 +952,17 @@ constructor(
         "en"
     }
 
-    private fun getLocaleForLanguage(): Locale = try {
-        val currentLanguage = languageManager.currentLanguage.value
-        Locale.forLanguageTag(currentLanguage)
-    } catch (_: Exception) {
-        Locale.forLanguageTag("en")
+    private fun getLocaleForLanguage(): Locale {
+        val lang = languageManager.currentLanguage.value
+        if (lang != currentLanguage) {
+            currentLanguage = lang
+            cachedLocale = try {
+                Locale.forLanguageTag(lang)
+            } catch (_: Exception) {
+                Locale.forLanguageTag("en")
+            }
+        }
+        return cachedLocale
     }
 
     private fun buildCacheKey(word: String, language: String): String = "${language}_$word"

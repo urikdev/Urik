@@ -63,6 +63,12 @@ class SwipePointRingBuffer {
         return result
     }
 
+    fun slotAt(logicalIndex: Int): Slot {
+        val tail = head - count + CAPACITY and MASK
+        val index = tail + logicalIndex and MASK
+        return slots[index]
+    }
+
     fun reset() {
         for (slot in slots) {
             slot.reset()

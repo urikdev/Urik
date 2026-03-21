@@ -62,6 +62,8 @@ object TextMatchingUtils {
      */
     fun stripWordPunctuation(word: String): String {
         if (word.isEmpty()) return word
+        val hasPunctuation = word.any { isWordSeparatingPunctuation(it) }
+        if (!hasPunctuation) return word
         return word.filter { !isWordSeparatingPunctuation(it) }
     }
 

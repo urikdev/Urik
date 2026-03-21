@@ -19,6 +19,7 @@ class ThemeManager(private val context: Context, private val settingsRepository:
     val currentTheme: StateFlow<KeyboardTheme> = _currentTheme.asStateFlow()
 
     private var cachedMaterialYouTheme: KeyboardTheme? = null
+    private var cachedMaterialYouIsLight: Boolean? = null
 
     init {
         managerScope.launch {
@@ -38,15 +39,19 @@ class ThemeManager(private val context: Context, private val settingsRepository:
 
     @RequiresApi(android.os.Build.VERSION_CODES.S)
     private fun generateMaterialYouTheme(): KeyboardTheme {
-        cachedMaterialYouTheme?.let { return it }
-
         val isLightTheme =
             context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK ==
                 Configuration.UI_MODE_NIGHT_NO
 
+        val cached = cachedMaterialYouTheme
+        if (cached != null && cachedMaterialYouIsLight == isLightTheme) return cached
+
         val colors = extractMaterialYouColors(context, isLightTheme)
 
-        return MaterialYou(colors).also { cachedMaterialYouTheme = it }
+        return MaterialYou(colors).also {
+            cachedMaterialYouTheme = it
+            cachedMaterialYouIsLight = isLightTheme
+        }
     }
 
     @RequiresApi(android.os.Build.VERSION_CODES.S)

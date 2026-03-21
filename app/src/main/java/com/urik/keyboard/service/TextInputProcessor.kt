@@ -11,6 +11,7 @@ import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.withContext
@@ -71,6 +72,7 @@ constructor(
 
     init {
         settingsRepository.settings
+            .distinctUntilChanged()
             .onEach { newSettings ->
                 updateConfiguration(newSettings)
             }.launchIn(processorScope)

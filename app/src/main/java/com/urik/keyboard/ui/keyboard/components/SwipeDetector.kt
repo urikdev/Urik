@@ -82,7 +82,8 @@ constructor(private val streamingScoringEngine: StreamingScoringEngine) {
         val rawFrequency: Long,
         val firstChar: Char,
         val uniqueLetterCount: Int,
-        val frequencyTier: FrequencyTier = FrequencyTier.COMMON
+        val frequencyTier: FrequencyTier = FrequencyTier.COMMON,
+        val uniqueLowercaseChars: Set<Char> = emptySet()
     )
 
     @Suppress("ktlint:standard:backing-property-naming")
@@ -187,15 +188,10 @@ constructor(private val streamingScoringEngine: StreamingScoringEngine) {
         else -> UScript.LATIN
     }
 
-    private fun areLayoutsCompatible(script1: Int, script2: Int): Boolean {
-        val latinLikeScripts = setOf(UScript.LATIN, UScript.CYRILLIC)
-        val arabicScripts = setOf(UScript.ARABIC)
-
-        return when (script1) {
-            in latinLikeScripts if script2 in latinLikeScripts -> true
-            in arabicScripts if script2 in arabicScripts -> true
-            else -> false
-        }
+    private fun areLayoutsCompatible(script1: Int, script2: Int): Boolean = when (script1) {
+        in LATIN_LIKE_SCRIPTS if script2 in LATIN_LIKE_SCRIPTS -> true
+        in ARABIC_SCRIPTS if script2 in ARABIC_SCRIPTS -> true
+        else -> false
     }
 
     private fun getCompatibleLanguagesForSwipe(activeLanguages: List<String>, currentScriptCode: Int): List<String> =
@@ -787,5 +783,8 @@ constructor(private val streamingScoringEngine: StreamingScoringEngine) {
         private const val GHOST_START_INTENT_POINTS = 4
         private const val GHOST_START_SLOWDOWN_RATIO = 0.7f
         private const val GHOST_IMPOSSIBLE_GAP_PX = 200f
+
+        private val LATIN_LIKE_SCRIPTS = setOf(UScript.LATIN, UScript.CYRILLIC)
+        private val ARABIC_SCRIPTS = setOf(UScript.ARABIC)
     }
 }

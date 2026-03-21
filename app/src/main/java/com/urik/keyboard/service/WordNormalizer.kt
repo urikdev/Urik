@@ -13,17 +13,27 @@ constructor() {
     private val nfcNormalizer = Normalizer2.getNFCInstance()
     private val nfdNormalizer = Normalizer2.getNFDInstance()
 
+    @Volatile private var cachedLocaleTag: String = ""
+
+    @Volatile private var cachedULocale: ULocale = ULocale.ENGLISH
+
+    private fun getULocale(languageTag: String): ULocale {
+        if (languageTag == cachedLocaleTag) return cachedULocale
+        val locale = try {
+            ULocale.forLanguageTag(languageTag)
+        } catch (_: Exception) {
+            ULocale.ENGLISH
+        }
+        cachedLocaleTag = languageTag
+        cachedULocale = locale
+        return locale
+    }
+
     fun normalize(word: String, languageTag: String): String {
         val standardNormalized = nfcNormalizer.normalize(word.trim())
         val canonicalized = canonicalizeApostrophes(standardNormalized)
-        val locale =
-            try {
-                ULocale.forLanguageTag(languageTag)
-            } catch (_: Exception) {
-                ULocale.ENGLISH
-            }
         return UCharacter
-            .toLowerCase(locale, canonicalized)
+            .toLowerCase(getULocale(languageTag), canonicalized)
             .trim()
     }
 

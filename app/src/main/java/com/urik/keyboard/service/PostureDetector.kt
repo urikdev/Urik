@@ -49,6 +49,8 @@ class PostureDetector(private val context: Context, private val scope: Coroutine
         windowContext = windowCtx
         try {
             windowInfoTracker = WindowInfoTracker.getOrCreate(windowCtx)
+            fallbackJob?.cancel()
+            fallbackJob = null
             startWindowInfoCollection()
         } catch (_: Exception) {
             ensureFallbackPolling()

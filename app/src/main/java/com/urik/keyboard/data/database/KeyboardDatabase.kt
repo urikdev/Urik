@@ -186,6 +186,14 @@ abstract class KeyboardDatabase : RoomDatabase() {
                             KeyboardDatabase::class.java,
                             DATABASE_NAME
                         ).addMigrations(MIGRATION_1_2, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
+                        .addCallback(
+                            object : Callback() {
+                                override fun onOpen(db: SupportSQLiteDatabase) {
+                                    db.execSQL("PRAGMA journal_mode=WAL")
+                                    db.execSQL("PRAGMA synchronous=NORMAL")
+                                }
+                            }
+                        )
 
                 if (passphrase != null) {
                     builder.openHelperFactory(SupportOpenHelperFactory(passphrase))

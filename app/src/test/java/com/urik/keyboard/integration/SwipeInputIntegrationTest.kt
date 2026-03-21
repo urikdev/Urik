@@ -115,6 +115,7 @@ class SwipeInputIntegrationTest {
         val wordNormalizer = WordNormalizer()
         val wordFrequencyRepository =
             WordFrequencyRepository(
+                database,
                 database.userWordFrequencyDao(),
                 database.userWordBigramDao(),
                 wordNormalizer,

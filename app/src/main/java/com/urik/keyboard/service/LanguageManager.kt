@@ -16,7 +16,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.withContext
 
@@ -57,27 +56,13 @@ constructor(
             updateEffectiveDictionaryLanguages()
 
             settingsRepository.settings
-                .map { it.primaryLanguage }
                 .distinctUntilChanged()
-                .onEach { _currentLanguage.value = it }
-                .launchIn(scope)
-
-            settingsRepository.settings
-                .map { it.primaryLayoutLanguage }
-                .distinctUntilChanged()
-                .onEach { _currentLayoutLanguage.value = it }
-                .launchIn(scope)
-
-            settingsRepository.settings
-                .map { it.activeLanguages }
-                .distinctUntilChanged()
-                .onEach { _activeLanguages.value = it }
-                .launchIn(scope)
-
-            settingsRepository.settings
-                .map { it.mergedDictionaries }
-                .distinctUntilChanged()
-                .onEach { _mergedDictionaries.value = it }
+                .onEach { s ->
+                    _currentLanguage.value = s.primaryLanguage
+                    _currentLayoutLanguage.value = s.primaryLayoutLanguage
+                    _activeLanguages.value = s.activeLanguages
+                    _mergedDictionaries.value = s.mergedDictionaries
+                }
                 .launchIn(scope)
 
             combine(

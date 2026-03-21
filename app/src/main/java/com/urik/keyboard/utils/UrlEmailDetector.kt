@@ -54,15 +54,6 @@ object UrlEmailDetector {
             }
         }
 
-        val combinedText = textBeforeCursor + currentWord
-        if (combinedText.contains("://")) {
-            val lastProtocolIndex = combinedText.lastIndexOf("://")
-            val textAfterProtocol = combinedText.substring(lastProtocolIndex + 3)
-            if (!textAfterProtocol.contains(' ')) {
-                return true
-            }
-        }
-
         return false
     }
 }

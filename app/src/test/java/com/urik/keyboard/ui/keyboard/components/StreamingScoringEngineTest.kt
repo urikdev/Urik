@@ -329,12 +329,15 @@ class StreamingScoringEngineTest {
         )
     }
 
-    private fun makeDictionaryEntry(word: String, firstChar: Char, frequency: Long): SwipeDetector.DictionaryEntry =
-        SwipeDetector.DictionaryEntry(
+    private fun makeDictionaryEntry(word: String, firstChar: Char, frequency: Long): SwipeDetector.DictionaryEntry {
+        val lowercaseWord = word.lowercase()
+        return SwipeDetector.DictionaryEntry(
             word = word,
             frequencyScore = 0.5f,
             rawFrequency = frequency,
             firstChar = firstChar,
-            uniqueLetterCount = word.toSet().size
+            uniqueLetterCount = lowercaseWord.toSet().size,
+            uniqueLowercaseChars = lowercaseWord.toSet()
         )
+    }
 }

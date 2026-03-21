@@ -835,13 +835,11 @@ constructor() {
         val simplifiedIndices = douglasPeuckerSimplify(path)
         val vertices = mutableListOf<PathVertex>()
 
-        simplifiedIndices
-            .asSequence()
-            .windowed(3, 1)
-            .forEach { window ->
-                val prevIdx = window[0]
-                val currIdx = window[1]
-                val nextIdx = window[2]
+        for (i in 1 until simplifiedIndices.size - 1) {
+            run {
+                val prevIdx = simplifiedIndices[i - 1]
+                val currIdx = simplifiedIndices[i]
+                val nextIdx = simplifiedIndices[i + 1]
 
                 val prev = path[prevIdx]
                 val curr = path[currIdx]
@@ -858,7 +856,7 @@ constructor() {
                 if (len1 < GeometricScoringConstants.VERTEX_MIN_SEGMENT_LENGTH_PX ||
                     len2 < GeometricScoringConstants.VERTEX_MIN_SEGMENT_LENGTH_PX
                 ) {
-                    return@forEach
+                    return@run
                 }
 
                 val dotProduct = (v1x * v2x + v1y * v2y) / (len1 * len2)
@@ -927,6 +925,7 @@ constructor() {
                     )
                 }
             }
+        }
 
         addFlyByVertices(path, simplifiedIndices, keyPositions, vertices)
 
@@ -1261,25 +1260,26 @@ constructor() {
         }
     }
 
-    fun calculateLexicalCoherenceBonus(letterScores: ArrayList<Pair<Char, Float>>): Float {
-        if (letterScores.size < LEXICAL_COHERENCE_MIN_LETTERS) {
+    fun calculateLexicalCoherenceBonus(scores: FloatArray, count: Int): Float {
+        if (count < LEXICAL_COHERENCE_MIN_LETTERS) {
             return 1.0f
         }
 
         var sum = 0f
         var nearMissCount = 0
 
-        for ((_, score) in letterScores) {
+        for (i in 0 until count) {
+            val score = scores[i]
             sum += score
             if (score in LEXICAL_NEAR_MISS_LOWER..LEXICAL_NEAR_MISS_UPPER) {
                 nearMissCount++
             }
         }
 
-        val avgScore = sum / letterScores.size
+        val avgScore = sum / count
         if (avgScore < LEXICAL_COHERENCE_AVG_THRESHOLD) return 1.0f
 
-        val coherenceRatio = nearMissCount.toFloat() / letterScores.size.toFloat()
+        val coherenceRatio = nearMissCount.toFloat() / count.toFloat()
 
         return if (coherenceRatio > LEXICAL_COHERENCE_RATIO_THRESHOLD) {
             LEXICAL_COHERENCE_BONUS

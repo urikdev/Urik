@@ -130,6 +130,7 @@ class KeyboardLayoutManager(
     private var cachedStrokeWidth = 0
     private var cachedStrokeWidthThick = 0
 
+    private val sharedHandler = Handler(Looper.getMainLooper())
     private var backspaceHandler: Handler? = null
     private var backspaceRunnable: Runnable? = null
     private var backspaceVibrationJob: Job? = null
@@ -193,7 +194,7 @@ class KeyboardLayoutManager(
                     longPressConsumedButtons.remove(button)
                     longPressStartX = event.rawX
                     longPressStartY = event.rawY
-                    val handler = Handler(Looper.getMainLooper())
+                    val handler = sharedHandler
                     val runnable =
                         Runnable {
                             characterLongPressFired.add(button)
@@ -301,7 +302,7 @@ class KeyboardLayoutManager(
                     longPressConsumedButtons.remove(view as Button)
                     spaceGestureStartX = event.x
                     spaceGestureStartY = event.y
-                    val handler = Handler(Looper.getMainLooper())
+                    val handler = sharedHandler
                     val runnable =
                         Runnable {
                             longPressConsumedButtons.add(view)
@@ -391,7 +392,7 @@ class KeyboardLayoutManager(
                     popupSelectionMode = false
                     longPressConsumedButtons.remove(view as Button)
                     val key = view.getTag(R.id.key_data) as? KeyboardKey.Character ?: return@OnTouchListener false
-                    val handler = Handler(Looper.getMainLooper())
+                    val handler = sharedHandler
                     val runnable =
                         Runnable {
                             longPressConsumedButtons.add(view)
@@ -469,7 +470,7 @@ class KeyboardLayoutManager(
                 MotionEvent.ACTION_DOWN -> {
                     shiftLongPressFired = false
                     longPressConsumedButtons.remove(view as Button)
-                    val handler = Handler(Looper.getMainLooper())
+                    val handler = sharedHandler
                     val runnable =
                         Runnable {
                             shiftLongPressFired = true
@@ -507,7 +508,7 @@ class KeyboardLayoutManager(
                     val button = view as Button
                     symbolsLongPressFired.remove(button)
                     longPressConsumedButtons.remove(button)
-                    val handler = Handler(Looper.getMainLooper())
+                    val handler = sharedHandler
                     val runnable =
                         Runnable {
                             symbolsLongPressFired.add(button)
@@ -569,7 +570,7 @@ class KeyboardLayoutManager(
                     longPressConsumedButtons.remove(view as Button)
                     longPressStartX = event.rawX
                     longPressStartY = event.rawY
-                    val handler = Handler(Looper.getMainLooper())
+                    val handler = sharedHandler
                     val runnable =
                         Runnable {
                             commaLongPressFired = true
@@ -1811,7 +1812,7 @@ class KeyboardLayoutManager(
         backspaceStartTime = System.currentTimeMillis()
         startBackspaceSpinUp()
 
-        backspaceHandler = Handler(Looper.getMainLooper())
+        backspaceHandler = sharedHandler
         backspaceRunnable =
             object : Runnable {
                 override fun run() {
@@ -2143,10 +2144,13 @@ class KeyboardLayoutManager(
         )
     }
 
-    private fun getKeyTextColor(key: KeyboardKey): Int = when (key) {
-        is KeyboardKey.Character -> themeManager.currentTheme.value.colors.keyTextCharacter
-        is KeyboardKey.Action -> themeManager.currentTheme.value.colors.keyTextAction
-        KeyboardKey.Spacer -> android.graphics.Color.TRANSPARENT
+    private fun getKeyTextColor(key: KeyboardKey): Int {
+        val colors = themeManager.currentTheme.value.colors
+        return when (key) {
+            is KeyboardKey.Character -> colors.keyTextCharacter
+            is KeyboardKey.Action -> colors.keyTextAction
+            KeyboardKey.Spacer -> android.graphics.Color.TRANSPARENT
+        }
     }
 
     private fun createLangBadgeDrawable(text: String, color: Int): android.graphics.drawable.BitmapDrawable {

@@ -101,6 +101,7 @@ class InputProcessingIntegrationTest {
         val wordNormalizer = WordNormalizer()
         val wordFrequencyRepository =
             WordFrequencyRepository(
+                database,
                 database.userWordFrequencyDao(),
                 database.userWordBigramDao(),
                 wordNormalizer,
