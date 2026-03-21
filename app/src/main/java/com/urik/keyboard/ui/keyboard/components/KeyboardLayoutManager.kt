@@ -1150,17 +1150,19 @@ class KeyboardLayoutManager(
                     layerDrawable.setLayerGravity(1, Gravity.TOP or Gravity.START)
 
                     layerDrawable
-                } else if (supportsCustomMapping) {
-                    val customSymbol = customKeyMappings[key.value.lowercase()]
-                    if (customSymbol != null) {
-                        keyHintRenderer.createKeyWithHint(
+                } else if (supportsCustomMapping && customKeyMappings[key.value.lowercase()] != null) {
+                    val customSymbol = customKeyMappings[key.value.lowercase()]!!
+                    keyHintRenderer.createKeyWithHint(
+                        keyBackground,
+                        customSymbol,
+                        themeManager.currentTheme.value.colors
+                    )
+                } else if (!hasNumberRowGutter && isFirstLetterRow) {
+                    keyHintRenderer.createKeyWithHint(
                             keyBackground,
-                            customSymbol,
+                        ((keyIndex + 1) % 10).toString(),
                             themeManager.currentTheme.value.colors
                         )
-                    } else {
-                        keyBackground
-                    }
                 } else {
                     keyBackground
                 }
@@ -1175,22 +1177,7 @@ class KeyboardLayoutManager(
 
             setTag(R.id.key_data, key)
             setOnClickListener(keyClickListener)
-            if (!hasNumberRowGutter && isFirstLetterRow) {
-                val keyBackground = getKeyBackground(key)
-
-                val numberText = createTextBadgeDrawable(((keyIndex + 1) % 10).toString(), getKeyTextColor(key))
-
-                val iconSize = (10 * context.resources.displayMetrics.density).toInt()
-                val leftInset = (5 * context.resources.displayMetrics.density).toInt()
-                val topInset = (4 * context.resources.displayMetrics.density).toInt()
-
-                val layerDrawable = LayerDrawable(arrayOf(keyBackground, numberText))
-                layerDrawable.setLayerSize(1, iconSize, iconSize)
-                layerDrawable.setLayerInset(1, leftInset, topInset, 0, 0)
-                layerDrawable.setLayerGravity(1, Gravity.TOP or Gravity.END)
-
-                background = layerDrawable
-            } else if (key is KeyboardKey.Action) {
+            if (key is KeyboardKey.Action) {
                 val iconRes =
                     when (key.action) {
                         KeyboardKey.ActionType.SHIFT -> if (state.isCapsLockOn) {
