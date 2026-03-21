@@ -144,6 +144,9 @@ class DatabaseSecurityManager(private val context: Context) {
                     setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
                     setKeySize(256)
                     setUserAuthenticationRequired(false)
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
+                        setUnlockedDeviceRequired(true)
+                    }
                 }.build()
 
         keyGenerator.init(keyGenParameterSpec)

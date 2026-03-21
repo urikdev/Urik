@@ -342,7 +342,7 @@ class PrivacyDataFragment : PreferenceFragmentCompat() {
     } catch (_: KeyPermanentlyInvalidatedException) {
         regenerateKeyAndCreateCryptoObject()
     } catch (_: Exception) {
-        null
+        regenerateKeyAndCreateCryptoObject()
     }
 
     private fun regenerateKeyAndCreateCryptoObject(): BiometricPrompt.CryptoObject? = try {
@@ -369,8 +369,8 @@ class PrivacyDataFragment : PreferenceFragmentCompat() {
                 BIOMETRIC_KEY_ALIAS,
                 KeyProperties.PURPOSE_ENCRYPT
             )
-                .setBlockModes(KeyProperties.BLOCK_MODE_CBC)
-                .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_PKCS7)
+                .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
+                .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
                 .setUserAuthenticationRequired(true)
                 .setInvalidatedByBiometricEnrollment(true)
                 .build()
@@ -388,7 +388,7 @@ class PrivacyDataFragment : PreferenceFragmentCompat() {
 
     companion object {
         private const val BIOMETRIC_KEY_ALIAS = "urik_learned_words_biometric_key"
-        private const val CIPHER_TRANSFORMATION = "AES/CBC/PKCS7Padding"
+        private const val CIPHER_TRANSFORMATION = "AES/GCM/NoPadding"
         private val BIOMETRIC_CHALLENGE = byteArrayOf(0)
     }
 }
