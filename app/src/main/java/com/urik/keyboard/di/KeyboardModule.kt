@@ -80,12 +80,13 @@ object KeyboardModule {
     @Provides
     @Singleton
     fun provideWordFrequencyRepository(
+        database: KeyboardDatabase,
         userWordFrequencyDao: UserWordFrequencyDao,
         userWordBigramDao: UserWordBigramDao,
         wordNormalizer: WordNormalizer,
         cacheMemoryManager: CacheMemoryManager
     ): WordFrequencyRepository =
-        WordFrequencyRepository(userWordFrequencyDao, userWordBigramDao, wordNormalizer, cacheMemoryManager)
+        WordFrequencyRepository(database, userWordFrequencyDao, userWordBigramDao, wordNormalizer, cacheMemoryManager)
 
     @Provides
     @Singleton

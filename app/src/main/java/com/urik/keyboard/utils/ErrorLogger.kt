@@ -46,6 +46,12 @@ object ErrorLogger {
     private var fallbackFile: File? = null
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+    private val totalErrorsRegex = """"totalErrors":\s*(\d+)""".toRegex()
+    private val firstErrorNullRegex = """"firstError":\s*null""".toRegex()
+    private val lastErrorValueRegex = """"lastError":\s*"[^"]*"""".toRegex()
+    private val lastErrorNullRegex = """"lastError":\s*null""".toRegex()
+    private val totalErrorsCountRegex = """"totalErrors":\s*\d+""".toRegex()
     private val logChannel =
         Channel<ErrorEntry>(
             CHANNEL_CAPACITY,
@@ -247,28 +253,29 @@ object ErrorLogger {
         val before = json.take(errorsEnd)
         val after = json.substring(errorsEnd)
 
-        val metadataRegex = """"totalErrors":\s*(\d+)""".toRegex()
         val currentCount =
-            metadataRegex
+            totalErrorsRegex
                 .find(after)
                 ?.groupValues
                 ?.get(1)
                 ?.toIntOrNull() ?: 0
         val newCount = currentCount + 1
 
+        val formattedTimestamp = dateFormat.format(Date(entry.timestamp))
+
         val updatedAfter =
             after
                 .replace(
-                    """"firstError":\s*null""".toRegex(),
-                    "\"firstError\":\"${dateFormat.format(Date(entry.timestamp))}\""
+                    firstErrorNullRegex,
+                    "\"firstError\":\"$formattedTimestamp\""
                 ).replace(
-                    """"lastError":\s*"[^"]*"""".toRegex(),
-                    "\"lastError\":\"${dateFormat.format(Date(entry.timestamp))}\""
+                    lastErrorValueRegex,
+                    "\"lastError\":\"$formattedTimestamp\""
                 ).replace(
-                    """"lastError":\s*null""".toRegex(),
-                    "\"lastError\":\"${dateFormat.format(Date(entry.timestamp))}\""
+                    lastErrorNullRegex,
+                    "\"lastError\":\"$formattedTimestamp\""
                 ).replace(
-                    """"totalErrors":\s*\d+""".toRegex(),
+                    totalErrorsCountRegex,
                     "\"totalErrors\":$newCount"
                 )
 

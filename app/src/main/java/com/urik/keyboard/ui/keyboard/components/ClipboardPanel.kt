@@ -493,16 +493,17 @@ class ClipboardPanel(context: Context, private val themeManager: ThemeManager) :
         val buttonContainer = view.getChildAt(1) as LinearLayout
         val pinButton = buttonContainer.findViewWithTag<Button>("pin_button")
         val deleteButton = buttonContainer.findViewWithTag<Button>("delete_button")
+        val colors = themeManager.currentTheme.value.colors
 
         contentText?.apply {
             text = item.content
-            setTextColor(themeManager.currentTheme.value.colors.keyTextCharacter)
+            setTextColor(colors.keyTextCharacter)
             contentDescription =
                 context.getString(R.string.clipboard_item_description, item.content.take(50))
         }
 
         view.apply {
-            setBackgroundColor(themeManager.currentTheme.value.colors.keyBackgroundCharacter)
+            setBackgroundColor(colors.keyBackgroundCharacter)
             setOnClickListener {
                 onItemSelected?.invoke(item.content)
             }
@@ -515,7 +516,7 @@ class ClipboardPanel(context: Context, private val themeManager: ThemeManager) :
                 } else {
                     ContextCompat.getDrawable(context, R.drawable.ic_pin_outline)
                 }
-            pinIcon?.setTint(themeManager.currentTheme.value.colors.keyTextAction)
+            pinIcon?.setTint(colors.keyTextAction)
             setCompoundDrawablesRelativeWithIntrinsicBounds(pinIcon, null, null, null)
             contentDescription =
                 if (item.isPinned) {
@@ -529,7 +530,7 @@ class ClipboardPanel(context: Context, private val themeManager: ThemeManager) :
         }
 
         deleteButton?.apply {
-            setTextColor(themeManager.currentTheme.value.colors.keyTextAction)
+            setTextColor(colors.keyTextAction)
             contentDescription = context.getString(R.string.clipboard_item_delete)
             setOnClickListener {
                 onItemDeleted?.invoke(item)
@@ -552,7 +553,8 @@ class ClipboardPanel(context: Context, private val themeManager: ThemeManager) :
                     LinearLayout(context).apply {
                         orientation = LinearLayout.VERTICAL
                         gravity = Gravity.CENTER
-                        setBackgroundColor(themeManager.currentTheme.value.colors.keyboardBackground)
+                        val colors = themeManager.currentTheme.value.colors
+                        setBackgroundColor(colors.keyboardBackground)
                         importantForAccessibility = IMPORTANT_FOR_ACCESSIBILITY_NO
 
                         val padding = (16 * density).toInt()
@@ -561,7 +563,7 @@ class ClipboardPanel(context: Context, private val themeManager: ThemeManager) :
                         val message =
                             TextView(context).apply {
                                 text = context.getString(R.string.clipboard_panel_delete_all_confirm)
-                                setTextColor(themeManager.currentTheme.value.colors.suggestionText)
+                                setTextColor(colors.suggestionText)
                                 gravity = Gravity.CENTER
                                 setPadding(0, 0, 0, padding)
                             }
@@ -575,8 +577,8 @@ class ClipboardPanel(context: Context, private val themeManager: ThemeManager) :
                                 val cancelBtn =
                                     Button(context).apply {
                                         text = context.getString(android.R.string.cancel)
-                                        setTextColor(themeManager.currentTheme.value.colors.keyTextAction)
-                                        setBackgroundColor(themeManager.currentTheme.value.colors.keyBackgroundAction)
+                                        setTextColor(colors.keyTextAction)
+                                        setBackgroundColor(colors.keyBackgroundAction)
                                         setOnClickListener { hideDeleteAllConfirmation() }
                                     }
 

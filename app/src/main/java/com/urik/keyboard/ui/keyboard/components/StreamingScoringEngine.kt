@@ -135,24 +135,23 @@ constructor(
         if (currentKeyPositions.isEmpty()) return
 
         val elapsedMs = (System.nanoTime() - gestureStartTimeNanos) / 1_000_000L
-        liveCandidates.size
 
         when {
             elapsedMs >= TRAVERSAL_PRUNE_MS && tickCount >= 3 -> {
                 val charsInBounds = computeCharsInBounds(path, currentKeyPositions)
                 val traversedKeys = computeTraversedKeys(path, currentKeyPositions)
-                liveCandidates = ArrayList(pruneByTraversal(liveCandidates, traversedKeys))
-                liveCandidates = ArrayList(pruneByBounds(liveCandidates, charsInBounds))
+                pruneByTraversalInPlace(liveCandidates, traversedKeys)
+                pruneByBoundsInPlace(liveCandidates, charsInBounds)
             }
 
             elapsedMs >= BOUNDS_PRUNE_MS && tickCount >= 2 -> {
                 val charsInBounds = computeCharsInBounds(path, currentKeyPositions)
-                liveCandidates = ArrayList(pruneByBounds(liveCandidates, charsInBounds))
+                pruneByBoundsInPlace(liveCandidates, charsInBounds)
             }
 
             elapsedMs >= ANCHOR_PRUNE_MS && tickCount >= 1 -> {
                 val startAnchorKeys = computeStartAnchorKeys(path, currentKeyPositions)
-                liveCandidates = ArrayList(pruneByStartAnchor(liveCandidates, startAnchorKeys))
+                pruneByStartAnchorInPlace(liveCandidates, startAnchorKeys)
             }
         }
     }
@@ -262,13 +261,38 @@ constructor(
         return candidates.filter { it.firstChar in startKeys }
     }
 
+    private fun pruneByStartAnchorInPlace(candidates: ArrayList<SwipeDetector.DictionaryEntry>, startKeys: Set<Char>) {
+        if (startKeys.isEmpty()) return
+        candidates.removeAll { it.firstChar !in startKeys }
+    }
+
+    private fun pruneByBoundsInPlace(candidates: ArrayList<SwipeDetector.DictionaryEntry>, charsInBounds: Set<Char>) {
+        if (charsInBounds.isEmpty()) return
+        candidates.removeAll { entry ->
+            val outOfBoundsCount = entry.uniqueLowercaseChars.count { it !in charsInBounds }
+            outOfBoundsCount > BOUNDS_SAFETY_MARGIN
+        }
+    }
+
+    private fun pruneByTraversalInPlace(
+        candidates: ArrayList<SwipeDetector.DictionaryEntry>,
+        traversedKeys: Set<Char>
+    ) {
+        if (traversedKeys.size < 2) return
+        candidates.removeAll { entry ->
+            val uniqueChars = entry.uniqueLowercaseChars
+            val traversedOverlap = uniqueChars.count { it in traversedKeys }
+            traversedOverlap.toFloat() / uniqueChars.size < TRAVERSAL_MIN_OVERLAP
+        }
+    }
+
     fun pruneByBounds(
         candidates: List<SwipeDetector.DictionaryEntry>,
         charsInBounds: Set<Char>
     ): List<SwipeDetector.DictionaryEntry> {
         if (charsInBounds.isEmpty()) return candidates
         return candidates.filter { entry ->
-            val uniqueChars = entry.word.lowercase().toSet()
+            val uniqueChars = entry.uniqueLowercaseChars
             val outOfBoundsCount = uniqueChars.count { it !in charsInBounds }
             outOfBoundsCount <= BOUNDS_SAFETY_MARGIN
         }
@@ -280,9 +304,9 @@ constructor(
     ): List<SwipeDetector.DictionaryEntry> {
         if (traversedKeys.size < 2) return candidates
         return candidates.filter { entry ->
-            val wordChars = entry.word.lowercase().toSet()
-            val traversedOverlap = wordChars.count { it in traversedKeys }
-            traversedOverlap.toFloat() / wordChars.size >= TRAVERSAL_MIN_OVERLAP
+            val uniqueChars = entry.uniqueLowercaseChars
+            val traversedOverlap = uniqueChars.count { it in traversedKeys }
+            traversedOverlap.toFloat() / uniqueChars.size >= TRAVERSAL_MIN_OVERLAP
         }
     }
 
@@ -387,6 +411,8 @@ constructor(
                 .sortedByDescending { it.value }
 
         return sorted.mapIndexed { rank, (word, frequency) ->
+            val lowercaseWord = word.lowercase()
+            val uniqueChars = lowercaseWord.toSet()
             SwipeDetector.DictionaryEntry(
                 word = word,
                 frequencyScore = ln(frequency.toFloat() + 1f) / 20f,
@@ -397,7 +423,8 @@ constructor(
                         word.first().toString()
                     ).first()
                     .lowercaseChar(),
-                uniqueLetterCount = word.toSet().size,
+                uniqueLetterCount = uniqueChars.size,
+                uniqueLowercaseChars = uniqueChars,
                 frequencyTier = SwipeDetector.FrequencyTier.fromRank(rank)
             )
         }

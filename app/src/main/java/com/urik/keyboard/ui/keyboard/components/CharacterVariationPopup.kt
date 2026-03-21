@@ -293,12 +293,12 @@ class CharacterVariationPopup(private val context: Context, private val themeMan
                     theme.colors.keyBackgroundCharacter
                 }
 
-            button.background =
-                GradientDrawable().apply {
-                    setColor(backgroundColor)
-                    cornerRadius = cachedCornerRadius
-                    setStroke(cachedStrokeWidth, theme.colors.keyBorder)
-                }
+            val bg = button.background
+            if (bg is GradientDrawable) {
+                bg.setColor(backgroundColor)
+                bg.setStroke(cachedStrokeWidth, theme.colors.keyBorder)
+                button.invalidate()
+            }
         }
 
         highlightedButton = null
@@ -307,12 +307,12 @@ class CharacterVariationPopup(private val context: Context, private val themeMan
             val button = characterButtons.find { it.text == char }
             if (button != null) {
                 highlightedButton = button
-                button.background =
-                    GradientDrawable().apply {
-                        setColor(theme.colors.statePressed)
-                        cornerRadius = cachedCornerRadius
-                        setStroke(cachedStrokeWidth, theme.colors.keyBorder)
-                    }
+                val bg = button.background
+                if (bg is GradientDrawable) {
+                    bg.setColor(theme.colors.statePressed)
+                    bg.setStroke(cachedStrokeWidth, theme.colors.keyBorder)
+                    button.invalidate()
+                }
             }
         }
     }

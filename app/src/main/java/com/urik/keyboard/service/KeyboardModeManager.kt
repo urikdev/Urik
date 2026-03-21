@@ -1,6 +1,7 @@
 package com.urik.keyboard.service
 
 import android.content.Context
+import com.urik.keyboard.di.ApplicationScope
 import com.urik.keyboard.model.KeyboardDisplayMode
 import com.urik.keyboard.model.KeyboardModeConfig
 import com.urik.keyboard.settings.KeyboardSettings
@@ -16,13 +17,15 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @Singleton
 class KeyboardModeManager
 @Inject
 constructor(
     @ApplicationContext private val context: Context,
-    private val settingsRepository: SettingsRepository
+    private val settingsRepository: SettingsRepository,
+    @ApplicationScope private val applicationScope: CoroutineScope
 ) {
     private val _currentMode = MutableStateFlow(KeyboardModeConfig.standard())
     val currentMode: StateFlow<KeyboardModeConfig> = _currentMode.asStateFlow()
@@ -93,21 +96,23 @@ constructor(
                     KeyboardModeConfig.split(postureInfo.hingeBounds, density)
             }
 
-        CoroutineScope(Dispatchers.IO).launch {
-            when (mode) {
-                KeyboardDisplayMode.STANDARD -> {
-                    settingsRepository.updateOneHandedModeEnabled(false)
-                }
+        applicationScope.launch {
+            withContext(Dispatchers.IO) {
+                when (mode) {
+                    KeyboardDisplayMode.STANDARD -> {
+                        settingsRepository.updateOneHandedModeEnabled(false)
+                    }
 
-                KeyboardDisplayMode.ONE_HANDED_LEFT,
-                KeyboardDisplayMode.ONE_HANDED_RIGHT
-                -> {
-                    settingsRepository.updateKeyboardDisplayMode(mode)
-                    settingsRepository.updateOneHandedModeEnabled(true)
-                }
+                    KeyboardDisplayMode.ONE_HANDED_LEFT,
+                    KeyboardDisplayMode.ONE_HANDED_RIGHT
+                    -> {
+                        settingsRepository.updateKeyboardDisplayMode(mode)
+                        settingsRepository.updateOneHandedModeEnabled(true)
+                    }
 
-                KeyboardDisplayMode.SPLIT -> {
-                    settingsRepository.updateKeyboardDisplayMode(mode)
+                    KeyboardDisplayMode.SPLIT -> {
+                        settingsRepository.updateKeyboardDisplayMode(mode)
+                    }
                 }
             }
         }

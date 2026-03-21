@@ -1,5 +1,7 @@
 package com.urik.keyboard.data
 
+import androidx.room.withTransaction
+import com.urik.keyboard.data.database.KeyboardDatabase
 import com.urik.keyboard.data.database.UserWordBigramDao
 import com.urik.keyboard.data.database.UserWordFrequencyDao
 import com.urik.keyboard.service.WordNormalizer
@@ -37,6 +39,7 @@ private data class PendingBigramUpdate(
 class WordFrequencyRepository
 @Inject
 constructor(
+    private val database: KeyboardDatabase,
     private val userWordFrequencyDao: UserWordFrequencyDao,
     private val userWordBigramDao: UserWordBigramDao,
     private val wordNormalizer: WordNormalizer,
@@ -112,22 +115,24 @@ constructor(
 
             val timestamp = System.currentTimeMillis()
 
-            updates.values.forEach { update ->
-                try {
-                    userWordFrequencyDao.incrementFrequencyBy(
-                        languageTag = update.languageTag,
-                        wordNormalized = update.wordNormalized,
-                        amount = update.incrementCount,
-                        lastUsed = timestamp
-                    )
-                } catch (e: Exception) {
-                    ErrorLogger.logException(
-                        component = "WordFrequencyRepository",
-                        severity = ErrorLogger.Severity.HIGH,
-                        exception = e,
-                        context = mapOf("operation" to "flushPendingFrequencyUpdates")
-                    )
+            try {
+                database.withTransaction {
+                    updates.values.forEach { update ->
+                        userWordFrequencyDao.incrementFrequencyBy(
+                            languageTag = update.languageTag,
+                            wordNormalized = update.wordNormalized,
+                            amount = update.incrementCount,
+                            lastUsed = timestamp
+                        )
+                    }
                 }
+            } catch (e: Exception) {
+                ErrorLogger.logException(
+                    component = "WordFrequencyRepository",
+                    severity = ErrorLogger.Severity.HIGH,
+                    exception = e,
+                    context = mapOf("operation" to "flushPendingFrequencyUpdates")
+                )
             }
         }
         pruneIfNeeded()
@@ -278,23 +283,25 @@ constructor(
 
             val timestamp = System.currentTimeMillis()
 
-            updates.values.forEach { update ->
-                try {
-                    userWordBigramDao.incrementBigramBy(
-                        languageTag = update.languageTag,
-                        wordANormalized = update.wordANormalized,
-                        wordBNormalized = update.wordBNormalized,
-                        amount = update.incrementCount,
-                        lastUsed = timestamp
-                    )
-                } catch (e: Exception) {
-                    ErrorLogger.logException(
-                        component = "WordFrequencyRepository",
-                        severity = ErrorLogger.Severity.HIGH,
-                        exception = e,
-                        context = mapOf("operation" to "flushPendingBigramUpdates")
-                    )
+            try {
+                database.withTransaction {
+                    updates.values.forEach { update ->
+                        userWordBigramDao.incrementBigramBy(
+                            languageTag = update.languageTag,
+                            wordANormalized = update.wordANormalized,
+                            wordBNormalized = update.wordBNormalized,
+                            amount = update.incrementCount,
+                            lastUsed = timestamp
+                        )
+                    }
                 }
+            } catch (e: Exception) {
+                ErrorLogger.logException(
+                    component = "WordFrequencyRepository",
+                    severity = ErrorLogger.Severity.HIGH,
+                    exception = e,
+                    context = mapOf("operation" to "flushPendingBigramUpdates")
+                )
             }
         }
     }

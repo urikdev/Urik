@@ -25,23 +25,18 @@ constructor(
 ) {
     private val mutex = Mutex()
     private val annotationCache = mutableMapOf<String, EmojiAnnotations>()
-    private var keywordIndex: Map<String, List<String>> = emptyMap()
+
+    @Volatile private var keywordIndex: Map<String, List<String>> = emptyMap()
     private var loadedLanguages: Set<String> = emptySet()
 
     suspend fun ensureLoaded(): Result<Unit> = withContext(dispatcher) {
         try {
             val activeLanguages = languageManager.activeLanguages.value
 
-            val needsReload =
-                mutex.withLock {
-                    activeLanguages.toSet() != loadedLanguages || keywordIndex.isEmpty()
-                }
-
-            if (!needsReload) {
-                return@withContext Result.success(Unit)
-            }
-
             mutex.withLock {
+                val needsReload = activeLanguages.toSet() != loadedLanguages || keywordIndex.isEmpty()
+                if (!needsReload) return@withContext Result.success(Unit)
+
                 loadedLanguages = activeLanguages.toSet()
                 annotationCache.clear()
 
@@ -108,10 +103,7 @@ constructor(
     suspend fun search(query: String): List<String> = withContext(dispatcher) {
         if (query.isBlank()) return@withContext emptyList()
 
-        val index =
-            mutex.withLock {
-                keywordIndex
-            }
+        val index = keywordIndex
 
         val normalizedQuery = query.trim().lowercase()
         val emojiScores = mutableMapOf<String, Int>()

@@ -3,10 +3,13 @@ package com.urik.keyboard.utils
 import com.ibm.icu.text.BreakIterator
 
 object BackspaceUtils {
+    private val threadLocalBreakIterator =
+        ThreadLocal.withInitial { BreakIterator.getCharacterInstance() }
+
     fun getLastGraphemeClusterLength(text: String): Int {
         if (text.isEmpty()) return 0
 
-        val iterator = BreakIterator.getCharacterInstance()
+        val iterator = threadLocalBreakIterator.get()!!
         iterator.setText(text)
 
         var previousBoundary = 0
