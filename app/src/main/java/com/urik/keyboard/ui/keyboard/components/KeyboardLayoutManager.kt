@@ -1056,6 +1056,13 @@ class KeyboardLayoutManager(
             val visualHeight = adjustedKeyHeight + 2
             val verticalMargin = ((adjustedMinTarget - visualHeight) / 2).coerceAtLeast(0)
 
+            val hasNumberRowGutter = run {
+                val firstRow = effectiveLayout?.rows?.get(0)
+                firstRow is List<KeyboardKey> && isTopNumberRow(firstRow)
+            }
+            val isLetterRow = rowKeys.all { k -> k is KeyboardKey.Character && k.type == KeyboardKey.KeyType.LETTER }
+            val keyIndex = rowKeys.indexOf(key)
+
             layoutParams =
                 LinearLayout
                     .LayoutParams(
@@ -1165,8 +1172,11 @@ class KeyboardLayoutManager(
 
             setTag(R.id.key_data, key)
             setOnClickListener(keyClickListener)
-
-            if (key is KeyboardKey.Action) {
+            if (!hasNumberRowGutter && isLetterRow) {
+                val keyBackground = getKeyBackground(key)
+                keyBackground.setTint(Color.GREEN)
+                background = keyBackground
+            } else if (key is KeyboardKey.Action) {
                 val iconRes =
                     when (key.action) {
                         KeyboardKey.ActionType.SHIFT -> if (state.isCapsLockOn) {
