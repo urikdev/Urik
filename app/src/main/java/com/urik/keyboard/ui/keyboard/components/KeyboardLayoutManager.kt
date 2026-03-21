@@ -1060,7 +1060,10 @@ class KeyboardLayoutManager(
                 val firstRow = effectiveLayout?.rows?.get(0)
                 firstRow is List<KeyboardKey> && isTopNumberRow(firstRow)
             }
-            val isLetterRow = rowKeys.all { k -> k is KeyboardKey.Character && k.type == KeyboardKey.KeyType.LETTER }
+            val isFirstLetterRow =
+                !hasNumberRowGutter &&
+                    rowKeys == effectiveLayout?.rows?.get(0) &&
+                    rowKeys.all { k -> k is KeyboardKey.Character && k.type == KeyboardKey.KeyType.LETTER }
             val keyIndex = rowKeys.indexOf(key)
 
             layoutParams =
@@ -1172,7 +1175,7 @@ class KeyboardLayoutManager(
 
             setTag(R.id.key_data, key)
             setOnClickListener(keyClickListener)
-            if (!hasNumberRowGutter && isLetterRow) {
+            if (!hasNumberRowGutter && isFirstLetterRow) {
                 val keyBackground = getKeyBackground(key)
                 keyBackground.setTint(Color.GREEN)
                 background = keyBackground
