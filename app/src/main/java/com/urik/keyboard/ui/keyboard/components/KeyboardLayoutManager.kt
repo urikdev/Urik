@@ -1187,7 +1187,7 @@ class KeyboardLayoutManager(
                 val layerDrawable = LayerDrawable(arrayOf(keyBackground, numberText))
                 layerDrawable.setLayerSize(1, iconSize, iconSize)
                 layerDrawable.setLayerInset(1, leftInset, topInset, 0, 0)
-                layerDrawable.setLayerGravity(1, Gravity.TOP or Gravity.START)
+                layerDrawable.setLayerGravity(1, Gravity.TOP or Gravity.END)
 
                 background = layerDrawable
             } else if (key is KeyboardKey.Action) {
