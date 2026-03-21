@@ -3,6 +3,9 @@ package com.urik.keyboard.settings.privacydata
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.security.keystore.KeyGenParameterSpec
+import android.security.keystore.KeyPermanentlyInvalidatedException
+import android.security.keystore.KeyProperties
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
@@ -23,8 +26,12 @@ import com.urik.keyboard.settings.SettingsEventHandler
 import com.urik.keyboard.settings.learnedwords.LearnedWordsFragment
 import com.urik.keyboard.utils.ErrorLogger
 import dagger.hilt.android.AndroidEntryPoint
+import java.security.KeyStore
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import javax.crypto.Cipher
+import javax.crypto.KeyGenerator
+import javax.crypto.SecretKey
 import kotlinx.coroutines.launch
 
 /**
@@ -275,7 +282,36 @@ class PrivacyDataFragment : PreferenceFragmentCompat() {
 
         val callback = object : BiometricPrompt.AuthenticationCallback() {
             override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
+                result.cryptoObject?.cipher?.let { cipher ->
+                    try {
+                        cipher.doFinal(BIOMETRIC_CHALLENGE)
+                    } catch (_: Exception) {
+                        return
+                    }
+                }
                 navigateToLearnedWords()
+            }
+        }
+
+        val biometricPrompt = BiometricPrompt(activity, executor, callback)
+        val biometricManager = BiometricManager.from(requireContext())
+        val hasStrongBiometric = biometricManager.canAuthenticate(
+            BiometricManager.Authenticators.BIOMETRIC_STRONG
+        ) == BiometricManager.BIOMETRIC_SUCCESS
+
+        if (hasStrongBiometric) {
+            val cryptoObject = createCryptoObject()
+            if (cryptoObject != null) {
+                val promptInfo = BiometricPrompt.PromptInfo.Builder()
+                    .setTitle(resources.getString(R.string.learned_words_auth_title))
+                    .setSubtitle(resources.getString(R.string.learned_words_auth_subtitle))
+                    .setAllowedAuthenticators(
+                        BiometricManager.Authenticators.BIOMETRIC_STRONG
+                    )
+                    .setNegativeButtonText(resources.getString(android.R.string.cancel))
+                    .build()
+                biometricPrompt.authenticate(promptInfo, cryptoObject)
+                return
             }
         }
 
@@ -288,8 +324,58 @@ class PrivacyDataFragment : PreferenceFragmentCompat() {
                     BiometricManager.Authenticators.DEVICE_CREDENTIAL
             )
             .build()
+        biometricPrompt.authenticate(promptInfo)
+    }
 
-        BiometricPrompt(activity, executor, callback).authenticate(promptInfo)
+    private fun createCryptoObject(): BiometricPrompt.CryptoObject? = try {
+        val keyStore = KeyStore.getInstance("AndroidKeyStore")
+        keyStore.load(null)
+
+        if (!keyStore.containsAlias(BIOMETRIC_KEY_ALIAS)) {
+            generateBiometricKey()
+        }
+
+        val key = keyStore.getKey(BIOMETRIC_KEY_ALIAS, null) as SecretKey
+        val cipher = Cipher.getInstance(CIPHER_TRANSFORMATION)
+        cipher.init(Cipher.ENCRYPT_MODE, key)
+        BiometricPrompt.CryptoObject(cipher)
+    } catch (_: KeyPermanentlyInvalidatedException) {
+        regenerateKeyAndCreateCryptoObject()
+    } catch (_: Exception) {
+        null
+    }
+
+    private fun regenerateKeyAndCreateCryptoObject(): BiometricPrompt.CryptoObject? = try {
+        val keyStore = KeyStore.getInstance("AndroidKeyStore")
+        keyStore.load(null)
+        keyStore.deleteEntry(BIOMETRIC_KEY_ALIAS)
+        generateBiometricKey()
+
+        val key = keyStore.getKey(BIOMETRIC_KEY_ALIAS, null) as SecretKey
+        val cipher = Cipher.getInstance(CIPHER_TRANSFORMATION)
+        cipher.init(Cipher.ENCRYPT_MODE, key)
+        BiometricPrompt.CryptoObject(cipher)
+    } catch (_: Exception) {
+        null
+    }
+
+    private fun generateBiometricKey() {
+        val keyGenerator = KeyGenerator.getInstance(
+            KeyProperties.KEY_ALGORITHM_AES,
+            "AndroidKeyStore"
+        )
+        keyGenerator.init(
+            KeyGenParameterSpec.Builder(
+                BIOMETRIC_KEY_ALIAS,
+                KeyProperties.PURPOSE_ENCRYPT
+            )
+                .setBlockModes(KeyProperties.BLOCK_MODE_CBC)
+                .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_PKCS7)
+                .setUserAuthenticationRequired(true)
+                .setInvalidatedByBiometricEnrollment(true)
+                .build()
+        )
+        keyGenerator.generateKey()
     }
 
     private fun navigateToLearnedWords() {
@@ -298,5 +384,11 @@ class PrivacyDataFragment : PreferenceFragmentCompat() {
             .replace(R.id.settings_container, LearnedWordsFragment())
             .addToBackStack(null)
             .commit()
+    }
+
+    companion object {
+        private const val BIOMETRIC_KEY_ALIAS = "urik_learned_words_biometric_key"
+        private const val CIPHER_TRANSFORMATION = "AES/CBC/PKCS7Padding"
+        private val BIOMETRIC_CHALLENGE = byteArrayOf(0)
     }
 }
