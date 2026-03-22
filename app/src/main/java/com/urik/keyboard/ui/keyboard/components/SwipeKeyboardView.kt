@@ -29,6 +29,7 @@ import com.urik.keyboard.R
 import com.urik.keyboard.model.KeyboardKey
 import com.urik.keyboard.model.KeyboardLayout
 import com.urik.keyboard.model.KeyboardState
+import com.urik.keyboard.service.AdaptiveDimensions
 import com.urik.keyboard.service.EmojiSearchManager
 import com.urik.keyboard.service.LanguageManager
 import com.urik.keyboard.service.SpellCheckManager
@@ -112,6 +113,7 @@ constructor(
     private var gestureStartY = 0f
     private var gestureLastProcessedX = 0f
     private var gestureDensity = 1f
+    private var adaptiveDimensions: AdaptiveDimensions? = null
     private var gesturePrevX = 0f
     private var gesturePrevTime = 0L
     private var currentCursorSpeed: CursorSpeed =
@@ -609,6 +611,11 @@ constructor(
 
         closeButton?.setTextColor(theme.colors.keyTextAction)
         closeButton?.setBackgroundColor(theme.colors.keyBackgroundAction)
+    }
+
+    fun updateAdaptiveDimensions(dimensions: AdaptiveDimensions) {
+        adaptiveDimensions = dimensions
+        cacheSuggestionMetrics()
     }
 
     /**
@@ -1259,10 +1266,12 @@ constructor(
     }
 
     private fun calculateResponsiveSuggestionTextSize(): Float {
-        val keyHeight = context.resources.getDimensionPixelSize(R.dimen.key_height)
+        val dims = adaptiveDimensions
+        val keyHeight = dims?.keyHeightPx
+            ?: context.resources.getDimensionPixelSize(R.dimen.key_height)
         val baseTextSize = keyHeight * 0.40f / context.resources.displayMetrics.density
-        val minSize = 15f
-        val maxSize = 19f
+        val minSize = dims?.suggestionTextMinSp ?: 15f
+        val maxSize = dims?.suggestionTextMaxSp ?: 19f
 
         return baseTextSize.coerceIn(minSize, maxSize)
     }
@@ -1855,8 +1864,9 @@ constructor(
                     val dx = ev.x - gestureStartX
                     val dy = ev.y - gestureStartY
                     val distance = kotlin.math.sqrt(dx * dx + dy * dy)
+                    val gestureThresholdDp = adaptiveDimensions?.gestureThresholdDp ?: 20f
                     val gestureThreshold =
-                        20f * gestureDensity
+                        gestureThresholdDp * gestureDensity
 
                     if (distance > gestureThreshold) {
                         isGestureActive = true

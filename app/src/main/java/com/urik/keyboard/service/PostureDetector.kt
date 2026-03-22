@@ -1,6 +1,7 @@
 package com.urik.keyboard.service
 
 import android.content.Context
+import android.content.res.Configuration
 import android.graphics.Rect
 import androidx.window.layout.FoldingFeature
 import androidx.window.layout.WindowInfoTracker
@@ -31,7 +32,8 @@ data class PostureInfo(
     val hingeBounds: Rect? = null,
     val screenWidthPx: Int,
     val screenHeightPx: Int,
-    val isTablet: Boolean = false
+    val isTablet: Boolean = false,
+    val orientation: Int = Configuration.ORIENTATION_PORTRAIT
 )
 
 class PostureDetector(private val context: Context, private val scope: CoroutineScope) {
@@ -91,6 +93,10 @@ class PostureDetector(private val context: Context, private val scope: Coroutine
             }
     }
 
+    fun onConfigurationChanged() {
+        _postureInfo.value = getCurrentPostureInfo()
+    }
+
     fun stop() {
         collectJob?.cancel()
         fallbackJob?.cancel()
@@ -145,7 +151,8 @@ class PostureDetector(private val context: Context, private val scope: Coroutine
                 hingeBounds = hingeBounds,
                 screenWidthPx = widthPx,
                 screenHeightPx = heightPx,
-                isTablet = isTablet
+                isTablet = isTablet,
+                orientation = context.resources.configuration.orientation
             )
     }
 
@@ -174,7 +181,8 @@ class PostureDetector(private val context: Context, private val scope: Coroutine
             hingeBounds = null,
             screenWidthPx = widthPx,
             screenHeightPx = heightPx,
-            isTablet = isTablet
+            isTablet = isTablet,
+            orientation = context.resources.configuration.orientation
         )
     }
 

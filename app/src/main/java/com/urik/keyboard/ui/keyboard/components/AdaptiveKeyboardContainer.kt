@@ -306,6 +306,7 @@ constructor(
     private fun updateThemeColors() {
         val colors = themeManager?.currentTheme?.value?.colors ?: return
 
+        setBackgroundColor(colors.keyboardBackground)
         modeToggleBar?.setBackgroundColor(colors.keyboardBackground)
         updateToggleButtonStates()
     }

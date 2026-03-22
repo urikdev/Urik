@@ -7,6 +7,7 @@ import android.view.MotionEvent
 import com.ibm.icu.lang.UScript
 import com.ibm.icu.util.ULocale
 import com.urik.keyboard.model.KeyboardKey
+import com.urik.keyboard.service.AdaptiveDimensions
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.math.sqrt
@@ -123,6 +124,8 @@ constructor(private val streamingScoringEngine: StreamingScoringEngine) {
 
     @Volatile
     private var swipeStartDistancePx = 50f
+    private var swipeActivationDp = SWIPE_START_DISTANCE_DP
+    private var currentDensity = 1f
 
     @Volatile
     private var layoutScaleFactor = 1.0f
@@ -214,7 +217,13 @@ constructor(private val streamingScoringEngine: StreamingScoringEngine) {
      * Updates swipe distance threshold based on screen density.
      */
     fun updateDisplayMetrics(density: Float) {
-        swipeStartDistancePx = SWIPE_START_DISTANCE_DP * density
+        currentDensity = density
+        swipeStartDistancePx = swipeActivationDp * density
+    }
+
+    fun updateAdaptiveDimensions(dimensions: AdaptiveDimensions) {
+        swipeActivationDp = dimensions.swipeActivationDp
+        swipeStartDistancePx = swipeActivationDp * currentDensity
     }
 
     fun setSwipeListener(listener: SwipeListener?) {

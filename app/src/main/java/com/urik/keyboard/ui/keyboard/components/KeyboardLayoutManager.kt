@@ -30,6 +30,7 @@ import com.urik.keyboard.model.KeyboardKey
 import com.urik.keyboard.model.KeyboardLayout
 import com.urik.keyboard.model.KeyboardMode
 import com.urik.keyboard.model.KeyboardState
+import com.urik.keyboard.service.AdaptiveDimensions
 import com.urik.keyboard.service.CharacterVariationService
 import com.urik.keyboard.service.LanguageManager
 import com.urik.keyboard.settings.KeyLabelSize
@@ -104,6 +105,7 @@ class KeyboardLayoutManager(
     private var currentKeyLabelSize = KeyLabelSize.MEDIUM
     private var longPressPunctuationMode = LongPressPunctuationMode.PERIOD
     private var splitGapPx = 0
+    private var adaptiveDimensions: AdaptiveDimensions? = null
 
     private var activePunctuationPopup: CharacterVariationPopup? = null
     private var popupSelectionMode = false
@@ -624,6 +626,12 @@ class KeyboardLayoutManager(
     private val punctuationErrorCooldownMs = 60000L
     private var lastErrorCleanupTime = 0L
 
+    fun updateAdaptiveDimensions(dimensions: AdaptiveDimensions) {
+        adaptiveDimensions = dimensions
+        splitGapPx = dimensions.splitGapPx
+        invalidateCalculationCache()
+    }
+
     fun updateScriptContext() {
         invalidateCalculationCache()
     }
@@ -787,31 +795,46 @@ class KeyboardLayoutManager(
     private fun ensureCacheValid() {
         if (cacheValid) return
 
-        val basePadding = context.resources.getDimensionPixelSize(R.dimen.key_margin_horizontal)
-        val baseMinTouchTarget = context.resources.getDimensionPixelSize(R.dimen.minimum_touch_target)
-        val baseKeyHeight = context.resources.getDimensionPixelSize(R.dimen.key_height)
-        val baseHorizontalMargin = context.resources.getDimensionPixelSize(R.dimen.key_margin_horizontal)
+        val dims = adaptiveDimensions
+        if (dims != null) {
+            cachedDimensions["minTarget"] = dims.minimumTouchTargetPx
+            cachedDimensions["keyHeight"] = dims.keyHeightPx
+            cachedDimensions["horizontalPadding"] = dims.keyMarginHorizontalPx
+            cachedDimensions["verticalPadding"] =
+                (dims.keyMarginHorizontalPx * 0.5f * currentKeySize.scaleFactor).toInt()
+            cachedDimensions["horizontalMargin"] = dims.keyMarginHorizontalPx
+            cachedDimensions["rowVerticalMargin"] = dims.keyMarginVerticalPx
+            cachedDimensions["numberRowGutter"] = dims.numberRowGutterPx
+        } else {
+            val basePadding = context.resources.getDimensionPixelSize(R.dimen.key_margin_horizontal)
+            val baseMinTouchTarget = context.resources.getDimensionPixelSize(R.dimen.minimum_touch_target)
+            val baseKeyHeight = context.resources.getDimensionPixelSize(R.dimen.key_height)
+            val baseHorizontalMargin = context.resources.getDimensionPixelSize(R.dimen.key_margin_horizontal)
 
-        val keySizeMultiplier = currentKeySize.scaleFactor
+            val keySizeMultiplier = currentKeySize.scaleFactor
 
-        cachedDimensions["minTarget"] = (baseMinTouchTarget * keySizeMultiplier).toInt()
-        cachedDimensions["keyHeight"] = (baseKeyHeight * keySizeMultiplier).toInt()
-        cachedDimensions["horizontalPadding"] = basePadding
-        cachedDimensions["verticalPadding"] = (basePadding * 0.5f * keySizeMultiplier).toInt()
-        cachedDimensions["horizontalMargin"] = baseHorizontalMargin
-        cachedDimensions["numberRowGutter"] = context.resources.getDimensionPixelSize(R.dimen.number_row_gutter)
+            cachedDimensions["minTarget"] = (baseMinTouchTarget * keySizeMultiplier).toInt()
+            cachedDimensions["keyHeight"] = (baseKeyHeight * keySizeMultiplier).toInt()
+            cachedDimensions["horizontalPadding"] = basePadding
+            cachedDimensions["verticalPadding"] = (basePadding * 0.5f * keySizeMultiplier).toInt()
+            cachedDimensions["horizontalMargin"] = baseHorizontalMargin
+            cachedDimensions["rowVerticalMargin"] =
+                context.resources.getDimensionPixelSize(R.dimen.key_margin_vertical)
+            cachedDimensions["numberRowGutter"] = context.resources.getDimensionPixelSize(R.dimen.number_row_gutter)
+        }
 
         cacheValid = true
     }
 
     private fun getCachedTextSize(keyHeight: Int): Float = cachedTextSizes.getOrPut(keyHeight) {
-        val baseTextSize = keyHeight * 0.38f / context.resources.displayMetrics.density
-        val minSize = 12f
-        val maxSize =
-            when (currentKeySize) {
-                KeySize.EXTRA_LARGE -> 16f
-                else -> 24f
-            }
+        val dims = adaptiveDimensions
+        val ratio = dims?.keyTextBaseRatio ?: 0.38f
+        val minSize = dims?.keyTextMinSp ?: 12f
+        val maxSize = dims?.keyTextMaxSp ?: when (currentKeySize) {
+            KeySize.EXTRA_LARGE -> 16f
+            else -> 24f
+        }
+        val baseTextSize = keyHeight * ratio / context.resources.displayMetrics.density
         val adjusted = baseTextSize.coerceIn(minSize, maxSize)
         adjusted * currentKeyLabelSize.scaleFactor
     }
@@ -846,8 +869,11 @@ class KeyboardLayoutManager(
                         ViewGroup.LayoutParams.WRAP_CONTENT
                     )
 
-                val horizontalPadding = context.resources.getDimensionPixelSize(R.dimen.keyboard_padding)
-                val verticalPadding = context.resources.getDimensionPixelSize(R.dimen.keyboard_padding_vertical)
+                val dims = adaptiveDimensions
+                val horizontalPadding = dims?.keyboardPaddingHorizontalPx
+                    ?: context.resources.getDimensionPixelSize(R.dimen.keyboard_padding)
+                val verticalPadding = dims?.keyboardPaddingVerticalPx
+                    ?: context.resources.getDimensionPixelSize(R.dimen.keyboard_padding_vertical)
 
                 setPadding(horizontalPadding, verticalPadding, horizontalPadding, verticalPadding)
                 setBackgroundColor(themeManager.currentTheme.value.colors.keyboardBackground)
@@ -894,10 +920,11 @@ class KeyboardLayoutManager(
                             LinearLayout.LayoutParams.MATCH_PARENT,
                             LinearLayout.LayoutParams.WRAP_CONTENT
                         ).apply {
-                            val verticalMargin = context.resources.getDimensionPixelSize(R.dimen.key_margin_vertical)
+                            ensureCacheValid()
+                            val verticalMargin = cachedDimensions["rowVerticalMargin"]
+                                ?: context.resources.getDimensionPixelSize(R.dimen.key_margin_vertical)
                             val gutterMargin =
                                 if (hasNumberRowGutter) {
-                                    ensureCacheValid()
                                     cachedDimensions["numberRowGutter"]!!
                                 } else {
                                     0
