@@ -3,36 +3,42 @@ Privacy-focused Android keyboard with swipe typing, custom layouts, and password
 **Input**
 - Swipe typing with geometric path matching and vertex detection
 - One-handed and split modes with coordinate transformation
+- Adaptive layout for tablets and foldables
 - Long-press for character variations and custom key mapping
 - Long-press comma key to switch keyboards (IME picker)
 - Spacebar swipe for cursor control
-- QWERTZ, AZERTY, Dvorak, Colemak, and Workman layouts
+- Backspace swipe to delete previous word
+- Optional number row
+- QWERTZ, AZERTY, Dvorak, Colemak, Workman, and Hcesar layouts
 - Hardware keyboard detection
 
 **Intelligence**
 - Local bigram model for next-word prediction
 - On-device spell checking using SymSpell algorithm
-- Smart autocorrect for URLs, emails, and punctuation context
+- Autocorrect with configurable pause-on-misspell; skips URLs, emails, and punctuation
 - Word learning with encrypted SQLCipher database
 - User-specific word frequency tracking
-- Multilingual support with dedicated language toggle button
+- 16 supported languages with dedicated language toggle button
+- Merged dictionaries mode for multilingual typing sessions
 - Emoji search with keyword support
 
 **Integration**
 - Inline autofill support for password managers (Android 11+)
 - Clipboard history with encrypted storage
-- Material You dynamic theming (Android 12+)
 
 **Customization**
+- 15+ built-in themes with favorites and Material You dynamic theming (Android 12+)
 - Custom long-press symbol and key assignments
 - Haptic feedback strength slider
 - Auto-capitalization toggle
-- Configurable key sizes and typing behavior
+- Configurable key size, key label size, spacebar size, and cursor speed
+- Manage learned words: browse, search, and delete entries
 - WCAG AA contrast and TalkBack support
 
 **Privacy**
 - No telemetry, analytics or network permissions
 - Local on-device processing
 - Encrypted local storage for user data (AES-256 + Android Keystore)
+- Biometric authentication for accessing learned words
 - Dictionary export and import for backup or migration
 - Bigram predictions and word frequencies remain local-only (not exported)

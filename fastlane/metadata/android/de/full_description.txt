@@ -3,36 +3,42 @@ Datenschutzorientierte Android-Tastatur mit Wischgesten-Eingabe, benutzerdefinie
 **Eingabe**
 - Wischgesten-Eingabe mit geometrischem Pfadabgleich und Eckpunkterkennung
 - Einhand- und Split-Modus mit Koordinatentransformation
+- Adaptives Layout für Tablets und Faltgeräte
 - Langes Drücken für Zeichenvariationen und benutzerdefinierte Tastenbelegung
 - Langes Drücken der Komma-Taste zum Wechseln der Tastatur (IME-Auswahl)
 - Wischen über die Leertaste zur Cursor-Positionierung
-- QWERTZ-, AZERTY-, Dvorak-, Colemak- und Workman-Layouts
+- Wischen über die Rücktaste zum Löschen des vorherigen Wortes
+- Optionale Zahlenreihe
+- QWERTZ-, AZERTY-, Dvorak-, Colemak-, Workman- und Hcesar-Layouts
 - Erkennung von Hardware-Tastaturen
 
 **Intelligenz**
 - Lokales Bigram-Modell zur Vorhersage des nächsten Wortes
 - Geräteinterne Rechtschreibprüfung mit SymSpell-Algorithmus
-- Intelligente Autokorrektur für URLs, E-Mail Adressen und Interpunktionskontext
+- Autokorrektur mit konfigurierbarer Tipp-Pause; überspringt URLs, E-Mail-Adressen und Interpunktion
 - Wortlernen mit verschlüsselter SQLCipher-Datenbank
 - Benutzerspezifische Aufzeichnung der Wortfrequenz
-- Unterstützt Mehrsprachigkeit mit dediziertem Sprachumschalter
+- 16 unterstützte Sprachen mit dediziertem Sprachumschalter
+- Zusammengeführte Wörterbücher für mehrsprachige Eingabesitzungen
 - Emoji-Suche anhand von Schlüsselwörtern
 
 **Integration**
 - Unterstützt automatisches Ausfüllen durch Passwortmanager (Android 11+)
 - Zwischenablageverlauf mit verschlüsseltem Speicher
-- Dynamische Material You Thema (Android 12+)
 
 **Anpassung**
+- Mehr als 15 integrierte Designs mit Favoriten und dynamischem Material You Thema (Android 12+)
 - Benutzerdefinierte Symbol- und Tastenbelegung durch langes Drücken
 - Schieberegler für die Stärke des haptischen Feedbacks
 - Umschalten der automatischen Großschreibung
-- Konfigurierbare Tastengrößen und Eingabeverhalten
+- Konfigurierbare Tastengröße, Tastenbeschriftungsgröße, Leertastengröße und Cursorgeschwindigkeit
+- Gelernte Wörter verwalten: Einträge durchsuchen und löschen
 - WCAG AA-Kontrast und TalkBack-Unterstützung
 
 **Datenschutz**
 - Keine Telemetrie, Analysen oder Netzwerkberechtigungen
 - Lokale Verarbeitung auf dem Gerät
 - Verschlüsselte lokale Speicherung für Benutzerdaten (AES-256 + Android Keystore)
+- Biometrische Authentifizierung für den Zugriff auf gelernte Wörter
 - Export und Import von Wörterbüchern für Backups oder Migrationen
 - Bigram-Vorhersagen und Wortfrequenzen bleiben lokal (werden nicht exportiert)
