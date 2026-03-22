@@ -1,6 +1,6 @@
 package com.urik.keyboard.model
 
-import android.graphics.Rect
+import com.urik.keyboard.service.AdaptiveDimensions
 
 enum class KeyboardDisplayMode {
     STANDARD,
@@ -13,11 +13,11 @@ data class KeyboardModeConfig(
     val mode: KeyboardDisplayMode,
     val widthFactor: Float = 1.0f,
     val offsetX: Float = 0f,
-    val splitGapPx: Int = 0
+    val splitGapPx: Int = 0,
+    val adaptiveDimensions: AdaptiveDimensions? = null
 ) {
     companion object {
         private const val ONE_HANDED_WIDTH_FACTOR = 0.90f
-        private const val DEFAULT_SPLIT_GAP_DP = 120
 
         fun standard() = KeyboardModeConfig(
             mode = KeyboardDisplayMode.STANDARD,
@@ -36,17 +36,5 @@ data class KeyboardModeConfig(
             widthFactor = ONE_HANDED_WIDTH_FACTOR,
             offsetX = screenWidth * (1f - ONE_HANDED_WIDTH_FACTOR)
         )
-
-        fun split(hingeBounds: Rect?, density: Float): KeyboardModeConfig {
-            val gapPx =
-                hingeBounds?.width()?.takeIf { it > 0 }
-                    ?: (DEFAULT_SPLIT_GAP_DP * density).toInt()
-
-            return KeyboardModeConfig(
-                mode = KeyboardDisplayMode.SPLIT,
-                widthFactor = 1.0f,
-                splitGapPx = gapPx
-            )
-        }
     }
 }

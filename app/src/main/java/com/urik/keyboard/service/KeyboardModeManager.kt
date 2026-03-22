@@ -1,6 +1,7 @@
 package com.urik.keyboard.service
 
 import android.content.Context
+import android.content.res.Configuration
 import com.urik.keyboard.di.ApplicationScope
 import com.urik.keyboard.model.KeyboardDisplayMode
 import com.urik.keyboard.model.KeyboardModeConfig
@@ -32,6 +33,7 @@ constructor(
 
     private var collectionJob: Job? = null
     private var currentPostureInfo: PostureInfo? = null
+    private var latestSettings: KeyboardSettings? = null
 
     private val density: Float
         get() = context.resources.displayMetrics.density
@@ -45,6 +47,7 @@ constructor(
                     settingsRepository.settings,
                     postureDetector.postureInfo
                 ) { settings, postureInfo ->
+                    latestSettings = settings
                     currentPostureInfo = postureInfo
                     determineMode(settings, postureInfo)
                 }.collect { config ->
@@ -53,21 +56,38 @@ constructor(
             }
     }
 
-    private fun determineMode(settings: KeyboardSettings, postureInfo: PostureInfo): KeyboardModeConfig {
+    internal fun determineMode(settings: KeyboardSettings, postureInfo: PostureInfo): KeyboardModeConfig {
+        val dimensions = AdaptiveDimensions.compute(
+            postureInfo = postureInfo,
+            keySize = settings.keySize,
+            density = density
+        )
+
         if (settings.oneHandedModeEnabled) {
-            return when (settings.keyboardDisplayMode) {
+            val base = when (settings.keyboardDisplayMode) {
                 KeyboardDisplayMode.ONE_HANDED_RIGHT ->
                     KeyboardModeConfig.oneHandedRight(postureInfo.screenWidthPx)
-
                 else -> KeyboardModeConfig.oneHandedLeft()
             }
+            return base.copy(adaptiveDimensions = dimensions)
+        }
+
+        val isLandscapeCompact = postureInfo.orientation == Configuration.ORIENTATION_LANDSCAPE &&
+            postureInfo.sizeClass == DeviceSizeClass.COMPACT
+        if (isLandscapeCompact) {
+            return KeyboardModeConfig.standard().copy(adaptiveDimensions = dimensions)
         }
 
         if (settings.adaptiveKeyboardModesEnabled && shouldAutoSplit(postureInfo)) {
-            return KeyboardModeConfig.split(postureInfo.hingeBounds, density)
+            return KeyboardModeConfig(
+                mode = KeyboardDisplayMode.SPLIT,
+                widthFactor = 1.0f,
+                splitGapPx = dimensions.splitGapPx,
+                adaptiveDimensions = dimensions
+            )
         }
 
-        return KeyboardModeConfig.standard()
+        return KeyboardModeConfig.standard().copy(adaptiveDimensions = dimensions)
     }
 
     private fun shouldAutoSplit(postureInfo: PostureInfo): Boolean {
@@ -82,18 +102,33 @@ constructor(
 
     fun setManualMode(mode: KeyboardDisplayMode) {
         val postureInfo = currentPostureInfo ?: return
+        val settings = latestSettings ?: KeyboardSettings()
+
+        val dimensions = AdaptiveDimensions.compute(
+            postureInfo = postureInfo,
+            keySize = settings.keySize,
+            density = density
+        )
 
         _currentMode.value =
             when (mode) {
-                KeyboardDisplayMode.STANDARD -> KeyboardModeConfig.standard()
+                KeyboardDisplayMode.STANDARD ->
+                    KeyboardModeConfig.standard().copy(adaptiveDimensions = dimensions)
 
-                KeyboardDisplayMode.ONE_HANDED_LEFT -> KeyboardModeConfig.oneHandedLeft()
+                KeyboardDisplayMode.ONE_HANDED_LEFT ->
+                    KeyboardModeConfig.oneHandedLeft().copy(adaptiveDimensions = dimensions)
 
                 KeyboardDisplayMode.ONE_HANDED_RIGHT ->
                     KeyboardModeConfig.oneHandedRight(postureInfo.screenWidthPx)
+                        .copy(adaptiveDimensions = dimensions)
 
                 KeyboardDisplayMode.SPLIT ->
-                    KeyboardModeConfig.split(postureInfo.hingeBounds, density)
+                    KeyboardModeConfig(
+                        mode = KeyboardDisplayMode.SPLIT,
+                        widthFactor = 1.0f,
+                        splitGapPx = dimensions.splitGapPx,
+                        adaptiveDimensions = dimensions
+                    )
             }
 
         applicationScope.launch {

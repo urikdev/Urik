@@ -189,8 +189,8 @@ abstract class KeyboardDatabase : RoomDatabase() {
                         .addCallback(
                             object : Callback() {
                                 override fun onOpen(db: SupportSQLiteDatabase) {
-                                    db.execSQL("PRAGMA journal_mode=WAL")
-                                    db.execSQL("PRAGMA synchronous=NORMAL")
+                                    db.query("PRAGMA journal_mode=WAL").close()
+                                    db.query("PRAGMA synchronous=NORMAL").close()
                                 }
                             }
                         )

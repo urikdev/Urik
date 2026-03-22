@@ -432,7 +432,13 @@ class UrikInputMethodService :
                 actualWindow.navigationBarColor = themeManager.currentTheme.value.colors.keyboardBackground
             }
 
-            layoutManager.updateSplitGapPx(keyboardModeManager.currentMode.value.splitGapPx)
+            val initialMode = keyboardModeManager.currentMode.value
+            val initialDims = initialMode.adaptiveDimensions
+            if (initialDims != null) {
+                layoutManager.updateAdaptiveDimensions(initialDims)
+            } else {
+                layoutManager.updateSplitGapPx(initialMode.splitGapPx)
+            }
 
             val hasMultipleImes = inputMethodManager.enabledInputMethodList.size > 1
             layoutManager.updateHasMultipleImes(hasMultipleImes)
@@ -572,6 +578,9 @@ class UrikInputMethodService :
             }
 
         swipeKeyboardView = swipeView
+        keyboardModeManager.currentMode.value.adaptiveDimensions?.let {
+            swipeView.updateAdaptiveDimensions(it)
+        }
         layoutManager.setSwipeKeyboardView(swipeView)
         updateSwipeKeyboard()
         observeViewModel()
@@ -912,7 +921,16 @@ class UrikInputMethodService :
                     try {
                         val postureInfo = postureDetector?.postureInfo?.value
                         adaptiveContainer?.setModeConfig(config, postureInfo?.hingeBounds)
-                        layoutManager.updateSplitGapPx(config.splitGapPx)
+
+                        val dims = config.adaptiveDimensions
+                        if (dims != null) {
+                            layoutManager.updateAdaptiveDimensions(dims)
+                            swipeKeyboardView?.updateAdaptiveDimensions(dims)
+                            swipeDetector.updateAdaptiveDimensions(dims)
+                        } else {
+                            layoutManager.updateSplitGapPx(config.splitGapPx)
+                        }
+
                         updateSwipeEnabledState(config.mode)
                         updateSwipeKeyboard()
                     } finally {
@@ -2666,6 +2684,8 @@ class UrikInputMethodService :
         }
 
         lastDisplayDensity = currentDensity
+
+        postureDetector?.onConfigurationChanged()
 
         val currentKeyboard = newConfig.keyboard
         if (lastKeyboardConfig != android.content.res.Configuration.KEYBOARD_UNDEFINED &&
