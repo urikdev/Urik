@@ -1150,10 +1150,10 @@ class KeyboardLayoutManager(
                 } else if (isNumberHintEnabled() && isNumberHintRow(rowKeys)) {
                     val keyIndex = rowKeys.indexOf(key)
                     keyHintRenderer.createKeyWithHint(
-                            keyBackground,
+                        keyBackground,
                         ((keyIndex + 1) % 10).toString(),
-                            themeManager.currentTheme.value.colors
-                        )
+                        themeManager.currentTheme.value.colors
+                    )
                 } else {
                     keyBackground
                 }
@@ -1363,17 +1363,17 @@ class KeyboardLayoutManager(
         else -> false
     }
 
-    private fun isRowNumberGutter(row: List<KeyboardKey>?): Boolean = row is List<KeyboardKey> && isTopNumberRow(row)
-    private fun hasNumberRowGutter(): Boolean = isRowNumberGutter(effectiveLayout?.rows?.get(0))
-    private fun isNumberHintRow(row: List<KeyboardKey>): Boolean {
-        if (hasNumberRowGutter())
-            return false
+    private fun isNumberHintRow(row: List<KeyboardKey>): Boolean = effectiveLayout?.rows?.get(0)
+        ?.let { firstRow ->
+            !isTopNumberRow(firstRow) && row == firstRow
+        } ?: return false
 
-        val firstRow = effectiveLayout?.rows?.get(0) ?: return false
-        return row == firstRow
-    }
     private fun isNumberHintEnabled(): Boolean = effectiveLayout?.rows?.get(0)
-        ?.let { row -> row.count { key -> key is KeyboardKey.Character && key.type == KeyboardKey.KeyType.LETTER } == 10 }
+        ?.let { row ->
+            row.count { key ->
+                key is KeyboardKey.Character && key.type == KeyboardKey.KeyType.LETTER
+            } == 10
+        }
         ?: false
 
     private fun getCurrentLocale(): java.util.Locale {
@@ -1793,9 +1793,13 @@ class KeyboardLayoutManager(
 
         backgroundScope.launch {
             try {
-                val firstRowLetter = if (isNumberHintEnabled() && key.type == KeyboardKey.KeyType.LETTER) run {
+                val firstRowLetter = if (isNumberHintEnabled() && key.type == KeyboardKey.KeyType.LETTER) {
                     val firstRow = effectiveLayout?.rows?.get(0)
-                    if (firstRow?.contains(key) == true) {firstRow} else {null}
+                    if (firstRow?.contains(key) == true) {
+                        firstRow
+                    } else {
+                        null
+                    }
                 } else {
                     null
                 }
