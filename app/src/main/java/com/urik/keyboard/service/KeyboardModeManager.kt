@@ -67,6 +67,7 @@ constructor(
             val base = when (settings.keyboardDisplayMode) {
                 KeyboardDisplayMode.ONE_HANDED_RIGHT ->
                     KeyboardModeConfig.oneHandedRight(postureInfo.screenWidthPx)
+
                 else -> KeyboardModeConfig.oneHandedLeft()
             }
             return base.copy(adaptiveDimensions = dimensions)

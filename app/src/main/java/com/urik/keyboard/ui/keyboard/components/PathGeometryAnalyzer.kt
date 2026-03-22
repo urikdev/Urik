@@ -116,7 +116,25 @@ constructor() {
 
     data class AdaptiveSigma(val sigma: Float, val neighborCount: Int)
 
-    data class KeyNeighborhood(val neighborChars: CharArray, val neighborDistances: FloatArray)
+    data class KeyNeighborhood(val neighborChars: CharArray, val neighborDistances: FloatArray) {
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
+
+            other as KeyNeighborhood
+
+            if (!neighborChars.contentEquals(other.neighborChars)) return false
+            if (!neighborDistances.contentEquals(other.neighborDistances)) return false
+
+            return true
+        }
+
+        override fun hashCode(): Int {
+            var result = neighborChars.contentHashCode()
+            result = 31 * result + neighborDistances.contentHashCode()
+            return result
+        }
+    }
 
     private val reusableCurvatureArray = FloatArray(MAX_PATH_POINTS)
     private val reusableVelocityArray = FloatArray(MAX_PATH_POINTS)
