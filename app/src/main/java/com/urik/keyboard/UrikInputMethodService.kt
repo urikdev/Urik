@@ -2181,7 +2181,12 @@ class UrikInputMethodService :
                     if (!isUrlOrEmail) {
                         suggestionPipeline.cancelDebounceJob()
                         val isValid = textInputProcessor.validateWord(inputState.displayBuffer)
-                        if (isValid) {
+                        val bypassForContraction = isValid &&
+                            currentSettings.autocorrectionEnabled &&
+                            inputState.lastAutocorrection == null &&
+                            textInputProcessor.hasDominantContractionForm(inputState.displayBuffer)
+
+                        if (isValid && !bypassForContraction) {
                             inputState.isActivelyEditing = true
                             suggestionPipeline.recordWordUsage(inputState.displayBuffer)
                             outputBridge.beginBatchEdit()
@@ -2211,7 +2216,7 @@ class UrikInputMethodService :
                                 inputState.isCurrentWordAtSentenceStart
                             )
 
-                        if (currentSettings.pauseOnMisspelledWord) {
+                        if (currentSettings.pauseOnMisspelledWord && !bypassForContraction) {
                             inputState.spellConfirmationState = SpellConfirmationState.AWAITING_CONFIRMATION
                             inputState.pendingWordForLearning = inputState.displayBuffer
                             outputBridge.highlightCurrentWord()

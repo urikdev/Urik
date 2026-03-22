@@ -465,6 +465,47 @@ constructor(
         return suffixValid
     }
 
+    fun getDominantContractionForm(normalizedWord: String): String? {
+        val canonical = wordNormalizer.canonicalizeApostrophes(normalizedWord)
+        if (canonical.contains('\'')) return null
+
+        val wordFreq = wordFrequencies[canonical] ?: return null
+
+        for (i in 1 until canonical.length) {
+            val candidate = canonical.substring(0, i) + "'" + canonical.substring(i)
+            val contractionFreq = wordFrequencies[candidate] ?: continue
+            if (contractionFreq >= wordFreq * CONTRACTION_DOMINANCE_RATIO) {
+                return candidate
+            }
+        }
+        return null
+    }
+
+    suspend fun hasDominantContractionForm(normalizedWord: String): Boolean {
+        val canonical = wordNormalizer.canonicalizeApostrophes(normalizedWord)
+        if (canonical.contains('\'')) return false
+
+        val dictFreq = wordFrequencies[canonical] ?: return false
+
+        val currentLang = getCurrentLanguage()
+        val userFreq = try {
+            wordFrequencyRepository.getFrequency(canonical, currentLang)
+        } catch (_: Exception) {
+            0
+        }
+
+        val effectiveBaseFreq = dictFreq + userFreq * USER_FREQ_CONTRACTION_WEIGHT
+
+        for (i in 1 until canonical.length) {
+            val candidate = canonical.substring(0, i) + "'" + canonical.substring(i)
+            val contractionFreq = wordFrequencies[candidate] ?: continue
+            if (contractionFreq >= effectiveBaseFreq * CONTRACTION_DOMINANCE_RATIO) {
+                return true
+            }
+        }
+        return false
+    }
+
     /**
      * Batch dictionary check for multiple words.
      *
@@ -797,7 +838,19 @@ constructor(
                                         CONTRACTION_GUARANTEED_CONFIDENCE
                                     } else {
                                         val maxDistance = MAX_EDIT_DISTANCE
-                                        val distanceScore = (maxDistance - editDistance) / maxDistance
+                                        val strippedResult =
+                                            com.urik.keyboard.utils.TextMatchingUtils
+                                                .stripWordPunctuation(result.term)
+                                        val isContractionCandidate = strippedResult != result.term
+
+                                        val effectiveDistance =
+                                            if (isContractionCandidate && editDistance >= 2.0) {
+                                                (editDistance - 1.0).coerceAtLeast(0.0)
+                                            } else {
+                                                editDistance
+                                            }
+
+                                        val distanceScore = (maxDistance - effectiveDistance) / maxDistance
                                         val freqScore = ln(frequency.toDouble() + 1.0) / ln(MAX_DICT_FREQUENCY)
                                         var baseConfidence =
                                             SYMSPELL_DISTANCE_WEIGHT * distanceScore +
@@ -810,10 +863,7 @@ constructor(
                                             )
                                         baseConfidence += spatialScore * SPATIAL_PROXIMITY_WEIGHT
 
-                                        val strippedResult =
-                                            com.urik.keyboard.utils.TextMatchingUtils
-                                                .stripWordPunctuation(result.term)
-                                        if (strippedResult != result.term && editDistance == 1.0) {
+                                        if (isContractionCandidate && editDistance == 1.0) {
                                             baseConfidence += APOSTROPHE_BOOST
                                         }
 
@@ -827,6 +877,14 @@ constructor(
                                         if (userFrequency > 0) {
                                             val userFreqBoost = calculateFrequencyBoost(userFrequency)
                                             baseConfidence += userFreqBoost
+                                        }
+
+                                        if (strippedResult.length < normalizedWord.length) {
+                                            val lengthRatio =
+                                                strippedResult.length.toDouble() / normalizedWord.length
+                                            if (lengthRatio < MINIMUM_LENGTH_RATIO) {
+                                                baseConfidence *= lengthRatio
+                                            }
                                         }
 
                                         baseConfidence.coerceIn(
@@ -864,16 +922,32 @@ constructor(
         suggestions: List<SpellingSuggestion>,
         maxResults: Int
     ): List<SpellingSuggestion> {
-        if (suggestions.size <= maxResults) {
-            val hasDuplicates = suggestions.map { it.word }.toSet().size < suggestions.size
-            if (!hasDuplicates) return suggestions
+        val promoted = promoteContractionForms(suggestions)
+
+        if (promoted.size <= maxResults) {
+            val hasDuplicates = promoted.map { it.word }.toSet().size < promoted.size
+            if (!hasDuplicates) return promoted
         }
-        return suggestions
+        return promoted
             .groupBy { it.word }
             .mapValues { (_, dupes) -> dupes.maxBy { it.confidence } }
             .values
             .sortedByDescending { it.confidence }
             .take(maxResults)
+    }
+
+    private fun promoteContractionForms(suggestions: List<SpellingSuggestion>): List<SpellingSuggestion> {
+        var anyPromoted = false
+        val result = suggestions.map { suggestion ->
+            val contraction = getDominantContractionForm(suggestion.word)
+            if (contraction != null) {
+                anyPromoted = true
+                suggestion.copy(word = contraction)
+            } else {
+                suggestion
+            }
+        }
+        return if (anyPromoted) result else suggestions
     }
 
     private suspend fun getCompletionsForPrefix(prefix: String, languageCode: String): List<Pair<String, Int>> {
@@ -1328,6 +1402,8 @@ constructor(
         const val APOSTROPHE_BOOST = 0.30
         const val DIACRITIC_PROMOTION_BOOST = 0.08
         const val CONTRACTION_GUARANTEED_CONFIDENCE = 0.995
+        const val CONTRACTION_DOMINANCE_RATIO = 20L
+        const val USER_FREQ_CONTRACTION_WEIGHT = 300L
 
         const val DICTIONARY_BATCH_SIZE = 2000
         const val INITIAL_WORD_LIST_CAPACITY = 50000
@@ -1352,6 +1428,7 @@ constructor(
 
         const val SPATIAL_PROXIMITY_WEIGHT = 0.35
         const val PROXIMITY_SIGMA_MULTIPLIER = 2.0
+        const val MINIMUM_LENGTH_RATIO = 0.6
 
         const val MAX_PREFIX_COMPLETION_RESULTS = 10
         const val MAX_INPUT_CODEPOINTS = 100

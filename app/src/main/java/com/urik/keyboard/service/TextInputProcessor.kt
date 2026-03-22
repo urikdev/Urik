@@ -239,6 +239,11 @@ constructor(
         }
     }
 
+    suspend fun hasDominantContractionForm(word: String): Boolean {
+        val normalized = normalizeText(word)
+        return spellCheckManager.hasDominantContractionForm(normalized)
+    }
+
     private fun normalizeText(text: String): String {
         if (text.isBlank()) return text
         return text.lowercase(currentLocale.toLocale()).trim()
