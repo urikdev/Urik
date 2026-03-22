@@ -1062,9 +1062,7 @@ class KeyboardLayoutManager(
             }
             val isFirstLetterRow =
                 !hasNumberRowGutter &&
-                    rowKeys == effectiveLayout?.rows?.get(0) &&
-                    rowKeys.all { k -> k is KeyboardKey.Character && k.type == KeyboardKey.KeyType.LETTER }
-            val keyIndex = rowKeys.indexOf(key)
+                    rowKeys == effectiveLayout?.rows?.get(0)
 
             layoutParams =
                 LinearLayout
@@ -1158,6 +1156,7 @@ class KeyboardLayoutManager(
                         themeManager.currentTheme.value.colors
                     )
                 } else if (!hasNumberRowGutter && isFirstLetterRow) {
+                    val keyIndex = rowKeys.indexOf(key)
                     keyHintRenderer.createKeyWithHint(
                             keyBackground,
                         ((keyIndex + 1) % 10).toString(),
