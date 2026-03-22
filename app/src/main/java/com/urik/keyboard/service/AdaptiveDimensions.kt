@@ -85,7 +85,6 @@ data class AdaptiveDimensions(
             val numberRowGutterPx = (BASE_NUMBER_ROW_GUTTER_DP * density).toInt()
 
             val screenWidthPx = postureInfo.screenWidthPx
-            val maxKeyboardWidthPx = screenWidthPx
 
             val suggestionRange = when {
                 isLandscape && !isLargeFormFactor -> 13f to 15f
@@ -117,12 +116,14 @@ data class AdaptiveDimensions(
             val splitGapPx = when {
                 isFoldableSplit -> postureInfo.hingeBounds?.width()?.takeIf { it > 0 }
                     ?: (DEFAULT_SPLIT_GAP_DP * density).toInt()
+
                 isLargeFormFactor -> (DEFAULT_SPLIT_GAP_DP * density).toInt()
+
                 else -> 0
             }
 
             return AdaptiveDimensions(
-                maxKeyboardWidthPx = maxKeyboardWidthPx,
+                maxKeyboardWidthPx = screenWidthPx,
                 keyHeightPx = keyHeightPx,
                 minimumTouchTargetPx = minimumTouchTargetPx,
                 keyMarginHorizontalPx = keyMarginHorizontalPx,
