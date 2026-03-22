@@ -19,8 +19,8 @@ android {
         applicationId = "com.urik.keyboard"
         minSdk = 26
         targetSdk = 35
-        versionCode = 57
-        versionName = "0.19.0-beta"
+        versionCode = 58
+        versionName = "0.20.0-beta"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
