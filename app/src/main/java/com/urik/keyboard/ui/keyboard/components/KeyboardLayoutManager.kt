@@ -1789,7 +1789,19 @@ class KeyboardLayoutManager(
 
         backgroundScope.launch {
             try {
-                val variations = characterVariationService.getVariations(key.value, currentLayoutLang)
+                val firstRowLetter = if (key.type == KeyboardKey.KeyType.LETTER) run {
+                    val firstRow = effectiveLayout?.rows?.get(0)
+                    if (firstRow?.contains(key) == true) {firstRow} else {null}
+                } else {
+                    null
+                }
+
+                var variations = characterVariationService.getVariations(key.value, currentLayoutLang)
+
+                if (firstRowLetter != null) {
+                    val number = (firstRowLetter.indexOf(key) + 1) % 10
+                    variations = listOf(number.toString()) + variations
+                }
                 if (variations.isNotEmpty()) {
                     val casedVariations = applyCasingToVariations(variations)
                     withContext(Dispatchers.Main) {
