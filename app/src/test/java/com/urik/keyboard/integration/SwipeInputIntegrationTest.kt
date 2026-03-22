@@ -170,6 +170,8 @@ class SwipeInputIntegrationTest {
                 wordNormalizer
             )
         swipeDetector = SwipeDetector(streamingScoringEngine)
+
+        spellCheckManager.isWordInDictionary("hello")
     }
 
     @After

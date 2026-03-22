@@ -79,7 +79,7 @@ class SpellCheckManagerTest {
         shoes 380
         don't 500
         haven't 450
-        can't 480
+        can't 48000
         you're 460
         canteen 200
         canton 180
@@ -88,6 +88,21 @@ class SpellCheckManagerTest {
         donate 220
         donkey 210
         done 230
+        how's 15000
+        cant 10
+        wont 15
+        won't 6000
+        its 100
+        it's 500
+        well 2000
+        we'll 100
+        lets 200
+        let's 1000
+        this 5000
+        that's 3000
+        thats 50
+        join 500
+        in 8000
         """.trimIndent()
 
     @Before
@@ -100,6 +115,7 @@ class SpellCheckManagerTest {
         cacheMemoryManager = mock()
         wordNormalizer = mock()
         whenever(wordNormalizer.stripDiacritics(any())).thenAnswer { it.arguments[0] as String }
+        whenever(wordNormalizer.canonicalizeApostrophes(any())).thenAnswer { it.arguments[0] as String }
 
         wordLearningEngine =
             mock {
@@ -1200,6 +1216,178 @@ class SpellCheckManagerTest {
         assertTrue(
             "Cache should be invalidated after effective language change",
             dictionaryCache.getIfPresent("en_hello") == null
+        )
+    }
+
+    @Test
+    fun `hasDominantContractionForm returns true when contraction is 20x more frequent`() = runTest {
+        spellCheckManager.isWordInDictionary("hello")
+        assertTrue(spellCheckManager.hasDominantContractionForm("hows"))
+    }
+
+    @Test
+    fun `hasDominantContractionForm returns true for cant vs can't`() = runTest {
+        spellCheckManager.isWordInDictionary("hello")
+        assertTrue(spellCheckManager.hasDominantContractionForm("cant"))
+    }
+
+    @Test
+    fun `hasDominantContractionForm returns true for wont vs won't`() = runTest {
+        spellCheckManager.isWordInDictionary("hello")
+        assertTrue(spellCheckManager.hasDominantContractionForm("wont"))
+    }
+
+    @Test
+    fun `hasDominantContractionForm returns false when ratio is below threshold`() = runTest {
+        spellCheckManager.isWordInDictionary("hello")
+        assertFalse(spellCheckManager.hasDominantContractionForm("its"))
+        assertFalse(spellCheckManager.hasDominantContractionForm("lets"))
+    }
+
+    @Test
+    fun `hasDominantContractionForm returns false when plain form is more frequent`() = runTest {
+        spellCheckManager.isWordInDictionary("hello")
+        assertFalse(spellCheckManager.hasDominantContractionForm("well"))
+    }
+
+    @Test
+    fun `hasDominantContractionForm returns false for word already containing apostrophe`() = runTest {
+        spellCheckManager.isWordInDictionary("hello")
+        assertFalse(spellCheckManager.hasDominantContractionForm("don't"))
+    }
+
+    @Test
+    fun `hasDominantContractionForm returns false for word not in dictionary`() = runTest {
+        spellCheckManager.isWordInDictionary("hello")
+        assertFalse(spellCheckManager.hasDominantContractionForm("xyz"))
+    }
+
+    @Test
+    fun `hasDominantContractionForm returns false when no contraction form exists`() = runTest {
+        spellCheckManager.isWordInDictionary("hello")
+        assertFalse(spellCheckManager.hasDominantContractionForm("hello"))
+    }
+
+    @Test
+    fun `getDominantContractionForm returns contraction when dominant`() = runTest {
+        spellCheckManager.isWordInDictionary("hello")
+        assertEquals("how's", spellCheckManager.getDominantContractionForm("hows"))
+        assertEquals("can't", spellCheckManager.getDominantContractionForm("cant"))
+        assertEquals("won't", spellCheckManager.getDominantContractionForm("wont"))
+    }
+
+    @Test
+    fun `getDominantContractionForm returns null when not dominant`() = runTest {
+        spellCheckManager.isWordInDictionary("hello")
+        assertEquals(null, spellCheckManager.getDominantContractionForm("its"))
+        assertEquals(null, spellCheckManager.getDominantContractionForm("well"))
+        assertEquals(null, spellCheckManager.getDominantContractionForm("hello"))
+    }
+
+    @Test
+    fun `suggestions promote cant to can't for misspelled input`() = runTest {
+        val suggestions = spellCheckManager.getSpellingSuggestionsWithConfidence("cabt")
+        val words = suggestions.map { it.word }
+        assertTrue(
+            "can't should appear in suggestions for cabt",
+            words.contains("can't")
+        )
+        assertFalse(
+            "cant should be promoted to can't, not appear separately",
+            words.contains("cant")
+        )
+    }
+
+    @Test
+    fun `contraction distance reduction gives distance-2 contraction competitive confidence`() = runTest {
+        spellCheckManager.isWordInDictionary("hello")
+        val suggestions = spellCheckManager.getSpellingSuggestionsWithConfidence("thts")
+
+        val thatsConfidence = suggestions.find { it.word == "that's" }?.confidence
+        val thisConfidence = suggestions.find { it.word == "this" }?.confidence
+
+        assertNotNull("that's should appear in suggestions for thts", thatsConfidence)
+        assertNotNull("this should appear in suggestions for thts", thisConfidence)
+
+        if (thatsConfidence != null && thisConfidence != null) {
+            val gap = thisConfidence - thatsConfidence
+            assertTrue(
+                "that's should be within 0.05 of this (gap=$gap), proving distance reduction worked",
+                gap < 0.05
+            )
+        }
+    }
+
+    @Test
+    fun `short candidate penalized when much shorter than input`() = runTest {
+        spellCheckManager.isWordInDictionary("hello")
+        val suggestions = spellCheckManager.getSpellingSuggestionsWithConfidence("jkin")
+        val words = suggestions.map { it.word }
+        if (words.contains("join") && words.contains("in")) {
+            val joinIdx = words.indexOf("join")
+            val inIdx = words.indexOf("in")
+            assertTrue(
+                "join should rank above in for jkin",
+                joinIdx < inIdx
+            )
+        }
+    }
+
+    @Test
+    fun `distance 1 contraction apostrophe boost unchanged`() = runTest {
+        spellCheckManager.isWordInDictionary("hello")
+        val suggestions = spellCheckManager.getSpellingSuggestionsWithConfidence("cant")
+        val words = suggestions.map { it.word }
+        assertTrue(
+            "can't should appear for cant",
+            words.contains("can't")
+        )
+        if (words.isNotEmpty()) {
+            assertTrue(
+                "can't should be top suggestion for cant",
+                words.first() == "can't"
+            )
+        }
+    }
+
+    @Test
+    fun `contraction distance reduction does not apply at distance 1`() = runTest {
+        spellCheckManager.isWordInDictionary("hello")
+        val suggestions = spellCheckManager.getSpellingSuggestionsWithConfidence("helo")
+        val topWord = suggestions.firstOrNull()?.word
+        assertEquals(
+            "hello should still be top result for helo (distance 1, no contraction change)",
+            "hello",
+            topWord
+        )
+    }
+
+    @Test
+    fun `user frequency suppresses contraction dominance bypass`() = runTest {
+        spellCheckManager.isWordInDictionary("hello")
+
+        assertTrue(
+            "With no user frequency, hows should have dominant contraction",
+            spellCheckManager.hasDominantContractionForm("hows")
+        )
+
+        whenever(wordFrequencyRepository.getFrequency(eq("hows"), any())).thenReturn(15)
+
+        assertFalse(
+            "With user frequency boosting hows, contraction dominance should be suppressed",
+            spellCheckManager.hasDominantContractionForm("hows")
+        )
+    }
+
+    @Test
+    fun `low user frequency does not suppress contraction dominance`() = runTest {
+        spellCheckManager.isWordInDictionary("hello")
+
+        whenever(wordFrequencyRepository.getFrequency(eq("hows"), any())).thenReturn(1)
+
+        assertTrue(
+            "Low user frequency should not suppress contraction dominance",
+            spellCheckManager.hasDominantContractionForm("hows")
         )
     }
 }
