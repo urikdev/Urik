@@ -249,6 +249,20 @@ class UrikInputMethodService :
         viewModel.checkAndApplyAutoCapitalization(textBefore, currentSettings.autoCapitalizationEnabled)
     }
 
+    private fun sendCharacterAsKeyEvents(char: String) {
+        val ic = currentInputConnection ?: return
+        val events = android.view.KeyCharacterMap.load(
+            android.view.KeyCharacterMap.VIRTUAL_KEYBOARD
+        ).getEvents(char.toCharArray())
+        if (events != null) {
+            for (event in events) {
+                ic.sendKeyEvent(event)
+            }
+        } else {
+            ic.commitText(char, 1)
+        }
+    }
+
     override fun onCreate() {
         super.onCreate()
         try {
@@ -312,7 +326,9 @@ class UrikInputMethodService :
                     state = inputState,
                     swipeDetector = swipeDetector,
                     swipeSpaceManager = swipeSpaceManager,
-                    icProvider = { currentInputConnection }
+                    icProvider = { currentInputConnection },
+                    keyEventSender = { keyCode -> sendDownUpKeyEvents(keyCode) },
+                    keyCharEventSender = { char -> sendCharacterAsKeyEvents(char) }
                 )
 
             suggestionPipeline =
@@ -1033,6 +1049,7 @@ class UrikInputMethodService :
 
         inputState.isSecureField = SecureFieldDetector.isSecure(info)
         inputState.isDirectCommitField = SecureFieldDetector.isDirectCommit(info)
+        inputState.isRawKeyEventField = SecureFieldDetector.isRawKeyEvent(info)
         inputState.currentInputAction = ActionDetector.detectAction(info)
 
         val inputType = info?.inputType ?: 0
@@ -1048,14 +1065,14 @@ class UrikInputMethodService :
 
         if (inputState.isSecureField) {
             clearSecureFieldState()
-        } else if (!inputState.isUrlOrEmailField) {
+        } else if (!inputState.isUrlOrEmailField && !inputState.isRawKeyEventField) {
             if (inputState.displayBuffer.isNotEmpty() || inputState.wordState.hasContent) {
                 coordinateStateClear()
             }
 
             val textBefore = outputBridge.safeGetTextBeforeCursor(50)
             checkAutoCapitalization(textBefore)
-        } else {
+        } else if (!inputState.isRawKeyEventField) {
             if (inputState.displayBuffer.isNotEmpty()) {
                 val actualTextBefore = outputBridge.safeGetTextBeforeCursor(1)
                 val actualTextAfter = outputBridge.safeGetTextAfterCursor(1)
@@ -1135,7 +1152,7 @@ class UrikInputMethodService :
             inputState.lastSpaceTime = 0
 
             if (inputState.requiresDirectCommit) {
-                outputBridge.commitText(char, 1)
+                outputBridge.sendCharacter(char)
                 return
             }
 
@@ -1265,7 +1282,7 @@ class UrikInputMethodService :
 
     private fun handleNonLetterInput(char: String) {
         if (inputState.requiresDirectCommit) {
-            outputBridge.commitText(char, 1)
+            outputBridge.sendCharacter(char)
             return
         }
         serviceScope.launch {
@@ -1748,7 +1765,7 @@ class UrikInputMethodService :
                 }
 
                 else -> {
-                    outputBridge.commitText("\n", 1)
+                    outputBridge.sendEnter()
                 }
             }
 
@@ -1795,6 +1812,11 @@ class UrikInputMethodService :
             if (!selectedText.isNullOrEmpty()) {
                 outputBridge.commitText("", 1)
                 coordinateStateClear()
+                return
+            }
+
+            if (inputState.isRawKeyEventField) {
+                outputBridge.sendBackspace()
                 return
             }
 
@@ -2116,7 +2138,7 @@ class UrikInputMethodService :
         serviceScope.launch {
             try {
                 if (inputState.requiresDirectCommit) {
-                    outputBridge.commitText(" ", 1)
+                    outputBridge.sendSpace()
                     return@launch
                 }
 
@@ -2495,6 +2517,7 @@ class UrikInputMethodService :
 
         inputState.isSecureField = SecureFieldDetector.isSecure(attribute)
         inputState.isDirectCommitField = SecureFieldDetector.isDirectCommit(attribute)
+        inputState.isRawKeyEventField = SecureFieldDetector.isRawKeyEvent(attribute)
         inputState.currentInputAction = ActionDetector.detectAction(attribute)
 
         val inputType = attribute?.inputType ?: 0
@@ -2505,7 +2528,7 @@ class UrikInputMethodService :
 
         if (inputState.isSecureField) {
             clearSecureFieldState()
-        } else if (!inputState.isUrlOrEmailField) {
+        } else if (!inputState.isUrlOrEmailField && !inputState.isRawKeyEventField) {
             val textBefore = outputBridge.safeGetTextBeforeCursor(50)
             checkAutoCapitalization(textBefore)
         }
