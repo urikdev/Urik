@@ -185,7 +185,7 @@ class UrikInputMethodService :
     override val lifecycle: Lifecycle
         get() = lifecycleRegistry
 
-    fun setAcceleratedDeletion(active: Boolean) {
+    private fun setAcceleratedDeletion(active: Boolean) {
         inputState.isAcceleratedDeletion = active
     }
 
@@ -2832,7 +2832,7 @@ class UrikInputMethodService :
     }
 
     override fun onDestroy() {
-        streamingScoringEngine.shutdown()
+        streamingScoringEngine.cancelActiveGesture()
         wordFrequencyRepository.clearCache()
         autofillStateTracker.cleanup()
 

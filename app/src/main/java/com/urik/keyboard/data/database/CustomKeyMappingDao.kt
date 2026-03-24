@@ -1,5 +1,6 @@
 package com.urik.keyboard.data.database
 
+import androidx.annotation.VisibleForTesting
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
@@ -55,9 +56,7 @@ interface CustomKeyMappingDao {
     @Query("DELETE FROM custom_key_mappings")
     suspend fun clearAllMappings(): Int
 
-    /**
-     * Gets count of custom mappings.
-     */
+    @VisibleForTesting
     @Query("SELECT COUNT(*) FROM custom_key_mappings")
     suspend fun getMappingCount(): Int
 }
