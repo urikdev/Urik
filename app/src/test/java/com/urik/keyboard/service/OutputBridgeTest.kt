@@ -2,6 +2,7 @@
 
 package com.urik.keyboard.service
 
+import android.view.KeyEvent
 import android.view.inputmethod.ExtractedText
 import android.view.inputmethod.ExtractedTextRequest
 import android.view.inputmethod.InputConnection
@@ -15,6 +16,8 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 
@@ -25,6 +28,8 @@ class OutputBridgeTest {
     private lateinit var mockSwipeDetector: SwipeDetector
     private lateinit var mockSwipeSpaceManager: SwipeSpaceManager
     private lateinit var outputBridge: OutputBridge
+    private var keyEventSenderCalls = mutableListOf<Int>()
+    private var keyCharEventSenderCalls = mutableListOf<String>()
 
     @Before
     fun setup() {
@@ -32,12 +37,16 @@ class OutputBridgeTest {
         mockState = mock()
         mockSwipeDetector = mock()
         mockSwipeSpaceManager = mock()
+        keyEventSenderCalls = mutableListOf()
+        keyCharEventSenderCalls = mutableListOf()
         outputBridge =
             OutputBridge(
                 state = mockState,
                 swipeDetector = mockSwipeDetector,
                 swipeSpaceManager = mockSwipeSpaceManager,
-                icProvider = { mockIc }
+                icProvider = { mockIc },
+                keyEventSender = { keyCode -> keyEventSenderCalls.add(keyCode) },
+                keyCharEventSender = { char -> keyCharEventSenderCalls.add(char) }
             )
     }
 
@@ -126,7 +135,9 @@ class OutputBridgeTest {
                 state = mockState,
                 swipeDetector = mockSwipeDetector,
                 swipeSpaceManager = mockSwipeSpaceManager,
-                icProvider = { null }
+                icProvider = { null },
+                keyEventSender = {},
+                keyCharEventSender = {}
             )
 
         assertEquals(0, nullIcBridge.safeGetCursorPosition())
@@ -242,5 +253,97 @@ class OutputBridgeTest {
         assertEquals("world", word)
         assertEquals(expectedNewPosition, wordEnd)
         assertEquals(expectedNewPosition - "world".length, wordStart)
+    }
+
+    @Test
+    fun `sendCharacter uses key events for raw key event field`() {
+        whenever(mockState.isRawKeyEventField).thenReturn(true)
+
+        outputBridge.sendCharacter("a")
+
+        assertEquals(listOf("a"), keyCharEventSenderCalls)
+        verify(mockIc, never()).commitText(any(), any())
+    }
+
+    @Test
+    fun `sendCharacter uses commitText for normal field`() {
+        whenever(mockState.isRawKeyEventField).thenReturn(false)
+
+        outputBridge.sendCharacter("a")
+
+        assertEquals(emptyList<String>(), keyCharEventSenderCalls)
+        verify(mockIc).commitText("a", 1)
+    }
+
+    @Test
+    fun `sendBackspace uses key events for raw key event field`() {
+        whenever(mockState.isRawKeyEventField).thenReturn(true)
+
+        outputBridge.sendBackspace()
+
+        assertEquals(listOf(KeyEvent.KEYCODE_DEL), keyEventSenderCalls)
+        verify(mockIc, never()).deleteSurroundingText(any(), any())
+    }
+
+    @Test
+    fun `sendBackspace uses deleteSurroundingText for normal field`() {
+        whenever(mockState.isRawKeyEventField).thenReturn(false)
+        whenever(mockIc.getTextBeforeCursor(eq(1), eq(0))).thenReturn("a")
+
+        outputBridge.sendBackspace()
+
+        assertEquals(emptyList<Int>(), keyEventSenderCalls)
+        verify(mockIc).deleteSurroundingText(1, 0)
+    }
+
+    @Test
+    fun `sendBackspace no-ops for normal field with empty text before cursor`() {
+        whenever(mockState.isRawKeyEventField).thenReturn(false)
+        whenever(mockIc.getTextBeforeCursor(eq(1), eq(0))).thenReturn("")
+
+        outputBridge.sendBackspace()
+
+        assertEquals(emptyList<Int>(), keyEventSenderCalls)
+        verify(mockIc, never()).deleteSurroundingText(any(), any())
+    }
+
+    @Test
+    fun `sendSpace uses key events for raw key event field`() {
+        whenever(mockState.isRawKeyEventField).thenReturn(true)
+
+        outputBridge.sendSpace()
+
+        assertEquals(listOf(KeyEvent.KEYCODE_SPACE), keyEventSenderCalls)
+        verify(mockIc, never()).commitText(any(), any())
+    }
+
+    @Test
+    fun `sendSpace uses commitText for normal field`() {
+        whenever(mockState.isRawKeyEventField).thenReturn(false)
+
+        outputBridge.sendSpace()
+
+        assertEquals(emptyList<Int>(), keyEventSenderCalls)
+        verify(mockIc).commitText(" ", 1)
+    }
+
+    @Test
+    fun `sendEnter uses key events for raw key event field`() {
+        whenever(mockState.isRawKeyEventField).thenReturn(true)
+
+        outputBridge.sendEnter()
+
+        assertEquals(listOf(KeyEvent.KEYCODE_ENTER), keyEventSenderCalls)
+        verify(mockIc, never()).commitText(any(), any())
+    }
+
+    @Test
+    fun `sendEnter uses commitText for normal field`() {
+        whenever(mockState.isRawKeyEventField).thenReturn(false)
+
+        outputBridge.sendEnter()
+
+        assertEquals(emptyList<Int>(), keyEventSenderCalls)
+        verify(mockIc).commitText("\n", 1)
     }
 }

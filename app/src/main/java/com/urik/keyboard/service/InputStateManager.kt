@@ -99,6 +99,10 @@ class InputStateManager(
         internal set
 
     @Volatile
+    var isRawKeyEventField: Boolean = false
+        internal set
+
+    @Volatile
     var isUrlOrEmailField: Boolean = false
         internal set
 

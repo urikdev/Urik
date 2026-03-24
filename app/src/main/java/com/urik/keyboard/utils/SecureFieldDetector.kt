@@ -101,4 +101,21 @@ object SecureFieldDetector {
 
         return false
     }
+
+    /**
+     * Detects if current input field requires raw key event dispatch (TYPE_NULL).
+     *
+     * TYPE_NULL fields (terminals, SSH clients, game inputs) expect input as KeyEvent
+     * objects via sendKeyEvent(), not via commitText()/deleteSurroundingText().
+     * This is a subset of [isDirectCommit] — all raw key event fields are also
+     * direct-commit fields, but not vice versa (e.g., TYPE_CLASS_NUMBER uses
+     * commitText, not key events).
+     *
+     * @param info EditorInfo from input field, or null if unavailable
+     * @return true if field requires key event dispatch, false otherwise
+     */
+    fun isRawKeyEvent(info: EditorInfo?): Boolean {
+        if (info == null) return false
+        return info.inputType == InputType.TYPE_NULL
+    }
 }
