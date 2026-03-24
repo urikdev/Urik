@@ -1,6 +1,5 @@
 package com.urik.keyboard.data.database
 
-import androidx.room.ColumnInfo
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
@@ -105,29 +104,11 @@ interface LearnedWordDao {
     )
     suspend fun getWordCount(languageTag: String): Int
 
-    @Query(
-        """
-        SELECT language_tag, COUNT(*) as word_count
-        FROM learned_words 
-        GROUP BY language_tag
-        ORDER BY word_count DESC
-    """
-    )
-    suspend fun getWordCountByLanguageRaw(): List<LanguageWordCount>
-
     @Query("SELECT COUNT(*) FROM learned_words")
     suspend fun getTotalWordCount(): Int
 
     @Query("SELECT AVG(CAST(frequency AS REAL)) FROM learned_words")
     suspend fun getAverageFrequency(): Double
-
-    @Query(
-        """
-        SELECT COUNT(*) FROM learned_words 
-        WHERE source = :source
-    """
-    )
-    suspend fun getWordCountBySource(source: WordSource): Int
 
     @Query(
         """
@@ -277,12 +258,5 @@ interface LearnedWordDao {
 }
 
 data class FastSuggestion(val word: String, val frequency: Int)
-
-data class LanguageWordCount(
-    @ColumnInfo(name = "language_tag")
-    val languageTag: String,
-    @ColumnInfo(name = "word_count")
-    val wordCount: Int
-)
 
 data class WordSourceCount(val source: WordSource, val count: Int)

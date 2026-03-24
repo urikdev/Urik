@@ -2237,7 +2237,7 @@ constructor(
 
         spellCheckManager = null
         keyboardLayoutManager = null
-        swipeDetector?.setSwipeListener(null)
+        swipeDetector?.removeSwipeListener(this)
         swipeDetector = null
         themeManager = null
         wordLearningEngine = null

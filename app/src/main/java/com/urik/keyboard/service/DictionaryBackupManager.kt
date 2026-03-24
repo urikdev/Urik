@@ -2,6 +2,7 @@ package com.urik.keyboard.service
 
 import android.content.Context
 import android.net.Uri
+import androidx.annotation.VisibleForTesting
 import androidx.room.withTransaction
 import com.urik.keyboard.data.database.KeyboardDatabase
 import com.urik.keyboard.data.database.LearnedWord
@@ -60,6 +61,7 @@ constructor(
             ignoreUnknownKeys = true
         }
 
+    @VisibleForTesting
     internal open suspend fun <R> runInTransaction(block: suspend () -> R): R = database.withTransaction { block() }
 
     suspend fun exportToUri(uri: Uri): Result<ExportResult> = withContext(ioDispatcher) {

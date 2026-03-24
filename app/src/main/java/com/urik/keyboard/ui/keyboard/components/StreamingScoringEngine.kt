@@ -3,6 +3,7 @@
 package com.urik.keyboard.ui.keyboard.components
 
 import android.graphics.PointF
+import androidx.annotation.VisibleForTesting
 import com.urik.keyboard.data.WordFrequencyRepository
 import com.urik.keyboard.service.SpellCheckManager
 import com.urik.keyboard.service.WordLearningEngine
@@ -253,7 +254,8 @@ constructor(
             return@withContext arbitration.candidates
         }
 
-    fun pruneByStartAnchor(
+    @VisibleForTesting
+    internal fun pruneByStartAnchor(
         candidates: List<SwipeDetector.DictionaryEntry>,
         startKeys: Set<Char>
     ): List<SwipeDetector.DictionaryEntry> {
@@ -286,7 +288,8 @@ constructor(
         }
     }
 
-    fun pruneByBounds(
+    @VisibleForTesting
+    internal fun pruneByBounds(
         candidates: List<SwipeDetector.DictionaryEntry>,
         charsInBounds: Set<Char>
     ): List<SwipeDetector.DictionaryEntry> {
@@ -298,7 +301,8 @@ constructor(
         }
     }
 
-    fun pruneByTraversal(
+    @VisibleForTesting
+    internal fun pruneByTraversal(
         candidates: List<SwipeDetector.DictionaryEntry>,
         traversedKeys: Set<Char>
     ): List<SwipeDetector.DictionaryEntry> {
@@ -443,7 +447,8 @@ constructor(
         }
     }
 
-    fun shutdown() {
+    @VisibleForTesting
+    internal fun shutdown() {
         cancelActiveGesture()
         scoringScope.cancel()
         scoringDispatcher.close()

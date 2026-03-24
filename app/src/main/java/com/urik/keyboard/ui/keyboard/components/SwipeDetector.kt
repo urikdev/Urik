@@ -4,6 +4,7 @@ package com.urik.keyboard.ui.keyboard.components
 
 import android.graphics.PointF
 import android.view.MotionEvent
+import androidx.annotation.VisibleForTesting
 import com.ibm.icu.lang.UScript
 import com.ibm.icu.util.ULocale
 import com.urik.keyboard.model.KeyboardKey
@@ -228,6 +229,12 @@ constructor(private val streamingScoringEngine: StreamingScoringEngine) {
 
     fun setSwipeListener(listener: SwipeListener?) {
         this._swipeListener = listener
+    }
+
+    fun removeSwipeListener(listener: SwipeListener) {
+        if (_swipeListener === listener) {
+            _swipeListener = null
+        }
     }
 
     fun updateLastCommittedWord(word: String) {
@@ -758,10 +765,8 @@ constructor(private val streamingScoringEngine: StreamingScoringEngine) {
         lastUpdateTime = 0L
     }
 
-    /**
-     * Cleans up resources and cancels pending operations.
-     */
-    fun cleanup() {
+    @VisibleForTesting
+    internal fun cleanup() {
         scoringJob?.cancel()
         scopeJob.cancel()
         streamingScoringEngine.cancelActiveGesture()

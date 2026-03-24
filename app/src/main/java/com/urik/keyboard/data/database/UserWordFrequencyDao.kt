@@ -1,5 +1,6 @@
 package com.urik.keyboard.data.database
 
+import androidx.annotation.VisibleForTesting
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
@@ -27,9 +28,11 @@ interface UserWordFrequencyDao {
     )
     suspend fun findWords(languageTag: String, normalizedWords: List<String>): List<UserWordFrequency>
 
+    @VisibleForTesting
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertWord(word: UserWordFrequency): Long
 
+    @VisibleForTesting
     @Update
     suspend fun updateWord(word: UserWordFrequency)
 
