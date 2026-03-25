@@ -776,6 +776,12 @@ constructor(
                                         COMPLETION_LENGTH_WEIGHT * lengthRatio +
                                             COMPLETION_FREQUENCY_WEIGHT * frequencyScore
 
+                                    val spatialScore = calculateFullWordSpatialScore(
+                                        normalizedWord,
+                                        word.lowercase()
+                                    )
+                                    baseConfidence += spatialScore * COMPLETION_SPATIAL_WEIGHT
+
                                     if (userFrequency > 0) {
                                         val userFreqBoost = calculateFrequencyBoost(userFrequency)
                                         baseConfidence += userFreqBoost
@@ -1253,7 +1259,67 @@ constructor(
             return scoreSameLengthAlignment(input, candidate, keyPositions, twoSigmaSquared)
         }
 
-        return scoreDifferentLengthAlignment(input, candidate, keyPositions, twoSigmaSquared)
+        if (input.length > candidate.length) {
+            return scoreDifferentLengthAlignment(input, candidate, keyPositions, twoSigmaSquared)
+        }
+
+        return scorePrefixWithLookahead(input, candidate, keyPositions, twoSigmaSquared, avgKeySpacing)
+    }
+
+    private fun scorePrefixWithLookahead(
+        input: String,
+        candidate: String,
+        keyPositions: Map<Char, android.graphics.PointF>,
+        twoSigmaSquared: Double,
+        avgKeySpacing: Double
+    ): Double {
+        if (input.isEmpty()) return 0.0
+
+        val lengthDiff = candidate.length - input.length
+        val typedScore = if (lengthDiff <= 2) {
+            maxOf(
+                scoreDifferentLengthAlignment(input, candidate, keyPositions, twoSigmaSquared),
+                scoreDirectPrefix(input, candidate, keyPositions, twoSigmaSquared)
+            )
+        } else {
+            scoreDirectPrefix(input, candidate, keyPositions, twoSigmaSquared)
+        }
+
+        val lookaheadSigma = avgKeySpacing * LOOKAHEAD_SIGMA_MULTIPLIER
+        val lookaheadTwoSigmaSquared = 2.0 * lookaheadSigma * lookaheadSigma
+
+        var lookaheadScoreSum = 0.0
+        var lookaheadWeightSum = 0.0
+        for (i in input.length until candidate.length) {
+            val positionsAhead = i - input.length
+            val decayIndex = minOf(positionsAhead, LOOKAHEAD_DECAY_TABLE.lastIndex)
+            val weight = LOOKAHEAD_BASE_WEIGHT * LOOKAHEAD_DECAY_TABLE[decayIndex]
+            val transitionScore = scoreCharPair(
+                candidate[i - 1],
+                candidate[i],
+                keyPositions,
+                lookaheadTwoSigmaSquared
+            )
+            lookaheadScoreSum += transitionScore * weight
+            lookaheadWeightSum += weight
+        }
+
+        val typedWeight = input.length.toDouble()
+        val totalWeight = typedWeight + lookaheadWeightSum
+        return (typedScore * typedWeight + lookaheadScoreSum) / totalWeight
+    }
+
+    private fun scoreDirectPrefix(
+        input: String,
+        candidate: String,
+        keyPositions: Map<Char, android.graphics.PointF>,
+        twoSigmaSquared: Double
+    ): Double {
+        var totalScore = 0.0
+        for (i in input.indices) {
+            totalScore += scoreCharPair(input[i], candidate[i], keyPositions, twoSigmaSquared)
+        }
+        return if (input.isNotEmpty()) totalScore / input.length else 0.0
     }
 
     private fun scoreSameLengthAlignment(
@@ -1429,6 +1495,19 @@ constructor(
         const val SPATIAL_PROXIMITY_WEIGHT = 0.35
         const val PROXIMITY_SIGMA_MULTIPLIER = 2.0
         const val MINIMUM_LENGTH_RATIO = 0.6
+
+        const val LOOKAHEAD_BASE_WEIGHT = 0.5
+        const val LOOKAHEAD_DECAY = 0.7
+        const val LOOKAHEAD_SIGMA_MULTIPLIER = 4.0
+        const val COMPLETION_SPATIAL_WEIGHT = 0.15
+        private const val MAX_LOOKAHEAD_POSITIONS = 20
+
+        @JvmField
+        val LOOKAHEAD_DECAY_TABLE = DoubleArray(MAX_LOOKAHEAD_POSITIONS) { i ->
+            var result = 1.0
+            repeat(i) { result *= LOOKAHEAD_DECAY }
+            result
+        }
 
         const val MAX_PREFIX_COMPLETION_RESULTS = 10
         const val MAX_INPUT_CODEPOINTS = 100
