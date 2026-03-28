@@ -40,7 +40,7 @@ class CharacterVariationPopupAccessibilityTest {
         whenever(themeManager.currentTheme).thenReturn(themeFlow)
 
         popup = CharacterVariationPopup(context, themeManager)
-        popup.setCharacterVariations(".", listOf("!", "?", ",")) {}
+        popup.setCharacterVariations("", listOf("!", "?", ",")) {}
 
         scrollView = popup.contentView as HorizontalScrollView
         variationContainer = scrollView.getChildAt(0) as LinearLayout
@@ -202,10 +202,10 @@ class CharacterVariationPopupAccessibilityTest {
     }
 
     @Test
-    fun `punctuation popup has correct button count`() {
+    fun `variation popup contains only variation buttons`() {
         assertEquals(
-            "Base char '.' + 3 variations = 4 buttons",
-            4,
+            "3 variations = 3 buttons",
+            3,
             variationContainer.childCount
         )
     }

@@ -24,6 +24,7 @@ class CharacterVariationPopup(private val context: Context, private val themeMan
     private var onVariationSelected: ((String) -> Unit)? = null
     private val characterButtons = mutableListOf<Button>()
     private var highlightedButton: Button? = null
+    private var baseCharButton: Button? = null
     private val density = context.resources.displayMetrics.density
     private val cachedCornerRadius = 8f * density
     private val cachedStrokeWidth = (1 * density).toInt()
@@ -71,6 +72,9 @@ class CharacterVariationPopup(private val context: Context, private val themeMan
         setOnDismissListener {
             onVariationSelected = null
             variationContainer.removeAllViews()
+            characterButtons.clear()
+            highlightedButton = null
+            baseCharButton = null
         }
     }
 
@@ -87,6 +91,7 @@ class CharacterVariationPopup(private val context: Context, private val themeMan
         variationContainer.removeAllViews()
         characterButtons.clear()
         highlightedButton = null
+        baseCharButton = null
 
         val totalCount = variations.size + if (baseChar.isNotEmpty()) 1 else 0
 
@@ -100,8 +105,7 @@ class CharacterVariationPopup(private val context: Context, private val themeMan
         }
 
         val itemSize = (40 * density).toInt()
-        val totalItems = variations.size + if (baseChar.isNotEmpty()) 1 else 0
-        val idealWidth = totalItems * itemSize + (16 * density).toInt()
+        val idealWidth = totalCount * itemSize + (16 * density).toInt()
         val popupHeight = itemSize + (8 * density).toInt()
 
         val screenWidth = context.resources.displayMetrics.widthPixels
@@ -185,6 +189,7 @@ class CharacterVariationPopup(private val context: Context, private val themeMan
                 )
             }
 
+        if (isBase) baseCharButton = button
         characterButtons.add(button)
         variationContainer.addView(button)
     }
@@ -254,38 +259,38 @@ class CharacterVariationPopup(private val context: Context, private val themeMan
         }
     }
 
-    fun getCharacterAt(rawX: Float, rawY: Float): String? {
-        if (!isShowing) {
-            return null
-        }
-
-        val location = IntArray(2)
-        contentView.getLocationOnScreen(location)
-        val localX = rawX - location[0]
-        val localY = rawY - location[1]
-
+    internal fun findButtonAt(localX: Float, localY: Float): Button? {
+        if (characterButtons.isEmpty()) return null
         for (button in characterButtons) {
-            val buttonLeft = button.left
-            val buttonTop = button.top
-            val buttonRight = button.right
-            val buttonBottom = button.bottom
-
-            val inHorizontalRange = localX >= buttonLeft && localX <= buttonRight
-            val inVerticalRange = localY >= buttonTop && localY <= buttonBottom
-
-            if (inHorizontalRange && inVerticalRange) {
-                return button.text.toString()
+            if (localX >= button.left &&
+                localX <= button.right &&
+                localY >= button.top &&
+                localY <= button.bottom
+            ) {
+                return button
             }
         }
+        return characterButtons.minByOrNull { button ->
+            val cx = (button.left + button.right) / 2f
+            val cy = (button.top + button.bottom) / 2f
+            val dx = localX - cx
+            val dy = localY - cy
+            dx * dx + dy * dy
+        }
+    }
 
-        return null
+    fun getCharacterAt(rawX: Float, rawY: Float): String? {
+        if (!isShowing) return null
+        val location = IntArray(2)
+        contentView.getLocationOnScreen(location)
+        return findButtonAt(rawX - location[0], rawY - location[1])?.text?.toString()
     }
 
     fun setHighlighted(char: String?) {
         val theme = themeManager.currentTheme.value
 
         highlightedButton?.let { button ->
-            val isBase = button == characterButtons.firstOrNull()
+            val isBase = button === baseCharButton
             val backgroundColor =
                 if (isBase) {
                     theme.colors.keyBackgroundAction
