@@ -2,7 +2,6 @@ package com.urik.keyboard.utils
 
 import android.text.InputType
 import android.view.inputmethod.EditorInfo
-import com.urik.keyboard.utils.SecureFieldDetector.isDirectCommit
 import com.urik.keyboard.utils.SecureFieldDetector.isSecure
 
 /**
@@ -104,19 +103,27 @@ object SecureFieldDetector {
     }
 
     /**
-     * Detects if current input field requires raw key event dispatch (TYPE_NULL).
+     * Detects if current input field requires raw key event dispatch (TYPE_NULL or terminal-mode).
      *
-     * TYPE_NULL fields (terminals, SSH clients, game inputs) expect input as KeyEvent
-     * objects via sendKeyEvent(), not via commitText()/deleteSurroundingText().
-     * This is a subset of [isDirectCommit] — all raw key event fields are also
-     * direct-commit fields, but not vice versa (e.g., TYPE_CLASS_NUMBER uses
-     * commitText, not key events).
-     *
-     * @param info EditorInfo from input field, or null if unavailable
-     * @return true if field requires key event dispatch, false otherwise
+     * Matches pure TYPE_NULL and the VISIBLE_PASSWORD + NO_SUGGESTIONS combination used by
+     * terminal emulators (e.g. ConnectBot) that implement BaseInputConnection with fullEditor=false,
+     * where commitText is a no-op and only sendKeyEvent reaches the terminal channel.
      */
     fun isRawKeyEvent(info: EditorInfo?): Boolean {
         if (info == null) return false
-        return info.inputType == InputType.TYPE_NULL
+        if (info.inputType == InputType.TYPE_NULL) return true
+
+        val inputClass = info.inputType and InputType.TYPE_MASK_CLASS
+        if (inputClass == InputType.TYPE_CLASS_TEXT) {
+            val variation = info.inputType and InputType.TYPE_MASK_VARIATION
+            val flags = info.inputType and InputType.TYPE_MASK_FLAGS
+            if (variation == InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD &&
+                flags and InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS != 0
+            ) {
+                return true
+            }
+        }
+
+        return false
     }
 }

@@ -1779,7 +1779,7 @@ class UrikInputMethodService :
                 viewModel.onEvent(KeyboardEvent.ModeChanged(KeyboardMode.LETTERS))
             }
 
-            if (imeAction == EditorInfo.IME_ACTION_NONE) {
+            if (imeAction == EditorInfo.IME_ACTION_NONE && !inputState.isRawKeyEventField) {
                 val textBefore = outputBridge.safeGetTextBeforeCursor(50)
                 checkAutoCapitalization(textBefore)
             }
@@ -1790,6 +1790,11 @@ class UrikInputMethodService :
 
     private fun handleBackspace() {
         try {
+            if (inputState.isRawKeyEventField) {
+                outputBridge.sendBackspace()
+                return
+            }
+
             val actualCursorPos = outputBridge.safeGetCursorPosition()
 
             if (inputState.displayBuffer.isNotEmpty() && inputState.composingRegionStart != -1) {
@@ -1812,11 +1817,6 @@ class UrikInputMethodService :
             if (!selectedText.isNullOrEmpty()) {
                 outputBridge.commitText("", 1)
                 coordinateStateClear()
-                return
-            }
-
-            if (inputState.isRawKeyEventField) {
-                outputBridge.sendBackspace()
                 return
             }
 
