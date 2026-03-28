@@ -346,16 +346,43 @@ class SecureFieldDetectorTest {
     }
 
     @Test
-    fun `test no suggestions with visible password is not raw key event`() {
+    fun `test no suggestions with visible password is raw key event`() {
         val field = createEditorInfo(
             inputClass = EditorInfo.TYPE_CLASS_TEXT,
             inputVariation = InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD,
             inputFlags = InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
         )
 
-        Assert.assertFalse(
-            "NO_SUGGESTIONS + VISIBLE_PASSWORD should not be raw key event",
+        Assert.assertTrue(
+            "NO_SUGGESTIONS + VISIBLE_PASSWORD should be raw key event (terminal emulator pattern)",
             SecureFieldDetector.isRawKeyEvent(field)
+        )
+    }
+
+    @Test
+    fun `test visible password without no suggestions is not raw key event`() {
+        val field = createEditorInfo(
+            inputClass = EditorInfo.TYPE_CLASS_TEXT,
+            inputVariation = InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
+        )
+
+        Assert.assertFalse(
+            "VISIBLE_PASSWORD alone should not be raw key event",
+            SecureFieldDetector.isRawKeyEvent(field)
+        )
+    }
+
+    @Test
+    fun `test no suggestions with visible password is still direct commit`() {
+        val field = createEditorInfo(
+            inputClass = EditorInfo.TYPE_CLASS_TEXT,
+            inputVariation = InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD,
+            inputFlags = InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
+        )
+
+        Assert.assertTrue(
+            "NO_SUGGESTIONS + VISIBLE_PASSWORD should still be direct commit",
+            SecureFieldDetector.isDirectCommit(field)
         )
     }
 
