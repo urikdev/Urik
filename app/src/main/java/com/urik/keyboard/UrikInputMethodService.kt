@@ -875,7 +875,11 @@ class UrikInputMethodService :
         observerJobs.add(
             serviceScope.launch {
                 viewModel.layout.collect { layout ->
-                    if (layout != null) updateSwipeKeyboard()
+                    if (layout != null) {
+                        updateSwipeKeyboard()
+                        val locale = ULocale.forLanguageTag(languageManager.currentLayoutLanguage.value)
+                        updateScriptContext(locale)
+                    }
                 }
             }
         )
@@ -883,8 +887,6 @@ class UrikInputMethodService :
         observerJobs.add(
             serviceScope.launch {
                 languageManager.currentLayoutLanguage.collect { detectedLanguage ->
-                    val locale = ULocale.forLanguageTag(detectedLanguage)
-                    updateScriptContext(locale)
                     swipeDetector.updateCurrentLanguage(detectedLanguage.split("-").first())
                 }
             }
