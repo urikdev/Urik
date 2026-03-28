@@ -1810,20 +1810,9 @@ class KeyboardLayoutManager(
 
         currentVariationKeyType = key.type
 
-        val script = effectiveLayout?.script ?: "Latn"
-        val casedBaseChar =
-            if (key.type == KeyboardKey.KeyType.LETTER &&
-                isBicameralScript(script) &&
-                shouldCapitalize(lastKeyboardState)
-            ) {
-                key.value.uppercase(getCurrentLocale())
-            } else {
-                key.value
-            }
-
         variationPopup =
             CharacterVariationPopup(context, themeManager).apply {
-                setCharacterVariations(casedBaseChar, variations, characterVariationCallback)
+                setCharacterVariations("", variations, characterVariationCallback)
                 showAboveAnchor(anchorView)
             }
 
