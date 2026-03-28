@@ -36,7 +36,8 @@ constructor(private val pathGeometryAnalyzer: PathGeometryAnalyzer) {
         val traversalPenalty: Float,
         val orderPenalty: Float,
         val vertexLengthPenalty: Float,
-        val passthroughPenalty: Float
+        val passthroughPenalty: Float,
+        val positionAlignmentPenalty: Float
     )
 
     private val reuseLetterPathIndices = ArrayList<Int>(20)
@@ -241,6 +242,11 @@ constructor(private val pathGeometryAnalyzer: PathGeometryAnalyzer) {
             )
 
         val passthroughPenalty = calculatePassthroughPenalty(entry.word, signal)
+        val positionAlignmentPenalty = calculatePositionAlignmentPenalty(
+            entry.word.length,
+            reuseLetterPathIndices,
+            signal.path.size
+        )
 
         @Suppress("ktlint:standard:max-line-length")
         val combinedScore =
@@ -250,7 +256,7 @@ constructor(private val pathGeometryAnalyzer: PathGeometryAnalyzer) {
                 traversalPenalty * orderPenalty * vertexLengthPenalty *
                 pathCoherenceMultiplier * boundsPenalty *
                 pathLengthMultiplier * pathResidualPenalty *
-                passthroughPenalty * shortPathDampener
+                passthroughPenalty * shortPathDampener * positionAlignmentPenalty
 
         val residual = 1.0f - combinedScore.coerceIn(0f, 1f)
 
@@ -278,7 +284,8 @@ constructor(private val pathGeometryAnalyzer: PathGeometryAnalyzer) {
             traversalPenalty = traversalPenalty,
             orderPenalty = orderPenalty,
             vertexLengthPenalty = vertexLengthPenalty,
-            passthroughPenalty = passthroughPenalty
+            passthroughPenalty = passthroughPenalty,
+            positionAlignmentPenalty = positionAlignmentPenalty
         )
     }
 
@@ -320,9 +327,11 @@ constructor(private val pathGeometryAnalyzer: PathGeometryAnalyzer) {
             val searchRange =
                 when {
                     isFirstLetter -> (swipePath.size * 0.30).toInt().coerceAtLeast(3)
+
                     isLastLetter ->
                         swipePath.size -
                             (swipePath.size * 0.30).toInt().coerceAtLeast(swipePath.size - 3)
+
                     else -> swipePath.size
                 }
 
@@ -899,6 +908,37 @@ constructor(private val pathGeometryAnalyzer: PathGeometryAnalyzer) {
         }
     }
 
+    /**
+     * Penalises candidates whose letters map to path positions that are displaced
+     * from their expected sequential positions.
+     */
+    private fun calculatePositionAlignmentPenalty(
+        wordLength: Int,
+        letterPathIndices: ArrayList<Int>,
+        pathSize: Int
+    ): Float {
+        if (wordLength < POSITION_ALIGNMENT_MIN_WORD_LENGTH ||
+            letterPathIndices.size < wordLength ||
+            pathSize < 2
+        ) {
+            return 1.0f
+        }
+        var totalDeviation = 0f
+        val lastLetterIdx = (wordLength - 1).toFloat()
+        val lastPathIdx = (pathSize - 1).toFloat()
+        for (i in 0 until wordLength) {
+            val expectedIdx = i / lastLetterIdx * lastPathIdx
+            totalDeviation += abs(letterPathIndices[i] - expectedIdx) / lastPathIdx
+        }
+        val avgDeviation = totalDeviation / wordLength
+        return when {
+            avgDeviation > POSITION_ALIGNMENT_SEVERE_THRESHOLD -> POSITION_ALIGNMENT_SEVERE_PENALTY
+            avgDeviation > POSITION_ALIGNMENT_MODERATE_THRESHOLD -> POSITION_ALIGNMENT_MODERATE_PENALTY
+            avgDeviation > POSITION_ALIGNMENT_MILD_THRESHOLD -> POSITION_ALIGNMENT_MILD_PENALTY
+            else -> 1.0f
+        }
+    }
+
     private fun calculatePassthroughPenalty(word: String, signal: SwipeSignal): Float {
         if (signal.passthroughKeys.isEmpty()) return 1.0f
         val intentionalKeys = signal.traversedKeys - signal.passthroughKeys
@@ -989,5 +1029,13 @@ constructor(private val pathGeometryAnalyzer: PathGeometryAnalyzer) {
 
         const val REPEATED_LETTER_NO_DWELL_ATTENUATION = 0.40f
         const val NON_CONSECUTIVE_REVISIT_MIN_SPAN = 3
+
+        const val POSITION_ALIGNMENT_MIN_WORD_LENGTH = 4
+        const val POSITION_ALIGNMENT_MILD_THRESHOLD = 0.05f
+        const val POSITION_ALIGNMENT_MODERATE_THRESHOLD = 0.08f
+        const val POSITION_ALIGNMENT_SEVERE_THRESHOLD = 0.14f
+        const val POSITION_ALIGNMENT_MILD_PENALTY = 0.88f
+        const val POSITION_ALIGNMENT_MODERATE_PENALTY = 0.72f
+        const val POSITION_ALIGNMENT_SEVERE_PENALTY = 0.50f
     }
 }

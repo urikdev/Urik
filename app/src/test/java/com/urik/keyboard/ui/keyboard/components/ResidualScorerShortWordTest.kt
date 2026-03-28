@@ -193,6 +193,101 @@ class ResidualScorerShortWordTest {
     }
 
     @Test
+    fun `longer word amount outscores subset word aunt on full amount gesture`() {
+        val path =
+            generateLinearPath(
+                colemakKeyPositions['a']!!,
+                colemakKeyPositions['m']!!,
+                colemakKeyPositions['o']!!,
+                colemakKeyPositions['u']!!,
+                colemakKeyPositions['n']!!,
+                colemakKeyPositions['t']!!,
+                pointsPerSegment = 10
+            )
+
+        val sigmaCache = buildSigmaCache(colemakKeyPositions)
+        val neighborhoodCache = pathGeometryAnalyzer.computeKeyNeighborhoods(colemakKeyPositions)
+
+        val signal =
+            SwipeSignal.extract(
+                path,
+                colemakKeyPositions,
+                pathGeometryAnalyzer,
+                sigmaCache,
+                path.size
+            )
+
+        val amountEntry = makeEntry("amount", 30_000_000)
+        val auntEntry = makeEntry("aunt", 5_000_000)
+
+        val amountResult =
+            scorer.scoreCandidate(
+                amountEntry,
+                signal,
+                colemakKeyPositions,
+                sigmaCache,
+                neighborhoodCache,
+                30_000_000L
+            )
+        val auntResult =
+            scorer.scoreCandidate(
+                auntEntry,
+                signal,
+                colemakKeyPositions,
+                sigmaCache,
+                neighborhoodCache,
+                30_000_000L
+            )
+
+        assertTrue(
+            "amount (${amountResult?.combinedScore}) should outscore aunt " +
+                "(${auntResult?.combinedScore}) by at least 10% on the full a→m→o→u→n→t path",
+            (amountResult?.combinedScore ?: 0f) >= (auntResult?.combinedScore ?: 0f) * 1.10f
+        )
+    }
+
+    @Test
+    fun `aunt scores well on its own genuine short path`() {
+        val path =
+            generateLinearPath(
+                colemakKeyPositions['a']!!,
+                colemakKeyPositions['u']!!,
+                colemakKeyPositions['n']!!,
+                colemakKeyPositions['t']!!,
+                pointsPerSegment = 8
+            )
+
+        val sigmaCache = buildSigmaCache(colemakKeyPositions)
+        val neighborhoodCache = pathGeometryAnalyzer.computeKeyNeighborhoods(colemakKeyPositions)
+
+        val signal =
+            SwipeSignal.extract(
+                path,
+                colemakKeyPositions,
+                pathGeometryAnalyzer,
+                sigmaCache,
+                path.size
+            )
+
+        val auntEntry = makeEntry("aunt", 5_000_000)
+
+        val result =
+            scorer.scoreCandidate(
+                auntEntry,
+                signal,
+                colemakKeyPositions,
+                sigmaCache,
+                neighborhoodCache,
+                5_000_000L
+            )
+
+        assertTrue(
+            "aunt should score reasonably on a genuine a→u→n→t path (got ${result?.combinedScore})",
+            (result?.combinedScore ?: 0f) > 0.30f
+        )
+    }
+
+    @Test
     fun `long word bonus does not regress for legitimate long gestures`() {
         val longPath =
             generateLinearPath(
