@@ -19,12 +19,12 @@ sealed class HapticSignature {
     }
 
     data object LetterClick : HapticSignature() {
-        override val durationMs = 25L
+        override val durationMs = 32L
 
         override fun createEffect(baseAmplitude: Int): VibrationEffect {
             val amplitude = baseAmplitude.coerceIn(1, 255)
             return createAmplitudeEffect(
-                longArrayOf(0, 25),
+                longArrayOf(0, 32),
                 intArrayOf(0, amplitude),
                 durationMs,
                 baseAmplitude
@@ -48,13 +48,13 @@ sealed class HapticSignature {
     }
 
     data object BackspaceChirp : HapticSignature() {
-        override val durationMs = 28L
+        override val durationMs = 30L
 
         override fun createEffect(baseAmplitude: Int): VibrationEffect {
             val startAmplitude = baseAmplitude.coerceIn(1, 255)
             val endAmplitude = (startAmplitude * 0.4).toInt()
             return createAmplitudeEffect(
-                longArrayOf(0, 14, 14),
+                longArrayOf(0, 15, 15),
                 intArrayOf(0, startAmplitude, endAmplitude),
                 durationMs,
                 baseAmplitude
@@ -92,12 +92,12 @@ sealed class HapticSignature {
     }
 
     data object PunctuationTick : HapticSignature() {
-        override val durationMs = 18L
+        override val durationMs = 28L
 
         override fun createEffect(baseAmplitude: Int): VibrationEffect {
             val amplitude = (baseAmplitude * 0.7).toInt().coerceIn(1, 255)
             return createAmplitudeEffect(
-                longArrayOf(0, 18),
+                longArrayOf(0, 28),
                 intArrayOf(0, amplitude),
                 durationMs,
                 baseAmplitude

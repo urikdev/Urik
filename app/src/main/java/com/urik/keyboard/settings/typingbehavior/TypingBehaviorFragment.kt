@@ -241,6 +241,8 @@ class TypingBehaviorFragment : PreferenceFragmentCompat() {
             true
         }
 
+        vibrationPref.isEnabled = vibrator?.hasAmplitudeControl() == true
+
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
@@ -274,9 +276,8 @@ class TypingBehaviorFragment : PreferenceFragmentCompat() {
     }
 
     private fun previewHaptic(amplitude: Int) {
-        vibrator?.let {
-            val effect = VibrationEffect.createOneShot(25L, amplitude.coerceIn(1, 255))
-            it.vibrate(effect)
-        }
+        val v = vibrator ?: return
+        if (!v.hasAmplitudeControl()) return
+        v.vibrate(VibrationEffect.createOneShot(25L, amplitude.coerceIn(1, 255)))
     }
 }
