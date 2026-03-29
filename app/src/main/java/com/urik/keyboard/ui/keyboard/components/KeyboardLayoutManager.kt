@@ -176,7 +176,7 @@ class KeyboardLayoutManager(
             if (longPressConsumedButtons.remove(view as? Button)) return@OnClickListener
 
             val key = view.getTag(R.id.key_data) as? KeyboardKey ?: return@OnClickListener
-            val skipHaptic = key is KeyboardKey.Character && hapticDownFiredButtons.remove(view as? Button) == true
+            val skipHaptic = hapticDownFiredButtons.remove(view as? Button) == true
             if (!skipHaptic) {
                 performContextualHaptic(key)
             }
@@ -1206,6 +1206,7 @@ class KeyboardLayoutManager(
 
             setTag(R.id.key_data, key)
             setOnClickListener(keyClickListener)
+            isHapticFeedbackEnabled = false
 
             if (key is KeyboardKey.Action) {
                 val iconRes =
