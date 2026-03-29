@@ -248,6 +248,24 @@ class KeyboardLayoutManagerHapticTest {
     }
 
     @Test
+    fun `backspace tap does not double-fire haptic when click follows ACTION_DOWN`() {
+        val key = KeyboardKey.Action(KeyboardKey.ActionType.BACKSPACE)
+        val button = buttonFor(key)
+        button.setOnTouchListener(manager.backspaceTouchListener)
+        button.setOnClickListener(manager.keyClickListener)
+
+        val down = motionEvent(MotionEvent.ACTION_DOWN)
+        button.dispatchTouchEvent(down)
+        down.recycle()
+
+        assertEquals(1, firedKeys.size)
+
+        button.performClick()
+
+        assertEquals("keyClickListener must not fire second haptic for backspace", 1, firedKeys.size)
+    }
+
+    @Test
     fun `backspace long-press fires additional haptic after ACTION_DOWN haptic`() {
         val key = KeyboardKey.Action(KeyboardKey.ActionType.BACKSPACE)
         val button = buttonFor(key)
