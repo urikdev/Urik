@@ -615,8 +615,20 @@ constructor(
 
     fun updateAdaptiveDimensions(dimensions: AdaptiveDimensions) {
         adaptiveDimensions = dimensions
+        suggestionBarHeightPx = -1
         cacheSuggestionMetrics()
+        suggestionBar?.let { bar ->
+            val barHeight = effectiveSuggestionBarHeight()
+            bar.minimumHeight = barHeight
+            (bar.layoutParams as? LinearLayout.LayoutParams)?.let { params ->
+                params.height = barHeight
+                bar.layoutParams = params
+            }
+        }
     }
+
+    private fun effectiveSuggestionBarHeight(): Int = adaptiveDimensions?.minimumTouchTargetPx
+        ?: context.resources.getDimensionPixelSize(R.dimen.minimum_touch_target)
 
     /**
      * Shows full-screen emoji picker overlay.
@@ -724,8 +736,8 @@ constructor(
                 keyboardView.requestLayout()
             }
             suggestionBar?.let { bar ->
-                val minTouchTarget = context.resources.getDimensionPixelSize(R.dimen.minimum_touch_target)
-                bar.minimumHeight = minTouchTarget
+                val barHeight = effectiveSuggestionBarHeight()
+                bar.minimumHeight = barHeight
                 bar.requestLayout()
             }
             keyboardView.requestLayout()
@@ -749,8 +761,7 @@ constructor(
                     val searchHeight = emojiSearchContainer!!.measuredHeight
 
                     if (suggestionBarHeightPx == -1) {
-                        suggestionBarHeightPx =
-                            context.resources.getDimensionPixelSize(R.dimen.minimum_touch_target)
+                        suggestionBarHeightPx = effectiveSuggestionBarHeight()
                     }
                     if (searchOverlapOffsetPx == -1) {
                         searchOverlapOffsetPx = (4 * context.resources.displayMetrics.density).toInt()
@@ -911,7 +922,7 @@ constructor(
             (bar.parent as? ViewGroup)?.removeView(bar)
         }
 
-        val suggestionBarHeight = context.resources.getDimensionPixelSize(R.dimen.minimum_touch_target)
+        val suggestionBarHeight = effectiveSuggestionBarHeight()
         keyboardView.addView(
             suggestionBar,
             0,
@@ -2226,7 +2237,7 @@ constructor(
 
         spellCheckManager = null
         keyboardLayoutManager = null
-        swipeDetector?.setSwipeListener(null)
+        swipeDetector?.removeSwipeListener(this)
         swipeDetector = null
         themeManager = null
         wordLearningEngine = null

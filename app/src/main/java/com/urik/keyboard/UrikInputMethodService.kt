@@ -185,7 +185,7 @@ class UrikInputMethodService :
     override val lifecycle: Lifecycle
         get() = lifecycleRegistry
 
-    fun setAcceleratedDeletion(active: Boolean) {
+    private fun setAcceleratedDeletion(active: Boolean) {
         inputState.isAcceleratedDeletion = active
     }
 
@@ -247,6 +247,20 @@ class UrikInputMethodService :
 
     private fun checkAutoCapitalization(textBefore: String) {
         viewModel.checkAndApplyAutoCapitalization(textBefore, currentSettings.autoCapitalizationEnabled)
+    }
+
+    private fun sendCharacterAsKeyEvents(char: String) {
+        val ic = currentInputConnection ?: return
+        val events = android.view.KeyCharacterMap.load(
+            android.view.KeyCharacterMap.VIRTUAL_KEYBOARD
+        ).getEvents(char.toCharArray())
+        if (events != null) {
+            for (event in events) {
+                ic.sendKeyEvent(event)
+            }
+        } else {
+            ic.commitText(char, 1)
+        }
     }
 
     override fun onCreate() {
@@ -312,7 +326,9 @@ class UrikInputMethodService :
                     state = inputState,
                     swipeDetector = swipeDetector,
                     swipeSpaceManager = swipeSpaceManager,
-                    icProvider = { currentInputConnection }
+                    icProvider = { currentInputConnection },
+                    keyEventSender = { keyCode -> sendDownUpKeyEvents(keyCode) },
+                    keyCharEventSender = { char -> sendCharacterAsKeyEvents(char) }
                 )
 
             suggestionPipeline =
@@ -859,7 +875,11 @@ class UrikInputMethodService :
         observerJobs.add(
             serviceScope.launch {
                 viewModel.layout.collect { layout ->
-                    if (layout != null) updateSwipeKeyboard()
+                    if (layout != null) {
+                        updateSwipeKeyboard()
+                        val locale = ULocale.forLanguageTag(languageManager.currentLayoutLanguage.value)
+                        updateScriptContext(locale)
+                    }
                 }
             }
         )
@@ -867,8 +887,6 @@ class UrikInputMethodService :
         observerJobs.add(
             serviceScope.launch {
                 languageManager.currentLayoutLanguage.collect { detectedLanguage ->
-                    val locale = ULocale.forLanguageTag(detectedLanguage)
-                    updateScriptContext(locale)
                     swipeDetector.updateCurrentLanguage(detectedLanguage.split("-").first())
                 }
             }
@@ -1033,6 +1051,7 @@ class UrikInputMethodService :
 
         inputState.isSecureField = SecureFieldDetector.isSecure(info)
         inputState.isDirectCommitField = SecureFieldDetector.isDirectCommit(info)
+        inputState.isRawKeyEventField = SecureFieldDetector.isRawKeyEvent(info)
         inputState.currentInputAction = ActionDetector.detectAction(info)
 
         val inputType = info?.inputType ?: 0
@@ -1048,14 +1067,14 @@ class UrikInputMethodService :
 
         if (inputState.isSecureField) {
             clearSecureFieldState()
-        } else if (!inputState.isUrlOrEmailField) {
+        } else if (!inputState.isUrlOrEmailField && !inputState.isRawKeyEventField) {
             if (inputState.displayBuffer.isNotEmpty() || inputState.wordState.hasContent) {
                 coordinateStateClear()
             }
 
             val textBefore = outputBridge.safeGetTextBeforeCursor(50)
             checkAutoCapitalization(textBefore)
-        } else {
+        } else if (!inputState.isRawKeyEventField) {
             if (inputState.displayBuffer.isNotEmpty()) {
                 val actualTextBefore = outputBridge.safeGetTextBeforeCursor(1)
                 val actualTextAfter = outputBridge.safeGetTextAfterCursor(1)
@@ -1135,7 +1154,7 @@ class UrikInputMethodService :
             inputState.lastSpaceTime = 0
 
             if (inputState.requiresDirectCommit) {
-                outputBridge.commitText(char, 1)
+                outputBridge.sendCharacter(char)
                 return
             }
 
@@ -1265,7 +1284,7 @@ class UrikInputMethodService :
 
     private fun handleNonLetterInput(char: String) {
         if (inputState.requiresDirectCommit) {
-            outputBridge.commitText(char, 1)
+            outputBridge.sendCharacter(char)
             return
         }
         serviceScope.launch {
@@ -1748,7 +1767,7 @@ class UrikInputMethodService :
                 }
 
                 else -> {
-                    outputBridge.commitText("\n", 1)
+                    outputBridge.sendEnter()
                 }
             }
 
@@ -1762,7 +1781,7 @@ class UrikInputMethodService :
                 viewModel.onEvent(KeyboardEvent.ModeChanged(KeyboardMode.LETTERS))
             }
 
-            if (imeAction == EditorInfo.IME_ACTION_NONE) {
+            if (imeAction == EditorInfo.IME_ACTION_NONE && !inputState.isRawKeyEventField) {
                 val textBefore = outputBridge.safeGetTextBeforeCursor(50)
                 checkAutoCapitalization(textBefore)
             }
@@ -1773,6 +1792,11 @@ class UrikInputMethodService :
 
     private fun handleBackspace() {
         try {
+            if (inputState.isRawKeyEventField) {
+                outputBridge.sendBackspace()
+                return
+            }
+
             val actualCursorPos = outputBridge.safeGetCursorPosition()
 
             if (inputState.displayBuffer.isNotEmpty() && inputState.composingRegionStart != -1) {
@@ -2116,7 +2140,7 @@ class UrikInputMethodService :
         serviceScope.launch {
             try {
                 if (inputState.requiresDirectCommit) {
-                    outputBridge.commitText(" ", 1)
+                    outputBridge.sendSpace()
                     return@launch
                 }
 
@@ -2495,6 +2519,7 @@ class UrikInputMethodService :
 
         inputState.isSecureField = SecureFieldDetector.isSecure(attribute)
         inputState.isDirectCommitField = SecureFieldDetector.isDirectCommit(attribute)
+        inputState.isRawKeyEventField = SecureFieldDetector.isRawKeyEvent(attribute)
         inputState.currentInputAction = ActionDetector.detectAction(attribute)
 
         val inputType = attribute?.inputType ?: 0
@@ -2505,7 +2530,7 @@ class UrikInputMethodService :
 
         if (inputState.isSecureField) {
             clearSecureFieldState()
-        } else if (!inputState.isUrlOrEmailField) {
+        } else if (!inputState.isUrlOrEmailField && !inputState.isRawKeyEventField) {
             val textBefore = outputBridge.safeGetTextBeforeCursor(50)
             checkAutoCapitalization(textBefore)
         }
@@ -2832,7 +2857,7 @@ class UrikInputMethodService :
     }
 
     override fun onDestroy() {
-        streamingScoringEngine.shutdown()
+        streamingScoringEngine.cancelActiveGesture()
         wordFrequencyRepository.clearCache()
         autofillStateTracker.cleanup()
 

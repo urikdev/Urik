@@ -5,6 +5,7 @@ import android.text.SpannableString
 import android.text.Spanned
 import android.text.style.BackgroundColorSpan
 import android.text.style.ForegroundColorSpan
+import android.view.KeyEvent
 import android.view.inputmethod.ExtractedTextRequest
 import android.view.inputmethod.InputConnection
 import com.urik.keyboard.ui.keyboard.components.SwipeDetector
@@ -15,7 +16,9 @@ class OutputBridge(
     private val state: InputStateManager,
     private val swipeDetector: SwipeDetector,
     private val swipeSpaceManager: SwipeSpaceManager,
-    private val icProvider: () -> InputConnection?
+    private val icProvider: () -> InputConnection?,
+    private val keyEventSender: (Int) -> Unit = {},
+    private val keyCharEventSender: (String) -> Unit = {}
 ) {
     private val ic: InputConnection?
         get() = icProvider()
@@ -283,6 +286,41 @@ class OutputBridge(
         }
 
         return Triple(wordStart, cursorPosition, word)
+    }
+
+    fun sendCharacter(char: String) {
+        if (state.isRawKeyEventField) {
+            keyCharEventSender(char)
+        } else {
+            ic?.commitText(char, 1)
+        }
+    }
+
+    fun sendBackspace() {
+        if (state.isRawKeyEventField) {
+            keyEventSender(KeyEvent.KEYCODE_DEL)
+        } else {
+            val textBefore = safeGetTextBeforeCursor(1)
+            if (textBefore.isNotEmpty()) {
+                deleteSurroundingText(BackspaceUtils.getLastGraphemeClusterLength(textBefore), 0)
+            }
+        }
+    }
+
+    fun sendSpace() {
+        if (state.isRawKeyEventField) {
+            keyEventSender(KeyEvent.KEYCODE_SPACE)
+        } else {
+            ic?.commitText(" ", 1)
+        }
+    }
+
+    fun sendEnter() {
+        if (state.isRawKeyEventField) {
+            keyEventSender(KeyEvent.KEYCODE_ENTER)
+        } else {
+            ic?.commitText("\n", 1)
+        }
     }
 
     companion object {

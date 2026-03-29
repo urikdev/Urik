@@ -1,5 +1,6 @@
 package com.urik.keyboard.utils
 
+import androidx.annotation.VisibleForTesting
 import com.ibm.icu.text.BreakIterator
 
 object BackspaceUtils {
@@ -69,6 +70,7 @@ object BackspaceUtils {
     fun calculateDeleteLength(wordLength: Int, shouldDeleteSpace: Boolean): Int =
         if (shouldDeleteSpace) wordLength + 1 else wordLength
 
+    @VisibleForTesting
     fun calculateComposingRegionAfterDeletion(
         textBeforeCursor: String,
         graphemeLength: Int,

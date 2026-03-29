@@ -2,6 +2,7 @@ package com.urik.keyboard.service
 
 import android.content.Context
 import android.content.res.Configuration
+import androidx.annotation.VisibleForTesting
 import com.urik.keyboard.di.ApplicationScope
 import com.urik.keyboard.model.KeyboardDisplayMode
 import com.urik.keyboard.model.KeyboardModeConfig
@@ -56,6 +57,7 @@ constructor(
             }
     }
 
+    @VisibleForTesting
     internal fun determineMode(settings: KeyboardSettings, postureInfo: PostureInfo): KeyboardModeConfig {
         val dimensions = AdaptiveDimensions.compute(
             postureInfo = postureInfo,

@@ -1,5 +1,6 @@
 package com.urik.keyboard.utils
 
+import androidx.annotation.VisibleForTesting
 import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.AtomicReference
 
@@ -151,8 +152,10 @@ class SelectionStateTracker {
 
     fun getCurrentState(): SelectionState = currentState.get()
 
+    @VisibleForTesting
     fun getCurrentSequence(): Long = sequenceCounter.get()
 
+    @VisibleForTesting
     fun validateOperationPosition(expectedStart: Int, expectedEnd: Int, tolerance: Int = 0): Boolean {
         val state = currentState.get()
         if (state == SelectionState.INVALID) return false
@@ -164,6 +167,7 @@ class SelectionStateTracker {
             kotlin.math.abs(actualEnd - expectedEnd) <= tolerance
     }
 
+    @VisibleForTesting
     fun validateComposingRegionIntegrity(expectedComposingStart: Int, expectedComposingEnd: Int): Boolean {
         val state = currentState.get()
 
@@ -190,11 +194,13 @@ class SelectionStateTracker {
         pendingOperationExpectedPosition = -1
     }
 
+    @VisibleForTesting
     fun isCursorAtParagraphBoundary(textBeforeCursor: String): Boolean {
         if (textBeforeCursor.isEmpty()) return true
         return textBeforeCursor.lastOrNull() == '\n'
     }
 
+    @VisibleForTesting
     fun findParagraphBoundaryBefore(textBeforeCursor: String, maxLookback: Int = MAX_PARAGRAPH_LOOKBACK): Int {
         if (textBeforeCursor.isEmpty()) return 0
 
@@ -218,6 +224,7 @@ class SelectionStateTracker {
         }
     }
 
+    @VisibleForTesting
     fun getLastKnownValidPosition(): Int = lastKnownValidPosition
 
     companion object {

@@ -21,6 +21,7 @@ import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityManager
 import android.widget.Button
 import android.widget.LinearLayout
+import androidx.annotation.VisibleForTesting
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.createBitmap
 import androidx.core.graphics.drawable.toDrawable
@@ -95,6 +96,10 @@ class KeyboardLayoutManager(
         }
     private var hapticEnabled = true
     private var hapticAmplitude = 170
+
+    @VisibleForTesting
+    internal var onHapticFired: ((KeyboardKey?) -> Unit)? = null
+
     private var shiftLongPressFired = false
 
     private val accessibilityManager = context.getSystemService(Context.ACCESSIBILITY_SERVICE) as AccessibilityManager
@@ -123,6 +128,7 @@ class KeyboardLayoutManager(
     private val customMappingLongPressFired = ConcurrentHashMap.newKeySet<Button>()
     private val characterLongPressFired = ConcurrentHashMap.newKeySet<Button>()
     private val longPressConsumedButtons = ConcurrentHashMap.newKeySet<Button>()
+    private val hapticDownFiredButtons = ConcurrentHashMap.newKeySet<Button>()
 
     private val cachedTextSizes = mutableMapOf<Int, Float>()
     private val cachedDimensions = mutableMapOf<String, Int>()
@@ -164,12 +170,16 @@ class KeyboardLayoutManager(
         onKeyClick(punctuationKey)
     }
 
-    private val keyClickListener =
+    @VisibleForTesting
+    internal val keyClickListener =
         View.OnClickListener { view ->
             if (longPressConsumedButtons.remove(view as? Button)) return@OnClickListener
 
             val key = view.getTag(R.id.key_data) as? KeyboardKey ?: return@OnClickListener
-            performContextualHaptic(key)
+            val skipHaptic = hapticDownFiredButtons.remove(view as? Button) == true
+            if (!skipHaptic) {
+                performContextualHaptic(key)
+            }
 
             if (accessibilityManager.isEnabled) {
                 val event = AccessibilityEvent.obtain(AccessibilityEvent.TYPE_VIEW_CLICKED)
@@ -184,8 +194,9 @@ class KeyboardLayoutManager(
     private var longPressStartY = 0f
     private val longPressCancelThresholdPx = 20f
 
+    @VisibleForTesting
     @SuppressLint("ClickableViewAccessibility")
-    private val characterLongPressTouchListener =
+    internal val characterLongPressTouchListener =
         View.OnTouchListener { view, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
@@ -194,6 +205,8 @@ class KeyboardLayoutManager(
                     characterLongPressFired.remove(button)
                     customMappingLongPressFired.remove(button)
                     longPressConsumedButtons.remove(button)
+                    hapticDownFiredButtons.add(button)
+                    performContextualHaptic(key)
                     longPressStartX = event.rawX
                     longPressStartY = event.rawY
                     val handler = sharedHandler
@@ -386,14 +399,17 @@ class KeyboardLayoutManager(
             }
         }
 
+    @VisibleForTesting
     @SuppressLint("ClickableViewAccessibility")
-    private val punctuationLongPressTouchListener =
+    internal val punctuationLongPressTouchListener =
         View.OnTouchListener { view, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
                     popupSelectionMode = false
                     longPressConsumedButtons.remove(view as Button)
                     val key = view.getTag(R.id.key_data) as? KeyboardKey.Character ?: return@OnTouchListener false
+                    hapticDownFiredButtons.add(view as Button)
+                    performContextualHaptic(key)
                     val handler = sharedHandler
                     val runnable =
                         Runnable {
@@ -539,17 +555,25 @@ class KeyboardLayoutManager(
             }
         }
 
-    private val backspaceLongClickListener =
+    @VisibleForTesting
+    internal val backspaceLongClickListener =
         View.OnLongClickListener { _ ->
             performContextualHaptic(KeyboardKey.Action(KeyboardKey.ActionType.BACKSPACE))
             startAcceleratedBackspace()
             true
         }
 
+    @VisibleForTesting
     @SuppressLint("ClickableViewAccessibility")
-    private val backspaceTouchListener =
-        View.OnTouchListener { _, event ->
+    internal val backspaceTouchListener =
+        View.OnTouchListener { view, event ->
             when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    hapticDownFiredButtons.add(view as Button)
+                    performContextualHaptic(KeyboardKey.Action(KeyboardKey.ActionType.BACKSPACE))
+                    false
+                }
+
                 MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                     stopAcceleratedBackspace()
                     false
@@ -563,13 +587,17 @@ class KeyboardLayoutManager(
 
     private var commaLongPressFired = false
 
+    @VisibleForTesting
     @SuppressLint("ClickableViewAccessibility")
-    private val commaLongPressTouchListener =
+    internal val commaLongPressTouchListener =
         View.OnTouchListener { view, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
                     commaLongPressFired = false
                     longPressConsumedButtons.remove(view as Button)
+                    val commaKey = view.getTag(R.id.key_data) as? KeyboardKey.Character
+                    hapticDownFiredButtons.add(view as Button)
+                    if (commaKey != null) performContextualHaptic(commaKey)
                     longPressStartX = event.rawX
                     longPressStartY = event.rawY
                     val handler = sharedHandler
@@ -611,6 +639,18 @@ class KeyboardLayoutManager(
                     false
                 }
             }
+        }
+
+    @VisibleForTesting
+    @SuppressLint("ClickableViewAccessibility")
+    internal val punctuationTapHapticTouchListener =
+        View.OnTouchListener { view, event ->
+            if (event.action == MotionEvent.ACTION_DOWN) {
+                val key = view.getTag(R.id.key_data) as? KeyboardKey.Character
+                hapticDownFiredButtons.add(view as Button)
+                if (key != null) performContextualHaptic(key)
+            }
+            false
         }
 
     private val punctuationCache: ManagedCache<String, List<String>> =
@@ -741,6 +781,7 @@ class KeyboardLayoutManager(
     }
 
     private fun performContextualHaptic(key: KeyboardKey?) {
+        onHapticFired?.invoke(key)
         if (!hapticEnabled || hapticAmplitude == 0) return
 
         try {
@@ -1168,6 +1209,8 @@ class KeyboardLayoutManager(
 
             setTag(R.id.key_data, key)
             setOnClickListener(keyClickListener)
+            isHapticFeedbackEnabled = false
+
             if (key is KeyboardKey.Action) {
                 val iconRes =
                     when (key.action) {
@@ -1276,6 +1319,8 @@ class KeyboardLayoutManager(
                     setOnTouchListener(punctuationLongPressTouchListener)
                 } else if (key.value == ",") {
                     setOnTouchListener(commaLongPressTouchListener)
+                } else {
+                    setOnTouchListener(punctuationTapHapticTouchListener)
                 }
             }
 
@@ -1327,15 +1372,18 @@ class KeyboardLayoutManager(
         }
     }
 
+    @VisibleForTesting
     @SuppressLint("ClickableViewAccessibility")
-    private fun cleanupButton(button: Button) {
+    internal fun cleanupButton(button: Button) {
         buttonPendingCallbacks.remove(button)?.let { pending ->
             pending.handler.removeCallbacks(pending.runnable)
         }
         symbolsLongPressFired.remove(button)
         customMappingLongPressFired.remove(button)
         characterLongPressFired.remove(button)
+        hapticDownFiredButtons.remove(button)
 
+        button.isHapticFeedbackEnabled = true
         button.isPressed = false
         button.setOnClickListener(null)
         button.setOnLongClickListener(null)
@@ -1841,20 +1889,9 @@ class KeyboardLayoutManager(
 
         currentVariationKeyType = key.type
 
-        val script = effectiveLayout?.script ?: "Latn"
-        val casedBaseChar =
-            if (key.type == KeyboardKey.KeyType.LETTER &&
-                isBicameralScript(script) &&
-                shouldCapitalize(lastKeyboardState)
-            ) {
-                key.value.uppercase(getCurrentLocale())
-            } else {
-                key.value
-            }
-
         variationPopup =
             CharacterVariationPopup(context, themeManager).apply {
-                setCharacterVariations(casedBaseChar, variations, characterVariationCallback)
+                setCharacterVariations("", variations, characterVariationCallback)
                 showAboveAnchor(anchorView)
             }
 

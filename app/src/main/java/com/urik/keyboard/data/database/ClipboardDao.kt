@@ -1,5 +1,6 @@
 package com.urik.keyboard.data.database
 
+import androidx.annotation.VisibleForTesting
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
@@ -39,6 +40,7 @@ interface ClipboardDao {
     @Query("SELECT COUNT(*) FROM clipboard_items WHERE is_pinned = 0")
     suspend fun getUnpinnedCount(): Int
 
+    @VisibleForTesting
     @Query("SELECT COUNT(*) FROM clipboard_items")
     suspend fun getCount(): Int
 
