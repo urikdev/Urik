@@ -283,4 +283,8 @@
     <string name="clipboard_item_pin">Καρφίτσωμα στοιχείου προχείρου</string>
     <string name="clipboard_item_unpin">Ξεκαρφίτσωμα στοιχείου προχείρου</string>
     <string name="clipboard_item_delete">Διαγραφή στοιχείου προχείρου</string>
+    <string name="error_update_number_hints">Αποτυχία ενημέρωσης υποδείξεων αριθμών</string>
+    <string name="layout_settings_show_number_hints">Εμφάνιση υποδείξεων αριθμών</string>
+    <string name="layout_settings_number_hints_on">Ενεργοποιημένο</string>
+    <string name="layout_settings_number_hints_off">Απενεργοποιημένο</string>
 </resources>

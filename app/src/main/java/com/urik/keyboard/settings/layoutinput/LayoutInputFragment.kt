@@ -37,6 +37,7 @@ class LayoutInputFragment : PreferenceFragmentCompat() {
     private lateinit var oneHandedModeEnabledPref: SwitchPreferenceCompat
     private lateinit var numberRowPref: SwitchPreferenceCompat
     private lateinit var languageSwitchKeyPref: SwitchPreferenceCompat
+    private lateinit var numberHintsPref: SwitchPreferenceCompat
     private lateinit var spaceBarPref: ListPreference
     private lateinit var customizeKeysPref: Preference
     private var testField: EditText? = null
@@ -113,6 +114,16 @@ class LayoutInputFragment : PreferenceFragmentCompat() {
             }
         screen.addPreference(languageSwitchKeyPref)
 
+        numberHintsPref =
+            SwitchPreferenceCompat(context).apply {
+                key = "show_number_hints"
+                isPersistent = false
+                title = resources.getString(R.string.layout_settings_show_number_hints)
+                summaryOn = resources.getString(R.string.layout_settings_number_hints_on)
+                summaryOff = resources.getString(R.string.layout_settings_number_hints_off)
+            }
+        screen.addPreference(numberHintsPref)
+
         spaceBarPref =
             ListPreference(context).apply {
                 key = "space_bar_size"
@@ -169,6 +180,11 @@ class LayoutInputFragment : PreferenceFragmentCompat() {
             true
         }
 
+        numberHintsPref.setOnPreferenceChangeListener { _, newValue ->
+            viewModel.updateShowNumberHints(newValue as Boolean)
+            true
+        }
+
         spaceBarPref.setOnPreferenceChangeListener { _, newValue ->
             viewModel.updateSpaceBarSize(SpaceBarSize.valueOf(newValue as String))
             true
@@ -183,6 +199,8 @@ class LayoutInputFragment : PreferenceFragmentCompat() {
                         oneHandedModeEnabledPref.isChecked = state.oneHandedModeEnabled
                         numberRowPref.isChecked = state.showNumberRow
                         languageSwitchKeyPref.isChecked = state.showLanguageSwitchKey
+                        numberHintsPref.isEnabled = !state.showNumberRow
+                        numberHintsPref.isChecked = state.showNumberHints
                         spaceBarPref.value = state.spaceBarSize.name
                     }
                 }

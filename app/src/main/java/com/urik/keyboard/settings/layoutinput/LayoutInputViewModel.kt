@@ -36,7 +36,8 @@ constructor(private val settingsRepository: SettingsRepository) : ViewModel() {
                     alternativeKeyboardLayout = settings.alternativeKeyboardLayout,
                     adaptiveKeyboardModesEnabled = settings.adaptiveKeyboardModesEnabled,
                     oneHandedModeEnabled = settings.oneHandedModeEnabled,
-                    showLanguageSwitchKey = settings.showLanguageSwitchKey
+                    showLanguageSwitchKey = settings.showLanguageSwitchKey,
+                    showNumberHints = settings.showNumberHints
                 )
             }.stateIn(
                 scope = viewModelScope,
@@ -86,6 +87,14 @@ constructor(private val settingsRepository: SettingsRepository) : ViewModel() {
         }
     }
 
+    fun updateShowNumberHints(enabled: Boolean) {
+        viewModelScope.launch {
+            settingsRepository
+                .updateShowNumberHints(enabled)
+                .onFailure { _events.emit(SettingsEvent.Error.NumberHintsToggleFailed) }
+        }
+    }
+
     private companion object {
         const val STOP_TIMEOUT_MILLIS = 5000L
     }
@@ -100,5 +109,6 @@ data class LayoutInputUiState(
     val alternativeKeyboardLayout: AlternativeKeyboardLayout = AlternativeKeyboardLayout.DEFAULT,
     val adaptiveKeyboardModesEnabled: Boolean = true,
     val oneHandedModeEnabled: Boolean = false,
-    val showLanguageSwitchKey: Boolean = false
+    val showLanguageSwitchKey: Boolean = false,
+    val showNumberHints: Boolean = false
 )

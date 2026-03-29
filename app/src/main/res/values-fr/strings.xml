@@ -314,5 +314,9 @@
     <string name="clipboard_item_pin">Épingler l\'élément du presse-papiers</string>
     <string name="clipboard_item_unpin">Détacher l\'élément du presse-papiers</string>
     <string name="clipboard_item_delete">Supprimer l\'élément du presse-papiers</string>
+    <string name="error_update_number_hints">Échec de la mise à jour des indicateurs de chiffres</string>
+    <string name="layout_settings_show_number_hints">Afficher les indicateurs de chiffres</string>
+    <string name="layout_settings_number_hints_on">Activé</string>
+    <string name="layout_settings_number_hints_off">Désactivé</string>
 
 </resources>

@@ -313,5 +313,9 @@
     <string name="error_update_backspace_swipe">Falha ao atualizar a eliminação por gesto de deslizar a tecla Backspace</string>
     <string name="error_update_long_press_punctuation">Falha ao atualizar pontuação de pressão longa</string>
     <string name="max_languages_reached">Máximo de 3 idiomas permitidos</string>
+    <string name="error_update_number_hints">Falha ao atualizar dicas numéricas</string>
+    <string name="layout_settings_show_number_hints">Mostrar dicas numéricas</string>
+    <string name="layout_settings_number_hints_on">Ativado</string>
+    <string name="layout_settings_number_hints_off">Desativado</string>
 
 </resources>

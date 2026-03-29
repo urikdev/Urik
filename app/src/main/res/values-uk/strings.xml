@@ -315,4 +315,9 @@
     <string name="error_update_long_press_punctuation">Не вдалося оновити пунктуацію довгого натискання</string>
     <string name="max_languages_reached">Можна додати до 3 мов.</string>
 
+    <string name="error_update_number_hints">Не вдалося оновити числові підказки</string>
+    <string name="layout_settings_show_number_hints">Показувати числові підказки</string>
+    <string name="layout_settings_number_hints_on">Увімкнено</string>
+    <string name="layout_settings_number_hints_off">Вимкнено</string>
+
 </resources>

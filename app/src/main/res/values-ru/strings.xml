@@ -317,4 +317,9 @@
     <string name="error_update_long_press_punctuation">Не удалось обновить пунктуацию долгого нажатия</string>
     <string name="max_languages_reached">Можно добавить до 3 языков.</string>
 
+    <string name="error_update_number_hints">Не удалось обновить числовые подсказки</string>
+    <string name="layout_settings_show_number_hints">Показывать числовые подсказки</string>
+    <string name="layout_settings_number_hints_on">Включено</string>
+    <string name="layout_settings_number_hints_off">Выключено</string>
+
 </resources>

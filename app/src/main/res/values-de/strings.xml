@@ -312,5 +312,9 @@
     <string name="error_update_backspace_swipe">Fehler beim Aktualisieren der Wischgeste zum Löschen mit der Rücktaste</string>
     <string name="error_update_long_press_punctuation">Lang-Druck-Interpunktion konnte nicht geändert werden</string>
     <string name="max_languages_reached">Maximal 3 Sprachen erlaubt</string>
+    <string name="error_update_number_hints">Zahlenhinweise konnten nicht aktualisiert werden</string>
+    <string name="layout_settings_show_number_hints">Zahlenhinweise anzeigen</string>
+    <string name="layout_settings_number_hints_on">Ein</string>
+    <string name="layout_settings_number_hints_off">Aus</string>
 
 </resources>

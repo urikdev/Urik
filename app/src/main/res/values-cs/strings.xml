@@ -313,5 +313,9 @@
     <string name="error_update_backspace_swipe">Nepodařilo se aktualizovat klávesu Backspace a klávesu Smazat přejetím</string>
     <string name="error_update_long_press_punctuation">Nepodařilo se aktualizovat interpunkci dlouhého stisku</string>
     <string name="max_languages_reached">Povoleny maximálně 3 jazyky</string>
+    <string name="error_update_number_hints">Nepodařilo se aktualizovat číselné nápovědy</string>
+    <string name="layout_settings_show_number_hints">Zobrazit číselné nápovědy</string>
+    <string name="layout_settings_number_hints_on">Zapnuto</string>
+    <string name="layout_settings_number_hints_off">Vypnuto</string>
 
 </resources>

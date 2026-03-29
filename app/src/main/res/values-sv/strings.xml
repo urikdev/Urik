@@ -261,4 +261,8 @@
     <string name="error_update_backspace_swipe">Misslyckades med att uppdatera backstegssvep och borttagning</string>
     <string name="error_update_long_press_punctuation">Det gick inte att uppdatera långtryckstecken</string>
     <string name="max_languages_reached">Max 3 språk tillåtna</string>
+    <string name="error_update_number_hints">Det gick inte att uppdatera siffertips</string>
+    <string name="layout_settings_show_number_hints">Visa siffertips</string>
+    <string name="layout_settings_number_hints_on">På</string>
+    <string name="layout_settings_number_hints_off">Av</string>
 </resources>

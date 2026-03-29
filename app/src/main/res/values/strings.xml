@@ -229,6 +229,10 @@
     <string name="error_update_merged_dictionaries">Failed to update dictionary mode</string>
     <string name="error_update_pause_on_misspelled">Failed to update pause setting</string>
     <string name="error_update_autocorrection">Failed to update autocorrection setting</string>
+    <string name="error_update_number_hints">Failed to update number hints</string>
+    <string name="layout_settings_show_number_hints">Show Number Hints</string>
+    <string name="layout_settings_number_hints_on">On</string>
+    <string name="layout_settings_number_hints_off">Off</string>
     <string name="error_delete_word">Failed to delete word</string>
     <string name="error_delete_all_words">Failed to delete learned words</string>
 
