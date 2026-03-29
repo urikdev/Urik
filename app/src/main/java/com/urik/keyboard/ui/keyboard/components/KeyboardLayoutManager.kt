@@ -1181,17 +1181,20 @@ class KeyboardLayoutManager(
                     layerDrawable.setLayerGravity(1, Gravity.TOP or Gravity.START)
 
                     layerDrawable
-                } else if (supportsCustomMapping) {
-                    val customSymbol = customKeyMappings[key.value.lowercase()]
-                    if (customSymbol != null) {
-                        keyHintRenderer.createKeyWithHint(
-                            keyBackground,
-                            customSymbol,
-                            themeManager.currentTheme.value.colors
-                        )
-                    } else {
-                        keyBackground
-                    }
+                } else if (supportsCustomMapping && customKeyMappings[key.value.lowercase()] != null) {
+                    val customSymbol = customKeyMappings[key.value.lowercase()]!!
+                    keyHintRenderer.createKeyWithHint(
+                        keyBackground,
+                        customSymbol,
+                        themeManager.currentTheme.value.colors
+                    )
+                } else if (isNumberHintEnabled() && isNumberHintRow(rowKeys)) {
+                    val keyIndex = rowKeys.indexOf(key)
+                    keyHintRenderer.createKeyWithHint(
+                        keyBackground,
+                        ((keyIndex + 1) % 10).toString(),
+                        themeManager.currentTheme.value.colors
+                    )
                 } else {
                     keyBackground
                 }
@@ -1407,6 +1410,19 @@ class KeyboardLayoutManager(
         "Latn", "Cyrl", "Grek" -> true
         else -> false
     }
+
+    private fun isNumberHintRow(row: List<KeyboardKey>): Boolean = effectiveLayout?.rows?.get(0)
+        ?.let { firstRow ->
+            !isTopNumberRow(firstRow) && row == firstRow
+        } ?: return false
+
+    private fun isNumberHintEnabled(): Boolean = effectiveLayout?.rows?.get(0)
+        ?.let { row ->
+            row.count { key ->
+                key is KeyboardKey.Character && key.type == KeyboardKey.KeyType.LETTER
+            } == 10
+        }
+        ?: false
 
     private fun getCurrentLocale(): java.util.Locale {
         val lang =
@@ -1825,7 +1841,23 @@ class KeyboardLayoutManager(
 
         backgroundScope.launch {
             try {
-                val variations = characterVariationService.getVariations(key.value, currentLayoutLang)
+                val firstRowLetter = if (isNumberHintEnabled() && key.type == KeyboardKey.KeyType.LETTER) {
+                    val firstRow = effectiveLayout?.rows?.get(0)
+                    if (firstRow?.contains(key) == true) {
+                        firstRow
+                    } else {
+                        null
+                    }
+                } else {
+                    null
+                }
+
+                var variations = characterVariationService.getVariations(key.value, currentLayoutLang)
+
+                if (firstRowLetter != null) {
+                    val number = (firstRowLetter.indexOf(key) + 1) % 10
+                    variations = listOf(number.toString()) + variations
+                }
                 if (variations.isNotEmpty()) {
                     val casedVariations = applyCasingToVariations(variations)
                     withContext(Dispatchers.Main) {
