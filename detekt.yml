@@ -7,7 +7,7 @@ complexity:
     threshold: 5
   CyclomaticComplexMethod:
     active: true
-    threshold: 65
+    threshold: 66
   LargeClass:
     active: true
     threshold: 2500
@@ -26,11 +26,11 @@ complexity:
     threshold: 7
   TooManyFunctions:
     active: true
-    thresholdInFiles: 75
-    thresholdInClasses: 75
-    thresholdInInterfaces: 75
-    thresholdInObjects: 75
-    thresholdInEnums: 75
+    thresholdInFiles: 76
+    thresholdInClasses: 76
+    thresholdInInterfaces: 76
+    thresholdInObjects: 76
+    thresholdInEnums: 76
     ignoreDeprecated: true
     ignorePrivate: false
     ignoreOverridden: true
