@@ -283,4 +283,8 @@
     <string name="clipboard_item_pin">Fixar element al porta-retalls</string>
     <string name="clipboard_item_unpin">Deixar de fixar l\'element al porta-retalls</string>
     <string name="clipboard_item_delete">Eliminar l\'element del porta-retalls</string>
+    <string name="error_update_number_hints">Ha fallat l\'actualització dels suggeriments numèrics</string>
+    <string name="layout_settings_show_number_hints">Mostrar suggeriments numèrics</string>
+    <string name="layout_settings_number_hints_on">Activat</string>
+    <string name="layout_settings_number_hints_off">Desactivat</string>
 </resources>

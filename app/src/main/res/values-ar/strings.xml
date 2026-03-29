@@ -315,4 +315,9 @@
     <string name="merged_dictionaries_title">قواميس مدمجة</string>
     <string name="merged_dictionaries_on">جميع قواميس اللغات المستخدمة في الاقتراحات</string>
 
+    <string name="error_update_number_hints">فشل تحديث تلميحات الأرقام</string>
+    <string name="layout_settings_show_number_hints">إظهار تلميحات الأرقام</string>
+    <string name="layout_settings_number_hints_on">تشغيل</string>
+    <string name="layout_settings_number_hints_off">إيقاف</string>
+
 </resources>

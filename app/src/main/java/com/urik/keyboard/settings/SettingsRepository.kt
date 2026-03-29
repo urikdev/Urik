@@ -78,6 +78,7 @@ constructor(
         val MERGED_DICTIONARIES = booleanPreferencesKey("merged_dictionaries")
         val PAUSE_ON_MISSPELLED_WORD = booleanPreferencesKey("pause_on_misspelled_word")
         val AUTOCORRECTION_ENABLED = booleanPreferencesKey("autocorrection_enabled")
+        val SHOW_NUMBER_HINTS = booleanPreferencesKey("show_number_hints")
     }
 
     /**
@@ -234,7 +235,8 @@ constructor(
                     showLanguageSwitchKey = preferences[PreferenceKeys.SHOW_LANGUAGE_SWITCH_KEY] ?: false,
                     mergedDictionaries = preferences[PreferenceKeys.MERGED_DICTIONARIES] ?: true,
                     pauseOnMisspelledWord = preferences[PreferenceKeys.PAUSE_ON_MISSPELLED_WORD] ?: true,
-                    autocorrectionEnabled = preferences[PreferenceKeys.AUTOCORRECTION_ENABLED] ?: false
+                    autocorrectionEnabled = preferences[PreferenceKeys.AUTOCORRECTION_ENABLED] ?: false,
+                    showNumberHints = preferences[PreferenceKeys.SHOW_NUMBER_HINTS] ?: false
                 ).validated()
             }.catch { e ->
                 ErrorLogger.logException(
@@ -610,6 +612,13 @@ constructor(
             it[PreferenceKeys.AUTOCORRECTION_ENABLED] = enabled
             if (enabled) it[PreferenceKeys.PAUSE_ON_MISSPELLED_WORD] = false
         }
+        Result.success(Unit)
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
+
+    suspend fun updateShowNumberHints(enabled: Boolean): Result<Unit> = try {
+        dataStore.edit { it[PreferenceKeys.SHOW_NUMBER_HINTS] = enabled }
         Result.success(Unit)
     } catch (e: Exception) {
         Result.failure(e)

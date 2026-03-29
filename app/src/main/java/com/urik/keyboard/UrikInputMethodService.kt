@@ -820,6 +820,7 @@ class UrikInputMethodService :
 
                     layoutManager.updateClipboardEnabled(newSettings.clipboardEnabled)
                     layoutManager.updateShowLanguageSwitchKey(newSettings.showLanguageSwitchKey)
+                    layoutManager.updateNumberHints(newSettings.showNumberHints)
 
                     if (layoutChanged) {
                         repository.cleanup()
@@ -1033,6 +1034,7 @@ class UrikInputMethodService :
 
         layoutManager.updateClipboardEnabled(currentSettings.clipboardEnabled)
         layoutManager.updateShowLanguageSwitchKey(currentSettings.showLanguageSwitchKey)
+        layoutManager.updateNumberHints(currentSettings.showNumberHints)
 
         if (serviceJob.isCancelled) {
             serviceJob = SupervisorJob()
@@ -1839,7 +1841,7 @@ class UrikInputMethodService :
                 val textBeforeCursor = outputBridge.safeGetTextBeforeCursor(1)
                 if (textBeforeCursor.isEmpty()) {
                     if (inputState.isAcceleratedDeletion) {
-                        layoutManager.forceStopAcceleratedBackspace()
+                        layoutManager.stopAcceleratedBackspace()
                     }
                     return
                 }
@@ -2449,7 +2451,7 @@ class UrikInputMethodService :
         super.onFinishInputView(finishingInput)
 
         if (::layoutManager.isInitialized) {
-            layoutManager.forceStopAcceleratedBackspace()
+            layoutManager.stopAcceleratedBackspace()
         }
 
         observerJobs.forEach { it.cancel() }
@@ -2499,7 +2501,7 @@ class UrikInputMethodService :
         super.onStartInput(attribute, restarting)
 
         if (::layoutManager.isInitialized) {
-            layoutManager.forceStopAcceleratedBackspace()
+            layoutManager.stopAcceleratedBackspace()
         }
 
         autofillStateTracker.cancelPendingClear()
@@ -2540,7 +2542,7 @@ class UrikInputMethodService :
         super.onFinishInput()
 
         if (::layoutManager.isInitialized) {
-            layoutManager.forceStopAcceleratedBackspace()
+            layoutManager.stopAcceleratedBackspace()
         }
 
         suggestionPipeline.cancelDebounceJob()

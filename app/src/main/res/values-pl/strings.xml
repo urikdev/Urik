@@ -314,5 +314,9 @@
     <string name="error_update_backspace_swipe">Nie udało się zaktualizować funkcji usuwania za pomocą przesunięcia Backspace</string>
     <string name="error_update_long_press_punctuation">Nie udało się zaktualizować interpunkcji długiego naciśnięcia</string>
     <string name="max_languages_reached">Maksymalnie 3 języki dozwolone</string>
+    <string name="error_update_number_hints">Nie udało się zaktualizować podpowiedzi liczbowych</string>
+    <string name="layout_settings_show_number_hints">Pokaż podpowiedzi liczbowe</string>
+    <string name="layout_settings_number_hints_on">Włączone</string>
+    <string name="layout_settings_number_hints_off">Wyłączone</string>
 
 </resources>

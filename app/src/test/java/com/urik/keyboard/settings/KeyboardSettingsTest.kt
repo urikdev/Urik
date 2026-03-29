@@ -690,4 +690,29 @@ class KeyboardSettingsTest {
 
         assertFalse(validated.autocorrectionEnabled)
     }
+
+    @Test
+    fun `showNumberHints defaults to false`() {
+        val settings = KeyboardSettings()
+
+        assertFalse(settings.showNumberHints)
+    }
+
+    @Test
+    fun `validated preserves showNumberHints when true`() {
+        val settings = KeyboardSettings(showNumberHints = true)
+
+        val validated = settings.validated()
+
+        assertTrue(validated.showNumberHints)
+    }
+
+    @Test
+    fun `validated preserves showNumberHints when false`() {
+        val settings = KeyboardSettings(showNumberHints = false)
+
+        val validated = settings.validated()
+
+        assertFalse(validated.showNumberHints)
+    }
 }

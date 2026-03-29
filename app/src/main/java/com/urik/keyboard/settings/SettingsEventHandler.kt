@@ -127,6 +127,10 @@ class SettingsEventHandler(private val context: Context) {
                     context.getString(R.string.error_update_autocorrection)
                 }
 
+                is SettingsEvent.Error.NumberHintsToggleFailed -> {
+                    context.getString(R.string.error_update_number_hints)
+                }
+
                 is SettingsEvent.Error.DeleteWordFailed -> {
                     context.getString(R.string.error_delete_word)
                 }

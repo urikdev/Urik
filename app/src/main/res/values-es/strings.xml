@@ -313,5 +313,9 @@
     <string name="error_update_backspace_swipe">No se pudo actualizar la función de retroceso/deslizar/eliminar.</string>
     <string name="error_update_long_press_punctuation">Error al actualizar la puntuación de pulsación larga</string>
     <string name="max_languages_reached">Se permiten máximo 3 idiomas</string>
+    <string name="error_update_number_hints">No se pudieron actualizar las sugerencias de números</string>
+    <string name="layout_settings_show_number_hints">Mostrar sugerencias de números</string>
+    <string name="layout_settings_number_hints_on">Activado</string>
+    <string name="layout_settings_number_hints_off">Desactivado</string>
 
 </resources>

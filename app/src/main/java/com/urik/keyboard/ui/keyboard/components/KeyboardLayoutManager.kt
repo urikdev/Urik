@@ -71,6 +71,7 @@ class KeyboardLayoutManager(
     private var clipboardEnabled = false
     private var activeLanguages: List<String> = emptyList()
     private var showLanguageSwitchKey = false
+    private var showNumberHints = false
     private var hasMultipleImes = false
 
     var effectiveLayout: KeyboardLayout? = null
@@ -687,10 +688,6 @@ class KeyboardLayoutManager(
         vibrateEffect(effect)
     }
 
-    fun forceStopAcceleratedBackspace() {
-        stopAcceleratedBackspace()
-    }
-
     fun cancelAllPendingCallbacks() {
         buttonPendingCallbacks.values.forEach { pending ->
             pending.handler.removeCallbacks(pending.runnable)
@@ -762,6 +759,10 @@ class KeyboardLayoutManager(
         showLanguageSwitchKey = enabled
     }
 
+    fun updateNumberHints(enabled: Boolean) {
+        showNumberHints = enabled
+    }
+
     fun updateCustomKeyMappings(mappings: Map<String, String>) {
         customKeyMappings = mappings
     }
@@ -830,7 +831,6 @@ class KeyboardLayoutManager(
         cachedTextSizes.clear()
         cachedDimensions.clear()
         cacheValid = false
-        cachedCornerRadius = 0f
     }
 
     private fun ensureCacheValid() {
@@ -864,6 +864,10 @@ class KeyboardLayoutManager(
             cachedDimensions["numberRowGutter"] = context.resources.getDimensionPixelSize(R.dimen.number_row_gutter)
         }
 
+        val density = context.resources.displayMetrics.density
+        cachedCornerRadius = 8f * density
+        cachedStrokeWidth = (1 * density).toInt()
+        cachedStrokeWidthThick = (2 * density).toInt()
         cacheValid = true
     }
 
@@ -1188,7 +1192,7 @@ class KeyboardLayoutManager(
                         customSymbol,
                         themeManager.currentTheme.value.colors
                     )
-                } else if (isNumberHintEnabled() && isNumberHintRow(rowKeys)) {
+                } else if (isNumberHintRow(rowKeys)) {
                     val keyIndex = rowKeys.indexOf(key)
                     keyHintRenderer.createKeyWithHint(
                         keyBackground,
@@ -1411,18 +1415,26 @@ class KeyboardLayoutManager(
         else -> false
     }
 
-    private fun isNumberHintRow(row: List<KeyboardKey>): Boolean = effectiveLayout?.rows?.get(0)
-        ?.let { firstRow ->
-            !isTopNumberRow(firstRow) && row == firstRow
-        } ?: return false
+    @VisibleForTesting
+    internal fun isNumberHintRow(row: List<KeyboardKey>): Boolean {
+        if (!isNumberHintEnabled()) return false
+        return effectiveLayout?.rows?.get(0)
+            ?.let { firstRow ->
+                !isTopNumberRow(firstRow) && row == firstRow
+            } ?: false
+    }
 
-    private fun isNumberHintEnabled(): Boolean = effectiveLayout?.rows?.get(0)
-        ?.let { row ->
-            row.count { key ->
-                key is KeyboardKey.Character && key.type == KeyboardKey.KeyType.LETTER
-            } == 10
-        }
-        ?: false
+    @VisibleForTesting
+    internal fun isNumberHintEnabled(): Boolean {
+        if (!showNumberHints) return false
+        return effectiveLayout?.rows?.get(0)
+            ?.let { row ->
+                row.count { key ->
+                    key is KeyboardKey.Character && key.type == KeyboardKey.KeyType.LETTER
+                } == 10
+            }
+            ?: false
+    }
 
     private fun getCurrentLocale(): java.util.Locale {
         val lang =
@@ -1921,7 +1933,7 @@ class KeyboardLayoutManager(
         backspaceHandler?.postDelayed(backspaceRunnable!!, 50L)
     }
 
-    private fun stopAcceleratedBackspace() {
+    internal fun stopAcceleratedBackspace() {
         backspaceRunnable?.let { runnable ->
             backspaceHandler?.removeCallbacks(runnable)
         }
@@ -2167,16 +2179,8 @@ class KeyboardLayoutManager(
         }
     }
 
-    private fun ensureDimensionCacheValid() {
-        if (cachedCornerRadius > 0f) return
-        val density = context.resources.displayMetrics.density
-        cachedCornerRadius = 8f * density
-        cachedStrokeWidth = (1 * density).toInt()
-        cachedStrokeWidthThick = (2 * density).toInt()
-    }
-
     private fun getKeyBackground(key: KeyboardKey): Drawable {
-        ensureDimensionCacheValid()
+        ensureCacheValid()
         val theme = themeManager.currentTheme.value
 
         val backgroundColor =

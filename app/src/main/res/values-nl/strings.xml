@@ -315,4 +315,9 @@
     <string name="clipboard_item_unpin">Klemborditem losmaken</string>
     <string name="clipboard_item_delete">Klemborditem verwijderen</string>
 
+    <string name="error_update_number_hints">Kan getalsaanwijzingen niet bijwerken</string>
+    <string name="layout_settings_show_number_hints">Getalsaanwijzingen weergeven</string>
+    <string name="layout_settings_number_hints_on">Aan</string>
+    <string name="layout_settings_number_hints_off">Uit</string>
+
 </resources>

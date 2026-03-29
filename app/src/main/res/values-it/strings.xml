@@ -314,5 +314,9 @@
     <string name="clipboard_item_pin">Fissa elemento appunti</string>
     <string name="clipboard_item_unpin">Rimuovi fissaggio elemento appunti</string>
     <string name="clipboard_item_delete">Elimina elemento appunti</string>
+    <string name="error_update_number_hints">Impossibile aggiornare i suggerimenti numerici</string>
+    <string name="layout_settings_show_number_hints">Mostra suggerimenti numerici</string>
+    <string name="layout_settings_number_hints_on">Attivo</string>
+    <string name="layout_settings_number_hints_off">Disattivo</string>
 
 </resources>

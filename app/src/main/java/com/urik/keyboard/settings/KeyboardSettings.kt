@@ -118,7 +118,8 @@ data class KeyboardSettings(
     val showLanguageSwitchKey: Boolean = false,
     val mergedDictionaries: Boolean = true,
     val pauseOnMisspelledWord: Boolean = true,
-    val autocorrectionEnabled: Boolean = false
+    val autocorrectionEnabled: Boolean = false,
+    val showNumberHints: Boolean = false
 ) {
     /**
      * Whether word learning is enabled via [learnNewWords] flag.
