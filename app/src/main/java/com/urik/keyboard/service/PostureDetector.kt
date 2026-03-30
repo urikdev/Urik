@@ -49,6 +49,7 @@ class PostureDetector(private val context: Context, private val scope: Coroutine
 
     fun attachToWindow(windowCtx: Context) {
         windowContext = windowCtx
+        _postureInfo.value = getCurrentPostureInfo()
         try {
             windowInfoTracker = WindowInfoTracker.getOrCreate(windowCtx)
             fallbackJob?.cancel()
@@ -109,7 +110,8 @@ class PostureDetector(private val context: Context, private val scope: Coroutine
     }
 
     private fun updatePostureFromLayoutInfo(layoutInfo: androidx.window.layout.WindowLayoutInfo) {
-        val displayMetrics = context.resources.displayMetrics
+        val effectiveContext = windowContext ?: context
+        val displayMetrics = effectiveContext.resources.displayMetrics
         val widthPx = displayMetrics.widthPixels
         val heightPx = displayMetrics.heightPixels
         val density = displayMetrics.density
@@ -152,12 +154,13 @@ class PostureDetector(private val context: Context, private val scope: Coroutine
                 screenWidthPx = widthPx,
                 screenHeightPx = heightPx,
                 isTablet = isTablet,
-                orientation = context.resources.configuration.orientation
+                orientation = effectiveContext.resources.configuration.orientation
             )
     }
 
     private fun getCurrentPostureInfo(): PostureInfo {
-        val displayMetrics = context.resources.displayMetrics
+        val effectiveContext = windowContext ?: context
+        val displayMetrics = effectiveContext.resources.displayMetrics
         val widthPx = displayMetrics.widthPixels
         val heightPx = displayMetrics.heightPixels
         val density = displayMetrics.density
@@ -182,7 +185,7 @@ class PostureDetector(private val context: Context, private val scope: Coroutine
             screenWidthPx = widthPx,
             screenHeightPx = heightPx,
             isTablet = isTablet,
-            orientation = context.resources.configuration.orientation
+            orientation = effectiveContext.resources.configuration.orientation
         )
     }
 
