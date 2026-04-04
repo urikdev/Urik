@@ -1,0 +1,695 @@
+{
+  "locale": "sk",
+  "script": "Latn",
+  "isRTL": false,
+  "modes": {
+    "letters": {
+      "rows": [
+        [
+          {
+            "type": "character",
+            "char": "1",
+            "keyType": "number"
+          },
+          {
+            "type": "character",
+            "char": "2",
+            "keyType": "number"
+          },
+          {
+            "type": "character",
+            "char": "3",
+            "keyType": "number"
+          },
+          {
+            "type": "character",
+            "char": "4",
+            "keyType": "number"
+          },
+          {
+            "type": "character",
+            "char": "5",
+            "keyType": "number"
+          },
+          {
+            "type": "character",
+            "char": "6",
+            "keyType": "number"
+          },
+          {
+            "type": "character",
+            "char": "7",
+            "keyType": "number"
+          },
+          {
+            "type": "character",
+            "char": "8",
+            "keyType": "number"
+          },
+          {
+            "type": "character",
+            "char": "9",
+            "keyType": "number"
+          },
+          {
+            "type": "character",
+            "char": "0",
+            "keyType": "number"
+          }
+        ],
+        [
+          {
+            "type": "character",
+            "char": "q",
+            "keyType": "letter"
+          },
+          {
+            "type": "character",
+            "char": "w",
+            "keyType": "letter"
+          },
+          {
+            "type": "character",
+            "char": "e",
+            "keyType": "letter"
+          },
+          {
+            "type": "character",
+            "char": "r",
+            "keyType": "letter"
+          },
+          {
+            "type": "character",
+            "char": "t",
+            "keyType": "letter"
+          },
+          {
+            "type": "character",
+            "char": "z",
+            "keyType": "letter"
+          },
+          {
+            "type": "character",
+            "char": "u",
+            "keyType": "letter"
+          },
+          {
+            "type": "character",
+            "char": "i",
+            "keyType": "letter"
+          },
+          {
+            "type": "character",
+            "char": "o",
+            "keyType": "letter"
+          },
+          {
+            "type": "character",
+            "char": "p",
+            "keyType": "letter"
+          },
+          {
+            "type": "character",
+            "char": "\u013e",
+            "keyType": "letter"
+          },
+          {
+            "type": "character",
+            "char": "\u00e4",
+            "keyType": "letter"
+          }
+        ],
+        [
+          {
+            "type": "character",
+            "char": "a",
+            "keyType": "letter"
+          },
+          {
+            "type": "character",
+            "char": "s",
+            "keyType": "letter"
+          },
+          {
+            "type": "character",
+            "char": "d",
+            "keyType": "letter"
+          },
+          {
+            "type": "character",
+            "char": "f",
+            "keyType": "letter"
+          },
+          {
+            "type": "character",
+            "char": "g",
+            "keyType": "letter"
+          },
+          {
+            "type": "character",
+            "char": "h",
+            "keyType": "letter"
+          },
+          {
+            "type": "character",
+            "char": "j",
+            "keyType": "letter"
+          },
+          {
+            "type": "character",
+            "char": "k",
+            "keyType": "letter"
+          },
+          {
+            "type": "character",
+            "char": "l",
+            "keyType": "letter"
+          },
+          {
+            "type": "character",
+            "char": "\u00f4",
+            "keyType": "letter"
+          },
+          {
+            "type": "character",
+            "char": "\u00e1",
+            "keyType": "letter"
+          }
+        ],
+        [
+          {
+            "type": "action",
+            "action": "shift"
+          },
+          {
+            "type": "character",
+            "char": "y",
+            "keyType": "letter"
+          },
+          {
+            "type": "character",
+            "char": "x",
+            "keyType": "letter"
+          },
+          {
+            "type": "character",
+            "char": "c",
+            "keyType": "letter"
+          },
+          {
+            "type": "character",
+            "char": "v",
+            "keyType": "letter"
+          },
+          {
+            "type": "character",
+            "char": "b",
+            "keyType": "letter"
+          },
+          {
+            "type": "character",
+            "char": "n",
+            "keyType": "letter"
+          },
+          {
+            "type": "character",
+            "char": "m",
+            "keyType": "letter"
+          },
+          {
+            "type": "action",
+            "action": "backspace"
+          }
+        ],
+        [
+          {
+            "type": "action",
+            "action": "mode_switch_symbols"
+          },
+          {
+            "type": "character",
+            "char": ",",
+            "keyType": "punctuation"
+          },
+          {
+            "type": "action",
+            "action": "space"
+          },
+          {
+            "type": "character",
+            "char": ".",
+            "keyType": "punctuation"
+          },
+          {
+            "type": "action",
+            "action": "dynamic_action"
+          }
+        ]
+      ]
+    },
+    "numbers": {
+      "rows": [
+        [
+          {
+            "type": "character",
+            "char": "1",
+            "keyType": "number"
+          },
+          {
+            "type": "character",
+            "char": "2",
+            "keyType": "number"
+          },
+          {
+            "type": "character",
+            "char": "3",
+            "keyType": "number"
+          }
+        ],
+        [
+          {
+            "type": "character",
+            "char": "4",
+            "keyType": "number"
+          },
+          {
+            "type": "character",
+            "char": "5",
+            "keyType": "number"
+          },
+          {
+            "type": "character",
+            "char": "6",
+            "keyType": "number"
+          }
+        ],
+        [
+          {
+            "type": "character",
+            "char": "7",
+            "keyType": "number"
+          },
+          {
+            "type": "character",
+            "char": "8",
+            "keyType": "number"
+          },
+          {
+            "type": "character",
+            "char": "9",
+            "keyType": "number"
+          }
+        ],
+        [
+          {
+            "type": "character",
+            "char": ",",
+            "keyType": "punctuation"
+          },
+          {
+            "type": "character",
+            "char": "0",
+            "keyType": "number"
+          },
+          {
+            "type": "action",
+            "action": "backspace"
+          }
+        ],
+        [
+          {
+            "type": "action",
+            "action": "mode_switch_letters"
+          },
+          {
+            "type": "character",
+            "char": ".",
+            "keyType": "punctuation"
+          },
+          {
+            "type": "action",
+            "action": "space"
+          },
+          {
+            "type": "character",
+            "char": "-",
+            "keyType": "symbol"
+          },
+          {
+            "type": "action",
+            "action": "dynamic_action"
+          }
+        ]
+      ]
+    },
+    "symbols": {
+      "rows": [
+        [
+          {
+            "type": "character",
+            "char": "!",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "@",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "#",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "\u20ac",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "%",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "^",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "&",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "*",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "(",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": ")",
+            "keyType": "symbol"
+          }
+        ],
+        [
+          {
+            "type": "character",
+            "char": "-",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "_",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "=",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "+",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "[",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "]",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "{",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "}",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "\\",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "|",
+            "keyType": "symbol"
+          }
+        ],
+        [
+          {
+            "type": "action",
+            "action": "mode_switch_symbols_secondary"
+          },
+          {
+            "type": "character",
+            "char": ".",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": ";",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "'",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "\"",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": ":",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "<",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": ">",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "/",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "?",
+            "keyType": "symbol"
+          },
+          {
+            "type": "action",
+            "action": "backspace"
+          }
+        ],
+        [
+          {
+            "type": "action",
+            "action": "mode_switch_letters"
+          },
+          {
+            "type": "action",
+            "action": "space"
+          },
+          {
+            "type": "action",
+            "action": "dynamic_action"
+          }
+        ]
+      ]
+    },
+    "symbols_secondary": {
+      "rows": [
+        [
+          {
+            "type": "character",
+            "char": "~",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "`",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "\u2022",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "\u2014",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "\u2013",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "\u00b7",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "\u03c0",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "\u00f7",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "\u00d7",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "\u00b1",
+            "keyType": "symbol"
+          }
+        ],
+        [
+          {
+            "type": "character",
+            "char": "\u00a3",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "\u00a5",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "\u20ac",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "\u00a2",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "\u00b0",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "\u00ae",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "\u00a9",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "\u2122",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "\u221e",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "\u00a7",
+            "keyType": "symbol"
+          }
+        ],
+        [
+          {
+            "type": "action",
+            "action": "mode_switch_symbols"
+          },
+          {
+            "type": "character",
+            "char": "\u201c",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "\u201d",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "\u00ab",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "\u00bb",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "\u2039",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "\u203a",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "\u201e",
+            "keyType": "symbol"
+          },
+          {
+            "type": "character",
+            "char": "\u2026",
+            "keyType": "symbol"
+          },
+          {
+            "type": "action",
+            "action": "backspace"
+          }
+        ],
+        [
+          {
+            "type": "action",
+            "action": "mode_switch_letters"
+          },
+          {
+            "type": "action",
+            "action": "space"
+          },
+          {
+            "type": "action",
+            "action": "dynamic_action"
+          }
+        ]
+      ]
+    }
+  }
+}
