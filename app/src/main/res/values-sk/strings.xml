@@ -1,0 +1,321 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="ime_name">Klávesnica Urik</string>
+    <string name="ime_label">Klávesnica Urik</string>
+    <string name="ime_description">Písanie ťahom, kontrola pravopisu, a viacjazyčná podpora bez ohrozenia vášho súkromia. Žiadna telemetria. Žiadny zber dát. Všetko zostáva na vašom zariadení.</string>
+
+    <!-- Settings -->
+    <string name="enable_keyboard_title">Zapnúť</string>
+    <string name="open_settings">Otvoriť nastavenia</string>
+    <string name="error_opening_settings">Nedajú sa otvoriť nastavenia.</string>
+
+    <!-- Settings Activity -->
+    <string name="settings_title">Nastavenia klávesnice</string>
+    <string name="about_title">O aplikácii</string>
+    <string name="about_button">O aplikácii</string>
+    <string name="about_version">Verzia</string>
+    <string name="about_copyright">Copyright © 2025 Urik Development</string>
+    <string name="about_license">Licencia: GNU GPL v3.0</string>
+    <string name="about_source_code">Zdrojový kód</string>
+    <string name="about_release_notes">Poznámky k vydaniu</string>
+    <string name="about_report_bug">Nahlásiť chybu</string>
+    <string name="about_privacy_policy">Zásady ochrany osobných údajov</string>
+    <string name="about_support">Podporiť vývoj</string>
+    <string name="autocorrect_settings_title">Nastavenia autokorekcie</string>
+    <string name="autocorrect_settings_description">Kontrola pravopisu a návrhy</string>
+    <string name="language_settings_title">Nastavenia jazyka</string>
+    <string name="language_settings_description">Zvoľte jazyky klávesnice</string>
+    <string name="typing_settings_title">Nastavenia správania pri písaní</string>
+    <string name="typing_settings_description">Interpunkcia, haptická spätná väzba, atď.</string>
+    <string name="layout_settings_title">Rozloženie &amp; Vstup</string>
+    <string name="layout_settings_description">Riadok čísel, veľkosť medzerníka</string>
+    <string name="appearance_settings_title">Vzhľad</string>
+    <string name="appearance_settings_description">Téma, veľkosť</string>
+    <string name="privacy_settings_title">Súkromie &amp; Dáta</string>
+    <string name="privacy_settings_description">Vyčistiť dáta, obnoviť nastavenia</string>
+    <string name="licenses_title">Open Source licencie</string>
+    <string name="licenses_description">Zobraziť licencie tretích strán</string>
+    <string name="dictionary_attribution_title">Dáta slovníka</string>
+    <string name="theme_picker_title">Téma klávesnice</string>
+    <string name="dictionary_attribution_summary">Licencia a atribúcia FrequencyWords</string>
+    <string name="test_field_hint">Otestovať zmeny</string>
+
+    <!-- Settings Enums -->
+    <!-- Key Size -->
+    <string name="key_size_small">Malá</string>
+    <string name="key_size_medium">Stredná</string>
+    <string name="key_size_large">Veľká</string>
+    <string name="key_size_extra_large">Extra veľká</string>
+
+    <!-- Long Press Duration -->
+    <string name="long_press_duration_short">Krátke</string>
+    <string name="long_press_duration_medium">Stredné</string>
+    <string name="long_press_duration_long">Dlhé</string>
+    <string name="cursor_speed_slow">Pomalá</string>
+    <string name="cursor_speed_medium">Stredná</string>
+    <string name="cursor_speed_fast">Rýchla</string>
+    <string name="cursor_speed_very_fast">Veľmi rýchla</string>
+
+    <!-- Space Bar Size -->
+    <string name="space_bar_size_compact">Kompaktná</string>
+    <string name="space_bar_size_standard">Štandardná</string>
+    <string name="space_bar_size_wide">Široká</string>
+
+    <!-- Key Label Size -->
+    <string name="key_label_size_small">Malá</string>
+    <string name="key_label_size_medium">Stredná</string>
+    <string name="key_label_size_large">Veľká</string>
+
+    <!-- Appearance Settings -->
+    <string name="appearance_settings_theme">Téma</string>
+    <string name="appearance_settings_key_size">Veľkosť klávesov</string>
+    <string name="appearance_settings_key_label_size">Veľkosť popisu klávesov</string>
+
+    <!-- Auto-Correct Settings -->
+    <string name="autocorrect_settings_spell_check">Kontrola pravopisu</string>
+    <string name="autocorrect_settings_spell_check_on">Kontrola pravopisu zapnutá</string>
+    <string name="autocorrect_settings_spell_check_off">Kontrola pravopisu vypnutá</string>
+    <string name="autocorrect_settings_show_suggestions">Ukazovať odporúčania</string>
+    <string name="autocorrect_settings_suggestions_on">Odporúčania ukázáné</string>
+    <string name="autocorrect_settings_suggestions_off">Odporúčania skryté</string>
+    <string name="autocorrect_settings_suggestion_count">Počet odporúčaní</string>
+    <string name="autocorrect_settings_learn_new_words">Naučiť nové slová</string>
+    <string name="autocorrect_settings_learn_new_words_on">Učenie zapnuté</string>
+    <string name="autocorrect_settings_learn_new_words_off">Učenie vypnuté</string>
+    <string name="autocorrect_settings_pause_on_misspelled">Pauza pri chybne napísanom slove</string>
+    <string name="autocorrect_settings_pause_on_misspelled_on">Zapnuté</string>
+    <string name="autocorrect_settings_pause_on_misspelled_off">Vypnuté</string>
+    <string name="autocorrect_settings_autocorrection">Automatická oprava</string>
+    <string name="autocorrect_settings_autocorrection_on">Zapnutá</string>
+    <string name="autocorrect_settings_autocorrection_off">Vypnutá</string>
+
+    <!-- Language Settings -->
+    <string name="select_active_language">Vyberte aktívny jazyk</string>
+
+    <!-- Sound & Feedback Settings -->
+    <string name="primary_layout_language">Aktuálne rozloženie</string>
+    <string name="merged_dictionaries_category">Slovník</string>
+    <string name="merged_dictionaries_title">Zlúčené slovníky</string>
+    <string name="merged_dictionaries_on">Pre návrhy sa používajú všetky jazykové slovníky</string>
+    <string name="merged_dictionaries_off">Pre návrhy sa používa len slovník aktívneho rozloženia</string>
+    <string name="feedback_settings_haptic_feedback">Haptická odozva</string>
+    <string name="feedback_settings_haptic_on">Haptická odozva zapnutá</string>
+    <string name="feedback_settings_haptic_off">Haptická odozva vypnutá</string>
+    <string name="feedback_settings_vibration_strength">Sila vibrácií</string>
+
+    <!-- Typing Behavior Settings -->
+    <string name="typing_settings_double_space_period">Bodka po dvojitej medzere</string>
+    <string name="typing_settings_double_space_on">Dvojitá medzera vloží bodku</string>
+    <string name="typing_settings_double_space_off">Dvojitá medzera vloží medzeru</string>
+    <string name="typing_settings_auto_capitalization">Automatické veľké písmená</string>
+    <string name="typing_settings_auto_capitalization_on">Veľké písmená na začiatku vety</string>
+    <string name="typing_settings_auto_capitalization_off">Žiadne automatické veľké písmená</string>
+    <string name="typing_settings_swipe_on">Písanie prejdením prstom povolené</string>
+    <string name="typing_settings_swipe_off">Písanie prejdením prstom zakázané</string>
+    <string name="typing_settings_long_press_duration">Trvanie dlhého stlačenia</string>
+
+    <!-- Layout & Input Settings -->
+    <string name="layout_settings_alternative_layout">Rozloženie klávesnice</string>
+    <string name="layout_settings_adaptive_modes_enabled">Adaptívne režimy klávesnice</string>
+    <string name="layout_settings_adaptive_modes_on">Automaticky sa prispôsobuje typu zariadenia a polohe (tablety, skladacie telefóny)</string>
+    <string name="layout_settings_adaptive_modes_off">Vždy používať štandardné rozloženie na celú šírku</string>
+    <string name="layout_settings_one_handed_mode_enabled">Režim jednej ruky</string>
+    <string name="layout_settings_one_handed_mode_on">Povolený</string>
+    <string name="layout_settings_one_handed_mode_off">Štandardná klávesnica na celú šírku</string>
+    <string name="one_handed_mode_left">Zakotviť klávesnicu vľavo</string>
+    <string name="one_handed_mode_right">Zakotviť klávesnicu vpravo</string>
+    <string name="one_handed_mode_full">Vrátiť sa na klávesnicu na celú šírku</string>
+    <string name="layout_settings_show_number_row">Zobraziť číselný riadok</string>
+    <string name="layout_settings_number_row_on">Číselný riadok zobrazený</string>
+    <string name="layout_settings_number_row_off">Číselný riadok skrytý</string>
+    <string name="layout_settings_show_language_switch_key">Zobraziť kláves na prepínanie jazyka</string>
+    <string name="layout_settings_language_switch_key_on">Povoliť</string>
+    <string name="layout_settings_language_switch_key_off">Zakázať</string>
+    <string name="layout_settings_space_bar_size">Veľkosť medzerníka</string>
+    <string name="alternative_layout_default">Predvolené (Jazykové rozloženie)</string>
+    <string name="layout_settings_customize_keys">Prispôsobiť klávesy</string>
+    <string name="layout_settings_customize_keys_summary">Priradiť vlastný znak dlhému stlačeniu</string>
+
+    <!-- Layout Mapper -->
+    <string name="layout_mapper_title">Prispôsobiť klávesy</string>
+    <string name="layout_mapper_instructions">Kliknite na kláves, aby ste priradili vlastný znak. Dlhé stlačenie tohto klávesu na klávesnici vloží váš znak.</string>
+    <string name="layout_mapper_edit_key">Upraviť kláves: %1$s</string>
+    <string name="layout_mapper_symbol_hint">Vlastný znak</string>
+    <string name="layout_mapper_save">Uložiť</string>
+    <string name="layout_mapper_remove">Odstrániť</string>
+    <string name="layout_mapper_reset_all">Obnoviť všetko</string>
+    <string name="layout_mapper_reset_title">Obnoviť všetky mapovania?</string>
+    <string name="layout_mapper_reset_message">Týmto sa odstránia všetky vlastné mapovania klávesov. Tento krok sa nedá vrátiť späť.</string>
+    <string name="layout_mapper_reset_confirm">Obnoviť</string>
+    <string name="layout_mapper_saved">Mapovanie uložené</string>
+    <string name="layout_mapper_removed">Mapovanie odstránené</string>
+    <string name="layout_mapper_cleared">Všetky mapovania vymazané</string>
+    <string name="layout_mapper_save_failed">Nepodarilo sa uložiť mapovania</string>
+    <string name="layout_mapper_remove_failed">Nepodarilo sa odstrániť mapovania</string>
+    <string name="layout_mapper_clear_failed">Nepodarilo sa vymazať mapovania</string>
+
+    <!-- Privacy & Data Settings -->
+    <string name="privacy_settings_clipboard_history">História schránky</string>
+    <string name="privacy_settings_clipboard_history_on">História schránky zapnutá</string>
+    <string name="privacy_settings_clipboard_history_off">História schránky vypnutá</string>
+    <string name="privacy_settings_clear_learned_words">Zmazať naučené slová</string>
+    <string name="privacy_settings_clear_learned_words_summary">Zmazať celý naučený slovník</string>
+    <string name="privacy_settings_clear_learned_words_confirm">Naozaj chcete zmazať celý naučený slovník? Tento krok sa nedá vrátiť späť.</string>
+    <string name="privacy_settings_reset_to_defaults">Obnoviť predvolené</string>
+    <string name="privacy_settings_reset_to_defaults_confirm">Obnoviť všetky nastavenia na predvolené?</string>
+    <string name="privacy_settings_export_error_log">Exportovať hlásenia chýb</string>
+    <string name="privacy_settings_export_error_log_summary">Zdieľať diagnostické hlásenia k ladeniu</string>
+    <string name="privacy_settings_export_error_log_failed">Nepodarilo sa exportovať chybové hlásenia</string>
+    <string name="privacy_settings_export_dictionary">Exportovať slovník</string>
+    <string name="privacy_settings_export_dictionary_summary">Uložiť naučené slová do súboru</string>
+    <string name="privacy_settings_import_dictionary">Importovať slovník</string>
+    <string name="privacy_settings_import_dictionary_summary">Obnoviť naučené slová zo súboru</string>
+    <string name="learned_words_title">Naučené slová</string>
+    <string name="learned_words_manage">Spravovať naučené slová</string>
+    <string name="learned_words_manage_summary">Zobraziť a zmazať jednotlivé naučené slová</string>
+    <string name="learned_words_empty">Zatiaľ žiadne naučené slová</string>
+    <string name="learned_words_delete_all">Zmazať všetko</string>
+    <string name="learned_words_delete_all_confirm">Zmazať všetky naučené slová? Tento krok sa nedá vrátiť späť.</string>
+    <string name="learned_words_auth_title">Overiť identitu</string>
+    <string name="learned_words_auth_subtitle">Pre zobrazenie naučených slov sa overte</string>
+
+    <!-- Error Messages -->
+    <string name="error_title">Chyba</string>
+    <string name="error_update_key_size">Nepodarilo sa zmeniť veľkosť klávesov</string>
+    <string name="error_update_key_label_size">Nepodarilo sa aktualizovať veľkosť popisov</string>
+    <string name="error_update_spell_check">Nepodarilo sa aktualizovať kontrolu pravopisu</string>
+    <string name="error_update_suggestions">Nepodarilo sa aktualizovať nastavenia odporúčaní</string>
+    <string name="error_update_suggestion_count">Nepodarilo sa aktualizovať počet odporúčaní</string>
+    <string name="error_update_word_learning">Nepodarilo sa aktualizovať učenie slov</string>
+    <string name="error_update_clipboard">Nepodarilo sa aktualizovať nastavenia schránky</string>
+    <string name="error_update_language">Nepodarilo sa aktualizovať nastavenia jazyka</string>
+    <string name="error_update_haptic_feedback">Nepodarilo sa aktualizovať haptickú odozvu</string>
+    <string name="error_update_vibration_strength">Nepodarilo sa aktualizovať silu vibrácií</string>
+    <string name="error_update_double_space_period">Nepodarilo sa aktualizovať funkciu bodka po dvojitej medzere</string>
+    <string name="error_update_auto_capitalization">Nepodarilo sa aktualizovať automatické veľké písmená</string>
+    <string name="error_update_swipe">Nepodarilo sa aktualizovať písanie prejdením</string>
+    <string name="error_update_long_press_duration">Nepodarilo sa aktualizovať trvanie dlhého stlačenia</string>
+    <string name="error_update_number_row">Nepodarilo sa aktualizovať riadok čísel</string>
+    <string name="error_update_space_bar_size">Nepodarilo sa aktualizovať veľkosť medzerníka</string>
+    <string name="error_update_alternative_layout">Nepodarilo sa aktualizovať rozloženie klávesnice</string>
+    <string name="error_clear_learned_words">Nepodarilo sa zmazať naučené slová</string>
+    <string name="error_reset_to_defaults">Nepodarilo sa obnoviť nastavenia</string>
+    <string name="error_dictionary_export">Nepodarilo sa exportovať slovník</string>
+    <string name="error_dictionary_import">Nepodarilo sa importovať slovník</string>
+    <string name="error_update_merged_dictionaries">Nepodarilo sa aktualizovať režim slovníka</string>
+    <string name="error_update_pause_on_misspelled">Nepodarilo sa aktualizovať nastavenia pauzy</string>
+    <string name="error_update_autocorrection">Nepodarilo sa aktualizovať nastavenia automatickej opravy</string>
+    <string name="error_delete_word">Nepodarilo sa zmazať slovo</string>
+    <string name="error_delete_all_words">Nepodarilo sa zmazať naučené slová</string>
+
+    <!-- Success Messages -->
+    <string name="success_learned_words_cleared">Naučené slová zmazané</string>
+    <string name="success_settings_reset">Obnovené predvolené nastavenia</string>
+    <string name="success_dictionary_exported">Exportovaných %1$d slov</string>
+    <string name="success_dictionary_imported">Pridaných %1$d nových, aktualizovaných %2$d slov</string>
+    <string name="success_word_deleted">Slovo odstránené</string>
+    <string name="success_all_words_deleted">Všetky naučené slová zmazané</string>
+
+    <!-- Keyboard descriptions -->
+    <string name="keyboard_description">Virtuálna klávesnica</string>
+
+    <!-- Default key labels -->
+    <string name="letters_mode_label">ABC</string>
+    <string name="numbers_mode_label">123</string>
+    <string name="symbols_mode_label">+=&lt;</string>
+
+    <!-- Accessibility descriptions -->
+    <string name="key_character_description">Písať %1$s</string>
+
+    <string name="shift_key_description">Kláves shift, stlačte na zväčšenie ďalšieho písmena</string>
+    <string name="shift_active_description">Shift je aktívny, stlačte na deaktiváciu</string>
+    <string name="caps_lock_description">Caps lock</string>
+    <string name="caps_lock_on_description">Caps lock je zapnutý, stlačte na vypnutie</string>
+    <string name="backspace_key_description">Zmazať predchádzajúci znak</string>
+    <string name="space_key_description">Medzerník</string>
+    <string name="letters_mode_description">Prepnúť na klávesnicu písmen</string>
+    <string name="numbers_mode_description">Prepnúť na klávesnicu čísel</string>
+    <string name="symbols_mode_description">Prepnúť na klávesnicu symbolov</string>
+    <string name="symbols_secondary_mode_description">Prepnúť na rozšírenú klávesnicu symbolov</string>
+    <string name="language_switch_description">Prepnúť jazyk klávesnice</string>
+    <string name="ime_prediction_description">Predpoveď: %1$s</string>
+
+    <!-- Action button accessibility descriptions -->
+    <string name="action_enter_description">Stlačte enter</string>
+    <string name="action_send_description">Poslať správu</string>
+    <string name="action_search_description">Hľadať</string>
+    <string name="action_done_description">Dokončiť úpravy</string>
+    <string name="action_go_description">Ísť na pozíciu</string>
+    <string name="action_next_description">Presunúť do ďalšieho poľa</string>
+    <string name="action_previous_description">Presunúť do prechádzajúceho poľa</string>
+
+    <string name="action_emoji">Emoji</string>
+    <string name="emoji_search_hint" tools:ignore="TypographyEllipsis">Hľadať emoji...</string>
+    <string name="autofill_indicator_description">Dostupné návrhy správcu hesiel</string>
+
+    <!-- Theme Picker Accessibility -->
+    <string name="theme_description">%1$s téma</string>
+    <string name="theme_description_selected">%1$s téma, momentálne zvolená</string>
+    <string name="theme_add_favorite">Pridať %1$s medzi obľúbené</string>
+    <string name="theme_remove_favorite">Odobrať %1$s z obľúbených</string>
+
+    <!-- Character Variation Accessibility -->
+    <string name="character_variation_position">Variácia znakov %1$d z %2$d: %3$s</string>
+    <string name="character_option_role">voľba znaku</string>
+
+    <!-- Blacklisting Words -->
+    <string name="remove_suggestion">Odstrániť %1$s z odporúčaní?</string>
+    <string name="remove_cancel">Zrušiť</string>
+    <string name="remove_confirm">Odstrániť</string>
+
+    <!-- Tips -->
+    <string name="tip_1_title">Učenie slov</string>
+    <string name="tip_1_description">Stlačte medzerník na pridanie zvýrazneného preklepu do vášho slovníka.</string>
+
+    <string name="tip_2_title">Rýchle menu interpunkcie</string>
+    <string name="tip_2_description">Dlho podržte medzerník na otvorenie rýchleho menu interpunkcie.</string>
+
+    <string name="tip_3_title">Variácie znakov</string>
+    <string name="tip_3_description">Dlho podržte znak na zobrazenie variantov znaku.</string>
+
+    <string name="tip_4_title">Odobrať slová</string>
+    <string name="tip_4_description">Dlho podržte návrh slova pre odobranie z vášho slovníka.</string>
+
+    <!-- Clipboard Panel -->
+    <string name="tip_5_description">Dlhým podržaním klávesu so symbolom otvorte Správcu schránky.</string>
+    <string name="clipboard_panel_pinned">Pripnuté</string>
+    <string name="clipboard_panel_recent">Nedávne</string>
+    <string name="clipboard_panel_empty">Žiadna história schránky</string>
+    <string name="clipboard_panel_delete_all">Zmazať všetko</string>
+    <string name="clipboard_panel_delete_all_confirm">Zmazať všetky nepripnuté položky schránky?</string>
+
+    <!-- Clipboard Accessibility -->
+    <string name="clipboard_consent_message">Urik môže čítať a ukladať obsah schránky donekonečna. Ak si to neželáte, prejdite do nastavení a vypnite históriu schránky.</string>
+    <string name="clipboard_panel_close">Zavrieť schránku</string>
+    <string name="clipboard_item_description">Položka schránky: %1$s</string>
+    <string name="clipboard_item_pin">Pripnúť položku schránky</string>
+    <string name="clipboard_item_unpin">Odopnúť položku schránky</string>
+    <string name="clipboard_item_delete">Zmazať položku schránky</string>
+    <string name="tip_5_title">Správca schránky</string>
+    <string name="typing_settings_swipe_enabled">Písanie ťahom</string>
+    <string name="typing_settings_spacebar_cursor">Ovládanie kurzoru medzerníkom</string>
+    <string name="typing_settings_spacebar_cursor_on">Prejdením po medzerníku posúvate kurzor</string>
+    <string name="typing_settings_spacebar_cursor_off">Ovládanie kurzoru medzerníkom je zakázané</string>
+    <string name="typing_settings_cursor_speed">Rýchlosť kurzora</string>
+    <string name="typing_settings_backspace_swipe">Zmazať prejdením po Backspace</string>
+    <string name="typing_settings_backspace_swipe_on">Prejdením prstom doľava pri stlačení klávesu Backspace zmažete slovo</string>
+    <string name="typing_settings_backspace_swipe_off">Zakázané mazanie prejdením prstu</string>
+    <string name="typing_settings_long_press_punctuation">Interpunkcia dlhého stlačenia</string>
+    <string name="long_press_punctuation_off">Vypnutá</string>
+    <string name="long_press_punctuation_spacebar">Medzerník</string>
+    <string name="long_press_punctuation_period">Kláves bodky</string>
+    <string name="error_update_spacebar_cursor">Nepodarilo sa aktualizovať ovládanie kurzoru medzerníkom</string>
+    <string name="error_update_cursor_speed">Nepodarilo sa aktualizovať rýchlosť kurzoru</string>
+    <string name="error_update_backspace_swipe">Nepodarilo sa aktualizovať zmazanie prejdením po klávese Backspace</string>
+    <string name="error_update_long_press_punctuation">Nepodarilo sa aktualizovať interpunkciu dlhého stlačenia</string>
+    <string name="max_languages_reached">Povolené maximálne 3 jazyky</string>
+    <string name="error_update_number_hints">Nepodarilo sa aktualizovať číselné nápovedy</string>
+    <string name="layout_settings_show_number_hints">Zobraziť číselné nápovedy</string>
+    <string name="layout_settings_number_hints_on">Zapnuté</string>
+    <string name="layout_settings_number_hints_off">Vypnuté</string>
+
+</resources>
