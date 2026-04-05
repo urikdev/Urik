@@ -55,6 +55,10 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
             alpha = 60
         }
 
+    init {
+        importantForAccessibility = IMPORTANT_FOR_ACCESSIBILITY_NO
+    }
+
     private var isActive = false
     private val startPoint = PointF()
     private var hasStartPoint = false

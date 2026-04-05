@@ -362,6 +362,7 @@ class UrikInputMethodService :
                     themeManager = themeManager,
                     cacheMemoryManager = cacheMemoryManager
                 )
+            layoutManager.onDeleteWord = { handleBackspaceSwipeDelete() }
         } catch (e: Exception) {
             ErrorLogger.logException(
                 component = "UrikInputMethodService",

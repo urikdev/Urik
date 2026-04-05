@@ -320,4 +320,31 @@
     <string name="layout_settings_number_hints_on">تشغيل</string>
     <string name="layout_settings_number_hints_off">إيقاف</string>
 
+    <!-- Accessibility role descriptions -->
+    <string name="key_role">مفتاح</string>
+    <string name="action_key_role">مفتاح إجراء</string>
+    <string name="suggestion_role">اقتراح</string>
+    <string name="tab_role">علامة تبويب</string>
+    <string name="toggle_button_role">زر تبديل</string>
+
+    <!-- Accessibility state descriptions -->
+    <string name="state_active">نشط</string>
+    <string name="state_inactive">غير نشط</string>
+    <string name="state_on">مفعّل</string>
+    <string name="state_off">معطّل</string>
+    <string name="state_selected">محدد</string>
+    <string name="state_not_selected">غير محدد</string>
+
+    <!-- Accessibility actions -->
+    <string name="backspace_delete_word_action">حذف كلمة</string>
+
+    <!-- Emoji picker accessibility -->
+    <string name="emoji_search_close">إغلاق البحث</string>
+    <string name="emoji_search_button">البحث عن رموز تعبيرية</string>
+    <string name="emoji_backspace">مسح</string>
+    <string name="emoji_picker_close">إغلاق لوحة الرموز التعبيرية</string>
+
+    <!-- AlphabetSideBar accessibility -->
+    <string name="alphabet_sidebar_description">شريط التنقل الأبجدي</string>
+
 </resources>

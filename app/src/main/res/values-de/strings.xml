@@ -317,4 +317,30 @@
     <string name="layout_settings_number_hints_on">Ein</string>
     <string name="layout_settings_number_hints_off">Aus</string>
 
+    <!-- Accessibility role descriptions -->
+    <string name="key_role">Taste</string>
+    <string name="action_key_role">Aktionstaste</string>
+    <string name="suggestion_role">Vorschlag</string>
+    <string name="tab_role">Tab</string>
+    <string name="toggle_button_role">Umschalttaste</string>
+
+    <!-- Accessibility state descriptions -->
+    <string name="state_active">aktiv</string>
+    <string name="state_inactive">inaktiv</string>
+    <string name="state_on">ein</string>
+    <string name="state_off">aus</string>
+    <string name="state_selected">ausgewählt</string>
+    <string name="state_not_selected">nicht ausgewählt</string>
+
+    <!-- Accessibility actions -->
+    <string name="backspace_delete_word_action">Wort löschen</string>
+
+    <!-- Emoji picker accessibility -->
+    <string name="emoji_search_close">Suche schließen</string>
+    <string name="emoji_search_button">Emojis suchen</string>
+    <string name="emoji_backspace">Löschen</string>
+    <string name="emoji_picker_close">Emoji-Auswahl schließen</string>
+
+    <!-- AlphabetSideBar accessibility -->
+    <string name="alphabet_sidebar_description">Alphabetische Navigationsleiste</string>
 </resources>

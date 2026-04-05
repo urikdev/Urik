@@ -421,7 +421,7 @@ constructor(
                 text = "✕"
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, emojiTextSize)
                 gravity = Gravity.CENTER
-                contentDescription = "Close search"
+                contentDescription = baseContext.getString(R.string.emoji_search_close)
                 layoutParams =
                     LinearLayout.LayoutParams(
                         minTouchTarget,
@@ -476,7 +476,7 @@ constructor(
                 scaleType = ImageView.ScaleType.CENTER_INSIDE
                 val buttonPadding = (12f * baseContext.resources.displayMetrics.density).toInt()
                 setPadding(buttonPadding, buttonPadding, buttonPadding, buttonPadding)
-                contentDescription = "Search emojis"
+                contentDescription = baseContext.getString(R.string.emoji_search_button)
                 isClickable = true
                 isFocusable = true
                 layoutParams =
@@ -494,7 +494,7 @@ constructor(
                 gravity = Gravity.CENTER
                 val buttonPadding = (18f * baseContext.resources.displayMetrics.density).toInt()
                 setPadding(buttonPadding, 0, buttonPadding, 0)
-                contentDescription = "Backspace"
+                contentDescription = baseContext.getString(R.string.emoji_backspace)
                 layoutParams =
                     LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -508,7 +508,7 @@ constructor(
                 text = "✕"
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, emojiTextSize)
                 gravity = Gravity.CENTER
-                contentDescription = "Close emoji picker"
+                contentDescription = baseContext.getString(R.string.emoji_picker_close)
                 layoutParams =
                     LinearLayout.LayoutParams(
                         minTouchTarget,
@@ -1025,6 +1025,16 @@ constructor(
 
             btn.contentDescription = context.getString(R.string.ime_prediction_description, suggestion)
 
+            ViewCompat.setAccessibilityDelegate(
+                btn,
+                object : AccessibilityDelegateCompat() {
+                    override fun onInitializeAccessibilityNodeInfo(host: View, info: AccessibilityNodeInfoCompat) {
+                        super.onInitializeAccessibilityNodeInfo(host, info)
+                        info.roleDescription = context.getString(R.string.suggestion_role)
+                    }
+                }
+            )
+
             suggestionMeasurePaint.letterSpacing = 0f
             val isCenterCandidate = capped.size >= 3 && index == 1
             val fitted =
@@ -1507,7 +1517,7 @@ constructor(
                 LinearLayout(context).apply {
                     orientation = LinearLayout.HORIZONTAL
                     gravity = Gravity.CENTER_VERTICAL
-                    importantForAccessibility = IMPORTANT_FOR_ACCESSIBILITY_NO
+                    accessibilityLiveRegion = ACCESSIBILITY_LIVE_REGION_POLITE
 
                     val basePadding = context.resources.getDimensionPixelSize(R.dimen.key_margin_horizontal)
                     val verticalPadding = (basePadding * 0.3f).toInt()

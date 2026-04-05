@@ -287,4 +287,31 @@
     <string name="layout_settings_show_number_hints">Εμφάνιση υποδείξεων αριθμών</string>
     <string name="layout_settings_number_hints_on">Ενεργοποιημένο</string>
     <string name="layout_settings_number_hints_off">Απενεργοποιημένο</string>
+
+    <!-- Accessibility role descriptions -->
+    <string name="key_role">πλήκτρο</string>
+    <string name="action_key_role">πλήκτρο ενέργειας</string>
+    <string name="suggestion_role">πρόταση</string>
+    <string name="tab_role">καρτέλα</string>
+    <string name="toggle_button_role">κουμπί εναλλαγής</string>
+
+    <!-- Accessibility state descriptions -->
+    <string name="state_active">ενεργό</string>
+    <string name="state_inactive">ανενεργό</string>
+    <string name="state_on">ενεργοποιημένο</string>
+    <string name="state_off">απενεργοποιημένο</string>
+    <string name="state_selected">επιλεγμένο</string>
+    <string name="state_not_selected">μη επιλεγμένο</string>
+
+    <!-- Accessibility actions -->
+    <string name="backspace_delete_word_action">Διαγραφή λέξης</string>
+
+    <!-- Emoji picker accessibility -->
+    <string name="emoji_search_close">Κλείσιμο αναζήτησης</string>
+    <string name="emoji_search_button">Αναζήτηση emoji</string>
+    <string name="emoji_backspace">Διαγραφή</string>
+    <string name="emoji_picker_close">Κλείσιμο επιλογέα emoji</string>
+
+    <!-- AlphabetSideBar accessibility -->
+    <string name="alphabet_sidebar_description">Πλαϊνή γραμμή αλφαβητικής πλοήγησης</string>
 </resources>

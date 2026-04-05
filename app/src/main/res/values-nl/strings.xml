@@ -320,4 +320,31 @@
     <string name="layout_settings_number_hints_on">Aan</string>
     <string name="layout_settings_number_hints_off">Uit</string>
 
+    <!-- Accessibility role descriptions -->
+    <string name="key_role">toets</string>
+    <string name="action_key_role">actietoets</string>
+    <string name="suggestion_role">suggestie</string>
+    <string name="tab_role">tabblad</string>
+    <string name="toggle_button_role">schakelknop</string>
+
+    <!-- Accessibility state descriptions -->
+    <string name="state_active">actief</string>
+    <string name="state_inactive">inactief</string>
+    <string name="state_on">aan</string>
+    <string name="state_off">uit</string>
+    <string name="state_selected">geselecteerd</string>
+    <string name="state_not_selected">niet geselecteerd</string>
+
+    <!-- Accessibility actions -->
+    <string name="backspace_delete_word_action">Woord verwijderen</string>
+
+    <!-- Emoji picker accessibility -->
+    <string name="emoji_search_close">Zoekopdracht sluiten</string>
+    <string name="emoji_search_button">Emoji\'s zoeken</string>
+    <string name="emoji_backspace">Wissen</string>
+    <string name="emoji_picker_close">Emojikiezer sluiten</string>
+
+    <!-- AlphabetSideBar accessibility -->
+    <string name="alphabet_sidebar_description">Alfabetische navigatiebalk</string>
+
 </resources>

@@ -149,6 +149,20 @@ class ClipboardPanel(context: Context, private val themeManager: ThemeManager) :
                 val padding = (12 * density).toInt()
                 setPadding(padding, padding, padding, padding)
                 setOnClickListener { switchToTab(Tab.PINNED) }
+                ViewCompat.setAccessibilityDelegate(
+                    this,
+                    object : AccessibilityDelegateCompat() {
+                        override fun onInitializeAccessibilityNodeInfo(host: View, info: AccessibilityNodeInfoCompat) {
+                            super.onInitializeAccessibilityNodeInfo(host, info)
+                            info.roleDescription = context.getString(R.string.tab_role)
+                            info.stateDescription = if (currentTab == Tab.PINNED) {
+                                context.getString(R.string.state_selected)
+                            } else {
+                                context.getString(R.string.state_not_selected)
+                            }
+                        }
+                    }
+                )
                 layoutParams =
                     LinearLayout.LayoutParams(
                         0,
@@ -166,6 +180,20 @@ class ClipboardPanel(context: Context, private val themeManager: ThemeManager) :
                 val padding = (12 * density).toInt()
                 setPadding(padding, padding, padding, padding)
                 setOnClickListener { switchToTab(Tab.RECENT) }
+                ViewCompat.setAccessibilityDelegate(
+                    this,
+                    object : AccessibilityDelegateCompat() {
+                        override fun onInitializeAccessibilityNodeInfo(host: View, info: AccessibilityNodeInfoCompat) {
+                            super.onInitializeAccessibilityNodeInfo(host, info)
+                            info.roleDescription = context.getString(R.string.tab_role)
+                            info.stateDescription = if (currentTab == Tab.RECENT) {
+                                context.getString(R.string.state_selected)
+                            } else {
+                                context.getString(R.string.state_not_selected)
+                            }
+                        }
+                    }
+                )
                 layoutParams =
                     LinearLayout.LayoutParams(
                         0,

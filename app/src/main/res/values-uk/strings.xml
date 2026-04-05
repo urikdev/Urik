@@ -320,4 +320,31 @@
     <string name="layout_settings_number_hints_on">Увімкнено</string>
     <string name="layout_settings_number_hints_off">Вимкнено</string>
 
+    <!-- Accessibility role descriptions -->
+    <string name="key_role">клавіша</string>
+    <string name="action_key_role">клавіша дії</string>
+    <string name="suggestion_role">пропозиція</string>
+    <string name="tab_role">вкладка</string>
+    <string name="toggle_button_role">кнопка перемикання</string>
+
+    <!-- Accessibility state descriptions -->
+    <string name="state_active">активно</string>
+    <string name="state_inactive">неактивно</string>
+    <string name="state_on">увімкнено</string>
+    <string name="state_off">вимкнено</string>
+    <string name="state_selected">обрано</string>
+    <string name="state_not_selected">не обрано</string>
+
+    <!-- Accessibility actions -->
+    <string name="backspace_delete_word_action">Видалити слово</string>
+
+    <!-- Emoji picker accessibility -->
+    <string name="emoji_search_close">Закрити пошук</string>
+    <string name="emoji_search_button">Шукати емодзі</string>
+    <string name="emoji_backspace">Видалити</string>
+    <string name="emoji_picker_close">Закрити вибір емодзі</string>
+
+    <!-- AlphabetSideBar accessibility -->
+    <string name="alphabet_sidebar_description">Бічна панель алфавітної навігації</string>
+
 </resources>

@@ -11,8 +11,10 @@ import android.util.TypedValue
 import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
 import android.view.View
+import android.view.accessibility.AccessibilityManager
 import android.view.animation.OvershootInterpolator
 import androidx.annotation.AttrRes
+import com.urik.keyboard.R
 
 class AlphabetSideBar
 @JvmOverloads
@@ -58,6 +60,8 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 
     init {
         resolveThemeColors()
+        importantForAccessibility = IMPORTANT_FOR_ACCESSIBILITY_YES
+        contentDescription = context.getString(R.string.alphabet_sidebar_description)
     }
 
     fun setOnLetterSelectedListener(listener: (String) -> Unit) {
@@ -150,6 +154,10 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
             performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
             invalidate()
             onLetterSelected?.invoke(letters[index])
+            val a11yManager = context.getSystemService(Context.ACCESSIBILITY_SERVICE) as? AccessibilityManager
+            if (a11yManager?.isTouchExplorationEnabled == true) {
+                announceForAccessibility(letters[index])
+            }
         }
     }
 
