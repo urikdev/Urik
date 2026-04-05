@@ -322,4 +322,31 @@
     <string name="layout_settings_number_hints_on">Включено</string>
     <string name="layout_settings_number_hints_off">Выключено</string>
 
+    <!-- Accessibility role descriptions -->
+    <string name="key_role">клавиша</string>
+    <string name="action_key_role">клавиша действия</string>
+    <string name="suggestion_role">предложение</string>
+    <string name="tab_role">вкладка</string>
+    <string name="toggle_button_role">кнопка переключения</string>
+
+    <!-- Accessibility state descriptions -->
+    <string name="state_active">активно</string>
+    <string name="state_inactive">неактивно</string>
+    <string name="state_on">включено</string>
+    <string name="state_off">выключено</string>
+    <string name="state_selected">выбрано</string>
+    <string name="state_not_selected">не выбрано</string>
+
+    <!-- Accessibility actions -->
+    <string name="backspace_delete_word_action">Удалить слово</string>
+
+    <!-- Emoji picker accessibility -->
+    <string name="emoji_search_close">Закрыть поиск</string>
+    <string name="emoji_search_button">Поиск эмодзи</string>
+    <string name="emoji_backspace">Удалить</string>
+    <string name="emoji_picker_close">Закрыть выбор эмодзи</string>
+
+    <!-- AlphabetSideBar accessibility -->
+    <string name="alphabet_sidebar_description">Боковая панель алфавитной навигации</string>
+
 </resources>

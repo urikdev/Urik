@@ -12,6 +12,9 @@ import android.view.ViewTreeObserver
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
+import androidx.core.view.AccessibilityDelegateCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
 import com.urik.keyboard.R
 import com.urik.keyboard.model.KeyboardDisplayMode
 import com.urik.keyboard.model.KeyboardModeConfig
@@ -230,6 +233,16 @@ constructor(
             setPadding(padding, padding, padding, padding)
 
             setOnClickListener { onClick() }
+
+            ViewCompat.setAccessibilityDelegate(
+                this,
+                object : AccessibilityDelegateCompat() {
+                    override fun onInitializeAccessibilityNodeInfo(host: View, info: AccessibilityNodeInfoCompat) {
+                        super.onInitializeAccessibilityNodeInfo(host, info)
+                        info.roleDescription = context.getString(R.string.toggle_button_role)
+                    }
+                }
+            )
         }
 
     private fun positionToggleBar() {
@@ -282,6 +295,37 @@ constructor(
                 setButtonBackground(centerButton, inactiveColor, colors)
                 setButtonBackground(rightButton, inactiveColor, colors)
             }
+        }
+
+        leftButton?.let {
+            ViewCompat.setStateDescription(
+                it,
+                if (currentConfig.mode == KeyboardDisplayMode.ONE_HANDED_LEFT) {
+                    context.getString(R.string.state_active)
+                } else {
+                    context.getString(R.string.state_inactive)
+                }
+            )
+        }
+        centerButton?.let {
+            ViewCompat.setStateDescription(
+                it,
+                if (currentConfig.mode == KeyboardDisplayMode.STANDARD) {
+                    context.getString(R.string.state_active)
+                } else {
+                    context.getString(R.string.state_inactive)
+                }
+            )
+        }
+        rightButton?.let {
+            ViewCompat.setStateDescription(
+                it,
+                if (currentConfig.mode == KeyboardDisplayMode.ONE_HANDED_RIGHT) {
+                    context.getString(R.string.state_active)
+                } else {
+                    context.getString(R.string.state_inactive)
+                }
+            )
         }
     }
 

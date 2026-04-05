@@ -61,7 +61,6 @@ class LanguagePickerPopup(private val context: Context, private val themeManager
 
                 val listView =
                     ListView(context).apply {
-                        importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
                         ViewCompat.setAccessibilityDelegate(
                             this,
                             object : AccessibilityDelegateCompat() {

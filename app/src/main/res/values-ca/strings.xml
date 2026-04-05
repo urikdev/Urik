@@ -287,4 +287,31 @@
     <string name="layout_settings_show_number_hints">Mostrar suggeriments numèrics</string>
     <string name="layout_settings_number_hints_on">Activat</string>
     <string name="layout_settings_number_hints_off">Desactivat</string>
+
+    <!-- Accessibility role descriptions -->
+    <string name="key_role">tecla</string>
+    <string name="action_key_role">tecla d\'acció</string>
+    <string name="suggestion_role">suggeriment</string>
+    <string name="tab_role">pestanya</string>
+    <string name="toggle_button_role">botó de commutació</string>
+
+    <!-- Accessibility state descriptions -->
+    <string name="state_active">actiu</string>
+    <string name="state_inactive">inactiu</string>
+    <string name="state_on">activat</string>
+    <string name="state_off">desactivat</string>
+    <string name="state_selected">seleccionat</string>
+    <string name="state_not_selected">no seleccionat</string>
+
+    <!-- Accessibility actions -->
+    <string name="backspace_delete_word_action">Suprimeix la paraula</string>
+
+    <!-- Emoji picker accessibility -->
+    <string name="emoji_search_close">Tanca la cerca</string>
+    <string name="emoji_search_button">Cerca emojis</string>
+    <string name="emoji_backspace">Retrocés</string>
+    <string name="emoji_picker_close">Tanca el selector d\'emojis</string>
+
+    <!-- AlphabetSideBar accessibility -->
+    <string name="alphabet_sidebar_description">Barra lateral de navegació alfabètica</string>
 </resources>

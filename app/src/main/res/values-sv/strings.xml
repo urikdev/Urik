@@ -265,4 +265,31 @@
     <string name="layout_settings_show_number_hints">Visa siffertips</string>
     <string name="layout_settings_number_hints_on">På</string>
     <string name="layout_settings_number_hints_off">Av</string>
+
+    <!-- Accessibility role descriptions -->
+    <string name="key_role">tangent</string>
+    <string name="action_key_role">åtgärdstangent</string>
+    <string name="suggestion_role">förslag</string>
+    <string name="tab_role">flik</string>
+    <string name="toggle_button_role">växlingsknapp</string>
+
+    <!-- Accessibility state descriptions -->
+    <string name="state_active">aktiv</string>
+    <string name="state_inactive">inaktiv</string>
+    <string name="state_on">på</string>
+    <string name="state_off">av</string>
+    <string name="state_selected">vald</string>
+    <string name="state_not_selected">inte vald</string>
+
+    <!-- Accessibility actions -->
+    <string name="backspace_delete_word_action">Ta bort ord</string>
+
+    <!-- Emoji picker accessibility -->
+    <string name="emoji_search_close">Stäng sökning</string>
+    <string name="emoji_search_button">Sök emojis</string>
+    <string name="emoji_backspace">Backsteg</string>
+    <string name="emoji_picker_close">Stäng emojiväljararen</string>
+
+    <!-- AlphabetSideBar accessibility -->
+    <string name="alphabet_sidebar_description">Sidofält för alfabetisk navigering</string>
 </resources>

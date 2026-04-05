@@ -319,4 +319,31 @@
     <string name="layout_settings_number_hints_on">Attivo</string>
     <string name="layout_settings_number_hints_off">Disattivo</string>
 
+    <!-- Accessibility role descriptions -->
+    <string name="key_role">tasto</string>
+    <string name="action_key_role">tasto azione</string>
+    <string name="suggestion_role">suggerimento</string>
+    <string name="tab_role">scheda</string>
+    <string name="toggle_button_role">pulsante di commutazione</string>
+
+    <!-- Accessibility state descriptions -->
+    <string name="state_active">attivo</string>
+    <string name="state_inactive">inattivo</string>
+    <string name="state_on">attivato</string>
+    <string name="state_off">disattivato</string>
+    <string name="state_selected">selezionato</string>
+    <string name="state_not_selected">non selezionato</string>
+
+    <!-- Accessibility actions -->
+    <string name="backspace_delete_word_action">Elimina parola</string>
+
+    <!-- Emoji picker accessibility -->
+    <string name="emoji_search_close">Chiudi ricerca</string>
+    <string name="emoji_search_button">Cerca emoji</string>
+    <string name="emoji_backspace">Cancella</string>
+    <string name="emoji_picker_close">Chiudi selettore emoji</string>
+
+    <!-- AlphabetSideBar accessibility -->
+    <string name="alphabet_sidebar_description">Barra laterale di navigazione alfabetica</string>
+
 </resources>

@@ -328,4 +328,31 @@
     <string name="clipboard_item_unpin">Unpin clipboard item</string>
     <string name="clipboard_item_delete">Delete clipboard item</string>
 
+    <!-- Accessibility role descriptions -->
+    <string name="key_role">key</string>
+    <string name="action_key_role">action key</string>
+    <string name="suggestion_role">suggestion</string>
+    <string name="tab_role">tab</string>
+    <string name="toggle_button_role">toggle button</string>
+
+    <!-- Accessibility state descriptions -->
+    <string name="state_active">active</string>
+    <string name="state_inactive">inactive</string>
+    <string name="state_on">on</string>
+    <string name="state_off">off</string>
+    <string name="state_selected">selected</string>
+    <string name="state_not_selected">not selected</string>
+
+    <!-- Accessibility actions -->
+    <string name="backspace_delete_word_action">Delete word</string>
+
+    <!-- Emoji picker accessibility (replaces hardcoded English) -->
+    <string name="emoji_search_close">Close search</string>
+    <string name="emoji_search_button">Search emojis</string>
+    <string name="emoji_backspace">Backspace</string>
+    <string name="emoji_picker_close">Close emoji picker</string>
+
+    <!-- AlphabetSideBar accessibility -->
+    <string name="alphabet_sidebar_description">Alphabet navigation sidebar</string>
+
 </resources>

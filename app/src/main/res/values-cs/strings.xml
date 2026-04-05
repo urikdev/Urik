@@ -318,4 +318,31 @@
     <string name="layout_settings_number_hints_on">Zapnuto</string>
     <string name="layout_settings_number_hints_off">Vypnuto</string>
 
+    <!-- Accessibility role descriptions -->
+    <string name="key_role">klávesa</string>
+    <string name="action_key_role">akční klávesa</string>
+    <string name="suggestion_role">návrh</string>
+    <string name="tab_role">karta</string>
+    <string name="toggle_button_role">přepínací tlačítko</string>
+
+    <!-- Accessibility state descriptions -->
+    <string name="state_active">aktivní</string>
+    <string name="state_inactive">neaktivní</string>
+    <string name="state_on">zapnuto</string>
+    <string name="state_off">vypnuto</string>
+    <string name="state_selected">vybráno</string>
+    <string name="state_not_selected">nevybráno</string>
+
+    <!-- Accessibility actions -->
+    <string name="backspace_delete_word_action">Smazat slovo</string>
+
+    <!-- Emoji picker accessibility -->
+    <string name="emoji_search_close">Zavřít hledání</string>
+    <string name="emoji_search_button">Hledat emotikony</string>
+    <string name="emoji_backspace">Smazat</string>
+    <string name="emoji_picker_close">Zavřít výběr emotikonů</string>
+
+    <!-- AlphabetSideBar accessibility -->
+    <string name="alphabet_sidebar_description">Boční panel abecedního procházení</string>
+
 </resources>

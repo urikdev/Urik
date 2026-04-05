@@ -25,6 +25,9 @@ import androidx.annotation.VisibleForTesting
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.createBitmap
 import androidx.core.graphics.drawable.toDrawable
+import androidx.core.view.AccessibilityDelegateCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
 import androidx.core.widget.TextViewCompat
 import com.urik.keyboard.R
 import com.urik.keyboard.model.KeyboardKey
@@ -41,18 +44,12 @@ import com.urik.keyboard.settings.LongPressPunctuationMode
 import com.urik.keyboard.settings.SpaceBarSize
 import com.urik.keyboard.theme.ThemeManager
 import com.urik.keyboard.utils.CacheMemoryManager
-import com.urik.keyboard.utils.ManagedCache
 import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.json.JSONException
 
 private data class PendingCallbacks(val handler: Handler, val runnable: Runnable)
 
@@ -98,6 +95,8 @@ class KeyboardLayoutManager(
     private var hapticEnabled = true
     private var hapticAmplitude = 170
 
+    var onDeleteWord: (() -> Unit)? = null
+
     @VisibleForTesting
     internal var onHapticFired: ((KeyboardKey?) -> Unit)? = null
 
@@ -140,11 +139,17 @@ class KeyboardLayoutManager(
     private var cachedStrokeWidthThick = 0
 
     private val sharedHandler = Handler(Looper.getMainLooper())
-    private var backspaceHandler: Handler? = null
-    private var backspaceRunnable: Runnable? = null
-    private var backspaceVibrationJob: Job? = null
 
-    private var backspaceStartTime = 0L
+    private val backspaceController = BackspaceController(
+        onBackspaceKey = { onKeyClick(KeyboardKey.Action(KeyboardKey.ActionType.BACKSPACE)) },
+        onAcceleratedDeletionChanged = onAcceleratedDeletionChanged,
+        vibrateEffect = ::vibrateEffect,
+        cancelVibration = { vibrator?.cancel() },
+        getHapticEnabled = { hapticEnabled },
+        getHapticAmplitude = { hapticAmplitude },
+        getSupportsAmplitudeControl = { supportsAmplitudeControl },
+        getBackgroundScope = { backgroundScope }
+    )
 
     private var variationPopup: CharacterVariationPopup? = null
     private var currentVariationKeyType: KeyboardKey.KeyType? = null
@@ -560,7 +565,7 @@ class KeyboardLayoutManager(
     internal val backspaceLongClickListener =
         View.OnLongClickListener { _ ->
             performContextualHaptic(KeyboardKey.Action(KeyboardKey.ActionType.BACKSPACE))
-            startAcceleratedBackspace()
+            backspaceController.start()
             true
         }
 
@@ -576,7 +581,7 @@ class KeyboardLayoutManager(
                 }
 
                 MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                    stopAcceleratedBackspace()
+                    backspaceController.stop()
                     false
                 }
 
@@ -654,18 +659,7 @@ class KeyboardLayoutManager(
             false
         }
 
-    private val punctuationCache: ManagedCache<String, List<String>> =
-        cacheMemoryManager.createCache(
-            name = "punctuation_cache",
-            maxSize = 20
-        )
-
-    private val failedPunctuationLanguages = ConcurrentHashMap.newKeySet<String>()
-    private val punctuationErrorCounts = ConcurrentHashMap<String, Int>()
-    private val lastPunctuationErrors = ConcurrentHashMap<String, Long>()
-    private val maxPunctuationRetries = 3
-    private val punctuationErrorCooldownMs = 60000L
-    private var lastErrorCleanupTime = 0L
+    private val punctuationLoader = PunctuationLoader(context, cacheMemoryManager)
 
     fun updateAdaptiveDimensions(dimensions: AdaptiveDimensions) {
         adaptiveDimensions = dimensions
@@ -686,6 +680,10 @@ class KeyboardLayoutManager(
         val amplitude = if (supportsAmplitudeControl) hapticAmplitude else android.os.VibrationEffect.DEFAULT_AMPLITUDE
         val effect = HapticSignature.BackspaceChirp.createEffect(amplitude)
         vibrateEffect(effect)
+    }
+
+    fun stopAcceleratedBackspace() {
+        backspaceController.stop()
     }
 
     fun cancelAllPendingCallbacks() {
@@ -978,6 +976,7 @@ class KeyboardLayoutManager(
                         }
 
                 isBaselineAligned = false
+                importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
             }
 
         if (shouldSplit) {
@@ -1174,17 +1173,7 @@ class KeyboardLayoutManager(
                 if (isCommaWithMultipleImes) {
                     val keyboardIcon = ContextCompat.getDrawable(context, R.drawable.ic_keyboard)
                     keyboardIcon?.setTint(getKeyTextColor(key))
-
-                    val iconSize = (10 * context.resources.displayMetrics.density).toInt()
-                    val leftInset = (5 * context.resources.displayMetrics.density).toInt()
-                    val topInset = (4 * context.resources.displayMetrics.density).toInt()
-
-                    val layerDrawable = LayerDrawable(arrayOf(keyBackground, keyboardIcon))
-                    layerDrawable.setLayerSize(1, iconSize, iconSize)
-                    layerDrawable.setLayerInset(1, leftInset, topInset, 0, 0)
-                    layerDrawable.setLayerGravity(1, Gravity.TOP or Gravity.START)
-
-                    layerDrawable
+                    addBadgeOverlay(keyBackground, keyboardIcon)
                 } else if (supportsCustomMapping && customKeyMappings[key.value.lowercase()] != null) {
                     val customSymbol = customKeyMappings[key.value.lowercase()]!!
                     keyHintRenderer.createKeyWithHint(
@@ -1210,6 +1199,54 @@ class KeyboardLayoutManager(
 
             importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_YES
             contentDescription = getKeyContentDescription(key, state)
+
+            ViewCompat.setAccessibilityDelegate(
+                this,
+                object : AccessibilityDelegateCompat() {
+                    override fun onInitializeAccessibilityNodeInfo(host: View, info: AccessibilityNodeInfoCompat) {
+                        super.onInitializeAccessibilityNodeInfo(host, info)
+                        when (key) {
+                            is KeyboardKey.Character -> {
+                                info.roleDescription = context.getString(R.string.key_role)
+                            }
+                            is KeyboardKey.Action -> {
+                                info.roleDescription = context.getString(R.string.action_key_role)
+                                when (key.action) {
+                                    KeyboardKey.ActionType.SHIFT -> {
+                                        info.stateDescription = when {
+                                            state.isCapsLockOn -> context.getString(R.string.state_on)
+                                            state.isShiftPressed -> context.getString(R.string.state_active)
+                                            else -> context.getString(R.string.state_inactive)
+                                        }
+                                    }
+                                    KeyboardKey.ActionType.BACKSPACE -> {
+                                        info.addAction(
+                                            AccessibilityNodeInfoCompat.AccessibilityActionCompat(
+                                                R.id.action_delete_word,
+                                                context.getString(R.string.backspace_delete_word_action)
+                                            )
+                                        )
+                                    }
+                                    else -> {}
+                                }
+                            }
+                            KeyboardKey.Spacer -> {}
+                        }
+                    }
+
+                    override fun performAccessibilityAction(
+                        host: View,
+                        action: Int,
+                        args: android.os.Bundle?
+                    ): Boolean {
+                        if (action == R.id.action_delete_word) {
+                            onDeleteWord?.invoke()
+                            return true
+                        }
+                        return super.performAccessibilityAction(host, action, args)
+                    }
+                }
+            )
 
             setTag(R.id.key_data, key)
             setOnClickListener(keyClickListener)
@@ -1251,58 +1288,33 @@ class KeyboardLayoutManager(
 
                     iconDrawable?.setTint(getKeyTextColor(key))
 
-                    if (key is KeyboardKey.Action &&
-                        key.action == KeyboardKey.ActionType.SHIFT &&
+                    val baseLayer = LayerDrawable(arrayOf(keyBackground, iconDrawable)).apply {
+                        setLayerInset(1, 12, 12, 12, 12)
+                        setLayerGravity(1, Gravity.CENTER)
+                    }
+
+                    background = if (key.action == KeyboardKey.ActionType.SHIFT &&
                         activeLanguages.size >= 2 &&
                         !showLanguageSwitchKey
                     ) {
-                        val iconSize = (10 * context.resources.displayMetrics.density).toInt()
-                        val leftInset = (5 * context.resources.displayMetrics.density).toInt()
-                        val topInset = (4 * context.resources.displayMetrics.density).toInt()
                         val shortcode =
                             languageManager.currentLayoutLanguage.value
                                 .take(2)
                                 .uppercase(java.util.Locale.ROOT)
                         val langBadge = createLangBadgeDrawable(shortcode, getKeyTextColor(key))
-
-                        val layerDrawable = LayerDrawable(arrayOf(keyBackground, iconDrawable, langBadge))
-                        layerDrawable.setLayerInset(1, 12, 12, 12, 12)
-                        layerDrawable.setLayerGravity(1, Gravity.CENTER)
-                        layerDrawable.setLayerSize(2, iconSize, iconSize)
-                        layerDrawable.setLayerInset(2, leftInset, topInset, 0, 0)
-                        layerDrawable.setLayerGravity(2, Gravity.TOP or Gravity.START)
-
-                        background = layerDrawable
-                        text = ""
+                        addBadgeOverlay(baseLayer, langBadge)
                     } else {
-                        val layerDrawable = LayerDrawable(arrayOf(keyBackground, iconDrawable))
-                        layerDrawable.setLayerInset(1, 12, 12, 12, 12)
-                        layerDrawable.setLayerGravity(1, Gravity.CENTER)
-
-                        background = layerDrawable
-                        text = ""
+                        baseLayer
                     }
+                    text = ""
                 } else if (key.action == KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS &&
                     clipboardEnabled &&
                     effectiveLayout?.mode == KeyboardMode.LETTERS
                 ) {
                     val keyBackground = getKeyBackground(key)
                     val clipboardIcon = ContextCompat.getDrawable(context, R.drawable.ic_clipboard)
-
                     clipboardIcon?.setTint(getKeyTextColor(key))
-
-                    val iconSize = (10 * context.resources.displayMetrics.density).toInt()
-                    val leftInset = (5 * context.resources.displayMetrics.density).toInt()
-                    val topInset = (4 * context.resources.displayMetrics.density).toInt()
-
-                    val layerDrawable = LayerDrawable(arrayOf(keyBackground, clipboardIcon))
-                    layerDrawable.setLayerSize(1, iconSize, iconSize)
-                    layerDrawable.setLayerInset(1, leftInset, topInset, 0, 0)
-                    layerDrawable.setLayerGravity(1, Gravity.TOP or Gravity.START)
-
-                    background = layerDrawable
-                } else if (key.action == KeyboardKey.ActionType.LANGUAGE_SWITCH) {
-                    background = getKeyBackground(key)
+                    background = addBadgeOverlay(keyBackground, clipboardIcon)
                 } else {
                     background = getKeyBackground(key)
                 }
@@ -1611,13 +1623,13 @@ class KeyboardLayoutManager(
 
         backgroundScope.launch {
             try {
-                val punctuation = loadPunctuationWithErrorHandling(languageCode)
+                val punctuation = punctuationLoader.loadPunctuation(languageCode)
                 withContext(Dispatchers.Main) {
                     showPunctuationPopup(view, punctuation)
                 }
             } catch (_: Exception) {
                 withContext(Dispatchers.Main) {
-                    showPunctuationPopup(view, DEFAULT_PUNCTUATION)
+                    showPunctuationPopup(view, PunctuationLoader.DEFAULT_PUNCTUATION)
                 }
             }
         }
@@ -1631,13 +1643,13 @@ class KeyboardLayoutManager(
 
         backgroundScope.launch {
             try {
-                val punctuation = loadPunctuationWithErrorHandling(languageCode)
+                val punctuation = punctuationLoader.loadPunctuation(languageCode)
                 withContext(Dispatchers.Main) {
                     showPunctuationPopup(view, punctuation)
                 }
             } catch (_: Exception) {
                 withContext(Dispatchers.Main) {
-                    showPunctuationPopup(view, DEFAULT_PUNCTUATION)
+                    showPunctuationPopup(view, PunctuationLoader.DEFAULT_PUNCTUATION)
                 }
             }
         }
@@ -1698,144 +1710,6 @@ class KeyboardLayoutManager(
         activePunctuationPopup = popup
         popupSelectionMode = true
         swipeKeyboardView?.setPopupActive(true)
-    }
-
-    private fun loadPunctuationWithErrorHandling(languageCode: String): List<String> {
-        punctuationCache.getIfPresent(languageCode)?.let { cached ->
-            return cached
-        }
-
-        performPeriodicErrorCleanup()
-
-        if (shouldSkipPunctuationLoading(languageCode)) {
-            return getFallbackPunctuation(languageCode)
-        }
-
-        return try {
-            loadPunctuationFromAssets(languageCode).also { punctuation ->
-                punctuationCache.put(languageCode, punctuation)
-                punctuationErrorCounts.remove(languageCode)
-                lastPunctuationErrors.remove(languageCode)
-            }
-        } catch (_: Exception) {
-            recordPunctuationError(languageCode)
-            getFallbackPunctuation(languageCode)
-        }
-    }
-
-    private fun recordPunctuationError(languageCode: String) {
-        val currentTime = System.currentTimeMillis()
-        val currentCount = punctuationErrorCounts.getOrDefault(languageCode, 0)
-
-        punctuationErrorCounts[languageCode] = currentCount + 1
-        lastPunctuationErrors[languageCode] = currentTime
-
-        if (currentCount + 1 >= maxPunctuationRetries) {
-            failedPunctuationLanguages.add(languageCode)
-        }
-
-        enforceErrorTrackingBounds()
-    }
-
-    private fun enforceErrorTrackingBounds() {
-        while (punctuationErrorCounts.size > MAX_ERROR_TRACKING_SIZE) {
-            val oldestEntry =
-                lastPunctuationErrors.entries
-                    .minByOrNull { it.value }
-                    ?.key
-
-            if (oldestEntry != null) {
-                punctuationErrorCounts.remove(oldestEntry)
-                lastPunctuationErrors.remove(oldestEntry)
-                failedPunctuationLanguages.remove(oldestEntry)
-            } else {
-                break
-            }
-        }
-    }
-
-    private fun performPeriodicErrorCleanup() {
-        val currentTime = System.currentTimeMillis()
-
-        if (currentTime - lastErrorCleanupTime < ERROR_CLEANUP_INTERVAL_MS) {
-            return
-        }
-
-        lastErrorCleanupTime = currentTime
-
-        val cutoffTime = currentTime - ERROR_TRACKING_RETENTION_SECONDS * 1000L
-
-        val expiredLanguages =
-            lastPunctuationErrors.entries
-                .filter { entry -> entry.value < cutoffTime }
-                .map { entry -> entry.key }
-                .toList()
-
-        expiredLanguages.forEach { languageCode ->
-            punctuationErrorCounts.remove(languageCode)
-            lastPunctuationErrors.remove(languageCode)
-            failedPunctuationLanguages.remove(languageCode)
-        }
-    }
-
-    private fun loadPunctuationFromAssets(languageCode: String): List<String> {
-        val filename = "$languageCode.json"
-
-        return context.assets.open("punctuation/$filename").bufferedReader().use { reader ->
-            val jsonContent = reader.readText()
-            if (jsonContent.isBlank()) {
-                error("Punctuation file $filename is empty")
-            }
-            parsePunctuationJson(jsonContent)
-        }
-    }
-
-    private fun parsePunctuationJson(jsonContent: String): List<String> {
-        val json = org.json.JSONObject(jsonContent)
-        if (!json.has("punctuation")) {
-            throw JSONException("Missing 'punctuation' key in punctuation file")
-        }
-
-        val punctuationArray = json.getJSONArray("punctuation")
-        val result = mutableListOf<String>()
-
-        for (i in 0 until punctuationArray.length()) {
-            val punctuation = punctuationArray.getString(i)
-            if (punctuation.isNotBlank()) {
-                result.add(punctuation)
-            }
-        }
-
-        if (result.isEmpty()) {
-            error("No valid punctuation marks found in file")
-        }
-
-        return result
-    }
-
-    private fun getFallbackPunctuation(languageCode: String): List<String> = when {
-        languageCode != "en" && !failedPunctuationLanguages.contains("en") -> {
-            try {
-                loadPunctuationFromAssets("en").also { punctuation ->
-                    punctuationCache.put("en", punctuation)
-                }
-            } catch (_: Exception) {
-                failedPunctuationLanguages.add("en")
-                DEFAULT_PUNCTUATION
-            }
-        }
-
-        else -> {
-            DEFAULT_PUNCTUATION
-        }
-    }
-
-    private fun shouldSkipPunctuationLoading(languageCode: String): Boolean {
-        val errorCount = punctuationErrorCounts.getOrDefault(languageCode, 0)
-        val lastError = lastPunctuationErrors.getOrDefault(languageCode, 0)
-        val now = System.currentTimeMillis()
-
-        return errorCount >= maxPunctuationRetries && now - lastError < punctuationErrorCooldownMs
     }
 
     private fun handleCharacterLongPress(key: KeyboardKey.Character, view: View, button: Button) {
@@ -1909,175 +1783,6 @@ class KeyboardLayoutManager(
 
         popupSelectionMode = true
         swipeKeyboardView?.setPopupActive(true)
-    }
-
-    private fun startAcceleratedBackspace() {
-        stopAcceleratedBackspace()
-
-        onAcceleratedDeletionChanged(true)
-
-        backspaceStartTime = System.currentTimeMillis()
-        startBackspaceSpinUp()
-
-        backspaceHandler = sharedHandler
-        backspaceRunnable =
-            object : Runnable {
-                override fun run() {
-                    onKeyClick(KeyboardKey.Action(KeyboardKey.ActionType.BACKSPACE))
-
-                    val nextInterval = calculateBackspaceInterval(System.currentTimeMillis() - backspaceStartTime)
-                    backspaceHandler?.postDelayed(this, nextInterval)
-                }
-            }
-
-        backspaceHandler?.postDelayed(backspaceRunnable!!, 50L)
-    }
-
-    internal fun stopAcceleratedBackspace() {
-        backspaceRunnable?.let { runnable ->
-            backspaceHandler?.removeCallbacks(runnable)
-        }
-        backspaceHandler = null
-        backspaceRunnable = null
-        backspaceStartTime = 0L
-        stopBackspaceSpinUp()
-
-        onAcceleratedDeletionChanged(false)
-    }
-
-    private fun startBackspaceSpinUp() {
-        stopBackspaceSpinUp()
-
-        if (!hapticEnabled || hapticAmplitude == 0) return
-
-        backspaceVibrationJob =
-            backgroundScope.launch {
-                var phase = 1
-
-                while (isActive) {
-                    val elapsed = System.currentTimeMillis() - backspaceStartTime
-
-                    when {
-                        elapsed < 500 -> {
-                            if (phase != 1) {
-                                phase = 1
-                                withContext(Dispatchers.Main) {
-                                    vibrator?.cancel()
-                                }
-                            }
-
-                            val phaseProgress = elapsed / 500f
-                            val intervalMs = (80 - phaseProgress * 20).toLong().coerceAtLeast(60)
-                            val intensity = 0.4f + phaseProgress * 0.3f
-                            val amplitude =
-                                if (supportsAmplitudeControl) {
-                                    (hapticAmplitude * intensity).toInt().coerceIn(1, 255)
-                                } else {
-                                    android.os.VibrationEffect.DEFAULT_AMPLITUDE
-                                }
-
-                            withContext(Dispatchers.Main) {
-                                vibrateEffect(
-                                    android.os.VibrationEffect.createOneShot(intervalMs / 2, amplitude)
-                                )
-                            }
-                            delay(intervalMs)
-                        }
-
-                        elapsed < 1500 -> {
-                            if (phase != 2) {
-                                phase = 2
-                                withContext(Dispatchers.Main) {
-                                    vibrator?.cancel()
-                                }
-                            }
-
-                            val phaseProgress = (elapsed - 500) / 1000f
-                            val intervalMs = (60 - phaseProgress * 30).toLong().coerceAtLeast(30)
-                            val intensity = 0.7f + phaseProgress * 0.3f
-                            val amplitude =
-                                if (supportsAmplitudeControl) {
-                                    (hapticAmplitude * intensity).toInt().coerceIn(1, 255)
-                                } else {
-                                    android.os.VibrationEffect.DEFAULT_AMPLITUDE
-                                }
-
-                            withContext(Dispatchers.Main) {
-                                vibrateEffect(
-                                    android.os.VibrationEffect.createOneShot(intervalMs / 2, amplitude)
-                                )
-                            }
-                            delay(intervalMs)
-                        }
-
-                        else -> {
-                            if (phase != 3) {
-                                phase = 3
-                                startContinuousBackspaceRumble()
-                            }
-                            delay(50)
-                        }
-                    }
-                }
-            }
-    }
-
-    private fun startContinuousBackspaceRumble() {
-        if (!hapticEnabled || hapticAmplitude == 0) return
-
-        val rampSteps = 30
-        val timings =
-            LongArray(rampSteps + 10) { i ->
-                if (i < rampSteps) 50L else 40L
-            }
-
-        val amplitudes =
-            IntArray(rampSteps + 10) { i ->
-                val progress =
-                    if (i < rampSteps) {
-                        i / rampSteps.toFloat()
-                    } else {
-                        1.0f
-                    }
-
-                val intensity = 0.4f + progress * 0.7f
-                if (supportsAmplitudeControl) {
-                    (hapticAmplitude * intensity).toInt().coerceIn(1, 255)
-                } else {
-                    android.os.VibrationEffect.DEFAULT_AMPLITUDE
-                }
-            }
-
-        backgroundScope.launch {
-            withContext(Dispatchers.Main) {
-                vibrateEffect(
-                    android.os.VibrationEffect.createWaveform(
-                        timings,
-                        amplitudes,
-                        rampSteps + 2
-                    )
-                )
-            }
-        }
-    }
-
-    private fun stopBackspaceSpinUp() {
-        backspaceVibrationJob?.cancel()
-        backspaceVibrationJob = null
-        vibrator?.cancel()
-    }
-
-    private fun calculateBackspaceInterval(elapsed: Long): Long {
-        val startSpeed = 100L
-        val endSpeed = 15L
-        val accelerationDuration = 2000f
-
-        if (elapsed >= accelerationDuration) {
-            return endSpeed
-        }
-
-        val progress = elapsed / accelerationDuration
-        return (startSpeed - (startSpeed - endSpeed) * progress).toLong()
     }
 
     private fun getKeyWeight(key: KeyboardKey, rowKeys: List<KeyboardKey>): Float {
@@ -2252,6 +1957,19 @@ class KeyboardLayoutManager(
         }
     }
 
+    private fun addBadgeOverlay(base: Drawable, badge: Drawable?): Drawable {
+        val density = context.resources.displayMetrics.density
+        val iconSize = (10 * density).toInt()
+        val leftInset = (5 * density).toInt()
+        val topInset = (4 * density).toInt()
+
+        return LayerDrawable(arrayOf(base, badge)).apply {
+            setLayerSize(1, iconSize, iconSize)
+            setLayerInset(1, leftInset, topInset, 0, 0)
+            setLayerGravity(1, Gravity.TOP or Gravity.START)
+        }
+    }
+
     private fun createLangBadgeDrawable(text: String, color: Int): android.graphics.drawable.BitmapDrawable {
         val density = context.resources.displayMetrics.density
         val sizePx = (10 * density).toInt().coerceAtLeast(1)
@@ -2280,12 +1998,12 @@ class KeyboardLayoutManager(
             pending.handler.removeCallbacks(pending.runnable)
         }
         buttonPendingCallbacks.clear()
-        stopAcceleratedBackspace()
+        backspaceController.cleanup()
         variationPopup?.dismiss()
         variationPopup = null
         languagePickerPopup?.dismiss()
         languagePickerPopup = null
-        punctuationCache.invalidateAll()
+        punctuationLoader.cleanup()
     }
 
     companion object {
@@ -2293,9 +2011,5 @@ class KeyboardLayoutManager(
         private const val SHIFT_KEY_WEIGHT = 1.5f
         private const val BACKSPACE_KEY_WEIGHT = 1.5f
         private const val MAX_BUTTON_POOL_SIZE = 40
-        private const val MAX_ERROR_TRACKING_SIZE = 20
-        private const val ERROR_CLEANUP_INTERVAL_MS = 300000L
-        private const val ERROR_TRACKING_RETENTION_SECONDS = 60
-        private val DEFAULT_PUNCTUATION = listOf(".", ",", "?", "!", "'", "\"", ";", ":")
     }
 }

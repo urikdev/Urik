@@ -319,4 +319,31 @@
     <string name="layout_settings_number_hints_on">روشن</string>
     <string name="layout_settings_number_hints_off">خاموش</string>
 
+    <!-- Accessibility role descriptions -->
+    <string name="key_role">کلید</string>
+    <string name="action_key_role">کلید عملیات</string>
+    <string name="suggestion_role">پیشنهاد</string>
+    <string name="tab_role">زبانه</string>
+    <string name="toggle_button_role">دکمه تغییر وضعیت</string>
+
+    <!-- Accessibility state descriptions -->
+    <string name="state_active">فعال</string>
+    <string name="state_inactive">غیرفعال</string>
+    <string name="state_on">روشن</string>
+    <string name="state_off">خاموش</string>
+    <string name="state_selected">انتخاب شده</string>
+    <string name="state_not_selected">انتخاب نشده</string>
+
+    <!-- Accessibility actions -->
+    <string name="backspace_delete_word_action">حذف کلمه</string>
+
+    <!-- Emoji picker accessibility -->
+    <string name="emoji_search_close">بستن جستجو</string>
+    <string name="emoji_search_button">جستجوی ایموجی</string>
+    <string name="emoji_backspace">پاک کردن</string>
+    <string name="emoji_picker_close">بستن انتخابگر ایموجی</string>
+
+    <!-- AlphabetSideBar accessibility -->
+    <string name="alphabet_sidebar_description">نوار کناری ناوبری الفبایی</string>
+
 </resources>

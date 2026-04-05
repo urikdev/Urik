@@ -11,4 +11,5 @@
     <item name="layout_mapper_toolbar" type="id" />
     <item name="key_data" type="id" />
     <item name="suggestion_text" type="id" />
+    <item name="action_delete_word" type="id" />
 </resources>
