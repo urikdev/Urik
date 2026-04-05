@@ -1115,6 +1115,8 @@ class KeyboardLayoutManager(
 
             val finalTextSize = getCachedTextSize(adjustedKeyHeight)
 
+            TextViewCompat.setAutoSizeTextTypeWithDefaults(this, TextViewCompat.AUTO_SIZE_TEXT_TYPE_NONE)
+
             setTextAppearance(
                 when (key) {
                     is KeyboardKey.Action -> R.style.KeyTextAppearance_Action
@@ -1150,11 +1152,6 @@ class KeyboardLayoutManager(
                     finalTextSize.toInt(),
                     1,
                     TypedValue.COMPLEX_UNIT_SP
-                )
-            } else {
-                TextViewCompat.setAutoSizeTextTypeWithDefaults(
-                    this,
-                    TextViewCompat.AUTO_SIZE_TEXT_TYPE_NONE
                 )
             }
 
