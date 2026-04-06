@@ -124,6 +124,7 @@ class KeyboardLayoutManager(
     private val buttonPool = mutableListOf<Button>()
     private val activeButtons = mutableSetOf<Button>()
     private val buttonPendingCallbacks = ConcurrentHashMap<Button, PendingCallbacks>()
+    private val buttonLongPressRunnables = HashMap<Button, Runnable>()
     private val symbolsLongPressFired = ConcurrentHashMap.newKeySet<Button>()
     private val customMappingLongPressFired = ConcurrentHashMap.newKeySet<Button>()
     private val characterLongPressFired = ConcurrentHashMap.newKeySet<Button>()
@@ -215,16 +216,9 @@ class KeyboardLayoutManager(
                     performContextualHaptic(key)
                     longPressStartX = event.rawX
                     longPressStartY = event.rawY
-                    val handler = sharedHandler
-                    val runnable =
-                        Runnable {
-                            characterLongPressFired.add(button)
-                            longPressConsumedButtons.add(button)
-                            performContextualHaptic(key)
-                            handleCharacterLongPress(key, view, button)
-                        }
-                    buttonPendingCallbacks[button] = PendingCallbacks(handler, runnable)
-                    handler.postDelayed(runnable, currentLongPressDuration.durationMs)
+                    val runnable = buttonLongPressRunnables[button] ?: return@OnTouchListener false
+                    buttonPendingCallbacks[button] = PendingCallbacks(sharedHandler, runnable)
+                    sharedHandler.postDelayed(runnable, currentLongPressDuration.durationMs)
                     false
                 }
 
@@ -323,15 +317,9 @@ class KeyboardLayoutManager(
                     longPressConsumedButtons.remove(view as Button)
                     spaceGestureStartX = event.x
                     spaceGestureStartY = event.y
-                    val handler = sharedHandler
-                    val runnable =
-                        Runnable {
-                            longPressConsumedButtons.add(view)
-                            performContextualHaptic(KeyboardKey.Action(KeyboardKey.ActionType.SPACE))
-                            handleSpaceLongPress(view)
-                        }
-                    buttonPendingCallbacks[view] = PendingCallbacks(handler, runnable)
-                    handler.postDelayed(runnable, currentLongPressDuration.durationMs)
+                    val runnable = buttonLongPressRunnables[view as Button] ?: return@OnTouchListener false
+                    buttonPendingCallbacks[view] = PendingCallbacks(sharedHandler, runnable)
+                    sharedHandler.postDelayed(runnable, currentLongPressDuration.durationMs)
                     false
                 }
 
@@ -416,15 +404,9 @@ class KeyboardLayoutManager(
                     val key = view.getTag(R.id.key_data) as? KeyboardKey.Character ?: return@OnTouchListener false
                     hapticDownFiredButtons.add(view as Button)
                     performContextualHaptic(key)
-                    val handler = sharedHandler
-                    val runnable =
-                        Runnable {
-                            longPressConsumedButtons.add(view)
-                            performContextualHaptic(key)
-                            handlePunctuationLongPress(key, view)
-                        }
-                    buttonPendingCallbacks[view] = PendingCallbacks(handler, runnable)
-                    handler.postDelayed(runnable, currentLongPressDuration.durationMs)
+                    val runnable = buttonLongPressRunnables[view as Button] ?: return@OnTouchListener false
+                    buttonPendingCallbacks[view] = PendingCallbacks(sharedHandler, runnable)
+                    sharedHandler.postDelayed(runnable, currentLongPressDuration.durationMs)
                     false
                 }
 
@@ -494,16 +476,9 @@ class KeyboardLayoutManager(
                 MotionEvent.ACTION_DOWN -> {
                     shiftLongPressFired = false
                     longPressConsumedButtons.remove(view as Button)
-                    val handler = sharedHandler
-                    val runnable =
-                        Runnable {
-                            shiftLongPressFired = true
-                            longPressConsumedButtons.add(view)
-                            performContextualHaptic(KeyboardKey.Action(KeyboardKey.ActionType.SHIFT))
-                            handleShiftLongPress(view)
-                        }
-                    buttonPendingCallbacks[view] = PendingCallbacks(handler, runnable)
-                    handler.postDelayed(runnable, currentLongPressDuration.durationMs)
+                    val runnable = buttonLongPressRunnables[view as Button] ?: return@OnTouchListener false
+                    buttonPendingCallbacks[view] = PendingCallbacks(sharedHandler, runnable)
+                    sharedHandler.postDelayed(runnable, currentLongPressDuration.durationMs)
                     false
                 }
 
@@ -532,17 +507,9 @@ class KeyboardLayoutManager(
                     val button = view as Button
                     symbolsLongPressFired.remove(button)
                     longPressConsumedButtons.remove(button)
-                    val handler = sharedHandler
-                    val runnable =
-                        Runnable {
-                            symbolsLongPressFired.add(button)
-                            longPressConsumedButtons.add(button)
-                            button.isPressed = false
-                            performContextualHaptic(null)
-                            onSymbolsLongPress()
-                        }
-                    buttonPendingCallbacks[button] = PendingCallbacks(handler, runnable)
-                    handler.postDelayed(runnable, currentLongPressDuration.durationMs)
+                    val runnable = buttonLongPressRunnables[button] ?: return@OnTouchListener false
+                    buttonPendingCallbacks[button] = PendingCallbacks(sharedHandler, runnable)
+                    sharedHandler.postDelayed(runnable, currentLongPressDuration.durationMs)
                     false
                 }
 
@@ -606,17 +573,9 @@ class KeyboardLayoutManager(
                     if (commaKey != null) performContextualHaptic(commaKey)
                     longPressStartX = event.rawX
                     longPressStartY = event.rawY
-                    val handler = sharedHandler
-                    val runnable =
-                        Runnable {
-                            commaLongPressFired = true
-                            longPressConsumedButtons.add(view)
-                            view.isPressed = false
-                            performContextualHaptic(KeyboardKey.Character(",", KeyboardKey.KeyType.PUNCTUATION))
-                            onShowInputMethodPicker()
-                        }
-                    buttonPendingCallbacks[view] = PendingCallbacks(handler, runnable)
-                    handler.postDelayed(runnable, currentLongPressDuration.durationMs)
+                    val runnable = buttonLongPressRunnables[view as Button] ?: return@OnTouchListener false
+                    buttonPendingCallbacks[view] = PendingCallbacks(sharedHandler, runnable)
+                    sharedHandler.postDelayed(runnable, currentLongPressDuration.durationMs)
                     false
                 }
 
@@ -1083,6 +1042,65 @@ class KeyboardLayoutManager(
         return button
     }
 
+    private fun preallocateLongPressRunnable(button: Button, key: KeyboardKey) {
+        when {
+            key is KeyboardKey.Character &&
+                (
+                    key.type == KeyboardKey.KeyType.LETTER ||
+                        key.type == KeyboardKey.KeyType.NUMBER ||
+                        key.type == KeyboardKey.KeyType.SYMBOL
+                    ) -> buttonLongPressRunnables[button] = Runnable {
+                characterLongPressFired.add(button)
+                longPressConsumedButtons.add(button)
+                performContextualHaptic(key)
+                handleCharacterLongPress(key, button, button)
+            }
+            key is KeyboardKey.Character &&
+                key.type == KeyboardKey.KeyType.PUNCTUATION &&
+                longPressPunctuationMode == LongPressPunctuationMode.PERIOD &&
+                key.value == "." ->
+                buttonLongPressRunnables[button] = Runnable {
+                    longPressConsumedButtons.add(button)
+                    performContextualHaptic(key)
+                    handlePunctuationLongPress(key, button)
+                }
+            key is KeyboardKey.Character && key.value == "," ->
+                buttonLongPressRunnables[button] = Runnable {
+                    commaLongPressFired = true
+                    longPressConsumedButtons.add(button)
+                    button.isPressed = false
+                    performContextualHaptic(KeyboardKey.Character(",", KeyboardKey.KeyType.PUNCTUATION))
+                    onShowInputMethodPicker()
+                }
+            key is KeyboardKey.Action &&
+                key.action == KeyboardKey.ActionType.SPACE &&
+                longPressPunctuationMode == LongPressPunctuationMode.SPACEBAR ->
+                buttonLongPressRunnables[button] = Runnable {
+                    longPressConsumedButtons.add(button)
+                    performContextualHaptic(KeyboardKey.Action(KeyboardKey.ActionType.SPACE))
+                    handleSpaceLongPress(button)
+                }
+            key is KeyboardKey.Action &&
+                key.action == KeyboardKey.ActionType.SHIFT &&
+                !showLanguageSwitchKey &&
+                activeLanguages.size > 1 ->
+                buttonLongPressRunnables[button] = Runnable {
+                    shiftLongPressFired = true
+                    longPressConsumedButtons.add(button)
+                    performContextualHaptic(KeyboardKey.Action(KeyboardKey.ActionType.SHIFT))
+                    handleShiftLongPress(button)
+                }
+            key is KeyboardKey.Action && key.action == KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS ->
+                buttonLongPressRunnables[button] = Runnable {
+                    symbolsLongPressFired.add(button)
+                    longPressConsumedButtons.add(button)
+                    button.isPressed = false
+                    performContextualHaptic(null)
+                    onSymbolsLongPress()
+                }
+        }
+    }
+
     @SuppressLint("ClickableViewAccessibility")
     private fun configureButton(button: Button, key: KeyboardKey, state: KeyboardState, rowKeys: List<KeyboardKey>) {
         ensureCacheValid()
@@ -1317,6 +1335,8 @@ class KeyboardLayoutManager(
                 }
             }
 
+            preallocateLongPressRunnable(button, key)
+
             if (key is KeyboardKey.Character &&
                 (
                     key.type == KeyboardKey.KeyType.LETTER ||
@@ -1388,6 +1408,7 @@ class KeyboardLayoutManager(
     @VisibleForTesting
     @SuppressLint("ClickableViewAccessibility")
     internal fun cleanupButton(button: Button) {
+        buttonLongPressRunnables.remove(button)
         buttonPendingCallbacks.remove(button)?.let { pending ->
             pending.handler.removeCallbacks(pending.runnable)
         }

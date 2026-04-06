@@ -90,7 +90,7 @@ constructor(
             maxSize = DICTIONARY_CACHE_SIZE
         )
 
-    private val blacklistedWords = mutableSetOf<String>()
+    private val blacklistedWords = ConcurrentHashMap.newKeySet<String>()
 
     private data class CachedWord(
         val word: String,
@@ -1104,9 +1104,7 @@ constructor(
         try {
             val normalizedWord = word.lowercase(getLocaleForLanguage()).trim()
 
-            synchronized(blacklistedWords) {
-                blacklistedWords.add(normalizedWord)
-            }
+            blacklistedWords.add(normalizedWord)
 
             val currentLang = getCurrentLanguage()
             val cacheKey = buildCacheKey(normalizedWord, currentLang)
@@ -1124,10 +1122,7 @@ constructor(
         try {
             val normalizedWord = word.lowercase(getLocaleForLanguage()).trim()
 
-            var removed = false
-            synchronized(blacklistedWords) {
-                removed = blacklistedWords.remove(normalizedWord)
-            }
+            val removed = blacklistedWords.remove(normalizedWord)
 
             if (removed) {
                 val currentLang = getCurrentLanguage()
@@ -1141,17 +1136,13 @@ constructor(
 
     fun isWordBlacklisted(word: String): Boolean = try {
         val normalizedWord = word.lowercase(getLocaleForLanguage()).trim()
-        synchronized(blacklistedWords) {
-            normalizedWord in blacklistedWords
-        }
+        normalizedWord in blacklistedWords
     } catch (_: Exception) {
         false
     }
 
     fun clearBlacklist() {
-        synchronized(blacklistedWords) {
-            blacklistedWords.clear()
-        }
+        blacklistedWords.clear()
     }
 
     override fun onMemoryPressure(level: Int) {

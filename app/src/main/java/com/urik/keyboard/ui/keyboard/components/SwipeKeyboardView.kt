@@ -1001,16 +1001,14 @@ constructor(
         val cellWidth =
             (barWidth - emojiWidth - suggestionDividerWidth * (capped.size - 1).coerceAtLeast(0)) / capped.size
 
+        val suggestionTextColor = themeManager!!.currentTheme.value.colors.suggestionText
         capped.forEachIndexed { index, suggestion ->
             if (isDestroyed) return@forEachIndexed
 
             val btn = getOrCreateSuggestionView()
 
             btn.setTextSize(TypedValue.COMPLEX_UNIT_SP, suggestionTextSizeSp)
-            btn.setTextColor(
-                themeManager!!
-                    .currentTheme.value.colors.suggestionText
-            )
+            btn.setTextColor(suggestionTextColor)
 
             btn.textDirection =
                 if (currentLayout?.isRTL == true) {
@@ -2046,25 +2044,20 @@ constructor(
             return findKeyAtDirect(nx, ny)
         }
 
+        var closestButton: Button? = null
+        var closestSquaredDist = Float.MAX_VALUE
+        val isInAlphaRegion = numberRowBoundaryY > 0 && ny > numberRowBoundaryY
+
         keyPositions.forEach { (button, rect) ->
             if (rect.contains(nx.toInt(), ny.toInt())) {
                 return keyMapping[button]
             }
-        }
-
-        var closestButton: Button? = null
-        var closestDistance = Float.MAX_VALUE
-        val isInAlphaRegion = numberRowBoundaryY > 0 && ny > numberRowBoundaryY
-
-        keyPositions.forEach { (button, rect) ->
             if (isInAlphaRegion && button in numberRowButtons) return@forEach
-
-            val centerX = rect.centerX().toFloat()
-            val centerY = rect.centerY().toFloat()
-            val distance = kotlin.math.sqrt((nx - centerX) * (nx - centerX) + (ny - centerY) * (ny - centerY))
-
-            if (distance < closestDistance) {
-                closestDistance = distance
+            val dx = nx - rect.centerX()
+            val dy = ny - rect.centerY()
+            val squaredDist = dx * dx + dy * dy
+            if (squaredDist < closestSquaredDist) {
+                closestSquaredDist = squaredDist
                 closestButton = button
             }
         }

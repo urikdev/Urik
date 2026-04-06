@@ -32,6 +32,7 @@ import com.urik.keyboard.data.KeyboardRepository
 import com.urik.keyboard.model.KeyboardDisplayMode
 import com.urik.keyboard.model.KeyboardEvent
 import com.urik.keyboard.model.KeyboardKey
+import com.urik.keyboard.model.KeyboardLayout
 import com.urik.keyboard.model.KeyboardMode
 import com.urik.keyboard.service.AutofillStateTracker
 import com.urik.keyboard.service.CharacterVariationService
@@ -76,6 +77,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -169,6 +171,8 @@ class UrikInputMethodService :
     private val observerJobs = mutableListOf<Job>()
 
     private var swipeKeyboardView: SwipeKeyboardView? = null
+    private var filteredLayoutCache: KeyboardLayout? = null
+    private var filteredLayoutCacheKey: Pair<KeyboardLayout?, Boolean>? = null
     private var adaptiveContainer: com.urik.keyboard.ui.keyboard.components.AdaptiveKeyboardContainer? = null
     private var keyboardRootContainer: LinearLayout? = null
     private var clipboardPanel: ClipboardPanel? = null
@@ -791,47 +795,49 @@ class UrikInputMethodService :
     private fun observeSettings() {
         observerJobs.add(
             serviceScope.launch {
-                settingsRepository.settings.collect { newSettings ->
-                    if (!::layoutManager.isInitialized || !::swipeDetector.isInitialized) {
-                        return@collect
+                settingsRepository.settings
+                    .distinctUntilChanged()
+                    .collect { newSettings ->
+                        if (!::layoutManager.isInitialized || !::swipeDetector.isInitialized) {
+                            return@collect
+                        }
+
+                        val layoutChanged =
+                            currentSettings.alternativeKeyboardLayout != newSettings.alternativeKeyboardLayout ||
+                                currentSettings.showLanguageSwitchKey != newSettings.showLanguageSwitchKey
+
+                        currentSettings = newSettings
+
+                        val currentMode = keyboardModeManager.currentMode.value.mode
+                        updateSwipeEnabledState(currentMode)
+
+                        layoutManager.updateLongPressDuration(newSettings.longPressDuration)
+                        layoutManager.updateLongPressPunctuationMode(newSettings.longPressPunctuationMode)
+
+                        layoutManager.updateKeySize(newSettings.keySize)
+                        layoutManager.updateSpaceBarSize(newSettings.spaceBarSize)
+                        layoutManager.updateKeyLabelSize(newSettings.keyLabelSize)
+
+                        swipeKeyboardView?.setCursorSpeed(newSettings.cursorSpeed)
+
+                        layoutManager.updateHapticSettings(
+                            newSettings.hapticFeedback,
+                            newSettings.vibrationStrength
+                        )
+
+                        layoutManager.updateClipboardEnabled(newSettings.clipboardEnabled)
+                        layoutManager.updateShowLanguageSwitchKey(newSettings.showLanguageSwitchKey)
+                        layoutManager.updateNumberHints(newSettings.showNumberHints)
+
+                        if (layoutChanged) {
+                            repository.cleanup()
+                            viewModel.reloadLayout()
+                        }
+
+                        withContext(Dispatchers.Main) {
+                            updateSwipeKeyboard()
+                        }
                     }
-
-                    val layoutChanged =
-                        currentSettings.alternativeKeyboardLayout != newSettings.alternativeKeyboardLayout ||
-                            currentSettings.showLanguageSwitchKey != newSettings.showLanguageSwitchKey
-
-                    currentSettings = newSettings
-
-                    val currentMode = keyboardModeManager.currentMode.value.mode
-                    updateSwipeEnabledState(currentMode)
-
-                    layoutManager.updateLongPressDuration(newSettings.longPressDuration)
-                    layoutManager.updateLongPressPunctuationMode(newSettings.longPressPunctuationMode)
-
-                    layoutManager.updateKeySize(newSettings.keySize)
-                    layoutManager.updateSpaceBarSize(newSettings.spaceBarSize)
-                    layoutManager.updateKeyLabelSize(newSettings.keyLabelSize)
-
-                    swipeKeyboardView?.setCursorSpeed(newSettings.cursorSpeed)
-
-                    layoutManager.updateHapticSettings(
-                        newSettings.hapticFeedback,
-                        newSettings.vibrationStrength
-                    )
-
-                    layoutManager.updateClipboardEnabled(newSettings.clipboardEnabled)
-                    layoutManager.updateShowLanguageSwitchKey(newSettings.showLanguageSwitchKey)
-                    layoutManager.updateNumberHints(newSettings.showNumberHints)
-
-                    if (layoutChanged) {
-                        repository.cleanup()
-                        viewModel.reloadLayout()
-                    }
-
-                    withContext(Dispatchers.Main) {
-                        updateSwipeKeyboard()
-                    }
-                }
             }
         )
     }
@@ -963,6 +969,34 @@ class UrikInputMethodService :
         observeSettings()
     }
 
+    private fun computeFilteredLayout(layout: KeyboardLayout): KeyboardLayout = when {
+        !currentSettings.showNumberRow &&
+            layout.mode == KeyboardMode.LETTERS &&
+            layout.rows.isNotEmpty() -> {
+            layout.copy(rows = layout.rows.drop(1))
+        }
+
+        layout.mode in listOf(KeyboardMode.SYMBOLS, KeyboardMode.SYMBOLS_SECONDARY) &&
+            layout.rows.isNotEmpty() -> {
+            val numberRow =
+                listOf(
+                    KeyboardKey.Character("1", KeyboardKey.KeyType.NUMBER),
+                    KeyboardKey.Character("2", KeyboardKey.KeyType.NUMBER),
+                    KeyboardKey.Character("3", KeyboardKey.KeyType.NUMBER),
+                    KeyboardKey.Character("4", KeyboardKey.KeyType.NUMBER),
+                    KeyboardKey.Character("5", KeyboardKey.KeyType.NUMBER),
+                    KeyboardKey.Character("6", KeyboardKey.KeyType.NUMBER),
+                    KeyboardKey.Character("7", KeyboardKey.KeyType.NUMBER),
+                    KeyboardKey.Character("8", KeyboardKey.KeyType.NUMBER),
+                    KeyboardKey.Character("9", KeyboardKey.KeyType.NUMBER),
+                    KeyboardKey.Character("0", KeyboardKey.KeyType.NUMBER)
+                )
+            layout.copy(rows = listOf(numberRow) + layout.rows)
+        }
+
+        else -> layout
+    }
+
     private fun updateSwipeKeyboard() {
         try {
             if (!lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
@@ -973,35 +1007,15 @@ class UrikInputMethodService :
             val layout = viewModel.layout.value
 
             if (layout != null && swipeKeyboardView != null) {
+                val cacheKey = layout to currentSettings.showNumberRow
                 val filteredLayout =
-                    when {
-                        !currentSettings.showNumberRow &&
-                            layout.mode == KeyboardMode.LETTERS &&
-                            layout.rows.isNotEmpty() -> {
-                            layout.copy(rows = layout.rows.drop(1))
-                        }
-
-                        layout.mode in listOf(KeyboardMode.SYMBOLS, KeyboardMode.SYMBOLS_SECONDARY) &&
-                            layout.rows.isNotEmpty() -> {
-                            val numberRow =
-                                listOf(
-                                    KeyboardKey.Character("1", KeyboardKey.KeyType.NUMBER),
-                                    KeyboardKey.Character("2", KeyboardKey.KeyType.NUMBER),
-                                    KeyboardKey.Character("3", KeyboardKey.KeyType.NUMBER),
-                                    KeyboardKey.Character("4", KeyboardKey.KeyType.NUMBER),
-                                    KeyboardKey.Character("5", KeyboardKey.KeyType.NUMBER),
-                                    KeyboardKey.Character("6", KeyboardKey.KeyType.NUMBER),
-                                    KeyboardKey.Character("7", KeyboardKey.KeyType.NUMBER),
-                                    KeyboardKey.Character("8", KeyboardKey.KeyType.NUMBER),
-                                    KeyboardKey.Character("9", KeyboardKey.KeyType.NUMBER),
-                                    KeyboardKey.Character("0", KeyboardKey.KeyType.NUMBER)
-                                )
-                            layout.copy(rows = listOf(numberRow) + layout.rows)
-                        }
-
-                        else -> {
-                            layout
-                        }
+                    if (filteredLayoutCacheKey == cacheKey) {
+                        filteredLayoutCache ?: computeFilteredLayout(layout)
+                    } else {
+                        val computed = computeFilteredLayout(layout)
+                        filteredLayoutCache = computed
+                        filteredLayoutCacheKey = cacheKey
+                        computed
                     }
 
                 swipeKeyboardView?.updateKeyboard(filteredLayout, state)
@@ -1193,10 +1207,11 @@ class UrikInputMethodService :
             inputState.postCommitReplacementState = null
             inputState.lastAutocorrection = null
 
-            inputState.isActivelyEditing = true
+            var cachedAbsoluteCursorPos: Int? = null
 
             if (inputState.composingRegionStart != -1 && inputState.displayBuffer.isNotEmpty()) {
                 val absoluteCursorPos = outputBridge.safeGetCursorPosition()
+                cachedAbsoluteCursorPos = absoluteCursorPos
                 val cursorOffsetInWord = (absoluteCursorPos - inputState.composingRegionStart).coerceIn(
                     0,
                     inputState.displayBuffer.length
@@ -1206,19 +1221,24 @@ class UrikInputMethodService :
                 val textBeforePart = outputBridge.safeGetTextBeforeCursor(
                     cursorOffsetInWord
                 ).takeLast(cursorOffsetInWord)
-                val textAfterPart = outputBridge.safeGetTextAfterCursor(
-                    charsAfterCursorInWord
-                ).take(charsAfterCursorInWord)
+                val textAfterPart = if (charsAfterCursorInWord > 0) {
+                    outputBridge.safeGetTextAfterCursor(
+                        charsAfterCursorInWord
+                    ).take(charsAfterCursorInWord)
+                } else {
+                    ""
+                }
                 val actualComposingText = textBeforePart + textAfterPart
 
                 if (actualComposingText != inputState.displayBuffer) {
                     inputState.composingRegionStart = -1
+                    inputState.clearPendingTypingOus()
                 }
             }
 
             val cursorPosInWord =
                 if (inputState.composingRegionStart != -1 && inputState.displayBuffer.isNotEmpty()) {
-                    val absoluteCursorPos = outputBridge.safeGetCursorPosition()
+                    val absoluteCursorPos = cachedAbsoluteCursorPos ?: outputBridge.safeGetCursorPosition()
                     CursorEditingUtils.calculateCursorPositionInWord(
                         absoluteCursorPos,
                         inputState.composingRegionStart,
@@ -1248,6 +1268,23 @@ class UrikInputMethodService :
             val needsCursorRepositioning =
                 inputState.composingRegionStart != -1 &&
                     newCursorPositionInText != inputState.displayBuffer.length
+
+            if (inputState.composingRegionStart != -1) {
+                val expectedComposingEnd = inputState.composingRegionStart + inputState.displayBuffer.length
+                inputState.enqueueTypingOus(
+                    InputStateManager.ExpectedTypingOus(
+                        composingStart = inputState.composingRegionStart,
+                        composingEnd = expectedComposingEnd,
+                        cursorPosition = if (needsCursorRepositioning) {
+                            inputState.composingRegionStart + newCursorPositionInText
+                        } else {
+                            expectedComposingEnd
+                        }
+                    )
+                )
+            } else {
+                inputState.isActivelyEditing = true
+            }
 
             if (needsCursorRepositioning) {
                 outputBridge.beginBatchEdit()
@@ -2649,6 +2686,11 @@ class UrikInputMethodService :
             if (newSelStart == newSelEnd) {
                 outputBridge.attemptRecompositionAtCursor(newSelStart)
             }
+            return
+        }
+
+        if (inputState.tryConsumeTypingOus(newSelStart, candidatesStart, candidatesEnd)) {
+            inputState.lastKnownCursorPosition = newSelStart
             return
         }
 

@@ -101,7 +101,7 @@ class OutputBridge(
         ic?.beginBatchEdit()
         try {
             ic?.setComposingText(state.displayBuffer, 1)
-            if (state.composingRegionStart != -1) {
+            if (state.composingRegionStart != -1 && newSelStart < expectedEnd) {
                 ic?.setSelection(newSelStart, newSelStart)
             }
         } finally {

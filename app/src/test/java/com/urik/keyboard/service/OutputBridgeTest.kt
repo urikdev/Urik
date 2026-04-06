@@ -10,6 +10,7 @@ import com.urik.keyboard.ui.keyboard.components.SwipeDetector
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -253,6 +254,34 @@ class OutputBridgeTest {
         assertEquals("world", word)
         assertEquals(expectedNewPosition, wordEnd)
         assertEquals(expectedNewPosition - "world".length, wordStart)
+    }
+
+    @Test
+    fun `reassertComposingRegion calls setSelection for cursor mid-word`() {
+        whenever(mockState.displayBuffer).thenReturn("world")
+        whenever(mockState.composingRegionStart).thenReturn(0)
+        whenever(mockState.composingReassertionCount).thenReturn(0)
+
+        // newSelStart=3 < expectedEnd=5: cursor is genuinely mid-word
+        val result = outputBridge.reassertComposingRegion(newSelStart = 3)
+
+        assertTrue(result)
+        verify(mockIc).setComposingText("world", 1)
+        verify(mockIc).setSelection(3, 3)
+    }
+
+    @Test
+    fun `reassertComposingRegion skips setSelection when newSelStart is at composing end`() {
+        whenever(mockState.displayBuffer).thenReturn("world")
+        whenever(mockState.composingRegionStart).thenReturn(0)
+        whenever(mockState.composingReassertionCount).thenReturn(0)
+
+        // newSelStart == expectedEnd (5): cursor already at composing end after setComposingText
+        val result = outputBridge.reassertComposingRegion(newSelStart = 5)
+
+        assertTrue(result)
+        verify(mockIc).setComposingText("world", 1)
+        verify(mockIc, never()).setSelection(any(), any())
     }
 
     @Test

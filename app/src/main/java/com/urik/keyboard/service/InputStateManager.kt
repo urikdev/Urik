@@ -128,6 +128,32 @@ class InputStateManager(
     val requiresDirectCommit: Boolean
         get() = isSecureField || isDirectCommitField
 
+    data class ExpectedTypingOus(val composingStart: Int, val composingEnd: Int, val cursorPosition: Int)
+
+    private val pendingTypingOus = ArrayDeque<ExpectedTypingOus>()
+
+    fun enqueueTypingOus(ous: ExpectedTypingOus) {
+        pendingTypingOus.addLast(ous)
+    }
+
+    fun tryConsumeTypingOus(cursor: Int, candStart: Int, candEnd: Int): Boolean {
+        val expected = pendingTypingOus.firstOrNull() ?: return false
+        return if (cursor == expected.cursorPosition &&
+            candStart == expected.composingStart &&
+            candEnd == expected.composingEnd
+        ) {
+            pendingTypingOus.removeFirst()
+            true
+        } else {
+            pendingTypingOus.clear()
+            false
+        }
+    }
+
+    fun clearPendingTypingOus() {
+        pendingTypingOus.clear()
+    }
+
     fun getSequenceAndBuffer(): Pair<Long, String> = synchronized(processingLock) {
         ++processingSequence to displayBuffer
     }
@@ -168,6 +194,7 @@ class InputStateManager(
         }
 
         cancelDebounceJob()
+        clearPendingTypingOus()
 
         isActivelyEditing = true
         isCurrentWordAtSentenceStart = false
@@ -210,6 +237,7 @@ class InputStateManager(
         }
 
         cancelDebounceJob()
+        clearPendingTypingOus()
 
         isActivelyEditing = true
 

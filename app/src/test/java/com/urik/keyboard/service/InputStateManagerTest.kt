@@ -1,8 +1,10 @@
 package com.urik.keyboard.service
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
@@ -92,5 +94,69 @@ class InputStateManagerTest {
         stateManager.clearSpellConfirmationFields()
 
         assertNotNull(stateManager.lastAutocorrection)
+    }
+
+    @Test
+    fun `tryConsumeTypingOus returns false on empty queue`() {
+        val consumed = stateManager.tryConsumeTypingOus(cursor = 5, candStart = 0, candEnd = 5)
+
+        assertFalse(consumed)
+    }
+
+    @Test
+    fun `tryConsumeTypingOus consumes matching entry`() {
+        stateManager.enqueueTypingOus(
+            InputStateManager.ExpectedTypingOus(
+                composingStart = 0,
+                composingEnd = 5,
+                cursorPosition = 5
+            )
+        )
+
+        val consumed = stateManager.tryConsumeTypingOus(cursor = 5, candStart = 0, candEnd = 5)
+
+        assertTrue(consumed)
+        assertFalse(stateManager.tryConsumeTypingOus(cursor = 5, candStart = 0, candEnd = 5))
+    }
+
+    @Test
+    fun `tryConsumeTypingOus clears queue on mismatch`() {
+        stateManager.enqueueTypingOus(InputStateManager.ExpectedTypingOus(0, 5, 5))
+        stateManager.enqueueTypingOus(InputStateManager.ExpectedTypingOus(0, 6, 6))
+
+        val consumed = stateManager.tryConsumeTypingOus(cursor = 99, candStart = 0, candEnd = 5)
+
+        assertFalse(consumed)
+        assertFalse(stateManager.tryConsumeTypingOus(cursor = 6, candStart = 0, candEnd = 6))
+    }
+
+    @Test
+    fun `tryConsumeTypingOus processes multiple in-flight OUS in order`() {
+        stateManager.enqueueTypingOus(InputStateManager.ExpectedTypingOus(0, 1, 1))
+        stateManager.enqueueTypingOus(InputStateManager.ExpectedTypingOus(0, 2, 2))
+        stateManager.enqueueTypingOus(InputStateManager.ExpectedTypingOus(0, 3, 3))
+
+        assertTrue(stateManager.tryConsumeTypingOus(cursor = 1, candStart = 0, candEnd = 1))
+        assertTrue(stateManager.tryConsumeTypingOus(cursor = 2, candStart = 0, candEnd = 2))
+        assertTrue(stateManager.tryConsumeTypingOus(cursor = 3, candStart = 0, candEnd = 3))
+        assertFalse(stateManager.tryConsumeTypingOus(cursor = 3, candStart = 0, candEnd = 3))
+    }
+
+    @Test
+    fun `clearInternalStateOnly clears pending typing OUS`() {
+        stateManager.enqueueTypingOus(InputStateManager.ExpectedTypingOus(0, 5, 5))
+
+        stateManager.clearInternalStateOnly()
+
+        assertFalse(stateManager.tryConsumeTypingOus(cursor = 5, candStart = 0, candEnd = 5))
+    }
+
+    @Test
+    fun `invalidateComposingState clears pending typing OUS`() {
+        stateManager.enqueueTypingOus(InputStateManager.ExpectedTypingOus(0, 5, 5))
+
+        stateManager.invalidateComposingState()
+
+        assertFalse(stateManager.tryConsumeTypingOus(cursor = 5, candStart = 0, candEnd = 5))
     }
 }
