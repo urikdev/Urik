@@ -66,6 +66,8 @@ sealed interface SettingsEvent {
 
         data object NumberHintsToggleFailed : Error
 
+        data object ResetToLettersOnDismissToggleFailed : Error
+
         data object DeleteWordFailed : Error
 
         data object DeleteAllWordsFailed : Error

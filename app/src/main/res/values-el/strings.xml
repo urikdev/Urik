@@ -115,6 +115,9 @@
     <string name="long_press_punctuation_spacebar">Πλήκτρο διαστήματος</string>
     <string name="long_press_punctuation_period">Πλήκτρο τελείας</string>
     <string name="typing_settings_long_press_duration">Διάρκεια παρατεταμένου πατήματος</string>
+    <string name="typing_settings_reset_to_letters">Επαναφορά στην προβολή γραμμάτων κατά την αλλαγή εισόδου</string>
+    <string name="typing_settings_reset_to_letters_on">Ενεργοποιημένο</string>
+    <string name="typing_settings_reset_to_letters_off">Απενεργοποιημένο</string>
     <!-- Layout & Input Settings -->
     <string name="layout_settings_alternative_layout">Διάταξη πληκτρολογίου</string>
     <string name="layout_settings_adaptive_modes_enabled">Προσαρμοζόμενες λειτουργίες πληκτρολογίου</string>
@@ -284,6 +287,7 @@
     <string name="clipboard_item_unpin">Ξεκαρφίτσωμα στοιχείου προχείρου</string>
     <string name="clipboard_item_delete">Διαγραφή στοιχείου προχείρου</string>
     <string name="error_update_number_hints">Αποτυχία ενημέρωσης υποδείξεων αριθμών</string>
+    <string name="error_update_reset_to_letters">Αποτυχία ενημέρωσης ρύθμισης επαναφοράς στα γράμματα</string>
     <string name="layout_settings_show_number_hints">Εμφάνιση υποδείξεων αριθμών</string>
     <string name="layout_settings_number_hints_on">Ενεργοποιημένο</string>
     <string name="layout_settings_number_hints_off">Απενεργοποιημένο</string>

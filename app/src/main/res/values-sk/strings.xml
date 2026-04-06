@@ -112,6 +112,9 @@
     <string name="typing_settings_swipe_on">Písanie prejdením prstom povolené</string>
     <string name="typing_settings_swipe_off">Písanie prejdením prstom zakázané</string>
     <string name="typing_settings_long_press_duration">Trvanie dlhého stlačenia</string>
+    <string name="typing_settings_reset_to_letters">Vrátiť sa na zobrazenie písmen pri zmene vstupu</string>
+    <string name="typing_settings_reset_to_letters_on">Zapnuté</string>
+    <string name="typing_settings_reset_to_letters_off">Vypnuté</string>
 
     <!-- Layout & Input Settings -->
     <string name="layout_settings_alternative_layout">Rozloženie klávesnice</string>
@@ -314,6 +317,7 @@
     <string name="error_update_long_press_punctuation">Nepodarilo sa aktualizovať interpunkciu dlhého stlačenia</string>
     <string name="max_languages_reached">Povolené maximálne 3 jazyky</string>
     <string name="error_update_number_hints">Nepodarilo sa aktualizovať číselné nápovedy</string>
+    <string name="error_update_reset_to_letters">Nepodarilo sa aktualizovať nastavenie návratu na písmena</string>
     <string name="layout_settings_show_number_hints">Zobraziť číselné nápovedy</string>
     <string name="layout_settings_number_hints_on">Zapnuté</string>
     <string name="layout_settings_number_hints_off">Vypnuté</string>

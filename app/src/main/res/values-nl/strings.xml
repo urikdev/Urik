@@ -125,6 +125,9 @@
     <string name="long_press_punctuation_spacebar">Spatiebalk</string>
     <string name="long_press_punctuation_period">Punttoets</string>
     <string name="typing_settings_long_press_duration">Duur lang indrukken</string>
+    <string name="typing_settings_reset_to_letters">Terugzetten naar letterweergave bij invoerwijziging</string>
+    <string name="typing_settings_reset_to_letters_on">Aan</string>
+    <string name="typing_settings_reset_to_letters_off">Uit</string>
     <string name="layout_settings_customize_keys">Toetsen aanpassen</string>
     <string name="layout_settings_customize_keys_summary">Aangepast teken toewijzen aan lang indrukken</string>
 
@@ -316,6 +319,7 @@
     <string name="clipboard_item_delete">Klemborditem verwijderen</string>
 
     <string name="error_update_number_hints">Kan getalsaanwijzingen niet bijwerken</string>
+    <string name="error_update_reset_to_letters">Kan instelling voor terugzetten naar letters niet bijwerken</string>
     <string name="layout_settings_show_number_hints">Getalsaanwijzingen weergeven</string>
     <string name="layout_settings_number_hints_on">Aan</string>
     <string name="layout_settings_number_hints_off">Uit</string>

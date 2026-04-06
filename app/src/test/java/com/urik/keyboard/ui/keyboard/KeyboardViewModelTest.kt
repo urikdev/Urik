@@ -517,6 +517,55 @@ class KeyboardViewModelTest {
     }
 
     @Test
+    fun `resetToLetters from SYMBOLS sets mode to LETTERS`() = runTest {
+        whenever(repository.getLayoutForMode(eq(KeyboardMode.SYMBOLS), any(), any()))
+            .thenReturn(Result.success(createMockLayout(KeyboardMode.SYMBOLS)))
+        whenever(repository.getLayoutForMode(eq(KeyboardMode.LETTERS), any(), any()))
+            .thenReturn(Result.success(createMockLayout(KeyboardMode.LETTERS)))
+
+        viewModel.onEvent(KeyboardEvent.ModeChanged(KeyboardMode.SYMBOLS))
+        viewModel.resetToLetters()
+
+        assertEquals(KeyboardMode.LETTERS, viewModel.state.value.currentMode)
+    }
+
+    @Test
+    fun `resetToLetters from NUMBERS sets mode to LETTERS`() = runTest {
+        whenever(repository.getLayoutForMode(eq(KeyboardMode.NUMBERS), any(), any()))
+            .thenReturn(Result.success(createMockLayout(KeyboardMode.NUMBERS)))
+        whenever(repository.getLayoutForMode(eq(KeyboardMode.LETTERS), any(), any()))
+            .thenReturn(Result.success(createMockLayout(KeyboardMode.LETTERS)))
+
+        viewModel.onEvent(KeyboardEvent.ModeChanged(KeyboardMode.NUMBERS))
+        viewModel.resetToLetters()
+
+        assertEquals(KeyboardMode.LETTERS, viewModel.state.value.currentMode)
+    }
+
+    @Test
+    fun `resetToLetters from SYMBOLS_SECONDARY sets mode to LETTERS`() = runTest {
+        whenever(repository.getLayoutForMode(eq(KeyboardMode.SYMBOLS_SECONDARY), any(), any()))
+            .thenReturn(Result.success(createMockLayout(KeyboardMode.SYMBOLS_SECONDARY)))
+        whenever(repository.getLayoutForMode(eq(KeyboardMode.LETTERS), any(), any()))
+            .thenReturn(Result.success(createMockLayout(KeyboardMode.LETTERS)))
+
+        viewModel.onEvent(KeyboardEvent.ModeChanged(KeyboardMode.SYMBOLS_SECONDARY))
+        viewModel.resetToLetters()
+
+        assertEquals(KeyboardMode.LETTERS, viewModel.state.value.currentMode)
+    }
+
+    @Test
+    fun `resetToLetters is no-op when already in LETTERS`() = runTest {
+        clearInvocations(repository)
+
+        viewModel.resetToLetters()
+
+        verify(repository, never()).getLayoutForMode(any(), any(), any())
+        assertEquals(KeyboardMode.LETTERS, viewModel.state.value.currentMode)
+    }
+
+    @Test
     fun `layout loads successfully on init`() {
         assertNotNull(viewModel.layout.value)
         assertEquals(KeyboardMode.LETTERS, viewModel.layout.value?.mode)

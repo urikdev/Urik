@@ -122,6 +122,9 @@
     <string name="long_press_punctuation_spacebar">المسافة</string>
     <string name="long_press_punctuation_period">مفتاح النقطة</string>
     <string name="typing_settings_long_press_duration">فترة الضغط المطول</string>
+    <string name="typing_settings_reset_to_letters">إعادة الضبط إلى عرض الحروف عند تغيير الإدخال</string>
+    <string name="typing_settings_reset_to_letters_on">تشغيل</string>
+    <string name="typing_settings_reset_to_letters_off">إيقاف</string>
 
     <!-- Layout & Input Settings -->
     <string name="layout_settings_alternative_layout">تخطيط لوحة المفاتيح</string>
@@ -316,6 +319,7 @@
     <string name="merged_dictionaries_on">جميع قواميس اللغات المستخدمة في الاقتراحات</string>
 
     <string name="error_update_number_hints">فشل تحديث تلميحات الأرقام</string>
+    <string name="error_update_reset_to_letters">فشل تحديث إعداد إعادة الضبط إلى الحروف</string>
     <string name="layout_settings_show_number_hints">إظهار تلميحات الأرقام</string>
     <string name="layout_settings_number_hints_on">تشغيل</string>
     <string name="layout_settings_number_hints_off">إيقاف</string>

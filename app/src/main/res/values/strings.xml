@@ -126,6 +126,9 @@
     <string name="long_press_punctuation_spacebar">Spacebar</string>
     <string name="long_press_punctuation_period">Period Key</string>
     <string name="typing_settings_long_press_duration">Long Press Duration</string>
+    <string name="typing_settings_reset_to_letters">Reset to Letters View on Input Change</string>
+    <string name="typing_settings_reset_to_letters_on">On</string>
+    <string name="typing_settings_reset_to_letters_off">Off</string>
 
     <!-- Layout & Input Settings -->
     <string name="layout_settings_alternative_layout">Keyboard Layout</string>
@@ -230,6 +233,7 @@
     <string name="error_update_pause_on_misspelled">Failed to update pause setting</string>
     <string name="error_update_autocorrection">Failed to update autocorrection setting</string>
     <string name="error_update_number_hints">Failed to update number hints</string>
+    <string name="error_update_reset_to_letters">Failed to update reset to letters setting</string>
     <string name="layout_settings_show_number_hints">Show Number Hints</string>
     <string name="layout_settings_number_hints_on">On</string>
     <string name="layout_settings_number_hints_off">Off</string>

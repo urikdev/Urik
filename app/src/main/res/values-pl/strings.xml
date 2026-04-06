@@ -113,6 +113,9 @@
     <string name="typing_settings_swipe_on">Pisanie gestem włączone</string>
     <string name="typing_settings_swipe_off">Pisanie gestem wyłączone</string>
     <string name="typing_settings_long_press_duration">Czas trwania długiego naciśnięcia</string>
+    <string name="typing_settings_reset_to_letters">Przywróć widok liter przy zmianie wejścia</string>
+    <string name="typing_settings_reset_to_letters_on">Włączone</string>
+    <string name="typing_settings_reset_to_letters_off">Wyłączone</string>
     <string name="layout_settings_customize_keys">Dostosuj klawisze</string>
     <string name="layout_settings_customize_keys_summary">Przypisz niestandardowy znak do długiego naciśnięcia</string>
 
@@ -315,6 +318,7 @@
     <string name="error_update_long_press_punctuation">Nie udało się zaktualizować interpunkcji długiego naciśnięcia</string>
     <string name="max_languages_reached">Maksymalnie 3 języki dozwolone</string>
     <string name="error_update_number_hints">Nie udało się zaktualizować podpowiedzi liczbowych</string>
+    <string name="error_update_reset_to_letters">Nie udało się zaktualizować ustawienia przywracania do liter</string>
     <string name="layout_settings_show_number_hints">Pokaż podpowiedzi liczbowe</string>
     <string name="layout_settings_number_hints_on">Włączone</string>
     <string name="layout_settings_number_hints_off">Wyłączone</string>

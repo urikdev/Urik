@@ -88,6 +88,18 @@ constructor(
         startLoadLayout(_state.value.currentMode)
     }
 
+    /**
+     * Resets keyboard mode to LETTERS.
+     *
+     * No-op if already in LETTERS mode.
+     */
+    fun resetToLetters() {
+        if (_state.value.currentMode != KeyboardMode.LETTERS) {
+            startLoadLayout(KeyboardMode.LETTERS)
+            updateState { it.copy(currentMode = KeyboardMode.LETTERS) }
+        }
+    }
+
     fun onEvent(event: KeyboardEvent) {
         viewModelScope.launch {
             _events.emit(event)
