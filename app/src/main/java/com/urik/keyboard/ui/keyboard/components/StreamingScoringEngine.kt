@@ -52,6 +52,8 @@ constructor(
 
     @Volatile private var liveCandidates = ArrayList<SwipeDetector.DictionaryEntry>(LIVE_SET_CAPACITY)
 
+    private val resultsBuffer = ArrayList<ResidualScorer.CandidateResult>()
+
     @Volatile private var gestureActive = false
 
     @Volatile private var tickCount = 0
@@ -202,13 +204,13 @@ constructor(
                         .getBigramPredictions(
                             lastCommittedWord,
                             currentLanguageTag
-                        ).toSet()
+                        )
                 } else {
                     emptySet()
                 }
 
             var maxFrequencySeen = 0L
-            val results = ArrayList<ResidualScorer.CandidateResult>(candidates.size / 4)
+            resultsBuffer.clear()
 
             for (i in candidates.indices) {
                 if (i % 50 == 0) yield()
@@ -228,11 +230,11 @@ constructor(
                         maxFrequencySeen
                     ) ?: continue
 
-                results.add(result)
+                resultsBuffer.add(result)
 
                 if (result.combinedScore > EXCELLENT_CANDIDATE_THRESHOLD) {
                     var excellentCount = 0
-                    for (candidate in results) {
+                    for (candidate in resultsBuffer) {
                         if (candidate.combinedScore > 0.90f) excellentCount++
                     }
                     if (excellentCount >= MIN_EXCELLENT_CANDIDATES) break
@@ -243,7 +245,7 @@ constructor(
 
             val arbitration =
                 zipfCheck.arbitrate(
-                    results,
+                    resultsBuffer,
                     signal.geometricAnalysis,
                     currentKeyPositions,
                     bigramPredictions,

@@ -77,6 +77,27 @@ class SelectionStateTrackerTest {
     }
 
     @Test
+    fun `cursor at end of extended composing region returns Sequential not CursorLeftComposingRegion`() {
+        // Simulate delayed OUS delivery under fast typing:
+        // previous OUS reflects "wor" composing=[0,3] with cursor at composing end
+        tracker.updateSelection(3, 3, 0, 3)
+
+        // Next OUS reflects "worl" composing=[0,4] — cursor moved to new composing end.
+        // With the previous composing end at 3, cursor=4 exceeds it, but cursor is still
+        // within the CURRENT composing region [0,4]. This is normal sequential typing, not
+        // a genuine departure.
+        val result =
+            tracker.updateSelection(
+                newSelStart = 4,
+                newSelEnd = 4,
+                candidatesStart = 0,
+                candidatesEnd = 4
+            )
+
+        assertEquals(SelectionChangeResult.Sequential, result)
+    }
+
+    @Test
     fun `composing region lost returns ComposingRegionLost`() {
         tracker.updateSelection(15, 15, 10, 20)
 

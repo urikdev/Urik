@@ -53,14 +53,14 @@ constructor(
             maxSize = USER_FREQUENCY_CACHE_SIZE
         )
 
-    private val bigramCache: ManagedCache<String, List<String>> =
+    private val bigramCache: ManagedCache<String, LinkedHashSet<String>> =
         cacheMemoryManager.createCache(
             name = "user_bigram_cache",
             maxSize = BIGRAM_CACHE_SIZE
         )
 
     @Volatile
-    private var topBigramsCache = ConcurrentHashMap<String, Map<String, List<String>>>()
+    private var topBigramsCache = ConcurrentHashMap<String, Map<String, LinkedHashSet<String>>>()
 
     private val writeScope = CoroutineScope(SupervisorJob() + ioDispatcher)
     private var frequencyFlushJob: Job? = null
@@ -87,10 +87,10 @@ constructor(
 
         frequencyCache.invalidate(cacheKey)
 
-        pendingFrequencyUpdates.compute(cacheKey) { _, existing ->
-            existing?.apply { incrementCount++ }
-                ?: PendingFrequencyUpdate(languageTag, normalized)
-        }
+        pendingFrequencyUpdates.merge(
+            cacheKey,
+            PendingFrequencyUpdate(languageTag, normalized)
+        ) { existing, _ -> existing.apply { incrementCount++ } }
 
         scheduleFrequencyFlush()
 
@@ -255,10 +255,10 @@ constructor(
         bigramCache.invalidate(cacheKey)
         topBigramsCache.remove(languageTag)
 
-        pendingBigramUpdates.compute(bigramKey) { _, existing ->
-            existing?.apply { incrementCount++ }
-                ?: PendingBigramUpdate(languageTag, normalizedA, normalizedB)
-        }
+        pendingBigramUpdates.merge(
+            bigramKey,
+            PendingBigramUpdate(languageTag, normalizedA, normalizedB)
+        ) { existing, _ -> existing.apply { incrementCount++ } }
 
         scheduleBigramFlush()
 
@@ -310,21 +310,29 @@ constructor(
         wordA: String,
         languageTag: String,
         limit: Int = MAX_BIGRAM_PREDICTIONS
-    ): List<String> = withContext(defaultDispatcher) {
+    ): Set<String> = withContext(defaultDispatcher) {
         try {
             if (wordA.isBlank()) {
-                return@withContext emptyList()
+                return@withContext emptySet()
             }
 
             val normalizedA = normalizeWord(wordA, languageTag)
             val cacheKey = buildBigramCacheKey(languageTag, normalizedA)
 
             bigramCache.getIfPresent(cacheKey)?.let { cached ->
-                return@withContext cached.take(limit)
+                return@withContext if (cached.size <= limit) {
+                    cached
+                } else {
+                    LinkedHashSet(cached.take(limit))
+                }
             }
 
             topBigramsCache[languageTag]?.get(normalizedA)?.let { cached ->
-                return@withContext cached.take(limit)
+                return@withContext if (cached.size <= limit) {
+                    cached
+                } else {
+                    LinkedHashSet(cached.take(limit))
+                }
             }
 
             val predictions =
@@ -332,9 +340,10 @@ constructor(
                     userWordBigramDao.getPredictions(languageTag, normalizedA, limit)
                 }
 
-            bigramCache.put(cacheKey, predictions)
+            val predictionsSet = LinkedHashSet(predictions)
+            bigramCache.put(cacheKey, predictionsSet)
 
-            return@withContext predictions
+            return@withContext predictionsSet
         } catch (e: Exception) {
             ErrorLogger.logException(
                 component = "WordFrequencyRepository",
@@ -342,7 +351,7 @@ constructor(
                 exception = e,
                 context = mapOf("operation" to "getBigramPredictions")
             )
-            return@withContext emptyList()
+            return@withContext emptySet()
         }
     }
 
@@ -356,7 +365,7 @@ constructor(
                     .mapValues { (_, bigrams) ->
                         bigrams
                             .sortedByDescending { it.frequency }
-                            .map { it.wordBNormalized }
+                            .mapTo(LinkedHashSet()) { it.wordBNormalized }
                     }
 
             topBigramsCache[languageTag] = bigramMap

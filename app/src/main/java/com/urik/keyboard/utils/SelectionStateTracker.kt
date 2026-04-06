@@ -98,6 +98,13 @@ class SelectionStateTracker {
         if (previousState.hasComposingRegion &&
             (newCursor < previousState.composingStart || newCursor > previousState.composingEnd)
         ) {
+            if (newState.hasComposingRegion &&
+                newCursor >= newState.composingStart &&
+                newCursor <= newState.composingEnd
+            ) {
+                lastKnownValidPosition = newCursor
+                return SelectionChangeResult.Sequential
+            }
             lastKnownValidPosition = newCursor
             return SelectionChangeResult.CursorLeftComposingRegion(
                 composingStart = previousState.composingStart,
