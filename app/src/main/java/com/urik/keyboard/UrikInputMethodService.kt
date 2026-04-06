@@ -2530,6 +2530,10 @@ class UrikInputMethodService :
             coordinateStateClear()
         }
 
+        if (currentSettings.resetToLettersOnDismiss) {
+            viewModel.resetToLetters()
+        }
+
         autofillStateTracker.scheduleClear(serviceScope) {
             swipeKeyboardView?.forceClearAllSuggestions()
         }

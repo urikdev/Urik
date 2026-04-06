@@ -114,6 +114,9 @@
     <string name="typing_settings_swipe_off">Непрерывный ввод отключен</string>
 
     <string name="typing_settings_long_press_duration">Длительность Долгого Нажатия</string>
+    <string name="typing_settings_reset_to_letters">Сброс к Виду Букв при Смене Ввода</string>
+    <string name="typing_settings_reset_to_letters_on">Включено</string>
+    <string name="typing_settings_reset_to_letters_off">Выключено</string>
     <string name="layout_settings_customize_keys">Настройка Клавиш</string>
     <string name="layout_settings_customize_keys_summary">Назначить пользовательский символ долгому нажатию</string>
 
@@ -318,6 +321,7 @@
     <string name="max_languages_reached">Можно добавить до 3 языков.</string>
 
     <string name="error_update_number_hints">Не удалось обновить числовые подсказки</string>
+    <string name="error_update_reset_to_letters">Не удалось обновить настройку сброса к буквам</string>
     <string name="layout_settings_show_number_hints">Показывать числовые подсказки</string>
     <string name="layout_settings_number_hints_on">Включено</string>
     <string name="layout_settings_number_hints_off">Выключено</string>

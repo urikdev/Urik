@@ -125,6 +125,9 @@
     <string name="long_press_punctuation_spacebar">Barra spaziatrice</string>
     <string name="long_press_punctuation_period">Tasto punto</string>
     <string name="typing_settings_long_press_duration">Durata pressione lunga</string>
+    <string name="typing_settings_reset_to_letters">Reimposta alla vista lettere al cambio di input</string>
+    <string name="typing_settings_reset_to_letters_on">Attivo</string>
+    <string name="typing_settings_reset_to_letters_off">Disattivo</string>
     <string name="layout_settings_customize_keys">Personalizza tasti</string>
     <string name="layout_settings_customize_keys_summary">Assegna carattere personalizzato a pressione prolungata</string>
 
@@ -315,6 +318,7 @@
     <string name="clipboard_item_unpin">Rimuovi fissaggio elemento appunti</string>
     <string name="clipboard_item_delete">Elimina elemento appunti</string>
     <string name="error_update_number_hints">Impossibile aggiornare i suggerimenti numerici</string>
+    <string name="error_update_reset_to_letters">Impossibile aggiornare l\'impostazione di reimpostazione alle lettere</string>
     <string name="layout_settings_show_number_hints">Mostra suggerimenti numerici</string>
     <string name="layout_settings_number_hints_on">Attivo</string>
     <string name="layout_settings_number_hints_off">Disattivo</string>

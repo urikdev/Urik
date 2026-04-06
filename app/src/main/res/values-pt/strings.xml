@@ -112,6 +112,9 @@
     <string name="typing_settings_swipe_on">Digitação por gestos ativada</string>
     <string name="typing_settings_swipe_off">Deslizar para digitar desativado</string>
     <string name="typing_settings_long_press_duration">Duração do toque prolongado</string>
+    <string name="typing_settings_reset_to_letters">Redefinir para vista de letras ao mudar entrada</string>
+    <string name="typing_settings_reset_to_letters_on">Ativado</string>
+    <string name="typing_settings_reset_to_letters_off">Desativado</string>
     <string name="layout_settings_customize_keys">Personalizar Teclas</string>
     <string name="layout_settings_customize_keys_summary">Atribuir caractere personalizado a toque prolongado</string>
 
@@ -314,6 +317,7 @@
     <string name="error_update_long_press_punctuation">Falha ao atualizar pontuação de pressão longa</string>
     <string name="max_languages_reached">Máximo de 3 idiomas permitidos</string>
     <string name="error_update_number_hints">Falha ao atualizar dicas numéricas</string>
+    <string name="error_update_reset_to_letters">Falha ao atualizar configuração de redefinição para letras</string>
     <string name="layout_settings_show_number_hints">Mostrar dicas numéricas</string>
     <string name="layout_settings_number_hints_on">Ativado</string>
     <string name="layout_settings_number_hints_off">Desativado</string>

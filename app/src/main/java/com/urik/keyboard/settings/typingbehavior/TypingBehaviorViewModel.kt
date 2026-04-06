@@ -42,7 +42,8 @@ constructor(private val settingsRepository: SettingsRepository) :
                     longPressPunctuationMode = settings.longPressPunctuationMode,
                     longPressDuration = settings.longPressDuration,
                     hapticFeedback = settings.hapticFeedback,
-                    vibrationStrength = settings.vibrationStrength
+                    vibrationStrength = settings.vibrationStrength,
+                    resetToLettersOnDismiss = settings.resetToLettersOnDismiss
                 )
             }.stateIn(
                 scope = viewModelScope,
@@ -130,6 +131,14 @@ constructor(private val settingsRepository: SettingsRepository) :
         }
     }
 
+    fun updateResetToLettersOnDismiss(enabled: Boolean) {
+        viewModelScope.launch {
+            settingsRepository
+                .updateResetToLettersOnDismiss(enabled)
+                .onFailure { _events.emit(SettingsEvent.Error.ResetToLettersOnDismissToggleFailed) }
+        }
+    }
+
     private companion object {
         const val STOP_TIMEOUT_MILLIS = 5000L
     }
@@ -148,5 +157,6 @@ data class TypingBehaviorUiState(
     val longPressPunctuationMode: LongPressPunctuationMode = LongPressPunctuationMode.PERIOD,
     val longPressDuration: LongPressDuration = LongPressDuration.MEDIUM,
     val hapticFeedback: Boolean = true,
-    val vibrationStrength: Int = 128
+    val vibrationStrength: Int = 128,
+    val resetToLettersOnDismiss: Boolean = true
 )

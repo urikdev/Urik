@@ -115,6 +115,9 @@
     <string name="long_press_punctuation_spacebar">Barra espaiadora</string>
     <string name="long_press_punctuation_period">Tecla del període</string>
     <string name="typing_settings_long_press_duration">Duració de pulsació llarga</string>
+    <string name="typing_settings_reset_to_letters">Restableix a la vista de lletres en canviar l\'entrada</string>
+    <string name="typing_settings_reset_to_letters_on">Activat</string>
+    <string name="typing_settings_reset_to_letters_off">Desactivat</string>
     <!-- Layout & Input Settings -->
     <string name="layout_settings_alternative_layout">Disseny del teclat</string>
     <string name="layout_settings_adaptive_modes_enabled">Modes adaptatius del teclat</string>
@@ -284,6 +287,7 @@
     <string name="clipboard_item_unpin">Deixar de fixar l\'element al porta-retalls</string>
     <string name="clipboard_item_delete">Eliminar l\'element del porta-retalls</string>
     <string name="error_update_number_hints">Ha fallat l\'actualització dels suggeriments numèrics</string>
+    <string name="error_update_reset_to_letters">Ha fallat l\'actualització del paràmetre de restabliment a les lletres</string>
     <string name="layout_settings_show_number_hints">Mostrar suggeriments numèrics</string>
     <string name="layout_settings_number_hints_on">Activat</string>
     <string name="layout_settings_number_hints_off">Desactivat</string>

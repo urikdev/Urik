@@ -38,6 +38,7 @@ class TypingBehaviorFragment : PreferenceFragmentCompat() {
 
     private lateinit var doubleSpacePref: SwitchPreferenceCompat
     private lateinit var autoCapitalizationPref: SwitchPreferenceCompat
+    private lateinit var resetToLettersPref: SwitchPreferenceCompat
     private lateinit var swipePref: SwitchPreferenceCompat
     private lateinit var spacebarCursorPref: SwitchPreferenceCompat
     private lateinit var cursorSpeedPref: ListPreference
@@ -96,6 +97,16 @@ class TypingBehaviorFragment : PreferenceFragmentCompat() {
                 summaryOff = resources.getString(R.string.typing_settings_auto_capitalization_off)
             }
         screen.addPreference(autoCapitalizationPref)
+
+        resetToLettersPref =
+            SwitchPreferenceCompat(context).apply {
+                key = "reset_to_letters_on_dismiss"
+                isPersistent = false
+                title = resources.getString(R.string.typing_settings_reset_to_letters)
+                summaryOn = resources.getString(R.string.typing_settings_reset_to_letters_on)
+                summaryOff = resources.getString(R.string.typing_settings_reset_to_letters_off)
+            }
+        screen.addPreference(resetToLettersPref)
 
         swipePref =
             SwitchPreferenceCompat(context).apply {
@@ -199,6 +210,11 @@ class TypingBehaviorFragment : PreferenceFragmentCompat() {
             true
         }
 
+        resetToLettersPref.setOnPreferenceChangeListener { _, newValue ->
+            viewModel.updateResetToLettersOnDismiss(newValue as Boolean)
+            true
+        }
+
         swipePref.setOnPreferenceChangeListener { _, newValue ->
             viewModel.updateSwipeEnabled(newValue as Boolean)
             true
@@ -249,6 +265,7 @@ class TypingBehaviorFragment : PreferenceFragmentCompat() {
                     viewModel.uiState.collect { state ->
                         doubleSpacePref.isChecked = state.doubleSpacePeriod
                         autoCapitalizationPref.isChecked = state.autoCapitalizationEnabled
+                        resetToLettersPref.isChecked = state.resetToLettersOnDismiss
                         swipePref.isChecked = state.swipeEnabled
                         spacebarCursorPref.isChecked = state.spacebarCursorControl
                         cursorSpeedPref.value = state.cursorSpeed.name

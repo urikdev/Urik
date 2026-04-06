@@ -111,6 +111,9 @@
     <string name="typing_settings_swipe_on">Wischen zum Tippen aktiviert</string>
     <string name="typing_settings_swipe_off">Wischen zum Tippen deaktiviert</string>
     <string name="typing_settings_long_press_duration">Dauer für langen Tastendruck</string>
+    <string name="typing_settings_reset_to_letters">Bei Eingabewechsel zur Buchstabenansicht zurücksetzen</string>
+    <string name="typing_settings_reset_to_letters_on">Ein</string>
+    <string name="typing_settings_reset_to_letters_off">Aus</string>
 
     <!-- Layout & Input Settings -->
     <string name="layout_settings_alternative_layout">Tastaturlayout</string>
@@ -313,6 +316,7 @@
     <string name="error_update_long_press_punctuation">Lang-Druck-Interpunktion konnte nicht geändert werden</string>
     <string name="max_languages_reached">Maximal 3 Sprachen erlaubt</string>
     <string name="error_update_number_hints">Zahlenhinweise konnten nicht aktualisiert werden</string>
+    <string name="error_update_reset_to_letters">Buchstabenansicht-Zurücksetzen konnte nicht aktualisiert werden</string>
     <string name="layout_settings_show_number_hints">Zahlenhinweise anzeigen</string>
     <string name="layout_settings_number_hints_on">Ein</string>
     <string name="layout_settings_number_hints_off">Aus</string>

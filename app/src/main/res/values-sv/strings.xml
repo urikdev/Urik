@@ -67,6 +67,9 @@
     <string name="typing_settings_swipe_on">Svep för att skriva aktiverat</string>
     <string name="typing_settings_swipe_off">Svep för att skriva inaktiverat</string>
     <string name="typing_settings_long_press_duration">Lång tryckningstid</string>
+    <string name="typing_settings_reset_to_letters">Återställ till bokstavsvy vid inmatningsbyte</string>
+    <string name="typing_settings_reset_to_letters_on">På</string>
+    <string name="typing_settings_reset_to_letters_off">Av</string>
     <string name="layout_settings_customize_keys">Anpassa tangenter</string>
     <string name="layout_settings_customize_keys_summary">Tilldela anpassad karaktär till långt tryck</string>
 
@@ -262,6 +265,7 @@
     <string name="error_update_long_press_punctuation">Det gick inte att uppdatera långtryckstecken</string>
     <string name="max_languages_reached">Max 3 språk tillåtna</string>
     <string name="error_update_number_hints">Det gick inte att uppdatera siffertips</string>
+    <string name="error_update_reset_to_letters">Kunde inte uppdatera inställning för återställning till bokstäver</string>
     <string name="layout_settings_show_number_hints">Visa siffertips</string>
     <string name="layout_settings_number_hints_on">På</string>
     <string name="layout_settings_number_hints_off">Av</string>
