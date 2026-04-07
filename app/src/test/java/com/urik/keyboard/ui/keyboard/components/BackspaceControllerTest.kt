@@ -107,7 +107,7 @@ class BackspaceControllerTest {
         controller.start()
         controller.cleanup()
         // Verify no crash and acceleration is disabled
-        assertTrue(accelerationStates.last() == false)
+        assertTrue(!accelerationStates.last())
     }
 
     @Test

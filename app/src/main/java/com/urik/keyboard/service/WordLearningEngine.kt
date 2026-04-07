@@ -521,6 +521,7 @@ constructor(
                         )
 
                     candidates
+                        .asSequence()
                         .filter { candidate ->
                             candidate.wordNormalized.length <= MAX_SIMILAR_WORD_LENGTH
                         }
@@ -532,6 +533,7 @@ constructor(
                                 candidate.word != normalized
                         }.sortedBy { it.second }
                         .take(maxResults - results.size)
+                        .toList()
                         .forEach { (candidate, _) ->
                             results[candidate.word] = candidate.frequency
                         }
