@@ -184,7 +184,7 @@ class KeyboardLayoutManager(
             if (longPressConsumedButtons.remove(view as? Button)) return@OnClickListener
 
             val key = view.getTag(R.id.key_data) as? KeyboardKey ?: return@OnClickListener
-            val skipHaptic = hapticDownFiredButtons.remove(view as? Button) == true
+            val skipHaptic = hapticDownFiredButtons.remove(view as? Button)
             if (!skipHaptic) {
                 performContextualHaptic(key)
             }
@@ -1060,6 +1060,7 @@ class KeyboardLayoutManager(
                 performContextualHaptic(key)
                 handleCharacterLongPress(key, button, button)
             }
+
             key is KeyboardKey.Character &&
                 key.type == KeyboardKey.KeyType.PUNCTUATION &&
                 longPressPunctuationMode == LongPressPunctuationMode.PERIOD &&
@@ -1069,6 +1070,7 @@ class KeyboardLayoutManager(
                     performContextualHaptic(key)
                     handlePunctuationLongPress(key, button)
                 }
+
             key is KeyboardKey.Character && key.value == "," ->
                 buttonLongPressRunnables[button] = Runnable {
                     commaLongPressFired = true
@@ -1077,6 +1079,7 @@ class KeyboardLayoutManager(
                     performContextualHaptic(KeyboardKey.Character(",", KeyboardKey.KeyType.PUNCTUATION))
                     onShowInputMethodPicker()
                 }
+
             key is KeyboardKey.Action &&
                 key.action == KeyboardKey.ActionType.SPACE &&
                 longPressPunctuationMode == LongPressPunctuationMode.SPACEBAR ->
@@ -1085,6 +1088,7 @@ class KeyboardLayoutManager(
                     performContextualHaptic(KeyboardKey.Action(KeyboardKey.ActionType.SPACE))
                     handleSpaceLongPress(button)
                 }
+
             key is KeyboardKey.Action &&
                 key.action == KeyboardKey.ActionType.SHIFT &&
                 !showLanguageSwitchKey &&
@@ -1095,6 +1099,7 @@ class KeyboardLayoutManager(
                     performContextualHaptic(KeyboardKey.Action(KeyboardKey.ActionType.SHIFT))
                     handleShiftLongPress(button)
                 }
+
             key is KeyboardKey.Action && key.action == KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS ->
                 buttonLongPressRunnables[button] = Runnable {
                     symbolsLongPressFired.add(button)
@@ -1229,6 +1234,7 @@ class KeyboardLayoutManager(
                             is KeyboardKey.Character -> {
                                 info.roleDescription = context.getString(R.string.key_role)
                             }
+
                             is KeyboardKey.Action -> {
                                 info.roleDescription = context.getString(R.string.action_key_role)
                                 when (key.action) {
@@ -1239,6 +1245,7 @@ class KeyboardLayoutManager(
                                             else -> context.getString(R.string.state_inactive)
                                         }
                                     }
+
                                     KeyboardKey.ActionType.BACKSPACE -> {
                                         info.addAction(
                                             AccessibilityNodeInfoCompat.AccessibilityActionCompat(
@@ -1247,9 +1254,11 @@ class KeyboardLayoutManager(
                                             )
                                         )
                                     }
+
                                     else -> {}
                                 }
                             }
+
                             KeyboardKey.Spacer -> {}
                         }
                     }

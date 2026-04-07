@@ -1,5 +1,6 @@
 package com.urik.keyboard.ui.keyboard.components
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.drawable.GradientDrawable
 import android.view.Gravity
@@ -22,6 +23,7 @@ import com.urik.keyboard.theme.ThemeManager
  * Clipboard history panel with consent screen and item management.
  *
  */
+@SuppressLint("ViewConstructor")
 class ClipboardPanel(context: Context, private val themeManager: ThemeManager) : FrameLayout(context) {
     private var onConsentAccepted: (() -> Unit)? = null
     private var onItemSelected: ((String) -> Unit)? = null
