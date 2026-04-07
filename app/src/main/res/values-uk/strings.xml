@@ -69,6 +69,9 @@
     <string name="appearance_settings_theme">Тема</string>
     <string name="appearance_settings_key_size">Розмір Клавіш</string>
     <string name="appearance_settings_key_label_size">Розмір Підписів Клавіш</string>
+    <string name="appearance_settings_press_highlight">Підсвічування Натискань</string>
+    <string name="appearance_settings_press_highlight_on">Візуальний зворотний зв\'язок увімкнено</string>
+    <string name="appearance_settings_press_highlight_off">Візуальний зворотний зв\'язок вимкнено</string>
 
     <!-- Auto-Correct Settings -->
     <string name="autocorrect_settings_spell_check">Перевірка Орфографії</string>
@@ -113,9 +116,9 @@
     <string name="typing_settings_swipe_on">Безперервний Ввід увімкнено</string>
     <string name="typing_settings_swipe_off">Безперервний Ввід вимкнено</string>
     <string name="typing_settings_long_press_duration">Тривалість Довгого Натискання</string>
-    <string name="typing_settings_reset_to_letters">Повернутися до перегляду літер при зміні вводу</string>
-    <string name="typing_settings_reset_to_letters_on">Увімкнено</string>
-    <string name="typing_settings_reset_to_letters_off">Вимкнено</string>
+    <string name="typing_settings_reset_to_letters">Скинути розкладку</string>
+    <string name="typing_settings_reset_to_letters_on">Повернутися до перегляду літер</string>
+    <string name="typing_settings_reset_to_letters_off">Залишитися на останньому перегляді</string>
     <string name="layout_settings_customize_keys">Настройка Клавіш</string>
     <string name="layout_settings_customize_keys_summary">Назначити власний символ довгому натисканню</string>
 
@@ -320,6 +323,7 @@
 
     <string name="error_update_number_hints">Не вдалося оновити числові підказки</string>
     <string name="error_update_reset_to_letters">Не вдалося оновити налаштування повернення до літер</string>
+    <string name="error_update_press_highlight">Не вдалося оновити налаштування підсвічування натискань</string>
     <string name="layout_settings_show_number_hints">Показувати числові підказки</string>
     <string name="layout_settings_number_hints_on">Увімкнено</string>
     <string name="layout_settings_number_hints_off">Вимкнено</string>

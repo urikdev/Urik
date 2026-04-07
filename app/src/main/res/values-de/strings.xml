@@ -68,6 +68,9 @@
     <string name="appearance_settings_theme">Thema</string>
     <string name="appearance_settings_key_size">Tastengröße</string>
     <string name="appearance_settings_key_label_size">Tasten-Schriftgröße</string>
+    <string name="appearance_settings_press_highlight">Tastendruckhervorhebung</string>
+    <string name="appearance_settings_press_highlight_on">Visuelles Feedback wird angezeigt</string>
+    <string name="appearance_settings_press_highlight_off">Visuelles Feedback wird ausgeblendet</string>
 
     <!-- Auto-Correct Settings -->
     <string name="autocorrect_settings_spell_check">Rechtschreibprüfung</string>
@@ -111,9 +114,9 @@
     <string name="typing_settings_swipe_on">Wischen zum Tippen aktiviert</string>
     <string name="typing_settings_swipe_off">Wischen zum Tippen deaktiviert</string>
     <string name="typing_settings_long_press_duration">Dauer für langen Tastendruck</string>
-    <string name="typing_settings_reset_to_letters">Bei Eingabewechsel zur Buchstabenansicht zurücksetzen</string>
-    <string name="typing_settings_reset_to_letters_on">Ein</string>
-    <string name="typing_settings_reset_to_letters_off">Aus</string>
+    <string name="typing_settings_reset_to_letters">Layout zurücksetzen</string>
+    <string name="typing_settings_reset_to_letters_on">Zur Buchstabenansicht zurücksetzen</string>
+    <string name="typing_settings_reset_to_letters_off">In letzter Ansicht bleiben</string>
 
     <!-- Layout & Input Settings -->
     <string name="layout_settings_alternative_layout">Tastaturlayout</string>
@@ -317,6 +320,7 @@
     <string name="max_languages_reached">Maximal 3 Sprachen erlaubt</string>
     <string name="error_update_number_hints">Zahlenhinweise konnten nicht aktualisiert werden</string>
     <string name="error_update_reset_to_letters">Buchstabenansicht-Zurücksetzen konnte nicht aktualisiert werden</string>
+    <string name="error_update_press_highlight">Tastendruckhervorhebung konnte nicht geändert werden</string>
     <string name="layout_settings_show_number_hints">Zahlenhinweise anzeigen</string>
     <string name="layout_settings_number_hints_on">Ein</string>
     <string name="layout_settings_number_hints_off">Aus</string>

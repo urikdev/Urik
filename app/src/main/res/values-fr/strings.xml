@@ -70,6 +70,9 @@
     <string name="appearance_settings_theme">Thème</string>
     <string name="appearance_settings_key_size">Taille des touches</string>
     <string name="appearance_settings_key_label_size">Taille du texte des touches</string>
+    <string name="appearance_settings_press_highlight">Mise en évidence des touches</string>
+    <string name="appearance_settings_press_highlight_on">Retour visuel affiché</string>
+    <string name="appearance_settings_press_highlight_off">Retour visuel masqué</string>
 
     <!-- Auto-Correct Settings -->
     <string name="autocorrect_settings_spell_check">Vérification orthographique</string>
@@ -125,9 +128,9 @@
     <string name="long_press_punctuation_spacebar">Barre d\'espace</string>
     <string name="long_press_punctuation_period">Touche Point</string>
     <string name="typing_settings_long_press_duration">Durée de la pression longue</string>
-    <string name="typing_settings_reset_to_letters">Réinitialiser vers la vue des lettres lors d\'un changement de saisie</string>
-    <string name="typing_settings_reset_to_letters_on">Activé</string>
-    <string name="typing_settings_reset_to_letters_off">Désactivé</string>
+    <string name="typing_settings_reset_to_letters">Réinitialiser la disposition</string>
+    <string name="typing_settings_reset_to_letters_on">Réinitialiser vers la vue des lettres</string>
+    <string name="typing_settings_reset_to_letters_off">Rester sur la dernière vue</string>
 
     <!-- Layout & Input Settings -->
     <string name="layout_settings_alternative_layout">Disposition du clavier</string>
@@ -319,6 +322,7 @@
     <string name="clipboard_item_delete">Supprimer l\'élément du presse-papiers</string>
     <string name="error_update_number_hints">Échec de la mise à jour des indicateurs de chiffres</string>
     <string name="error_update_reset_to_letters">Impossible de mettre à jour le paramètre de réinitialisation aux lettres</string>
+    <string name="error_update_press_highlight">Impossible de mettre à jour le paramètre de mise en évidence des touches</string>
     <string name="layout_settings_show_number_hints">Afficher les indicateurs de chiffres</string>
     <string name="layout_settings_number_hints_on">Activé</string>
     <string name="layout_settings_number_hints_off">Désactivé</string>

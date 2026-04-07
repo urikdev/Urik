@@ -70,6 +70,7 @@ class KeyboardLayoutManager(
     private var showLanguageSwitchKey = false
     private var showNumberHints = false
     private var hasMultipleImes = false
+    private var pressHighlightEnabled = true
 
     var effectiveLayout: KeyboardLayout? = null
         private set
@@ -718,6 +719,10 @@ class KeyboardLayoutManager(
 
     fun updateNumberHints(enabled: Boolean) {
         showNumberHints = enabled
+    }
+
+    fun updatePressHighlight(enabled: Boolean) {
+        pressHighlightEnabled = enabled
     }
 
     fun updateCustomKeyMappings(mappings: Map<String, String>) {
@@ -1932,10 +1937,14 @@ class KeyboardLayoutManager(
             }
 
         val pressedDrawable =
-            GradientDrawable().apply {
-                setColor(theme.colors.statePressed)
-                cornerRadius = cachedCornerRadius
-                setStroke(cachedStrokeWidth, theme.colors.keyBorderPressed)
+            if (pressHighlightEnabled) {
+                GradientDrawable().apply {
+                    setColor(theme.colors.statePressed)
+                    cornerRadius = cachedCornerRadius
+                    setStroke(cachedStrokeWidth, theme.colors.keyBorderPressed)
+                }
+            } else {
+                normalDrawable
             }
 
         val focusedDrawable =
@@ -1959,8 +1968,9 @@ class KeyboardLayoutManager(
         stateListDrawable.addState(intArrayOf(), normalDrawable)
 
         return RippleDrawable(
-            android.content.res.ColorStateList
-                .valueOf(theme.colors.statePressed),
+            android.content.res.ColorStateList.valueOf(
+                if (pressHighlightEnabled) theme.colors.statePressed else android.graphics.Color.TRANSPARENT
+            ),
             stateListDrawable,
             null
         )

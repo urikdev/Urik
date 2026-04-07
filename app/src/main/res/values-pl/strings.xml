@@ -69,6 +69,9 @@
     <string name="appearance_settings_theme">Motyw</string>
     <string name="appearance_settings_key_size">Rozmiar klawiszy</string>
     <string name="appearance_settings_key_label_size">Rozmiar etykiety klawiszy</string>
+    <string name="appearance_settings_press_highlight">Podświetlenie naciśnięcia klawisza</string>
+    <string name="appearance_settings_press_highlight_on">Wizualna informacja zwrotna widoczna</string>
+    <string name="appearance_settings_press_highlight_off">Wizualna informacja zwrotna ukryta</string>
 
     <!-- Auto-Correct Settings -->
     <string name="autocorrect_settings_spell_check">Sprawdzanie pisowni</string>
@@ -113,9 +116,9 @@
     <string name="typing_settings_swipe_on">Pisanie gestem włączone</string>
     <string name="typing_settings_swipe_off">Pisanie gestem wyłączone</string>
     <string name="typing_settings_long_press_duration">Czas trwania długiego naciśnięcia</string>
-    <string name="typing_settings_reset_to_letters">Przywróć widok liter przy zmianie wejścia</string>
-    <string name="typing_settings_reset_to_letters_on">Włączone</string>
-    <string name="typing_settings_reset_to_letters_off">Wyłączone</string>
+    <string name="typing_settings_reset_to_letters">Resetuj układ</string>
+    <string name="typing_settings_reset_to_letters_on">Przywróć widok liter</string>
+    <string name="typing_settings_reset_to_letters_off">Pozostań na ostatnim widoku</string>
     <string name="layout_settings_customize_keys">Dostosuj klawisze</string>
     <string name="layout_settings_customize_keys_summary">Przypisz niestandardowy znak do długiego naciśnięcia</string>
 
@@ -319,6 +322,7 @@
     <string name="max_languages_reached">Maksymalnie 3 języki dozwolone</string>
     <string name="error_update_number_hints">Nie udało się zaktualizować podpowiedzi liczbowych</string>
     <string name="error_update_reset_to_letters">Nie udało się zaktualizować ustawienia przywracania do liter</string>
+    <string name="error_update_press_highlight">Nie udało się zaktualizować podświetlenia naciśnięcia klawisza</string>
     <string name="layout_settings_show_number_hints">Pokaż podpowiedzi liczbowe</string>
     <string name="layout_settings_number_hints_on">Włączone</string>
     <string name="layout_settings_number_hints_off">Wyłączone</string>

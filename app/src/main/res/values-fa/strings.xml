@@ -69,6 +69,9 @@
     <string name="appearance_settings_theme">تم</string>
     <string name="appearance_settings_key_size">اندازه کلیدها</string>
     <string name="appearance_settings_key_label_size">اندازه نوشته کلیدها</string>
+    <string name="appearance_settings_press_highlight">برجسته‌سازی فشار کلید</string>
+    <string name="appearance_settings_press_highlight_on">بازخورد بصری نمایش داده می‌شود</string>
+    <string name="appearance_settings_press_highlight_off">بازخورد بصری پنهان است</string>
 
     <!-- Auto-Correct Settings -->
     <string name="autocorrect_settings_spell_check">بررسی املا</string>
@@ -124,9 +127,9 @@
     <string name="long_press_punctuation_spacebar">نوار فاصله</string>
     <string name="long_press_punctuation_period">کلید نقطه</string>
     <string name="typing_settings_long_press_duration">مدت زمان نگه داشتن طولانی</string>
-    <string name="typing_settings_reset_to_letters">بازگشت به نمای حروف هنگام تغییر ورودی</string>
-    <string name="typing_settings_reset_to_letters_on">روشن</string>
-    <string name="typing_settings_reset_to_letters_off">خاموش</string>
+    <string name="typing_settings_reset_to_letters">بازنشانی چیدمان</string>
+    <string name="typing_settings_reset_to_letters_on">بازگشت به نمای حروف</string>
+    <string name="typing_settings_reset_to_letters_off">ماندن در آخرین نما</string>
     <string name="layout_settings_customize_keys">سفارشی‌سازی کلیدها</string>
     <string name="layout_settings_customize_keys_summary">اختصاص شخصی برای فشار طولانی</string>
 
@@ -319,6 +322,7 @@
     <string name="max_languages_reached">حداکثر ۳ زبان مجاز</string>
     <string name="error_update_number_hints">به‌روزرسانی راهنمای اعداد ناموفق بود</string>
     <string name="error_update_reset_to_letters">به‌روزرسانی تنظیم بازگشت به حروف ناموفق بود</string>
+    <string name="error_update_press_highlight">به‌روزرسانی تنظیم برجسته‌سازی فشار کلید ناموفق بود</string>
     <string name="layout_settings_show_number_hints">نمایش راهنمای اعداد</string>
     <string name="layout_settings_number_hints_on">روشن</string>
     <string name="layout_settings_number_hints_off">خاموش</string>
