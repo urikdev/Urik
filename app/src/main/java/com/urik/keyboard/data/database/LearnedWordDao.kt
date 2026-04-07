@@ -98,7 +98,23 @@ interface LearnedWordDao {
 
     @Query(
         """
-        SELECT COUNT(*) FROM learned_words 
+        SELECT * FROM learned_words
+        WHERE language_tag = :languageTag
+        AND LENGTH(word_normalized) BETWEEN :minLength AND :maxLength
+        ORDER BY frequency DESC
+        LIMIT :limit
+    """
+    )
+    suspend fun getWordsByLengthRange(
+        languageTag: String,
+        minLength: Int,
+        maxLength: Int,
+        limit: Int = 500
+    ): List<LearnedWord>
+
+    @Query(
+        """
+        SELECT COUNT(*) FROM learned_words
         WHERE language_tag = :languageTag
     """
     )

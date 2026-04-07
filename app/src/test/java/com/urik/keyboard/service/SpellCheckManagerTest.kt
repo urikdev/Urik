@@ -430,7 +430,7 @@ class SpellCheckManagerTest {
 
         assertTrue(suggestions.isNotEmpty())
         assertEquals("learned", suggestions.first().source)
-        assertTrue(suggestions.first().confidence > 0.85)
+        assertTrue(suggestions.first().confidence > 0.80)
         assertEquals(0, suggestions.first().ranking)
     }
 

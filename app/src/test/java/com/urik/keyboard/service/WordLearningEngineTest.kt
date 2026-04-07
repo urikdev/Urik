@@ -31,6 +31,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argThat
 import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.times
@@ -75,6 +76,7 @@ class WordLearningEngineTest {
                 onBlocking { getAverageFrequency() } doReturn 0.0
                 onBlocking { getWordCountsBySource() } doReturn emptyList()
                 onBlocking { cleanupLowFrequencyWords(any()) } doReturn 0
+                onBlocking { getWordsByLengthRange(any(), any(), any(), any()) } doReturn emptyList()
             }
 
         userWordFrequencyDao = mock()
@@ -394,6 +396,62 @@ class WordLearningEngineTest {
         val results = wordLearningEngine.getSimilarLearnedWordsWithFrequency("test", "en", 2)
 
         assertEquals(2, results.size)
+    }
+
+    @Test
+    fun `getSimilarLearnedWordsWithFrequency finds word via fuzzy search when not in top-frequency results`() =
+        runTest {
+            val lowFreqWord = LearnedWord.create(
+                word = "bools",
+                wordNormalized = "bools",
+                languageTag = "en",
+                frequency = 2,
+                source = WordSource.USER_TYPED
+            )
+
+            whenever(learnedWordDao.findExactWord("en", "books")).thenReturn(null)
+            whenever(learnedWordDao.findWordsWithPrefix(eq("en"), eq("books"), any())).thenReturn(emptyList())
+            whenever(learnedWordDao.getWordsByLengthRange(eq("en"), eq(3), eq(7), any()))
+                .thenReturn(listOf(lowFreqWord))
+
+            val results = wordLearningEngine.getSimilarLearnedWordsWithFrequency("books", "en", 5)
+
+            assertTrue(
+                "Should find 'bools' (edit distance 1 from 'books') via length-range fuzzy search",
+                results.any { it.first == "bools" }
+            )
+        }
+
+    @Test
+    fun `getSimilarLearnedWordsWithFrequency prefers closer edit distance over frequency in fuzzy results`() = runTest {
+        val bools = LearnedWord.create(
+            word = "bools",
+            wordNormalized = "bools",
+            languageTag = "en",
+            frequency = 2,
+            source = WordSource.USER_TYPED
+        )
+        val highFreq = (1..5).map { i ->
+            LearnedWord.create(
+                word = "word$i",
+                wordNormalized = "word$i",
+                languageTag = "en",
+                frequency = 1000,
+                source = WordSource.USER_TYPED
+            )
+        }
+
+        whenever(learnedWordDao.findExactWord("en", "books")).thenReturn(null)
+        whenever(learnedWordDao.findWordsWithPrefix(eq("en"), eq("books"), any())).thenReturn(emptyList())
+        whenever(learnedWordDao.getWordsByLengthRange(eq("en"), eq(3), eq(7), any()))
+            .thenReturn(listOf(bools) + highFreq)
+
+        val results = wordLearningEngine.getSimilarLearnedWordsWithFrequency("books", "en", 5)
+
+        assertTrue(
+            "Should include 'bools' (edit distance 1) despite low frequency",
+            results.any { it.first == "bools" }
+        )
     }
 
     @Test

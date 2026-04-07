@@ -380,7 +380,7 @@ constructor(
      * Search strategy (in order, up to maxResults):
      * 1. Exact match
      * 2. Prefix matches (FTS4 query)
-     * 3. Edit distance ≤2 (fuzzy search on top 30 frequent words)
+     * 3. Edit distance ≤2 (fuzzy search on all words within ±MAX_LENGTH_DIFFERENCE_FUZZY characters of input length)
      *
      * Results sorted by frequency descending.
      *
@@ -510,22 +510,20 @@ constructor(
                 }
 
                 try {
+                    val minLen = (normalized.length - MAX_LENGTH_DIFFERENCE_FUZZY).coerceAtLeast(1)
+                    val maxLen = normalized.length + MAX_LENGTH_DIFFERENCE_FUZZY
                     val candidates =
-                        learnedWordDao.getMostFrequentWords(
+                        learnedWordDao.getWordsByLengthRange(
                             languageTag = languageCode,
-                            limit = FUZZY_SEARCH_CANDIDATE_LIMIT
+                            minLength = minLen,
+                            maxLength = maxLen,
+                            limit = FUZZY_SEARCH_LENGTH_RANGE_LIMIT
                         )
 
-                    val viableCandidates =
-                        candidates.filter { candidate ->
-                            val lengthDiff = kotlin.math.abs(
-                                candidate.wordNormalized.length - normalized.length
-                            )
-                            lengthDiff <= MAX_LENGTH_DIFFERENCE_FUZZY &&
-                                candidate.wordNormalized.length <= MAX_SIMILAR_WORD_LENGTH
+                    candidates
+                        .filter { candidate ->
+                            candidate.wordNormalized.length <= MAX_SIMILAR_WORD_LENGTH
                         }
-
-                    viableCandidates
                         .map { candidate ->
                             candidate to calculateEditDistance(candidate.wordNormalized, normalized)
                         }.filter { (candidate, distance) ->
@@ -1061,7 +1059,7 @@ constructor(
         const val MAX_NORMALIZED_WORD_LENGTH = 50
         const val MIN_PREFIX_MATCH_LENGTH = 2
         const val MIN_FUZZY_SEARCH_LENGTH = 4
-        const val FUZZY_SEARCH_CANDIDATE_LIMIT = 30
+        const val FUZZY_SEARCH_LENGTH_RANGE_LIMIT = 500
         const val STRIPPED_MATCH_LIMIT_SHORT = 200
         const val STRIPPED_MATCH_LIMIT_MEDIUM = 100
         const val MAX_LENGTH_DIFFERENCE_FUZZY = 2

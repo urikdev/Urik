@@ -716,8 +716,9 @@ constructor(
                                 CONTRACTION_GUARANTEED_CONFIDENCE
                             } else {
                                 val frequencyBoost = calculateFrequencyBoost(frequency)
+                                val spatialScore = calculateFullWordSpatialScore(normalizedWord, word.lowercase())
                                 val baseConfidence = LEARNED_WORD_BASE_CONFIDENCE - index * 0.02
-                                (baseConfidence + frequencyBoost).coerceIn(
+                                (baseConfidence + spatialScore * LEARNED_SPATIAL_WEIGHT + frequencyBoost).coerceIn(
                                     LEARNED_WORD_CONFIDENCE_MIN,
                                     LEARNED_WORD_CONFIDENCE_MAX
                                 )
@@ -1468,8 +1469,9 @@ constructor(
         const val INITIALIZATION_TIMEOUT_MS = 5000L
 
         const val FREQUENCY_BOOST_MULTIPLIER = 0.02
-        const val LEARNED_WORD_BASE_CONFIDENCE = 0.95
-        const val LEARNED_WORD_CONFIDENCE_MIN = 0.85
+        const val LEARNED_WORD_BASE_CONFIDENCE = 0.60
+        const val LEARNED_WORD_CONFIDENCE_MIN = 0.30
+        const val LEARNED_SPATIAL_WEIGHT = 0.35
         const val LEARNED_WORD_CONFIDENCE_MAX = 0.99
 
         const val MAX_PREFIX_COMPLETIONS = 5
