@@ -70,6 +70,9 @@
     <string name="appearance_settings_theme">السمة</string>
     <string name="appearance_settings_key_size">حجم المفتاح</string>
     <string name="appearance_settings_key_label_size">حجم طبعة المفتاح</string>
+    <string name="appearance_settings_press_highlight">تمييز ضغط المفتاح</string>
+    <string name="appearance_settings_press_highlight_on">التغذية الراجعة المرئية مفعلة</string>
+    <string name="appearance_settings_press_highlight_off">التغذية الراجعة المرئية مخفية</string>
 
     <!-- Auto-Correct Settings -->
     <string name="autocorrect_settings_spell_check">مصحح التهجئة</string>
@@ -122,9 +125,9 @@
     <string name="long_press_punctuation_spacebar">المسافة</string>
     <string name="long_press_punctuation_period">مفتاح النقطة</string>
     <string name="typing_settings_long_press_duration">فترة الضغط المطول</string>
-    <string name="typing_settings_reset_to_letters">إعادة الضبط إلى عرض الحروف عند تغيير الإدخال</string>
-    <string name="typing_settings_reset_to_letters_on">تشغيل</string>
-    <string name="typing_settings_reset_to_letters_off">إيقاف</string>
+    <string name="typing_settings_reset_to_letters">إعادة تعيين التخطيط</string>
+    <string name="typing_settings_reset_to_letters_on">إعادة الضبط إلى عرض الحروف</string>
+    <string name="typing_settings_reset_to_letters_off">البقاء في العرض الأخير</string>
 
     <!-- Layout & Input Settings -->
     <string name="layout_settings_alternative_layout">تخطيط لوحة المفاتيح</string>
@@ -320,6 +323,7 @@
 
     <string name="error_update_number_hints">فشل تحديث تلميحات الأرقام</string>
     <string name="error_update_reset_to_letters">فشل تحديث إعداد إعادة الضبط إلى الحروف</string>
+    <string name="error_update_press_highlight">فشل تحديث إعداد تمييز ضغط المفتاح</string>
     <string name="layout_settings_show_number_hints">إظهار تلميحات الأرقام</string>
     <string name="layout_settings_number_hints_on">تشغيل</string>
     <string name="layout_settings_number_hints_off">إيقاف</string>

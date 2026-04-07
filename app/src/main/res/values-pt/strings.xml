@@ -69,6 +69,9 @@
     <string name="appearance_settings_theme">Tema</string>
     <string name="appearance_settings_key_size">Tamanho da tecla</string>
     <string name="appearance_settings_key_label_size">Tamanho do rótulo da tecla</string>
+    <string name="appearance_settings_press_highlight">Destaque de tecla ao pressionar</string>
+    <string name="appearance_settings_press_highlight_on">Feedback visual exibido</string>
+    <string name="appearance_settings_press_highlight_off">Feedback visual ocultado</string>
 
     <!-- Auto-Correct Settings -->
     <string name="autocorrect_settings_spell_check">Correção ortográfica</string>
@@ -112,9 +115,9 @@
     <string name="typing_settings_swipe_on">Digitação por gestos ativada</string>
     <string name="typing_settings_swipe_off">Deslizar para digitar desativado</string>
     <string name="typing_settings_long_press_duration">Duração do toque prolongado</string>
-    <string name="typing_settings_reset_to_letters">Redefinir para vista de letras ao mudar entrada</string>
-    <string name="typing_settings_reset_to_letters_on">Ativado</string>
-    <string name="typing_settings_reset_to_letters_off">Desativado</string>
+    <string name="typing_settings_reset_to_letters">Redefinir layout</string>
+    <string name="typing_settings_reset_to_letters_on">Redefinir para vista de letras</string>
+    <string name="typing_settings_reset_to_letters_off">Permanecer na última vista</string>
     <string name="layout_settings_customize_keys">Personalizar Teclas</string>
     <string name="layout_settings_customize_keys_summary">Atribuir caractere personalizado a toque prolongado</string>
 
@@ -318,6 +321,7 @@
     <string name="max_languages_reached">Máximo de 3 idiomas permitidos</string>
     <string name="error_update_number_hints">Falha ao atualizar dicas numéricas</string>
     <string name="error_update_reset_to_letters">Falha ao atualizar configuração de redefinição para letras</string>
+    <string name="error_update_press_highlight">Falha ao atualizar configuração de destaque de tecla ao pressionar</string>
     <string name="layout_settings_show_number_hints">Mostrar dicas numéricas</string>
     <string name="layout_settings_number_hints_on">Ativado</string>
     <string name="layout_settings_number_hints_off">Desativado</string>

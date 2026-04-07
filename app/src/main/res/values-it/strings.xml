@@ -69,6 +69,9 @@
     <string name="appearance_settings_theme">Tema</string>
     <string name="appearance_settings_key_size">Dimensione tasti</string>
     <string name="appearance_settings_key_label_size">Dimensione etichette tasti</string>
+    <string name="appearance_settings_press_highlight">Evidenziazione tasto alla pressione</string>
+    <string name="appearance_settings_press_highlight_on">Feedback visivo mostrato</string>
+    <string name="appearance_settings_press_highlight_off">Feedback visivo nascosto</string>
 
     <!-- Auto-Correct Settings -->
     <string name="autocorrect_settings_spell_check">Controllo ortografico</string>
@@ -125,9 +128,9 @@
     <string name="long_press_punctuation_spacebar">Barra spaziatrice</string>
     <string name="long_press_punctuation_period">Tasto punto</string>
     <string name="typing_settings_long_press_duration">Durata pressione lunga</string>
-    <string name="typing_settings_reset_to_letters">Reimposta alla vista lettere al cambio di input</string>
-    <string name="typing_settings_reset_to_letters_on">Attivo</string>
-    <string name="typing_settings_reset_to_letters_off">Disattivo</string>
+    <string name="typing_settings_reset_to_letters">Reimposta layout</string>
+    <string name="typing_settings_reset_to_letters_on">Reimposta alla vista lettere</string>
+    <string name="typing_settings_reset_to_letters_off">Rimani sull\'ultima vista</string>
     <string name="layout_settings_customize_keys">Personalizza tasti</string>
     <string name="layout_settings_customize_keys_summary">Assegna carattere personalizzato a pressione prolungata</string>
 
@@ -319,6 +322,7 @@
     <string name="clipboard_item_delete">Elimina elemento appunti</string>
     <string name="error_update_number_hints">Impossibile aggiornare i suggerimenti numerici</string>
     <string name="error_update_reset_to_letters">Impossibile aggiornare l\'impostazione di reimpostazione alle lettere</string>
+    <string name="error_update_press_highlight">Impossibile aggiornare l\'impostazione di evidenziazione tasto alla pressione</string>
     <string name="layout_settings_show_number_hints">Mostra suggerimenti numerici</string>
     <string name="layout_settings_number_hints_on">Attivo</string>
     <string name="layout_settings_number_hints_off">Disattivo</string>

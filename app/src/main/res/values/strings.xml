@@ -71,6 +71,9 @@
     <string name="appearance_settings_theme">Theme</string>
     <string name="appearance_settings_key_size">Key Size</string>
     <string name="appearance_settings_key_label_size">Key Label Size</string>
+    <string name="appearance_settings_press_highlight">Key Press Highlight</string>
+    <string name="appearance_settings_press_highlight_on">Visual feedback shown</string>
+    <string name="appearance_settings_press_highlight_off">Visual feedback hidden</string>
 
     <!-- Auto-Correct Settings -->
     <string name="autocorrect_settings_spell_check">Spell Check</string>
@@ -126,9 +129,9 @@
     <string name="long_press_punctuation_spacebar">Spacebar</string>
     <string name="long_press_punctuation_period">Period Key</string>
     <string name="typing_settings_long_press_duration">Long Press Duration</string>
-    <string name="typing_settings_reset_to_letters">Reset to Letters View on Input Change</string>
-    <string name="typing_settings_reset_to_letters_on">On</string>
-    <string name="typing_settings_reset_to_letters_off">Off</string>
+    <string name="typing_settings_reset_to_letters">Reset Layout</string>
+    <string name="typing_settings_reset_to_letters_on">Reset to letters view</string>
+    <string name="typing_settings_reset_to_letters_off">Remain on last view</string>
 
     <!-- Layout & Input Settings -->
     <string name="layout_settings_alternative_layout">Keyboard Layout</string>
@@ -234,6 +237,7 @@
     <string name="error_update_autocorrection">Failed to update autocorrection setting</string>
     <string name="error_update_number_hints">Failed to update number hints</string>
     <string name="error_update_reset_to_letters">Failed to update reset to letters setting</string>
+    <string name="error_update_press_highlight">Failed to update key press highlight setting</string>
     <string name="layout_settings_show_number_hints">Show Number Hints</string>
     <string name="layout_settings_number_hints_on">On</string>
     <string name="layout_settings_number_hints_off">Off</string>

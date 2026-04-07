@@ -13,6 +13,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.preference.ListPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
+import androidx.preference.SwitchPreferenceCompat
 import com.urik.keyboard.R
 import com.urik.keyboard.settings.KeyLabelSize
 import com.urik.keyboard.settings.KeySize
@@ -39,6 +40,7 @@ class AppearanceFragment : PreferenceFragmentCompat() {
     private lateinit var themePref: Preference
     private lateinit var keySizePref: ListPreference
     private lateinit var labelSizePref: ListPreference
+    private lateinit var pressHighlightPref: SwitchPreferenceCompat
     private var testField: EditText? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -93,7 +95,17 @@ class AppearanceFragment : PreferenceFragmentCompat() {
                 summaryProvider = ListPreference.SimpleSummaryProvider.getInstance()
             }
 
+        pressHighlightPref =
+            SwitchPreferenceCompat(context).apply {
+                key = "press_highlight_enabled"
+                isPersistent = false
+                title = resources.getString(R.string.appearance_settings_press_highlight)
+                summaryOn = resources.getString(R.string.appearance_settings_press_highlight_on)
+                summaryOff = resources.getString(R.string.appearance_settings_press_highlight_off)
+            }
+
         screen.addPreference(themePref)
+        screen.addPreference(pressHighlightPref)
         screen.addPreference(keySizePref)
         screen.addPreference(labelSizePref)
 
@@ -113,6 +125,11 @@ class AppearanceFragment : PreferenceFragmentCompat() {
             true
         }
 
+        pressHighlightPref.setOnPreferenceChangeListener { _, newValue ->
+            viewModel.updateKeyPressHighlightEnabled(newValue as Boolean)
+            true
+        }
+
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
@@ -125,6 +142,7 @@ class AppearanceFragment : PreferenceFragmentCompat() {
                     viewModel.uiState.collect { state ->
                         keySizePref.value = state.keySize.name
                         labelSizePref.value = state.keyLabelSize.name
+                        pressHighlightPref.isChecked = state.keyPressHighlightEnabled
                     }
                 }
 

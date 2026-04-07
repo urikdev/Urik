@@ -69,6 +69,9 @@
     <string name="appearance_settings_theme">Téma</string>
     <string name="appearance_settings_key_size">Velikost kláves</string>
     <string name="appearance_settings_key_label_size">Velikost popisu kláves</string>
+    <string name="appearance_settings_press_highlight">Zvýraznění stisku klávesy</string>
+    <string name="appearance_settings_press_highlight_on">Vizuální zpětná vazba zobrazena</string>
+    <string name="appearance_settings_press_highlight_off">Vizuální zpětná vazba skryta</string>
 
     <!-- Auto-Correct Settings -->
     <string name="autocorrect_settings_spell_check">Kontrola pravopisu</string>
@@ -112,9 +115,9 @@
     <string name="typing_settings_swipe_on">Psaní přejetím prstem povoleno</string>
     <string name="typing_settings_swipe_off">Psaní přejetím prstem zakázáno</string>
     <string name="typing_settings_long_press_duration">Délka dlouhého stisku</string>
-    <string name="typing_settings_reset_to_letters">Přepnout zpět na písmena při změně vstupu</string>
-    <string name="typing_settings_reset_to_letters_on">Zapnuto</string>
-    <string name="typing_settings_reset_to_letters_off">Vypnuto</string>
+    <string name="typing_settings_reset_to_letters">Resetovat rozložení</string>
+    <string name="typing_settings_reset_to_letters_on">Přepnout zpět na písmena</string>
+    <string name="typing_settings_reset_to_letters_off">Zůstat na posledním zobrazení</string>
 
     <!-- Layout & Input Settings -->
     <string name="layout_settings_alternative_layout">Rozložení klávesnice</string>
@@ -318,6 +321,7 @@
     <string name="max_languages_reached">Povoleny maximálně 3 jazyky</string>
     <string name="error_update_number_hints">Nepodařilo se aktualizovat číselné nápovědy</string>
     <string name="error_update_reset_to_letters">Nepodařilo se aktualizovat nastavení přepnutí na písmena</string>
+    <string name="error_update_press_highlight">Nepodařilo se aktualizovat zvýraznění stisku klávesy</string>
     <string name="layout_settings_show_number_hints">Zobrazit číselné nápovědy</string>
     <string name="layout_settings_number_hints_on">Zapnuto</string>
     <string name="layout_settings_number_hints_off">Vypnuto</string>

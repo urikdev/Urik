@@ -69,6 +69,9 @@
     <string name="appearance_settings_theme">Tema</string>
     <string name="appearance_settings_key_size">Tamaño de la tecla</string>
     <string name="appearance_settings_key_label_size">Tamaño de la etiqueta tecla</string>
+    <string name="appearance_settings_press_highlight">Resaltado al pulsar tecla</string>
+    <string name="appearance_settings_press_highlight_on">Retroalimentación visual visible</string>
+    <string name="appearance_settings_press_highlight_off">Retroalimentación visual oculta</string>
 
     <!-- Auto-Correct Settings -->
     <string name="autocorrect_settings_spell_check">Corrección ortográfica</string>
@@ -112,9 +115,9 @@
     <string name="typing_settings_swipe_on">Deslizar para escribir habilitado</string>
     <string name="typing_settings_swipe_off">Deslizar para escribir deshabilitado</string>
     <string name="typing_settings_long_press_duration">Duración de pulsación larga</string>
-    <string name="typing_settings_reset_to_letters">Restablecer a la vista de letras al cambiar la entrada</string>
-    <string name="typing_settings_reset_to_letters_on">Activado</string>
-    <string name="typing_settings_reset_to_letters_off">Desactivado</string>
+    <string name="typing_settings_reset_to_letters">Restablecer diseño</string>
+    <string name="typing_settings_reset_to_letters_on">Restablecer a la vista de letras</string>
+    <string name="typing_settings_reset_to_letters_off">Permanecer en la última vista</string>
 
     <!-- Layout & Input Settings -->
     <string name="layout_settings_alternative_layout">Diseño de teclado</string>
@@ -318,6 +321,7 @@
     <string name="max_languages_reached">Se permiten máximo 3 idiomas</string>
     <string name="error_update_number_hints">No se pudieron actualizar las sugerencias de números</string>
     <string name="error_update_reset_to_letters">Error al actualizar la configuración de restablecimiento a letras</string>
+    <string name="error_update_press_highlight">Error al actualizar la configuración de resaltado al pulsar tecla</string>
     <string name="layout_settings_show_number_hints">Mostrar sugerencias de números</string>
     <string name="layout_settings_number_hints_on">Activado</string>
     <string name="layout_settings_number_hints_off">Desactivado</string>

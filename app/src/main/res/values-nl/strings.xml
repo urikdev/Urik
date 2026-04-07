@@ -69,6 +69,9 @@
     <string name="appearance_settings_theme">Thema</string>
     <string name="appearance_settings_key_size">Toetsgrootte</string>
     <string name="appearance_settings_key_label_size">Toetslabelgrootte</string>
+    <string name="appearance_settings_press_highlight">Toetsdrukmarkering</string>
+    <string name="appearance_settings_press_highlight_on">Visuele feedback weergegeven</string>
+    <string name="appearance_settings_press_highlight_off">Visuele feedback verborgen</string>
 
     <!-- Auto-Correct Settings -->
     <string name="autocorrect_settings_spell_check">Spellingscontrole</string>
@@ -125,9 +128,9 @@
     <string name="long_press_punctuation_spacebar">Spatiebalk</string>
     <string name="long_press_punctuation_period">Punttoets</string>
     <string name="typing_settings_long_press_duration">Duur lang indrukken</string>
-    <string name="typing_settings_reset_to_letters">Terugzetten naar letterweergave bij invoerwijziging</string>
-    <string name="typing_settings_reset_to_letters_on">Aan</string>
-    <string name="typing_settings_reset_to_letters_off">Uit</string>
+    <string name="typing_settings_reset_to_letters">Layout resetten</string>
+    <string name="typing_settings_reset_to_letters_on">Terugzetten naar letterweergave</string>
+    <string name="typing_settings_reset_to_letters_off">Op laatste weergave blijven</string>
     <string name="layout_settings_customize_keys">Toetsen aanpassen</string>
     <string name="layout_settings_customize_keys_summary">Aangepast teken toewijzen aan lang indrukken</string>
 
@@ -320,6 +323,7 @@
 
     <string name="error_update_number_hints">Kan getalsaanwijzingen niet bijwerken</string>
     <string name="error_update_reset_to_letters">Kan instelling voor terugzetten naar letters niet bijwerken</string>
+    <string name="error_update_press_highlight">Kan instelling voor toetsdrukmarkering niet bijwerken</string>
     <string name="layout_settings_show_number_hints">Getalsaanwijzingen weergeven</string>
     <string name="layout_settings_number_hints_on">Aan</string>
     <string name="layout_settings_number_hints_off">Uit</string>

@@ -69,6 +69,9 @@
     <string name="appearance_settings_theme">Téma</string>
     <string name="appearance_settings_key_size">Veľkosť klávesov</string>
     <string name="appearance_settings_key_label_size">Veľkosť popisu klávesov</string>
+    <string name="appearance_settings_press_highlight">Zvýraznenie stlačenia klávesu</string>
+    <string name="appearance_settings_press_highlight_on">Vizuálna spätná väzba zobrazená</string>
+    <string name="appearance_settings_press_highlight_off">Vizuálna spätná väzba skrytá</string>
 
     <!-- Auto-Correct Settings -->
     <string name="autocorrect_settings_spell_check">Kontrola pravopisu</string>
@@ -112,9 +115,9 @@
     <string name="typing_settings_swipe_on">Písanie prejdením prstom povolené</string>
     <string name="typing_settings_swipe_off">Písanie prejdením prstom zakázané</string>
     <string name="typing_settings_long_press_duration">Trvanie dlhého stlačenia</string>
-    <string name="typing_settings_reset_to_letters">Vrátiť sa na zobrazenie písmen pri zmene vstupu</string>
-    <string name="typing_settings_reset_to_letters_on">Zapnuté</string>
-    <string name="typing_settings_reset_to_letters_off">Vypnuté</string>
+    <string name="typing_settings_reset_to_letters">Resetovať rozloženie</string>
+    <string name="typing_settings_reset_to_letters_on">Vrátiť sa na zobrazenie písmen</string>
+    <string name="typing_settings_reset_to_letters_off">Zostať na poslednom zobrazení</string>
 
     <!-- Layout & Input Settings -->
     <string name="layout_settings_alternative_layout">Rozloženie klávesnice</string>
@@ -318,6 +321,7 @@
     <string name="max_languages_reached">Povolené maximálne 3 jazyky</string>
     <string name="error_update_number_hints">Nepodarilo sa aktualizovať číselné nápovedy</string>
     <string name="error_update_reset_to_letters">Nepodarilo sa aktualizovať nastavenie návratu na písmena</string>
+    <string name="error_update_press_highlight">Nepodarilo sa aktualizovať zvýraznenie stlačenia klávesu</string>
     <string name="layout_settings_show_number_hints">Zobraziť číselné nápovedy</string>
     <string name="layout_settings_number_hints_on">Zapnuté</string>
     <string name="layout_settings_number_hints_off">Vypnuté</string>

@@ -32,7 +32,8 @@ constructor(private val settingsRepository: SettingsRepository) : ViewModel() {
             .map { settings ->
                 AppearanceUiState(
                     keySize = settings.keySize,
-                    keyLabelSize = settings.keyLabelSize
+                    keyLabelSize = settings.keyLabelSize,
+                    keyPressHighlightEnabled = settings.keyPressHighlightEnabled
                 )
             }.stateIn(
                 scope = viewModelScope,
@@ -56,6 +57,14 @@ constructor(private val settingsRepository: SettingsRepository) : ViewModel() {
         }
     }
 
+    fun updateKeyPressHighlightEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            settingsRepository
+                .updateKeyPressHighlightEnabled(enabled)
+                .onFailure { _events.emit(SettingsEvent.Error.KeyPressHighlightToggleFailed) }
+        }
+    }
+
     private companion object {
         const val STOP_TIMEOUT_MILLIS = 5000L
     }
@@ -66,5 +75,6 @@ constructor(private val settingsRepository: SettingsRepository) : ViewModel() {
  */
 data class AppearanceUiState(
     val keySize: KeySize = KeySize.MEDIUM,
-    val keyLabelSize: KeyLabelSize = KeyLabelSize.MEDIUM
+    val keyLabelSize: KeyLabelSize = KeyLabelSize.MEDIUM,
+    val keyPressHighlightEnabled: Boolean = true
 )

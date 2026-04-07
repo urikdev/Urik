@@ -828,6 +828,7 @@ class UrikInputMethodService :
                         layoutManager.updateClipboardEnabled(newSettings.clipboardEnabled)
                         layoutManager.updateShowLanguageSwitchKey(newSettings.showLanguageSwitchKey)
                         layoutManager.updateNumberHints(newSettings.showNumberHints)
+                        layoutManager.updatePressHighlight(newSettings.keyPressHighlightEnabled)
 
                         if (layoutChanged) {
                             repository.cleanup()
@@ -1050,6 +1051,7 @@ class UrikInputMethodService :
         layoutManager.updateClipboardEnabled(currentSettings.clipboardEnabled)
         layoutManager.updateShowLanguageSwitchKey(currentSettings.showLanguageSwitchKey)
         layoutManager.updateNumberHints(currentSettings.showNumberHints)
+        layoutManager.updatePressHighlight(currentSettings.keyPressHighlightEnabled)
 
         if (serviceJob.isCancelled) {
             serviceJob = SupervisorJob()

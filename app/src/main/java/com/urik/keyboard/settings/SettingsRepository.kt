@@ -80,6 +80,7 @@ constructor(
         val AUTOCORRECTION_ENABLED = booleanPreferencesKey("autocorrection_enabled")
         val SHOW_NUMBER_HINTS = booleanPreferencesKey("show_number_hints")
         val RESET_TO_LETTERS_ON_DISMISS = booleanPreferencesKey("reset_to_letters_on_dismiss")
+        val PRESS_HIGHLIGHT_ENABLED = booleanPreferencesKey("press_highlight_enabled")
     }
 
     /**
@@ -238,7 +239,8 @@ constructor(
                     pauseOnMisspelledWord = preferences[PreferenceKeys.PAUSE_ON_MISSPELLED_WORD] ?: true,
                     autocorrectionEnabled = preferences[PreferenceKeys.AUTOCORRECTION_ENABLED] ?: false,
                     showNumberHints = preferences[PreferenceKeys.SHOW_NUMBER_HINTS] ?: false,
-                    resetToLettersOnDismiss = preferences[PreferenceKeys.RESET_TO_LETTERS_ON_DISMISS] ?: true
+                    resetToLettersOnDismiss = preferences[PreferenceKeys.RESET_TO_LETTERS_ON_DISMISS] ?: true,
+                    keyPressHighlightEnabled = preferences[PreferenceKeys.PRESS_HIGHLIGHT_ENABLED] ?: true
                 ).validated()
             }.catch { e ->
                 ErrorLogger.logException(
@@ -631,6 +633,16 @@ constructor(
      */
     suspend fun updateResetToLettersOnDismiss(enabled: Boolean): Result<Unit> = try {
         dataStore.edit { it[PreferenceKeys.RESET_TO_LETTERS_ON_DISMISS] = enabled }
+        Result.success(Unit)
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
+
+    /**
+     * Updates key press highlight toggle.
+     */
+    suspend fun updateKeyPressHighlightEnabled(enabled: Boolean): Result<Unit> = try {
+        dataStore.edit { it[PreferenceKeys.PRESS_HIGHLIGHT_ENABLED] = enabled }
         Result.success(Unit)
     } catch (e: Exception) {
         Result.failure(e)
