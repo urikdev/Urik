@@ -11,7 +11,6 @@ import android.util.TypedValue
 import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
 import android.view.View
-import android.view.accessibility.AccessibilityManager
 import android.view.animation.OvershootInterpolator
 import androidx.annotation.AttrRes
 import com.urik.keyboard.R
@@ -62,6 +61,7 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
         resolveThemeColors()
         importantForAccessibility = IMPORTANT_FOR_ACCESSIBILITY_YES
         contentDescription = context.getString(R.string.alphabet_sidebar_description)
+        accessibilityLiveRegion = ACCESSIBILITY_LIVE_REGION_POLITE
     }
 
     fun setOnLetterSelectedListener(listener: (String) -> Unit) {
@@ -126,13 +126,16 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
                 parent?.requestDisallowInterceptTouchEvent(true)
                 return true
             }
+
             MotionEvent.ACTION_MOVE -> {
                 updateSelectedIndex(event.y)
                 return true
             }
+
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                 isTouching = false
                 selectedIndex = -1
+                contentDescription = context.getString(R.string.alphabet_sidebar_description)
                 startAnimator(from = touchAnimationProgress, to = 0f, durationMs = 150, overshoot = false)
                 parent?.requestDisallowInterceptTouchEvent(false)
                 return true
@@ -151,13 +154,10 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
         val index = getLetterIndex(y)
         if (index != selectedIndex) {
             selectedIndex = index
+            contentDescription = letters[index]
             performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
             invalidate()
             onLetterSelected?.invoke(letters[index])
-            val a11yManager = context.getSystemService(Context.ACCESSIBILITY_SERVICE) as? AccessibilityManager
-            if (a11yManager?.isTouchExplorationEnabled == true) {
-                announceForAccessibility(letters[index])
-            }
         }
     }
 
@@ -217,13 +217,20 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
     }
 
     private fun resolveThemeColors() {
-        textColor = resolveColorAttr(android.R.attr.textColorSecondary, textColor)
+        textColor = resolveTextColor(android.R.attr.textColorSecondary, textColor)
         selectedTextColor = resolveColorAttr(android.R.attr.colorPrimary, selectedTextColor)
         val highlight = resolveColorAttr(android.R.attr.colorControlHighlight, 0x1A000000)
 
         barBackgroundColor = adjustAlpha(highlight, 0.3f)
         barTouchBackgroundColor = adjustAlpha(highlight, 0.6f)
         selectedCircleColor = adjustAlpha(selectedTextColor, 0.15f)
+    }
+
+    private fun resolveTextColor(@AttrRes attr: Int, fallback: Int): Int {
+        val ta = context.obtainStyledAttributes(intArrayOf(attr))
+        val color = ta.getColor(0, fallback)
+        ta.recycle()
+        return color
     }
 
     private fun resolveColorAttr(@AttrRes attr: Int, fallback: Int): Int {
