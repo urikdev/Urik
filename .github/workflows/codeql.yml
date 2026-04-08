@@ -39,11 +39,11 @@ jobs:
       with:
         persist-credentials: false
 
-    - name: Set up JDK 21
+    - name: Set up JDK 17
       if: matrix.language == 'java-kotlin'
       uses: actions/setup-java@v5
       with:
-        java-version: '21'
+        java-version: '17'
         distribution: 'temurin'
 
     - name: Initialize CodeQL
