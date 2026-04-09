@@ -279,7 +279,7 @@
     <string name="tip_1_description">Naciśnij spację po zaznaczonym błędzie, aby dodać słowo do swojego słownika.</string>
 
     <string name="tip_2_title">Szybkie Menu Interpunkcji</string>
-    <string name="tip_2_description">Długie naciśnięcie klawisza spacji otworzy szybkie menu interpunkcji.</string>
+    <string name="tip_2_description">Długie naciśnięcie kropki lub klawisza spacji otworzy szybkie menu interpunkcji.</string>
 
     <string name="tip_3_title">Warianty Znaków</string>
     <string name="tip_3_description">Długie naciśnięcie na znaku pozwoli wybrać wariant dla tego znaku.</string>
@@ -289,6 +289,12 @@
 
     <string name="tip_5_title">Menedżer Schowka</string>
     <string name="tip_5_description">Długie naciśnięcie na klawiszu symbolu otworzy zarządzanie schowka.</string>
+
+    <string name="tip_6_title">Sterowanie Kursorem</string>
+    <string name="tip_6_description">Przesuń palcem w lewo lub prawo po klawiszu spacji, aby przesunąć kursor o jeden znak.</string>
+
+    <string name="tip_7_title">Szybkie Usuwanie</string>
+    <string name="tip_7_description">Przesuń palcem w lewo po klawiszu cofania, aby usunąć całe słowo.</string>
 
     <!-- Clipboard Panel -->
     <string name="clipboard_panel_pinned">Przypięte</string>

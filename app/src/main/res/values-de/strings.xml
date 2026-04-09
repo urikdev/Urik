@@ -277,7 +277,7 @@
     <string name="tip_1_description">Drücke die Leertaste nach einem Schreibfehler, um das Wort dem Wörterbuch hinzuzufügen.</string>
 
     <string name="tip_2_title">Interpunktion-Schnellzugriffmenü</string>
-    <string name="tip_2_description">Halte die Leertaste gedrückt, um das Interpunktion-Schnellzugriffmenü zu öffnen.</string>
+    <string name="tip_2_description">Halte den Punkt oder die Leertaste gedrückt, um das Interpunktion-Schnellzugriffmenü zu öffnen.</string>
 
     <string name="tip_3_title">Zeichenvariationen</string>
     <string name="tip_3_description">Halt eine Zeichentaste gedrückt, um mehr Variationen dieses Zeichens zu sehen.</string>
@@ -301,6 +301,10 @@
     <string name="clipboard_item_unpin">Zwischenablage-Element lösen</string>
     <string name="clipboard_item_delete">Zwischenablage-Element löschen</string>
     <string name="tip_5_title">Zwischenablage-Manager</string>
+    <string name="tip_6_title">Cursorsteuerung</string>
+    <string name="tip_6_description">Wische links oder rechts auf der Leertaste, um den Cursor um ein Zeichen zu bewegen.</string>
+    <string name="tip_7_title">Schnell löschen</string>
+    <string name="tip_7_description">Wische links auf der Rücktaste, um ein ganzes Wort zu löschen.</string>
     <string name="typing_settings_swipe_enabled">Wischgesten-Eingabe</string>
     <string name="typing_settings_spacebar_cursor">Cursor-Positionierung mit der Leertaste</string>
     <string name="typing_settings_spacebar_cursor_on">Leertaste wischen, um Cursor zu bewegen</string>

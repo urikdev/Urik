@@ -279,7 +279,7 @@
     <string name="tip_1_description">Натисніть пробіл після виділеної опечатки, щоб додати слово до вашого словника.</string>
 
     <string name="tip_2_title">Швидке Меню Пунктуації</string>
-    <string name="tip_2_description">Натисніть та тримайте пробіл, щоб відкрити швидке меню пунктуації.</string>
+    <string name="tip_2_description">Натисніть та тримайте крапку або пробіл, щоб відкрити швидке меню пунктуації.</string>
 
     <string name="tip_3_title">Варіації Символів</string>
     <string name="tip_3_description">Натисніть та тримайте символ, щоб вибрати його варіацію.</string>
@@ -289,6 +289,12 @@
 
     <string name="tip_5_title">Менеджер Буфера Обміну</string>
     <string name="tip_5_description">Натисніть та тримайте клавішу символів, щоб відкрити Менеджер Буфера Обміну.</string>
+
+    <string name="tip_6_title">Керування Курсором</string>
+    <string name="tip_6_description">Проведіть вліво або вправо по пробілу, щоб перемістити курсор на один символ.</string>
+
+    <string name="tip_7_title">Швидке Видалення</string>
+    <string name="tip_7_description">Проведіть вліво по клавіші видалення, щоб видалити ціле слово.</string>
 
     <!-- Clipboard Panel -->
     <string name="clipboard_panel_pinned">Закріплені</string>

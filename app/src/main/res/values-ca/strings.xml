@@ -269,13 +269,17 @@
     <string name="tip_1_title">Aprendre paraules</string>
     <string name="tip_1_description">Premeu la barra espaiadora després d\'una errada tipogràfica ressaltada per afegir la paraula al vostre diccionari.</string>
     <string name="tip_2_title">Menú ràpid de puntuació</string>
-    <string name="tip_2_description">Mantingueu premuda la barra espaiadora per obrir un menú ràpid de puntuació.</string>
+    <string name="tip_2_description">Mantingueu premut el punt o la barra espaiadora per obrir un menú ràpid de puntuació.</string>
     <string name="tip_3_title">Variacions de caràcters</string>
     <string name="tip_3_description">Prem llargament un caràcter per seleccionar-ne una variació.</string>
     <string name="tip_4_title">Eliminar paraules</string>
     <string name="tip_4_description">Mantingueu premut un suggeriment per eliminar-lo del vostre diccionari.</string>
     <string name="tip_5_title">Administrador del porta-retalls</string>
     <string name="tip_5_description">Mantingueu premut el símbol de la tecla per obrir l\'administrador del porta-retalls.</string>
+    <string name="tip_6_title">Control del cursor</string>
+    <string name="tip_6_description">Llisca cap a l\'esquerra o dreta a la barra espaiadora per moure el cursor un caràcter a la vegada.</string>
+    <string name="tip_7_title">Eliminació ràpida</string>
+    <string name="tip_7_description">Llisca cap a l\'esquerra a la tecla de retrocés per eliminar una paraula sencera.</string>
     <!-- Clipboard Panel -->
     <string name="clipboard_panel_pinned">Fixat</string>
     <string name="clipboard_panel_recent">Recent</string>

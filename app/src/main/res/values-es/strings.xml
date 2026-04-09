@@ -278,7 +278,7 @@
     <string name="tip_1_description">Pulsa la barra espaciadora después de resaltar una errata para añadir la palabra a tu diccionario.</string>
 
     <string name="tip_2_title">Menú rápido de puntuación</string>
-    <string name="tip_2_description">Mantén pulsada la barra espaciadora para abrir un menú rápido de puntuación.</string>
+    <string name="tip_2_description">Mantén pulsado el punto o la barra espaciadora para abrir un menú rápido de puntuación.</string>
 
     <string name="tip_3_title">Variaciones de caracteres</string>
     <string name="tip_3_description">Mantén pulsado un personaje para seleccionar una variante para ese personaje.</string>
@@ -302,6 +302,10 @@
     <string name="clipboard_item_unpin">Desfijar elemento del portapapeles</string>
     <string name="clipboard_item_delete">Eliminar elemento del portapapeles</string>
     <string name="tip_5_title">Administrador del portapapeles</string>
+    <string name="tip_6_title">Control del cursor</string>
+    <string name="tip_6_description">Desliza hacia la izquierda o derecha en la barra espaciadora para mover el cursor un carácter a la vez.</string>
+    <string name="tip_7_title">Eliminar rápido</string>
+    <string name="tip_7_description">Desliza hacia la izquierda en la tecla de retroceso para eliminar una palabra completa.</string>
     <string name="typing_settings_swipe_enabled">Escritura deslizando</string>
     <string name="typing_settings_spacebar_cursor">Control del cursor con la barra espaciadora</string>
     <string name="typing_settings_spacebar_cursor_on">Deslice la barra espaciadora para mover el cursor</string>

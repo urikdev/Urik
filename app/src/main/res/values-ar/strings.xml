@@ -292,7 +292,7 @@
     <string name="tip_1_description">اضغط المسافة بعد الكلمة الخاطئة المضللة لإضافتها إلى معجمك.</string>
 
     <string name="tip_2_title">قائمة الرموز السريعة</string>
-    <string name="tip_2_description">إضغط مطولًا على المسافة لفتح قائمة الرموز السريعة.</string>
+    <string name="tip_2_description">إضغط مطولًا على النقطة أو المسافة لفتح قائمة الرموز السريعة.</string>
 
     <string name="tip_3_title">تفاوت الحرف</string>
     <string name="tip_3_description">إضغط مطولًا على حرف لإختيار تفاوت لهذا الحرف.</string>
@@ -302,6 +302,12 @@
 
     <string name="tip_5_title">مدير الحافظة</string>
     <string name="tip_5_description">إضغط مطولًا على زر الرموز لفتح مدير الحافظة.</string>
+
+    <string name="tip_6_title">التحكم بالمؤشر</string>
+    <string name="tip_6_description">اسحب يسارًا أو يمينًا على مفتاح المسافة لتحريك المؤشر حرفًا واحدًا في كل مرة.</string>
+
+    <string name="tip_7_title">الحذف السريع</string>
+    <string name="tip_7_description">اسحب يسارًا على مفتاح الحذف لمسح كلمة كاملة مرة واحدة.</string>
 
     <!-- Clipboard Panel -->
     <string name="clipboard_panel_pinned">مثبتة</string>
