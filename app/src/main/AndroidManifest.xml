@@ -74,7 +74,8 @@
             android:name=".UrikInputMethodService"
             android:exported="true"
             android:label="@string/ime_name"
-            android:permission="android.permission.BIND_INPUT_METHOD">
+            android:permission="android.permission.BIND_INPUT_METHOD"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|locale|layoutDirection">
             <intent-filter>
                 <action android:name="android.view.InputMethod" />
             </intent-filter>

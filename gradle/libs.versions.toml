@@ -9,8 +9,9 @@ emoji2Emojipicker = "1.6.0"
 hiltAndroid = "2.59.2"
 icu4j = "78.3"
 coreKtx = "1.18.0"
-coreKtxVersion = "1.7.0"
+testCoreKtx = "1.7.0"
 junit = "4.13.2"
+kotlin = "2.3.20"
 kotlinxCoroutinesAndroid = "1.10.2"
 kotlinxCoroutinesTest = "1.10.2"
 kotlinxSerializationJson = "1.10.0"
@@ -42,7 +43,7 @@ androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomRunt
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
 androidx-sqlite-ktx = { module = "androidx.sqlite:sqlite-ktx", version.ref = "sqliteKtx" }
 androidx-window = { module = "androidx.window:window", version.ref = "window" }
-core-ktx = { group = "androidx.test", name = "core-ktx", version.ref = "coreKtxVersion" }
+core-ktx = { group = "androidx.test", name = "core-ktx", version.ref = "testCoreKtx" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroid" }
 hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hiltAndroid" }
 icu4j = { module = "com.ibm.icu:icu4j", version.ref = "icu4j" }
@@ -57,3 +58,4 @@ robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectr
 symspellkt = { module = "com.darkrockstudios:symspellkt", version.ref = "symspellkt" }
 
 [plugins]
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
