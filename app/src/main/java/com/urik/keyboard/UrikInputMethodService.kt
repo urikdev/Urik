@@ -1268,7 +1268,11 @@ class UrikInputMethodService :
             val newCursorPositionInText = cursorPosInWord + char.length
 
             if (isStartingNewWord) {
-                inputState.composingRegionStart = outputBridge.safeGetCursorPosition()
+                inputState.composingRegionStart = if (inputState.isKnownCursorTrustworthy()) {
+                    inputState.lastKnownCursorPosition
+                } else {
+                    outputBridge.safeGetCursorPosition()
+                }
             }
 
             val needsCursorRepositioning =

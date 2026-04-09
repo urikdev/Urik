@@ -1409,22 +1409,22 @@ constructor(
     private fun calculateAverageKeySpacing(keyPositions: Map<Char, android.graphics.PointF>): Double {
         if (keyPositions.size < 2) return 0.0
 
-        val positions = keyPositions.values
-        var totalDistanceSquared = 0.0
-        var count = 0
+        val posArray = keyPositions.values.toTypedArray()
+        var totalMinDistance = 0.0
 
-        val posArray = positions.toTypedArray()
         for (i in posArray.indices) {
-            val end = minOf(i + 4, posArray.size)
-            for (j in i + 1 until end) {
-                val dx = posArray[i].x - posArray[j].x
-                val dy = posArray[i].y - posArray[j].y
-                totalDistanceSquared += (dx * dx + dy * dy).toDouble()
-                count++
+            var minDistSq = Double.MAX_VALUE
+            for (j in posArray.indices) {
+                if (i == j) continue
+                val dx = (posArray[i].x - posArray[j].x).toDouble()
+                val dy = (posArray[i].y - posArray[j].y).toDouble()
+                val distSq = dx * dx + dy * dy
+                if (distSq < minDistSq) minDistSq = distSq
             }
+            if (minDistSq != Double.MAX_VALUE) totalMinDistance += kotlin.math.sqrt(minDistSq)
         }
 
-        return if (count > 0) kotlin.math.sqrt(totalDistanceSquared / count) else 0.0
+        return totalMinDistance / posArray.size
     }
 
     private fun calculateFrequencyBoost(frequency: Int): Double {
