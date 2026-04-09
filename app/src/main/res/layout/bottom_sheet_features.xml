@@ -96,7 +96,8 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:layout_marginBottom="12dp">
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -108,6 +109,49 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/tip_5_description"
+                android:textSize="13sp"
+                android:textColor="@color/content_primary"
+                android:layout_marginTop="2dp"
+                android:alpha="0.8" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginBottom="12dp">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/tip_6_title"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="@color/content_primary" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/tip_6_description"
+                android:textSize="13sp"
+                android:textColor="@color/content_primary"
+                android:layout_marginTop="2dp"
+                android:alpha="0.8" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/tip_7_title"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="@color/content_primary" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/tip_7_description"
                 android:textSize="13sp"
                 android:textColor="@color/content_primary"
                 android:layout_marginTop="2dp"

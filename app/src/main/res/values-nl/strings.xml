@@ -295,7 +295,7 @@
     <string name="tip_1_description">Druk op spatie na een gemarkeerde spelfout om het woord aan je woordenboek toe te voegen.</string>
 
     <string name="tip_2_title">Leestekenmenu</string>
-    <string name="tip_2_description">Druk lang op de spatiebalk om het menu voor leestekens te openen.</string>
+    <string name="tip_2_description">Druk lang op de punt of spatiebalk om het menu voor leestekens te openen.</string>
 
     <string name="tip_3_title">Tekenvariaties</string>
     <string name="tip_3_description">Druk lang op een teken om een variatie voor dat teken te selecteren.</string>
@@ -305,6 +305,12 @@
 
     <string name="tip_5_title">Klembordbeheerder</string>
     <string name="tip_5_description">Druk lang op de symbooltoets om de Klembordbeheerder te openen.</string>
+
+    <string name="tip_6_title">Cursorcontrole</string>
+    <string name="tip_6_description">Veeg naar links of rechts op de spatiebalk om de cursor één teken tegelijk te verplaatsen.</string>
+
+    <string name="tip_7_title">Snel verwijderen</string>
+    <string name="tip_7_description">Veeg naar links op de backspacetoets om een heel woord te verwijderen.</string>
 
     <!-- Clipboard Panel -->
     <string name="clipboard_panel_pinned">Vastgezet</string>

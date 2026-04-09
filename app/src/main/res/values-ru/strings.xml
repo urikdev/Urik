@@ -281,7 +281,7 @@
     <string name="tip_1_description">Нажмите пробел после выделенной опечатки, чтобы добавить слово в словарь.</string>
 
     <string name="tip_2_title">Быстрое Меню Пунктуации</string>
-    <string name="tip_2_description">Нажмите и удерживайте пробел, чтобы открыть быстрое меню пунктуации.</string>
+    <string name="tip_2_description">Нажмите и удерживайте точку или пробел, чтобы открыть быстрое меню пунктуации.</string>
 
     <string name="tip_3_title">Варианты Символов</string>
     <string name="tip_3_description">Нажмите и удерживайте символ, чтобы выбрать его вариант.</string>
@@ -291,6 +291,12 @@
 
     <string name="tip_5_title">Менеджер Буфера Обмена</string>
     <string name="tip_5_description">Нажмите и удерживайте клавишу символов, чтобы открыть Менеджер Буфера Обмена.</string>
+
+    <string name="tip_6_title">Управление Курсором</string>
+    <string name="tip_6_description">Проведите влево или вправо по пробелу, чтобы переместить курсор на один символ.</string>
+
+    <string name="tip_7_title">Быстрое Удаление</string>
+    <string name="tip_7_description">Проведите влево по клавише удаления, чтобы удалить целое слово.</string>
 
     <!-- Clipboard Panel -->
     <string name="clipboard_panel_pinned">Закрепленные</string>

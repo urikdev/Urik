@@ -278,7 +278,7 @@
     <string name="tip_1_description">Stlačte medzerník na pridanie zvýrazneného preklepu do vášho slovníka.</string>
 
     <string name="tip_2_title">Rýchle menu interpunkcie</string>
-    <string name="tip_2_description">Dlho podržte medzerník na otvorenie rýchleho menu interpunkcie.</string>
+    <string name="tip_2_description">Dlho podržte bodku alebo medzerník na otvorenie rýchleho menu interpunkcie.</string>
 
     <string name="tip_3_title">Variácie znakov</string>
     <string name="tip_3_description">Dlho podržte znak na zobrazenie variantov znaku.</string>
@@ -302,6 +302,10 @@
     <string name="clipboard_item_unpin">Odopnúť položku schránky</string>
     <string name="clipboard_item_delete">Zmazať položku schránky</string>
     <string name="tip_5_title">Správca schránky</string>
+    <string name="tip_6_title">Ovládanie kurzoru</string>
+    <string name="tip_6_description">Prejdite prstom doľava alebo doprava po medzerníku pre presun kurzora o jeden znak.</string>
+    <string name="tip_7_title">Rýchle zmazanie</string>
+    <string name="tip_7_description">Prejdite prstom doľava po klávese Backspace pre zmazanie celého slova.</string>
     <string name="typing_settings_swipe_enabled">Písanie ťahom</string>
     <string name="typing_settings_spacebar_cursor">Ovládanie kurzoru medzerníkom</string>
     <string name="typing_settings_spacebar_cursor_on">Prejdením po medzerníku posúvate kurzor</string>

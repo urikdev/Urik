@@ -294,7 +294,7 @@
     <string name="tip_1_description">پس از یک اشتباه املایی برجسته، فاصله را بزنید تا کلمه به لغت‌نامه شما اضافه شود.</string>
 
     <string name="tip_2_title">منوی سریع نقطه‌گذاری</string>
-    <string name="tip_2_description">نوار فاصله را نگه دارید تا منوی سریع نقطه‌گذاری باز شود.</string>
+    <string name="tip_2_description">نقطه یا نوار فاصله را نگه دارید تا منوی سریع نقطه‌گذاری باز شود.</string>
 
     <string name="tip_3_title">تنوع کاراکترها</string>
     <string name="tip_3_description">برای انتخاب تنوع یک کاراکتر، آن را نگه دارید.</string>
@@ -304,6 +304,12 @@
 
     <string name="tip_5_title">مدیریت کلیپ‌بورد</string>
     <string name="tip_5_description">کلید نماد را نگه دارید تا مدیر کلیپ‌بورد باز شود.</string>
+
+    <string name="tip_6_title">کنترل مکان‌نما</string>
+    <string name="tip_6_description">روی نوار فاصله به چپ یا راست بکشید تا مکان‌نما یک کاراکتر جابجا شود.</string>
+
+    <string name="tip_7_title">حذف سریع</string>
+    <string name="tip_7_description">روی کلید حذف به چپ بکشید تا یک کلمه کامل حذف شود.</string>
 
     <!-- Clipboard Panel -->
     <string name="clipboard_panel_pinned">سنجاق‌شده</string>

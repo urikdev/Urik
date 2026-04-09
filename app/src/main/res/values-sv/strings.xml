@@ -232,7 +232,7 @@
     <string name="tip_1_title">Lärande ord</string>
     <string name="tip_1_description">Tryck mellanslag efter ett markerat stavfel för att lägga till ordet i din ordbok.</string>
     <string name="tip_2_title">Interpunktion</string>
-    <string name="tip_2_description">Långt tryck på mellanslagstangenten för att öppna en snabbmeny för skiljetecken.</string>
+    <string name="tip_2_description">Långt tryck på punkt eller mellanslagstangenten för att öppna en snabbmeny för skiljetecken.</string>
     <string name="tip_3_title">Karaktärsvariationer</string>
     <string name="tip_3_description">Tryck länge på ett tecken för att välja en variant av det tecknet.</string>
     <string name="tip_4_title">Ta bort ord</string>
@@ -250,6 +250,10 @@
     <string name="clipboard_item_unpin">Lossa urklippsobjekt</string>
     <string name="clipboard_item_delete">Ta bort urklippsobjekt</string>
     <string name="tip_5_title">Urklippshanteraren</string>
+    <string name="tip_6_title">Markörskontroll</string>
+    <string name="tip_6_description">Svep åt vänster eller höger på mellanslagstangenten för att flytta markören ett tecken i taget.</string>
+    <string name="tip_7_title">Snabb borttagning</string>
+    <string name="tip_7_description">Svep åt vänster på backstegstangenten för att ta bort ett helt ord.</string>
     <string name="typing_settings_swipe_enabled">Svepskrivning</string>
     <string name="typing_settings_spacebar_cursor">Mellanslagsmarkörkontroll</string>
     <string name="typing_settings_spacebar_cursor_on">Drej mellanslagstangenten för att flytta markören</string>

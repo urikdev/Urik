@@ -269,13 +269,17 @@
     <string name="tip_1_title">Εκμάθηση λέξεων</string>
     <string name="tip_1_description">Πατήστε το διάστημα μετά από επισημασμένο ορθογραφικό λάθος για να προσθέσετε τη λέξη στο λεξικό σας.</string>
     <string name="tip_2_title">Γρήγορο μενού σημείων στίξης</string>
-    <string name="tip_2_description">Πατήστε παρατεταμένα το πλήκτρο διαστήματος για να ανοίξετε το γρήγορο μενού σημείων στίξης.</string>
+    <string name="tip_2_description">Πατήστε παρατεταμένα την τελεία ή το πλήκτρο διαστήματος για να ανοίξετε το γρήγορο μενού σημείων στίξης.</string>
     <string name="tip_3_title">Παραλλαγές χαρακτήρων</string>
     <string name="tip_3_description">Πατήστε παρατεταμένα έναν χαρακτήρα για να επιλέξετε μια παραλλαγή του.</string>
     <string name="tip_4_title">Διαγραφή λέξεων</string>
     <string name="tip_4_description">Πατήστε παρατεταμένα μια πρόταση για να τη διαγράψετε από το λεξικό σας.</string>
     <string name="tip_5_title">Διαχείριση προχείρου</string>
     <string name="tip_5_description">Πατήστε παρατεταμένα το πλήκτρο συμβόλων για να ανοίξετε τον διαχειριστή προχείρου.</string>
+    <string name="tip_6_title">Έλεγχος κέρσορα</string>
+    <string name="tip_6_description">Σαρώστε αριστερά ή δεξιά στο πλήκτρο διαστήματος για να μετακινήσετε τον κέρσορα έναν χαρακτήρα τη φορά.</string>
+    <string name="tip_7_title">Γρήγορη διαγραφή</string>
+    <string name="tip_7_description">Σαρώστε αριστερά στο πλήκτρο backspace για να διαγράψετε ολόκληρη λέξη.</string>
     <!-- Clipboard Panel -->
     <string name="clipboard_panel_pinned">Καρφιτσωμένο</string>
     <string name="clipboard_panel_recent">Πρόσφατα</string>
