@@ -107,6 +107,7 @@ class OutputBridge(
         } finally {
             ic?.endBatchEdit()
         }
+
         return true
     }
 

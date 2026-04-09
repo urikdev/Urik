@@ -1193,7 +1193,9 @@ class UrikInputMethodService :
                 }
             }
 
-            if (inputState.displayBuffer.isNotEmpty()) {
+            val fastPath = inputState.isComposingCursorAtExpectedEnd()
+
+            if (!fastPath && inputState.displayBuffer.isNotEmpty()) {
                 val actualTextBefore = outputBridge.safeGetTextBeforeCursor(1)
                 val actualTextAfter = outputBridge.safeGetTextAfterCursor(1)
 
@@ -1211,7 +1213,7 @@ class UrikInputMethodService :
 
             var cachedAbsoluteCursorPos: Int? = null
 
-            if (inputState.composingRegionStart != -1 && inputState.displayBuffer.isNotEmpty()) {
+            if (!fastPath && inputState.composingRegionStart != -1 && inputState.displayBuffer.isNotEmpty()) {
                 val absoluteCursorPos = outputBridge.safeGetCursorPosition()
                 cachedAbsoluteCursorPos = absoluteCursorPos
                 val cursorOffsetInWord = (absoluteCursorPos - inputState.composingRegionStart).coerceIn(
@@ -1239,7 +1241,9 @@ class UrikInputMethodService :
             }
 
             val cursorPosInWord =
-                if (inputState.composingRegionStart != -1 && inputState.displayBuffer.isNotEmpty()) {
+                if (fastPath) {
+                    inputState.displayBuffer.length
+                } else if (inputState.composingRegionStart != -1 && inputState.displayBuffer.isNotEmpty()) {
                     val absoluteCursorPos = cachedAbsoluteCursorPos ?: outputBridge.safeGetCursorPosition()
                     CursorEditingUtils.calculateCursorPositionInWord(
                         absoluteCursorPos,
@@ -1893,24 +1897,13 @@ class UrikInputMethodService :
                 return
             }
 
-            val textBeforeCursor = outputBridge.safeGetTextBeforeCursor(WORD_BOUNDARY_CONTEXT_LENGTH)
-
             if (inputState.isSecureField) {
+                val textBeforeCursor = outputBridge.safeGetTextBeforeCursor(WORD_BOUNDARY_CONTEXT_LENGTH)
                 if (textBeforeCursor.isNotEmpty()) {
                     val graphemeLength = BackspaceUtils.getLastGraphemeClusterLength(textBeforeCursor)
                     outputBridge.deleteSurroundingText(graphemeLength, 0)
                 }
                 return
-            }
-
-            if (inputState.displayBuffer.isNotEmpty()) {
-                val actualTextBefore = outputBridge.safeGetTextBeforeCursor(1)
-                val actualTextAfter = outputBridge.safeGetTextAfterCursor(1)
-
-                if (actualTextBefore.isEmpty() && actualTextAfter.isEmpty()) {
-                    coordinateStateClear()
-                    return
-                }
             }
 
             if (inputState.spellConfirmationState == SpellConfirmationState.AWAITING_CONFIRMATION) {
@@ -1923,22 +1916,24 @@ class UrikInputMethodService :
             }
 
             if (inputState.displayBuffer.isNotEmpty() && inputState.composingRegionStart != -1) {
-                val absoluteCursorPos = outputBridge.safeGetCursorPosition()
-                val cursorOffsetInWord = (absoluteCursorPos - inputState.composingRegionStart).coerceIn(
+                val cursorOffsetInWord = (actualCursorPos - inputState.composingRegionStart).coerceIn(
                     0,
                     inputState.displayBuffer.length
                 )
                 val charsAfterCursorInWord = inputState.displayBuffer.length - cursorOffsetInWord
 
-                val textBeforePart = outputBridge.safeGetTextBeforeCursor(
-                    cursorOffsetInWord
-                ).takeLast(cursorOffsetInWord)
-                val textAfterPart = outputBridge.safeGetTextAfterCursor(
-                    charsAfterCursorInWord
-                ).take(charsAfterCursorInWord)
-                val actualComposingText = textBeforePart + textAfterPart
+                val textBeforePart = if (cursorOffsetInWord > 0) {
+                    outputBridge.safeGetTextBeforeCursor(cursorOffsetInWord).takeLast(cursorOffsetInWord)
+                } else {
+                    ""
+                }
+                val textAfterPart = if (charsAfterCursorInWord > 0) {
+                    outputBridge.safeGetTextAfterCursor(charsAfterCursorInWord).take(charsAfterCursorInWord)
+                } else {
+                    ""
+                }
 
-                if (actualComposingText != inputState.displayBuffer) {
+                if (textBeforePart + textAfterPart != inputState.displayBuffer) {
                     coordinateStateClear()
                     handleCommittedTextBackspace()
                     return
@@ -1962,21 +1957,19 @@ class UrikInputMethodService :
             inputState.isActivelyEditing = true
 
             if (inputState.displayBuffer.isNotEmpty()) {
-                val absoluteCursorPos = outputBridge.safeGetCursorPosition()
-
                 val cursorPosInWord =
                     if (inputState.composingRegionStart != -1) {
                         CursorEditingUtils.calculateCursorPositionInWord(
-                            absoluteCursorPos,
+                            actualCursorPos,
                             inputState.composingRegionStart,
                             inputState.displayBuffer.length
                         )
                     } else {
-                        val potentialStart = absoluteCursorPos - inputState.displayBuffer.length
+                        val potentialStart = actualCursorPos - inputState.displayBuffer.length
                         if (potentialStart >= 0) {
                             inputState.composingRegionStart = potentialStart
                             CursorEditingUtils.calculateCursorPositionInWord(
-                                absoluteCursorPos,
+                                actualCursorPos,
                                 inputState.composingRegionStart,
                                 inputState.displayBuffer.length
                             )
@@ -2642,7 +2635,9 @@ class UrikInputMethodService :
             candidatesEnd
         )
 
-        if (inputState.requiresDirectCommit) return
+        if (inputState.requiresDirectCommit) {
+            return
+        }
 
         val selectionResult =
             inputState.selectionStateTracker.updateSelection(
@@ -2695,7 +2690,8 @@ class UrikInputMethodService :
             return
         }
 
-        if (inputState.tryConsumeTypingOus(newSelStart, candidatesStart, candidatesEnd)) {
+        val ousConsumed = inputState.tryConsumeTypingOus(newSelStart, candidatesStart, candidatesEnd)
+        if (ousConsumed) {
             inputState.lastKnownCursorPosition = newSelStart
             return
         }

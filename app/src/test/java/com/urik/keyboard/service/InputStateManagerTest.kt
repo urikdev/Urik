@@ -159,4 +159,54 @@ class InputStateManagerTest {
 
         assertFalse(stateManager.tryConsumeTypingOus(cursor = 5, candStart = 0, candEnd = 5))
     }
+
+    @Test
+    fun `isComposingCursorAtExpectedEnd returns true when all conditions met`() {
+        stateManager.composingRegionStart = 10
+        stateManager.displayBuffer = "hello"
+        stateManager.isActivelyEditing = false
+        stateManager.lastKnownCursorPosition = 15
+
+        assertTrue(stateManager.isComposingCursorAtExpectedEnd())
+    }
+
+    @Test
+    fun `isComposingCursorAtExpectedEnd returns false when composingRegionStart is -1`() {
+        stateManager.composingRegionStart = -1
+        stateManager.displayBuffer = "hello"
+        stateManager.isActivelyEditing = false
+        stateManager.lastKnownCursorPosition = 5
+
+        assertFalse(stateManager.isComposingCursorAtExpectedEnd())
+    }
+
+    @Test
+    fun `isComposingCursorAtExpectedEnd returns false when displayBuffer is empty`() {
+        stateManager.composingRegionStart = 10
+        stateManager.displayBuffer = ""
+        stateManager.isActivelyEditing = false
+        stateManager.lastKnownCursorPosition = 10
+
+        assertFalse(stateManager.isComposingCursorAtExpectedEnd())
+    }
+
+    @Test
+    fun `isComposingCursorAtExpectedEnd returns false when isActivelyEditing`() {
+        stateManager.composingRegionStart = 10
+        stateManager.displayBuffer = "hello"
+        stateManager.isActivelyEditing = true
+        stateManager.lastKnownCursorPosition = 15
+
+        assertFalse(stateManager.isComposingCursorAtExpectedEnd())
+    }
+
+    @Test
+    fun `isComposingCursorAtExpectedEnd returns false when cursor drifted`() {
+        stateManager.composingRegionStart = 10
+        stateManager.displayBuffer = "hello"
+        stateManager.isActivelyEditing = false
+        stateManager.lastKnownCursorPosition = 12
+
+        assertFalse(stateManager.isComposingCursorAtExpectedEnd())
+    }
 }
