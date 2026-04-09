@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     id("com.android.application")
-    id("org.jetbrains.kotlin.plugin.serialization")
+    alias(libs.plugins.kotlin.serialization)
     id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
     id("org.jlleitschuh.gradle.ktlint")
@@ -92,10 +92,7 @@ android {
             isReturnDefaultValues = true
 
             all {
-                it.jvmArgs(
-                    "-XX:+EnableDynamicAgentLoading",
-                    "-Djdk.instrument.traceUsage"
-                )
+                it.jvmArgs("-XX:+EnableDynamicAgentLoading")
             }
         }
     }
