@@ -159,6 +159,10 @@ class InputStateManager(
         !isActivelyEditing &&
         lastKnownCursorPosition == composingRegionStart + displayBuffer.length
 
+    fun isKnownCursorTrustworthy(): Boolean = lastKnownCursorPosition != -1 &&
+        !isActivelyEditing &&
+        pendingTypingOus.isEmpty()
+
     fun getSequenceAndBuffer(): Pair<Long, String> = synchronized(processingLock) {
         ++processingSequence to displayBuffer
     }

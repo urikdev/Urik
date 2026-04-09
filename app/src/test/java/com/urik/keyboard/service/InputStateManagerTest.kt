@@ -209,4 +209,47 @@ class InputStateManagerTest {
 
         assertFalse(stateManager.isComposingCursorAtExpectedEnd())
     }
+
+    @Test
+    fun `isKnownCursorTrustworthy returns true when all conditions met`() {
+        stateManager.lastKnownCursorPosition = 10
+        stateManager.isActivelyEditing = false
+
+        assertTrue(stateManager.isKnownCursorTrustworthy())
+    }
+
+    @Test
+    fun `isKnownCursorTrustworthy returns false when lastKnownCursorPosition is -1`() {
+        stateManager.lastKnownCursorPosition = -1
+        stateManager.isActivelyEditing = false
+
+        assertFalse(stateManager.isKnownCursorTrustworthy())
+    }
+
+    @Test
+    fun `isKnownCursorTrustworthy returns false when isActivelyEditing`() {
+        stateManager.lastKnownCursorPosition = 10
+        stateManager.isActivelyEditing = true
+
+        assertFalse(stateManager.isKnownCursorTrustworthy())
+    }
+
+    @Test
+    fun `isKnownCursorTrustworthy returns false when pending OUS in queue`() {
+        stateManager.lastKnownCursorPosition = 10
+        stateManager.isActivelyEditing = false
+        stateManager.enqueueTypingOus(InputStateManager.ExpectedTypingOus(0, 5, 5))
+
+        assertFalse(stateManager.isKnownCursorTrustworthy())
+    }
+
+    @Test
+    fun `isKnownCursorTrustworthy returns false immediately after clearInternalStateOnly`() {
+        stateManager.lastKnownCursorPosition = 10
+        stateManager.isActivelyEditing = false
+
+        stateManager.clearInternalStateOnly()
+
+        assertFalse(stateManager.isKnownCursorTrustworthy())
+    }
 }

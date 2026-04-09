@@ -2008,16 +2008,10 @@ constructor(
                 }
 
                 if (hadTouchStart) {
-                    val dx = event.x - touchStartPoint.x
-                    val dy = event.y - touchStartPoint.y
-                    val distance = kotlin.math.sqrt(dx * dx + dy * dy)
-
-                    if (distance < 20f) {
-                        findKeyAt(event.x, event.y)?.let { key ->
-                            onTap(key)
-                            performClick()
-                            return true
-                        }
+                    findKeyAt(touchStartPoint.x, touchStartPoint.y)?.let { key ->
+                        onTap(key)
+                        performClick()
+                        return true
                     }
                 }
 
