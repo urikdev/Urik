@@ -134,4 +134,72 @@ class BackspaceControllerTest {
         ShadowLooper.idleMainLooper(100, java.util.concurrent.TimeUnit.MILLISECONDS)
         assertTrue("No vibration effects when amplitude is 0", vibrationEffects.isEmpty())
     }
+
+    @Test
+    fun `stop called from onBackspaceKey callback does not orphan the runnable`() {
+        var stopIssuedFromCallback = false
+        lateinit var selfStoppingController: BackspaceController
+        val events = mutableListOf<Unit>()
+
+        selfStoppingController = BackspaceController(
+            onBackspaceKey = {
+                events.add(Unit)
+                if (!stopIssuedFromCallback) {
+                    stopIssuedFromCallback = true
+                    selfStoppingController.stop()
+                }
+            },
+            onAcceleratedDeletionChanged = {},
+            vibrateEffect = {},
+            cancelVibration = {},
+            getHapticEnabled = { false },
+            getHapticAmplitude = { 0 },
+            getSupportsAmplitudeControl = { false },
+            getBackgroundScope = { scope }
+        )
+
+        selfStoppingController.start()
+        ShadowLooper.idleMainLooper(500, java.util.concurrent.TimeUnit.MILLISECONDS)
+
+        assertEquals(
+            "Orphaned runnable must not fire after stop() was called from within onBackspaceKey callback",
+            1,
+            events.size
+        )
+    }
+
+    @Test
+    fun `ACTION_UP stop after in-callback stop does not re-enable repeat`() {
+        var stopIssuedFromCallback = false
+        lateinit var selfStoppingController: BackspaceController
+        val events = mutableListOf<Unit>()
+
+        selfStoppingController = BackspaceController(
+            onBackspaceKey = {
+                events.add(Unit)
+                if (!stopIssuedFromCallback) {
+                    stopIssuedFromCallback = true
+                    selfStoppingController.stop()
+                }
+            },
+            onAcceleratedDeletionChanged = {},
+            vibrateEffect = {},
+            cancelVibration = {},
+            getHapticEnabled = { false },
+            getHapticAmplitude = { 0 },
+            getSupportsAmplitudeControl = { false },
+            getBackgroundScope = { scope }
+        )
+
+        selfStoppingController.start()
+        ShadowLooper.idleMainLooper(60, java.util.concurrent.TimeUnit.MILLISECONDS)
+        selfStoppingController.stop()
+        ShadowLooper.idleMainLooper(500, java.util.concurrent.TimeUnit.MILLISECONDS)
+
+        assertEquals(
+            "No further backspace events after ACTION_UP stop following in-callback stop",
+            1,
+            events.size
+        )
+    }
 }
