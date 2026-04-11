@@ -40,6 +40,7 @@ class BackspaceController(
                 override fun run() {
                     onBackspaceKey()
 
+                    if (backspaceRunnable !== this) return
                     val nextInterval = calculateInterval(System.currentTimeMillis() - startTime)
                     handler.postDelayed(this, nextInterval)
                 }
