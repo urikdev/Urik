@@ -12,34 +12,54 @@ import org.robolectric.RuntimeEnvironment
 
 @RunWith(RobolectricTestRunner::class)
 class PostureDetectorTest {
-    @Test
-    fun `attachToWindow syncs PostureInfo orientation from window context`() {
-        val app = RuntimeEnvironment.getApplication()
-        val scope = CoroutineScope(Dispatchers.Unconfined + SupervisorJob())
+    private val app = RuntimeEnvironment.getApplication()
+    private val scope = CoroutineScope(Dispatchers.Unconfined + SupervisorJob())
 
-        val landscapeConfig = Configuration(app.resources.configuration).apply {
-            orientation = Configuration.ORIENTATION_LANDSCAPE
-        }
-        val serviceContext = app.createConfigurationContext(landscapeConfig)
-
-        val detector = PostureDetector(serviceContext, scope)
-        detector.start()
-
-        assertEquals(
-            "Initial PostureInfo should reflect the (stale) service context orientation",
-            Configuration.ORIENTATION_LANDSCAPE,
-            detector.postureInfo.value.orientation
-        )
-
-        val portraitConfig = Configuration(app.resources.configuration).apply {
+    private fun portraitContext() = app.createConfigurationContext(
+        Configuration(app.resources.configuration).apply {
             orientation = Configuration.ORIENTATION_PORTRAIT
         }
-        val windowContext = app.createConfigurationContext(portraitConfig)
+    )
 
-        detector.attachToWindow(windowContext)
+    private fun landscapeContext() = app.createConfigurationContext(
+        Configuration(app.resources.configuration).apply {
+            orientation = Configuration.ORIENTATION_LANDSCAPE
+        }
+    )
+
+    @Test
+    fun `initial PostureInfo reflects service context orientation`() {
+        val detector = PostureDetector(portraitContext(), scope)
 
         assertEquals(
-            "PostureInfo must update to window context orientation after attachToWindow",
+            Configuration.ORIENTATION_PORTRAIT,
+            detector.postureInfo.value.orientation
+        )
+    }
+
+    @Test
+    fun `attachToWindow does not override portrait service context with stale landscape window context`() {
+        val detector = PostureDetector(portraitContext(), scope)
+
+        detector.attachToWindow(landscapeContext())
+
+        assertEquals(
+            "attachToWindow must not replace portrait posture with stale landscape window context",
+            Configuration.ORIENTATION_PORTRAIT,
+            detector.postureInfo.value.orientation
+        )
+    }
+
+    @Test
+    fun `onConfigurationChanged uses service context not stale window context`() {
+        val detector = PostureDetector(portraitContext(), scope)
+
+        detector.attachToWindow(landscapeContext())
+
+        detector.onConfigurationChanged()
+
+        assertEquals(
+            "onConfigurationChanged must re-read service context orientation, not stale window context",
             Configuration.ORIENTATION_PORTRAIT,
             detector.postureInfo.value.orientation
         )

@@ -49,7 +49,7 @@ class PostureDetector(private val context: Context, private val scope: Coroutine
 
     fun attachToWindow(windowCtx: Context) {
         windowContext = windowCtx
-        _postureInfo.value = getCurrentPostureInfo()
+        _postureInfo.value = getCurrentPostureInfo(context)
         try {
             windowInfoTracker = WindowInfoTracker.getOrCreate(windowCtx)
             fallbackJob?.cancel()
@@ -88,14 +88,14 @@ class PostureDetector(private val context: Context, private val scope: Coroutine
         fallbackJob =
             scope.launch {
                 while (true) {
-                    _postureInfo.value = getCurrentPostureInfo()
+                    _postureInfo.value = getCurrentPostureInfo(context)
                     delay(FALLBACK_POLL_MS)
                 }
             }
     }
 
     fun onConfigurationChanged() {
-        _postureInfo.value = getCurrentPostureInfo()
+        _postureInfo.value = getCurrentPostureInfo(context)
     }
 
     fun stop() {
@@ -158,9 +158,8 @@ class PostureDetector(private val context: Context, private val scope: Coroutine
             )
     }
 
-    private fun getCurrentPostureInfo(): PostureInfo {
-        val effectiveContext = windowContext ?: context
-        val displayMetrics = effectiveContext.resources.displayMetrics
+    private fun getCurrentPostureInfo(ctx: Context = windowContext ?: context): PostureInfo {
+        val displayMetrics = ctx.resources.displayMetrics
         val widthPx = displayMetrics.widthPixels
         val heightPx = displayMetrics.heightPixels
         val density = displayMetrics.density
@@ -185,7 +184,7 @@ class PostureDetector(private val context: Context, private val scope: Coroutine
             screenWidthPx = widthPx,
             screenHeightPx = heightPx,
             isTablet = isTablet,
-            orientation = effectiveContext.resources.configuration.orientation
+            orientation = ctx.resources.configuration.orientation
         )
     }
 
