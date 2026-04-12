@@ -3,6 +3,7 @@ package com.urik.keyboard
 import android.annotation.SuppressLint
 import android.inputmethodservice.InputMethodService
 import android.os.Build
+import android.os.SystemClock
 import android.util.Size
 import android.view.Gravity
 import android.view.KeyEvent
@@ -331,7 +332,14 @@ class UrikInputMethodService :
                     swipeDetector = swipeDetector,
                     swipeSpaceManager = swipeSpaceManager,
                     icProvider = { currentInputConnection },
-                    keyEventSender = { keyCode -> sendDownUpKeyEvents(keyCode) },
+                    keyEventSender = { keyCode ->
+                        val ic = currentInputConnection
+                        if (ic != null) {
+                            val now = SystemClock.uptimeMillis()
+                            ic.sendKeyEvent(KeyEvent(now, now, KeyEvent.ACTION_DOWN, keyCode, 0))
+                            ic.sendKeyEvent(KeyEvent(now, now, KeyEvent.ACTION_UP, keyCode, 0))
+                        }
+                    },
                     keyCharEventSender = { char -> sendCharacterAsKeyEvents(char) }
                 )
 
@@ -1071,6 +1079,10 @@ class UrikInputMethodService :
         inputState.isSecureField = SecureFieldDetector.isSecure(info)
         inputState.isDirectCommitField = SecureFieldDetector.isDirectCommit(info)
         inputState.isRawKeyEventField = SecureFieldDetector.isRawKeyEvent(info)
+        inputState.isTerminalField = SecureFieldDetector.isTerminalField(info)
+        if (inputState.isTerminalField) {
+            viewModel.disableAutoCapForTerminalField()
+        }
         inputState.currentInputAction = ActionDetector.detectAction(info)
 
         val inputType = info?.inputType ?: 0
@@ -1086,14 +1098,14 @@ class UrikInputMethodService :
 
         if (inputState.isSecureField) {
             clearSecureFieldState()
-        } else if (!inputState.isUrlOrEmailField && !inputState.isRawKeyEventField) {
+        } else if (!inputState.isUrlOrEmailField && !inputState.isTerminalField) {
             if (inputState.displayBuffer.isNotEmpty() || inputState.wordState.hasContent) {
                 coordinateStateClear()
             }
 
             val textBefore = outputBridge.safeGetTextBeforeCursor(50)
             checkAutoCapitalization(textBefore)
-        } else if (!inputState.isRawKeyEventField) {
+        } else if (!inputState.isTerminalField) {
             if (inputState.displayBuffer.isNotEmpty()) {
                 val actualTextBefore = outputBridge.safeGetTextBeforeCursor(1)
                 val actualTextAfter = outputBridge.safeGetTextAfterCursor(1)
@@ -1479,6 +1491,13 @@ class UrikInputMethodService :
             inputState.clearBigramPredictions()
 
             if (inputState.requiresDirectCommit) {
+                if (!inputState.isSecureField && !inputState.isRawKeyEventField) {
+                    val textBefore = outputBridge.safeGetTextBeforeCursor(1)
+                    if (textBefore.isNotEmpty() && !swipeSpaceManager.isWhitespace(textBefore)) {
+                        outputBridge.commitText(" ", 1)
+                        swipeSpaceManager.markAutoSpaceInserted()
+                    }
+                }
                 outputBridge.commitText(validatedWord, 1)
                 return
             }
@@ -1831,7 +1850,7 @@ class UrikInputMethodService :
                 viewModel.onEvent(KeyboardEvent.ModeChanged(KeyboardMode.LETTERS))
             }
 
-            if (imeAction == EditorInfo.IME_ACTION_NONE && !inputState.isRawKeyEventField) {
+            if (imeAction == EditorInfo.IME_ACTION_NONE && !inputState.isTerminalField) {
                 val textBefore = outputBridge.safeGetTextBeforeCursor(50)
                 checkAutoCapitalization(textBefore)
             }
@@ -1842,7 +1861,7 @@ class UrikInputMethodService :
 
     private fun handleBackspace() {
         try {
-            if (inputState.isRawKeyEventField) {
+            if (inputState.isTerminalField) {
                 outputBridge.sendBackspace()
                 return
             }
@@ -2563,6 +2582,10 @@ class UrikInputMethodService :
         inputState.isSecureField = SecureFieldDetector.isSecure(attribute)
         inputState.isDirectCommitField = SecureFieldDetector.isDirectCommit(attribute)
         inputState.isRawKeyEventField = SecureFieldDetector.isRawKeyEvent(attribute)
+        inputState.isTerminalField = SecureFieldDetector.isTerminalField(attribute)
+        if (inputState.isTerminalField) {
+            viewModel.disableAutoCapForTerminalField()
+        }
         inputState.currentInputAction = ActionDetector.detectAction(attribute)
 
         val inputType = attribute?.inputType ?: 0
@@ -2573,7 +2596,7 @@ class UrikInputMethodService :
 
         if (inputState.isSecureField) {
             clearSecureFieldState()
-        } else if (!inputState.isUrlOrEmailField && !inputState.isRawKeyEventField) {
+        } else if (!inputState.isUrlOrEmailField && !inputState.isTerminalField) {
             val textBefore = outputBridge.safeGetTextBeforeCursor(50)
             checkAutoCapitalization(textBefore)
         }

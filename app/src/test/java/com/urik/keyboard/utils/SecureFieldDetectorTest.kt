@@ -346,15 +346,15 @@ class SecureFieldDetectorTest {
     }
 
     @Test
-    fun `test no suggestions with visible password is raw key event`() {
+    fun `test no suggestions with visible password is not raw key event`() {
         val field = createEditorInfo(
             inputClass = EditorInfo.TYPE_CLASS_TEXT,
             inputVariation = InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD,
             inputFlags = InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
         )
 
-        Assert.assertTrue(
-            "NO_SUGGESTIONS + VISIBLE_PASSWORD should be raw key event (terminal emulator pattern)",
+        Assert.assertFalse(
+            "NO_SUGGESTIONS + VISIBLE_PASSWORD should NOT be raw key event after refactor",
             SecureFieldDetector.isRawKeyEvent(field)
         )
     }
@@ -369,20 +369,6 @@ class SecureFieldDetectorTest {
         Assert.assertFalse(
             "VISIBLE_PASSWORD alone should not be raw key event",
             SecureFieldDetector.isRawKeyEvent(field)
-        )
-    }
-
-    @Test
-    fun `test no suggestions with visible password is still direct commit`() {
-        val field = createEditorInfo(
-            inputClass = EditorInfo.TYPE_CLASS_TEXT,
-            inputVariation = InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD,
-            inputFlags = InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
-        )
-
-        Assert.assertTrue(
-            "NO_SUGGESTIONS + VISIBLE_PASSWORD should still be direct commit",
-            SecureFieldDetector.isDirectCommit(field)
         )
     }
 
@@ -404,6 +390,92 @@ class SecureFieldDetectorTest {
         Assert.assertFalse(
             "Password field should not be raw key event",
             SecureFieldDetector.isRawKeyEvent(field)
+        )
+    }
+
+    @Test
+    fun `test TYPE_NULL is terminal field`() {
+        val field = EditorInfo()
+        field.inputType = InputType.TYPE_NULL
+
+        Assert.assertTrue(
+            "TYPE_NULL should be terminal field",
+            SecureFieldDetector.isTerminalField(field)
+        )
+    }
+
+    @Test
+    fun `test no suggestions with visible password is terminal field`() {
+        val field = createEditorInfo(
+            inputClass = EditorInfo.TYPE_CLASS_TEXT,
+            inputVariation = InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD,
+            inputFlags = InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
+        )
+
+        Assert.assertTrue(
+            "NO_SUGGESTIONS + VISIBLE_PASSWORD should be terminal field (ConnectBot pattern)",
+            SecureFieldDetector.isTerminalField(field)
+        )
+    }
+
+    @Test
+    fun `test normal text field is not terminal field`() {
+        val field = createEditorInfo(
+            inputClass = EditorInfo.TYPE_CLASS_TEXT,
+            inputVariation = EditorInfo.TYPE_TEXT_VARIATION_NORMAL
+        )
+
+        Assert.assertFalse(
+            "Normal text field should not be terminal field",
+            SecureFieldDetector.isTerminalField(field)
+        )
+    }
+
+    @Test
+    fun `test visible password without no suggestions is not terminal field`() {
+        val field = createEditorInfo(
+            inputClass = EditorInfo.TYPE_CLASS_TEXT,
+            inputVariation = InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
+        )
+
+        Assert.assertFalse(
+            "VISIBLE_PASSWORD alone should not be terminal field",
+            SecureFieldDetector.isTerminalField(field)
+        )
+    }
+
+    @Test
+    fun `test no suggestions alone is not terminal field`() {
+        val field = createEditorInfo(
+            inputClass = EditorInfo.TYPE_CLASS_TEXT,
+            inputVariation = EditorInfo.TYPE_TEXT_VARIATION_NORMAL,
+            inputFlags = InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
+        )
+
+        Assert.assertFalse(
+            "NO_SUGGESTIONS alone should not be terminal field",
+            SecureFieldDetector.isTerminalField(field)
+        )
+    }
+
+    @Test
+    fun `test password field is not terminal field`() {
+        val field = createEditorInfo(
+            inputClass = EditorInfo.TYPE_CLASS_TEXT,
+            inputVariation = EditorInfo.TYPE_TEXT_VARIATION_PASSWORD
+        )
+
+        Assert.assertFalse(
+            "Password field should not be terminal field",
+            SecureFieldDetector.isTerminalField(field)
+        )
+    }
+
+    @Test
+    fun `test null returns false for terminal field`() {
+        Assert.assertFalse(
+            "Null EditorInfo should not be terminal field",
+            SecureFieldDetector.isTerminalField(null)
         )
     }
 }
