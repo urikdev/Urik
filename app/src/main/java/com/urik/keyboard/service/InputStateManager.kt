@@ -103,6 +103,10 @@ class InputStateManager(
         internal set
 
     @Volatile
+    var isTerminalField: Boolean = false
+        internal set
+
+    @Volatile
     var isUrlOrEmailField: Boolean = false
         internal set
 

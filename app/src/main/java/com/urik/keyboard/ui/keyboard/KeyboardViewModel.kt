@@ -193,6 +193,10 @@ constructor(
         updateState { it.copy(isShiftPressed = false, isCapsLockOn = false, isAutoShift = false) }
     }
 
+    fun disableAutoCapForTerminalField() {
+        updateState { it.copy(isShiftPressed = false, isAutoShift = false) }
+    }
+
     private fun handleEvent(event: KeyboardEvent) {
         when (event) {
             is KeyboardEvent.KeyPressed -> handleKeyPress(event.key)

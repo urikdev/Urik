@@ -735,6 +735,32 @@ class KeyboardViewModelTest {
         assertEquals(KeyboardMode.SYMBOLS, viewModel.state.value.currentMode)
     }
 
+    @Test
+    fun `disableAutoCapForTerminalField clears both shift and autoShift atomically`() = runTest {
+        viewModel.enableAutoCapitalization()
+        assertTrue(viewModel.state.value.isShiftPressed)
+        assertTrue(viewModel.state.value.isAutoShift)
+
+        viewModel.disableAutoCapForTerminalField()
+
+        assertFalse(viewModel.state.value.isShiftPressed)
+        assertFalse(viewModel.state.value.isAutoShift)
+    }
+
+    @Test
+    fun `disableAutoCapForTerminalField is a no-op when caps lock is on`() = runTest {
+        viewModel.onEvent(KeyboardEvent.KeyPressed(KeyboardKey.Action(KeyboardKey.ActionType.CAPS_LOCK)))
+        assertTrue(viewModel.state.value.isCapsLockOn)
+
+        viewModel.enableAutoCapitalization()
+
+        viewModel.disableAutoCapForTerminalField()
+
+        assertTrue(viewModel.state.value.isCapsLockOn)
+        assertFalse(viewModel.state.value.isShiftPressed)
+        assertFalse(viewModel.state.value.isAutoShift)
+    }
+
     private fun createMockLayout(mode: KeyboardMode): KeyboardLayout = KeyboardLayout(
         mode = mode,
         rows = emptyList()

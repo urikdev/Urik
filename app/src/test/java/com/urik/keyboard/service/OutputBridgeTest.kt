@@ -305,8 +305,8 @@ class OutputBridgeTest {
     }
 
     @Test
-    fun `sendBackspace uses key events for raw key event field`() {
-        whenever(mockState.isRawKeyEventField).thenReturn(true)
+    fun `sendBackspace uses key events for terminal field`() {
+        whenever(mockState.isTerminalField).thenReturn(true)
 
         outputBridge.sendBackspace()
 
@@ -316,7 +316,7 @@ class OutputBridgeTest {
 
     @Test
     fun `sendBackspace uses deleteSurroundingText for normal field`() {
-        whenever(mockState.isRawKeyEventField).thenReturn(false)
+        whenever(mockState.isTerminalField).thenReturn(false)
         whenever(mockIc.getTextBeforeCursor(eq(1), eq(0))).thenReturn("a")
 
         outputBridge.sendBackspace()
@@ -327,7 +327,7 @@ class OutputBridgeTest {
 
     @Test
     fun `sendBackspace no-ops for normal field with empty text before cursor`() {
-        whenever(mockState.isRawKeyEventField).thenReturn(false)
+        whenever(mockState.isTerminalField).thenReturn(false)
         whenever(mockIc.getTextBeforeCursor(eq(1), eq(0))).thenReturn("")
 
         outputBridge.sendBackspace()
@@ -357,8 +357,8 @@ class OutputBridgeTest {
     }
 
     @Test
-    fun `sendEnter uses key events for raw key event field`() {
-        whenever(mockState.isRawKeyEventField).thenReturn(true)
+    fun `sendEnter uses key events for terminal field`() {
+        whenever(mockState.isTerminalField).thenReturn(true)
 
         outputBridge.sendEnter()
 
@@ -368,11 +368,119 @@ class OutputBridgeTest {
 
     @Test
     fun `sendEnter uses commitText for normal field`() {
-        whenever(mockState.isRawKeyEventField).thenReturn(false)
+        whenever(mockState.isTerminalField).thenReturn(false)
 
         outputBridge.sendEnter()
 
         assertEquals(emptyList<Int>(), keyEventSenderCalls)
         verify(mockIc).commitText("\n", 1)
+    }
+
+    @Test
+    fun `commitPreviousSwipeAndInsertSpace inserts space after previous swipe word`() {
+        whenever(mockState.wordState).thenReturn(WordState(isFromSwipe = true, buffer = "hello"))
+        whenever(mockState.displayBuffer).thenReturn("hello")
+        whenever(mockIc.getTextBeforeCursor(1, 0)).thenReturn("o")
+        whenever(mockSwipeSpaceManager.isWhitespace("o")).thenReturn(false)
+
+        outputBridge.commitPreviousSwipeAndInsertSpace()
+
+        verify(mockSwipeDetector).updateLastCommittedWord("hello")
+        verify(mockIc).beginBatchEdit()
+        verify(mockIc).finishComposingText()
+        verify(mockIc).commitText(" ", 1)
+        verify(mockSwipeSpaceManager).markAutoSpaceInserted()
+        verify(mockIc).endBatchEdit()
+        verify(mockState).onSwipeCommitted()
+    }
+
+    @Test
+    fun `commitPreviousSwipeAndInsertSpace skips space when cursor already after whitespace`() {
+        whenever(mockState.wordState).thenReturn(WordState(isFromSwipe = true, buffer = "hello"))
+        whenever(mockState.displayBuffer).thenReturn("hello")
+        whenever(mockIc.getTextBeforeCursor(1, 0)).thenReturn(" ")
+        whenever(mockSwipeSpaceManager.isWhitespace(" ")).thenReturn(true)
+
+        outputBridge.commitPreviousSwipeAndInsertSpace()
+
+        verify(mockSwipeDetector).updateLastCommittedWord("hello")
+        verify(mockIc).beginBatchEdit()
+        verify(mockIc).finishComposingText()
+        verify(mockIc, never()).commitText(eq(" "), any())
+        verify(mockSwipeSpaceManager, never()).markAutoSpaceInserted()
+        verify(mockIc).endBatchEdit()
+        verify(mockState).onSwipeCommitted()
+    }
+
+    @Test
+    fun `commitPreviousSwipeAndInsertSpace returns early when word is not from swipe`() {
+        whenever(mockState.wordState).thenReturn(WordState(isFromSwipe = false, buffer = "hello"))
+        whenever(mockState.displayBuffer).thenReturn("hello")
+
+        outputBridge.commitPreviousSwipeAndInsertSpace()
+
+        verify(mockSwipeDetector, never()).updateLastCommittedWord(any())
+        verify(mockIc, never()).beginBatchEdit()
+        verify(mockIc, never()).finishComposingText()
+        verify(mockIc, never()).commitText(any(), any())
+        verify(mockState, never()).onSwipeCommitted()
+    }
+
+    @Test
+    fun `commitPreviousSwipeAndInsertSpace returns early when display buffer is empty`() {
+        whenever(mockState.wordState).thenReturn(WordState(isFromSwipe = true, buffer = ""))
+        whenever(mockState.displayBuffer).thenReturn("")
+
+        outputBridge.commitPreviousSwipeAndInsertSpace()
+
+        verify(mockSwipeDetector, never()).updateLastCommittedWord(any())
+        verify(mockIc, never()).beginBatchEdit()
+        verify(mockIc, never()).finishComposingText()
+        verify(mockIc, never()).commitText(any(), any())
+        verify(mockState, never()).onSwipeCommitted()
+    }
+
+    @Test
+    fun `sendCharacter uses commitText for ConnectBot field (terminal but not raw key event)`() {
+        whenever(mockState.isTerminalField).thenReturn(true)
+        whenever(mockState.isRawKeyEventField).thenReturn(false)
+
+        outputBridge.sendCharacter("a")
+
+        assertEquals(emptyList<String>(), keyCharEventSenderCalls)
+        verify(mockIc).commitText("a", 1)
+    }
+
+    @Test
+    fun `sendBackspace uses key events for ConnectBot field (terminal but not raw key event)`() {
+        whenever(mockState.isTerminalField).thenReturn(true)
+        whenever(mockState.isRawKeyEventField).thenReturn(false)
+
+        outputBridge.sendBackspace()
+
+        assertEquals(listOf(KeyEvent.KEYCODE_DEL), keyEventSenderCalls)
+        verify(mockIc, never()).deleteSurroundingText(any(), any())
+    }
+
+    @Test
+    fun `sendEnter uses key events for ConnectBot field (terminal but not raw key event)`() {
+        whenever(mockState.isTerminalField).thenReturn(true)
+        whenever(mockState.isRawKeyEventField).thenReturn(false)
+
+        outputBridge.sendEnter()
+
+        assertEquals(listOf(KeyEvent.KEYCODE_ENTER), keyEventSenderCalls)
+        verify(mockIc, never()).commitText(any(), any())
+    }
+
+    @Test
+    fun `sendSpace uses commitText for ConnectBot field (terminal but not raw key event)`() {
+        whenever(mockState.isTerminalField).thenReturn(true)
+        whenever(mockState.isRawKeyEventField).thenReturn(false)
+
+        outputBridge.sendSpace()
+
+        assertEquals(emptyList<Int>(), keyEventSenderCalls)
+        verify(mockIc).commitText(" ", 1)
     }
 }

@@ -103,20 +103,41 @@ object SecureFieldDetector {
     }
 
     /**
-     * Detects if current input field requires raw key event dispatch (TYPE_NULL or terminal-mode).
+     * Detects if current input field requires raw key event dispatch (TYPE_NULL terminals).
      *
-     * Matches pure TYPE_NULL and the VISIBLE_PASSWORD + NO_SUGGESTIONS combination used by
-     * terminal emulators (e.g. ConnectBot) that implement BaseInputConnection with fullEditor=false,
-     * where commitText is a no-op and only sendKeyEvent reaches the terminal channel.
+     * TYPE_NULL fields (JuiceSSH, Termius) must receive ALL input — including printable
+     * characters — via sendKeyEvent. Their InputConnection does not process commitText.
+     *
+     * Note: VISIBLE_PASSWORD+NO_SUGGESTIONS (ConnectBot) is NOT included here — those
+     * fields echo printable characters via commitText and only need key events for DEL/ENTER.
+     * Use isTerminalField() to cover both patterns.
      */
     fun isRawKeyEvent(info: EditorInfo?): Boolean {
         if (info == null) return false
-        if (info.inputType == InputType.TYPE_NULL) return true
+        return info.inputType == InputType.TYPE_NULL
+    }
 
-        val inputClass = info.inputType and InputType.TYPE_MASK_CLASS
+    /**
+     * Detects if current input field is a terminal context requiring auto-cap suppression
+     * and DEL/ENTER dispatch via key events (without FLAG_SOFT_KEYBOARD).
+     *
+     * Covers two distinct terminal patterns:
+     * - TYPE_NULL: JuiceSSH, Termius — all input via key events
+     * - VISIBLE_PASSWORD + NO_SUGGESTIONS: ConnectBot — printable chars via commitText,
+     *   DEL/ENTER via key events
+     *
+     * isRawKeyEvent (TYPE_NULL) implies isTerminalField, but not vice versa.
+     */
+    fun isTerminalField(info: EditorInfo?): Boolean {
+        if (info == null) return false
+
+        val inputType = info.inputType
+        if (inputType == InputType.TYPE_NULL) return true
+
+        val inputClass = inputType and InputType.TYPE_MASK_CLASS
         if (inputClass == InputType.TYPE_CLASS_TEXT) {
-            val variation = info.inputType and InputType.TYPE_MASK_VARIATION
-            val flags = info.inputType and InputType.TYPE_MASK_FLAGS
+            val variation = inputType and InputType.TYPE_MASK_VARIATION
+            val flags = inputType and InputType.TYPE_MASK_FLAGS
             if (variation == InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD &&
                 flags and InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS != 0
             ) {
