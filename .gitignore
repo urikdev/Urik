@@ -90,3 +90,6 @@ navigation.json
 
 # F-Droid metadata
 com.urik.keyboard.yml
+
+# Localization work folder
+_work/
