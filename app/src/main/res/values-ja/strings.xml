@@ -1,0 +1,363 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="ime_name">Urik キーボード</string>
+    <string name="ime_label">Urik キーボード</string>
+    <string name="ime_description">スワイプ入力、スペルチェック、多言語対応をプライバシーを損なわずに実現。テレメトリなし。データ収集なし。すべてデバイス上に保存。</string>
+
+    <!-- Settings -->
+    <string name="enable_keyboard_title">有効にする</string>
+    <string name="open_settings">設定を開く</string>
+    <string name="error_opening_settings">設定を開けませんでした</string>
+
+    <!-- Settings Activity -->
+    <string name="settings_title">キーボード設定</string>
+    <string name="about_title">情報</string>
+    <string name="about_button">情報</string>
+    <string name="about_version">バージョン</string>
+    <string name="about_copyright">Copyright © 2025 Urik Development</string>
+    <string name="about_license">ライセンス：GNU GPL v3.0</string>
+    <string name="about_source_code">ソースコード</string>
+    <string name="about_release_notes">リリースノート</string>
+    <string name="about_report_bug">バグを報告</string>
+    <string name="about_privacy_policy">プライバシーポリシー</string>
+    <string name="about_support">開発を支援</string>
+    <string name="autocorrect_settings_title">自動修正設定</string>
+    <string name="autocorrect_settings_description">スペルと候補</string>
+    <string name="language_settings_title">言語設定</string>
+    <string name="language_settings_description">キーボードの言語を選択</string>
+    <string name="select_active_language">使用言語を選択</string>
+    <string name="typing_settings_title">入力動作設定</string>
+    <string name="typing_settings_description">句読点、触覚フィードバックなど</string>
+    <string name="layout_settings_title">レイアウト &amp; 入力</string>
+    <string name="layout_settings_description">数字行、スペースバーサイズ</string>
+    <string name="appearance_settings_title">外観</string>
+    <string name="appearance_settings_description">テーマ、サイズ</string>
+    <string name="privacy_settings_title">プライバシー &amp; データ</string>
+    <string name="privacy_settings_description">データ消去、設定リセット</string>
+    <string name="licenses_title">オープンソースライセンス</string>
+    <string name="licenses_description">サードパーティライブラリのライセンスを表示</string>
+    <string name="dictionary_attribution_title">辞書データ</string>
+    <string name="theme_picker_title">キーボードテーマ</string>
+    <string name="dictionary_attribution_summary">FrequencyWords ライセンスと帰属</string>
+    <string name="test_field_hint">変更をテスト</string>
+
+    <!-- Settings Enums -->
+    <!-- Key Size -->
+    <string name="key_size_small">小</string>
+    <string name="key_size_medium">中</string>
+    <string name="key_size_large">大</string>
+    <string name="key_size_extra_large">特大</string>
+
+    <!-- Long Press Duration -->
+    <string name="long_press_duration_short">短い</string>
+    <string name="long_press_duration_medium">中</string>
+    <string name="long_press_duration_long">長い</string>
+    <string name="cursor_speed_slow">遅い</string>
+    <string name="cursor_speed_medium">中</string>
+    <string name="cursor_speed_fast">速い</string>
+    <string name="cursor_speed_very_fast">最速</string>
+
+    <!-- Space Bar Size -->
+    <string name="space_bar_size_compact">コンパクト</string>
+    <string name="space_bar_size_standard">標準</string>
+    <string name="space_bar_size_wide">ワイド</string>
+
+    <!-- Key Label Size -->
+    <string name="key_label_size_small">小</string>
+    <string name="key_label_size_medium">中</string>
+    <string name="key_label_size_large">大</string>
+
+    <!-- Appearance Settings -->
+    <string name="appearance_settings_theme">テーマ</string>
+    <string name="appearance_settings_key_size">キーサイズ</string>
+    <string name="appearance_settings_key_label_size">キーラベルサイズ</string>
+    <string name="appearance_settings_press_highlight">キー押下ハイライト</string>
+    <string name="appearance_settings_press_highlight_on">視覚フィードバックあり</string>
+    <string name="appearance_settings_press_highlight_off">視覚フィードバックなし</string>
+
+    <!-- Auto-Correct Settings -->
+    <string name="autocorrect_settings_spell_check">スペルチェック</string>
+    <string name="autocorrect_settings_spell_check_on">スペルチェック有効</string>
+    <string name="autocorrect_settings_spell_check_off">スペルチェック無効</string>
+    <string name="autocorrect_settings_show_suggestions">候補を表示</string>
+    <string name="autocorrect_settings_suggestions_on">候補表示中</string>
+    <string name="autocorrect_settings_suggestions_off">候補を非表示</string>
+    <string name="autocorrect_settings_suggestion_count">候補の表示数</string>
+    <string name="autocorrect_settings_learn_new_words">新しい単語を学習</string>
+    <string name="autocorrect_settings_learn_new_words_on">学習有効</string>
+    <string name="autocorrect_settings_learn_new_words_off">学習無効</string>
+    <string name="autocorrect_settings_pause_on_misspelled">スペルミス時に一時停止</string>
+    <string name="autocorrect_settings_pause_on_misspelled_on">オン</string>
+    <string name="autocorrect_settings_pause_on_misspelled_off">オフ</string>
+    <string name="autocorrect_settings_autocorrection">自動修正</string>
+    <string name="autocorrect_settings_autocorrection_on">オン</string>
+    <string name="autocorrect_settings_autocorrection_off">オフ</string>
+
+    <!-- Language Settings -->
+    <string name="max_languages_reached">最大3言語まで設定できます</string>
+    <string name="primary_layout_language">現在のレイアウト</string>
+    <string name="merged_dictionaries_category">辞書</string>
+    <string name="merged_dictionaries_title">辞書の統合</string>
+    <string name="merged_dictionaries_on">全言語の辞書を候補に使用</string>
+    <string name="merged_dictionaries_off">現在のレイアウト言語の辞書のみ候補に使用</string>
+
+    <!-- Sound & Feedback Settings -->
+    <string name="feedback_settings_haptic_feedback">触覚フィードバック</string>
+    <string name="feedback_settings_haptic_on">触覚フィードバック有効</string>
+    <string name="feedback_settings_haptic_off">触覚フィードバック無効</string>
+    <string name="feedback_settings_vibration_strength">バイブレーション強度</string>
+
+    <!-- Typing Behavior Settings -->
+    <string name="typing_settings_double_space_period">ダブルスペースでピリオド入力</string>
+    <string name="typing_settings_double_space_on">ダブルスペースでピリオドを挿入</string>
+    <string name="typing_settings_double_space_off">ダブルスペースでスペースを挿入</string>
+    <string name="typing_settings_auto_capitalization">自動大文字化</string>
+    <string name="typing_settings_auto_capitalization_on">文頭を自動で大文字化</string>
+    <string name="typing_settings_auto_capitalization_off">自動大文字化なし</string>
+    <string name="typing_settings_swipe_enabled">スワイプ入力</string>
+    <string name="typing_settings_swipe_on">スワイプ入力有効</string>
+    <string name="typing_settings_swipe_off">スワイプ入力無効</string>
+    <string name="typing_settings_spacebar_cursor">スペースバーでカーソル操作</string>
+    <string name="typing_settings_spacebar_cursor_on">スペースバーをスワイプしてカーソル移動</string>
+    <string name="typing_settings_spacebar_cursor_off">スペースバーカーソル操作無効</string>
+    <string name="typing_settings_cursor_speed">カーソル速度</string>
+    <string name="typing_settings_backspace_swipe">バックスペーススワイプ削除</string>
+    <string name="typing_settings_backspace_swipe_on">バックスペースを左スワイプで単語削除</string>
+    <string name="typing_settings_backspace_swipe_off">バックスペーススワイプ削除無効</string>
+    <string name="typing_settings_long_press_punctuation">長押し句読点メニュー</string>
+    <string name="long_press_punctuation_off">オフ</string>
+    <string name="long_press_punctuation_spacebar">スペースバー</string>
+    <string name="long_press_punctuation_period">ピリオドキー</string>
+    <string name="typing_settings_long_press_duration">長押し時間</string>
+    <string name="typing_settings_reset_to_letters">レイアウトをリセット</string>
+    <string name="typing_settings_reset_to_letters_on">文字ビューに戻す</string>
+    <string name="typing_settings_reset_to_letters_off">最後のビューを維持</string>
+
+    <!-- Layout & Input Settings -->
+    <string name="layout_settings_alternative_layout">キーボードレイアウト</string>
+    <string name="layout_settings_adaptive_modes_enabled">適応型キーボードモード</string>
+    <string name="layout_settings_adaptive_modes_on">デバイスの種類と向きに自動適応（タブレット、折り畳み端末）</string>
+    <string name="layout_settings_adaptive_modes_off">常に標準全幅レイアウトを使用</string>
+    <string name="layout_settings_one_handed_mode_enabled">片手モード</string>
+    <string name="layout_settings_one_handed_mode_on">有効</string>
+    <string name="layout_settings_one_handed_mode_off">標準全幅キーボード</string>
+    <string name="one_handed_mode_left">キーボードを左寄せ</string>
+    <string name="one_handed_mode_right">キーボードを右寄せ</string>
+    <string name="one_handed_mode_full">全幅キーボードに戻す</string>
+    <string name="layout_settings_show_number_row">数字行を表示</string>
+    <string name="layout_settings_number_row_on">数字行を表示中</string>
+    <string name="layout_settings_number_row_off">数字行を非表示</string>
+    <string name="layout_settings_show_language_switch_key">言語切替キーを表示</string>
+    <string name="layout_settings_language_switch_key_on">有効</string>
+    <string name="layout_settings_language_switch_key_off">無効</string>
+    <string name="layout_settings_space_bar_size">スペースバーサイズ</string>
+    <string name="alternative_layout_default">デフォルト（言語レイアウト）</string>
+    <string name="layout_settings_customize_keys">キーのカスタマイズ</string>
+    <string name="layout_settings_customize_keys_summary">長押しにカスタム文字を割り当て</string>
+
+    <!-- Layout Mapper -->
+    <string name="layout_mapper_title">キーのカスタマイズ</string>
+    <string name="layout_mapper_instructions">キーをタップしてカスタム文字を割り当てます。キーボード上でそのキーを長押しすると文字が入力されます。</string>
+    <string name="layout_mapper_edit_key">キーを編集：%1$s</string>
+    <string name="layout_mapper_symbol_hint">カスタム文字</string>
+    <string name="layout_mapper_save">保存</string>
+    <string name="layout_mapper_remove">削除</string>
+    <string name="layout_mapper_reset_all">すべてリセット</string>
+    <string name="layout_mapper_reset_title">すべてのマッピングをリセットしますか？</string>
+    <string name="layout_mapper_reset_message">すべてのカスタムキーマッピングが削除されます。この操作は元に戻せません。</string>
+    <string name="layout_mapper_reset_confirm">リセット</string>
+    <string name="layout_mapper_saved">マッピングを保存しました</string>
+    <string name="layout_mapper_removed">マッピングを削除しました</string>
+    <string name="layout_mapper_cleared">すべてのマッピングを削除しました</string>
+    <string name="layout_mapper_save_failed">マッピングの保存に失敗しました</string>
+    <string name="layout_mapper_remove_failed">マッピングの削除に失敗しました</string>
+    <string name="layout_mapper_clear_failed">マッピングの消去に失敗しました</string>
+
+    <!-- Privacy & Data Settings -->
+    <string name="privacy_settings_clipboard_history">クリップボード履歴</string>
+    <string name="privacy_settings_clipboard_history_on">クリップボード履歴有効</string>
+    <string name="privacy_settings_clipboard_history_off">クリップボード履歴無効</string>
+    <string name="privacy_settings_clear_learned_words">学習済み単語を消去</string>
+    <string name="privacy_settings_clear_learned_words_summary">学習した語彙をすべて削除</string>
+    <string name="privacy_settings_clear_learned_words_confirm">学習済み単語をすべて消去しますか？この操作は元に戻せません。</string>
+    <string name="privacy_settings_reset_to_defaults">デフォルトにリセット</string>
+    <string name="privacy_settings_reset_to_defaults_confirm">すべての設定をデフォルトにリセットしますか？</string>
+    <string name="privacy_settings_export_error_log">エラーログをエクスポート</string>
+    <string name="privacy_settings_export_error_log_summary">デバッグ用の診断ログを共有</string>
+    <string name="privacy_settings_export_error_log_failed">エラーログのエクスポートに失敗しました</string>
+    <string name="privacy_settings_export_dictionary">辞書をエクスポート</string>
+    <string name="privacy_settings_export_dictionary_summary">学習済み単語をファイルに保存</string>
+    <string name="privacy_settings_import_dictionary">辞書をインポート</string>
+    <string name="privacy_settings_import_dictionary_summary">ファイルから学習済み単語を復元</string>
+    <string name="learned_words_title">学習済み単語</string>
+    <string name="learned_words_manage">学習済み単語を管理</string>
+    <string name="learned_words_manage_summary">学習済み単語を確認・削除</string>
+    <string name="learned_words_empty">学習済み単語はありません</string>
+    <string name="learned_words_delete_all">すべて削除</string>
+    <string name="learned_words_delete_all_confirm">学習済み単語をすべて削除しますか？この操作は元に戻せません。</string>
+    <string name="learned_words_auth_title">本人確認</string>
+    <string name="learned_words_auth_subtitle">学習済み単語を表示するには認証してください</string>
+
+    <!-- Error Messages -->
+    <string name="error_title">エラー</string>
+    <string name="error_update_key_size">キーサイズの更新に失敗しました</string>
+    <string name="error_update_key_label_size">ラベルサイズの更新に失敗しました</string>
+    <string name="error_update_spell_check">スペルチェックの更新に失敗しました</string>
+    <string name="error_update_suggestions">候補設定の更新に失敗しました</string>
+    <string name="error_update_suggestion_count">候補数の更新に失敗しました</string>
+    <string name="error_update_word_learning">単語学習の更新に失敗しました</string>
+    <string name="error_update_clipboard">クリップボード設定の更新に失敗しました</string>
+    <string name="error_update_language">言語設定の更新に失敗しました</string>
+    <string name="error_update_haptic_feedback">触覚フィードバックの更新に失敗しました</string>
+    <string name="error_update_vibration_strength">バイブレーション強度の更新に失敗しました</string>
+    <string name="error_update_double_space_period">ダブルスペースでピリオドの更新に失敗しました</string>
+    <string name="error_update_auto_capitalization">自動大文字化の更新に失敗しました</string>
+    <string name="error_update_swipe">スワイプ入力の更新に失敗しました</string>
+    <string name="error_update_spacebar_cursor">スペースバーカーソル操作の更新に失敗しました</string>
+    <string name="error_update_cursor_speed">カーソル速度の更新に失敗しました</string>
+    <string name="error_update_backspace_swipe">バックスペーススワイプ削除の更新に失敗しました</string>
+    <string name="error_update_long_press_punctuation">長押し句読点の更新に失敗しました</string>
+    <string name="error_update_long_press_duration">長押し時間の更新に失敗しました</string>
+    <string name="error_update_number_row">数字行の更新に失敗しました</string>
+    <string name="error_update_space_bar_size">スペースバーサイズの更新に失敗しました</string>
+    <string name="error_update_alternative_layout">キーボードレイアウトの更新に失敗しました</string>
+    <string name="error_clear_learned_words">学習済み単語の消去に失敗しました</string>
+    <string name="error_reset_to_defaults">設定のリセットに失敗しました</string>
+    <string name="error_dictionary_export">辞書のエクスポートに失敗しました</string>
+    <string name="error_dictionary_import">辞書のインポートに失敗しました</string>
+    <string name="error_update_merged_dictionaries">辞書モードの更新に失敗しました</string>
+    <string name="error_update_pause_on_misspelled">一時停止設定の更新に失敗しました</string>
+    <string name="error_update_autocorrection">自動修正設定の更新に失敗しました</string>
+    <string name="error_update_number_hints">数字ヒントの更新に失敗しました</string>
+    <string name="error_update_reset_to_letters">文字リセット設定の更新に失敗しました</string>
+    <string name="error_update_press_highlight">キー押下ハイライト設定の更新に失敗しました</string>
+    <string name="layout_settings_show_number_hints">数字ヒントを表示</string>
+    <string name="layout_settings_number_hints_on">オン</string>
+    <string name="layout_settings_number_hints_off">オフ</string>
+    <string name="error_delete_word">単語の削除に失敗しました</string>
+    <string name="error_delete_all_words">学習済み単語の削除に失敗しました</string>
+
+    <!-- Success Messages -->
+    <string name="success_learned_words_cleared">学習済み単語を消去しました</string>
+    <string name="success_settings_reset">設定をデフォルトにリセットしました</string>
+    <string name="success_dictionary_exported">%1$d 件の単語をエクスポートしました</string>
+    <string name="success_dictionary_imported">%1$d 件追加、%2$d 件更新しました</string>
+    <string name="success_word_deleted">単語を削除しました</string>
+    <string name="success_all_words_deleted">学習済み単語をすべて削除しました</string>
+
+    <!-- Keyboard descriptions -->
+    <string name="keyboard_description">仮想キーボード</string>
+
+    <!-- Default key labels -->
+    <string name="letters_mode_label">ABC</string>
+    <string name="numbers_mode_label">123</string>
+    <string name="symbols_mode_label">+=&lt;</string>
+
+    <!-- Accessibility descriptions -->
+    <string name="key_character_description">%1$s を入力</string>
+
+    <string name="shift_key_description">Shiftキー、タップで次の文字を大文字化</string>
+    <string name="shift_active_description">Shift有効、タップで解除</string>
+    <string name="caps_lock_description">Caps Lock</string>
+    <string name="caps_lock_on_description">Caps Lockオン、タップでオフ</string>
+    <string name="backspace_key_description">前の文字を削除</string>
+    <string name="space_key_description">スペースバー</string>
+    <string name="letters_mode_description">文字キーボードに切替</string>
+    <string name="numbers_mode_description">数字キーボードに切替</string>
+    <string name="symbols_mode_description">記号キーボードに切替</string>
+    <string name="symbols_secondary_mode_description">拡張記号キーボードに切替</string>
+    <string name="language_switch_description">キーボード言語を切替</string>
+    <string name="ime_prediction_description">予測候補：%1$s</string>
+
+    <!-- Action button accessibility descriptions -->
+    <string name="action_enter_description">Enterを押す</string>
+    <string name="action_send_description">メッセージを送信</string>
+    <string name="action_search_description">検索</string>
+    <string name="action_done_description">編集完了</string>
+    <string name="action_go_description">宛先に移動</string>
+    <string name="action_next_description">次のフィールドへ</string>
+    <string name="action_previous_description">前のフィールドへ</string>
+
+    <string name="action_emoji">絵文字</string>
+    <string name="emoji_search_hint" tools:ignore="TypographyEllipsis">絵文字を検索...</string>
+    <string name="autofill_indicator_description">パスワードマネージャーの候補あり</string>
+
+    <!-- Theme Picker Accessibility -->
+    <string name="theme_description">%1$s テーマ</string>
+    <string name="theme_description_selected">%1$s テーマ（選択中）</string>
+    <string name="theme_add_favorite">%1$s をお気に入りに追加</string>
+    <string name="theme_remove_favorite">%1$s をお気に入りから削除</string>
+
+    <!-- Character Variation Accessibility -->
+    <string name="character_variation_position">文字バリエーション %1$d / %2$d：%3$s</string>
+    <string name="character_option_role">文字オプション</string>
+
+    <!-- Blacklisting Words -->
+    <string name="remove_suggestion">%1$s を候補から削除しますか？</string>
+    <string name="remove_cancel">キャンセル</string>
+    <string name="remove_confirm">削除</string>
+
+    <!-- Tips -->
+    <string name="tip_1_title">単語学習</string>
+    <string name="tip_1_description">ハイライトされたスペルミスの後にスペースを押すと、辞書に単語が追加されます。</string>
+
+    <string name="tip_2_title">句読点クイックメニュー</string>
+    <string name="tip_2_description">ピリオドまたはスペースバーを長押しして句読点クイックメニューを開きます。</string>
+
+    <string name="tip_3_title">文字バリエーション</string>
+    <string name="tip_3_description">文字を長押しして別のバリエーションを選択します。</string>
+
+    <string name="tip_4_title">候補から単語を削除</string>
+    <string name="tip_4_description">候補を長押しして候補リストから削除します。</string>
+
+    <string name="tip_5_title">クリップボードマネージャー</string>
+    <string name="tip_5_description">記号キーを長押しするとクリップボードマネージャーが開きます。</string>
+
+    <string name="tip_6_title">カーソル操作</string>
+    <string name="tip_6_description">スペースバーを左右にスワイプしてカーソルを1文字ずつ移動できます。</string>
+
+    <string name="tip_7_title">クイック削除</string>
+    <string name="tip_7_description">バックスペースキーを左にスワイプすると単語全体を一度に削除できます。</string>
+
+    <!-- Clipboard Panel -->
+    <string name="clipboard_panel_pinned">ピン留め</string>
+    <string name="clipboard_panel_recent">最近</string>
+    <string name="clipboard_panel_empty">クリップボード履歴はありません</string>
+    <string name="clipboard_panel_delete_all">すべて削除</string>
+    <string name="clipboard_panel_delete_all_confirm">ピン留めされていないクリップボードの項目をすべて削除しますか？</string>
+    <string name="clipboard_consent_message">Urikはクリップボードの内容を無期限に読み取り・保存できます。不要な場合は設定でクリップボード履歴をオフにしてください。</string>
+    <string name="clipboard_panel_close">クリップボードを閉じる</string>
+
+    <!-- Clipboard Accessibility -->
+    <string name="clipboard_item_description">クリップボード項目：%1$s</string>
+    <string name="clipboard_item_pin">クリップボード項目をピン留め</string>
+    <string name="clipboard_item_unpin">クリップボード項目のピン留めを解除</string>
+    <string name="clipboard_item_delete">クリップボード項目を削除</string>
+
+    <!-- Accessibility role descriptions -->
+    <string name="key_role">キー</string>
+    <string name="action_key_role">アクションキー</string>
+    <string name="suggestion_role">候補</string>
+    <string name="tab_role">タブ</string>
+    <string name="toggle_button_role">トグルボタン</string>
+
+    <!-- Accessibility state descriptions -->
+    <string name="state_active">アクティブ</string>
+    <string name="state_inactive">非アクティブ</string>
+    <string name="state_on">オン</string>
+    <string name="state_off">オフ</string>
+    <string name="state_selected">選択中</string>
+    <string name="state_not_selected">未選択</string>
+
+    <!-- Accessibility actions -->
+    <string name="backspace_delete_word_action">単語を削除</string>
+
+    <!-- Emoji picker accessibility (replaces hardcoded English) -->
+    <string name="emoji_search_close">検索を閉じる</string>
+    <string name="emoji_search_button">絵文字を検索</string>
+    <string name="emoji_backspace">バックスペース</string>
+    <string name="emoji_picker_close">絵文字ピッカーを閉じる</string>
+
+    <!-- AlphabetSideBar accessibility -->
+    <string name="alphabet_sidebar_description">アルファベットナビゲーションサイドバー</string>
+
+</resources>
