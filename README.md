@@ -32,7 +32,7 @@ Privacy-focused Android keyboard with swipe typing, custom layouts, and password
 - Spacebar swipe for cursor control
 - Backspace swipe to delete previous word
 - Optional number row
-- QWERTZ, AZERTY, Dvorak, Colemak, Workman, and Hcesar layouts
+- QWERTZ, AZERTY, Dvorak, Colemak, Workman, Bds and Hcesar layouts
 - Hardware keyboard detection
 
 **Intelligence**
@@ -41,7 +41,7 @@ Privacy-focused Android keyboard with swipe typing, custom layouts, and password
 - Autocorrect with configurable pause-on-misspell; skips URLs, emails, and punctuation
 - Word learning with encrypted SQLCipher database
 - User-specific word frequency tracking
-- 16 supported languages with dedicated language toggle button
+- 17 supported languages with dedicated language toggle button
 - Merged dictionaries mode for multilingual typing sessions
 - Emoji search with keyword support
 
