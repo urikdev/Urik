@@ -1,0 +1,368 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="app_name" translatable="false">Urik</string>
+    <string name="ime_name">Urik клавиатура</string>
+    <string name="ime_label">Urik клавиатура</string>
+    <string name="ime_description">Плъзгащо писане, проверка на правописа и многоезична поддръжка без компромис с поверителността. Без телеметрия. Без събиране на данни. Всичко остава на устройството ви.</string>
+
+    <!-- Settings -->
+    <string name="enable_keyboard_title">Активиране</string>
+    <string name="open_settings">Отвори настройките</string>
+    <string name="error_opening_settings">Не може да се отворят настройките</string>
+
+    <!-- Settings Activity -->
+    <string name="settings_title">Настройки на клавиатурата</string>
+    <string name="about_title">Относно</string>
+    <string name="about_button">Относно</string>
+    <string name="about_version">Версия</string>
+    <string name="about_copyright">Авторско право © 2025 Urik Development</string>
+    <string name="about_license">Лиценз: GNU GPL v3.0</string>
+    <string name="about_source_code">Изходен код</string>
+    <string name="about_release_notes">Бележки по изданието</string>
+    <string name="about_report_bug">Докладвай проблем</string>
+    <string name="about_privacy_policy">Политика за поверителност</string>
+    <string name="about_support">Подкрепи разработката</string>
+    <string name="autocorrect_settings_title">Настройки за автокорекция</string>
+    <string name="autocorrect_settings_description">Правопис и предложения</string>
+    <string name="language_settings_title">Езици</string>
+    <string name="language_settings_description">Избор на езици за клавиатурата</string>
+    <string name="select_active_language">Избери активен език</string>
+    <string name="typing_settings_title">Въвеждане</string>
+    <string name="typing_settings_description">Пунктуация, вибрация и др.</string>
+    <string name="layout_settings_title">Оформление и въвеждане</string>
+    <string name="layout_settings_description">Ред с цифри, размер на интервала</string>
+    <string name="appearance_settings_title">Външен вид</string>
+    <string name="appearance_settings_description">Тема, размер</string>
+    <string name="privacy_settings_title">Поверителност и данни</string>
+    <string name="privacy_settings_description">Изчистване на данни, нулиране на настройките</string>
+    <string name="licenses_title">Лицензи с отворен код</string>
+    <string name="licenses_description">Преглед на лицензите на външни библиотеки</string>
+    <string name="dictionary_attribution_title">Данни за речника</string>
+    <string name="theme_picker_title">Тема на клавиатурата</string>
+    <string name="dictionary_attribution_summary">FrequencyWords лиценз и атрибуция</string>
+    <string name="test_field_hint">Тествай промените</string>
+
+    <!-- Settings Enums -->
+    <!-- Key Size -->
+    <string name="key_size_small">Малък</string>
+    <string name="key_size_medium">Среден</string>
+    <string name="key_size_large">Голям</string>
+    <string name="key_size_extra_large">Много голям</string>
+
+    <!-- Long Press Duration -->
+    <string name="long_press_duration_short">Кратко</string>
+    <string name="long_press_duration_medium">Средно</string>
+    <string name="long_press_duration_long">Дълго</string>
+    <string name="cursor_speed_slow">Бавно</string>
+    <string name="cursor_speed_medium">Средно</string>
+    <string name="cursor_speed_fast">Бързо</string>
+    <string name="cursor_speed_very_fast">Много бързо</string>
+
+    <!-- Space Bar Size -->
+    <string name="space_bar_size_compact">Компактен</string>
+    <string name="space_bar_size_standard">Стандартен</string>
+    <string name="space_bar_size_wide">Широк</string>
+
+    <!-- Key Label Size -->
+    <string name="key_label_size_small">Малък</string>
+    <string name="key_label_size_medium">Среден</string>
+    <string name="key_label_size_large">Голям</string>
+
+    <!-- Appearance Settings -->
+    <string name="appearance_settings_theme">Тема</string>
+    <string name="appearance_settings_key_size">Размер на клавишите</string>
+    <string name="appearance_settings_key_label_size">Размер на надписите</string>
+    <string name="appearance_settings_press_highlight">Подсветка при натискане на клавиш</string>
+    <string name="appearance_settings_press_highlight_on">Показване на визуална обратна връзка</string>
+    <string name="appearance_settings_press_highlight_off">Визуалната обратна връзка е скрита</string>
+
+
+    <!-- Auto-Correct Settings -->
+    <string name="autocorrect_settings_spell_check">Проверка на правописа</string>
+    <string name="autocorrect_settings_spell_check_on">Проверката е включена</string>
+    <string name="autocorrect_settings_spell_check_off">Проверката е изключена</string>
+    <string name="autocorrect_settings_show_suggestions">Показване на предложения</string>
+    <string name="autocorrect_settings_suggestions_on">Предложенията са показани</string>
+    <string name="autocorrect_settings_suggestions_off">Предложенията са скрити</string>
+    <string name="autocorrect_settings_suggestion_count">Брой предложения</string>
+    <string name="autocorrect_settings_learn_new_words">Научаване на нови думи</string>
+    <string name="autocorrect_settings_learn_new_words_on">Обучението е включено</string>
+    <string name="autocorrect_settings_learn_new_words_off">Обучението е изключено</string>
+    <string name="autocorrect_settings_pause_on_misspelled">Пауза при грешка</string>
+    <string name="autocorrect_settings_pause_on_misspelled_on">Вкл.</string>
+    <string name="autocorrect_settings_pause_on_misspelled_off">Изкл.</string>
+    <string name="autocorrect_settings_autocorrection">Автокорекция</string>
+    <string name="autocorrect_settings_autocorrection_on">Вкл.</string>
+    <string name="autocorrect_settings_autocorrection_off">Изкл.</string>
+
+    <!-- Language Settings -->
+    <string name="max_languages_reached">Максимум 3 езика са позволени</string>
+    <string name="primary_layout_language">Текущо оформление</string>
+    <string name="merged_dictionaries_category">Речник</string>
+    <string name="merged_dictionaries_title">Обединени речници</string>
+    <string name="merged_dictionaries_on">Всички речници се използват за предложения</string>
+    <string name="merged_dictionaries_off">Само активният език се използва за предложения</string>
+
+    <!-- Sound & Feedback Settings -->
+    <string name="feedback_settings_haptic_feedback">Хаптична обратна връзка</string>
+    <string name="feedback_settings_haptic_on">Включена</string>
+    <string name="feedback_settings_haptic_off">Изключена</string>
+    <string name="feedback_settings_vibration_strength">Сила на вибрацията</string>
+
+    <!-- Typing Behavior Settings -->
+    <string name="typing_settings_double_space_period">Точка при двоен интервал</string>
+    <string name="typing_settings_double_space_on">Добавя точка</string>
+    <string name="typing_settings_double_space_off">Добавя интервал</string>
+    <string name="typing_settings_auto_capitalization">Автоматични главни букви</string>
+    <string name="typing_settings_auto_capitalization_on">Главна буква в началото на изречение</string>
+    <string name="typing_settings_auto_capitalization_off">Без автоматични главни букви</string>
+    <string name="typing_settings_swipe_enabled">Плъзгащо писане</string>
+    <string name="typing_settings_swipe_on">Включено</string>
+    <string name="typing_settings_swipe_off">Изключено</string>
+    <string name="typing_settings_spacebar_cursor">Контрол на курсора чрез интервала</string>
+    <string name="typing_settings_spacebar_cursor_on">Плъзни интервала за движение</string>
+    <string name="typing_settings_spacebar_cursor_off">Изключено</string>
+    <string name="typing_settings_cursor_speed">Скорост на курсора</string>
+    <string name="typing_settings_backspace_swipe">Изтриване с плъзгане на Backspace</string>
+    <string name="typing_settings_backspace_swipe_on">Плъзни наляво за изтриване на дума</string>
+    <string name="typing_settings_backspace_swipe_off">Изключено</string>    
+    <string name="typing_settings_long_press_punctuation">Пунктуация при дълго натискане</string>
+    <string name="long_press_punctuation_off">Изкл.</string>
+    <string name="long_press_punctuation_spacebar">Интервал</string>
+    <string name="long_press_punctuation_period">Клавиш точка</string>
+    <string name="typing_settings_long_press_duration">Продължителност на дълго натискане</string>
+    <string name="typing_settings_reset_to_letters">Нулиране на оформление</string>
+    <string name="typing_settings_reset_to_letters_on">Връщане към изглед с букви</string>
+    <string name="typing_settings_reset_to_letters_off">Оставане на последния изглед</string>
+
+    <!-- Layout & Input Settings -->
+    <string name="layout_settings_alternative_layout">Оформление на клавиатурата</string>
+    <string name="layout_settings_adaptive_modes_enabled">Адаптивни режими</string>
+    <string name="layout_settings_adaptive_modes_on">Автоматично се адаптира към устройството (таблети, сгъваеми)</string>
+    <string name="layout_settings_adaptive_modes_off">Винаги използва стандартно оформление</string>
+    <string name="layout_settings_one_handed_mode_enabled">Режим с една ръка</string>
+    <string name="layout_settings_one_handed_mode_on">Включен</string>
+    <string name="layout_settings_one_handed_mode_off">Стандартна клавиатура</string>
+    <string name="one_handed_mode_left">Вляво</string>
+    <string name="one_handed_mode_right">Вдясно</string>
+    <string name="one_handed_mode_full">На цял екран</string>
+    <string name="layout_settings_show_number_row">Показване на ред с цифри</string>
+    <string name="layout_settings_number_row_on">Редът с цифри е показан</string>
+    <string name="layout_settings_number_row_off">Редът с цифри е скрит</string>
+    <string name="layout_settings_show_language_switch_key">Показване на клавиш за смяна на език</string>
+    <string name="layout_settings_language_switch_key_on">Включен</string>
+    <string name="layout_settings_language_switch_key_off">Изключен</string>
+    <string name="layout_settings_space_bar_size">Размер на интервала</string>
+    <string name="alternative_layout_default">По подразбиране (езиково оформление)</string>
+    <string name="alternative_layout_qwerty" translatable="false">QWERTY</string>
+    <string name="alternative_layout_azerty" translatable="false">AZERTY</string>
+    <string name="alternative_layout_qwertz" translatable="false">QWERTZ</string>
+    <string name="alternative_layout_dvorak" translatable="false">Dvorak</string>
+    <string name="alternative_layout_colemak" translatable="false">Colemak</string>
+    <string name="alternative_layout_workman" translatable="false">Workman</string>
+    <string name="alternative_layout_hcesar" translatable="false">HCESAR</string>
+    <string name="layout_settings_customize_keys">Персонализиране на клавиши</string>
+    <string name="layout_settings_customize_keys_summary">Задаване на символ при дълго натискане</string>
+
+
+    <!-- Layout Mapper -->
+    <string name="layout_mapper_title">Персонализиране на клавиши</string>
+    <string name="layout_mapper_instructions">Докоснете клавиш, за да зададете символ. Дългото натискане ще го вмъкне.</string>
+    <string name="layout_mapper_edit_key">Редактиране на клавиш: %1$s</string>
+    <string name="layout_mapper_symbol_hint">Персонализиран символ</string>
+    <string name="layout_mapper_save">Запази</string>
+    <string name="layout_mapper_remove">Премахни</string>
+    <string name="layout_mapper_reset_all">Нулирай всички</string>
+    <string name="layout_mapper_reset_title">Нулиране на всички?</string>
+    <string name="layout_mapper_reset_message">Това ще премахне всички настройки. Не може да бъде отменено.</string>
+    <string name="layout_mapper_reset_confirm">Нулирай</string>
+    <string name="layout_mapper_saved">Запазено</string>
+    <string name="layout_mapper_removed">Премахнато</string>
+    <string name="layout_mapper_cleared">Всички са изчистени</string>
+    <string name="layout_mapper_save_failed">Неуспешно запазване</string>
+    <string name="layout_mapper_remove_failed">Неуспешно премахване</string>
+    <string name="layout_mapper_clear_failed">Неуспешно изчистване</string>
+
+    <!-- Privacy & Data Settings -->
+    <string name="privacy_settings_clipboard_history">История на клипборда</string>
+    <string name="privacy_settings_clipboard_history_on">Включена</string>
+    <string name="privacy_settings_clipboard_history_off">Изключена</string>
+    <string name="privacy_settings_clear_learned_words">Изчистване на научените думи</string>
+    <string name="privacy_settings_clear_learned_words_summary">Премахва всички научени думи</string>
+    <string name="privacy_settings_clear_learned_words_confirm">Изтриване на всички думи? Това не може да бъде отменено.</string>
+    <string name="privacy_settings_reset_to_defaults">Възстановяване на настройките</string>
+    <string name="privacy_settings_reset_to_defaults_confirm">Нулиране на всички настройки?</string>
+    <string name="privacy_settings_export_error_log">Експорт на логове</string>
+    <string name="privacy_settings_export_error_log_summary">Споделяне на логове за диагностика</string>
+    <string name="privacy_settings_export_error_log_failed">Неуспешен експорт</string>
+    <string name="privacy_settings_export_dictionary">Експорт на речник</string>
+    <string name="privacy_settings_export_dictionary_summary">Запазване на думи във файл</string>
+    <string name="privacy_settings_import_dictionary">Импорт на речник</string>
+    <string name="privacy_settings_import_dictionary_summary">Възстановяване на научени думи от файл</string>
+    <string name="learned_words_title">Научени думи</string>
+    <string name="learned_words_manage">Управление на думи</string>
+    <string name="learned_words_manage_summary">Преглед и изтриване на отделни научени думи</string>
+    <string name="learned_words_empty">Все още няма научени думи</string>
+    <string name="learned_words_delete_all">Изтрий всички</string>
+    <string name="learned_words_delete_all_confirm">Изтриване на всички? Не може да се върне.</string>
+    <string name="learned_words_auth_title">Потвърждение</string>
+    <string name="learned_words_auth_subtitle">Удостоверяване за преглед на научените думи</string>
+
+    <!-- Error Messages -->
+    <string name="error_title">Грешка</string>
+    <string name="error_update_key_size">Неуспешна промяна на размера на клавишите</string>
+    <string name="error_update_key_label_size">Неуспешна промяна на надписа на клавиша</string>
+    <string name="error_update_spell_check">Неуспешна промяна на проверка на правописа</string>
+    <string name="error_update_suggestions">Неуспешна промяна на предложенията</string>
+    <string name="error_update_suggestion_count">Неуспешна промяна на брой предложения</string>
+    <string name="error_update_word_learning">Неуспешна промяна на научените думи</string>
+    <string name="error_update_clipboard">Неуспешно обновяване на клипборда</string>
+    <string name="error_update_language">Неуспешно обновяване на езиковите настройки</string>
+    <string name="error_update_haptic_feedback">Неуспешна промяна на хаптичната обратна връзка</string>
+    <string name="error_update_vibration_strength">Неуспешна промяна на силата на вибрацията</string>
+    <string name="error_update_double_space_period">Неуспешна промяна на точката при двоен интервал</string>
+    <string name="error_update_auto_capitalization">Неуспешна промяна на автоматичната главна буква</string>
+    <string name="error_update_swipe">Неуспешна промяна на плъзгащо писане</string>
+    <string name="error_update_spacebar_cursor">Неуспешна промяна на контрол на курсора чрез интервала</string>
+    <string name="error_update_cursor_speed">Неуспешна промяна на скоростта на курсора</string>
+    <string name="error_update_backspace_swipe">Неуспешна промяна на изтриване с плъзгане на Backspace</string>
+    <string name="error_update_long_press_punctuation">Неуспешна промяна на пунктуация с дълго натискане</string>
+    <string name="error_update_long_press_duration">Неуспешна промяна на продължителност на дълго натискане</string>
+    <string name="error_update_number_row">Неуспешна промяна на реда с цифри</string>
+    <string name="error_update_space_bar_size">Неуспешна промяна на размера на интервала</string>
+    <string name="error_update_alternative_layout">Неуспешна промяна на оформлението на клавиатурата</string>
+    <string name="error_clear_learned_words">Неуспешно изчистване на научените думи</string>
+    <string name="error_reset_to_defaults">Неуспешно нулиране на настройките</string>
+    <string name="error_dictionary_export">Неуспешен експорт на речника</string>
+    <string name="error_dictionary_import">Неуспешен импорт на речника</string>
+    <string name="error_update_merged_dictionaries">Неуспешна промяна на речникa</string>
+    <string name="error_update_pause_on_misspelled">Неуспешна промяна на настройките за пауза</string>
+    <string name="error_update_autocorrection">Неуспешна промяна на настройките за автоматична поправка</string>
+    <string name="error_update_number_hints">Неуспешна промяна на подсказките за цифри</string>
+    <string name="error_update_reset_to_letters">Неуспешно обновяване на настройката за връщане към букви</string>
+    <string name="error_update_press_highlight">Неуспешно обновяване на подсветката при натискане на клавиш</string>
+    <string name="layout_settings_show_number_hints">Показване на подсказки за цифри</string>
+    <string name="layout_settings_number_hints_on">Вкл.</string>
+    <string name="layout_settings_number_hints_off">Изкл.</string>
+    <string name="error_delete_word">Неуспешно изтриване на дума</string>
+    <string name="error_delete_all_words">Неуспешно изтриване на научените думи</string>
+
+    <!-- Success Messages -->
+    <string name="success_learned_words_cleared">Научените думи са изчистени</string>
+    <string name="success_settings_reset">Настройките са нулирани</string>
+    <string name="success_dictionary_exported">Експортирани %1$d думи</string>
+    <string name="success_dictionary_imported">Добавени %1$d нови, обновени %2$d думи</string>
+    <string name="success_word_deleted">Думата е премахната</string>
+    <string name="success_all_words_deleted">Всички научени думи са изчистени</string>
+
+    <!-- Keyboard descriptions -->
+    <string name="keyboard_description">Виртуална клавиатура</string>
+
+    <!-- Default key labels -->
+    <string name="letters_mode_label">AБВ</string>
+    <string name="numbers_mode_label">123</string>
+    <string name="symbols_mode_label">+=&lt;</string>
+    <string name="symbols_secondary_mode_label" translatable="false">SYM</string>
+
+    <!-- Accessibility descriptions -->
+    <string name="key_character_description">Въведи %1$s</string>
+
+    <string name="shift_key_description">Клавиш Shift, натиснете за главна буква</string>
+    <string name="shift_active_description">Shift е активен, натиснете за изключване</string>
+    <string name="caps_lock_description">Caps Lock</string>
+    <string name="caps_lock_on_description">Caps Lock е включен, натиснете за изключване</string>
+    <string name="backspace_key_description">Изтрий предишния символ</string>
+    <string name="space_key_description">Интервал</string>
+    <string name="letters_mode_description">Превключи към букви</string>
+    <string name="numbers_mode_description">Превключи към цифри</string>
+    <string name="symbols_mode_description">Превключи към символи</string>
+    <string name="symbols_secondary_mode_description">Превключи към разширени символи</string>
+    <string name="language_switch_description">Смяна на езика</string>
+    <string name="ime_prediction_description">Предложение: %1$s</string>
+
+    <!-- Action button accessibility descriptions -->
+    <string name="action_enter_description">Натисни Enter</string>
+    <string name="action_send_description">Изпрати съобщение</string>
+    <string name="action_search_description">Търсене</string>
+    <string name="action_done_description">Готово</string>
+    <string name="action_go_description">Отиди към дестинацията</string>
+    <string name="action_next_description">Към следващото поле</string>
+    <string name="action_previous_description">Към предишното поле</string>
+
+    <string name="action_emoji">Емоджи</string>
+    <string name="emoji_search_hint" tools:ignore="TypographyEllipsis">Търсене на емоджи...</string>
+    <string name="autofill_indicator_description">Налични предложения от мениджър на пароли</string>
+
+    <!-- Theme Picker Accessibility -->
+    <string name="theme_description">%1$s тема</string>
+    <string name="theme_description_selected">%1$s тема, избрана в момента</string>
+    <string name="theme_add_favorite">Добави %1$s към любими</string>
+    <string name="theme_remove_favorite">Премахни %1$s от любими</string>
+
+    <!-- Character Variation Accessibility -->
+    <string name="character_variation_position">Вариация %1$d от %2$d: %3$s</string>
+    <string name="character_option_role">вариант на символ</string>
+
+    <!-- Blacklisting Words -->
+    <string name="remove_suggestion">Премахване на %1$s от предложенията?</string>
+    <string name="remove_cancel">Отказ</string>
+    <string name="remove_confirm">Премахни</string>
+
+    <!-- Tips -->
+    <string name="tip_1_title">Научаване на думи</string>
+    <string name="tip_1_description">Натиснете интервал след маркирана грешка, за да добавите думата в речника.</string>
+
+    <string name="tip_2_title">Бързо меню за пунктуация</string>
+    <string name="tip_2_description">Задръжте интервала, за да отворите меню.</string>
+
+    <string name="tip_3_title">Вариации на символи</string>
+    <string name="tip_3_description">Задръжте символ, за да изберете вариант.</string>
+
+    <string name="tip_4_title">Премахване на думи</string>
+    <string name="tip_4_description">Задръжте предложение, за да го премахнете.</string>
+
+    <string name="tip_5_title">Клипборд мениджър</string>
+    <string name="tip_5_description">Задръжте клавиша за символи, за да отворите клипборда.</string>
+
+    <!-- Clipboard Panel -->
+    <string name="clipboard_panel_pinned">Закачени</string>
+    <string name="clipboard_panel_recent">Последни</string>
+    <string name="clipboard_panel_empty">Няма елементи</string>
+    <string name="clipboard_panel_delete_all">Изтрий всички</string>
+    <string name="clipboard_panel_delete_all_confirm">Изтриване на всички незакачени елементи?</string>
+    <string name="clipboard_consent_message">Urik може да съхранява съдържанието на клипборда неограничено време. Ако не желаете това, изключете го от настройките.</string>
+    <string name="clipboard_panel_close">Затвори клипборда</string>
+
+    <!-- Clipboard Accessibility -->
+    <string name="clipboard_item_description">Елемент от клипборда: %1$s</string>
+    <string name="clipboard_item_pin">Закачи</string>
+    <string name="clipboard_item_unpin">Откачи</string>
+    <string name="clipboard_item_delete">Изтрий</string>
+
+    <!-- Accessibility role descriptions -->
+    <string name="key_role">клавиш</string>
+    <string name="action_key_role">действие</string>
+    <string name="suggestion_role">предложение</string>
+    <string name="tab_role">раздел</string>
+    <string name="toggle_button_role">бутон</string>
+
+    <!-- Accessibility state descriptions -->
+    <string name="state_active">активен</string>
+    <string name="state_inactive">неактивен</string>
+    <string name="state_on">вкл.</string>
+    <string name="state_off">изкл.</string>
+    <string name="state_selected">избран</string>
+    <string name="state_not_selected">неизбран</string>
+
+    <!-- Accessibility actions -->
+    <string name="backspace_delete_word_action">Изтрий дума</string>
+
+    <!-- Emoji picker accessibility -->
+    <string name="emoji_search_close">Затвори търсенето</string>
+    <string name="emoji_search_button">Търсене на емоджи</string>
+    <string name="emoji_backspace">Backspace</string>
+    <string name="emoji_picker_close">Затвори избора на емоджи</string>
+
+    <!-- AlphabetSideBar accessibility -->
+    <string name="alphabet_sidebar_description">Странична лента за навигация по азбука</string>
+
+</resources>

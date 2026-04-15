@@ -76,7 +76,8 @@ enum class AlternativeKeyboardLayout(val displayNameRes: Int) {
     DVORAK(R.string.alternative_layout_dvorak),
     COLEMAK(R.string.alternative_layout_colemak),
     WORKMAN(R.string.alternative_layout_workman),
-    HCESAR(R.string.alternative_layout_hcesar)
+    HCESAR(R.string.alternative_layout_hcesar),
+    BDS(R.string.alternative_layout_bds)
 }
 
 /**
@@ -200,7 +201,7 @@ data class KeyboardSettings(
          * Languages with full keyboard layout, dictionary, and localization support.
          */
         val SUPPORTED_LANGUAGES =
-            setOf("ar", "ca", "cs", "de", "el", "en", "es", "fa", "fr", "it", "nl", "pl", "pt", "ru", "sk", "sv", "uk")
+            setOf("ar", "bg", "ca", "cs", "de", "el", "en", "es", "fa", "fr", "it", "nl", "pl", "pt", "ru", "sk", "sv", "uk")
 
         /**
          * Returns localized display names for all supported languages.
