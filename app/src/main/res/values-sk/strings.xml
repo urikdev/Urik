@@ -356,5 +356,9 @@
 
     <!-- AlphabetSideBar accessibility -->
     <string name="alphabet_sidebar_description">Bočný panel abecedy</string>
-
+    <!-- Flick key accessibility -->
+    <string name="flick_key_description">%1$s. Posun: hore %2$s, vpravo %3$s, dole %4$s, vľavo %5$s</string>
+    <string name="flick_key_description_partial">%1$s. Posun: %2$s</string>
+    <string name="action_dakuten">Prepnúť znak znelosti</string>
+    <string name="action_small_kana">Prepnúť malú kanu</string>
 </resources>

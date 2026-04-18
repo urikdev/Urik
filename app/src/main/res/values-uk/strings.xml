@@ -360,5 +360,9 @@
 
     <!-- AlphabetSideBar accessibility -->
     <string name="alphabet_sidebar_description">Бічна панель алфавітної навігації</string>
-
+    <!-- Flick key accessibility -->
+    <string name="flick_key_description">%1$s. Свайп: вгору %2$s, вправо %3$s, вниз %4$s, вліво %5$s</string>
+    <string name="flick_key_description_partial">%1$s. Свайп: %2$s</string>
+    <string name="action_dakuten">Перемкнути знак дзвінкості</string>
+    <string name="action_small_kana">Перемкнути малу кану</string>
 </resources>

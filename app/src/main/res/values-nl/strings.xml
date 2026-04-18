@@ -360,5 +360,9 @@
 
     <!-- AlphabetSideBar accessibility -->
     <string name="alphabet_sidebar_description">Alfabetische navigatiebalk</string>
-
+    <!-- Flick key accessibility -->
+    <string name="flick_key_description">%1$s. Veeg: omhoog %2$s, rechts %3$s, omlaag %4$s, links %5$s</string>
+    <string name="flick_key_description_partial">%1$s. Veeg: %2$s</string>
+    <string name="action_dakuten">Stemteken wisselen</string>
+    <string name="action_small_kana">Klein kana wisselen</string>
 </resources>
