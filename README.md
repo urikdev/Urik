@@ -107,6 +107,13 @@ Emoji search uses multilingual keyword annotations from [Unicode CLDR](https://g
 - License: Unicode License V3
 - Modifications: Extracted emoji annotations, converted to searchable JSON format
 
+## Japanese Conversion Data
+
+Kana-to-kanji conversion uses dictionary data from [Mozc](https://github.com/google/mozc) by Google LLC.
+
+- License: BSD 3-Clause
+- Modifications: Extracted reading/surface/frequency triples; converted cost values to frequency scores; filtered single-character hiragana entries (covered by the spell-check dictionary)
+
 ## License
 
 GNU General Public License v3.0

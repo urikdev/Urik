@@ -326,4 +326,9 @@
 
     <!-- AlphabetSideBar accessibility -->
     <string name="alphabet_sidebar_description">Barra lateral de navegació alfabètica</string>
+    <!-- Flick key accessibility -->
+    <string name="flick_key_description">%1$s. Llisca: amunt %2$s, dreta %3$s, avall %4$s, esquerra %5$s</string>
+    <string name="flick_key_description_partial">%1$s. Llisca: %2$s</string>
+    <string name="action_dakuten">Alterna marca de veu</string>
+    <string name="action_small_kana">Alterna kana petit</string>
 </resources>

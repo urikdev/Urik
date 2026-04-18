@@ -326,4 +326,9 @@
 
     <!-- AlphabetSideBar accessibility -->
     <string name="alphabet_sidebar_description">Πλαϊνή γραμμή αλφαβητικής πλοήγησης</string>
+    <!-- Flick key accessibility -->
+    <string name="flick_key_description">%1$s. Σύρε: πάνω %2$s, δεξιά %3$s, κάτω %4$s, αριστερά %5$s</string>
+    <string name="flick_key_description_partial">%1$s. Σύρε: %2$s</string>
+    <string name="action_dakuten">Εναλλαγή σημαδιού φωνής</string>
+    <string name="action_small_kana">Εναλλαγή μικρού κάνα</string>
 </resources>

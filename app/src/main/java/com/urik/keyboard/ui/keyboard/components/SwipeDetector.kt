@@ -189,6 +189,7 @@ constructor(private val streamingScoringEngine: StreamingScoringEngine) {
         "en", "es", "pl", "pt", "de", "cs", "sk", "sv" -> UScript.LATIN
         "ru", "uk" -> UScript.CYRILLIC
         "ar", "fa" -> UScript.ARABIC
+        "ja" -> UScript.HIRAGANA
         else -> UScript.LATIN
     }
 

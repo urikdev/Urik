@@ -362,5 +362,9 @@
 
     <!-- AlphabetSideBar accessibility -->
     <string name="alphabet_sidebar_description">Боковая панель алфавитной навигации</string>
-
+    <!-- Flick key accessibility -->
+    <string name="flick_key_description">%1$s. Свайп: вверх %2$s, вправо %3$s, вниз %4$s, влево %5$s</string>
+    <string name="flick_key_description_partial">%1$s. Свайп: %2$s</string>
+    <string name="action_dakuten">Переключить знак озвончения</string>
+    <string name="action_small_kana">Переключить малую кану</string>
 </resources>

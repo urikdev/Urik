@@ -219,6 +219,7 @@ constructor(
             }
 
             KeyboardKey.Spacer -> {}
+            is KeyboardKey.FlickKey -> {}
         }
     }
 

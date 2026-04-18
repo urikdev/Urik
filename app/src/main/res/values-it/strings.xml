@@ -359,5 +359,9 @@
 
     <!-- AlphabetSideBar accessibility -->
     <string name="alphabet_sidebar_description">Barra laterale di navigazione alfabetica</string>
-
+    <!-- Flick key accessibility -->
+    <string name="flick_key_description">%1$s. Swipe: su %2$s, destra %3$s, giù %4$s, sinistra %5$s</string>
+    <string name="flick_key_description_partial">%1$s. Swipe: %2$s</string>
+    <string name="action_dakuten">Attiva/disattiva segno vocale</string>
+    <string name="action_small_kana">Attiva/disattiva kana piccolo</string>
 </resources>

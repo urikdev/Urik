@@ -356,5 +356,9 @@
 
     <!-- AlphabetSideBar accessibility -->
     <string name="alphabet_sidebar_description">Barra lateral de navegação alfabética</string>
-
+    <!-- Flick key accessibility -->
+    <string name="flick_key_description">%1$s. Deslizar: cima %2$s, direita %3$s, baixo %4$s, esquerda %5$s</string>
+    <string name="flick_key_description_partial">%1$s. Deslizar: %2$s</string>
+    <string name="action_dakuten">Alternar marca sonora</string>
+    <string name="action_small_kana">Alternar kana pequeno</string>
 </resources>

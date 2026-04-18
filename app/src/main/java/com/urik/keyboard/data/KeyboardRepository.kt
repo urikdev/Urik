@@ -276,12 +276,34 @@ constructor(
                         "mode_switch_symbols_secondary" -> KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS_SECONDARY
                         "caps_lock" -> KeyboardKey.ActionType.CAPS_LOCK
                         "dynamic_action" -> currentAction
+                        "dakuten" -> KeyboardKey.ActionType.DAKUTEN
+                        "small_kana" -> KeyboardKey.ActionType.SMALL_KANA
                         else -> KeyboardKey.ActionType.ENTER
                     }
                 KeyboardKey.Action(actionType)
             }
 
             "spacer" -> KeyboardKey.Spacer
+
+            "flick" -> {
+                val center = keyData.getString("char")
+                val keyType = when (keyData.optString("keyType", "letter")) {
+                    "letter" -> KeyboardKey.KeyType.LETTER
+                    "number" -> KeyboardKey.KeyType.NUMBER
+                    "symbol" -> KeyboardKey.KeyType.SYMBOL
+                    "punctuation" -> KeyboardKey.KeyType.PUNCTUATION
+                    else -> KeyboardKey.KeyType.LETTER
+                }
+                val flickObj = keyData.optJSONObject("flick")
+                KeyboardKey.FlickKey(
+                    center = center,
+                    up = flickObj?.optString("up")?.takeIf { it.isNotEmpty() },
+                    right = flickObj?.optString("right")?.takeIf { it.isNotEmpty() },
+                    down = flickObj?.optString("down")?.takeIf { it.isNotEmpty() },
+                    left = flickObj?.optString("left")?.takeIf { it.isNotEmpty() },
+                    type = keyType
+                )
+            }
 
             else -> throw IllegalArgumentException("Unknown key type: $type")
         }

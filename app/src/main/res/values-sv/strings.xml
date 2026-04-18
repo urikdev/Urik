@@ -304,4 +304,9 @@
 
     <!-- AlphabetSideBar accessibility -->
     <string name="alphabet_sidebar_description">Sidofält för alfabetisk navigering</string>
+    <!-- Flick key accessibility -->
+    <string name="flick_key_description">%1$s. Svep: upp %2$s, höger %3$s, ned %4$s, vänster %5$s</string>
+    <string name="flick_key_description_partial">%1$s. Svep: %2$s</string>
+    <string name="action_dakuten">Växla röstmärke</string>
+    <string name="action_small_kana">Växla liten kana</string>
 </resources>

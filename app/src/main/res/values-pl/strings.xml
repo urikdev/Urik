@@ -359,5 +359,9 @@
 
     <!-- AlphabetSideBar accessibility -->
     <string name="alphabet_sidebar_description">Pasek nawigacji alfabetycznej</string>
-
+    <!-- Flick key accessibility -->
+    <string name="flick_key_description">%1$s. Przesuń: góra %2$s, prawo %3$s, dół %4$s, lewo %5$s</string>
+    <string name="flick_key_description_partial">%1$s. Przesuń: %2$s</string>
+    <string name="action_dakuten">Przełącz znak dźwięczny</string>
+    <string name="action_small_kana">Przełącz małą kanę</string>
 </resources>

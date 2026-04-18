@@ -63,6 +63,8 @@ constructor(
             maxSize = PROCESSING_CACHE_MAX_SIZE
         )
 
+    @Volatile private var isJapaneseLayout = false
+
     private var currentScriptCode = UScript.LATIN
     private var currentLocale: ULocale = ULocale.ENGLISH
     private var currentSettings = KeyboardSettings()
@@ -88,6 +90,13 @@ constructor(
         ) {
             clearCaches()
             spellCheckManager.clearCaches()
+        }
+    }
+
+    fun setJapaneseLayout(japanese: Boolean) {
+        if (isJapaneseLayout != japanese) {
+            isJapaneseLayout = japanese
+            clearCaches()
         }
     }
 

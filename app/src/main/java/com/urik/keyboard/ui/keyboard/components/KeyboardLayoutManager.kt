@@ -116,6 +116,38 @@ class KeyboardLayoutManager(
     private var activePunctuationPopup: CharacterVariationPopup? = null
     private var popupSelectionMode = false
     private var swipeKeyboardView: SwipeKeyboardView? = null
+    private val flickGestureDetector = FlickGestureDetector().also { detector ->
+        detector.updateDisplayMetrics(context.resources.displayMetrics.density)
+        detector.setFlickListener(object : FlickGestureDetector.FlickListener {
+            override fun onFlickStart(key: KeyboardKey.FlickKey, anchorX: Float, anchorY: Float) {}
+            override fun onFlickDirectionChanged(
+                key: KeyboardKey.FlickKey,
+                direction: FlickGestureDetector.FlickDirection
+            ) {
+                flickPopup?.updateHighlight(direction)
+            }
+            override fun onFlickCommit(key: KeyboardKey.FlickKey, direction: FlickGestureDetector.FlickDirection) {
+                flickPopup?.dismiss()
+                flickPopup = null
+                val char = when (direction) {
+                    FlickGestureDetector.FlickDirection.NONE -> key.center
+                    FlickGestureDetector.FlickDirection.UP -> key.up ?: key.center
+                    FlickGestureDetector.FlickDirection.RIGHT -> key.right ?: key.center
+                    FlickGestureDetector.FlickDirection.DOWN -> key.down ?: key.center
+                    FlickGestureDetector.FlickDirection.LEFT -> key.left ?: key.center
+                }
+                onKeyClick(KeyboardKey.Character(char, key.type))
+            }
+            override fun onFlickCancel() {
+                flickPopup?.dismiss()
+                flickPopup = null
+            }
+            override fun onActionTap(key: KeyboardKey.Action) {
+                onKeyClick(key)
+            }
+        })
+    }
+    private var flickPopup: FlickPopup? = null
     private var spaceGestureStartX = 0f
     private var spaceGestureStartY = 0f
 
@@ -769,6 +801,8 @@ class KeyboardLayoutManager(
                         }
                     }
 
+                    is KeyboardKey.FlickKey -> HapticSignature.LetterClick
+
                     KeyboardKey.Spacer -> {
                         return
                     }
@@ -1112,6 +1146,7 @@ class KeyboardLayoutManager(
     }
 
     @SuppressLint("ClickableViewAccessibility")
+    @Suppress("CyclomaticComplexMethod")
     private fun configureButton(button: Button, key: KeyboardKey, state: KeyboardState, rowKeys: List<KeyboardKey>) {
         ensureCacheValid()
 
@@ -1257,6 +1292,10 @@ class KeyboardLayoutManager(
 
                                     else -> {}
                                 }
+                            }
+
+                            is KeyboardKey.FlickKey -> {
+                                info.roleDescription = context.getString(R.string.key_role)
                             }
 
                             KeyboardKey.Spacer -> {}
@@ -1416,6 +1455,21 @@ class KeyboardLayoutManager(
                 setOnTouchListener(backspaceTouchListener)
                 isHapticFeedbackEnabled = false
             }
+
+            if (key is KeyboardKey.FlickKey) {
+                setOnClickListener(null)
+                setOnTouchListener { view, event ->
+                    if (event.action == MotionEvent.ACTION_DOWN) {
+                        val popup = FlickPopup(context, themeManager)
+                        flickPopup?.dismiss()
+                        flickPopup = popup
+                        popup.show(key, view)
+                    }
+                    flickGestureDetector.handleTouchEvent(event) { _, _ ->
+                        view.getTag(R.id.key_data) as? KeyboardKey
+                    }
+                }
+            }
         }
     }
 
@@ -1533,11 +1587,17 @@ class KeyboardLayoutManager(
                         ).uppercase(java.util.Locale.ROOT)
                 }
 
+                KeyboardKey.ActionType.DAKUTEN -> "゛"
+
+                KeyboardKey.ActionType.SMALL_KANA -> "小"
+
                 else -> {
                     "?"
                 }
             }
         }
+
+        is KeyboardKey.FlickKey -> key.center
 
         KeyboardKey.Spacer -> {
             ""
@@ -1635,8 +1695,18 @@ class KeyboardLayoutManager(
                 KeyboardKey.ActionType.LANGUAGE_SWITCH -> {
                     context.getString(R.string.language_switch_description)
                 }
+
+                KeyboardKey.ActionType.DAKUTEN -> {
+                    context.getString(R.string.action_dakuten)
+                }
+
+                KeyboardKey.ActionType.SMALL_KANA -> {
+                    context.getString(R.string.action_small_kana)
+                }
             }
         }
+
+        is KeyboardKey.FlickKey -> buildFlickContentDescription(key)
 
         KeyboardKey.Spacer -> {
             ""
@@ -1861,6 +1931,8 @@ class KeyboardLayoutManager(
                         }
                     }
 
+                    is KeyboardKey.FlickKey -> STANDARD_KEY_WEIGHT
+
                     KeyboardKey.Spacer -> {
                         STANDARD_KEY_WEIGHT
                     }
@@ -1881,6 +1953,8 @@ class KeyboardLayoutManager(
 
                 is KeyboardKey.Action -> key.action == KeyboardKey.ActionType.BACKSPACE
 
+                is KeyboardKey.FlickKey -> false
+
                 KeyboardKey.Spacer -> false
             }
         }
@@ -1889,6 +1963,20 @@ class KeyboardLayoutManager(
     private fun isTopNumberRow(rowKeys: List<KeyboardKey>): Boolean {
         val characterKeys = rowKeys.filterIsInstance<KeyboardKey.Character>()
         return characterKeys.size == 10 && characterKeys.all { it.type == KeyboardKey.KeyType.NUMBER }
+    }
+
+    private fun buildFlickContentDescription(key: KeyboardKey.FlickKey): String {
+        val parts = buildList {
+            key.up?.let { add("up $it") }
+            key.right?.let { add("right $it") }
+            key.down?.let { add("down $it") }
+            key.left?.let { add("left $it") }
+        }
+        return if (parts.isEmpty()) {
+            key.center
+        } else {
+            "${key.center}. Flick: ${parts.joinToString(", ")}"
+        }
     }
 
     private fun shouldCapitalize(state: KeyboardState): Boolean = state.isShiftPressed || state.isCapsLockOn
@@ -1932,6 +2020,8 @@ class KeyboardLayoutManager(
                         else -> theme.colors.keyBackgroundAction
                     }
                 }
+
+                is KeyboardKey.FlickKey -> theme.colors.keyBackgroundCharacter
 
                 KeyboardKey.Spacer -> {
                     android.graphics.Color.TRANSPARENT
@@ -1990,6 +2080,7 @@ class KeyboardLayoutManager(
         return when (key) {
             is KeyboardKey.Character -> colors.keyTextCharacter
             is KeyboardKey.Action -> colors.keyTextAction
+            is KeyboardKey.FlickKey -> colors.keyTextCharacter
             KeyboardKey.Spacer -> android.graphics.Color.TRANSPARENT
         }
     }

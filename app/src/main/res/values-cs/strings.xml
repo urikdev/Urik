@@ -356,5 +356,9 @@
 
     <!-- AlphabetSideBar accessibility -->
     <string name="alphabet_sidebar_description">Boční panel abecedního procházení</string>
-
+    <!-- Flick key accessibility -->
+    <string name="flick_key_description">%1$s. Přejetí: nahoru %2$s, vpravo %3$s, dolů %4$s, vlevo %5$s</string>
+    <string name="flick_key_description_partial">%1$s. Přejetí: %2$s</string>
+    <string name="action_dakuten">Přepnout znak znělosti</string>
+    <string name="action_small_kana">Přepnout malou kanu</string>
 </resources>

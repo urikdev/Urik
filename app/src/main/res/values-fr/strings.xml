@@ -359,4 +359,9 @@
 
     <!-- AlphabetSideBar accessibility -->
     <string name="alphabet_sidebar_description">Barre latérale de navigation alphabétique</string>
+    <!-- Flick key accessibility -->
+    <string name="flick_key_description">%1$s. Flick : haut %2$s, droite %3$s, bas %4$s, gauche %5$s</string>
+    <string name="flick_key_description_partial">%1$s. Flick : %2$s</string>
+    <string name="action_dakuten">Basculer le signe voisé</string>
+    <string name="action_small_kana">Basculer le petit kana</string>
 </resources>

@@ -360,5 +360,9 @@
 
     <!-- AlphabetSideBar accessibility -->
     <string name="alphabet_sidebar_description">شريط التنقل الأبجدي</string>
-
+    <!-- Flick key accessibility -->
+    <string name="flick_key_description">%1$s. تمرير: لأعلى %2$s، لليمين %3$s، لأسفل %4$s، لليسار %5$s</string>
+    <string name="flick_key_description_partial">%1$s. تمرير: %2$s</string>
+    <string name="action_dakuten">تبديل علامة المنطوق</string>
+    <string name="action_small_kana">تبديل كانا الصغيرة</string>
 </resources>

@@ -18,6 +18,8 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -154,5 +156,65 @@ class KeyboardRepositoryTest {
         val result = loadLetters("el")
         assertTrue("el layout must load without error", result.isSuccess)
         assertEquals("Grek", result.getOrNull()?.script)
+    }
+
+    // ── Japanese ──────────────────────────────────────────────────────────────
+
+    @Test
+    fun `Japanese layout resolves to Hira script`() = runTest {
+        val result = loadLetters("ja")
+        assertTrue("ja layout must load without error", result.isSuccess)
+        assertEquals("Hira", result.getOrNull()?.script)
+    }
+
+    @Test
+    fun `Japanese layout letters mode contains FlickKey instances`() = runTest {
+        val layout = loadLetters("ja").getOrNull()!!
+        val flickKeys = layout.rows.flatten().filterIsInstance<KeyboardKey.FlickKey>()
+        assertTrue("Japanese layout must have FlickKey instances", flickKeys.isNotEmpty())
+    }
+
+    @Test
+    fun `Japanese あ key has correct flick variants`() = runTest {
+        val layout = loadLetters("ja").getOrNull()!!
+        val aKey = layout.rows.flatten()
+            .filterIsInstance<KeyboardKey.FlickKey>()
+            .find { it.center == "あ" }
+        assertNotNull("あ key must exist", aKey)
+        assertEquals("い", aKey!!.up)
+        assertEquals("う", aKey.right)
+        assertEquals("え", aKey.down)
+        assertEquals("お", aKey.left)
+    }
+
+    @Test
+    fun `Japanese や key has null for up and left`() = runTest {
+        val layout = loadLetters("ja").getOrNull()!!
+        val yaKey = layout.rows.flatten()
+            .filterIsInstance<KeyboardKey.FlickKey>()
+            .find { it.center == "や" }
+        assertNotNull("や key must exist", yaKey)
+        assertNull(yaKey!!.up)
+        assertNull(yaKey.left)
+        assertEquals("ゆ", yaKey.right)
+        assertEquals("よ", yaKey.down)
+    }
+
+    @Test
+    fun `Japanese layout contains DAKUTEN action key`() = runTest {
+        val layout = loadLetters("ja").getOrNull()!!
+        val dakutenKey = layout.rows.flatten()
+            .filterIsInstance<KeyboardKey.Action>()
+            .find { it.action == KeyboardKey.ActionType.DAKUTEN }
+        assertNotNull("DAKUTEN action key must exist in Japanese layout", dakutenKey)
+    }
+
+    @Test
+    fun `Japanese layout contains SMALL_KANA action key`() = runTest {
+        val layout = loadLetters("ja").getOrNull()!!
+        val smallKanaKey = layout.rows.flatten()
+            .filterIsInstance<KeyboardKey.Action>()
+            .find { it.action == KeyboardKey.ActionType.SMALL_KANA }
+        assertNotNull("SMALL_KANA action key must exist in Japanese layout", smallKanaKey)
     }
 }

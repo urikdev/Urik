@@ -890,6 +890,10 @@ constructor(
             KeyboardKey.Spacer -> {
                 return false
             }
+
+            is KeyboardKey.FlickKey -> {
+                return false
+            }
         }
     }
 
@@ -1457,6 +1461,7 @@ constructor(
 
         this.currentLayout = layout
         this.currentState = state
+        updateSwipeStateForLayout(layout)
 
         touchCoordinateTransformer.updateRtlState(layout.isRTL)
 
@@ -1498,6 +1503,7 @@ constructor(
         if (keyboardView is ViewGroup) {
             keyboardLayoutManager?.effectiveLayout?.let { effective ->
                 currentLayout = effective
+                updateSwipeStateForLayout(effective)
             }
 
             addView(
@@ -2283,6 +2289,11 @@ constructor(
     private fun returnEmojiViewsToPool() {
         emojiViewPool.addAll(activeEmojiViews)
         activeEmojiViews.clear()
+    }
+
+    private fun updateSwipeStateForLayout(layout: KeyboardLayout?) {
+        val hasFlickKeys = layout?.rows?.flatten()?.any { it is KeyboardKey.FlickKey } == true
+        swipeDetector?.setSwipeEnabled(!hasFlickKeys)
     }
 
     companion object {

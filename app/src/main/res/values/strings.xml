@@ -277,6 +277,12 @@
     <string name="language_switch_description">Switch keyboard language</string>
     <string name="ime_prediction_description">Prediction: %1$s</string>
 
+    <!-- Flick key accessibility descriptions -->
+    <string name="flick_key_description">%1$s. Flick: up %2$s, right %3$s, down %4$s, left %5$s</string>
+    <string name="flick_key_description_partial">%1$s. Flick: %2$s</string>
+    <string name="action_dakuten">Voiced mark toggle</string>
+    <string name="action_small_kana">Small kana toggle</string>
+
     <!-- Action button accessibility descriptions -->
     <string name="action_enter_description">Press enter</string>
     <string name="action_send_description">Send message</string>

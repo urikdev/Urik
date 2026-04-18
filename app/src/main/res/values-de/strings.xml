@@ -355,4 +355,9 @@
 
     <!-- AlphabetSideBar accessibility -->
     <string name="alphabet_sidebar_description">Alphabetische Navigationsleiste</string>
+    <!-- Flick key accessibility -->
+    <string name="flick_key_description">%1$s. Wischen: oben %2$s, rechts %3$s, unten %4$s, links %5$s</string>
+    <string name="flick_key_description_partial">%1$s. Wischen: %2$s</string>
+    <string name="action_dakuten">Stimmzeichen umschalten</string>
+    <string name="action_small_kana">Kleines Kana umschalten</string>
 </resources>
