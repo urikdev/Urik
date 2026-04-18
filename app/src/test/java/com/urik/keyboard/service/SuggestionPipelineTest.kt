@@ -44,6 +44,7 @@ class SuggestionPipelineTest {
     private lateinit var mockWordFrequencyRepository: WordFrequencyRepository
     private lateinit var mockLanguageManager: LanguageManager
     private lateinit var mockCaseTransformer: CaseTransformer
+    private lateinit var mockKanaKanjiConverter: KanaKanjiConverter
 
     private lateinit var inputState: InputStateManager
     private lateinit var outputBridge: OutputBridge
@@ -65,6 +66,7 @@ class SuggestionPipelineTest {
         mockWordFrequencyRepository = mock()
         mockLanguageManager = mock()
         mockCaseTransformer = mock()
+        mockKanaKanjiConverter = mock()
 
         whenever(mockIc.beginBatchEdit()).thenReturn(true)
         whenever(mockIc.endBatchEdit()).thenReturn(true)
@@ -109,6 +111,7 @@ class SuggestionPipelineTest {
             wordFrequencyRepository = mockWordFrequencyRepository,
             languageManager = mockLanguageManager,
             caseTransformer = mockCaseTransformer,
+            kanaKanjiConverter = mockKanaKanjiConverter,
             serviceScope = kotlinx.coroutines.CoroutineScope(testDispatcher),
             showSuggestions = { true },
             effectiveSuggestionCount = { 3 },

@@ -716,7 +716,11 @@ constructor(
                                 CONTRACTION_GUARANTEED_CONFIDENCE
                             } else {
                                 val frequencyBoost = calculateFrequencyBoost(frequency)
-                                val spatialScore = calculateFullWordSpatialScore(normalizedWord, word.lowercase())
+                                val spatialScore = if (languageCode == "ja") {
+                                    0.0
+                                } else {
+                                    calculateFullWordSpatialScore(normalizedWord, word.lowercase())
+                                }
                                 val baseConfidence = LEARNED_WORD_BASE_CONFIDENCE - index * 0.02
                                 (baseConfidence + spatialScore * LEARNED_SPATIAL_WEIGHT + frequencyBoost).coerceIn(
                                     LEARNED_WORD_CONFIDENCE_MIN,
@@ -777,10 +781,14 @@ constructor(
                                         COMPLETION_LENGTH_WEIGHT * lengthRatio +
                                             COMPLETION_FREQUENCY_WEIGHT * frequencyScore
 
-                                    val spatialScore = calculateFullWordSpatialScore(
-                                        normalizedWord,
-                                        word.lowercase()
-                                    )
+                                    val spatialScore = if (languageCode == "ja") {
+                                        0.0
+                                    } else {
+                                        calculateFullWordSpatialScore(
+                                            normalizedWord,
+                                            word.lowercase()
+                                        )
+                                    }
                                     baseConfidence += spatialScore * COMPLETION_SPATIAL_WEIGHT
 
                                     if (userFrequency > 0) {
@@ -864,10 +872,14 @@ constructor(
                                                 SYMSPELL_FREQUENCY_WEIGHT * freqScore
 
                                         val spatialScore =
-                                            calculateFullWordSpatialScore(
-                                                normalizedWord,
-                                                result.term.lowercase()
-                                            )
+                                            if (languageCode == "ja") {
+                                                0.0
+                                            } else {
+                                                calculateFullWordSpatialScore(
+                                                    normalizedWord,
+                                                    result.term.lowercase()
+                                                )
+                                            }
                                         baseConfidence += spatialScore * SPATIAL_PROXIMITY_WEIGHT
 
                                         if (isContractionCandidate && editDistance == 1.0) {

@@ -28,7 +28,7 @@ class KeyboardSettingsTest {
     fun `validated preserves german as supported language`() {
         val settings =
             KeyboardSettings(
-                activeLanguages = listOf("de", "en", "ja"),
+                activeLanguages = listOf("de", "en", "zh"),
                 primaryLanguage = "de"
             )
 
@@ -42,7 +42,7 @@ class KeyboardSettingsTest {
     fun `validated preserves czech as supported language`() {
         val settings =
             KeyboardSettings(
-                activeLanguages = listOf("cs", "en", "ja"),
+                activeLanguages = listOf("cs", "en", "zh"),
                 primaryLanguage = "cs"
             )
 
@@ -56,7 +56,7 @@ class KeyboardSettingsTest {
     fun `validated preserves slovak as supported language`() {
         val settings =
             KeyboardSettings(
-                activeLanguages = listOf("sk", "en", "ja"),
+                activeLanguages = listOf("sk", "en", "zh"),
                 primaryLanguage = "sk"
             )
 
@@ -70,7 +70,7 @@ class KeyboardSettingsTest {
     fun `validated preserves portuguese as supported language`() {
         val settings =
             KeyboardSettings(
-                activeLanguages = listOf("pt", "en", "ja"),
+                activeLanguages = listOf("pt", "en", "zh"),
                 primaryLanguage = "pt"
             )
 
@@ -84,8 +84,8 @@ class KeyboardSettingsTest {
     fun `validated defaults to english when all languages unsupported`() {
         val settings =
             KeyboardSettings(
-                activeLanguages = listOf("ja", "zh", "ko"),
-                primaryLanguage = "ja"
+                activeLanguages = listOf("zh", "ko", "ar-XY"),
+                primaryLanguage = "zh"
             )
 
         val validated = settings.validated()
@@ -99,7 +99,7 @@ class KeyboardSettingsTest {
         val settings =
             KeyboardSettings(
                 activeLanguages = listOf("en", "sv"),
-                primaryLanguage = "ja"
+                primaryLanguage = "zh"
             )
 
         val validated = settings.validated()
@@ -288,7 +288,7 @@ class KeyboardSettingsTest {
     fun `validated preserves russian as supported language`() {
         val settings =
             KeyboardSettings(
-                activeLanguages = listOf("ru", "en", "ja"),
+                activeLanguages = listOf("ru", "en", "zh"),
                 primaryLanguage = "ru"
             )
 
@@ -310,7 +310,7 @@ class KeyboardSettingsTest {
     fun `validated preserves ukrainian as supported language`() {
         val settings =
             KeyboardSettings(
-                activeLanguages = listOf("uk", "en", "ja"),
+                activeLanguages = listOf("uk", "en", "zh"),
                 primaryLanguage = "uk"
             )
 
@@ -340,7 +340,7 @@ class KeyboardSettingsTest {
     fun `validated preserves farsi as supported language`() {
         val settings =
             KeyboardSettings(
-                activeLanguages = listOf("fa", "en", "ja"),
+                activeLanguages = listOf("fa", "en", "zh"),
                 primaryLanguage = "fa"
             )
 
@@ -362,7 +362,7 @@ class KeyboardSettingsTest {
     fun `validated preserves italian as supported language`() {
         val settings =
             KeyboardSettings(
-                activeLanguages = listOf("it", "en", "ja"),
+                activeLanguages = listOf("it", "en", "zh"),
                 primaryLanguage = "it"
             )
 
@@ -384,7 +384,7 @@ class KeyboardSettingsTest {
     fun `validated preserves dutch as supported language`() {
         val settings =
             KeyboardSettings(
-                activeLanguages = listOf("nl", "en", "ja"),
+                activeLanguages = listOf("nl", "en", "zh"),
                 primaryLanguage = "nl"
             )
 
@@ -398,7 +398,7 @@ class KeyboardSettingsTest {
     fun `validated preserves polish as supported language`() {
         val settings =
             KeyboardSettings(
-                activeLanguages = listOf("pl", "en", "ja"),
+                activeLanguages = listOf("pl", "en", "zh"),
                 primaryLanguage = "pl"
             )
 
@@ -420,7 +420,7 @@ class KeyboardSettingsTest {
     fun `validated preserves french as supported language`() {
         val settings =
             KeyboardSettings(
-                activeLanguages = listOf("fr", "en", "ja"),
+                activeLanguages = listOf("fr", "en", "zh"),
                 primaryLanguage = "fr"
             )
 
@@ -442,7 +442,7 @@ class KeyboardSettingsTest {
     fun `validated preserves arabic as supported language`() {
         val settings =
             KeyboardSettings(
-                activeLanguages = listOf("ar", "en", "ja"),
+                activeLanguages = listOf("ar", "en", "zh"),
                 primaryLanguage = "ar"
             )
 
@@ -454,7 +454,7 @@ class KeyboardSettingsTest {
 
     @Test
     fun `defaultForLocale falls back to english for unsupported`() {
-        val settings = KeyboardSettings.defaultForLocale("ja")
+        val settings = KeyboardSettings.defaultForLocale("zh")
 
         assertEquals(listOf("en"), settings.activeLanguages)
         assertEquals("en", settings.primaryLanguage)
@@ -486,8 +486,8 @@ class KeyboardSettingsTest {
     fun `validated is idempotent`() {
         val settings =
             KeyboardSettings(
-                activeLanguages = listOf("en", "fr", "ja"),
-                primaryLanguage = "ja",
+                activeLanguages = listOf("en", "fr", "zh"),
+                primaryLanguage = "zh",
                 suggestionCount = 10
             )
 
@@ -501,8 +501,8 @@ class KeyboardSettingsTest {
     fun `multiple validation calls produce same result`() {
         val settings =
             KeyboardSettings(
-                activeLanguages = listOf("en", "sv", "fr", "ja"),
-                primaryLanguage = "ja",
+                activeLanguages = listOf("en", "sv", "fr", "zh"),
+                primaryLanguage = "zh",
                 suggestionCount = -1
             )
 
@@ -582,9 +582,9 @@ class KeyboardSettingsTest {
     fun `validated with all unsupported languages falls back to english`() {
         val settings =
             KeyboardSettings(
-                activeLanguages = listOf("ja", "zh", "ko"),
-                primaryLanguage = "ja",
-                primaryLayoutLanguage = "zh"
+                activeLanguages = listOf("zh", "ko", "ar-XY"),
+                primaryLanguage = "zh",
+                primaryLayoutLanguage = "ko"
             )
 
         val validated = settings.validated()
@@ -736,5 +736,26 @@ class KeyboardSettingsTest {
         val validated = settings.validated()
 
         assertFalse(validated.showNumberHints)
+    }
+
+    @Test
+    fun `defaultForLocale supports japanese`() {
+        val settings = KeyboardSettings.defaultForLocale("ja")
+
+        assertEquals(listOf("ja"), settings.activeLanguages)
+        assertEquals("ja", settings.primaryLanguage)
+    }
+
+    @Test
+    fun `validated preserves japanese as supported language`() {
+        val settings = KeyboardSettings(
+            activeLanguages = listOf("ja", "en", "zh"),
+            primaryLanguage = "ja"
+        )
+
+        val validated = settings.validated()
+
+        assertEquals(listOf("ja", "en"), validated.activeLanguages)
+        assertEquals("ja", validated.primaryLanguage)
     }
 }

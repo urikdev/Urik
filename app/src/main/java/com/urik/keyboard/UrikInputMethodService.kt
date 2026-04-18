@@ -67,6 +67,7 @@ import com.urik.keyboard.utils.BackspaceUtils
 import com.urik.keyboard.utils.CacheMemoryManager
 import com.urik.keyboard.utils.CursorEditingUtils
 import com.urik.keyboard.utils.ErrorLogger
+import com.urik.keyboard.utils.KanaTransformUtils
 import com.urik.keyboard.utils.KeyboardModeUtils
 import com.urik.keyboard.utils.SecureFieldDetector
 import com.urik.keyboard.utils.SelectionChangeResult
@@ -153,6 +154,9 @@ class UrikInputMethodService :
 
     @Inject
     lateinit var swipeSpaceManager: com.urik.keyboard.service.SwipeSpaceManager
+
+    @Inject
+    lateinit var kanaKanjiConverter: com.urik.keyboard.service.KanaKanjiConverter
 
     private lateinit var viewModel: KeyboardViewModel
     private lateinit var layoutManager: KeyboardLayoutManager
@@ -353,6 +357,7 @@ class UrikInputMethodService :
                     wordFrequencyRepository = wordFrequencyRepository,
                     languageManager = languageManager,
                     caseTransformer = caseTransformer,
+                    kanaKanjiConverter = kanaKanjiConverter,
                     serviceScope = serviceScope,
                     showSuggestions = { currentSettings.showSuggestions },
                     effectiveSuggestionCount = { currentSettings.effectiveSuggestionCount },
@@ -905,6 +910,9 @@ class UrikInputMethodService :
             serviceScope.launch {
                 languageManager.currentLayoutLanguage.collect { detectedLanguage ->
                     swipeDetector.updateCurrentLanguage(detectedLanguage.split("-").first())
+                    val isJa = detectedLanguage.split("-").first() == "ja"
+                    textInputProcessor.setJapaneseLayout(isJa)
+                    suggestionPipeline.setJapaneseLayout(isJa)
                 }
             }
         )
@@ -1175,6 +1183,7 @@ class UrikInputMethodService :
                 }
 
                 KeyboardKey.Spacer -> {}
+                is KeyboardKey.FlickKey -> {}
             }
         } catch (_: Exception) {
         }
@@ -1688,6 +1697,15 @@ class UrikInputMethodService :
                 return@launch
             }
 
+            if (suggestionPipeline.isJapaneseLayout) {
+                val reading = inputState.displayBuffer
+                val rawSource = inputState.currentRawSuggestions
+                    .firstOrNull { it.word.equals(suggestion, ignoreCase = true) }?.source
+                if (rawSource == "learned" || rawSource == "dictionary") {
+                    kanaKanjiConverter.incrementUserFrequency(reading = reading, surface = suggestion)
+                }
+            }
+
             suggestionPipeline.coordinateSuggestionSelection(suggestion, ::checkAutoCapitalization)
         }
     }
@@ -1805,6 +1823,30 @@ class UrikInputMethodService :
             }
 
             KeyboardKey.ActionType.LANGUAGE_SWITCH -> {
+            }
+
+            KeyboardKey.ActionType.DAKUTEN -> {
+                val ic = currentInputConnection ?: return
+                val before = ic.getTextBeforeCursor(1, 0)?.toString() ?: return
+                val transformed = KanaTransformUtils.cycleDakutenOnLast(before)
+                if (transformed != before) {
+                    ic.beginBatchEdit()
+                    ic.deleteSurroundingText(1, 0)
+                    ic.commitText(transformed, 1)
+                    ic.endBatchEdit()
+                }
+            }
+
+            KeyboardKey.ActionType.SMALL_KANA -> {
+                val ic = currentInputConnection ?: return
+                val before = ic.getTextBeforeCursor(1, 0)?.toString() ?: return
+                val transformed = KanaTransformUtils.toggleSmallKanaOnLast(before)
+                if (transformed != before) {
+                    ic.beginBatchEdit()
+                    ic.deleteSurroundingText(1, 0)
+                    ic.commitText(transformed, 1)
+                    ic.endBatchEdit()
+                }
             }
         }
     }

@@ -62,6 +62,20 @@ sealed class KeyboardKey {
      */
     data object Spacer : KeyboardKey()
 
+    /**
+     * Kana key with directional flick variants for 12-key Japanese input.
+     *
+     * [center] is committed on tap. Null directions indicate no character for that flick direction.
+     */
+    data class FlickKey(
+        val center: String,
+        val up: String?,
+        val right: String?,
+        val down: String?,
+        val left: String?,
+        val type: KeyType
+    ) : KeyboardKey()
+
     enum class KeyType {
         LETTER,
         NUMBER,
@@ -85,7 +99,9 @@ sealed class KeyboardKey {
         MODE_SWITCH_SYMBOLS,
         MODE_SWITCH_SYMBOLS_SECONDARY,
         CAPS_LOCK,
-        LANGUAGE_SWITCH
+        LANGUAGE_SWITCH,
+        DAKUTEN,
+        SMALL_KANA
     }
 }
 

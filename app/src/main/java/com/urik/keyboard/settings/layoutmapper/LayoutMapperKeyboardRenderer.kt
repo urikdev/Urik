@@ -131,6 +131,7 @@ class LayoutMapperKeyboardRenderer(private val context: Context) {
                     val button = createActionButton(key, keys, theme, textSize)
                     rowLayout.addView(button)
                 }
+                is KeyboardKey.FlickKey -> {}
             }
         }
 
@@ -250,6 +251,7 @@ class LayoutMapperKeyboardRenderer(private val context: Context) {
                     else -> STANDARD_KEY_WEIGHT
                 }
             KeyboardKey.Spacer -> STANDARD_KEY_WEIGHT
+            is KeyboardKey.FlickKey -> STANDARD_KEY_WEIGHT
         }
     }
 

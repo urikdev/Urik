@@ -268,6 +268,12 @@
     <string name="language_switch_description">キーボード言語を切替</string>
     <string name="ime_prediction_description">予測候補：%1$s</string>
 
+    <!-- Flick key accessibility descriptions -->
+    <string name="flick_key_description">%1$s。フリック：上 %2$s、右 %3$s、下 %4$s、左 %5$s</string>
+    <string name="flick_key_description_partial">%1$s。フリック：%2$s</string>
+    <string name="action_dakuten">濁点・半濁点</string>
+    <string name="action_small_kana">小文字切替</string>
+
     <!-- Action button accessibility descriptions -->
     <string name="action_enter_description">Enterを押す</string>
     <string name="action_send_description">メッセージを送信</string>

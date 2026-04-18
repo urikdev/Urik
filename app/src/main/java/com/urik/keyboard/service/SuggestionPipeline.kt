@@ -10,6 +10,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+@Suppress("LongParameterList")
 class SuggestionPipeline(
     private val state: InputStateManager,
     private val outputBridge: OutputBridge,
@@ -19,6 +20,7 @@ class SuggestionPipeline(
     private val wordFrequencyRepository: WordFrequencyRepository,
     private val languageManager: LanguageManager,
     private val caseTransformer: CaseTransformer,
+    private val kanaKanjiConverter: KanaKanjiConverter,
     private val serviceScope: CoroutineScope,
     private val showSuggestions: () -> Boolean,
     private val effectiveSuggestionCount: () -> Int,
@@ -28,9 +30,19 @@ class SuggestionPipeline(
 ) {
     private var suggestionDebounceJob: Job? = null
     private val suggestionDebounceDelay = SUGGESTION_DEBOUNCE_MS
+    var isJapaneseLayout: Boolean = false
+        private set
+
+    fun setJapaneseLayout(japanese: Boolean) {
+        isJapaneseLayout = japanese
+    }
 
     @Suppress("UnusedParameter")
     fun requestSuggestions(buffer: String, inputMethod: InputMethod, isCharacterInput: Boolean, char: String? = null) {
+        if (isJapaneseLayout) {
+            requestJapaneseSuggestions(buffer)
+            return
+        }
         val (currentSequence, bufferSnapshot) = state.getSequenceAndBuffer()
 
         suggestionDebounceJob?.cancel()
@@ -332,6 +344,47 @@ class SuggestionPipeline(
             } catch (_: Exception) {
                 outputBridge.coordinateStateClear()
             }
+        }
+    }
+
+    private fun requestJapaneseSuggestions(hiraganaBuffer: String) {
+        suggestionDebounceJob?.cancel()
+        suggestionDebounceJob = serviceScope.launch(Dispatchers.Default) {
+            try {
+                delay(suggestionDebounceDelay)
+
+                val conversionCandidates = kanaKanjiConverter.getCandidates(hiraganaBuffer)
+                    .map { candidate ->
+                        SpellingSuggestion(
+                            word = candidate.surface,
+                            confidence = candidate.frequency.toDouble(),
+                            ranking = 0,
+                            source = candidate.source
+                        )
+                    }
+
+                val symspellCompletions = if (showSuggestions()) {
+                    spellCheckManager.getSpellingSuggestionsWithConfidence(hiraganaBuffer)
+                        .filter { it.source == "completion" }
+                } else {
+                    emptyList()
+                }
+
+                val combined = (conversionCandidates + symspellCompletions)
+                    .distinctBy { it.word }
+                    .take(effectiveSuggestionCount())
+
+                withContext(Dispatchers.Main) {
+                    if (combined.isNotEmpty()) {
+                        state.pendingSuggestions = combined.map { it.word }
+                        state.currentRawSuggestions = combined
+                        state.updateSuggestionDisplay(combined.map { it.word })
+                    } else {
+                        state.pendingSuggestions = emptyList()
+                        state.clearSuggestionDisplay()
+                    }
+                }
+            } catch (_: Exception) { }
         }
     }
 

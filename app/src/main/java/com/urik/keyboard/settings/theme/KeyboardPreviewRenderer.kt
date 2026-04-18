@@ -349,5 +349,9 @@ class KeyboardPreviewRenderer(private val context: Context) {
         KeyboardKey.Spacer -> {
             ""
         }
+
+        is KeyboardKey.FlickKey -> {
+            key.center
+        }
     }
 }
