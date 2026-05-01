@@ -293,7 +293,6 @@ constructor(
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
-        updateDensity()
     }
 
     private fun setupSwipeOverlay() {
