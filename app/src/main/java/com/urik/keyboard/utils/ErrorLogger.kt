@@ -1,6 +1,7 @@
 package com.urik.keyboard.utils
 
 import android.content.Context
+import com.urik.keyboard.utils.ErrorLogger.init
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -39,8 +40,20 @@ object ErrorLogger {
     private const val MAX_CONTEXT_VALUE_LENGTH = 200
     private const val CHANNEL_CAPACITY = 32
 
+    private val FORBIDDEN_CONTEXT_KEYS = setOf(
+        "text",
+        "word",
+        "input",
+        "query",
+        "content",
+        "suggestion",
+        "composing",
+        "typed"
+    )
+
     private val isLoggingException = AtomicBoolean(false)
     private val isInitialized = AtomicBoolean(false)
+    private val inMemoryCount = java.util.concurrent.atomic.AtomicInteger(0)
 
     private var logFile: File? = null
     private var fallbackFile: File? = null
@@ -62,7 +75,8 @@ object ErrorLogger {
 
     enum class Severity {
         CRITICAL,
-        HIGH
+        HIGH,
+        LOW
     }
 
     data class ErrorEntry(
@@ -92,6 +106,10 @@ object ErrorLogger {
         fallbackFile = File(context.filesDir, FALLBACK_FILE_NAME)
 
         validateOrCreateLogFile()
+        logFile?.let { file ->
+            file.setReadable(false, false)
+            file.setReadable(true, true)
+        }
 
         scope.launch {
             for (entry in logChannel) {
@@ -137,6 +155,7 @@ object ErrorLogger {
                     context = sanitizedContext
                 )
 
+            inMemoryCount.incrementAndGet()
             logChannel.trySend(entry)
         } finally {
             isLoggingException.set(false)
@@ -151,11 +170,26 @@ object ErrorLogger {
     fun exportLog(): File = logFile?.takeIf { it.exists() } ?: createEmptyLogFile()
 
     /**
+     * Resets logger state so tests can re-initialize with a fresh context.
+     *
+     * Must be called before [init] in each test that uses ErrorLogger.
+     */
+    @androidx.annotation.VisibleForTesting
+    fun resetForTesting() {
+        isInitialized.set(false)
+        inMemoryCount.set(0)
+        logFile = null
+        fallbackFile = null
+    }
+
+    /**
      * Gets count of logged errors.
      *
      * @return Number of errors in log, or 0 if file missing/corrupted
      */
-    fun getErrorCount(): Int {
+    fun getErrorCount(): Int = inMemoryCount.get()
+
+    fun getErrorCountFromFile(): Int {
         val file = logFile ?: return 0
         if (!file.exists()) return 0
 
@@ -218,6 +252,8 @@ object ErrorLogger {
             """.trimIndent()
 
         file.writeText(emptyLog)
+        file.setReadable(false, false)
+        file.setReadable(true, true)
         return file
     }
 
@@ -419,10 +455,12 @@ object ErrorLogger {
         return "$className.$methodName:$lineNumber"
     }
 
-    private fun sanitizeContext(context: Map<String, String>): Map<String, String> = context.mapValues { (_, value) ->
-        value
-            .take(MAX_CONTEXT_VALUE_LENGTH)
-            .replace("\n", " ")
-            .replace("\r", " ")
-    }
+    private fun sanitizeContext(context: Map<String, String>): Map<String, String> = context
+        .filterKeys { key -> key.lowercase() !in FORBIDDEN_CONTEXT_KEYS }
+        .mapValues { (_, value) ->
+            value
+                .take(MAX_CONTEXT_VALUE_LENGTH)
+                .replace("\n", " ")
+                .replace("\r", " ")
+        }
 }

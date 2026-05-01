@@ -160,6 +160,8 @@
     <string name="layout_mapper_clear_failed">Error al borrar los asignaciones</string>
 
     <!-- Privacy & Data Settings -->
+    <string name="privacy_settings_storage_encryption_title">Almacenamiento de palabras: Sin cifrar</string>
+    <string name="privacy_settings_storage_encryption_summary">No se detectó ninguna pantalla de bloqueo del dispositivo. Las palabras aprendidas se almacenan en texto plano. Establezca un PIN, patrón o bloqueo biométrico en la configuración de Android para habilitar el cifrado.</string>
     <string name="privacy_settings_clipboard_history">Historial del portapapeles</string>
     <string name="privacy_settings_clipboard_history_on">Historial del portapapeles activado</string>
     <string name="privacy_settings_clipboard_history_off">Historial del portapapeles desactivado</string>

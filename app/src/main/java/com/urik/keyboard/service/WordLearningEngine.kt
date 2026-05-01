@@ -339,7 +339,13 @@ constructor(
         } catch (_: SQLiteException) {
             handleDatabaseError()
             false
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            ErrorLogger.logException(
+                component = "WordLearningEngine",
+                severity = ErrorLogger.Severity.HIGH,
+                exception = e,
+                context = mapOf("operation" to "isWordLearned")
+            )
             false
         }
     }
@@ -369,7 +375,13 @@ constructor(
         } catch (_: SQLiteException) {
             handleDatabaseError()
             null
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            ErrorLogger.logException(
+                component = "WordLearningEngine",
+                severity = ErrorLogger.Severity.HIGH,
+                exception = e,
+                context = mapOf("operation" to "getLearnedWordOriginalCase")
+            )
             null
         }
     }
@@ -446,7 +458,13 @@ constructor(
                     if (exactMatch != null) {
                         results[exactMatch.word] = exactMatch.frequency
                     }
-                } catch (_: Exception) {
+                } catch (e: Exception) {
+                    ErrorLogger.logException(
+                        component = "WordLearningEngine",
+                        severity = ErrorLogger.Severity.HIGH,
+                        exception = e,
+                        context = mapOf("operation" to "getSimilarLearnedWords_exactMatch")
+                    )
                 }
             }
 
@@ -463,7 +481,13 @@ constructor(
                             results[learnedWord.word] = learnedWord.frequency
                         }
                     }
-                } catch (_: Exception) {
+                } catch (e: Exception) {
+                    ErrorLogger.logException(
+                        component = "WordLearningEngine",
+                        severity = ErrorLogger.Severity.HIGH,
+                        exception = e,
+                        context = mapOf("operation" to "getSimilarLearnedWords_prefixMatch")
+                    )
                 }
             }
 
@@ -495,7 +519,13 @@ constructor(
                         .forEach { candidate ->
                             results[candidate.word] = candidate.frequency
                         }
-                } catch (_: Exception) {
+                } catch (e: Exception) {
+                    ErrorLogger.logException(
+                        component = "WordLearningEngine",
+                        severity = ErrorLogger.Severity.HIGH,
+                        exception = e,
+                        context = mapOf("operation" to "getSimilarLearnedWords_strippedMatch")
+                    )
                 }
             }
 
@@ -537,7 +567,13 @@ constructor(
                         .forEach { (candidate, _) ->
                             results[candidate.word] = candidate.frequency
                         }
-                } catch (_: Exception) {
+                } catch (e: Exception) {
+                    ErrorLogger.logException(
+                        component = "WordLearningEngine",
+                        severity = ErrorLogger.Severity.HIGH,
+                        exception = e,
+                        context = mapOf("operation" to "getSimilarLearnedWords_fuzzyMatch")
+                    )
                 }
             }
 
@@ -550,7 +586,13 @@ constructor(
         } catch (_: SQLiteException) {
             handleDatabaseError()
             emptyList()
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            ErrorLogger.logException(
+                component = "WordLearningEngine",
+                severity = ErrorLogger.Severity.HIGH,
+                exception = e,
+                context = mapOf("operation" to "getSimilarLearnedWordsWithFrequency")
+            )
             emptyList()
         }
     }
@@ -760,7 +802,13 @@ constructor(
         } catch (_: SQLiteException) {
             handleDatabaseError()
             words.associateWith { false }
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            ErrorLogger.logException(
+                component = "WordLearningEngine",
+                severity = ErrorLogger.Severity.HIGH,
+                exception = e,
+                context = mapOf("operation" to "areWordsLearned")
+            )
             words.associateWith { false }
         }
     }
@@ -790,14 +838,26 @@ constructor(
             val totalWords =
                 try {
                     learnedWordDao.getTotalWordCount()
-                } catch (_: Exception) {
+                } catch (e: Exception) {
+                    ErrorLogger.logException(
+                        component = "WordLearningEngine",
+                        severity = ErrorLogger.Severity.HIGH,
+                        exception = e,
+                        context = mapOf("operation" to "getLearningStats_totalWordCount")
+                    )
                     0
                 }
 
             val averageFrequency =
                 try {
                     learnedWordDao.getAverageFrequency()
-                } catch (_: Exception) {
+                } catch (e: Exception) {
+                    ErrorLogger.logException(
+                        component = "WordLearningEngine",
+                        severity = ErrorLogger.Severity.HIGH,
+                        exception = e,
+                        context = mapOf("operation" to "getLearningStats_averageFrequency")
+                    )
                     0.0
                 }
 
@@ -806,7 +866,13 @@ constructor(
             val sourceCounts =
                 try {
                     learnedWordDao.getWordCountsBySource()
-                } catch (_: Exception) {
+                } catch (e: Exception) {
+                    ErrorLogger.logException(
+                        component = "WordLearningEngine",
+                        severity = ErrorLogger.Severity.HIGH,
+                        exception = e,
+                        context = mapOf("operation" to "getLearningStats_sourceCounts")
+                    )
                     emptyList()
                 }
 
@@ -882,7 +948,13 @@ constructor(
         try {
             val cutoff = System.currentTimeMillis() - CLEANUP_CUTOFF_MS
             learnedWordDao.cleanupLowFrequencyWords(cutoff)
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            ErrorLogger.logException(
+                component = "WordLearningEngine",
+                severity = ErrorLogger.Severity.HIGH,
+                exception = e,
+                context = mapOf("operation" to "tryCleanupOldWords")
+            )
         }
     }
 
@@ -939,7 +1011,13 @@ constructor(
                             async {
                                 try {
                                     learnedWordDao.getAllLearnedWordsForLanguage(lang)
-                                } catch (_: Exception) {
+                                } catch (e: Exception) {
+                                    ErrorLogger.logException(
+                                        component = "WordLearningEngine",
+                                        severity = ErrorLogger.Severity.HIGH,
+                                        exception = e,
+                                        context = mapOf("operation" to "getLearnedWordsForSwipe_language")
+                                    )
                                     emptyList()
                                 }
                             }
@@ -964,7 +1042,13 @@ constructor(
         } catch (_: SQLiteException) {
             handleDatabaseError()
             emptyMap()
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            ErrorLogger.logException(
+                component = "WordLearningEngine",
+                severity = ErrorLogger.Severity.HIGH,
+                exception = e,
+                context = mapOf("operation" to "getLearnedWordsForSwipeAllLanguages")
+            )
             emptyMap()
         }
     }

@@ -5,6 +5,7 @@ import android.content.res.Configuration
 import android.graphics.Rect
 import androidx.window.layout.FoldingFeature
 import androidx.window.layout.WindowInfoTracker
+import com.urik.keyboard.utils.ErrorLogger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -55,7 +56,13 @@ class PostureDetector(private val context: Context, private val scope: Coroutine
             fallbackJob?.cancel()
             fallbackJob = null
             startWindowInfoCollection()
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            ErrorLogger.logException(
+                component = "PostureDetector",
+                severity = ErrorLogger.Severity.LOW,
+                exception = e,
+                context = mapOf("operation" to "attachToWindow")
+            )
             ensureFallbackPolling()
         }
     }

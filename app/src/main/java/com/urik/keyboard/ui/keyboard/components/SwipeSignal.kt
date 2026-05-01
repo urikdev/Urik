@@ -1,5 +1,3 @@
-@file:Suppress("ktlint:standard:no-wildcard-imports")
-
 package com.urik.keyboard.ui.keyboard.components
 
 import android.graphics.PointF

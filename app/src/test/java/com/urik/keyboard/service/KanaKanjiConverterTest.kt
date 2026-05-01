@@ -24,17 +24,17 @@ class KanaKanjiConverterTest {
 
     @Test
     fun `getCandidates returns empty list for empty input`() = runTest {
-        assertTrue(converter.getCandidates("").isEmpty())
+        assertTrue(converter.getCandidates("", "ja").isEmpty())
     }
 
     @Test
     fun `getCandidates returns empty list for unknown reading`() = runTest {
-        assertTrue(converter.getCandidates("zzzz").isEmpty())
+        assertTrue(converter.getCandidates("zzzz", "ja").isEmpty())
     }
 
     @Test
     fun `getCandidates returns candidates sorted by frequency descending`() = runTest {
-        val candidates = converter.getCandidates("とうきょう")
+        val candidates = converter.getCandidates("とうきょう", "ja")
         if (candidates.isNotEmpty()) {
             for (i in 0 until candidates.size - 1) {
                 assertTrue(
@@ -47,7 +47,7 @@ class KanaKanjiConverterTest {
 
     @Test
     fun `getCandidates returns results for prefix reading`() = runTest {
-        val candidates = converter.getCandidates("わた")
+        val candidates = converter.getCandidates("わた", "ja")
         val readings = candidates.map { it.reading }
         assertTrue(
             "All candidates must have readings starting with 'わた'",
@@ -56,12 +56,12 @@ class KanaKanjiConverterTest {
     }
 
     @Test
-    fun `incrementUserFrequency boosts candidate on subsequent lookup`() = runTest {
+    fun `recordSelection boosts candidate on subsequent lookup`() = runTest {
         val reading = "わたし"
         val surface = "私"
-        converter.incrementUserFrequency(reading, surface)
+        converter.recordSelection(reading, surface)
 
-        val candidates = converter.getCandidates(reading)
+        val candidates = converter.getCandidates(reading, "ja")
         val boosted = candidates.find { it.surface == surface && it.source == "learned" }
         assertTrue("Boosted candidate must appear in results", boosted != null)
     }

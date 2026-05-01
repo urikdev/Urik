@@ -22,6 +22,7 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreferenceCompat
 import com.urik.keyboard.R
+import com.urik.keyboard.data.database.DatabaseSecurityManager
 import com.urik.keyboard.settings.SettingsEventHandler
 import com.urik.keyboard.settings.learnedwords.LearnedWordsFragment
 import com.urik.keyboard.utils.ErrorLogger
@@ -79,6 +80,17 @@ class PrivacyDataFragment : PreferenceFragmentCompat() {
         val screen = preferenceManager.createPreferenceScreen(context)
 
         eventHandler = SettingsEventHandler(requireContext())
+
+        if (!DatabaseSecurityManager(context).hasDeviceLockScreen()) {
+            val encryptionWarningPref = Preference(context).apply {
+                key = "storage_encryption_warning"
+                title = resources.getString(R.string.privacy_settings_storage_encryption_title)
+                summary = resources.getString(R.string.privacy_settings_storage_encryption_summary)
+                isSelectable = false
+                isIconSpaceReserved = false
+            }
+            screen.addPreference(encryptionWarningPref)
+        }
 
         clipboardPref =
             SwitchPreferenceCompat(context).apply {

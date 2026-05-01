@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import android.util.Base64
+import androidx.annotation.VisibleForTesting
 import com.urik.keyboard.utils.ErrorLogger
 import java.security.KeyStore
 import javax.crypto.Cipher
@@ -21,7 +22,10 @@ import javax.crypto.spec.GCMParameterSpec
  * - Device lock screen required (enforces device-level security)
  *
  */
-class DatabaseSecurityManager(private val context: Context) {
+class DatabaseSecurityManager(
+    private val context: Context,
+    @VisibleForTesting internal val lockScreenCheck: () -> Boolean = { defaultLockScreenCheck(context) }
+) {
     private val keyAlias = "urik_database_master_key"
     private val prefsFile = "urik_db_prefs"
     private val passphraseKey = "encrypted_passphrase"
@@ -38,12 +42,7 @@ class DatabaseSecurityManager(private val context: Context) {
      *
      * @return true if lock screen configured, false otherwise
      */
-    fun hasDeviceLockScreen(): Boolean {
-        val keyguardManager =
-            context.getSystemService(Context.KEYGUARD_SERVICE)
-                as? android.app.KeyguardManager
-        return keyguardManager?.isDeviceSecure ?: false
-    }
+    fun hasDeviceLockScreen(): Boolean = lockScreenCheck()
 
     /**
      * Retrieves or generates database encryption passphrase.
@@ -52,6 +51,12 @@ class DatabaseSecurityManager(private val context: Context) {
      */
     fun getDatabasePassphrase(): ByteArray? {
         if (!hasDeviceLockScreen()) {
+            ErrorLogger.logException(
+                component = "DatabaseSecurityManager",
+                severity = ErrorLogger.Severity.HIGH,
+                exception = IllegalStateException("Device has no lock screen; database encryption unavailable"),
+                context = mapOf("condition" to "no_lock_screen")
+            )
             return null
         }
 
@@ -127,6 +132,16 @@ class DatabaseSecurityManager(private val context: Context) {
         }
     }
 
+    /**
+     * Generates AES-256 master key in Android Keystore.
+     *
+     * setUserAuthenticationRequired(false): key does not require biometric/PIN to use.
+     * This is intentional — requiring auth would block the keyboard from decrypting the
+     * database passphrase in the background (no UI surface to prompt). The compensating
+     * control is setUnlockedDeviceRequired(true) on API 28+, which ensures the key is
+     * inaccessible when the device is locked (screen off / locked state), providing
+     * equivalent protection without requiring an interactive auth prompt.
+     */
     private fun generateMasterKey(): SecretKey {
         val keyGenerator =
             KeyGenerator.getInstance(
@@ -220,5 +235,12 @@ class DatabaseSecurityManager(private val context: Context) {
 
     companion object {
         private val secureRandom = java.security.SecureRandom()
+
+        private fun defaultLockScreenCheck(context: Context): Boolean {
+            val keyguardManager =
+                context.getSystemService(Context.KEYGUARD_SERVICE)
+                    as? android.app.KeyguardManager
+            return keyguardManager?.isDeviceSecure ?: false
+        }
     }
 }

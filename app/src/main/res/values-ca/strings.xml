@@ -160,6 +160,8 @@
     <string name="layout_mapper_remove_failed">Error eliminant l\'assignació</string>
     <string name="layout_mapper_clear_failed">Error esborrant les assignacions</string>
     <!-- Privacy & Data Settings -->
+    <string name="privacy_settings_storage_encryption_title">Emmagatzematge de paraules: sense xifrar</string>
+    <string name="privacy_settings_storage_encryption_summary">No s\'ha detectat cap pantalla de bloqueig del dispositiu. Les paraules apreses s\'emmagatzemen en text pla. Establiu un PIN, patró o bloqueig biomètric a la configuració d\'Android per habilitar el xifratge.</string>
     <string name="privacy_settings_clipboard_history">Historial del porta-retalls</string>
     <string name="privacy_settings_clipboard_history_on">Historial del porta-retalls activat</string>
     <string name="privacy_settings_clipboard_history_off">Historial del porta-retalls desactivat</string>

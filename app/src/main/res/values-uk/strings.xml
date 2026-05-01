@@ -161,6 +161,8 @@
     <string name="alternative_layout_default">За замовчуванням (Мовна розкладка)</string>
 
     <!-- Privacy & Data Settings -->
+    <string name="privacy_settings_storage_encryption_title">Зберігання слів: Незашифровано</string>
+    <string name="privacy_settings_storage_encryption_summary">Екран блокування пристрою не виявлено. Вивчені слова зберігаються у відкритому тексті. Встановіть PIN-код, графічний ключ або біометричне блокування в налаштуваннях Android, щоб увімкнути шифрування.</string>
     <string name="privacy_settings_clipboard_history">Історія Буфера Обміну</string>
     <string name="privacy_settings_clipboard_history_on">Історію буфера обміну увімкнено</string>
     <string name="privacy_settings_clipboard_history_off">Історію буфера обміну вимкнено</string>

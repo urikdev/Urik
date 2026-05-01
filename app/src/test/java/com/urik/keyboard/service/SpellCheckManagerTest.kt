@@ -8,11 +8,16 @@ import com.urik.keyboard.data.WordFrequencyRepository
 import com.urik.keyboard.utils.CacheMemoryManager
 import com.urik.keyboard.utils.ManagedCache
 import java.io.ByteArrayInputStream
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
@@ -1389,5 +1394,47 @@ class SpellCheckManagerTest {
             "Low user frequency should not suppress contraction dominance",
             spellCheckManager.hasDominantContractionForm("hows")
         )
+    }
+
+    @Test
+    fun `isDegradedMode is false by default`() = runTest {
+        assertFalse(spellCheckManager.isDegradedMode)
+    }
+
+    @Test
+    fun `isDegradedMode is false after successful initialization`() = runTest {
+        assertFalse(spellCheckManager.isDegradedMode)
+    }
+
+    @Test
+    fun `isDegradedMode is true after initialization timeout`() {
+        val standardDispatcher = StandardTestDispatcher()
+        val neverDispatcher = object : CoroutineDispatcher() {
+            override fun dispatch(context: kotlin.coroutines.CoroutineContext, block: Runnable) {
+                // Never executes — simulates IO that never completes, forcing a timeout
+            }
+        }
+        Dispatchers.setMain(standardDispatcher)
+        try {
+            val timeoutManager =
+                SpellCheckManager(
+                    context = context,
+                    languageManager = languageManager,
+                    wordLearningEngine = wordLearningEngine,
+                    wordFrequencyRepository = wordFrequencyRepository,
+                    cacheMemoryManager = cacheMemoryManager,
+                    ioDispatcher = neverDispatcher,
+                    wordNormalizer = wordNormalizer
+                )
+
+            kotlinx.coroutines.test.runTest(standardDispatcher) {
+                launch { timeoutManager.generateSuggestions("hello") }
+                advanceTimeBy(5001L)
+                runCurrent()
+                assertTrue(timeoutManager.isDegradedMode)
+            }
+        } finally {
+            Dispatchers.setMain(testDispatcher)
+        }
     }
 }

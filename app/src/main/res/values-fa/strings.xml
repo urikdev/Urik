@@ -172,6 +172,8 @@
     <string name="alternative_layout_default">پیش‌فرض (چیدمان زبان)</string>
 
     <!-- Privacy & Data Settings -->
+    <string name="privacy_settings_storage_encryption_title">ذخیره‌سازی کلمات: رمزنگاری نشده</string>
+    <string name="privacy_settings_storage_encryption_summary">صفحه قفل دستگاه شناسایی نشد. کلمات یاد گرفته شده به صورت متن ساده ذخیره می‌شوند. برای فعال‌سازی رمزنگاری، یک PIN، الگو یا قفل بیومتریک در تنظیمات اندروید تنظیم کنید.</string>
     <string name="privacy_settings_clipboard_history">تاریخچه کلیپ‌بورد</string>
     <string name="privacy_settings_clipboard_history_on">تاریخچه کلیپ‌بورد فعال است</string>
     <string name="privacy_settings_clipboard_history_off">تاریخچه کلیپ‌بورد غیرفعال است</string>

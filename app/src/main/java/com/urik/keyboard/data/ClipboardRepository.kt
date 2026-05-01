@@ -22,6 +22,9 @@ constructor(private val clipboardDao: ClipboardDao) {
                 timestamp = System.currentTimeMillis()
             )
         clipboardDao.insert(item)
+        clipboardDao.deleteExpired(
+            System.currentTimeMillis() - com.urik.keyboard.KeyboardConstants.DatabaseConstants.CLIPBOARD_TTL_MS
+        )
 
         val currentCount = clipboardDao.getUnpinnedCount()
         if (currentCount > com.urik.keyboard.KeyboardConstants.DatabaseConstants.MAX_CLIPBOARD_ITEMS) {
@@ -40,6 +43,9 @@ constructor(private val clipboardDao: ClipboardDao) {
     }
 
     suspend fun getRecentItems(): Result<List<ClipboardItem>> = try {
+        clipboardDao.deleteExpired(
+            System.currentTimeMillis() - com.urik.keyboard.KeyboardConstants.DatabaseConstants.CLIPBOARD_TTL_MS
+        )
         Result.success(clipboardDao.getRecentItems())
     } catch (e: Exception) {
         ErrorLogger.logException(

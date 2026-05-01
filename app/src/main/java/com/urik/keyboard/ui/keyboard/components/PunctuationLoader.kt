@@ -2,6 +2,7 @@ package com.urik.keyboard.ui.keyboard.components
 
 import android.content.Context
 import com.urik.keyboard.utils.CacheMemoryManager
+import com.urik.keyboard.utils.ErrorLogger
 import com.urik.keyboard.utils.ManagedCache
 import java.util.concurrent.ConcurrentHashMap
 import org.json.JSONException
@@ -35,7 +36,13 @@ class PunctuationLoader(private val context: Context, cacheMemoryManager: CacheM
                 punctuationErrorCounts.remove(languageCode)
                 lastPunctuationErrors.remove(languageCode)
             }
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            ErrorLogger.logException(
+                component = "PunctuationLoader",
+                severity = ErrorLogger.Severity.HIGH,
+                exception = e,
+                context = mapOf("operation" to "loadPunctuation")
+            )
             recordError(languageCode)
             getFallbackPunctuation(languageCode)
         }
@@ -86,7 +93,13 @@ class PunctuationLoader(private val context: Context, cacheMemoryManager: CacheM
                 loadFromAssets("en").also { punctuation ->
                     punctuationCache.put("en", punctuation)
                 }
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                ErrorLogger.logException(
+                    component = "PunctuationLoader",
+                    severity = ErrorLogger.Severity.LOW,
+                    exception = e,
+                    context = mapOf("operation" to "getFallbackPunctuation")
+                )
                 failedPunctuationLanguages.add("en")
                 DEFAULT_PUNCTUATION
             }

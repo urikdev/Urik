@@ -69,7 +69,8 @@ constructor(
 
     private val spellCheckers = ConcurrentHashMap<String, SpellChecker>()
     private val spellCheckerAccessOrder = ConcurrentHashMap<String, Long>()
-    private var currentLanguage: String = "en"
+
+    @Volatile private var currentLanguage: String = "en"
 
     @Volatile private var cachedLocale: Locale = Locale.forLanguageTag("en")
 
@@ -101,6 +102,10 @@ constructor(
 
     @Volatile
     private var isInitialized = false
+
+    @Volatile
+    var isDegradedMode: Boolean = false
+        private set
 
     @Volatile
     private var cachedKeyPositions = emptyMap<Char, android.graphics.PointF>()
@@ -168,6 +173,7 @@ constructor(
     private suspend fun ensureInitialized(): Boolean = withTimeoutOrNull(INITIALIZATION_TIMEOUT_MS) {
         initializationComplete.await()
     } ?: run {
+        isDegradedMode = true
         ErrorLogger.logException(
             component = "SpellCheckManager",
             severity = ErrorLogger.Severity.CRITICAL,
@@ -254,7 +260,13 @@ constructor(
             val normalizedWord = word.lowercase(locale).trim()
 
             return@withContext checkSymSpellDictionary(normalizedWord, currentLang)
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            ErrorLogger.logException(
+                component = "SpellCheckManager",
+                severity = ErrorLogger.Severity.HIGH,
+                exception = e,
+                context = mapOf("operation" to "isWordInSymSpellDictionary")
+            )
             return@withContext false
         }
     }
@@ -416,7 +428,13 @@ constructor(
             }
 
             return@withContext false
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            ErrorLogger.logException(
+                component = "SpellCheckManager",
+                severity = ErrorLogger.Severity.HIGH,
+                exception = e,
+                context = mapOf("operation" to "isWordInDictionary")
+            )
             return@withContext false
         }
     }
@@ -490,7 +508,13 @@ constructor(
         val currentLang = getCurrentLanguage()
         val userFreq = try {
             wordFrequencyRepository.getFrequency(canonical, currentLang)
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            ErrorLogger.logException(
+                component = "SpellCheckManager",
+                severity = ErrorLogger.Severity.LOW,
+                exception = e,
+                context = mapOf("operation" to "hasDominantContractionForm")
+            )
             0
         }
 
@@ -557,7 +581,13 @@ constructor(
                 try {
                     val normalizedWords = wordsToProcess.map { it.second }
                     wordLearningEngine.areWordsLearned(normalizedWords)
-                } catch (_: Exception) {
+                } catch (e: Exception) {
+                    ErrorLogger.logException(
+                        component = "SpellCheckManager",
+                        severity = ErrorLogger.Severity.HIGH,
+                        exception = e,
+                        context = mapOf("operation" to "areWordsInDictionary_learnedCheck")
+                    )
                     emptyMap()
                 }
             } else {
@@ -616,7 +646,13 @@ constructor(
                 .sortedByDescending { it.confidence }
                 .take(maxSuggestions)
                 .map { it.word }
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            ErrorLogger.logException(
+                component = "SpellCheckManager",
+                severity = ErrorLogger.Severity.HIGH,
+                exception = e,
+                context = mapOf("operation" to "generateSuggestions")
+            )
             emptyList()
         }
     }
@@ -647,7 +683,13 @@ constructor(
                 val normalizedWord = word.lowercase(locale).trim()
 
                 return@withContext getSpellingSuggestions(normalizedWord, effectiveLanguages)
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                ErrorLogger.logException(
+                    component = "SpellCheckManager",
+                    severity = ErrorLogger.Severity.HIGH,
+                    exception = e,
+                    context = mapOf("operation" to "getSpellingSuggestionsWithConfidence")
+                )
                 return@withContext emptyList()
             }
         }
@@ -686,253 +728,285 @@ constructor(
                     .flatten()
 
             mergeAndRankSuggestions(allLanguageSuggestions, MAX_SUGGESTIONS)
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            ErrorLogger.logException(
+                component = "SpellCheckManager",
+                severity = ErrorLogger.Severity.HIGH,
+                exception = e,
+                context = mapOf("operation" to "requestCombinedSuggestions")
+            )
             emptyList()
         }
     }
 
     private suspend fun querySingleLanguage(normalizedWord: String, languageCode: String): List<SpellingSuggestion> {
         try {
-            val allSuggestions = mutableListOf<SpellingSuggestion>()
             val seenWords = mutableSetOf<String>()
+            val allSuggestions = mutableListOf<SpellingSuggestion>()
+            allSuggestions += queryLearnedSuggestions(normalizedWord, languageCode, seenWords)
+            allSuggestions += queryCompletionSuggestions(normalizedWord, languageCode, seenWords)
+            allSuggestions += querySymSpellSuggestions(normalizedWord, languageCode, seenWords)
+            return allSuggestions.sortedByDescending { it.confidence }
+        } catch (e: Exception) {
+            ErrorLogger.logException(
+                component = "SpellCheckManager",
+                severity = ErrorLogger.Severity.HIGH,
+                exception = e,
+                context = mapOf("operation" to "querySingleLanguage")
+            )
+            return emptyList()
+        }
+    }
 
-            try {
-                val learnedSuggestions =
-                    wordLearningEngine.getSimilarLearnedWordsWithFrequency(
-                        normalizedWord,
-                        languageCode,
-                        maxResults = 5
+    private suspend fun queryLearnedSuggestions(
+        normalizedWord: String,
+        languageCode: String,
+        seenWords: MutableSet<String>
+    ): List<SpellingSuggestion> {
+        try {
+            val result = mutableListOf<SpellingSuggestion>()
+            val learnedSuggestions =
+                wordLearningEngine.getSimilarLearnedWordsWithFrequency(
+                    normalizedWord,
+                    languageCode,
+                    maxResults = 5
+                )
+            learnedSuggestions
+                .filter { (word, _) -> !isWordBlacklisted(word) }
+                .forEachIndexed { index, (word, frequency) ->
+                    val isContraction =
+                        com.urik.keyboard.utils.TextMatchingUtils
+                            .isContractionSuggestion(normalizedWord, word)
+                    val confidence =
+                        if (isContraction) {
+                            CONTRACTION_GUARANTEED_CONFIDENCE
+                        } else {
+                            val frequencyBoost = calculateFrequencyBoost(frequency)
+                            val spatialScore = if (languageCode == "ja") {
+                                0.0
+                            } else {
+                                calculateFullWordSpatialScore(normalizedWord, word.lowercase())
+                            }
+                            val baseConfidence = LEARNED_WORD_BASE_CONFIDENCE - index * 0.02
+                            (baseConfidence + spatialScore * LEARNED_SPATIAL_WEIGHT + frequencyBoost).coerceIn(
+                                LEARNED_WORD_CONFIDENCE_MIN,
+                                LEARNED_WORD_CONFIDENCE_MAX
+                            )
+                        }
+                    result.add(
+                        SpellingSuggestion(
+                            word = word,
+                            confidence = confidence,
+                            ranking = index,
+                            source = "learned",
+                            preserveCase = true
+                        )
                     )
+                    seenWords.add(word.lowercase())
+                }
+            return result
+        } catch (e: Exception) {
+            ErrorLogger.logException(
+                component = "SpellCheckManager",
+                severity = ErrorLogger.Severity.HIGH,
+                exception = e,
+                context = mapOf("operation" to "querySingleLanguage_learnedWords")
+            )
+            return emptyList()
+        }
+    }
 
-                learnedSuggestions
-                    .filter { (word, _) -> !isWordBlacklisted(word) }
-                    .forEachIndexed { index, (word, frequency) ->
+    private suspend fun queryCompletionSuggestions(
+        normalizedWord: String,
+        languageCode: String,
+        seenWords: MutableSet<String>
+    ): List<SpellingSuggestion> {
+        if (normalizedWord.length < MIN_COMPLETION_LENGTH) return emptyList()
+        try {
+            val result = mutableListOf<SpellingSuggestion>()
+            val completions = getCompletionsForPrefix(normalizedWord, languageCode)
+            val filteredCompletions =
+                completions
+                    .filter { (word, _) ->
+                        !seenWords.contains(word.lowercase()) && !isWordBlacklisted(word)
+                    }
+                    .take(MAX_PREFIX_COMPLETIONS)
+            val userFrequencies =
+                try {
+                    wordFrequencyRepository.getFrequencies(
+                        filteredCompletions.map { it.first },
+                        languageCode
+                    )
+                } catch (e: Exception) {
+                    ErrorLogger.logException(
+                        component = "SpellCheckManager",
+                        severity = ErrorLogger.Severity.LOW,
+                        exception = e,
+                        context = mapOf("operation" to "querySingleLanguage_completionFrequencies")
+                    )
+                    emptyMap()
+                }
+            filteredCompletions
+                .forEachIndexed { index, (word, frequency) ->
+                    val isContraction =
+                        com.urik.keyboard.utils.TextMatchingUtils
+                            .isContractionSuggestion(normalizedWord, word)
+                    val userFrequency = userFrequencies[word] ?: 0
+                    val confidence =
+                        if (isContraction) {
+                            CONTRACTION_GUARANTEED_CONFIDENCE
+                        } else {
+                            val lengthRatio = normalizedWord.length.toDouble() / word.length.toDouble()
+                            val frequencyScore = ln(frequency.toDouble() + 1.0) / FREQUENCY_SCORE_DIVISOR
+                            var baseConfidence =
+                                COMPLETION_LENGTH_WEIGHT * lengthRatio +
+                                    COMPLETION_FREQUENCY_WEIGHT * frequencyScore
+                            val spatialScore = if (languageCode == "ja") {
+                                0.0
+                            } else {
+                                calculateFullWordSpatialScore(normalizedWord, word.lowercase())
+                            }
+                            baseConfidence += spatialScore * COMPLETION_SPATIAL_WEIGHT
+                            if (userFrequency > 0) {
+                                val userFreqBoost = calculateFrequencyBoost(userFrequency)
+                                baseConfidence += userFreqBoost
+                            }
+                            baseConfidence.coerceIn(COMPLETION_CONFIDENCE_MIN, 0.99)
+                        }
+                    result.add(
+                        SpellingSuggestion(
+                            word = word,
+                            confidence = confidence,
+                            ranking = index,
+                            source = "completion"
+                        )
+                    )
+                    seenWords.add(word.lowercase())
+                }
+            return result
+        } catch (e: Exception) {
+            ErrorLogger.logException(
+                component = "SpellCheckManager",
+                severity = ErrorLogger.Severity.HIGH,
+                exception = e,
+                context = mapOf("operation" to "querySingleLanguage_completions")
+            )
+            return emptyList()
+        }
+    }
+
+    private suspend fun querySymSpellSuggestions(
+        normalizedWord: String,
+        languageCode: String,
+        seenWords: MutableSet<String>
+    ): List<SpellingSuggestion> {
+        try {
+            val result = mutableListOf<SpellingSuggestion>()
+            val spellChecker = getSpellCheckerForLanguage(languageCode) ?: return emptyList()
+            val symSpellResults = spellChecker.lookup(normalizedWord, Verbosity.All, MAX_EDIT_DISTANCE)
+            val inputAccentStripped = wordNormalizer.stripDiacritics(normalizedWord)
+            val filteredResults =
+                symSpellResults.filter { result ->
+                    !seenWords.contains(result.term.lowercase()) && !isWordBlacklisted(result.term)
+                }
+            val userFrequencies =
+                try {
+                    wordFrequencyRepository.getFrequencies(
+                        filteredResults.map { it.term },
+                        languageCode
+                    )
+                } catch (e: Exception) {
+                    ErrorLogger.logException(
+                        component = "SpellCheckManager",
+                        severity = ErrorLogger.Severity.LOW,
+                        exception = e,
+                        context = mapOf("operation" to "querySingleLanguage_symspellFrequencies")
+                    )
+                    emptyMap()
+                }
+            val scoredResults =
+                filteredResults
+                    .map { symResult ->
+                        val editDistance = symResult.distance
                         val isContraction =
                             com.urik.keyboard.utils.TextMatchingUtils
-                                .isContractionSuggestion(normalizedWord, word)
-
+                                .isContractionSuggestion(normalizedWord, symResult.term)
+                        val frequency = wordFrequencies[symResult.term.lowercase()] ?: 1L
+                        val userFrequency = userFrequencies[symResult.term] ?: 0
                         val confidence =
                             if (isContraction) {
                                 CONTRACTION_GUARANTEED_CONFIDENCE
                             } else {
-                                val frequencyBoost = calculateFrequencyBoost(frequency)
-                                val spatialScore = if (languageCode == "ja") {
-                                    0.0
-                                } else {
-                                    calculateFullWordSpatialScore(normalizedWord, word.lowercase())
-                                }
-                                val baseConfidence = LEARNED_WORD_BASE_CONFIDENCE - index * 0.02
-                                (baseConfidence + spatialScore * LEARNED_SPATIAL_WEIGHT + frequencyBoost).coerceIn(
-                                    LEARNED_WORD_CONFIDENCE_MIN,
-                                    LEARNED_WORD_CONFIDENCE_MAX
-                                )
-                            }
-
-                        allSuggestions.add(
-                            SpellingSuggestion(
-                                word = word,
-                                confidence = confidence,
-                                ranking = index,
-                                source = "learned",
-                                preserveCase = true
-                            )
-                        )
-                        seenWords.add(word.lowercase())
-                    }
-            } catch (_: Exception) {
-            }
-
-            try {
-                if (normalizedWord.length >= MIN_COMPLETION_LENGTH) {
-                    val completions = getCompletionsForPrefix(normalizedWord, languageCode)
-
-                    val filteredCompletions =
-                        completions
-                            .filter { (word, _) ->
-                                !seenWords.contains(word.lowercase()) && !isWordBlacklisted(word)
-                            }
-                            .take(MAX_PREFIX_COMPLETIONS)
-
-                    val userFrequencies =
-                        try {
-                            wordFrequencyRepository.getFrequencies(
-                                filteredCompletions.map { it.first },
-                                languageCode
-                            )
-                        } catch (_: Exception) {
-                            emptyMap()
-                        }
-
-                    filteredCompletions
-                        .forEachIndexed { index, (word, frequency) ->
-                            val isContraction =
-                                com.urik.keyboard.utils.TextMatchingUtils
-                                    .isContractionSuggestion(normalizedWord, word)
-
-                            val userFrequency = userFrequencies[word] ?: 0
-
-                            val confidence =
-                                if (isContraction) {
-                                    CONTRACTION_GUARANTEED_CONFIDENCE
-                                } else {
-                                    val lengthRatio = normalizedWord.length.toDouble() / word.length.toDouble()
-                                    val frequencyScore = ln(frequency.toDouble() + 1.0) / FREQUENCY_SCORE_DIVISOR
-                                    var baseConfidence =
-                                        COMPLETION_LENGTH_WEIGHT * lengthRatio +
-                                            COMPLETION_FREQUENCY_WEIGHT * frequencyScore
-
-                                    val spatialScore = if (languageCode == "ja") {
+                                val maxDistance = MAX_EDIT_DISTANCE
+                                val strippedResult =
+                                    com.urik.keyboard.utils.TextMatchingUtils
+                                        .stripWordPunctuation(symResult.term)
+                                val isContractionCandidate = strippedResult != symResult.term
+                                val effectiveDistance =
+                                    if (isContractionCandidate && editDistance >= 2.0) {
+                                        (editDistance - 1.0).coerceAtLeast(0.0)
+                                    } else {
+                                        editDistance
+                                    }
+                                val distanceScore = (maxDistance - effectiveDistance) / maxDistance
+                                val freqScore = ln(frequency.toDouble() + 1.0) / ln(MAX_DICT_FREQUENCY)
+                                var baseConfidence =
+                                    SYMSPELL_DISTANCE_WEIGHT * distanceScore +
+                                        SYMSPELL_FREQUENCY_WEIGHT * freqScore
+                                val spatialScore =
+                                    if (languageCode == "ja") {
                                         0.0
                                     } else {
                                         calculateFullWordSpatialScore(
                                             normalizedWord,
-                                            word.lowercase()
+                                            symResult.term.lowercase()
                                         )
                                     }
-                                    baseConfidence += spatialScore * COMPLETION_SPATIAL_WEIGHT
-
-                                    if (userFrequency > 0) {
-                                        val userFreqBoost = calculateFrequencyBoost(userFrequency)
-                                        baseConfidence += userFreqBoost
-                                    }
-
-                                    baseConfidence.coerceIn(
-                                        COMPLETION_CONFIDENCE_MIN,
-                                        0.99
-                                    )
+                                baseConfidence += spatialScore * SPATIAL_PROXIMITY_WEIGHT
+                                if (isContractionCandidate && editDistance == 1.0) {
+                                    baseConfidence += APOSTROPHE_BOOST
                                 }
-
-                            allSuggestions.add(
-                                SpellingSuggestion(
-                                    word = word,
-                                    confidence = confidence,
-                                    ranking = allSuggestions.size,
-                                    source = "completion"
-                                )
-                            )
-                            seenWords.add(word.lowercase())
-                        }
-                }
-            } catch (_: Exception) {
-            }
-
-            try {
-                val spellChecker = getSpellCheckerForLanguage(languageCode)
-                if (spellChecker != null) {
-                    val symSpellResults = spellChecker.lookup(normalizedWord, Verbosity.All, MAX_EDIT_DISTANCE)
-                    val inputAccentStripped = wordNormalizer.stripDiacritics(normalizedWord)
-
-                    val filteredResults =
-                        symSpellResults.filter { result ->
-                            !seenWords.contains(result.term.lowercase()) && !isWordBlacklisted(result.term)
-                        }
-
-                    val userFrequencies =
-                        try {
-                            wordFrequencyRepository.getFrequencies(
-                                filteredResults.map { it.term },
-                                languageCode
-                            )
-                        } catch (_: Exception) {
-                            emptyMap()
-                        }
-
-                    val scoredResults =
-                        filteredResults
-                            .map { result ->
-                                val editDistance = result.distance
-                                val isContraction =
-                                    com.urik.keyboard.utils.TextMatchingUtils
-                                        .isContractionSuggestion(normalizedWord, result.term)
-
-                                val frequency = wordFrequencies[result.term.lowercase()] ?: 1L
-                                val userFrequency = userFrequencies[result.term] ?: 0
-
-                                val confidence =
-                                    if (isContraction) {
-                                        CONTRACTION_GUARANTEED_CONFIDENCE
-                                    } else {
-                                        val maxDistance = MAX_EDIT_DISTANCE
-                                        val strippedResult =
-                                            com.urik.keyboard.utils.TextMatchingUtils
-                                                .stripWordPunctuation(result.term)
-                                        val isContractionCandidate = strippedResult != result.term
-
-                                        val effectiveDistance =
-                                            if (isContractionCandidate && editDistance >= 2.0) {
-                                                (editDistance - 1.0).coerceAtLeast(0.0)
-                                            } else {
-                                                editDistance
-                                            }
-
-                                        val distanceScore = (maxDistance - effectiveDistance) / maxDistance
-                                        val freqScore = ln(frequency.toDouble() + 1.0) / ln(MAX_DICT_FREQUENCY)
-                                        var baseConfidence =
-                                            SYMSPELL_DISTANCE_WEIGHT * distanceScore +
-                                                SYMSPELL_FREQUENCY_WEIGHT * freqScore
-
-                                        val spatialScore =
-                                            if (languageCode == "ja") {
-                                                0.0
-                                            } else {
-                                                calculateFullWordSpatialScore(
-                                                    normalizedWord,
-                                                    result.term.lowercase()
-                                                )
-                                            }
-                                        baseConfidence += spatialScore * SPATIAL_PROXIMITY_WEIGHT
-
-                                        if (isContractionCandidate && editDistance == 1.0) {
-                                            baseConfidence += APOSTROPHE_BOOST
-                                        }
-
-                                        val termStripped = wordNormalizer.stripDiacritics(result.term.lowercase())
-                                        if (inputAccentStripped == termStripped &&
-                                            normalizedWord != result.term.lowercase()
-                                        ) {
-                                            baseConfidence += DIACRITIC_PROMOTION_BOOST
-                                        }
-
-                                        if (userFrequency > 0) {
-                                            val userFreqBoost = calculateFrequencyBoost(userFrequency)
-                                            baseConfidence += userFreqBoost
-                                        }
-
-                                        if (strippedResult.length < normalizedWord.length) {
-                                            val lengthRatio =
-                                                strippedResult.length.toDouble() / normalizedWord.length
-                                            if (lengthRatio < MINIMUM_LENGTH_RATIO) {
-                                                baseConfidence *= lengthRatio
-                                            }
-                                        }
-
-                                        baseConfidence.coerceIn(
-                                            SYMSPELL_CONFIDENCE_MIN,
-                                            0.99
-                                        )
+                                val termStripped = wordNormalizer.stripDiacritics(symResult.term.lowercase())
+                                if (inputAccentStripped == termStripped &&
+                                    normalizedWord != symResult.term.lowercase()
+                                ) {
+                                    baseConfidence += DIACRITIC_PROMOTION_BOOST
+                                }
+                                if (userFrequency > 0) {
+                                    val userFreqBoost = calculateFrequencyBoost(userFrequency)
+                                    baseConfidence += userFreqBoost
+                                }
+                                if (strippedResult.length < normalizedWord.length) {
+                                    val lengthRatio =
+                                        strippedResult.length.toDouble() / normalizedWord.length
+                                    if (lengthRatio < MINIMUM_LENGTH_RATIO) {
+                                        baseConfidence *= lengthRatio
                                     }
-
-                                result to confidence
-                            }.sortedByDescending { it.second }
-                            .take(MAX_SUGGESTIONS)
-
-                    scoredResults.forEachIndexed { index, (result, confidence) ->
-                        allSuggestions.add(
-                            SpellingSuggestion(
-                                word = result.term,
-                                confidence = confidence,
-                                ranking = allSuggestions.size,
-                                source = "symspell"
-                            )
-                        )
-                        seenWords.add(result.term.lowercase())
-                    }
-                }
-            } catch (_: Exception) {
+                                }
+                                baseConfidence.coerceIn(SYMSPELL_CONFIDENCE_MIN, 0.99)
+                            }
+                        symResult to confidence
+                    }.sortedByDescending { it.second }
+                    .take(MAX_SUGGESTIONS)
+            scoredResults.forEachIndexed { index, (symResult, confidence) ->
+                result.add(
+                    SpellingSuggestion(
+                        word = symResult.term,
+                        confidence = confidence,
+                        ranking = index,
+                        source = "symspell"
+                    )
+                )
+                seenWords.add(symResult.term.lowercase())
             }
-
-            return allSuggestions.sortedByDescending { it.confidence }
-        } catch (_: Exception) {
+            return result
+        } catch (e: Exception) {
+            ErrorLogger.logException(
+                component = "SpellCheckManager",
+                severity = ErrorLogger.Severity.HIGH,
+                exception = e,
+                context = mapOf("operation" to "querySingleLanguage_symspell")
+            )
             return emptyList()
         }
     }
@@ -1041,7 +1115,13 @@ constructor(
     private fun getCurrentLanguage(): String = try {
         val currentLanguage = languageManager.currentLanguage.value
         currentLanguage.split("-").first()
-    } catch (_: Exception) {
+    } catch (e: Exception) {
+        ErrorLogger.logException(
+            component = "SpellCheckManager",
+            severity = ErrorLogger.Severity.LOW,
+            exception = e,
+            context = mapOf("operation" to "getCurrentLanguage")
+        )
         "en"
     }
 
@@ -1051,7 +1131,13 @@ constructor(
             currentLanguage = lang
             cachedLocale = try {
                 Locale.forLanguageTag(lang)
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                ErrorLogger.logException(
+                    component = "SpellCheckManager",
+                    severity = ErrorLogger.Severity.LOW,
+                    exception = e,
+                    context = mapOf("operation" to "getLocaleForLanguage")
+                )
                 Locale.forLanguageTag("en")
             }
         }
@@ -1087,7 +1173,13 @@ constructor(
 
             dictionaryCache.invalidate(cacheKey)
             suggestionCache.invalidateAll()
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            ErrorLogger.logException(
+                component = "SpellCheckManager",
+                severity = ErrorLogger.Severity.LOW,
+                exception = e,
+                context = mapOf("operation" to "invalidateWordCache")
+            )
         }
     }
 
@@ -1123,7 +1215,13 @@ constructor(
             val cacheKey = buildCacheKey(normalizedWord, currentLang)
             dictionaryCache.invalidate(cacheKey)
             suggestionCache.invalidateAll()
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            ErrorLogger.logException(
+                component = "SpellCheckManager",
+                severity = ErrorLogger.Severity.LOW,
+                exception = e,
+                context = mapOf("operation" to "blacklistSuggestion")
+            )
         }
     }
 
@@ -1143,14 +1241,26 @@ constructor(
                 dictionaryCache.invalidate(cacheKey)
                 suggestionCache.invalidateAll()
             }
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            ErrorLogger.logException(
+                component = "SpellCheckManager",
+                severity = ErrorLogger.Severity.LOW,
+                exception = e,
+                context = mapOf("operation" to "removeFromBlacklist")
+            )
         }
     }
 
     fun isWordBlacklisted(word: String): Boolean = try {
         val normalizedWord = word.lowercase(getLocaleForLanguage()).trim()
         normalizedWord in blacklistedWords
-    } catch (_: Exception) {
+    } catch (e: Exception) {
+        ErrorLogger.logException(
+            component = "SpellCheckManager",
+            severity = ErrorLogger.Severity.LOW,
+            exception = e,
+            context = mapOf("operation" to "isWordBlacklisted")
+        )
         false
     }
 
@@ -1216,7 +1326,13 @@ constructor(
             return@withContext parsedDictionaryWords[targetLang]
                 ?.filter { !isWordBlacklisted(it.first) }
                 ?: emptyList()
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            ErrorLogger.logException(
+                component = "SpellCheckManager",
+                severity = ErrorLogger.Severity.HIGH,
+                exception = e,
+                context = mapOf("operation" to "getCommonWords")
+            )
             return@withContext emptyList()
         }
     }
@@ -1244,7 +1360,13 @@ constructor(
             }
 
             return@withContext mergedWords
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            ErrorLogger.logException(
+                component = "SpellCheckManager",
+                severity = ErrorLogger.Severity.HIGH,
+                exception = e,
+                context = mapOf("operation" to "getCommonWordsForLanguages")
+            )
             return@withContext emptyMap()
         }
     }

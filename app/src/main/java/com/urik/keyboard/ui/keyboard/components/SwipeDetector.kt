@@ -1,14 +1,13 @@
-@file:Suppress("ktlint:standard:no-wildcard-imports")
-
 package com.urik.keyboard.ui.keyboard.components
 
 import android.graphics.PointF
+import android.icu.lang.UScript
+import android.icu.util.ULocale
 import android.view.MotionEvent
 import androidx.annotation.VisibleForTesting
-import com.ibm.icu.lang.UScript
-import com.ibm.icu.util.ULocale
 import com.urik.keyboard.model.KeyboardKey
 import com.urik.keyboard.service.AdaptiveDimensions
+import com.urik.keyboard.utils.ErrorLogger
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.math.sqrt
@@ -711,7 +710,13 @@ constructor(private val streamingScoringEngine: StreamingScoringEngine) {
                         withContext(Dispatchers.Main) {
                             _swipeListener?.onSwipeResults(topCandidates)
                         }
-                    } catch (_: Exception) {
+                    } catch (e: Exception) {
+                        ErrorLogger.logException(
+                            component = "SwipeDetector",
+                            severity = ErrorLogger.Severity.HIGH,
+                            exception = e,
+                            context = mapOf("operation" to "endSwipeDetection_finalize")
+                        )
                         withContext(Dispatchers.Main) {
                             _swipeListener?.onSwipeResults(emptyList())
                         }

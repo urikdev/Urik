@@ -173,6 +173,8 @@
     <string name="layout_mapper_clear_failed">マッピングの消去に失敗しました</string>
 
     <!-- Privacy & Data Settings -->
+    <string name="privacy_settings_storage_encryption_title">単語ストレージ：暗号化なし</string>
+    <string name="privacy_settings_storage_encryption_summary">デバイスのロック画面が検出されませんでした。学習した単語は平文で保存されています。暗号化を有効にするには、Androidの設定でPIN、パターン、または生体認証ロックを設定してください。</string>
     <string name="privacy_settings_clipboard_history">クリップボード履歴</string>
     <string name="privacy_settings_clipboard_history_on">クリップボード履歴有効</string>
     <string name="privacy_settings_clipboard_history_off">クリップボード履歴無効</string>

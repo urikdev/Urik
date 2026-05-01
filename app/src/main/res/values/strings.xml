@@ -181,6 +181,8 @@
     <string name="layout_mapper_clear_failed">Failed to clear mappings</string>
 
     <!-- Privacy & Data Settings -->
+    <string name="privacy_settings_storage_encryption_title">Word Storage: Unencrypted</string>
+    <string name="privacy_settings_storage_encryption_summary">No device lock screen detected. Learned words are stored in plaintext. Set a PIN, pattern, or biometric lock in Android Settings to enable encryption.</string>
     <string name="privacy_settings_clipboard_history">Clipboard History</string>
     <string name="privacy_settings_clipboard_history_on">Clipboard history enabled</string>
     <string name="privacy_settings_clipboard_history_off">Clipboard history disabled</string>

@@ -9,11 +9,14 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito.mock
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 import org.robolectric.RobolectricTestRunner
 
@@ -327,6 +330,60 @@ class StreamingScoringEngineTest {
             2,
             pruned.size
         )
+    }
+
+    @Test
+    fun ringBuffer_notBound_onTick_throwsIllegalStateException() {
+        // engine created in @Before without bindRingBuffer()
+        assertThrows(IllegalStateException::class.java) {
+            engine.onTick()
+        }
+    }
+
+    @Test
+    fun ringBuffer_bound_onTick_proceedsToSnapshot() {
+        val mockRingBuffer = mock(SwipePointRingBuffer::class.java)
+        `when`(mockRingBuffer.snapshot()).thenReturn(emptyList())
+        engine.bindRingBuffer(mockRingBuffer)
+        // Should not throw
+        engine.onTick()
+    }
+
+    @Test
+    fun `computeStartAnchorKeys reuses pre-allocated buffer across calls`() {
+        val path = listOf(
+            SwipeDetector.SwipePoint(30f, 50f, 0L),
+            SwipeDetector.SwipePoint(35f, 52f, 10L),
+            SwipeDetector.SwipePoint(32f, 48f, 20L)
+        )
+        val positions = mapOf('q' to PointF(30f, 50f), 'w' to PointF(80f, 50f))
+
+        val buffer = engine.anchorKeysBuffer
+        val firstResult = engine.computeStartAnchorKeysInternal(path, positions)
+        val secondResult = engine.computeStartAnchorKeysInternal(path, positions)
+
+        assertTrue("Buffer should be reused (same reference)", firstResult === buffer)
+        assertTrue("Second call should return same buffer reference", secondResult === buffer)
+    }
+
+    @Test
+    fun `computeCharsInBounds reuses pre-allocated buffer across calls`() {
+        val path = listOf(
+            SwipeDetector.SwipePoint(30f, 50f, 0L),
+            SwipeDetector.SwipePoint(200f, 130f, 50L)
+        )
+        val positions = mapOf(
+            'q' to PointF(30f, 50f),
+            'a' to PointF(40f, 130f),
+            'z' to PointF(90f, 210f)
+        )
+
+        val buffer = engine.boundsBuffer
+        val firstResult = engine.computeCharsInBoundsInternal(path, positions)
+        val secondResult = engine.computeCharsInBoundsInternal(path, positions)
+
+        assertTrue("Buffer should be reused (same reference)", firstResult === buffer)
+        assertTrue("Second call should return same buffer reference", secondResult === buffer)
     }
 
     private fun makeDictionaryEntry(word: String, firstChar: Char, frequency: Long): SwipeDetector.DictionaryEntry {

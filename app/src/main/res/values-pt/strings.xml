@@ -160,6 +160,8 @@
     <string name="alternative_layout_default">Padrão (Layout do idioma)</string>
 
     <!-- Privacy & Data Settings -->
+    <string name="privacy_settings_storage_encryption_title">Armazenamento de palavras: Não criptografado</string>
+    <string name="privacy_settings_storage_encryption_summary">Nenhuma tela de bloqueio de dispositivo detectada. As palavras aprendidas são armazenadas em texto simples. Defina um PIN, padrão ou bloqueio biométrico nas configurações do Android para ativar a criptografia.</string>
     <string name="privacy_settings_clipboard_history">Histórico da área de transferência</string>
     <string name="privacy_settings_clipboard_history_on">Histórico da área de transferência ativado</string>
     <string name="privacy_settings_clipboard_history_off">Histórico da área de transferência desativado</string>

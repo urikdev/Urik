@@ -11,6 +11,7 @@ object KeyboardConstants {
 
     object DatabaseConstants {
         const val MAX_CLIPBOARD_ITEMS = 100
+        const val CLIPBOARD_TTL_MS = 30L * 24 * 60 * 60 * 1000
     }
 
     object GeometricScoringConstants {

@@ -44,7 +44,7 @@ class SuggestionPipelineTest {
     private lateinit var mockWordFrequencyRepository: WordFrequencyRepository
     private lateinit var mockLanguageManager: LanguageManager
     private lateinit var mockCaseTransformer: CaseTransformer
-    private lateinit var mockKanaKanjiConverter: KanaKanjiConverter
+    private lateinit var mockScriptConverterRegistry: ScriptConverterRegistry
 
     private lateinit var inputState: InputStateManager
     private lateinit var outputBridge: OutputBridge
@@ -66,7 +66,7 @@ class SuggestionPipelineTest {
         mockWordFrequencyRepository = mock()
         mockLanguageManager = mock()
         mockCaseTransformer = mock()
-        mockKanaKanjiConverter = mock()
+        mockScriptConverterRegistry = mock()
 
         whenever(mockIc.beginBatchEdit()).thenReturn(true)
         whenever(mockIc.endBatchEdit()).thenReturn(true)
@@ -111,14 +111,18 @@ class SuggestionPipelineTest {
             wordFrequencyRepository = mockWordFrequencyRepository,
             languageManager = mockLanguageManager,
             caseTransformer = mockCaseTransformer,
-            kanaKanjiConverter = mockKanaKanjiConverter,
+            scriptConverterRegistry = mockScriptConverterRegistry,
             serviceScope = kotlinx.coroutines.CoroutineScope(testDispatcher),
-            showSuggestions = { true },
-            effectiveSuggestionCount = { 3 },
-            getKeyboardState = { KeyboardState() },
-            shouldAutoCapitalize = { false },
-            currentLanguageProvider = { "en" }
+            host = FakeSuggestionPipelineHost()
         )
+    }
+
+    private inner class FakeSuggestionPipelineHost : SuggestionPipelineHost {
+        override fun showSuggestions(): Boolean = true
+        override fun effectiveSuggestionCount(): Int = 3
+        override fun getKeyboardState(): KeyboardState = KeyboardState()
+        override fun shouldAutoCapitalize(text: String): Boolean = false
+        override fun currentLanguage(): String = "en"
     }
 
     @After

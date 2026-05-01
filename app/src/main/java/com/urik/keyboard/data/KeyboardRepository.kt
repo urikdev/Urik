@@ -1,14 +1,15 @@
 package com.urik.keyboard.data
 
 import android.content.Context
-import com.ibm.icu.util.ULocale
 import com.urik.keyboard.model.KeyboardKey
 import com.urik.keyboard.model.KeyboardLayout
 import com.urik.keyboard.model.KeyboardMode
 import com.urik.keyboard.utils.CacheMemoryManager
+import com.urik.keyboard.utils.ErrorLogger
 import com.urik.keyboard.utils.ManagedCache
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.FileNotFoundException
+import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.Dispatchers
@@ -125,7 +126,7 @@ constructor(
      */
     suspend fun getLayoutForMode(
         mode: KeyboardMode,
-        locale: ULocale,
+        locale: Locale,
         currentAction: KeyboardKey.ActionType = KeyboardKey.ActionType.ENTER
     ): Result<KeyboardLayout> = withContext(Dispatchers.IO) {
         val settings = settingsRepository.settings.first()
@@ -162,7 +163,7 @@ constructor(
         mode: KeyboardMode,
         layoutIdentifier: String,
         currentAction: KeyboardKey.ActionType,
-        originalLocale: ULocale
+        originalLocale: Locale
     ): KeyboardLayout = withContext(Dispatchers.IO) {
         cleanupExpiredErrors()
 
@@ -183,7 +184,13 @@ constructor(
             } else {
                 tryLanguageFallback(context, originalLocale, mode, currentAction)
             }
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            ErrorLogger.logException(
+                component = "KeyboardRepository",
+                severity = ErrorLogger.Severity.HIGH,
+                exception = e,
+                context = mapOf("operation" to "loadLayout")
+            )
             handleAssetError(layoutIdentifier)
             getFallbackLayout(mode, currentAction)
         }
@@ -310,7 +317,7 @@ constructor(
 
     private suspend fun tryLanguageFallback(
         context: Context,
-        locale: ULocale,
+        locale: Locale,
         mode: KeyboardMode,
         currentAction: KeyboardKey.ActionType
     ): KeyboardLayout = withContext(Dispatchers.IO) {
@@ -320,7 +327,13 @@ constructor(
             return@withContext try {
                 val layoutData = loadLayoutDataFromAssets(context, languageOnly)
                 parseLayoutForMode(layoutData, mode, currentAction)
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                ErrorLogger.logException(
+                    component = "KeyboardRepository",
+                    severity = ErrorLogger.Severity.HIGH,
+                    exception = e,
+                    context = mapOf("operation" to "tryLanguageFallback")
+                )
                 handleAssetError(languageOnly)
                 getFallbackLayout(mode, currentAction)
             }
@@ -338,7 +351,13 @@ constructor(
         return@withContext try {
             val layoutData = loadLayoutDataFromAssets(context, fallbackIdentifier)
             parseLayoutForMode(layoutData, mode, currentAction)
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            ErrorLogger.logException(
+                component = "KeyboardRepository",
+                severity = ErrorLogger.Severity.HIGH,
+                exception = e,
+                context = mapOf("operation" to "tryLoadFallback")
+            )
             getFallbackLayout(mode, currentAction)
         }
     }

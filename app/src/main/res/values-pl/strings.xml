@@ -161,6 +161,8 @@
     <string name="alternative_layout_default">Domyślny (Układ językowy)</string>
 
     <!-- Privacy & Data Settings -->
+    <string name="privacy_settings_storage_encryption_title">Przechowywanie słów: Niezaszyfrowane</string>
+    <string name="privacy_settings_storage_encryption_summary">Nie wykryto ekranu blokady urządzenia. Nauczone słowa są przechowywane jako tekst jawny. Ustaw PIN, wzór lub blokadę biometryczną w ustawieniach Androida, aby włączyć szyfrowanie.</string>
     <string name="privacy_settings_clipboard_history">Historia Schowka</string>
     <string name="privacy_settings_clipboard_history_on">Historia schowka włączona</string>
     <string name="privacy_settings_clipboard_history_off">Historia schowka wyłączona</string>
