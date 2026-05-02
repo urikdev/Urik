@@ -6,6 +6,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
+@Suppress("NewApi")
 class AutofillStateCoordinator(
     private val tracker: AutofillStateTracker,
     private val candidateBarController: CandidateBarController,
