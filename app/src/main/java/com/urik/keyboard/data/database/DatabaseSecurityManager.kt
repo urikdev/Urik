@@ -24,7 +24,7 @@ import javax.crypto.spec.GCMParameterSpec
  */
 class DatabaseSecurityManager(
     private val context: Context,
-    @VisibleForTesting internal val lockScreenCheck: () -> Boolean = { defaultLockScreenCheck(context) }
+    @get:VisibleForTesting internal val lockScreenCheck: () -> Boolean = { defaultLockScreenCheck(context) }
 ) {
     private val keyAlias = "urik_database_master_key"
     private val prefsFile = "urik_db_prefs"
