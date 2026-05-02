@@ -173,6 +173,8 @@
     <string name="alternative_layout_default">Predefinito (Layout lingua)</string>
 
     <!-- Privacy & Data Settings -->
+    <string name="privacy_settings_storage_encryption_title">Archiviazione parole: Non cifrata</string>
+    <string name="privacy_settings_storage_encryption_summary">Nessuna schermata di blocco rilevata. Le parole apprese sono archiviate in testo normale. Imposta un PIN, un pattern o un blocco biometrico nelle impostazioni Android per abilitare la crittografia.</string>
     <string name="privacy_settings_clipboard_history">Cronologia appunti</string>
     <string name="privacy_settings_clipboard_history_on">Cronologia appunti attivata</string>
     <string name="privacy_settings_clipboard_history_off">Cronologia appunti disattivata</string>

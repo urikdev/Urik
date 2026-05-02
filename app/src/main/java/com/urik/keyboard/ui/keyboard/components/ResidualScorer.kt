@@ -1,5 +1,3 @@
-@file:Suppress("ktlint:standard:no-wildcard-imports")
-
 package com.urik.keyboard.ui.keyboard.components
 
 import android.graphics.PointF
@@ -40,12 +38,16 @@ constructor(private val pathGeometryAnalyzer: PathGeometryAnalyzer) {
         val positionAlignmentPenalty: Float
     )
 
-    private val reuseLetterPathIndices = ArrayList<Int>(20)
-    private val reuseLetterScoreChars = CharArray(20)
-    private val reuseLetterScoreValues = FloatArray(20)
-    private var reuseLetterScoreCount = 0
-    private val reusableWordLetters = HashSet<Char>(10)
-    private val reusableWeights = FloatArray(2)
+    private class ScoringBuffers {
+        val letterPathIndices = ArrayList<Int>(20)
+        val letterScoreChars = CharArray(20)
+        val letterScoreValues = FloatArray(20)
+        var letterScoreCount = 0
+        val wordLetters = HashSet<Char>(10)
+        val weights = FloatArray(2)
+    }
+
+    private val threadLocalBuffers = ThreadLocal.withInitial { ScoringBuffers() }
 
     /**
      * Scores a single dictionary entry against the pre-computed swipe signal.
@@ -60,6 +62,7 @@ constructor(private val pathGeometryAnalyzer: PathGeometryAnalyzer) {
         neighborhoodCache: Map<Char, PathGeometryAnalyzer.KeyNeighborhood>,
         maxFrequencySeen: Long
     ): CandidateResult? {
+        val b = threadLocalBuffers.get()
         val rawBoundsPenalty = calculateBoundsPenalty(entry.word, signal.charsInBounds)
         val boundsPenalty =
             if (rawBoundsPenalty == 0f && entry.rawFrequency > 5_000_000L) {
@@ -110,20 +113,20 @@ constructor(private val pathGeometryAnalyzer: PathGeometryAnalyzer) {
             signal.frequencyWeight,
             isClusteredWord
         )
-        val spatialWeight = reusableWeights[0]
-        val frequencyWeight = reusableWeights[1]
+        val spatialWeight = b.weights[0]
+        val frequencyWeight = b.weights[1]
 
         val pathCoverage =
             pathGeometryAnalyzer.calculatePathCoverage(
                 entry.word,
                 signal.path,
                 keyPositions,
-                reuseLetterPathIndices
+                b.letterPathIndices
             )
 
         var orderViolations = 0
-        for (j in 0 until reuseLetterPathIndices.size - 1) {
-            if (reuseLetterPathIndices[j + 1] < reuseLetterPathIndices[j]) {
+        for (j in 0 until b.letterPathIndices.size - 1) {
+            if (b.letterPathIndices[j + 1] < b.letterPathIndices[j]) {
                 orderViolations++
             }
         }
@@ -176,12 +179,12 @@ constructor(private val pathGeometryAnalyzer: PathGeometryAnalyzer) {
         val wordLastChar = entry.word.last().lowercaseChar()
         val endKeyBonus = calculateEndKeyBonus(wordLastChar, signal.endAnchor)
 
-        reusableWordLetters.clear()
+        b.wordLetters.clear()
         for (c in entry.word) {
-            reusableWordLetters.add(c.lowercaseChar())
+            b.wordLetters.add(c.lowercaseChar())
         }
         var missingLetters = 0
-        for (letter in reusableWordLetters) {
+        for (letter in b.wordLetters) {
             if (letter !in signal.traversedKeys) missingLetters++
         }
         val traversalPenalty =
@@ -203,7 +206,7 @@ constructor(private val pathGeometryAnalyzer: PathGeometryAnalyzer) {
                 entry.word,
                 signal.path,
                 keyPositions,
-                reuseLetterPathIndices
+                b.letterPathIndices
             )
         val coherenceSensitivity =
             if (entry.word.length > GeometricScoringConstants.PATH_COHERENCE_MIN_WORD_LENGTH) {
@@ -244,7 +247,7 @@ constructor(private val pathGeometryAnalyzer: PathGeometryAnalyzer) {
         val passthroughPenalty = calculatePassthroughPenalty(entry.word, signal)
         val positionAlignmentPenalty = calculatePositionAlignmentPenalty(
             entry.word.length,
-            reuseLetterPathIndices,
+            b.letterPathIndices,
             signal.path.size
         )
 
@@ -262,8 +265,8 @@ constructor(private val pathGeometryAnalyzer: PathGeometryAnalyzer) {
 
         val elasticityApplied = signal.offRowKeys.isNotEmpty()
         var maxDwellBonus = 0f
-        for (i in reuseLetterPathIndices.indices) {
-            val idx = reuseLetterPathIndices[i]
+        for (i in b.letterPathIndices.indices) {
+            val idx = b.letterPathIndices[i]
             val char = if (i < entry.word.length) entry.word[i].lowercaseChar() else continue
             val boost = pathGeometryAnalyzer.getDwellInterestBoost(char, idx, signal.geometricAnalysis)
             if (boost > maxDwellBonus) maxDwellBonus = boost
@@ -278,7 +281,7 @@ constructor(private val pathGeometryAnalyzer: PathGeometryAnalyzer) {
             pathCoverage = pathCoverage,
             elasticityApplied = elasticityApplied,
             dwellBonus = maxDwellBonus,
-            letterPathIndices = ArrayList(reuseLetterPathIndices),
+            letterPathIndices = ArrayList(b.letterPathIndices),
             isClusteredWord = isClusteredWord,
             lengthPenalty = lengthPenalty,
             traversalPenalty = traversalPenalty,
@@ -302,8 +305,9 @@ constructor(private val pathGeometryAnalyzer: PathGeometryAnalyzer) {
         val swipePath = signal.path
         if (swipePath.isEmpty()) return 0f
 
-        reuseLetterPathIndices.clear()
-        reuseLetterScoreCount = 0
+        val b = threadLocalBuffers.get()
+        b.letterPathIndices.clear()
+        b.letterScoreCount = 0
 
         var totalScore = 0f
         val geometricAnalysis = signal.geometricAnalysis
@@ -498,12 +502,12 @@ constructor(private val pathGeometryAnalyzer: PathGeometryAnalyzer) {
                         pathGeometryAnalyzer.detectRepeatedLetterSignal(
                             swipePath,
                             keyPos,
-                            reuseLetterPathIndices.lastOrNull() ?: 0,
+                            b.letterPathIndices.lastOrNull() ?: 0,
                             closestPointIndex
                         )
                     letterScore *= 1f + repeatedLetterBoost
                 } else if (prevOccurrence >= 0) {
-                    val prevPathIdx = reuseLetterPathIndices[prevOccurrence]
+                    val prevPathIdx = b.letterPathIndices[prevOccurrence]
                     val pathSpan = abs(closestPointIndex - prevPathIdx)
                     val repeatedLetterBoost =
                         pathGeometryAnalyzer.detectRepeatedLetterSignal(
@@ -523,24 +527,24 @@ constructor(private val pathGeometryAnalyzer: PathGeometryAnalyzer) {
                 }
             }
 
-            reuseLetterPathIndices.add(closestPointIndex)
-            if (reuseLetterScoreCount < reuseLetterScoreValues.size) {
-                reuseLetterScoreChars[reuseLetterScoreCount] = char
-                reuseLetterScoreValues[reuseLetterScoreCount] = letterScore
-                reuseLetterScoreCount++
+            b.letterPathIndices.add(closestPointIndex)
+            if (b.letterScoreCount < b.letterScoreValues.size) {
+                b.letterScoreChars[b.letterScoreCount] = char
+                b.letterScoreValues[b.letterScoreCount] = letterScore
+                b.letterScoreCount++
             }
             totalScore += letterScore
         }
 
         val lexicalCoherenceBonus = pathGeometryAnalyzer.calculateLexicalCoherenceBonus(
-            reuseLetterScoreValues,
-            reuseLetterScoreCount
+            b.letterScoreValues,
+            b.letterScoreCount
         )
 
         val sequencePenalty =
             calculateSequencePenalty(
                 word,
-                reuseLetterPathIndices,
+                b.letterPathIndices,
                 uniqueLetterCount,
                 isClusteredWord
             )
@@ -552,7 +556,7 @@ constructor(private val pathGeometryAnalyzer: PathGeometryAnalyzer) {
         val pathExhaustionPenalty =
             calculatePathExhaustionPenalty(
                 word,
-                reuseLetterPathIndices,
+                b.letterPathIndices,
                 signal.path.size
             )
 
@@ -687,11 +691,12 @@ constructor(private val pathGeometryAnalyzer: PathGeometryAnalyzer) {
     }
 
     private fun calculateAnchorAwareWrongLetterPenalty(wordLength: Int): Float {
-        val rawPenalty = calculateWrongLetterPenalty(reuseLetterScoreValues, reuseLetterScoreCount, wordLength)
+        val b = threadLocalBuffers.get()
+        val rawPenalty = calculateWrongLetterPenalty(b.letterScoreValues, b.letterScoreCount, wordLength)
         if (wordLength < ANCHOR_KEY_MIN_WORD_LENGTH) return rawPenalty
         var highProximityCount = 0
-        for (i in 0 until reuseLetterScoreCount) {
-            if (reuseLetterScoreValues[i] >= ANCHOR_KEY_HIGH_PROXIMITY_THRESHOLD) highProximityCount++
+        for (i in 0 until b.letterScoreCount) {
+            if (b.letterScoreValues[i] >= ANCHOR_KEY_HIGH_PROXIMITY_THRESHOLD) highProximityCount++
         }
         val anchorRatio = highProximityCount.toFloat() / wordLength.toFloat()
         return if (anchorRatio >= ANCHOR_KEY_COVERAGE_RATIO) {
@@ -800,9 +805,10 @@ constructor(private val pathGeometryAnalyzer: PathGeometryAnalyzer) {
         baselineFreqWeight: Float,
         isClusteredWord: Boolean
     ) {
+        val b = threadLocalBuffers.get()
         if (isClusteredWord) {
-            reusableWeights[0] = CLUSTERED_WORD_SPATIAL_WEIGHT
-            reusableWeights[1] = CLUSTERED_WORD_FREQ_WEIGHT
+            b.weights[0] = CLUSTERED_WORD_SPATIAL_WEIGHT
+            b.weights[1] = CLUSTERED_WORD_FREQ_WEIGHT
             return
         }
         val frequencyRatio =
@@ -813,33 +819,33 @@ constructor(private val pathGeometryAnalyzer: PathGeometryAnalyzer) {
             }
         when {
             entry.word.length == 2 && adjustedSpatialScore > 0.75f -> {
-                reusableWeights[0] = 0.88f
-                reusableWeights[1] = 0.12f
+                b.weights[0] = 0.88f
+                b.weights[1] = 0.12f
             }
 
             entry.word.length in 3..4 && adjustedSpatialScore >= SHORT_WORD_SPATIAL_THRESHOLD -> {
-                reusableWeights[0] = SHORT_WORD_SPATIAL_WEIGHT
-                reusableWeights[1] = SHORT_WORD_FREQ_WEIGHT
+                b.weights[0] = SHORT_WORD_SPATIAL_WEIGHT
+                b.weights[1] = SHORT_WORD_FREQ_WEIGHT
             }
 
             frequencyRatio >= 10.0f -> {
-                reusableWeights[0] = minOf(baselineSpatialWeight, 0.50f)
-                reusableWeights[1] = maxOf(baselineFreqWeight, 0.50f)
+                b.weights[0] = minOf(baselineSpatialWeight, 0.50f)
+                b.weights[1] = maxOf(baselineFreqWeight, 0.50f)
             }
 
             frequencyRatio >= 5.0f -> {
-                reusableWeights[0] = minOf(baselineSpatialWeight, 0.55f)
-                reusableWeights[1] = maxOf(baselineFreqWeight, 0.45f)
+                b.weights[0] = minOf(baselineSpatialWeight, 0.55f)
+                b.weights[1] = maxOf(baselineFreqWeight, 0.45f)
             }
 
             frequencyRatio >= 3.0f -> {
-                reusableWeights[0] = minOf(baselineSpatialWeight, 0.58f)
-                reusableWeights[1] = maxOf(baselineFreqWeight, 0.42f)
+                b.weights[0] = minOf(baselineSpatialWeight, 0.58f)
+                b.weights[1] = maxOf(baselineFreqWeight, 0.42f)
             }
 
             else -> {
-                reusableWeights[0] = baselineSpatialWeight
-                reusableWeights[1] = baselineFreqWeight
+                b.weights[0] = baselineSpatialWeight
+                b.weights[1] = baselineFreqWeight
             }
         }
     }

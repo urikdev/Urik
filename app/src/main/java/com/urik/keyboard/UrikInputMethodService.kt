@@ -1,6 +1,10 @@
 package com.urik.keyboard
 
 import android.annotation.SuppressLint
+import android.icu.lang.UCharacter
+import android.icu.lang.UProperty
+import android.icu.lang.UScript
+import android.icu.util.ULocale
 import android.inputmethodservice.InputMethodService
 import android.os.Build
 import android.os.SystemClock
@@ -15,6 +19,7 @@ import android.view.inputmethod.InlineSuggestionsRequest
 import android.view.inputmethod.InlineSuggestionsResponse
 import android.widget.LinearLayout
 import android.widget.inline.InlinePresentationSpec
+import androidx.annotation.VisibleForTesting
 import androidx.autofill.inline.UiVersions
 import androidx.autofill.inline.common.TextViewStyle
 import androidx.autofill.inline.common.ViewStyle
@@ -24,10 +29,6 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
-import com.ibm.icu.lang.UCharacter
-import com.ibm.icu.lang.UProperty
-import com.ibm.icu.lang.UScript
-import com.ibm.icu.util.ULocale
 import com.urik.keyboard.KeyboardConstants.TextProcessingConstants
 import com.urik.keyboard.data.KeyboardRepository
 import com.urik.keyboard.model.KeyboardDisplayMode
@@ -35,13 +36,23 @@ import com.urik.keyboard.model.KeyboardEvent
 import com.urik.keyboard.model.KeyboardKey
 import com.urik.keyboard.model.KeyboardLayout
 import com.urik.keyboard.model.KeyboardMode
+import com.urik.keyboard.model.KeyboardState
+import com.urik.keyboard.service.AutoCorrectionEngine
+import com.urik.keyboard.service.AutocorrectDecision
+import com.urik.keyboard.service.AutofillStateCoordinator
 import com.urik.keyboard.service.AutofillStateTracker
+import com.urik.keyboard.service.CandidateBarController
 import com.urik.keyboard.service.CharacterVariationService
+import com.urik.keyboard.service.ClipboardActionCoordinator
 import com.urik.keyboard.service.ClipboardMonitorService
+import com.urik.keyboard.service.ClipboardPanelHost
 import com.urik.keyboard.service.EmojiSearchManager
-import com.urik.keyboard.service.EnglishPronounI
+import com.urik.keyboard.service.EnglishPronounCorrection
+import com.urik.keyboard.service.ImeStateCoordinator
 import com.urik.keyboard.service.InputMethod
 import com.urik.keyboard.service.InputStateManager
+import com.urik.keyboard.service.KeyEventHandler
+import com.urik.keyboard.service.KeyEventRouter
 import com.urik.keyboard.service.LanguageManager
 import com.urik.keyboard.service.LastAutocorrection
 import com.urik.keyboard.service.OutputBridge
@@ -50,6 +61,7 @@ import com.urik.keyboard.service.ProcessingResult
 import com.urik.keyboard.service.SpellCheckManager
 import com.urik.keyboard.service.SpellConfirmationState
 import com.urik.keyboard.service.SuggestionPipeline
+import com.urik.keyboard.service.SuggestionPipelineHost
 import com.urik.keyboard.service.TextInputProcessor
 import com.urik.keyboard.service.ViewCallback
 import com.urik.keyboard.service.WordLearningEngine
@@ -91,10 +103,14 @@ import kotlinx.coroutines.withContext
  * Delegates composing state to [InputStateManager], InputConnection operations
  * to [OutputBridge], and suggestion processing to [SuggestionPipeline].
  */
+@Suppress("LargeClass")
 @AndroidEntryPoint
-class UrikInputMethodService :
+open class UrikInputMethodService :
     InputMethodService(),
-    LifecycleOwner {
+    LifecycleOwner,
+    KeyEventHandler,
+    ClipboardPanelHost,
+    SuggestionPipelineHost {
     @Inject
     lateinit var repository: KeyboardRepository
 
@@ -156,16 +172,27 @@ class UrikInputMethodService :
     lateinit var swipeSpaceManager: com.urik.keyboard.service.SwipeSpaceManager
 
     @Inject
-    lateinit var kanaKanjiConverter: com.urik.keyboard.service.KanaKanjiConverter
+    lateinit var scriptConverterRegistry: com.urik.keyboard.service.ScriptConverterRegistry
+
+    @Inject
+    lateinit var autoCorrectionEngine: AutoCorrectionEngine
+
+    @Inject
+    lateinit var keyEventRouter: KeyEventRouter
 
     private lateinit var viewModel: KeyboardViewModel
     private lateinit var layoutManager: KeyboardLayoutManager
     private lateinit var lifecycleRegistry: LifecycleRegistry
     private var postureDetector: com.urik.keyboard.service.PostureDetector? = null
 
-    private lateinit var inputState: InputStateManager
-    private lateinit var outputBridge: OutputBridge
-    private lateinit var suggestionPipeline: SuggestionPipeline
+    @VisibleForTesting
+    internal lateinit var inputState: InputStateManager
+
+    @VisibleForTesting
+    internal lateinit var outputBridge: OutputBridge
+
+    @VisibleForTesting
+    internal lateinit var suggestionPipeline: SuggestionPipeline
 
     private val inputMethodManager: android.view.inputmethod.InputMethodManager by lazy {
         getSystemService(INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager
@@ -189,39 +216,28 @@ class UrikInputMethodService :
 
     private var currentSettings: KeyboardSettings = KeyboardSettings()
 
-    private val autofillStateTracker = AutofillStateTracker()
+    private lateinit var autofillCoordinator: AutofillStateCoordinator
+    private lateinit var clipboardCoordinator: ClipboardActionCoordinator
+
+    private lateinit var candidateBarController: CandidateBarController
+    private lateinit var imeStateCoordinator: ImeStateCoordinator
 
     override val lifecycle: Lifecycle
         get() = lifecycleRegistry
+
+    override fun showSuggestions(): Boolean = currentSettings.showSuggestions
+    override fun effectiveSuggestionCount(): Int = currentSettings.effectiveSuggestionCount
+    override fun getKeyboardState(): KeyboardState = viewModel.state.value
+    override fun shouldAutoCapitalize(text: String): Boolean = viewModel.shouldAutoCapitalize(text)
+    override fun currentLanguage(): String = languageManager.currentLanguage.value
 
     private fun setAcceleratedDeletion(active: Boolean) {
         inputState.isAcceleratedDeletion = active
     }
 
-    private fun clearSecureFieldState() {
-        inputState.clearInternalStateOnly()
-        outputBridge.finishComposingText()
-
-        spellCheckManager.clearCaches()
-        spellCheckManager.clearBlacklist()
-        textInputProcessor.clearCaches()
-        wordLearningEngine.clearCurrentLanguageCache()
-
-        inputState.lastSpaceTime = 0
-        inputState.lastShiftTime = 0
-    }
+    private fun clearSecureFieldState() = imeStateCoordinator.clearSecureFieldState()
 
     private fun isValidTextInput(text: String): Boolean = CursorEditingUtils.isValidTextInput(text)
-
-    private fun isAlphaNumericInput(char: String): Boolean {
-        if (char.isEmpty()) return false
-
-        if (inputState.displayBuffer.isNotEmpty() && char.all { it.isDigit() }) {
-            return true
-        }
-
-        return isValidTextInput(char)
-    }
 
     private fun updateScriptContext(locale: ULocale) {
         val currentLayout = viewModel.layout.value
@@ -245,14 +261,9 @@ class UrikInputMethodService :
     private fun isSentenceEndingPunctuation(char: Char): Boolean =
         UCharacter.hasBinaryProperty(char.code, UProperty.S_TERM)
 
-    private fun coordinateStateClear() {
-        streamingScoringEngine.cancelActiveGesture()
-        outputBridge.coordinateStateClear()
-    }
+    private fun coordinateStateClear() = imeStateCoordinator.coordinateStateClear()
 
-    private fun invalidateComposingStateOnCursorJump() {
-        outputBridge.invalidateComposingStateOnCursorJump()
-    }
+    private fun invalidateComposingStateOnCursorJump() = imeStateCoordinator.invalidateComposingStateOnCursorJump()
 
     private fun checkAutoCapitalization(textBefore: String) {
         viewModel.checkAndApplyAutoCapitalization(textBefore, currentSettings.autoCapitalizationEnabled)
@@ -281,11 +292,10 @@ class UrikInputMethodService :
             lastDisplayDensity = resources.displayMetrics.density
             swipeDetector.updateDisplayMetrics(lastDisplayDensity)
 
-            postureDetector =
-                com.urik.keyboard.service
-                    .PostureDetector(this, serviceScope)
-            postureDetector?.start()
-            keyboardModeManager.initialize(serviceScope, postureDetector!!)
+            postureDetector = com.urik.keyboard.service.PostureDetector(this, serviceScope).also {
+                it.start()
+                keyboardModeManager.initialize(serviceScope, it)
+            }
 
             initializeCoreComponents()
 
@@ -312,11 +322,11 @@ class UrikInputMethodService :
                     viewCallback =
                     object : ViewCallback {
                         override fun clearSuggestions() {
-                            swipeKeyboardView?.clearSuggestions()
+                            candidateBarController.clearSuggestions()
                         }
 
                         override fun updateSuggestions(suggestions: List<String>) {
-                            swipeKeyboardView?.updateSuggestions(suggestions)
+                            candidateBarController.updateSuggestions(suggestions)
                         }
                     },
                     onShiftStateChanged = { pressed ->
@@ -347,8 +357,40 @@ class UrikInputMethodService :
                     keyCharEventSender = { char -> sendCharacterAsKeyEvents(char) }
                 )
 
+            candidateBarController = CandidateBarController(viewProvider = { swipeKeyboardView })
+
+            imeStateCoordinator = ImeStateCoordinator(
+                outputBridge = outputBridge,
+                streamingScoringEngine = streamingScoringEngine,
+                inputState = inputState,
+                spellCheckManager = spellCheckManager,
+                textInputProcessor = textInputProcessor,
+                wordLearningEngine = wordLearningEngine
+            )
+
+            autofillCoordinator = AutofillStateCoordinator(
+                tracker = AutofillStateTracker(),
+                candidateBarController = candidateBarController,
+                serviceScope = serviceScope,
+                displaySuggestions = { suggestions -> inflateAndDisplaySuggestions(suggestions) }
+            )
+
+            clipboardCoordinator = ClipboardActionCoordinator(
+                clipboardRepository = clipboardRepository,
+                outputBridge = outputBridge,
+                serviceScope = serviceScope,
+                panelHost = this
+            )
+
+            keyEventRouter.configure(
+                handler = this,
+                searchInputHandler = { key -> candidateBarController.handleSearchInput(key) },
+                viewModel = viewModel
+            )
+
             suggestionPipeline =
                 SuggestionPipeline(
+                    host = this,
                     state = inputState,
                     outputBridge = outputBridge,
                     textInputProcessor = textInputProcessor,
@@ -357,19 +399,17 @@ class UrikInputMethodService :
                     wordFrequencyRepository = wordFrequencyRepository,
                     languageManager = languageManager,
                     caseTransformer = caseTransformer,
-                    kanaKanjiConverter = kanaKanjiConverter,
-                    serviceScope = serviceScope,
-                    showSuggestions = { currentSettings.showSuggestions },
-                    effectiveSuggestionCount = { currentSettings.effectiveSuggestionCount },
-                    getKeyboardState = { viewModel.state.value },
-                    shouldAutoCapitalize = { text -> viewModel.shouldAutoCapitalize(text) },
-                    currentLanguageProvider = { languageManager.currentLanguage.value }
+                    scriptConverterRegistry = scriptConverterRegistry,
+                    serviceScope = serviceScope
                 )
 
             layoutManager =
                 KeyboardLayoutManager(
                     context = this,
-                    onKeyClick = { key -> handleKeyPress(key) },
+                    onKeyClick = { key ->
+                        inputState.clearBigramPredictions()
+                        keyEventRouter.route(key)
+                    },
                     onAcceleratedDeletionChanged = { active -> setAcceleratedDeletion(active) },
                     onSymbolsLongPress = { handleClipboardButtonClick() },
                     onLanguageSwitch = { languageCode -> handleLanguageSwitch(languageCode) },
@@ -410,12 +450,24 @@ class UrikInputMethodService :
 
             try {
                 spellCheckManager.clearCaches()
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                ErrorLogger.logException(
+                    component = "UrikInputMethodService",
+                    severity = ErrorLogger.Severity.LOW,
+                    exception = e,
+                    context = mapOf("operation" to "clearCaches_spellCheck")
+                )
             }
 
             try {
                 textInputProcessor.clearCaches()
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                ErrorLogger.logException(
+                    component = "UrikInputMethodService",
+                    severity = ErrorLogger.Severity.LOW,
+                    exception = e,
+                    context = mapOf("operation" to "clearCaches_textInputProcessor")
+                )
             }
 
             val currentLanguage = languageManager.currentLanguage.value
@@ -440,7 +492,13 @@ class UrikInputMethodService :
 
             try {
                 wordLearningEngine.getLearningStats()
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                ErrorLogger.logException(
+                    component = "UrikInputMethodService",
+                    severity = ErrorLogger.Severity.LOW,
+                    exception = e,
+                    context = mapOf("operation" to "getLearningStats")
+                )
             }
         } catch (e: Exception) {
             ErrorLogger.logException(
@@ -589,7 +647,10 @@ class UrikInputMethodService :
                     emojiSearchManager,
                     recentEmojiProvider
                 )
-                setOnKeyClickListener { key -> handleKeyPress(key) }
+                setOnKeyClickListener { key ->
+                    inputState.clearBigramPredictions()
+                    keyEventRouter.route(key)
+                }
                 setOnSwipeWordListener { validatedWord -> handleSwipeWord(validatedWord) }
                 setOnSuggestionClickListener { suggestion -> handleSuggestionSelected(suggestion) }
                 setOnSuggestionLongPressListener { suggestion ->
@@ -647,7 +708,13 @@ class UrikInputMethodService :
                 }
 
                 outputBridge.commitText(emoji, 1)
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                ErrorLogger.logException(
+                    component = "UrikInputMethodService",
+                    severity = ErrorLogger.Severity.HIGH,
+                    exception = e,
+                    context = mapOf("operation" to "handleEmojiSelected")
+                )
             }
         }
     }
@@ -679,11 +746,11 @@ class UrikInputMethodService :
                         serviceScope.launch {
                             settingsRepository.updateClipboardConsentShown(true)
                             clipboardMonitorService.startMonitoring()
-                            showClipboardContentInPanel(panel)
+                            clipboardCoordinator.loadAndDisplayContent()
                         }
                     }
                 } else {
-                    showClipboardContentInPanel(panel)
+                    clipboardCoordinator.loadAndDisplayContent()
                 }
             } catch (e: Exception) {
                 ErrorLogger.logException(
@@ -701,34 +768,28 @@ class UrikInputMethodService :
         adaptiveContainer?.visibility = View.VISIBLE
     }
 
-    private suspend fun showClipboardContentInPanel(panel: ClipboardPanel) {
-        val pinnedResult = clipboardRepository.getPinnedItems()
-        val recentResult = clipboardRepository.getRecentItems()
-
-        val pinnedItems = pinnedResult.getOrElse { emptyList() }
-        val recentItems = recentResult.getOrElse { emptyList() }
-
+    override suspend fun onClipboardDataLoaded(
+        pinnedItems: List<com.urik.keyboard.data.database.ClipboardItem>,
+        recentItems: List<com.urik.keyboard.data.database.ClipboardItem>
+    ) {
+        val panel = clipboardPanel ?: return
         withContext(Dispatchers.Main) {
-            panel.showClipboardContent(
-                pinnedItems = pinnedItems,
-                recentItems = recentItems,
-                onItemClick = { content ->
-                    handleClipboardItemPaste(content)
-                    dismissClipboardPanel()
-                },
-                onPinToggle = { item ->
-                    handleClipboardPinToggle(item)
-                },
-                onDelete = { item ->
-                    handleClipboardItemDelete(item)
-                },
-                onDeleteAll = {
-                    handleClipboardDeleteAll()
-                },
-                onClose = {
-                    dismissClipboardPanel()
-                }
-            )
+            if (panel.isShowing) {
+                panel.refreshContent(pinnedItems, recentItems)
+            } else {
+                panel.showClipboardContent(
+                    pinnedItems = pinnedItems,
+                    recentItems = recentItems,
+                    onItemClick = { content ->
+                        clipboardCoordinator.pasteContent(content)
+                        dismissClipboardPanel()
+                    },
+                    onPinToggle = { item -> clipboardCoordinator.togglePin(item) },
+                    onDelete = { item -> clipboardCoordinator.deleteItem(item) },
+                    onDeleteAll = { clipboardCoordinator.deleteAllUnpinned() },
+                    onClose = { dismissClipboardPanel() }
+                )
+            }
         }
     }
 
@@ -758,50 +819,13 @@ class UrikInputMethodService :
     private fun showInputMethodPicker() {
         try {
             inputMethodManager.showInputMethodPicker()
-        } catch (_: Exception) {
-        }
-    }
-
-    private fun handleClipboardItemPaste(content: String) {
-        serviceScope.launch {
-            try {
-                outputBridge.commitText(content, 1)
-            } catch (_: Exception) {
-            }
-        }
-    }
-
-    private suspend fun refreshClipboardPanel() {
-        val panel = clipboardPanel ?: return
-        val pinnedResult = clipboardRepository.getPinnedItems()
-        val recentResult = clipboardRepository.getRecentItems()
-
-        val pinnedItems = pinnedResult.getOrElse { emptyList() }
-        val recentItems = recentResult.getOrElse { emptyList() }
-
-        withContext(Dispatchers.Main) {
-            panel.refreshContent(pinnedItems, recentItems)
-        }
-    }
-
-    private fun handleClipboardPinToggle(item: com.urik.keyboard.data.database.ClipboardItem) {
-        serviceScope.launch {
-            clipboardRepository.togglePin(item.id, !item.isPinned)
-            refreshClipboardPanel()
-        }
-    }
-
-    private fun handleClipboardItemDelete(item: com.urik.keyboard.data.database.ClipboardItem) {
-        serviceScope.launch {
-            clipboardRepository.deleteItem(item.id)
-            refreshClipboardPanel()
-        }
-    }
-
-    private fun handleClipboardDeleteAll() {
-        serviceScope.launch {
-            clipboardRepository.deleteAllUnpinned()
-            refreshClipboardPanel()
+        } catch (e: Exception) {
+            ErrorLogger.logException(
+                component = "UrikInputMethodService",
+                severity = ErrorLogger.Severity.LOW,
+                exception = e,
+                context = mapOf("operation" to "showInputMethodPicker")
+            )
         }
     }
 
@@ -888,7 +912,7 @@ class UrikInputMethodService :
                                 inputState.isCurrentWordAtSentenceStart
                             )
                         inputState.pendingSuggestions = recased
-                        swipeKeyboardView?.updateSuggestions(recased)
+                        candidateBarController.updateSuggestions(recased)
                     }
                 }
             }
@@ -1037,7 +1061,13 @@ class UrikInputMethodService :
 
                 swipeKeyboardView?.updateKeyboard(filteredLayout, state)
             }
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            ErrorLogger.logException(
+                component = "UrikInputMethodService",
+                severity = ErrorLogger.Severity.LOW,
+                exception = e,
+                context = mapOf("operation" to "updateSwipeKeyboard")
+            )
         }
     }
 
@@ -1084,20 +1114,7 @@ class UrikInputMethodService :
             lifecycleRegistry.currentState = Lifecycle.State.RESUMED
         }
 
-        inputState.isSecureField = SecureFieldDetector.isSecure(info)
-        inputState.isDirectCommitField = SecureFieldDetector.isDirectCommit(info)
-        inputState.isRawKeyEventField = SecureFieldDetector.isRawKeyEvent(info)
-        inputState.isTerminalField = SecureFieldDetector.isTerminalField(info)
-        if (inputState.isTerminalField) {
-            viewModel.disableAutoCapForTerminalField()
-        }
-        inputState.currentInputAction = ActionDetector.detectAction(info)
-
-        val inputType = info?.inputType ?: 0
-        val variation = inputType and EditorInfo.TYPE_MASK_VARIATION
-        inputState.isUrlOrEmailField = variation == EditorInfo.TYPE_TEXT_VARIATION_URI ||
-            variation == EditorInfo.TYPE_TEXT_VARIATION_EMAIL_ADDRESS ||
-            variation == EditorInfo.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS
+        applyFieldTypeFromEditorInfo(info)
 
         val targetMode = KeyboardModeUtils.determineTargetMode(info, viewModel.state.value.currentMode)
         if (targetMode != viewModel.state.value.currentMode) {
@@ -1125,18 +1142,20 @@ class UrikInputMethodService :
 
             try {
                 outputBridge.finishComposingText()
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                ErrorLogger.logException(
+                    component = "UrikInputMethodService",
+                    severity = ErrorLogger.Severity.LOW,
+                    exception = e,
+                    context = mapOf("operation" to "onStartInputView_finishComposing")
+                )
             }
         }
 
         updateKeyboardForCurrentAction()
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            autofillStateTracker.drainPendingResponse()?.let { buffered ->
-                if (!autofillStateTracker.isDismissed() && buffered.inlineSuggestions.isNotEmpty()) {
-                    inflateAndDisplaySuggestions(buffered.inlineSuggestions)
-                }
-            }
+            autofillCoordinator.onInputViewStarted(swipeKeyboardView != null)
         }
     }
 
@@ -1144,50 +1163,88 @@ class UrikInputMethodService :
         viewModel.updateActionType(inputState.currentInputAction)
     }
 
-    private fun handleKeyPress(key: KeyboardKey) {
-        try {
-            inputState.clearBigramPredictions()
+    override fun onLetterInput(char: String) {
+        autofillCoordinator.onKeyInput()
+        if (inputState.displayBuffer.isEmpty()) {
+            val state = viewModel.state.value
+            inputState.isCurrentWordAtSentenceStart = state.isAutoShift
+            inputState.isCurrentWordManualShifted =
+                state.isShiftPressed &&
+                !state.isAutoShift &&
+                !state.isCapsLockOn
+        }
+        handleLetterInput(char)
+    }
 
-            if (swipeKeyboardView?.handleSearchInput(key) == true) {
-                return
+    override fun onNonLetterInput(char: String) {
+        autofillCoordinator.onKeyInput()
+        handleNonLetterInput(char)
+    }
+
+    override fun onBackspace() = handleBackspace()
+
+    override fun onSpace() = handleSpace()
+
+    override fun onEnterAction(imeAction: Int) {
+        serviceScope.launch { performInputAction(imeAction) }
+    }
+
+    override fun onShift() {
+        val currentTime = System.currentTimeMillis()
+        val timeSinceLastShift = currentTime - inputState.lastShiftTime
+        val currentState = viewModel.state.value
+
+        when {
+            timeSinceLastShift <= doubleShiftThreshold -> {
+                viewModel.onEvent(KeyboardEvent.CapsLockToggled)
+                viewModel.onEvent(KeyboardEvent.ShiftStateChanged(false))
+                inputState.lastShiftTime = 0
             }
 
-            when (key) {
-                is KeyboardKey.Character -> {
-                    if (swipeKeyboardView?.clearAutofillIfShowing() == true) {
-                        autofillStateTracker.dismiss()
-                    }
-
-                    val char = viewModel.getCharacterForInput(key)
-                    if (key.type == KeyboardKey.KeyType.LETTER && inputState.displayBuffer.isEmpty()) {
-                        val state = viewModel.state.value
-                        inputState.isCurrentWordAtSentenceStart = state.isAutoShift
-                        inputState.isCurrentWordManualShifted =
-                            state.isShiftPressed &&
-                            !state.isAutoShift &&
-                            !state.isCapsLockOn
-                    }
-                    viewModel.clearShiftAfterCharacter(key)
-
-                    if (isAlphaNumericInput(char)) {
-                        handleLetterInput(char)
-                    } else {
-                        handleNonLetterInput(char)
-                    }
-
-                    viewModel.onEvent(KeyboardEvent.KeyPressed(key))
+            else -> {
+                when {
+                    currentState.isCapsLockOn -> viewModel.onEvent(KeyboardEvent.CapsLockToggled)
+                    !currentState.isShiftPressed -> viewModel.onEvent(KeyboardEvent.ShiftStateChanged(true))
+                    currentState.isShiftPressed -> viewModel.onEvent(KeyboardEvent.ShiftStateChanged(false))
                 }
-
-                is KeyboardKey.Action -> {
-                    handleActionKey(key)
-                }
-
-                KeyboardKey.Spacer -> {}
-                is KeyboardKey.FlickKey -> {}
+                inputState.lastShiftTime = currentTime
             }
-        } catch (_: Exception) {
         }
     }
+
+    override fun onCapsLock() {
+        viewModel.onEvent(KeyboardEvent.CapsLockToggled)
+    }
+
+    override fun onModeSwitch(mode: KeyboardMode) {
+        viewModel.onEvent(KeyboardEvent.ModeChanged(mode))
+    }
+
+    override fun onDakuten() {
+        val ic = currentInputConnection ?: return
+        val before = ic.getTextBeforeCursor(1, 0)?.toString() ?: return
+        val transformed = KanaTransformUtils.cycleDakutenOnLast(before)
+        if (transformed != before) {
+            ic.beginBatchEdit()
+            ic.deleteSurroundingText(1, 0)
+            ic.commitText(transformed, 1)
+            ic.endBatchEdit()
+        }
+    }
+
+    override fun onSmallKana() {
+        val ic = currentInputConnection ?: return
+        val before = ic.getTextBeforeCursor(1, 0)?.toString() ?: return
+        val transformed = KanaTransformUtils.toggleSmallKanaOnLast(before)
+        if (transformed != before) {
+            ic.beginBatchEdit()
+            ic.deleteSurroundingText(1, 0)
+            ic.commitText(transformed, 1)
+            ic.endBatchEdit()
+        }
+    }
+
+    override fun onLanguageSwitch() {}
 
     private fun handleLetterInput(char: String) {
         try {
@@ -1344,11 +1401,16 @@ class UrikInputMethodService :
 
             suggestionPipeline.requestSuggestions(
                 buffer = inputState.displayBuffer,
-                inputMethod = InputMethod.TYPED,
-                isCharacterInput = true,
-                char = char
+                inputMethod = InputMethod.TYPED
             )
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            ErrorLogger.logException(
+                component = "UrikInputMethodService",
+                severity = ErrorLogger.Severity.HIGH,
+                exception = e,
+                context = mapOf("operation" to "handleLetterInput", "char" to char)
+            )
+            coordinateStateClear()
             outputBridge.commitText(char, 1)
         }
     }
@@ -1380,7 +1442,7 @@ class UrikInputMethodService :
 
                 if (inputState.postCommitReplacementState != null) {
                     inputState.postCommitReplacementState = null
-                    swipeKeyboardView?.clearSuggestions()
+                    candidateBarController.clearSuggestions()
                 }
                 inputState.lastAutocorrection = null
 
@@ -1417,16 +1479,25 @@ class UrikInputMethodService :
                         )
 
                     if (!isUrlOrEmail) {
-                        suggestionPipeline.cancelDebounceJob()
-                        val isValid = textInputProcessor.validateWord(inputState.displayBuffer)
-                        if (!isValid) {
-                            val isPunctuation =
-                                char.length == 1 && CursorEditingUtils.isPunctuation(char.single())
+                        val isPunctuation =
+                            char.length == 1 && CursorEditingUtils.isPunctuation(char.single())
 
-                            if (isPunctuation) {
+                        if (isPunctuation) {
+                            suggestionPipeline.cancelDebounceJob()
+                            val isValid = textInputProcessor.validateWord(inputState.displayBuffer)
+                            if (!isValid) {
                                 outputBridge.beginBatchEdit()
                                 try {
-                                    outputBridge.autoCapitalizePronounI { languageManager.currentLanguage.value }
+                                    val pronounLang = languageManager.currentLanguage.value.split("-").first()
+                                    if (pronounLang == "en" && inputState.displayBuffer.isNotEmpty()) {
+                                        val corrected = EnglishPronounCorrection.capitalize(
+                                            inputState.displayBuffer.lowercase()
+                                        )
+                                        if (corrected != null && corrected != inputState.displayBuffer) {
+                                            inputState.onPronounCapitalized(corrected)
+                                            outputBridge.setComposingText(corrected, 1)
+                                        }
+                                    }
                                     suggestionPipeline.learnWordAndInvalidateCache(
                                         inputState.displayBuffer,
                                         InputMethod.TYPED
@@ -1449,24 +1520,39 @@ class UrikInputMethodService :
                                     outputBridge.endBatchEdit()
                                 }
                                 return@launch
-                            } else if (currentSettings.pauseOnMisspelledWord) {
-                                inputState.spellConfirmationState = SpellConfirmationState.AWAITING_CONFIRMATION
-                                inputState.pendingWordForLearning = inputState.displayBuffer
-                                outputBridge.highlightCurrentWord()
-
-                                val suggestions = textInputProcessor.getSuggestions(inputState.displayBuffer)
-                                val displaySuggestions =
-                                    suggestionPipeline.storeAndCapitalizeSuggestions(
-                                        suggestions,
-                                        inputState.isCurrentWordAtSentenceStart
-                                    )
-                                inputState.pendingSuggestions = displaySuggestions
-                                if (displaySuggestions.isNotEmpty()) {
-                                    swipeKeyboardView?.updateSuggestions(displaySuggestions)
-                                } else {
-                                    swipeKeyboardView?.clearSuggestions()
+                            }
+                        } else {
+                            suggestionPipeline.cancelDebounceJob()
+                            val decision = autoCorrectionEngine.decide(
+                                buffer = inputState.displayBuffer,
+                                spellCheckEnabled = currentSettings.spellCheckEnabled,
+                                autocorrectionEnabled = currentSettings.autocorrectionEnabled,
+                                pauseOnMisspelledWord = currentSettings.pauseOnMisspelledWord,
+                                lastAutocorrection = inputState.lastAutocorrection,
+                                textBeforeCursor = textBefore,
+                                nextChar = char
+                            )
+                            when (decision) {
+                                is AutocorrectDecision.Pause -> {
+                                    inputState.spellConfirmationState = SpellConfirmationState.AWAITING_CONFIRMATION
+                                    inputState.pendingWordForLearning = inputState.displayBuffer
+                                    outputBridge.highlightCurrentWord()
+                                    val suggestions = textInputProcessor.getSuggestions(inputState.displayBuffer)
+                                    val displaySuggestions =
+                                        suggestionPipeline.storeAndCapitalizeSuggestions(
+                                            suggestions,
+                                            inputState.isCurrentWordAtSentenceStart
+                                        )
+                                    inputState.pendingSuggestions = displaySuggestions
+                                    if (displaySuggestions.isNotEmpty()) {
+                                        candidateBarController.updateSuggestions(displaySuggestions)
+                                    } else {
+                                        candidateBarController.clearSuggestions()
+                                    }
+                                    return@launch
                                 }
-                                return@launch
+
+                                else -> { /* fall through to commit char */ }
                             }
                         }
                     }
@@ -1474,7 +1560,14 @@ class UrikInputMethodService :
 
                 outputBridge.beginBatchEdit()
                 try {
-                    outputBridge.autoCapitalizePronounI { languageManager.currentLanguage.value }
+                    val pronounLang = languageManager.currentLanguage.value.split("-").first()
+                    if (pronounLang == "en" && inputState.displayBuffer.isNotEmpty()) {
+                        val corrected = EnglishPronounCorrection.capitalize(inputState.displayBuffer.lowercase())
+                        if (corrected != null && corrected != inputState.displayBuffer) {
+                            inputState.onPronounCapitalized(corrected)
+                            outputBridge.setComposingText(corrected, 1)
+                        }
+                    }
                     suggestionPipeline.coordinateWordCompletion()
                     suggestionPipeline.showBigramPredictions()
                     outputBridge.commitText(char, 1)
@@ -1490,7 +1583,13 @@ class UrikInputMethodService :
                 } finally {
                     outputBridge.endBatchEdit()
                 }
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                ErrorLogger.logException(
+                    component = "UrikInputMethodService",
+                    severity = ErrorLogger.Severity.HIGH,
+                    exception = e,
+                    context = mapOf("operation" to "handleNonLetterInput")
+                )
             }
         }
     }
@@ -1514,7 +1613,14 @@ class UrikInputMethodService :
             if (inputState.displayBuffer.isNotEmpty()) {
                 outputBridge.beginBatchEdit()
                 try {
-                    outputBridge.autoCapitalizePronounI { languageManager.currentLanguage.value }
+                    val pronounLang = languageManager.currentLanguage.value.split("-").first()
+                    if (pronounLang == "en" && inputState.displayBuffer.isNotEmpty()) {
+                        val corrected = EnglishPronounCorrection.capitalize(inputState.displayBuffer.lowercase())
+                        if (corrected != null && corrected != inputState.displayBuffer) {
+                            inputState.onPronounCapitalized(corrected)
+                            outputBridge.setComposingText(corrected, 1)
+                        }
+                    }
                     swipeDetector.updateLastCommittedWord(inputState.displayBuffer)
                     outputBridge.commitText("${inputState.displayBuffer} ", 1)
 
@@ -1552,6 +1658,7 @@ class UrikInputMethodService :
             }
 
             serviceScope.launch {
+                val swipeScriptCode = textInputProcessor.currentScriptCode
                 try {
                     val currentLanguage =
                         languageManager.currentLanguage.value
@@ -1607,12 +1714,18 @@ class UrikInputMethodService :
                                         normalizedBuffer = validatedWord.lowercase(),
                                         isFromSwipe = true,
                                         graphemeCount = displayWord.length,
-                                        scriptCode = UScript.LATIN
+                                        scriptCode = swipeScriptCode
                                     )
                             }
                         }
                     }
-                } catch (_: Exception) {
+                } catch (e: Exception) {
+                    ErrorLogger.logException(
+                        component = "UrikInputMethodService",
+                        severity = ErrorLogger.Severity.HIGH,
+                        exception = e,
+                        context = mapOf("operation" to "handleSwipeWord_commitWord")
+                    )
                     withContext(Dispatchers.Main) {
                         val fallbackSuggestion =
                             com.urik.keyboard.service.SpellingSuggestion(
@@ -1638,12 +1751,18 @@ class UrikInputMethodService :
                                 normalizedBuffer = validatedWord.lowercase(),
                                 isFromSwipe = true,
                                 graphemeCount = fallbackDisplay.length,
-                                scriptCode = UScript.LATIN
+                                scriptCode = swipeScriptCode
                             )
                     }
                 }
             }
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            ErrorLogger.logException(
+                component = "UrikInputMethodService",
+                severity = ErrorLogger.Severity.HIGH,
+                exception = e,
+                context = mapOf("operation" to "handleSwipeWord")
+            )
             outputBridge.setComposingText(validatedWord, 1)
         }
     }
@@ -1679,7 +1798,8 @@ class UrikInputMethodService :
         return caseTransformer.applyCasing(suggestion, keyboardState, isSentenceStart)
     }
 
-    private fun getEnglishPronounIForm(normalizedWord: String): String? = EnglishPronounI.capitalize(normalizedWord)
+    private fun getEnglishPronounIForm(normalizedWord: String): String? =
+        EnglishPronounCorrection.capitalize(normalizedWord)
 
     private fun handleSuggestionSelected(suggestion: String) {
         serviceScope.launch {
@@ -1702,7 +1822,8 @@ class UrikInputMethodService :
                 val rawSource = inputState.currentRawSuggestions
                     .firstOrNull { it.word.equals(suggestion, ignoreCase = true) }?.source
                 if (rawSource == "learned" || rawSource == "dictionary") {
-                    kanaKanjiConverter.incrementUserFrequency(reading = reading, surface = suggestion)
+                    scriptConverterRegistry.forLanguage(languageManager.currentLanguage.value)
+                        ?.recordSelection(reading, suggestion)
                 }
             }
 
@@ -1719,134 +1840,18 @@ class UrikInputMethodService :
                     val currentSuggestions = inputState.pendingSuggestions.filter { it != suggestion }
                     inputState.pendingSuggestions = currentSuggestions
                     if (currentSuggestions.isNotEmpty()) {
-                        swipeKeyboardView?.updateSuggestions(currentSuggestions)
+                        candidateBarController.updateSuggestions(currentSuggestions)
                     } else {
-                        swipeKeyboardView?.clearSuggestions()
+                        candidateBarController.clearSuggestions()
                     }
                 }
-            } catch (_: Exception) {
-            }
-        }
-    }
-
-    private fun handleActionKey(key: KeyboardKey.Action) {
-        when (key.action) {
-            KeyboardKey.ActionType.BACKSPACE -> {
-                handleBackspace()
-            }
-
-            KeyboardKey.ActionType.SPACE -> {
-                handleSpace()
-            }
-
-            KeyboardKey.ActionType.ENTER,
-            KeyboardKey.ActionType.SEARCH,
-            KeyboardKey.ActionType.SEND,
-            KeyboardKey.ActionType.DONE,
-            KeyboardKey.ActionType.GO,
-            KeyboardKey.ActionType.NEXT,
-            KeyboardKey.ActionType.PREVIOUS
-            -> {
-                serviceScope.launch {
-                    performInputAction(
-                        when (key.action) {
-                            KeyboardKey.ActionType.SEARCH -> EditorInfo.IME_ACTION_SEARCH
-                            KeyboardKey.ActionType.SEND -> EditorInfo.IME_ACTION_SEND
-                            KeyboardKey.ActionType.DONE -> EditorInfo.IME_ACTION_DONE
-                            KeyboardKey.ActionType.GO -> EditorInfo.IME_ACTION_GO
-                            KeyboardKey.ActionType.NEXT -> EditorInfo.IME_ACTION_NEXT
-                            KeyboardKey.ActionType.PREVIOUS -> EditorInfo.IME_ACTION_PREVIOUS
-                            else -> EditorInfo.IME_ACTION_NONE
-                        }
-                    )
-                }
-            }
-
-            KeyboardKey.ActionType.MODE_SWITCH_LETTERS -> {
-                viewModel.onEvent(KeyboardEvent.ModeChanged(KeyboardMode.LETTERS))
-            }
-
-            KeyboardKey.ActionType.MODE_SWITCH_NUMBERS -> {
-                viewModel.onEvent(KeyboardEvent.ModeChanged(KeyboardMode.NUMBERS))
-            }
-
-            KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS -> {
-                viewModel.onEvent(KeyboardEvent.ModeChanged(KeyboardMode.SYMBOLS))
-            }
-
-            KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS_SECONDARY -> {
-                viewModel.onEvent(KeyboardEvent.ModeChanged(KeyboardMode.SYMBOLS_SECONDARY))
-            }
-
-            KeyboardKey.ActionType.SHIFT -> {
-                val currentTime = System.currentTimeMillis()
-                val timeSinceLastShift = currentTime - inputState.lastShiftTime
-                val currentState = viewModel.state.value
-
-                when {
-                    timeSinceLastShift <= doubleShiftThreshold -> {
-                        when {
-                            currentState.isShiftPressed && !currentState.isCapsLockOn -> {
-                                viewModel.onEvent(KeyboardEvent.CapsLockToggled)
-                                viewModel.onEvent(KeyboardEvent.ShiftStateChanged(false))
-                            }
-
-                            else -> {
-                                viewModel.onEvent(KeyboardEvent.CapsLockToggled)
-                                viewModel.onEvent(KeyboardEvent.ShiftStateChanged(false))
-                            }
-                        }
-                        inputState.lastShiftTime = 0
-                    }
-
-                    else -> {
-                        when {
-                            currentState.isCapsLockOn -> {
-                                viewModel.onEvent(KeyboardEvent.CapsLockToggled)
-                            }
-
-                            !currentState.isShiftPressed -> {
-                                viewModel.onEvent(KeyboardEvent.ShiftStateChanged(true))
-                            }
-
-                            currentState.isShiftPressed -> {
-                                viewModel.onEvent(KeyboardEvent.ShiftStateChanged(false))
-                            }
-                        }
-                        inputState.lastShiftTime = currentTime
-                    }
-                }
-            }
-
-            KeyboardKey.ActionType.CAPS_LOCK -> {
-                viewModel.onEvent(KeyboardEvent.CapsLockToggled)
-            }
-
-            KeyboardKey.ActionType.LANGUAGE_SWITCH -> {
-            }
-
-            KeyboardKey.ActionType.DAKUTEN -> {
-                val ic = currentInputConnection ?: return
-                val before = ic.getTextBeforeCursor(1, 0)?.toString() ?: return
-                val transformed = KanaTransformUtils.cycleDakutenOnLast(before)
-                if (transformed != before) {
-                    ic.beginBatchEdit()
-                    ic.deleteSurroundingText(1, 0)
-                    ic.commitText(transformed, 1)
-                    ic.endBatchEdit()
-                }
-            }
-
-            KeyboardKey.ActionType.SMALL_KANA -> {
-                val ic = currentInputConnection ?: return
-                val before = ic.getTextBeforeCursor(1, 0)?.toString() ?: return
-                val transformed = KanaTransformUtils.toggleSmallKanaOnLast(before)
-                if (transformed != before) {
-                    ic.beginBatchEdit()
-                    ic.deleteSurroundingText(1, 0)
-                    ic.commitText(transformed, 1)
-                    ic.endBatchEdit()
-                }
+            } catch (e: Exception) {
+                ErrorLogger.logException(
+                    component = "UrikInputMethodService",
+                    severity = ErrorLogger.Severity.LOW,
+                    exception = e,
+                    context = mapOf("operation" to "handleSuggestionRemoval")
+                )
             }
         }
     }
@@ -1896,7 +1901,13 @@ class UrikInputMethodService :
                 val textBefore = outputBridge.safeGetTextBeforeCursor(50)
                 checkAutoCapitalization(textBefore)
             }
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            ErrorLogger.logException(
+                component = "UrikInputMethodService",
+                severity = ErrorLogger.Severity.HIGH,
+                exception = e,
+                context = mapOf("operation" to "performInputAction")
+            )
             coordinateStateClear()
         }
     }
@@ -1977,7 +1988,7 @@ class UrikInputMethodService :
 
             if (inputState.postCommitReplacementState != null) {
                 inputState.postCommitReplacementState = null
-                swipeKeyboardView?.clearSuggestions()
+                candidateBarController.clearSuggestions()
             }
 
             if (inputState.displayBuffer.isNotEmpty() && inputState.composingRegionStart != -1) {
@@ -2097,8 +2108,7 @@ class UrikInputMethodService :
                         if (!inputState.isAcceleratedDeletion && !inputState.isUrlOrEmailField) {
                             suggestionPipeline.requestSuggestions(
                                 buffer = inputState.displayBuffer,
-                                inputMethod = InputMethod.TYPED,
-                                isCharacterInput = false
+                                inputMethod = InputMethod.TYPED
                             )
                         }
                     } else {
@@ -2109,14 +2119,26 @@ class UrikInputMethodService :
             } else {
                 handleCommittedTextBackspace()
             }
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            ErrorLogger.logException(
+                component = "UrikInputMethodService",
+                severity = ErrorLogger.Severity.HIGH,
+                exception = e,
+                context = mapOf("operation" to "handleBackspace")
+            )
             try {
                 val textBefore = outputBridge.safeGetTextBeforeCursor(50)
                 if (textBefore.isNotEmpty()) {
                     val graphemeLength = BackspaceUtils.getLastGraphemeClusterLength(textBefore)
                     outputBridge.deleteSurroundingText(graphemeLength, 0)
                 }
-            } catch (_: Exception) {
+            } catch (e2: Exception) {
+                ErrorLogger.logException(
+                    component = "UrikInputMethodService",
+                    severity = ErrorLogger.Severity.HIGH,
+                    exception = e2,
+                    context = mapOf("operation" to "handleBackspace_fallback")
+                )
             }
             coordinateStateClear()
         }
@@ -2214,13 +2236,12 @@ class UrikInputMethodService :
                                 outputBridge.setComposingText(autocorrection.originalTypedWord, 1)
                                 inputState.displayBuffer = autocorrection.originalTypedWord
                                 inputState.pendingSuggestions = emptyList()
-                                swipeKeyboardView?.clearSuggestions()
+                                candidateBarController.clearSuggestions()
                             } else {
                                 inputState.lastAutocorrection = null
                                 suggestionPipeline.requestSuggestions(
                                     buffer = word,
-                                    inputMethod = InputMethod.TYPED,
-                                    isCharacterInput = false
+                                    inputMethod = InputMethod.TYPED
                                 )
                             }
                         } else {
@@ -2231,9 +2252,50 @@ class UrikInputMethodService :
                     outputBridge.endBatchEdit()
                 }
             }
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            ErrorLogger.logException(
+                component = "UrikInputMethodService",
+                severity = ErrorLogger.Severity.HIGH,
+                exception = e,
+                context = mapOf("operation" to "handleLetterInput")
+            )
             coordinateStateClear()
         }
+    }
+
+    private fun applyPronounCorrectionIfNeeded() {
+        val pronounLang = languageManager.currentLanguage.value.split("-").first()
+        if (pronounLang == "en" && inputState.displayBuffer.isNotEmpty()) {
+            val corrected = EnglishPronounCorrection.capitalize(inputState.displayBuffer.lowercase())
+            if (corrected != null && corrected != inputState.displayBuffer) {
+                inputState.onPronounCapitalized(corrected)
+                outputBridge.setComposingText(corrected, 1)
+            }
+        }
+    }
+
+    private fun handleDoubleSpacePeriod(timeSinceLastSpace: Long): Boolean {
+        if (timeSinceLastSpace > doubleTapSpaceThreshold ||
+            inputState.spellConfirmationState != SpellConfirmationState.NORMAL ||
+            !currentSettings.doubleSpacePeriod
+        ) {
+            return false
+        }
+        outputBridge.beginBatchEdit()
+        try {
+            if (inputState.wordState.hasContent && !inputState.requiresDirectCommit) {
+                inputState.clearInternalStateOnly()
+                outputBridge.finishComposingText()
+            }
+            outputBridge.deleteSurroundingText(1, 0)
+            outputBridge.commitText(". ", 1)
+            val textBefore = outputBridge.safeGetTextBeforeCursor(50)
+            checkAutoCapitalization(textBefore)
+        } finally {
+            outputBridge.endBatchEdit()
+        }
+        inputState.lastSpaceTime = 0
+        return true
     }
 
     private fun handleSpace() {
@@ -2259,29 +2321,7 @@ class UrikInputMethodService :
                 val currentTime = System.currentTimeMillis()
                 val timeSinceLastSpace = currentTime - inputState.lastSpaceTime
 
-                if (timeSinceLastSpace <= doubleTapSpaceThreshold &&
-                    inputState.spellConfirmationState == SpellConfirmationState.NORMAL &&
-                    currentSettings.doubleSpacePeriod
-                ) {
-                    outputBridge.beginBatchEdit()
-                    try {
-                        if (inputState.wordState.hasContent && !inputState.requiresDirectCommit) {
-                            inputState.clearInternalStateOnly()
-                            outputBridge.finishComposingText()
-                        }
-                        outputBridge.deleteSurroundingText(1, 0)
-                        outputBridge.commitText(". ", 1)
-
-                        val textBefore =
-                            outputBridge.safeGetTextBeforeCursor(50)
-                        checkAutoCapitalization(textBefore)
-                    } finally {
-                        outputBridge.endBatchEdit()
-                    }
-
-                    inputState.lastSpaceTime = 0
-                    return@launch
-                }
+                if (handleDoubleSpacePeriod(timeSinceLastSpace)) return@launch
 
                 inputState.lastSpaceTime = currentTime
 
@@ -2304,82 +2344,154 @@ class UrikInputMethodService :
 
                     if (!isUrlOrEmail) {
                         suggestionPipeline.cancelDebounceJob()
-                        val isValid = textInputProcessor.validateWord(inputState.displayBuffer)
-                        val bypassForContraction = isValid &&
-                            currentSettings.autocorrectionEnabled &&
-                            inputState.lastAutocorrection == null &&
-                            textInputProcessor.hasDominantContractionForm(inputState.displayBuffer)
-
-                        if (isValid && !bypassForContraction) {
-                            inputState.isActivelyEditing = true
-                            suggestionPipeline.recordWordUsage(inputState.displayBuffer)
-                            outputBridge.beginBatchEdit()
-                            try {
-                                outputBridge.autoCapitalizePronounI { languageManager.currentLanguage.value }
-                                swipeDetector.updateLastCommittedWord(inputState.displayBuffer)
-                                outputBridge.finishComposingText()
-                                outputBridge.commitText(" ", 1)
-                                inputState.clearInternalStateOnly()
-                                suggestionPipeline.showBigramPredictions()
-
-                                val textBefore =
-                                    outputBridge.safeGetTextBeforeCursor(50)
-                                checkAutoCapitalization(textBefore)
-                            } finally {
-                                outputBridge.endBatchEdit()
-                            }
-
-                            return@launch
-                        }
-
-                        val suggestions =
-                            textInputProcessor.getSuggestions(inputState.displayBuffer)
-                        val displaySuggestions =
-                            suggestionPipeline.storeAndCapitalizeSuggestions(
-                                suggestions,
-                                inputState.isCurrentWordAtSentenceStart
-                            )
-
-                        if (currentSettings.pauseOnMisspelledWord && !bypassForContraction) {
-                            inputState.spellConfirmationState = SpellConfirmationState.AWAITING_CONFIRMATION
-                            inputState.pendingWordForLearning = inputState.displayBuffer
-                            outputBridge.highlightCurrentWord()
-                            inputState.pendingSuggestions = displaySuggestions
-                            if (displaySuggestions.isNotEmpty()) {
-                                swipeKeyboardView?.updateSuggestions(displaySuggestions)
-                            } else {
-                                swipeKeyboardView?.clearSuggestions()
-                            }
-                            return@launch
-                        }
-
-                        if (currentSettings.autocorrectionEnabled &&
-                            displaySuggestions.isNotEmpty() &&
-                            inputState.lastAutocorrection == null
-                        ) {
-                            val topSuggestion = displaySuggestions.first()
-                            if (isSafeForAutocorrect(topSuggestion)) {
-                                val originalWord = inputState.displayBuffer
+                        val decision = autoCorrectionEngine.decide(
+                            buffer = inputState.displayBuffer,
+                            spellCheckEnabled = currentSettings.spellCheckEnabled,
+                            autocorrectionEnabled = currentSettings.autocorrectionEnabled,
+                            pauseOnMisspelledWord = currentSettings.pauseOnMisspelledWord,
+                            lastAutocorrection = inputState.lastAutocorrection,
+                            textBeforeCursor = textBeforeForUrlCheck,
+                            nextChar = " "
+                        )
+                        when (decision) {
+                            is AutocorrectDecision.None -> {
                                 inputState.isActivelyEditing = true
-                                suggestionPipeline.recordWordUsage(topSuggestion)
+                                suggestionPipeline.recordWordUsage(inputState.displayBuffer)
                                 outputBridge.beginBatchEdit()
                                 try {
-                                    outputBridge.autoCapitalizePronounI { languageManager.currentLanguage.value }
-                                    outputBridge.commitText("$topSuggestion ", 1)
-                                    swipeDetector.updateLastCommittedWord(topSuggestion)
+                                    applyPronounCorrectionIfNeeded()
+                                    swipeDetector.updateLastCommittedWord(inputState.displayBuffer)
+                                    outputBridge.finishComposingText()
+                                    outputBridge.commitText(" ", 1)
+                                    inputState.clearInternalStateOnly()
+                                    suggestionPipeline.showBigramPredictions()
+
+                                    val textBefore = outputBridge.safeGetTextBeforeCursor(50)
+                                    checkAutoCapitalization(textBefore)
+                                } finally {
+                                    outputBridge.endBatchEdit()
+                                }
+                                return@launch
+                            }
+
+                            is AutocorrectDecision.ContractionBypass -> {
+                                val suggestions = textInputProcessor.getSuggestions(inputState.displayBuffer)
+                                val displaySuggestions =
+                                    suggestionPipeline.storeAndCapitalizeSuggestions(
+                                        suggestions,
+                                        inputState.isCurrentWordAtSentenceStart
+                                    )
+                                val originalWord = inputState.displayBuffer
+                                inputState.isActivelyEditing = true
+                                suggestionPipeline.learnWordAndInvalidateCache(originalWord, InputMethod.TYPED)
+                                outputBridge.beginBatchEdit()
+                                try {
+                                    applyPronounCorrectionIfNeeded()
+                                    swipeDetector.updateLastCommittedWord(originalWord)
+                                    outputBridge.finishComposingText()
+                                    outputBridge.commitText(" ", 1)
+                                    inputState.clearInternalStateOnly()
+
+                                    if (displaySuggestions.isNotEmpty()) {
+                                        inputState.postCommitReplacementState =
+                                            PostCommitReplacementState(
+                                                originalWord = originalWord,
+                                                committedWord = originalWord
+                                            )
+                                        inputState.pendingSuggestions = displaySuggestions
+                                        candidateBarController.updateSuggestions(displaySuggestions)
+                                    } else {
+                                        suggestionPipeline.showBigramPredictions()
+                                    }
+
+                                    val textBefore = outputBridge.safeGetTextBeforeCursor(50)
+                                    checkAutoCapitalization(textBefore)
+                                } finally {
+                                    outputBridge.endBatchEdit()
+                                }
+                                return@launch
+                            }
+
+                            is AutocorrectDecision.Pause -> {
+                                val suggestions = textInputProcessor.getSuggestions(inputState.displayBuffer)
+                                val displaySuggestions =
+                                    suggestionPipeline.storeAndCapitalizeSuggestions(
+                                        suggestions,
+                                        inputState.isCurrentWordAtSentenceStart
+                                    )
+                                inputState.spellConfirmationState = SpellConfirmationState.AWAITING_CONFIRMATION
+                                inputState.pendingWordForLearning = inputState.displayBuffer
+                                outputBridge.highlightCurrentWord()
+                                inputState.pendingSuggestions = displaySuggestions
+                                if (displaySuggestions.isNotEmpty()) {
+                                    candidateBarController.updateSuggestions(displaySuggestions)
+                                } else {
+                                    candidateBarController.clearSuggestions()
+                                }
+                                return@launch
+                            }
+
+                            is AutocorrectDecision.Correct -> {
+                                val originalWord = inputState.displayBuffer
+                                val correctedWord = decision.suggestion
+                                inputState.isActivelyEditing = true
+                                suggestionPipeline.recordWordUsage(correctedWord)
+                                outputBridge.beginBatchEdit()
+                                try {
+                                    applyPronounCorrectionIfNeeded()
+                                    outputBridge.commitText("$correctedWord ", 1)
+                                    swipeDetector.updateLastCommittedWord(correctedWord)
                                     inputState.clearInternalStateOnly()
                                     inputState.postCommitReplacementState =
                                         PostCommitReplacementState(
                                             originalWord = originalWord,
-                                            committedWord = topSuggestion
+                                            committedWord = correctedWord
                                         )
                                     inputState.lastAutocorrection =
                                         LastAutocorrection(
                                             originalTypedWord = originalWord,
-                                            correctedWord = topSuggestion
+                                            correctedWord = correctedWord
                                         )
                                     inputState.pendingSuggestions = listOf(originalWord)
-                                    swipeKeyboardView?.updateSuggestions(inputState.pendingSuggestions)
+                                    candidateBarController.updateSuggestions(inputState.pendingSuggestions)
+
+                                    val textBefore = outputBridge.safeGetTextBeforeCursor(50)
+                                    checkAutoCapitalization(textBefore)
+                                } finally {
+                                    outputBridge.endBatchEdit()
+                                }
+                                return@launch
+                            }
+
+                            is AutocorrectDecision.Suggestions -> {
+                                val suggestions = textInputProcessor.getSuggestions(inputState.displayBuffer)
+                                val displaySuggestions =
+                                    suggestionPipeline.storeAndCapitalizeSuggestions(
+                                        suggestions,
+                                        inputState.isCurrentWordAtSentenceStart
+                                    )
+                                val originalWord = inputState.displayBuffer
+                                inputState.isActivelyEditing = true
+                                suggestionPipeline.learnWordAndInvalidateCache(originalWord, InputMethod.TYPED)
+                                outputBridge.beginBatchEdit()
+                                try {
+                                    applyPronounCorrectionIfNeeded()
+                                    swipeDetector.updateLastCommittedWord(originalWord)
+                                    outputBridge.finishComposingText()
+                                    outputBridge.commitText(" ", 1)
+                                    inputState.clearInternalStateOnly()
+
+                                    if (displaySuggestions.isNotEmpty()) {
+                                        inputState.postCommitReplacementState =
+                                            PostCommitReplacementState(
+                                                originalWord = originalWord,
+                                                committedWord = originalWord
+                                            )
+                                        inputState.pendingSuggestions = displaySuggestions
+                                        candidateBarController.updateSuggestions(displaySuggestions)
+                                    } else {
+                                        suggestionPipeline.showBigramPredictions()
+                                    }
 
                                     val textBefore = outputBridge.safeGetTextBeforeCursor(50)
                                     checkAutoCapitalization(textBefore)
@@ -2389,42 +2501,12 @@ class UrikInputMethodService :
                                 return@launch
                             }
                         }
-
-                        val originalWord = inputState.displayBuffer
-                        inputState.isActivelyEditing = true
-                        suggestionPipeline.learnWordAndInvalidateCache(originalWord, InputMethod.TYPED)
-                        outputBridge.beginBatchEdit()
-                        try {
-                            outputBridge.autoCapitalizePronounI { languageManager.currentLanguage.value }
-                            swipeDetector.updateLastCommittedWord(originalWord)
-                            outputBridge.finishComposingText()
-                            outputBridge.commitText(" ", 1)
-                            inputState.clearInternalStateOnly()
-
-                            if (displaySuggestions.isNotEmpty()) {
-                                inputState.postCommitReplacementState =
-                                    PostCommitReplacementState(
-                                        originalWord = originalWord,
-                                        committedWord = originalWord
-                                    )
-                                inputState.pendingSuggestions = displaySuggestions
-                                swipeKeyboardView?.updateSuggestions(displaySuggestions)
-                            } else {
-                                suggestionPipeline.showBigramPredictions()
-                            }
-
-                            val textBefore = outputBridge.safeGetTextBeforeCursor(50)
-                            checkAutoCapitalization(textBefore)
-                        } finally {
-                            outputBridge.endBatchEdit()
-                        }
-                        return@launch
                     }
                 }
 
                 outputBridge.beginBatchEdit()
                 try {
-                    outputBridge.autoCapitalizePronounI { languageManager.currentLanguage.value }
+                    applyPronounCorrectionIfNeeded()
                     if (inputState.displayBuffer.isNotEmpty()) {
                         swipeDetector.updateLastCommittedWord(
                             inputState.displayBuffer
@@ -2440,7 +2522,13 @@ class UrikInputMethodService :
                 } finally {
                     outputBridge.endBatchEdit()
                 }
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                ErrorLogger.logException(
+                    component = "UrikInputMethodService",
+                    severity = ErrorLogger.Severity.HIGH,
+                    exception = e,
+                    context = mapOf("operation" to "handleSpace")
+                )
                 outputBridge.finishComposingText()
                 outputBridge.commitText(" ", 1)
                 inputState.clearInternalStateOnly()
@@ -2457,7 +2545,13 @@ class UrikInputMethodService :
             val currentSelection = outputBridge.safeGetCursorPosition()
             val newPosition = (currentSelection + distance).coerceAtLeast(0)
             outputBridge.setSelection(newPosition, newPosition)
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            ErrorLogger.logException(
+                component = "UrikInputMethodService",
+                severity = ErrorLogger.Severity.LOW,
+                exception = e,
+                context = mapOf("operation" to "handleSpacebarCursorMove")
+            )
         }
     }
 
@@ -2541,7 +2635,13 @@ class UrikInputMethodService :
 
             outputBridge.deleteSurroundingText(trailingPunctuationCount, 0)
             coordinateStateClear()
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            ErrorLogger.logException(
+                component = "UrikInputMethodService",
+                severity = ErrorLogger.Severity.HIGH,
+                exception = e,
+                context = mapOf("operation" to "handleBackspaceSwipeDelete")
+            )
         }
     }
 
@@ -2556,7 +2656,7 @@ class UrikInputMethodService :
         observerJobs.clear()
 
         suggestionPipeline.cancelDebounceJob()
-        swipeKeyboardView?.hideEmojiPicker()
+        candidateBarController.hideEmojiPicker()
         dismissClipboardPanel()
 
         if (lifecycle.currentState != Lifecycle.State.DESTROYED) {
@@ -2577,7 +2677,13 @@ class UrikInputMethodService :
                         outputBridge.finishComposingText()
                     }
                     coordinateStateClear()
-                } catch (_: Exception) {
+                } catch (e: Exception) {
+                    ErrorLogger.logException(
+                        component = "UrikInputMethodService",
+                        severity = ErrorLogger.Severity.HIGH,
+                        exception = e,
+                        context = mapOf("operation" to "onFinishInputView_commitWord")
+                    )
                     coordinateStateClear()
                 }
             }
@@ -2586,7 +2692,13 @@ class UrikInputMethodService :
         try {
             outputBridge.finishComposingText()
             coordinateStateClear()
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            ErrorLogger.logException(
+                component = "UrikInputMethodService",
+                severity = ErrorLogger.Severity.HIGH,
+                exception = e,
+                context = mapOf("operation" to "onFinishInputView_finishComposing")
+            )
             coordinateStateClear()
         }
 
@@ -2594,9 +2706,7 @@ class UrikInputMethodService :
             viewModel.resetToLetters()
         }
 
-        autofillStateTracker.scheduleClear(serviceScope) {
-            swipeKeyboardView?.forceClearAllSuggestions()
-        }
+        autofillCoordinator.onInputViewFinished()
     }
 
     override fun onStartInput(attribute: EditorInfo?, restarting: Boolean) {
@@ -2606,8 +2716,7 @@ class UrikInputMethodService :
             layoutManager.stopAcceleratedBackspace()
         }
 
-        autofillStateTracker.cancelPendingClear()
-        autofillStateTracker.onFieldChanged(
+        autofillCoordinator.onFieldChanged(
             inputType = attribute?.inputType ?: 0,
             imeOptions = attribute?.imeOptions ?: 0,
             fieldId = attribute?.fieldId ?: 0,
@@ -2621,20 +2730,7 @@ class UrikInputMethodService :
         inputState.lastCommittedWord = ""
         inputState.lastKnownCursorPosition = -1
 
-        inputState.isSecureField = SecureFieldDetector.isSecure(attribute)
-        inputState.isDirectCommitField = SecureFieldDetector.isDirectCommit(attribute)
-        inputState.isRawKeyEventField = SecureFieldDetector.isRawKeyEvent(attribute)
-        inputState.isTerminalField = SecureFieldDetector.isTerminalField(attribute)
-        if (inputState.isTerminalField) {
-            viewModel.disableAutoCapForTerminalField()
-        }
-        inputState.currentInputAction = ActionDetector.detectAction(attribute)
-
-        val inputType = attribute?.inputType ?: 0
-        val variation = inputType and EditorInfo.TYPE_MASK_VARIATION
-        inputState.isUrlOrEmailField = variation == EditorInfo.TYPE_TEXT_VARIATION_URI ||
-            variation == EditorInfo.TYPE_TEXT_VARIATION_EMAIL_ADDRESS ||
-            variation == EditorInfo.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS
+        applyFieldTypeFromEditorInfo(attribute)
 
         if (inputState.isSecureField) {
             clearSecureFieldState()
@@ -2642,6 +2738,20 @@ class UrikInputMethodService :
             val textBefore = outputBridge.safeGetTextBeforeCursor(50)
             checkAutoCapitalization(textBefore)
         }
+    }
+
+    private fun applyFieldTypeFromEditorInfo(info: EditorInfo?) {
+        inputState.isSecureField = SecureFieldDetector.isSecure(info)
+        inputState.isDirectCommitField = SecureFieldDetector.isDirectCommit(info)
+        inputState.isRawKeyEventField = SecureFieldDetector.isRawKeyEvent(info)
+        inputState.isTerminalField = SecureFieldDetector.isTerminalField(info)
+        if (inputState.isTerminalField) viewModel.disableAutoCapForTerminalField()
+        inputState.currentInputAction = ActionDetector.detectAction(info)
+        val inputType = info?.inputType ?: 0
+        val variation = inputType and EditorInfo.TYPE_MASK_VARIATION
+        inputState.isUrlOrEmailField = variation == EditorInfo.TYPE_TEXT_VARIATION_URI ||
+            variation == EditorInfo.TYPE_TEXT_VARIATION_EMAIL_ADDRESS ||
+            variation == EditorInfo.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS
     }
 
     override fun onFinishInput() {
@@ -2652,7 +2762,7 @@ class UrikInputMethodService :
         }
 
         suggestionPipeline.cancelDebounceJob()
-        swipeKeyboardView?.hideEmojiPicker()
+        candidateBarController.hideEmojiPicker()
         dismissClipboardPanel()
 
         if (inputState.displayBuffer.isNotEmpty() && !inputState.requiresDirectCommit) {
@@ -2669,7 +2779,13 @@ class UrikInputMethodService :
                         outputBridge.finishComposingText()
                     }
                     coordinateStateClear()
-                } catch (_: Exception) {
+                } catch (e: Exception) {
+                    ErrorLogger.logException(
+                        component = "UrikInputMethodService",
+                        severity = ErrorLogger.Severity.HIGH,
+                        exception = e,
+                        context = mapOf("operation" to "onFinishInput_commitWord")
+                    )
                     coordinateStateClear()
                 }
             }
@@ -2677,7 +2793,13 @@ class UrikInputMethodService :
 
         try {
             outputBridge.finishComposingText()
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            ErrorLogger.logException(
+                component = "UrikInputMethodService",
+                severity = ErrorLogger.Severity.HIGH,
+                exception = e,
+                context = mapOf("operation" to "onFinishInput_finishComposing")
+            )
         }
 
         coordinateStateClear()
@@ -2704,9 +2826,7 @@ class UrikInputMethodService :
             candidatesEnd
         )
 
-        if (inputState.requiresDirectCommit) {
-            return
-        }
+        if (handleDirectCommitInProgress()) return
 
         val selectionResult =
             inputState.selectionStateTracker.updateSelection(
@@ -2737,33 +2857,14 @@ class UrikInputMethodService :
             }
         }
 
-        if (selectionResult is SelectionChangeResult.AppSelectionExtended) {
-            if (inputState.displayBuffer.isNotEmpty() || inputState.wordState.hasContent) {
-                inputState.clearInternalStateOnly()
-                inputState.isActivelyEditing = false
-            }
-            inputState.lastKnownCursorPosition = newSelStart
-            return
-        }
+        if (handleAppSelectionExtended(selectionResult, newSelStart)) return
 
-        if (inputState.isUrlOrEmailField) return
+        if (handleUrlOrEmailField()) return
 
-        if (selectionResult is SelectionChangeResult.NonSequentialJump) {
-            if (inputState.displayBuffer.isNotEmpty() || inputState.wordState.hasContent) {
-                invalidateComposingStateOnCursorJump()
-            }
-            inputState.lastKnownCursorPosition = newSelStart
-            if (newSelStart == newSelEnd) {
-                outputBridge.attemptRecompositionAtCursor(newSelStart)
-            }
-            return
-        }
+        if (handleNonSequentialJump(selectionResult, newSelStart, newSelEnd)) return
 
         val ousConsumed = inputState.tryConsumeTypingOus(newSelStart, candidatesStart, candidatesEnd)
-        if (ousConsumed) {
-            inputState.lastKnownCursorPosition = newSelStart
-            return
-        }
+        if (handleTypingOusConsumed(ousConsumed, newSelStart)) return
 
         val hasComposingText = candidatesStart != -1 && candidatesEnd != -1
         val cursorInComposingRegion =
@@ -2773,11 +2874,7 @@ class UrikInputMethodService :
                 newSelEnd >= candidatesStart &&
                 newSelEnd <= candidatesEnd
 
-        if (inputState.isActivelyEditing) {
-            inputState.isActivelyEditing = false
-            inputState.lastKnownCursorPosition = newSelStart
-            return
-        }
+        if (handleActivelyEditing(newSelStart)) return
 
         if (selectionResult.requiresStateInvalidation()) {
             if (inputState.displayBuffer.isNotEmpty() && outputBridge.reassertComposingRegion(newSelStart)) {
@@ -2812,6 +2909,55 @@ class UrikInputMethodService :
         }
     }
 
+    @VisibleForTesting
+    internal fun handleDirectCommitInProgress(): Boolean = inputState.requiresDirectCommit
+
+    @VisibleForTesting
+    internal fun handleAppSelectionExtended(selectionResult: SelectionChangeResult, newSelStart: Int): Boolean {
+        if (selectionResult !is SelectionChangeResult.AppSelectionExtended) return false
+        if (inputState.displayBuffer.isNotEmpty() || inputState.wordState.hasContent) {
+            inputState.clearInternalStateOnly()
+            inputState.isActivelyEditing = false
+        }
+        inputState.lastKnownCursorPosition = newSelStart
+        return true
+    }
+
+    @VisibleForTesting
+    internal fun handleUrlOrEmailField(): Boolean = inputState.isUrlOrEmailField
+
+    @VisibleForTesting
+    internal fun handleNonSequentialJump(
+        selectionResult: SelectionChangeResult,
+        newSelStart: Int,
+        newSelEnd: Int
+    ): Boolean {
+        if (selectionResult !is SelectionChangeResult.NonSequentialJump) return false
+        if (inputState.displayBuffer.isNotEmpty() || inputState.wordState.hasContent) {
+            invalidateComposingStateOnCursorJump()
+        }
+        inputState.lastKnownCursorPosition = newSelStart
+        if (newSelStart == newSelEnd) {
+            outputBridge.attemptRecompositionAtCursor(newSelStart)
+        }
+        return true
+    }
+
+    @VisibleForTesting
+    internal fun handleTypingOusConsumed(ousConsumed: Boolean, newSelStart: Int): Boolean {
+        if (!ousConsumed) return false
+        inputState.lastKnownCursorPosition = newSelStart
+        return true
+    }
+
+    @VisibleForTesting
+    internal fun handleActivelyEditing(newSelStart: Int): Boolean {
+        if (!inputState.isActivelyEditing) return false
+        inputState.isActivelyEditing = false
+        inputState.lastKnownCursorPosition = newSelStart
+        return true
+    }
+
     override fun onConfigurationChanged(newConfig: android.content.res.Configuration) {
         super.onConfigurationChanged(newConfig)
         streamingScoringEngine.cancelActiveGesture()
@@ -2822,7 +2968,6 @@ class UrikInputMethodService :
             layoutManager.onDensityChanged()
             swipeDetector.updateDisplayMetrics(currentDensity)
             swipeKeyboardView?.let { view ->
-                view.updateDensity()
                 if (view.currentLayout != null && view.currentState != null) {
                     view.updateKeyboard(view.currentLayout!!, view.currentState!!)
                 }
@@ -2919,27 +3064,7 @@ class UrikInputMethodService :
     @Suppress("NewApi")
     override fun onInlineSuggestionsResponse(response: InlineSuggestionsResponse): Boolean {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) return false
-
-        val suggestions = response.inlineSuggestions
-
-        if (suggestions.isEmpty()) {
-            serviceScope.launch(Dispatchers.Main) {
-                swipeKeyboardView?.forceClearAllSuggestions()
-            }
-            return false
-        }
-
-        if (autofillStateTracker.isDismissed()) {
-            return true
-        }
-
-        if (swipeKeyboardView == null) {
-            autofillStateTracker.bufferResponse(response)
-            return true
-        }
-
-        inflateAndDisplaySuggestions(suggestions)
-        return true
+        return autofillCoordinator.onInlineSuggestionsResponse(response, swipeKeyboardView != null)
     }
 
     @Suppress("NewApi")
@@ -2954,7 +3079,7 @@ class UrikInputMethodService :
                 if (view != null) views.add(view)
             }
             if (views.isNotEmpty()) {
-                swipeKeyboardView?.updateInlineAutofillSuggestions(views, true)
+                candidateBarController.updateInlineAutofillSuggestions(views, true)
             }
         }
     }
@@ -2968,18 +3093,22 @@ class UrikInputMethodService :
                 }
             }
         }
-    } catch (_: Exception) {
+    } catch (e: Exception) {
+        ErrorLogger.logException(
+            component = "UrikInputMethodService",
+            severity = ErrorLogger.Severity.LOW,
+            exception = e,
+            context = mapOf("operation" to "inflateSuggestionView")
+        )
         null
     }
 
     override fun onDestroy() {
         streamingScoringEngine.cancelActiveGesture()
         wordFrequencyRepository.clearCache()
-        autofillStateTracker.cleanup()
+        autofillCoordinator.cleanup()
 
         serviceJob.cancel()
-        serviceJob = SupervisorJob()
-        serviceScope = CoroutineScope(Dispatchers.Main + serviceJob)
 
         observerJobs.forEach { it.cancel() }
         observerJobs.clear()
@@ -3002,8 +3131,6 @@ class UrikInputMethodService :
         lifecycleRegistry.currentState = Lifecycle.State.DESTROYED
         super.onDestroy()
     }
-
-    private fun isSafeForAutocorrect(word: String): Boolean = word.all { it.isLetter() || it == '\'' || it == '-' }
 
     private companion object {
         const val DOUBLE_TAP_SPACE_THRESHOLD_MS = 250L

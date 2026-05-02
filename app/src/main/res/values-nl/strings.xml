@@ -173,6 +173,8 @@
     <string name="alternative_layout_default">Standaard (Taalindeling)</string>
 
     <!-- Privacy & Data Settings -->
+    <string name="privacy_settings_storage_encryption_title">Woordopslag: Niet versleuteld</string>
+    <string name="privacy_settings_storage_encryption_summary">Geen apparaatvergrendeling gedetecteerd. Geleerde woorden worden opgeslagen als platte tekst. Stel een pincode, patroon of biometrische vergrendeling in via de Android-instellingen om versleuteling in te schakelen.</string>
     <string name="privacy_settings_clipboard_history">Klembordgeschiedenis</string>
     <string name="privacy_settings_clipboard_history_on">Klembordgeschiedenis ingeschakeld</string>
     <string name="privacy_settings_clipboard_history_off">Klembordgeschiedenis uitgeschakeld</string>

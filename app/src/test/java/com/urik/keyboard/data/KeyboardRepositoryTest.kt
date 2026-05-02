@@ -3,12 +3,12 @@
 package com.urik.keyboard.data
 
 import android.content.Context
-import com.ibm.icu.util.ULocale
 import com.urik.keyboard.model.KeyboardKey
 import com.urik.keyboard.model.KeyboardMode
 import com.urik.keyboard.settings.KeyboardSettings
 import com.urik.keyboard.settings.SettingsRepository
 import com.urik.keyboard.utils.CacheMemoryManager
+import java.util.Locale
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -59,7 +59,7 @@ class KeyboardRepositoryTest {
     }
 
     private suspend fun loadLetters(lang: String) =
-        repository.getLayoutForMode(KeyboardMode.LETTERS, ULocale.forLanguageTag(lang))
+        repository.getLayoutForMode(KeyboardMode.LETTERS, Locale.forLanguageTag(lang))
 
     private fun letterKeys(result: Result<com.urik.keyboard.model.KeyboardLayout>) = result.getOrNull()!!.rows.flatten()
         .filterIsInstance<KeyboardKey.Character>()

@@ -36,6 +36,7 @@ import com.urik.keyboard.service.SpellCheckManager
 import com.urik.keyboard.service.WordLearningEngine
 import com.urik.keyboard.settings.CursorSpeed
 import com.urik.keyboard.theme.ThemeManager
+import com.urik.keyboard.utils.ErrorLogger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -82,12 +83,13 @@ constructor(
     private var onBackspacePressed: (() -> Unit)? = null
     private var onSpacebarCursorMove: ((Int) -> Unit)? = null
     private var onBackspaceSwipeDelete: (() -> Unit)? = null
-    private val keyViews = mutableListOf<Button>()
-    private val keyPositions = mutableMapOf<Button, Rect>()
-    private val keyMapping = mutableMapOf<Button, KeyboardKey>()
-    private val keyCharacterPositions = mutableMapOf<KeyboardKey.Character, PointF>()
-    private var numberRowBoundaryY: Float = -1f
-    private val numberRowButtons = mutableSetOf<Button>()
+    private val layoutEngine = KeyboardLayoutEngine(
+        touchCoordinateTransformer = touchCoordinateTransformer,
+        onPositionsUpdated = { keyCharPositions, charToPosition ->
+            swipeDetector?.updateKeyPositions(keyCharPositions)
+            languageManager?.updateKeyPositions(charToPosition)
+        }
+    )
 
     private var popupActive = false
 
@@ -107,17 +109,18 @@ constructor(
     private val touchStartPoint = PointF()
     private var touchStartTime = 0L
 
-    private var isGestureActive = false
-    private var gestureKey: KeyboardKey.Action? = null
-    private var gestureStartX = 0f
-    private var gestureStartY = 0f
-    private var gestureLastProcessedX = 0f
-    private var gestureDensity = 1f
     private var adaptiveDimensions: AdaptiveDimensions? = null
-    private var gesturePrevX = 0f
-    private var gesturePrevTime = 0L
-    private var currentCursorSpeed: CursorSpeed =
-        CursorSpeed.MEDIUM
+    private var currentCursorSpeed: CursorSpeed = CursorSpeed.MEDIUM
+    private val gestureHandler = ActionKeyGestureHandler(
+        onSpacebarCursorMove = { delta -> onSpacebarCursorMove?.invoke(delta) },
+        onBackspaceSwipeDelete = {
+            keyboardLayoutManager?.triggerBackspaceHaptic()
+            onBackspaceSwipeDelete?.invoke()
+        },
+        getAdaptiveDimensions = { adaptiveDimensions },
+        getDensity = { resources.displayMetrics.density },
+        getCurrentCursorSpeed = { currentCursorSpeed }
+    )
 
     private var confirmationOverlay: FrameLayout? = null
     private var pendingRemovalSuggestion: String? = null
@@ -157,6 +160,7 @@ constructor(
     private var cachedCursorColor: Int = 0
 
     private var isDestroyed = false
+    private var isInitialized = false
 
     private var lastMappedWidth = 0
     private var lastMappedHeight = 0
@@ -289,7 +293,6 @@ constructor(
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
-        updateDensity()
     }
 
     private fun setupSwipeOverlay() {
@@ -810,6 +813,11 @@ constructor(
 
         detector.setSwipeListener(this)
         setupSwipeOverlay()
+        isInitialized = true
+    }
+
+    private fun requireInitialized() {
+        check(isInitialized) { "SwipeKeyboardView.initialize() must be called before use" }
     }
 
     fun setOnKeyClickListener(listener: (KeyboardKey) -> Unit) {
@@ -913,10 +921,6 @@ constructor(
         }
     }
 
-    fun updateDensity() {
-        gestureDensity = resources.displayMetrics.density
-    }
-
     private fun insertSuggestionBar() {
         if (isDestroyed) return
 
@@ -948,6 +952,7 @@ constructor(
      *
      */
     fun updateSuggestions(suggestions: List<String>) {
+        requireInitialized()
         if (isDestroyed) return
         updateSuggestionBarContent(suggestions)
     }
@@ -1457,6 +1462,7 @@ constructor(
      * Remaps key positions for swipe detection.
      */
     fun updateKeyboard(layout: KeyboardLayout, state: KeyboardState) {
+        requireInitialized()
         if (isDestroyed) return
 
         this.currentLayout = layout
@@ -1515,7 +1521,7 @@ constructor(
                 )
             )
 
-            extractButtonViews(keyboardView)
+            layoutEngine.buildFromViewGroup(keyboardView, currentLayout!!)
 
             suggestionBar =
                 LinearLayout(context).apply {
@@ -1593,45 +1599,6 @@ constructor(
         }
     }
 
-    private fun extractButtonViews(viewGroup: ViewGroup) {
-        if (isDestroyed) return
-
-        for (i in 0 until viewGroup.childCount) {
-            when (val child = viewGroup.getChildAt(i)) {
-                is Button -> {
-                    keyViews.add(child)
-                    mapButtonToKey(child)
-                }
-
-                is ViewGroup -> {
-                    extractButtonViews(child)
-                }
-            }
-        }
-    }
-
-    private fun mapButtonToKey(button: Button) {
-        if (isDestroyed) return
-
-        val layout = currentLayout ?: return
-
-        val buttonIndex = keyViews.indexOf(button)
-        if (buttonIndex == -1) return
-
-        var currentIndex = 0
-        layout.rows.forEach { row ->
-            row.forEach { key ->
-                if (key is KeyboardKey.Spacer) return@forEach
-
-                if (currentIndex == buttonIndex) {
-                    keyMapping[button] = key
-                    return
-                }
-                currentIndex++
-            }
-        }
-    }
-
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
         if (w > 0 && h > 0 && (w != lastMappedWidth || h != lastMappedHeight)) {
@@ -1652,197 +1619,22 @@ constructor(
     }
 
     private fun mapKeyPositions() {
-        if (isDestroyed || keyViews.isEmpty()) return
+        if (isDestroyed || layoutEngine.keyViews.isEmpty()) return
 
-        keyViews.forEach { button ->
+        val rawPositions = mutableMapOf<android.widget.Button, Rect>()
+        layoutEngine.keyViews.forEach { button ->
             if (isDestroyed) return@forEach
-
             button.getLocationInWindow(cachedLocationArray)
             this.getLocationInWindow(cachedParentLocationArray)
-
             val localX = cachedLocationArray[0] - cachedParentLocationArray[0]
             val localY = cachedLocationArray[1] - cachedParentLocationArray[1]
-
-            val localRect =
-                Rect(
-                    localX,
-                    localY,
-                    localX + button.width,
-                    localY + button.height
-                )
-
-            keyPositions[button] = localRect
-
-            val key = keyMapping[button]
-            if (key is KeyboardKey.Character) {
-                val centerX = localRect.centerX().toFloat()
-                val centerY = localRect.centerY().toFloat()
-                keyCharacterPositions[key] = PointF(centerX, centerY)
-            }
+            rawPositions[button] = Rect(localX, localY, localX + button.width, localY + button.height)
         }
-
-        computeNumberRowBoundary()
-        expandEdgeKeyHitAreas()
-
-        swipeDetector?.updateKeyPositions(keyCharacterPositions)
-
-        val charToPosition = mutableMapOf<Char, PointF>()
-        keyCharacterPositions.forEach { (key, pos) ->
-            if (key.value.isNotEmpty()) {
-                charToPosition[key.value.first()] = pos
-            }
-        }
-        languageManager?.updateKeyPositions(charToPosition)
-    }
-
-    private fun computeNumberRowBoundary() {
-        numberRowButtons.clear()
-        numberRowBoundaryY = -1f
-        val layout = currentLayout ?: return
-        if (layout.rows.size <= 1) return
-
-        val firstRow = layout.rows[0]
-        val charKeys = firstRow.filterIsInstance<KeyboardKey.Character>()
-        if (charKeys.size != 10 || !charKeys.all { it.type == KeyboardKey.KeyType.NUMBER }) return
-
-        var maxBottom = 0f
-        keyMapping.forEach { (button, key) ->
-            if (key is KeyboardKey.Character && key.type == KeyboardKey.KeyType.NUMBER) {
-                numberRowButtons.add(button)
-                val rect = keyPositions[button]
-                if (rect != null) {
-                    maxBottom = maxOf(maxBottom, rect.bottom.toFloat())
-                }
-            }
-        }
-        if (maxBottom > 0f) {
-            numberRowBoundaryY = maxBottom
-        }
-    }
-
-    private fun expandEdgeKeyHitAreas() {
-        if (isDestroyed || keyViews.isEmpty()) return
-
-        val layout = currentLayout ?: return
-        val viewWidth = width
-        val viewHeight = height
-
-        if (viewWidth <= 0 || viewHeight <= 0) return
-
-        val minTouchTargetPx = (48 * resources.displayMetrics.density).toInt()
-        val hasTopNumberRow = numberRowBoundaryY > 0
-
-        layout.rows.forEachIndexed { rowIndex, row ->
-            row.forEachIndexed { colIndex, key ->
-                val button = keyViews.getOrNull(getButtonIndexForKey(rowIndex, colIndex)) ?: return@forEachIndexed
-                val rect = keyPositions[button] ?: return@forEachIndexed
-
-                val isBottomRow = rowIndex == layout.rows.size - 1
-                val isFirstCol = colIndex == 0
-                val isLastCol = colIndex == row.size - 1
-                val isAlphaRowBelowNumberRow = hasTopNumberRow && rowIndex == 1
-
-                if (!isBottomRow && !isFirstCol && !isLastCol && !isAlphaRowBelowNumberRow) return@forEachIndexed
-
-                val expandedRect = Rect(rect)
-
-                if (isBottomRow) {
-                    expandedRect.bottom = viewHeight
-                }
-                if (isAlphaRowBelowNumberRow) {
-                    expandedRect.top = numberRowBoundaryY.toInt()
-                }
-                if (isFirstCol) {
-                    val maxExpansion = rect.left.coerceAtMost(minTouchTargetPx / 2)
-                    expandedRect.left = (rect.left - maxExpansion).coerceAtLeast(0)
-                }
-                if (isLastCol) {
-                    val remainingSpace = viewWidth - rect.right
-                    val maxExpansion = remainingSpace.coerceAtMost(minTouchTargetPx / 2)
-                    expandedRect.right = (rect.right + maxExpansion).coerceAtMost(viewWidth)
-                }
-
-                keyPositions[button] = expandedRect
-            }
-        }
-    }
-
-    private fun getButtonIndexForKey(rowIndex: Int, colIndex: Int): Int {
-        val layout = currentLayout ?: return -1
-        var index = 0
-
-        for (r in 0 until rowIndex) {
-            index += layout.rows[r].count { it !is KeyboardKey.Spacer }
-        }
-        index += layout.rows[rowIndex].take(colIndex).count { it !is KeyboardKey.Spacer }
-
-        return index
-    }
-
-    @Suppress("UnusedParameter")
-    private fun processGestureMovement(x: Float, y: Float) {
-        if (isDestroyed) return
-
-        val key = gestureKey ?: return
-
-        when (key.action) {
-            KeyboardKey.ActionType.SPACE -> {
-                val now = System.currentTimeMillis()
-                val dt = (now - gesturePrevTime).coerceAtLeast(1)
-                val velocityPxPerMs = kotlin.math.abs(x - gesturePrevX) / dt.toFloat()
-                gesturePrevX = x
-                gesturePrevTime = now
-
-                val velocityDpPerMs = velocityPxPerMs / gestureDensity
-                val accelerationMultiplier =
-                    when {
-                        velocityDpPerMs > 1.5f -> 3.0f
-                        velocityDpPerMs > 0.8f -> 2.0f
-                        velocityDpPerMs > 0.4f -> 1.4f
-                        else -> 1.0f
-                    }
-
-                val baseSensitivity = currentCursorSpeed.sensitivityDp * gestureDensity
-                val sensitivity = baseSensitivity / accelerationMultiplier
-
-                val totalDx = x - gestureStartX
-                val positionsToMove = (totalDx / sensitivity).toInt()
-                val lastPositionsMoved = ((gestureLastProcessedX - gestureStartX) / sensitivity).toInt()
-                val deltaPositions = positionsToMove - lastPositionsMoved
-
-                if (deltaPositions != 0) {
-                    onSpacebarCursorMove?.invoke(deltaPositions)
-                    gestureLastProcessedX = gestureStartX + positionsToMove * sensitivity
-                }
-            }
-
-            else -> { }
-        }
-    }
-
-    private fun finalizeGesture(x: Float, y: Float, key: KeyboardKey.Action?) {
-        if (isDestroyed || key == null) return
-
-        when (key.action) {
-            KeyboardKey.ActionType.BACKSPACE -> {
-                val dx = x - gestureStartX
-                val dy = y - gestureStartY
-                val absDx = kotlin.math.abs(dx)
-                val absDy = kotlin.math.abs(dy)
-                val minDistance = 30f * gestureDensity
-
-                if (dx < 0 && absDx > absDy && absDx > minDistance) {
-                    keyboardLayoutManager?.triggerBackspaceHaptic()
-                    onBackspaceSwipeDelete?.invoke()
-                }
-            }
-
-            else -> { }
-        }
+        layoutEngine.applyPositions(rawPositions, width, height)
     }
 
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
-        if (!isDestroyed && (isGestureActive || isSwipeActive)) {
+        if (!isDestroyed && (gestureHandler.isActive || isSwipeActive)) {
             return onTouchEvent(ev)
         }
         return super.dispatchTouchEvent(ev)
@@ -1865,36 +1657,19 @@ constructor(
                 hasTouchStart = true
                 touchStartTime = System.currentTimeMillis()
                 isSwipeActive = false
-                isGestureActive = false
-                gestureKey = null
+                gestureHandler.cancel()
 
-                val key = findKeyAt(ev.x, ev.y)
-                if (key is KeyboardKey.Action &&
-                    (key.action == KeyboardKey.ActionType.SPACE || key.action == KeyboardKey.ActionType.BACKSPACE)
-                ) {
-                    gestureKey = key
-                    gestureStartX = ev.x
-                    gestureStartY = ev.y
-                    gestureLastProcessedX = ev.x
-                    gesturePrevX = ev.x
-                    gesturePrevTime = System.currentTimeMillis()
-                }
+                val key = layoutEngine.findKeyAt(ev.x, ev.y)
+                gestureHandler.handleDown(key as? KeyboardKey.Action, ev.x, ev.y)
 
-                swipeDetector?.handleTouchEvent(ev) { x, y -> findKeyAt(x, y) }
+                swipeDetector?.handleTouchEvent(ev) { x, y -> layoutEngine.findKeyAt(x, y) }
                 return false
             }
 
             MotionEvent.ACTION_MOVE -> {
-                if (gestureKey != null && !isGestureActive && !popupActive) {
-                    val dx = ev.x - gestureStartX
-                    val dy = ev.y - gestureStartY
-                    val distance = kotlin.math.sqrt(dx * dx + dy * dy)
-                    val gestureThresholdDp = adaptiveDimensions?.gestureThresholdDp ?: 20f
-                    val gestureThreshold =
-                        gestureThresholdDp * gestureDensity
-
-                    if (distance > gestureThreshold) {
-                        isGestureActive = true
+                if (!gestureHandler.isActive && !popupActive) {
+                    val justActivated = gestureHandler.handleMove(ev.x, ev.y)
+                    if (justActivated) {
                         parent?.requestDisallowInterceptTouchEvent(true)
                         keyboardLayoutManager?.cancelAllPendingCallbacks()
                         keyboardLayoutManager?.dismissVariationPopup()
@@ -1903,8 +1678,8 @@ constructor(
                     }
                 }
 
-                if (isGestureActive) {
-                    processGestureMovement(ev.x, ev.y)
+                if (gestureHandler.isActive) {
+                    gestureHandler.handleMove(ev.x, ev.y)
                     return true
                 }
 
@@ -1912,7 +1687,7 @@ constructor(
                     return false
                 }
 
-                val isSwipe = swipeDetector?.handleTouchEvent(ev) { x, y -> findKeyAt(x, y) } ?: false
+                val isSwipe = swipeDetector?.handleTouchEvent(ev) { x, y -> layoutEngine.findKeyAt(x, y) } ?: false
 
                 if (isSwipe && !isSwipeActive) {
                     isSwipeActive = true
@@ -1923,15 +1698,14 @@ constructor(
             }
 
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                val wasGesture = isGestureActive
+                val wasGesture = gestureHandler.isActive
                 val wasSwipe = isSwipeActive
 
                 if (wasGesture || wasSwipe) {
                     parent?.requestDisallowInterceptTouchEvent(false)
                 }
 
-                isGestureActive = false
-                gestureKey = null
+                gestureHandler.cancel()
                 isSwipeActive = false
                 hasTouchStart = false
                 return wasGesture || wasSwipe
@@ -1943,6 +1717,7 @@ constructor(
 
     @Suppress("ReturnCount")
     override fun onTouchEvent(event: MotionEvent): Boolean {
+        requireInitialized()
         if (isDestroyed) return false
 
         if (isTouchInEmojiPicker(event.x, event.y)) {
@@ -1959,26 +1734,26 @@ constructor(
                 hasTouchStart = true
                 touchStartTime = System.currentTimeMillis()
 
-                val key = findKeyAt(event.x, event.y)
+                val key = layoutEngine.findKeyAt(event.x, event.y)
                 if (key != null) {
-                    swipeDetector?.handleTouchEvent(event) { x, y -> findKeyAt(x, y) }
+                    swipeDetector?.handleTouchEvent(event) { x, y -> layoutEngine.findKeyAt(x, y) }
                     return true
                 }
                 return false
             }
 
             MotionEvent.ACTION_MOVE -> {
-                if (isGestureActive) {
-                    processGestureMovement(event.x, event.y)
+                if (gestureHandler.isActive) {
+                    gestureHandler.handleMove(event.x, event.y)
                     return true
                 }
 
                 if (isSwipeActive) {
-                    swipeDetector?.handleTouchEvent(event) { x, y -> findKeyAt(x, y) }
+                    swipeDetector?.handleTouchEvent(event) { x, y -> layoutEngine.findKeyAt(x, y) }
                     return true
                 }
 
-                val isSwipe = swipeDetector?.handleTouchEvent(event) { x, y -> findKeyAt(x, y) } ?: false
+                val isSwipe = swipeDetector?.handleTouchEvent(event) { x, y -> layoutEngine.findKeyAt(x, y) } ?: false
                 if (isSwipe) {
                     isSwipeActive = true
                     return true
@@ -1989,32 +1764,31 @@ constructor(
 
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                 val hadTouchStart = hasTouchStart
-                val wasGesture = isGestureActive
-                val currentGestureKey = gestureKey
+                val wasGesture = gestureHandler.isActive
 
                 if (wasGesture || isSwipeActive) {
                     parent?.requestDisallowInterceptTouchEvent(false)
                 }
 
                 hasTouchStart = false
-                isGestureActive = false
-                gestureKey = null
 
                 if (wasGesture) {
-                    finalizeGesture(event.x, event.y, currentGestureKey)
+                    gestureHandler.handleUp(event.x, event.y)
                     performClick()
                     return true
                 }
 
+                gestureHandler.cancel()
+
                 if (isSwipeActive) {
                     isSwipeActive = false
-                    swipeDetector?.handleTouchEvent(event) { x, y -> findKeyAt(x, y) }
+                    swipeDetector?.handleTouchEvent(event) { x, y -> layoutEngine.findKeyAt(x, y) }
                     performClick()
                     return true
                 }
 
                 if (hadTouchStart) {
-                    findKeyAt(touchStartPoint.x, touchStartPoint.y)?.let { key ->
+                    layoutEngine.findKeyAt(touchStartPoint.x, touchStartPoint.y)?.let { key ->
                         onTap(key)
                         performClick()
                         return true
@@ -2031,57 +1805,6 @@ constructor(
     override fun performClick(): Boolean {
         super.performClick()
         return true
-    }
-
-    private fun findKeyAt(x: Float, y: Float): KeyboardKey? {
-        if (isDestroyed) return null
-
-        val normalizedPoint = touchCoordinateTransformer.normalizeForHitDetection(x, y)
-        val nx = normalizedPoint.x
-        val ny = normalizedPoint.y
-
-        if (keyPositions.isEmpty() && keyViews.isNotEmpty()) {
-            return findKeyAtDirect(nx, ny)
-        }
-
-        var closestButton: Button? = null
-        var closestSquaredDist = Float.MAX_VALUE
-        val isInAlphaRegion = numberRowBoundaryY > 0 && ny > numberRowBoundaryY
-
-        keyPositions.forEach { (button, rect) ->
-            if (rect.contains(nx.toInt(), ny.toInt())) {
-                return keyMapping[button]
-            }
-            if (isInAlphaRegion && button in numberRowButtons) return@forEach
-            val dx = nx - rect.centerX()
-            val dy = ny - rect.centerY()
-            val squaredDist = dx * dx + dy * dy
-            if (squaredDist < closestSquaredDist) {
-                closestSquaredDist = squaredDist
-                closestButton = button
-            }
-        }
-
-        return if (closestButton != null) keyMapping[closestButton] else null
-    }
-
-    private fun findKeyAtDirect(normalizedX: Float, normalizedY: Float): KeyboardKey? {
-        this.getLocationInWindow(cachedParentLocationArray)
-
-        keyViews.forEach { button ->
-            button.getLocationInWindow(cachedLocationArray)
-
-            val localX = cachedLocationArray[0] - cachedParentLocationArray[0]
-            val localY = cachedLocationArray[1] - cachedParentLocationArray[1]
-
-            cachedKeyRect.set(localX, localY, localX + button.width, localY + button.height)
-
-            if (cachedKeyRect.contains(normalizedX.toInt(), normalizedY.toInt())) {
-                return keyMapping[button]
-            }
-        }
-
-        return null
     }
 
     override fun onSwipeStart(startPoint: PointF) {
@@ -2116,7 +1839,13 @@ constructor(
                             onSwipeWordListener?.invoke(bestCandidate)
                         }
                     }
-                } catch (_: Exception) {
+                } catch (e: Exception) {
+                    ErrorLogger.logException(
+                        component = "SwipeKeyboardView",
+                        severity = ErrorLogger.Severity.HIGH,
+                        exception = e,
+                        context = mapOf("operation" to "onSwipeResults")
+                    )
                     val fallback =
                         candidates
                             .maxByOrNull {
@@ -2140,7 +1869,13 @@ constructor(
         val learnedStatus =
             try {
                 wordLearningEngine?.areWordsLearned(candidateWords) ?: emptyMap()
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                ErrorLogger.logException(
+                    component = "SwipeKeyboardView",
+                    severity = ErrorLogger.Severity.HIGH,
+                    exception = e,
+                    context = mapOf("operation" to "selectBestCandidate")
+                )
                 emptyMap()
             }
 
@@ -2168,12 +1903,7 @@ constructor(
     }
 
     private fun clearCollections() {
-        keyViews.clear()
-        keyPositions.clear()
-        keyMapping.clear()
-        keyCharacterPositions.clear()
-        numberRowButtons.clear()
-        numberRowBoundaryY = -1f
+        layoutEngine.clear()
 
         activeSuggestionViews.clear()
         suggestionViewPool.clear()

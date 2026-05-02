@@ -160,6 +160,8 @@
     <string name="layout_mapper_remove_failed">Αποτυχία αφαίρεσης αντιστοίχισης</string>
     <string name="layout_mapper_clear_failed">Αποτυχία κατάργησης αντιστοιχίσεων</string>
     <!-- Privacy & Data Settings -->
+    <string name="privacy_settings_storage_encryption_title">Αποθήκευση λέξεων: Μη κρυπτογραφημένη</string>
+    <string name="privacy_settings_storage_encryption_summary">Δεν εντοπίστηκε κλείδωμα οθόνης συσκευής. Οι μαθημένες λέξεις αποθηκεύονται σε απλό κείμενο. Ορίστε PIN, μοτίβο ή βιομετρικό κλείδωμα στις ρυθμίσεις Android για να ενεργοποιήσετε την κρυπτογράφηση.</string>
     <string name="privacy_settings_clipboard_history">Ιστορικό προχείρου</string>
     <string name="privacy_settings_clipboard_history_on">Το ιστορικό προχείρου ενεργοποιήθηκε</string>
     <string name="privacy_settings_clipboard_history_off">Το ιστορικό προχείρου απενεργοποιήθηκε</string>

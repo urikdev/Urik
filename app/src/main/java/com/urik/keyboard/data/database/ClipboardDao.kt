@@ -62,4 +62,7 @@ interface ClipboardDao {
     """
     )
     suspend fun enforceMaxItems(maxItems: Int = KeyboardConstants.DatabaseConstants.MAX_CLIPBOARD_ITEMS)
+
+    @Query("DELETE FROM clipboard_items WHERE is_pinned = 0 AND timestamp < :expiryTimestamp")
+    suspend fun deleteExpired(expiryTimestamp: Long)
 }

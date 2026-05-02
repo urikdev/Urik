@@ -159,6 +159,8 @@
     <string name="layout_mapper_clear_failed">Fehler beim Löschen der Zuordnungen</string>
 
     <!-- Privacy & Data Settings -->
+    <string name="privacy_settings_storage_encryption_title">Wortspeicher: Unverschlüsselt</string>
+    <string name="privacy_settings_storage_encryption_summary">Kein Gerätesperrbildschirm erkannt. Erlernte Wörter werden im Klartext gespeichert. Legen Sie eine PIN, ein Muster oder eine biometrische Sperre in den Android-Einstellungen fest, um die Verschlüsselung zu aktivieren.</string>
     <string name="privacy_settings_clipboard_history">Zwischenablage-Verlauf</string>
     <string name="privacy_settings_clipboard_history_on">Zwischenablage-Verlauf aktiviert</string>
     <string name="privacy_settings_clipboard_history_off">Zwischenablage-Verlauf deaktiviert</string>

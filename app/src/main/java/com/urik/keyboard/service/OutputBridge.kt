@@ -11,6 +11,7 @@ import android.view.inputmethod.InputConnection
 import com.urik.keyboard.ui.keyboard.components.SwipeDetector
 import com.urik.keyboard.utils.BackspaceUtils
 import com.urik.keyboard.utils.CursorEditingUtils
+import com.urik.keyboard.utils.ErrorLogger
 
 class OutputBridge(
     private val state: InputStateManager,
@@ -84,7 +85,13 @@ class OutputBridge(
                     ic?.endBatchEdit()
                 }
             }
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            ErrorLogger.logException(
+                component = "OutputBridge",
+                severity = ErrorLogger.Severity.LOW,
+                exception = e,
+                context = mapOf("operation" to "highlightCurrentWord")
+            )
         }
     }
 
@@ -172,22 +179,6 @@ class OutputBridge(
         state.onSwipeCommitted()
     }
 
-    fun autoCapitalizePronounI(languageProvider: () -> String) {
-        try {
-            val currentLanguage = languageProvider().split("-").first()
-            if (currentLanguage != "en") return
-            if (state.displayBuffer.isEmpty()) return
-
-            val capitalizedVersion = EnglishPronounI.capitalize(state.displayBuffer.lowercase())
-
-            if (capitalizedVersion != null && capitalizedVersion != state.displayBuffer) {
-                state.onPronounCapitalized(capitalizedVersion)
-                ic?.setComposingText(capitalizedVersion, 1)
-            }
-        } catch (_: Exception) {
-        }
-    }
-
     fun clearSpellConfirmationState() {
         state.clearSpellConfirmationFields()
 
@@ -197,7 +188,13 @@ class OutputBridge(
             } else {
                 ic?.finishComposingText()
             }
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            ErrorLogger.logException(
+                component = "OutputBridge",
+                severity = ErrorLogger.Severity.LOW,
+                exception = e,
+                context = mapOf("operation" to "clearSpellConfirmationState")
+            )
         }
     }
 
@@ -328,16 +325,5 @@ class OutputBridge(
         const val MAX_CURSOR_POSITION_CHARS = 1000
         const val MAX_COMPOSING_REASSERTIONS = 2
         const val WORD_BOUNDARY_CONTEXT_LENGTH = 64
-    }
-}
-
-object EnglishPronounI {
-    fun capitalize(lowercaseWord: String): String? = when (lowercaseWord) {
-        "i" -> "I"
-        "i'm" -> "I'm"
-        "i'll" -> "I'll"
-        "i've" -> "I've"
-        "i'd" -> "I'd"
-        else -> null
     }
 }

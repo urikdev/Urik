@@ -112,6 +112,8 @@
     <string name="layout_settings_language_switch_key_off">Inaktiverad</string>
     <string name="layout_settings_space_bar_size">Storlek på mellanslagstangenten</string>
     <string name="alternative_layout_default">Standard (Språklayout)</string>
+    <string name="privacy_settings_storage_encryption_title">Ordlagring: Okrypterad</string>
+    <string name="privacy_settings_storage_encryption_summary">Ingen skärmlåsning på enheten hittades. Inlärda ord lagras i klartext. Ange en PIN-kod, ett mönster eller biometrisk låsning i Android-inställningarna för att aktivera kryptering.</string>
     <string name="privacy_settings_clipboard_history">Urklippshistorik</string>
     <string name="privacy_settings_clipboard_history_on">Urklippshistorik aktiverad</string>
     <string name="privacy_settings_clipboard_history_off">Urklippshistorik inaktiverad</string>

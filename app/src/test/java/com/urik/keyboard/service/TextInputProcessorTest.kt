@@ -2,8 +2,8 @@
 
 package com.urik.keyboard.service
 
-import com.ibm.icu.lang.UScript
-import com.ibm.icu.util.ULocale
+import android.icu.lang.UScript
+import android.icu.util.ULocale
 import com.urik.keyboard.settings.KeyboardSettings
 import com.urik.keyboard.settings.SettingsRepository
 import kotlinx.coroutines.Dispatchers
@@ -413,5 +413,21 @@ class TextInputProcessorTest {
         val result = processor.processWordInput("", InputMethod.TYPED)
 
         assertTrue(result is ProcessingResult.Error)
+    }
+
+    @Test
+    fun `currentScriptCode reflects most recent updateScriptContext call`() {
+        processor.updateScriptContext(ULocale.forLanguageTag("ar"), UScript.ARABIC)
+        assertEquals(UScript.ARABIC, processor.currentScriptCode)
+    }
+
+    @Test
+    fun `currentScriptCode defaults to LATIN before any updateScriptContext call`() {
+        val freshProcessor = TextInputProcessor(
+            spellCheckManager = spellCheckManager,
+            settingsRepository = settingsRepository,
+            cacheMemoryManager = cacheMemoryManager
+        )
+        assertEquals(UScript.LATIN, freshProcessor.currentScriptCode)
     }
 }

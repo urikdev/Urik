@@ -1,5 +1,3 @@
-@file:Suppress("ktlint:standard:no-wildcard-imports")
-
 package com.urik.keyboard.ui.keyboard.components
 
 import android.graphics.PointF
@@ -8,6 +6,7 @@ import com.urik.keyboard.data.WordFrequencyRepository
 import com.urik.keyboard.service.SpellCheckManager
 import com.urik.keyboard.service.WordLearningEngine
 import com.urik.keyboard.service.WordNormalizer
+import com.urik.keyboard.utils.ErrorLogger
 import java.util.concurrent.Executors
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -70,14 +69,19 @@ constructor(
 
     @Volatile private var lastKeyPositionsHash = 0
 
+    @VisibleForTesting internal val anchorKeysBuffer = HashSet<Char>(32)
+
+    @VisibleForTesting internal val boundsBuffer = HashSet<Char>(32)
+
+    @VisibleForTesting internal val traversedBuffer = HashSet<Char>(32)
+
     @Volatile var lastCommittedWord: String = ""
 
     @Volatile var currentLanguageTag: String = "en"
 
     private var fullDictionary = ArrayList<SwipeDetector.DictionaryEntry>()
 
-    lateinit var ringBuffer: SwipePointRingBuffer
-        private set
+    @Volatile private var ringBuffer: SwipePointRingBuffer? = null
 
     fun bindRingBuffer(buffer: SwipePointRingBuffer) {
         ringBuffer = buffer
@@ -104,7 +108,13 @@ constructor(
 
                 updateAdaptiveSigmaCache(currentKeyPositions)
                 startTicker()
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                ErrorLogger.logException(
+                    component = "StreamingScoringEngine",
+                    severity = ErrorLogger.Severity.HIGH,
+                    exception = e,
+                    context = mapOf("operation" to "startGesture_initDictionary")
+                )
             }
         }
     }
@@ -129,9 +139,11 @@ constructor(
             }
     }
 
-    private fun onTick() {
-        if (!::ringBuffer.isInitialized) return
-        val path = ringBuffer.snapshot()
+    @VisibleForTesting internal fun onTick() {
+        val buffer = checkNotNull(ringBuffer) {
+            "SwipePointRingBuffer not bound; bindRingBuffer() must be called before startGesture()"
+        }
+        val path = buffer.snapshot()
         if (path.size < 3) return
 
         val currentKeyPositions = keyPositions
@@ -316,8 +328,12 @@ constructor(
         }
     }
 
-    private fun computeStartAnchorKeys(path: List<SwipeDetector.SwipePoint>, positions: Map<Char, PointF>): Set<Char> {
-        if (path.isEmpty()) return emptySet()
+    @VisibleForTesting internal fun computeStartAnchorKeysInternal(
+        path: List<SwipeDetector.SwipePoint>,
+        positions: Map<Char, PointF>
+    ): HashSet<Char> {
+        anchorKeysBuffer.clear()
+        if (path.isEmpty()) return anchorKeysBuffer
 
         val sampleCount = minOf(5, path.size)
         var cx = 0f
@@ -330,19 +346,25 @@ constructor(
         cy /= sampleCount
 
         val thresholdSq = START_ANCHOR_RADIUS * START_ANCHOR_RADIUS
-        val result = mutableSetOf<Char>()
         for ((char, pos) in positions) {
             val dx = pos.x - cx
             val dy = pos.y - cy
             if (dx * dx + dy * dy < thresholdSq) {
-                result.add(char)
+                anchorKeysBuffer.add(char)
             }
         }
-        return result
+        return anchorKeysBuffer
     }
 
-    private fun computeCharsInBounds(path: List<SwipeDetector.SwipePoint>, positions: Map<Char, PointF>): Set<Char> {
-        if (path.isEmpty()) return emptySet()
+    private fun computeStartAnchorKeys(path: List<SwipeDetector.SwipePoint>, positions: Map<Char, PointF>): Set<Char> =
+        computeStartAnchorKeysInternal(path, positions)
+
+    @VisibleForTesting internal fun computeCharsInBoundsInternal(
+        path: List<SwipeDetector.SwipePoint>,
+        positions: Map<Char, PointF>
+    ): HashSet<Char> {
+        boundsBuffer.clear()
+        if (path.isEmpty()) return boundsBuffer
 
         var minX = Float.MAX_VALUE
         var maxX = Float.MIN_VALUE
@@ -360,30 +382,32 @@ constructor(
         minY -= BOUNDS_MARGIN
         maxY += BOUNDS_MARGIN
 
-        val result = mutableSetOf<Char>()
         for ((char, pos) in positions) {
             if (pos.x in minX..maxX && pos.y in minY..maxY) {
-                result.add(char)
+                boundsBuffer.add(char)
             }
         }
-        return result
+        return boundsBuffer
     }
 
+    private fun computeCharsInBounds(path: List<SwipeDetector.SwipePoint>, positions: Map<Char, PointF>): Set<Char> =
+        computeCharsInBoundsInternal(path, positions)
+
     private fun computeTraversedKeys(path: List<SwipeDetector.SwipePoint>, positions: Map<Char, PointF>): Set<Char> {
-        val result = mutableSetOf<Char>()
+        traversedBuffer.clear()
         val traversalRadiusSq = TRAVERSAL_RADIUS * TRAVERSAL_RADIUS
 
         for (point in path) {
             for ((char, pos) in positions) {
-                if (char in result) continue
+                if (char in traversedBuffer) continue
                 val dx = point.x - pos.x
                 val dy = point.y - pos.y
                 if (dx * dx + dy * dy < traversalRadiusSq) {
-                    result.add(char)
+                    traversedBuffer.add(char)
                 }
             }
         }
-        return result
+        return traversedBuffer
     }
 
     private suspend fun loadOrCacheDictionary(compatibleLanguages: List<String>): Map<String, Int> {

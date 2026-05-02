@@ -173,6 +173,8 @@
     <string name="layout_mapper_clear_failed">Échec de la suppression des mappages</string>
 
     <!-- Privacy & Data Settings -->
+    <string name="privacy_settings_storage_encryption_title">Stockage des mots : Non chiffré</string>
+    <string name="privacy_settings_storage_encryption_summary">Aucun écran de verrouillage détecté. Les mots appris sont stockés en texte brut. Définissez un code PIN, un schéma ou un verrou biométrique dans les paramètres Android pour activer le chiffrement.</string>
     <string name="privacy_settings_clipboard_history">Historique du presse-papiers</string>
     <string name="privacy_settings_clipboard_history_on">Historique du presse-papiers activé</string>
     <string name="privacy_settings_clipboard_history_off">Historique du presse-papiers désactivé</string>

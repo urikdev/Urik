@@ -23,7 +23,6 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
-import com.ibm.icu.util.ULocale
 import com.urik.keyboard.R
 import com.urik.keyboard.data.KeyboardRepository
 import com.urik.keyboard.model.KeyboardKey
@@ -32,6 +31,7 @@ import com.urik.keyboard.model.KeyboardMode
 import com.urik.keyboard.settings.SettingsRepository
 import com.urik.keyboard.theme.ThemeManager
 import dagger.hilt.android.AndroidEntryPoint
+import java.util.Locale
 import javax.inject.Inject
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -175,7 +175,7 @@ class LayoutMapperActivity : AppCompatActivity() {
             repository
                 .getLayoutForMode(
                     KeyboardMode.LETTERS,
-                    ULocale.forLanguageTag("en"),
+                    Locale.forLanguageTag("en"),
                     KeyboardKey.ActionType.ENTER
                 ).getOrNull()
 

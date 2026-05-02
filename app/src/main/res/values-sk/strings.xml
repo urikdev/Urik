@@ -160,6 +160,8 @@
     <string name="layout_mapper_clear_failed">Nepodarilo sa vymazať mapovania</string>
 
     <!-- Privacy & Data Settings -->
+    <string name="privacy_settings_storage_encryption_title">Úložisko slov: Nešifrované</string>
+    <string name="privacy_settings_storage_encryption_summary">Nebol zistený žiadny uzamknutý displej zariadenia. Naučené slová sú uložené ako obyčajný text. Nastavte PIN, vzor alebo biometrické odomknutie v nastaveniach Androidu, aby ste povolili šifrovanie.</string>
     <string name="privacy_settings_clipboard_history">História schránky</string>
     <string name="privacy_settings_clipboard_history_on">História schránky zapnutá</string>
     <string name="privacy_settings_clipboard_history_off">História schránky vypnutá</string>

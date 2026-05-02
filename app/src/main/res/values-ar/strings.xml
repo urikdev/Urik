@@ -170,6 +170,8 @@
     <string name="layout_mapper_clear_failed">فشل حذف جميع التخصيصات</string>
 
     <!-- Privacy & Data Settings -->
+    <string name="privacy_settings_storage_encryption_title">تخزين الكلمات: غير مشفر</string>
+    <string name="privacy_settings_storage_encryption_summary">لم يتم اكتشاف شاشة قفل الجهاز. يتم تخزين الكلمات المتعلمة بنص عادي. قم بتعيين رمز PIN أو نمط أو قفل بيومتري في إعدادات Android لتمكين التشفير.</string>
     <string name="privacy_settings_clipboard_history">تاريخ الحافظة</string>
     <string name="privacy_settings_clipboard_history_on">تاريخ الحافظة مفعل</string>
     <string name="privacy_settings_clipboard_history_off">تفعيل الحافظة غير مفعل</string>

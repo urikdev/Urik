@@ -2,6 +2,7 @@ package com.urik.keyboard.service
 
 import android.content.Context
 import com.urik.keyboard.utils.CacheMemoryManager
+import com.urik.keyboard.utils.ErrorLogger
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.FileNotFoundException
 import java.io.IOException
@@ -130,7 +131,13 @@ constructor(
 
             val variations = getVariationsForLanguage(languageCode)
             variations[baseChar.lowercase()] ?: emptyList()
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            ErrorLogger.logException(
+                component = "CharacterVariationService",
+                severity = ErrorLogger.Severity.LOW,
+                exception = e,
+                context = mapOf("operation" to "getVariations")
+            )
             emptyList()
         }
     }
@@ -176,7 +183,13 @@ constructor(
             handleAssetError(languageCode)
             clearNonEssentialCaches()
             emptyMap()
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            ErrorLogger.logException(
+                component = "CharacterVariationService",
+                severity = ErrorLogger.Severity.HIGH,
+                exception = e,
+                context = mapOf("operation" to "loadVariationsWithErrorHandling")
+            )
             handleAssetError(languageCode)
             getFallbackVariations(languageCode)
         }
@@ -239,7 +252,13 @@ constructor(
                 try {
                     val context = contextRef.get() ?: return getMinimalFallbackVariations()
                     loadVariationsFromAssets(context, "en")
-                } catch (_: Exception) {
+                } catch (e: Exception) {
+                    ErrorLogger.logException(
+                        component = "CharacterVariationService",
+                        severity = ErrorLogger.Severity.LOW,
+                        exception = e,
+                        context = mapOf("operation" to "getFallbackVariations")
+                    )
                     failedLanguages.add("en")
                     getMinimalFallbackVariations()
                 }
@@ -291,7 +310,7 @@ constructor(
             }
         }
 
-        cacheMemoryManager.onTrimMemory(android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL)
+        cacheMemoryManager.handleTrimMemory(android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL)
     }
 
     /**

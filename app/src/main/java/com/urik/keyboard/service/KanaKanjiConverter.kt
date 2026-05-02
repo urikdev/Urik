@@ -1,35 +1,42 @@
 package com.urik.keyboard.service
 
 import android.content.Context
+import com.urik.keyboard.utils.ErrorLogger
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.util.TreeMap
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
-data class ConversionCandidate(val surface: String, val reading: String, val frequency: Long, val source: String)
-
 @Singleton
-class KanaKanjiConverter @Inject constructor(@ApplicationContext private val context: Context) {
+class KanaKanjiConverter @Inject constructor(@ApplicationContext private val context: Context) : ScriptConverter {
     private var index: TreeMap<String, MutableList<ConversionCandidate>> = TreeMap()
     private val userFrequencies = ConcurrentHashMap<String, Long>()
 
+    private val loadMutex = Mutex()
+
     @Volatile private var loaded = false
 
-    suspend fun getCandidates(reading: String): List<ConversionCandidate> {
-        ensureLoaded()
-        if (reading.isEmpty()) return emptyList()
+    override val supportedLanguages: Set<String> = setOf("ja")
 
-        val ceiling = reading + '\uFFFF'
-        val dict = index.subMap(reading, ceiling).values.flatten()
+    override val isReady: Boolean get() = loaded
+
+    override suspend fun getCandidates(input: String, languageCode: String): List<ConversionCandidate> {
+        ensureLoaded()
+        if (input.isEmpty()) return emptyList()
+
+        val ceiling = input + '\uFFFF'
+        val dict = index.subMap(input, ceiling).values.flatten()
 
         val userBoosted = userFrequencies.entries
-            .filter { it.key.startsWith("$reading\t") }
+            .filter { it.key.startsWith("$input\t") }
             .map { (key, freq) ->
                 val surface = key.substringAfter("\t")
-                ConversionCandidate(surface, reading, freq * USER_FREQ_MULTIPLIER, "learned")
+                ConversionCandidate(surface, input, freq * USER_FREQ_MULTIPLIER, "learned")
             }
 
         val userSurfaces = userBoosted.map { it.surface }.toSet()
@@ -38,16 +45,21 @@ class KanaKanjiConverter @Inject constructor(@ApplicationContext private val con
             .distinctBy { it.surface }
     }
 
-    fun incrementUserFrequency(reading: String, surface: String) {
-        val key = "$reading\t$surface"
+    override fun recordSelection(input: String, surface: String) {
+        val key = "$input\t$surface"
         userFrequencies.merge(key, BASE_USER_FREQUENCY) { old, new -> old + new }
+    }
+
+    override fun release() {
+        index = TreeMap()
+        loaded = false
     }
 
     private suspend fun ensureLoaded() {
         if (loaded) return
-        withContext(Dispatchers.IO) {
-            if (loaded) return@withContext
-            index = loadIndex()
+        loadMutex.withLock {
+            if (loaded) return
+            index = withContext(Dispatchers.IO) { loadIndex() }
             loaded = true
         }
     }
@@ -68,7 +80,13 @@ class KanaKanjiConverter @Inject constructor(@ApplicationContext private val con
                 }
             }
             result.values.forEach { list -> list.sortByDescending { it.frequency } }
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            ErrorLogger.logException(
+                component = "KanaKanjiConverter",
+                severity = ErrorLogger.Severity.HIGH,
+                exception = e,
+                context = mapOf("operation" to "loadIndex")
+            )
         }
         return result
     }

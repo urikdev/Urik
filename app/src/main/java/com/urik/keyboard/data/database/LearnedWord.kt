@@ -5,7 +5,7 @@ import androidx.room.Entity
 import androidx.room.Fts4
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import com.ibm.icu.text.BreakIterator
+import java.text.BreakIterator
 import kotlinx.serialization.Serializable
 
 /**

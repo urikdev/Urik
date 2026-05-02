@@ -1,6 +1,7 @@
 package com.urik.keyboard.utils
 
 import android.app.ActivityManager
+import android.content.ComponentCallbacks
 import android.content.ComponentCallbacks2
 import android.content.Context
 import android.content.res.Configuration
@@ -27,11 +28,10 @@ interface MemoryPressureSubscriber {
  *
  * @see ManagedCache for LRU cache implementation details
  */
-@Suppress("DEPRECATION")
 @Singleton
 class CacheMemoryManager
 @Inject
-constructor(private val context: Context) : ComponentCallbacks2 {
+constructor(private val context: Context) : ComponentCallbacks {
     private val managedCaches = ConcurrentHashMap<String, ManagedCache<*, *>>()
     private val pressureSubscribers = ConcurrentHashMap.newKeySet<MemoryPressureSubscriber>()
     private val memoryMonitoringScope = CoroutineScope(Dispatchers.Default)
@@ -111,7 +111,13 @@ constructor(private val context: Context) : ComponentCallbacks2 {
                     try {
                         checkMemoryPressure()
                         delay(MEMORY_CHECK_INTERVAL_MS)
-                    } catch (_: Exception) {
+                    } catch (e: Exception) {
+                        ErrorLogger.logException(
+                            component = "CacheMemoryManager",
+                            severity = ErrorLogger.Severity.LOW,
+                            exception = e,
+                            context = mapOf("operation" to "startMemoryMonitoring")
+                        )
                         delay(MEMORY_CHECK_ERROR_DELAY_MS)
                     }
                 }
@@ -124,17 +130,16 @@ constructor(private val context: Context) : ComponentCallbacks2 {
 
         when {
             availableMemoryMb < criticalMemoryThresholdMb -> {
-                onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL)
+                handleTrimMemory(ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL)
             }
 
             availableMemoryMb < lowMemoryThresholdMb -> {
-                onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_RUNNING_MODERATE)
+                handleTrimMemory(ComponentCallbacks2.TRIM_MEMORY_RUNNING_MODERATE)
             }
         }
     }
 
-    @Suppress("DEPRECATION")
-    override fun onTrimMemory(level: Int) {
+    internal fun handleTrimMemory(level: Int) {
         when (level) {
             ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL,
             ComponentCallbacks2.TRIM_MEMORY_COMPLETE
@@ -184,7 +189,13 @@ constructor(private val context: Context) : ComponentCallbacks2 {
         pressureSubscribers.forEach { subscriber ->
             try {
                 subscriber.onMemoryPressure(level)
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                ErrorLogger.logException(
+                    component = "CacheMemoryManager",
+                    severity = ErrorLogger.Severity.LOW,
+                    exception = e,
+                    context = mapOf("operation" to "notifyPressureSubscribers")
+                )
             }
         }
     }
@@ -192,9 +203,8 @@ constructor(private val context: Context) : ComponentCallbacks2 {
     override fun onConfigurationChanged(newConfig: Configuration) {
     }
 
-    @Deprecated("Use onTrimMemory instead")
     override fun onLowMemory() {
-        onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL)
+        handleTrimMemory(ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL)
     }
 
     /**

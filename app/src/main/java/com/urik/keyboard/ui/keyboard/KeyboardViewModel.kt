@@ -2,9 +2,6 @@ package com.urik.keyboard.ui.keyboard
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ibm.icu.lang.UCharacter
-import com.ibm.icu.lang.UProperty
-import com.ibm.icu.util.ULocale
 import com.urik.keyboard.data.KeyboardRepository
 import com.urik.keyboard.model.KeyboardEvent
 import com.urik.keyboard.model.KeyboardKey
@@ -14,6 +11,7 @@ import com.urik.keyboard.model.KeyboardState
 import com.urik.keyboard.service.LanguageManager
 import com.urik.keyboard.utils.ErrorLogger
 import dagger.hilt.android.lifecycle.HiltViewModel
+import java.util.Locale
 import javax.inject.Inject
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -122,7 +120,7 @@ constructor(
                 if (key.value == "ß") {
                     "ẞ"
                 } else {
-                    key.value.uppercase(getCurrentLocale().toLocale())
+                    key.value.uppercase(getCurrentLocale())
                 }
             }
 
@@ -171,8 +169,7 @@ constructor(
         return false
     }
 
-    private fun isSentenceEndingPunctuation(char: Char): Boolean =
-        UCharacter.hasBinaryProperty(char.code, UProperty.S_TERM)
+    private fun isSentenceEndingPunctuation(char: Char): Boolean = char in SENTENCE_TERMINAL_CHARS
 
     fun checkAndApplyAutoCapitalization(textBeforeCursor: String?, autoCapEnabled: Boolean = true) {
         if (!autoCapEnabled) return
@@ -219,6 +216,7 @@ constructor(
             }
 
             KeyboardKey.Spacer -> {}
+
             is KeyboardKey.FlickKey -> {}
         }
     }
@@ -356,13 +354,23 @@ constructor(
         }
     }
 
-    private fun getCurrentLocale(): ULocale {
+    private fun getCurrentLocale(): Locale {
         val currentLayoutLang = languageManager.currentLayoutLanguage.value
         val languageOnly = currentLayoutLang.split("-").first()
-        return ULocale.forLanguageTag(languageOnly)
+        return Locale.forLanguageTag(languageOnly)
     }
 
     private fun updateState(update: (KeyboardState) -> KeyboardState) {
         _state.value = update(_state.value)
+    }
+
+    private companion object {
+        val SENTENCE_TERMINAL_CHARS = setOf(
+            '.', '!', '?', '\u2026',
+            '\u0589', '\u061F', '\u06D4', '\u0964', '\u0965',
+            '\u203C', '\u2047', '\u2048', '\u2049',
+            '\u3002', '\uFE15', '\uFE16', '\uFE52', '\uFE56', '\uFE57',
+            '\uFF01', '\uFF0E', '\uFF1F', '\uFF61'
+        )
     }
 }
