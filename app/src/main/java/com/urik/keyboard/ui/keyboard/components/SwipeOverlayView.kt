@@ -9,10 +9,7 @@ import android.view.View
 import android.view.animation.DecelerateInterpolator
 import com.urik.keyboard.theme.ThemeManager
 
-/**
- * Visual overlay for swipe typing gesture trail.
- *
- */
+/** Visual swipe gesture trail overlay. */
 class SwipeOverlayView
 @JvmOverloads
 constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) :

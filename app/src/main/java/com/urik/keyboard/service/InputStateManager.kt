@@ -15,6 +15,8 @@ interface ViewCallback {
     fun clearSuggestions()
 
     fun updateSuggestions(suggestions: List<String>)
+
+    fun showDegradedIndicator(degraded: Boolean)
 }
 
 class InputStateManager(
@@ -199,6 +201,10 @@ class InputStateManager(
 
     fun updateSuggestionDisplay(suggestions: List<String>) {
         viewCallback.updateSuggestions(suggestions)
+    }
+
+    fun showDegradedIndicator(degraded: Boolean) {
+        viewCallback.showDegradedIndicator(degraded)
     }
 
     fun clearInternalStateOnly() {

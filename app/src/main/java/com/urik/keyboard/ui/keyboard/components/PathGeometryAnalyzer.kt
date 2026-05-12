@@ -143,9 +143,6 @@ constructor() {
     private val reusableCoverageFlags = BooleanArray(MAX_PATH_POINTS)
     private val cachedIntersectionPoint = PointF()
 
-    /**
-     * Performs comprehensive geometric analysis on a swipe path.
-     */
     fun analyze(path: List<SwipeDetector.SwipePoint>, keyPositions: Map<Char, PointF>): GeometricAnalysis {
         if (path.size < 3) {
             return createEmptyAnalysis()
@@ -172,15 +169,9 @@ constructor() {
         )
     }
 
-    /**
-     * Calculates adaptive Gaussian sigma based on key neighborhood density.
-     */
     fun calculateAdaptiveSigma(key: Char, keyPositions: Map<Char, PointF>): AdaptiveSigma =
         sigmaCalculator.calculateAdaptiveSigma(key, keyPositions)
 
-    /**
-     * Calculates velocity-based weight for letter scoring.
-     */
     fun calculateVelocityWeight(velocity: Float): Float = when {
         velocity < SLOW_VELOCITY_THRESHOLD -> {
             SLOW_VELOCITY_BOOST
@@ -195,14 +186,8 @@ constructor() {
         }
     }
 
-    /**
-     * Determines if path geometrically crossed through a key region.
-     */
     fun didPathTraverseKey(key: Char, analysis: GeometricAnalysis): Boolean = analysis.traversedKeys.containsKey(key)
 
-    /**
-     * Calculates dynamic spatial/frequency weights based on path confidence.
-     */
     fun calculateDynamicWeights(pathConfidence: Float): Pair<Float, Float> = when {
         pathConfidence > HIGH_CONFIDENCE_THRESHOLD -> {
             HIGH_CONFIDENCE_SPATIAL_WEIGHT to
@@ -225,9 +210,6 @@ constructor() {
         }
     }
 
-    /**
-     * Detects repeated letter signals (dwell or oscillation).
-     */
     fun detectRepeatedLetterSignal(
         path: List<SwipeDetector.SwipePoint>,
         keyPosition: PointF,
@@ -235,9 +217,6 @@ constructor() {
         endIndex: Int
     ): Float = dwellDetector.detectRepeatedLetterSignal(path, keyPosition, startIndex, endIndex)
 
-    /**
-     * Determines if a word is in a tight geometric cluster.
-     */
     fun isClusteredWord(word: String, keyPositions: Map<Char, PointF>): Boolean {
         if (word.length > MAX_CLUSTERED_WORD_LENGTH) return false
 
@@ -256,9 +235,6 @@ constructor() {
         return true
     }
 
-    /**
-     * Calculates path coverage - what percentage of path is explained by candidate word.
-     */
     fun calculatePathCoverage(
         word: String,
         path: List<SwipeDetector.SwipePoint>,

@@ -6,11 +6,6 @@ import com.urik.keyboard.utils.ErrorLogger
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/**
- * Repository for clipboard history management.
- *
- * Handles persistent storage of copied text items. All operations fail gracefully.
- */
 @Singleton
 class ClipboardRepository
 @Inject

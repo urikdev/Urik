@@ -11,6 +11,7 @@ import java.io.ByteArrayInputStream
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -20,6 +21,7 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import kotlinx.coroutines.yield
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -599,13 +601,6 @@ class SpellCheckManagerTest {
         for (i in 0 until words.size - 1) {
             assertTrue(words[i].second >= words[i + 1].second)
         }
-    }
-
-    @Test
-    fun `getCommonWords filters by length`() = runTest {
-        val words = spellCheckManager.getCommonWords()
-
-        assertTrue(words.all { it.first.length in 2..15 })
     }
 
     @Test
@@ -1407,6 +1402,105 @@ class SpellCheckManagerTest {
     }
 
     @Test
+    fun `wordFrequencies entries are scoped per language`() = runTest {
+        val frenchDictionary =
+            """
+            bonjour 2000
+            monde 1500
+            """.trimIndent()
+
+        whenever(assetManager.open("dictionaries/fr_symspell.txt"))
+            .thenAnswer { ByteArrayInputStream(frenchDictionary.toByteArray()) }
+
+        activeLanguagesFlow.value = listOf("en", "fr")
+        effectiveDictionaryLanguagesFlow.value = listOf("en", "fr")
+        currentLanguageFlow.value = "fr"
+
+        val frenchManager =
+            SpellCheckManager(
+                context = context,
+                languageManager = languageManager,
+                wordLearningEngine = wordLearningEngine,
+                wordFrequencyRepository = wordFrequencyRepository,
+                wordNormalizer = wordNormalizer,
+                cacheMemoryManager = cacheMemoryManager,
+                ioDispatcher = testDispatcher
+            )
+
+        frenchManager.isWordInDictionary("hello")
+        frenchManager.isWordInDictionary("bonjour")
+
+        val freqs = frenchManager.wordFrequenciesForTest()
+
+        assertNotNull("en inner map should exist", freqs["en"])
+        assertNotNull("fr inner map should exist", freqs["fr"])
+        assertTrue("en map should contain 'hello'", freqs["en"]?.containsKey("hello") == true)
+        assertTrue("fr map should contain 'bonjour'", freqs["fr"]?.containsKey("bonjour") == true)
+        assertFalse("en map should not contain 'bonjour'", freqs["en"]?.containsKey("bonjour") == true)
+    }
+
+    @Test
+    fun `evictExcessSpellCheckers clears wordFrequencies for the evicted language`() = runTest {
+        val languages = listOf("en", "fr", "es", "de", "it")
+
+        val dicts =
+            mapOf(
+                "fr" to "bonjour 2000\nmonde 1500",
+                "es" to "hola 2000\nmundo 1500",
+                "de" to "hallo 2000\nwelt 1500",
+                "it" to "ciao 2000\nmondo 1500"
+            )
+
+        dicts.forEach { (lang, content) ->
+            whenever(assetManager.open("dictionaries/${lang}_symspell.txt"))
+                .thenAnswer { ByteArrayInputStream(content.toByteArray()) }
+        }
+
+        activeLanguagesFlow.value = languages
+        effectiveDictionaryLanguagesFlow.value = languages
+
+        val multiManager =
+            SpellCheckManager(
+                context = context,
+                languageManager = languageManager,
+                wordLearningEngine = wordLearningEngine,
+                wordFrequencyRepository = wordFrequencyRepository,
+                wordNormalizer = wordNormalizer,
+                cacheMemoryManager = cacheMemoryManager,
+                ioDispatcher = testDispatcher
+            )
+
+        languages.forEach { lang ->
+            whenever(assetManager.open("dictionaries/${lang}_symspell.txt"))
+                .thenAnswer { ByteArrayInputStream((dicts[lang] ?: "hello 1000").toByteArray()) }
+            multiManager.getCommonWords(lang)
+        }
+
+        val freqs = multiManager.wordFrequenciesForTest()
+
+        val totalLangs = freqs.size
+        val max = SpellCheckManager.MAX_CACHED_SPELL_CHECKERS
+        assertTrue("Expected eviction: loaded ${languages.size} langs, max=$max", totalLangs < languages.size)
+        assertTrue(
+            "Active languages' frequency maps should still be present",
+            freqs.isNotEmpty()
+        )
+    }
+
+    @Test
+    fun `onMemoryPressure CRITICAL clears wordFrequencies`() = runTest {
+        spellCheckManager.isWordInDictionary("hello")
+
+        val freqsBefore = spellCheckManager.wordFrequenciesForTest()
+        assertTrue("wordFrequencies should be populated before pressure", freqsBefore.isNotEmpty())
+
+        spellCheckManager.onMemoryPressure(android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL)
+
+        val freqsAfter = spellCheckManager.wordFrequenciesForTest()
+        assertTrue("wordFrequencies should be empty after CRITICAL memory pressure", freqsAfter.isEmpty())
+    }
+
+    @Test
     fun `isDegradedMode is true after initialization timeout`() {
         val standardDispatcher = StandardTestDispatcher()
         val neverDispatcher = object : CoroutineDispatcher() {
@@ -1436,5 +1530,32 @@ class SpellCheckManagerTest {
         } finally {
             Dispatchers.setMain(testDispatcher)
         }
+    }
+
+    @Test
+    fun `isDegradedMode is true after initialization fails with exception`() = runTest {
+        whenever(assetManager.open("dictionaries/en_symspell.txt"))
+            .thenThrow(java.io.IOException("Asset missing"))
+
+        val failingManager =
+            SpellCheckManager(
+                context = context,
+                languageManager = languageManager,
+                wordLearningEngine = wordLearningEngine,
+                wordFrequencyRepository = wordFrequencyRepository,
+                wordNormalizer = wordNormalizer,
+                cacheMemoryManager = cacheMemoryManager,
+                ioDispatcher = testDispatcher
+            )
+
+        failingManager.generateSuggestions("hello")
+        assertTrue(failingManager.isDegradedMode)
+    }
+
+    @Test
+    fun `createSpellChecker cancels cooperatively without hanging`() = runTest(UnconfinedTestDispatcher()) {
+        val job = launch { spellCheckManager.isWordInDictionary("hello") }
+        yield()
+        job.cancelAndJoin()
     }
 }

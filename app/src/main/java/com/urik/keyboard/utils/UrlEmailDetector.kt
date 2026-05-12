@@ -1,14 +1,6 @@
 package com.urik.keyboard.utils
 
 object UrlEmailDetector {
-    /**
-     * Detects if we're typing in a URL or email context.
-     *
-     * @param currentWord Word currently being typed (may be empty)
-     * @param textBeforeCursor Text before cursor position (for context)
-     * @param nextChar Character about to be typed (may be null)
-     * @return true if in URL/email context, false otherwise
-     */
     fun isUrlOrEmailContext(currentWord: String, textBeforeCursor: String, nextChar: String? = null): Boolean {
         if (nextChar == "@") {
             return true

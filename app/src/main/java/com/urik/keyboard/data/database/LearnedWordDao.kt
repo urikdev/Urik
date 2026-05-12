@@ -35,12 +35,6 @@ interface LearnedWordDao {
     )
     suspend fun getFastSuggestions(prefix: String, languageTag: String, limit: Int = 5): List<FastSuggestion>
 
-    /**
-     * Full-text search for fuzzy word matching.
-     *
-     * Uses FTS4 for complex queries.
-     * Supports wildcards and ranking.
-     */
     @Query(
         """
         SELECT learned_words.* FROM learned_words_fts
@@ -74,9 +68,6 @@ interface LearnedWordDao {
     )
     suspend fun findExactWord(languageTag: String, normalizedWord: String): LearnedWord?
 
-    /**
-     * Batch existence check for multiple words.
-     */
     @Query(
         """
         SELECT word_normalized FROM learned_words 
@@ -207,12 +198,7 @@ interface LearnedWordDao {
     @Query("DELETE FROM learned_words_fts WHERE rowid = :rowid")
     suspend fun removeWordFromFts(rowid: Long): Int
 
-    /**
-     * Removes one-off typos older than cutoff timestamp.
-     *
-     * Only removes frequency=1 words (never reused). Preserves all
-     * words with frequency >= 2 regardless of age.
-     */
+    /** Only removes frequency=1 words (never reused). Words with frequency >= 2 are preserved regardless of age. */
     @Query("DELETE FROM learned_words WHERE frequency = 1 AND last_used < :cutoff")
     suspend fun cleanupLowFrequencyWords(cutoff: Long): Int
 

@@ -62,10 +62,6 @@ private class BoundedVariationErrorTracker(private val maxSize: Int) {
     }
 }
 
-/**
- * Loads character variations (long-press alternatives) from JSON assets.
- *
- */
 @Singleton
 class CharacterVariationService
 @Inject
@@ -112,16 +108,10 @@ constructor(
     }
 
     /**
-     * Gets character variations for long-press menu.
-     *
      * Fallback cascade on missing assets:
      * 1. Language-specific (languageCode) → 2. English (en) → 3. Hardcoded Latin
      *
      * Circuit breaker skips known-broken languages (3 failures, 60s cooldown).
-     *
-     * @param baseChar Character to get variations for (e.g., "a")
-     * @param languageCode Target language code (e.g., "sv", "en")
-     * @return List of variation characters, empty if none available
      */
     suspend fun getVariations(baseChar: String, languageCode: String): List<String> = withContext(Dispatchers.IO) {
         if (isDestroyed || baseChar.isEmpty()) return@withContext emptyList()
@@ -313,11 +303,7 @@ constructor(
         cacheMemoryManager.handleTrimMemory(android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL)
     }
 
-    /**
-     * Clears all caches and error state.
-     *
-     * Call when changing keyboard settings or on memory pressure.
-     */
+    /** Call when changing keyboard settings or on memory pressure. */
     fun cleanup() {
         if (isDestroyed) return
         isDestroyed = true

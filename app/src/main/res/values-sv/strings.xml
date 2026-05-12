@@ -114,6 +114,8 @@
     <string name="alternative_layout_default">Standard (Språklayout)</string>
     <string name="privacy_settings_storage_encryption_title">Ordlagring: Okrypterad</string>
     <string name="privacy_settings_storage_encryption_summary">Ingen skärmlåsning på enheten hittades. Inlärda ord lagras i klartext. Ange en PIN-kod, ett mönster eller biometrisk låsning i Android-inställningarna för att aktivera kryptering.</string>
+    <string name="privacy_settings_keystore_api27_title">Kryptering: begränsat låsskydd</string>
+    <string name="privacy_settings_keystore_api27_summary">Den här enheten kör Android 7.1 eller tidigare. I den här Android-versionen kan databasnyckeln inte begränsas till åtkomst endast när enheten är upplåst, så inlärda ord kan vara åtkomliga medan enheten är låst. Att uppgradera till Android 9.0 eller senare aktiverar fullständigt låsskärmsskydd.</string>
     <string name="privacy_settings_clipboard_history">Urklippshistorik</string>
     <string name="privacy_settings_clipboard_history_on">Urklippshistorik aktiverad</string>
     <string name="privacy_settings_clipboard_history_off">Urklippshistorik inaktiverad</string>

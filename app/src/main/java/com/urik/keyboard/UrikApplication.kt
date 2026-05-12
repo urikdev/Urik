@@ -13,19 +13,9 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 /**
- * Application class for keyboard app initialization and dependency injection.
- *
- * ## SQLCipher Native Library
- * Loads libsqlcipher.so at app startup (before any database access).
- * SQLCipher provides AES-256 encryption for sensitive data.
- *
- * ## Error Logging
- * Installs global exception handler for critical failures.
- * Logs to local file for debugging, no user data captured.
- *
- * ## Clipboard Monitoring
- * Observes settings and starts/stops clipboard monitoring system-wide.
- * Runs independently of keyboard visibility for complete clipboard capture.
+ * SQLCipher is loaded before any database access (must precede Room init).
+ * Clipboard monitoring runs independently of keyboard visibility for complete capture.
+ * Exception handler logs to local file only — no user data captured.
  */
 @HiltAndroidApp
 class UrikApplication : Application() {

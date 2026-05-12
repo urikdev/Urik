@@ -162,6 +162,8 @@
     <!-- Privacy & Data Settings -->
     <string name="privacy_settings_storage_encryption_title">Emmagatzematge de paraules: sense xifrar</string>
     <string name="privacy_settings_storage_encryption_summary">No s\'ha detectat cap pantalla de bloqueig del dispositiu. Les paraules apreses s\'emmagatzemen en text pla. Establiu un PIN, patró o bloqueig biomètric a la configuració d\'Android per habilitar el xifratge.</string>
+    <string name="privacy_settings_keystore_api27_title">Xifratge: protecció de bloqueig reduïda</string>
+    <string name="privacy_settings_keystore_api27_summary">Aquest dispositiu utilitza Android 7.1 o anterior. En aquesta versió d\'Android, la clau de la base de dades no es pot restringir perquè només sigui accessible quan el dispositiu estigui desbloquejat, de manera que les paraules apreses podrien ser accessibles mentre el dispositiu està bloquejat. Actualitzar a Android 9.0 o posterior habilita la protecció completa de pantalla de bloqueig.</string>
     <string name="privacy_settings_clipboard_history">Historial del porta-retalls</string>
     <string name="privacy_settings_clipboard_history_on">Historial del porta-retalls activat</string>
     <string name="privacy_settings_clipboard_history_off">Historial del porta-retalls desactivat</string>

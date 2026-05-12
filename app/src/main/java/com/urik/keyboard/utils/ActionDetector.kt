@@ -3,10 +3,6 @@ package com.urik.keyboard.utils
 import android.view.inputmethod.EditorInfo
 import com.urik.keyboard.model.KeyboardKey
 
-/**
- * Detects contextual action type from EditorInfo for dynamic enter key behavior.
- *
- */
 object ActionDetector {
     /**
      * Detects contextual action type for dynamic enter key behavior.

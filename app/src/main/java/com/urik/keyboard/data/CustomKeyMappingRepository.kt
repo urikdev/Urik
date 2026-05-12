@@ -7,25 +7,12 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.flow.Flow
 
-/**
- * Repository for custom key mapping operations.
- *
- * Provides reactive Flow-based access and atomic update operations.
- */
 @Singleton
 class CustomKeyMappingRepository
 @Inject
 constructor(private val customKeyMappingDao: CustomKeyMappingDao) {
-    /**
-     * Observes all custom key mappings as a Flow.
-     *
-     * Emits new map whenever mappings change.
-     */
     val mappings: Flow<List<CustomKeyMapping>> = customKeyMappingDao.observeAllMappings()
 
-    /**
-     * Gets all mappings as a map for quick lookup.
-     */
     suspend fun getAllMappingsAsMap(): Map<String, String> = try {
         customKeyMappingDao
             .getAllMappings()
@@ -40,12 +27,6 @@ constructor(private val customKeyMappingDao: CustomKeyMappingDao) {
         emptyMap()
     }
 
-    /**
-     * Sets or updates a custom mapping for a key.
-     *
-     * @param baseKey The key to map (e.g., "a")
-     * @param customSymbol The symbol to assign (e.g., "@")
-     */
     suspend fun setMapping(baseKey: String, customSymbol: String): Result<Unit> {
         val normalizedKey = baseKey.lowercase()
         return try {
@@ -63,12 +44,6 @@ constructor(private val customKeyMappingDao: CustomKeyMappingDao) {
         }
     }
 
-    /**
-     * Removes a custom mapping for a key.
-     *
-     * @param baseKey The key to remove mapping from
-     * @return true if a mapping was removed
-     */
     suspend fun removeMapping(baseKey: String): Result<Boolean> = try {
         val removed = customKeyMappingDao.removeMapping(baseKey.lowercase()) > 0
         Result.success(removed)
@@ -82,9 +57,6 @@ constructor(private val customKeyMappingDao: CustomKeyMappingDao) {
         Result.failure(e)
     }
 
-    /**
-     * Clears all custom key mappings.
-     */
     suspend fun clearAllMappings(): Result<Int> = try {
         val count = customKeyMappingDao.clearAllMappings()
         Result.success(count)

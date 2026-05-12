@@ -18,9 +18,6 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-/**
- * Word candidate with scoring metrics.
- */
 data class WordCandidate(val word: String, val spatialScore: Float, val frequencyScore: Float, val combinedScore: Float)
 
 /**
@@ -34,9 +31,6 @@ data class WordCandidate(val word: String, val spatialScore: Float, val frequenc
 class SwipeDetector
 @Inject
 constructor(private val streamingScoringEngine: StreamingScoringEngine) {
-    /**
-     * Captured swipe point with metadata.
-     */
     data class SwipePoint(
         val x: Float,
         val y: Float,
@@ -45,9 +39,6 @@ constructor(private val streamingScoringEngine: StreamingScoringEngine) {
         val velocity: Float = 0.0f
     )
 
-    /**
-     * Callback interface for swipe events.
-     */
     interface SwipeListener {
         fun onSwipeStart(startPoint: PointF)
 
@@ -142,17 +133,11 @@ constructor(private val streamingScoringEngine: StreamingScoringEngine) {
 
     private val cachedTransformPoint = PointF()
 
-    /**
-     * Updates layout transform for adaptive keyboard modes.
-     */
     fun updateLayoutTransform(scaleFactor: Float, offsetX: Float) {
         layoutScaleFactor = scaleFactor
         layoutOffsetX = offsetX
     }
 
-    /**
-     * Updates key position mapping for spatial scoring.
-     */
     fun updateKeyPositions(positions: Map<KeyboardKey.Character, PointF>) {
         val newMap = mutableMapOf<Char, PointF>()
         positions.forEach { (key, pos) ->
@@ -171,9 +156,6 @@ constructor(private val streamingScoringEngine: StreamingScoringEngine) {
         return cachedTransformPoint
     }
 
-    /**
-     * Updates script context when language or layout changes.
-     */
     fun updateScriptContext(locale: ULocale, isRTL: Boolean = false, scriptCode: Int = UScript.LATIN) {
         currentLocale = locale
         currentIsRTL = isRTL
@@ -204,9 +186,6 @@ constructor(private val streamingScoringEngine: StreamingScoringEngine) {
             areLayoutsCompatible(currentScriptCode, layoutScript)
         }
 
-    /**
-     * Enables or disables swipe typing.
-     */
     fun setSwipeEnabled(enabled: Boolean) {
         swipeEnabled = enabled
         if (!enabled) {
@@ -214,9 +193,6 @@ constructor(private val streamingScoringEngine: StreamingScoringEngine) {
         }
     }
 
-    /**
-     * Updates swipe distance threshold based on screen density.
-     */
     fun updateDisplayMetrics(density: Float) {
         currentDensity = density
         swipeStartDistancePx = swipeActivationDp * density
@@ -245,11 +221,7 @@ constructor(private val streamingScoringEngine: StreamingScoringEngine) {
         streamingScoringEngine.currentLanguageTag = tag
     }
 
-    /**
-     * Processes touch events for swipe detection.
-     *
-     * @return true if event consumed (swipe in progress), false if should propagate
-     */
+    /** @return true if event consumed (swipe in progress), false to propagate */
     @Suppress("ReturnCount")
     fun handleTouchEvent(event: MotionEvent, keyAt: (Float, Float) -> KeyboardKey?): Boolean {
         if (!swipeEnabled) {

@@ -175,6 +175,8 @@
     <!-- Privacy & Data Settings -->
     <string name="privacy_settings_storage_encryption_title">Stockage des mots : Non chiffré</string>
     <string name="privacy_settings_storage_encryption_summary">Aucun écran de verrouillage détecté. Les mots appris sont stockés en texte brut. Définissez un code PIN, un schéma ou un verrou biométrique dans les paramètres Android pour activer le chiffrement.</string>
+    <string name="privacy_settings_keystore_api27_title">Chiffrement : protection de verrouillage réduite</string>
+    <string name="privacy_settings_keystore_api27_summary">Cet appareil utilise Android 7.1 ou une version antérieure. Dans cette version d\'Android, la clé de la base de données ne peut pas être restreinte à un accès uniquement lorsque l\'appareil est déverrouillé. Les mots appris peuvent donc être accessibles pendant que l\'appareil est verrouillé. La mise à niveau vers Android 9.0 ou une version ultérieure active la protection complète par écran de verrouillage.</string>
     <string name="privacy_settings_clipboard_history">Historique du presse-papiers</string>
     <string name="privacy_settings_clipboard_history_on">Historique du presse-papiers activé</string>
     <string name="privacy_settings_clipboard_history_off">Historique du presse-papiers désactivé</string>

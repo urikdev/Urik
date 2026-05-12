@@ -17,9 +17,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-/**
- * Manages appearance settings state and updates.
- */
 @HiltViewModel
 class AppearanceViewModel
 @Inject
@@ -70,9 +67,6 @@ constructor(private val settingsRepository: SettingsRepository) : ViewModel() {
     }
 }
 
-/**
- * UI state for appearance settings.
- */
 data class AppearanceUiState(
     val keySize: KeySize = KeySize.MEDIUM,
     val keyLabelSize: KeyLabelSize = KeyLabelSize.MEDIUM,

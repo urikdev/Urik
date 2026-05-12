@@ -17,11 +17,6 @@ import com.urik.keyboard.settings.SettingsEventHandler
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
-/**
- * Settings fragment for keyboard language selection.
- *
- * Displays supported languages as radio buttons for primary language selection.
- */
 @AndroidEntryPoint
 class LanguagesFragment : PreferenceFragmentCompat() {
     private lateinit var viewModel: LanguagesViewModel

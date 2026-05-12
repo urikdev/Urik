@@ -1,15 +1,6 @@
 package com.urik.keyboard.utils
 
-/**
- * Utilities for text matching with punctuation handling.
- *
- */
 object TextMatchingUtils {
-    /**
-     * Checks if character is word-separating punctuation (apostrophes, hyphens).
-     *
-     * @return true if character should be stripped for matching purposes
-     */
     fun isWordSeparatingPunctuation(char: Char): Boolean {
         val type = Character.getType(char.code)
         return when (type) {
@@ -31,11 +22,6 @@ object TextMatchingUtils {
         }
     }
 
-    /**
-     * Checks if character is valid punctuation within a word for learning/storage.
-     *
-     * @return true if character is valid within a learned word
-     */
     fun isValidWordPunctuation(char: Char): Boolean {
         val type = Character.getType(char.code)
         return when (type) {
@@ -54,12 +40,6 @@ object TextMatchingUtils {
         }
     }
 
-    /**
-     * Strips word-separating punctuation for matching purposes.
-     *
-     * @param word Original word with punctuation
-     * @return Word with apostrophes and hyphens removed
-     */
     fun stripWordPunctuation(word: String): String {
         if (word.isEmpty()) return word
         val hasPunctuation = word.any { isWordSeparatingPunctuation(it) }

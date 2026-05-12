@@ -17,9 +17,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-/**
- * Manages layout and input settings state and updates.
- */
 @HiltViewModel
 class LayoutInputViewModel
 @Inject
@@ -100,9 +97,6 @@ constructor(private val settingsRepository: SettingsRepository) : ViewModel() {
     }
 }
 
-/**
- * UI state for layout and input settings.
- */
 data class LayoutInputUiState(
     val showNumberRow: Boolean = true,
     val spaceBarSize: SpaceBarSize = SpaceBarSize.STANDARD,

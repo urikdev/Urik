@@ -1,8 +1,5 @@
 package com.urik.keyboard.model
 
-/**
- * Keyboard input modes determining available characters.
- */
 enum class KeyboardMode {
     LETTERS,
     NUMBERS,
@@ -36,30 +33,12 @@ data class KeyboardLayout(
     val script: String = "Latn"
 )
 
-/**
- * Key types in the keyboard.
- *
- * Character keys insert text, Action keys trigger operations.
- */
 sealed class KeyboardKey {
-    /**
-     * Text-inserting key.
-     *
-     * @property value Character(s) to insert (can be multi-char for ligatures/emoji)
-     * @property type Visual/semantic classification for styling
-     */
+    /** @property value Can be multi-char for ligatures/emoji */
     data class Character(val value: String, val type: KeyType) : KeyboardKey()
 
-    /**
-     * Operation key (backspace, enter, mode switch, etc).
-     *
-     * @property action Operation to perform
-     */
     data class Action(val action: ActionType) : KeyboardKey()
 
-    /**
-     * Empty spacer for layout alignment.
-     */
     data object Spacer : KeyboardKey()
 
     /**
@@ -105,9 +84,6 @@ sealed class KeyboardKey {
     }
 }
 
-/**
- * Keyboard state change events.
- */
 sealed class KeyboardEvent {
     data class KeyPressed(val key: KeyboardKey) : KeyboardEvent()
 

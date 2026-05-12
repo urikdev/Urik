@@ -65,10 +65,6 @@ private class BoundedLayoutErrorTracker(private val maxSize: Int) {
     }
 }
 
-/**
- * Loads keyboard layouts from JSON assets with caching and fallback.
- *
- */
 @Singleton
 class KeyboardRepository
 @Inject
@@ -112,17 +108,10 @@ constructor(
     }
 
     /**
-     * Loads keyboard layout for given mode and locale.
-     *
      * Fallback cascade on missing assets:
      * 1. Full locale (en-US) → 2. Language only (en) → 3. Hardcoded QWERTY
      *
      * Circuit breaker skips known-broken locales (3 failures, 60s cooldown).
-     *
-     * @param mode Letters/Numbers/Symbols
-     * @param locale Target locale for layout
-     * @param currentAction Enter key action type (e.g., ENTER, SEARCH, DONE, GO)
-     * @return Layout or failure with exception
      */
     suspend fun getLayoutForMode(
         mode: KeyboardMode,
@@ -487,11 +476,7 @@ constructor(
         }
     }
 
-    /**
-     * Clears all caches and error state.
-     *
-     * Call when changing keyboard settings or on memory pressure.
-     */
+    /** Call when changing keyboard settings or on memory pressure. */
     fun cleanup() {
         layoutCache.invalidateAll()
         failedLocales.clear()

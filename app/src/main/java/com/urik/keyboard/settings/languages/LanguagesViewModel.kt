@@ -17,9 +17,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-/**
- * Manages language selection state and updates.
- */
 @HiltViewModel
 class LanguagesViewModel
 @Inject
@@ -82,9 +79,6 @@ constructor(private val settingsRepository: SettingsRepository) : ViewModel() {
     }
 }
 
-/**
- * UI state for language settings.
- */
 data class LanguagesUiState(
     val activeLanguages: List<String> = listOf(KeyboardSettings.DEFAULT_LANGUAGE),
     val primaryLanguage: String = KeyboardSettings.DEFAULT_LANGUAGE,

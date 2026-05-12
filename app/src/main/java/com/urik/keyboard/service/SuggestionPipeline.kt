@@ -33,6 +33,7 @@ class SuggestionPipeline(
     }
 
     fun requestSuggestions(buffer: String, inputMethod: InputMethod) {
+        state.showDegradedIndicator(spellCheckManager.isDegradedMode)
         if (isJapaneseLayout) {
             requestJapaneseSuggestions(buffer)
             return

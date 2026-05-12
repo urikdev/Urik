@@ -43,10 +43,6 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-/**
- * Main keyboard view with swipe typing and suggestion bar.
- *
- */
 class SwipeKeyboardView
 @JvmOverloads
 constructor(
@@ -150,6 +146,7 @@ constructor(
     private var searchOverlapOffsetPx = -1
 
     private var autofillIndicatorIcon: TextView? = null
+    private var degradedIndicatorView: TextView? = null
     private var isShowingAutofillSuggestions = false
 
     private var cachedLocationArray = IntArray(2)
@@ -707,9 +704,6 @@ constructor(
         )
     }
 
-    /**
-     * Hides emoji picker and restores keyboard view.
-     */
     fun hideEmojiPicker() {
         if (isDestroyed || !isShowingEmojiPicker) return
 
@@ -862,10 +856,6 @@ constructor(
         }
     }
 
-    /**
-     * Attempts to handle key input for emoji search if search is active.
-     * Returns true if the input was consumed by search, false otherwise.
-     */
     fun handleSearchInput(key: KeyboardKey): Boolean {
         if (!isEmojiSearchActive) return false
 
@@ -947,14 +937,23 @@ constructor(
         safeMappingPost()
     }
 
-    /**
-     * Updates suggestion bar with new word candidates.
-     *
-     */
     fun updateSuggestions(suggestions: List<String>) {
         requireInitialized()
         if (isDestroyed) return
         updateSuggestionBarContent(suggestions)
+    }
+
+    fun showDegradedIndicator(degraded: Boolean) {
+        if (!isInitialized || isDestroyed) return
+        val indicator = getOrCreateDegradedIndicator()
+        if (degraded) {
+            if (indicator.parent == null) {
+                suggestionBar?.addView(indicator, 0)
+            }
+            indicator.visibility = VISIBLE
+        } else {
+            indicator.visibility = GONE
+        }
     }
 
     private fun updateSuggestionBarContent(suggestions: List<String> = emptyList()) {
@@ -968,6 +967,12 @@ constructor(
             returnSuggestionViewsToPool()
 
             bar.removeAllViews()
+
+            degradedIndicatorView?.let { indicator ->
+                if (indicator.visibility == VISIBLE) {
+                    bar.addView(indicator, 0)
+                }
+            }
 
             if (suggestions.isNotEmpty()) {
                 populateSuggestions(bar, suggestions)
@@ -1304,11 +1309,6 @@ constructor(
         return baseTextSize.coerceIn(minSize, maxSize)
     }
 
-    /**
-     * Clears suggestion bar
-     *
-     * Call when word buffer empty or committed.
-     */
     fun clearSuggestions() {
         if (isDestroyed) return
         if (isShowingAutofillSuggestions) return
@@ -1438,6 +1438,29 @@ constructor(
                     }
 
             autofillIndicatorIcon = this
+        }
+    }
+
+    private fun getOrCreateDegradedIndicator(): TextView {
+        degradedIndicatorView?.let { return it }
+
+        return TextView(context).apply {
+            val suggestionTextSize = calculateResponsiveSuggestionTextSize()
+            val padding = (suggestionTextSize * context.resources.displayMetrics.density * 0.6f).toInt()
+            setPadding(padding, padding, padding, padding)
+
+            layoutParams =
+                LinearLayout
+                    .LayoutParams(
+                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                        0f
+                    ).apply {
+                        gravity = Gravity.CENTER_VERTICAL
+                        marginEnd = (4 * context.resources.displayMetrics.density).toInt()
+                    }
+
+            degradedIndicatorView = this
         }
     }
 
@@ -1823,9 +1846,6 @@ constructor(
         swipeOverlay.endSwipe()
     }
 
-    /**
-     * Processes swipe word candidates with learned word boosting.
-     */
     override fun onSwipeResults(candidates: List<WordCandidate>) {
         if (isDestroyed) return
 
@@ -1911,13 +1931,7 @@ constructor(
         dividerViewPool.clear()
     }
 
-    /**
-     * Cleans up all resources and cancels coroutines.
-     *
-     * Called automatically on detach.
-     * Nulls strong references to prevent leaks.
-     * Cancels managed viewScope.
-     */
+    /** Called automatically on detach. */
     fun cleanup() {
         if (isDestroyed) return
         isDestroyed = true
@@ -1941,6 +1955,8 @@ constructor(
         emojiButton = null
         emojiSearchInput = null
         cachedCursorDrawable = null
+        degradedIndicatorView = null
+        autofillIndicatorIcon = null
 
         searchScopeJob?.cancel()
         searchScopeJob = null

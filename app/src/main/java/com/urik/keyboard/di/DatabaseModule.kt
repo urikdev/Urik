@@ -7,6 +7,7 @@ import com.urik.keyboard.data.database.CustomKeyMappingDao
 import com.urik.keyboard.data.database.DatabaseSecurityManager
 import com.urik.keyboard.data.database.KeyboardDatabase
 import com.urik.keyboard.data.database.LearnedWordDao
+import com.urik.keyboard.data.database.UserKanjiFrequencyDao
 import com.urik.keyboard.data.database.UserWordBigramDao
 import com.urik.keyboard.data.database.UserWordFrequencyDao
 import com.urik.keyboard.utils.ErrorLogger
@@ -36,17 +37,6 @@ object DatabaseModule {
     fun provideDatabaseSecurityManager(@ApplicationContext context: Context): DatabaseSecurityManager =
         DatabaseSecurityManager(context)
 
-    /**
-     * Provides encrypted Room database with automatic migration and corruption recovery.
-     *
-     * Behavior:
-     * - Auto-migrates unencrypted → encrypted if device has lock screen
-     * - Migration failures preserve original database (no data loss)
-     * - Falls back to unencrypted if no device lock screen configured
-     * - Detects database corruption on initialization and recreates automatically
-     *
-     * @return Singleton KeyboardDatabase instance
-     */
     @Provides
     @Singleton
     @Suppress("ThrowsCount")
@@ -100,10 +90,13 @@ object DatabaseModule {
                 KeyboardDatabase.resetInstance()
 
                 val freshPassphrase = securityManager.getDatabasePassphrase()
+                requireNotNull(freshPassphrase) {
+                    "Cannot open database after corruption recovery: no passphrase available"
+                }
                 try {
                     KeyboardDatabase.getInstance(context, freshPassphrase)
                 } catch (e: Exception) {
-                    freshPassphrase?.fill(0)
+                    freshPassphrase.fill(0)
                     throw e
                 }
             }
@@ -147,4 +140,8 @@ object DatabaseModule {
 
     @Provides
     fun provideUserWordBigramDao(database: KeyboardDatabase): UserWordBigramDao = database.userWordBigramDao()
+
+    @Provides
+    fun provideUserKanjiFrequencyDao(database: KeyboardDatabase): UserKanjiFrequencyDao =
+        database.userKanjiFrequencyDao()
 }

@@ -207,21 +207,10 @@ constructor(private val context: Context) : ComponentCallbacks {
         handleTrimMemory(ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL)
     }
 
-    /**
-     * Immediately clears all managed caches.
-     *
-     * Used by SettingsRepository for "Clear All Data" privacy operation.
-     * Triggers onEvict callbacks for all entries.
-     */
     fun forceCleanup() {
         managedCaches.values.forEach { it.invalidateAll() }
     }
 
-    /**
-     * Cleans up resources and unregisters callbacks.
-     *
-     * Call when keyboard service destroyed.
-     */
     fun cleanup() {
         memoryMonitoringJob?.cancel()
         context.unregisterComponentCallbacks(this)
@@ -272,14 +261,7 @@ class ManagedCache<K : Any, V : Any>(val name: String, val maxSize: Int, private
     var misses = 0L
         private set
 
-    /**
-     * Returns cached value if present, or null if not found.
-     *
-     * Updates access order for LRU eviction. Increments hit/miss counters.
-     *
-     * @param key Cache key
-     * @return Cached value or null
-     */
+    /** Updates access order for LRU eviction on each read. */
     @Synchronized
     fun getIfPresent(key: K): V? {
         val value = cache[key]
@@ -291,26 +273,11 @@ class ManagedCache<K : Any, V : Any>(val name: String, val maxSize: Int, private
         return value
     }
 
-    /**
-     * Stores value in cache.
-     *
-     * If cache full, evicts least recently used entry before inserting.
-     *
-     * @param key Cache key
-     * @param value Value to cache
-     * @return Previous value if key existed, null otherwise
-     */
+    /** If cache full, evicts least recently used entry before inserting. */
     @Synchronized
     fun put(key: K, value: V): V? = cache.put(key, value)
 
-    /**
-     * Removes entry from cache.
-     *
-     * Invokes onEvict callback if provided.
-     *
-     * @param key Cache key to remove
-     * @return Removed value or null if not found
-     */
+    /** Invokes onEvict callback if provided. */
     @Synchronized
     fun invalidate(key: K): V? {
         val removed = cache.remove(key)
@@ -320,11 +287,7 @@ class ManagedCache<K : Any, V : Any>(val name: String, val maxSize: Int, private
         return removed
     }
 
-    /**
-     * Clears all entries and resets hit/miss counters.
-     *
-     * Invokes onEvict for each entry if callback provided.
-     */
+    /** Invokes onEvict for each entry if callback provided. Resets hit/miss counters. */
     @Synchronized
     fun invalidateAll() {
         if (onEvict != null) {
@@ -337,25 +300,14 @@ class ManagedCache<K : Any, V : Any>(val name: String, val maxSize: Int, private
         misses = 0L
     }
 
-    /**
-     * Returns current number of cached entries.
-     */
     @Synchronized
     fun size(): Int = cache.size
 
-    /**
-     * Returns snapshot of cache contents.
-     *
-     * Copy of internal map - modifications don't affect cache.
-     */
+    /** Returns a copy — modifications don't affect the cache. */
     @Synchronized
     fun asMap(): Map<K, V> = cache.toMap()
 
-    /**
-     * Returns cache hit rate as percentage
-     *
-     * @return Hit rate percentage, or 0 if no accesses yet
-     */
+    /** @return 0 if no accesses yet */
     @Synchronized
     fun hitRate(): Int {
         val total = hits + misses

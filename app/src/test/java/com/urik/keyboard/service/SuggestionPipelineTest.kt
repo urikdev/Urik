@@ -52,6 +52,7 @@ class SuggestionPipelineTest {
 
     private var capturedSuggestions: List<String> = emptyList()
     private var suggestionsCleared = false
+    private var capturedDegradedIndicator: Boolean? = null
 
     @Before
     fun setup() = runBlocking {
@@ -85,6 +86,10 @@ class SuggestionPipelineTest {
 
             override fun updateSuggestions(suggestions: List<String>) {
                 capturedSuggestions = suggestions
+            }
+
+            override fun showDegradedIndicator(degraded: Boolean) {
+                capturedDegradedIndicator = degraded
             }
         }
 
@@ -206,6 +211,23 @@ class SuggestionPipelineTest {
 
         verify(mockIc, never()).deleteSurroundingText(any(), any())
         verify(mockWordLearningEngine, never()).learnWord(any(), any())
+    }
+
+    @Test
+    fun `requestSuggestions forwards isDegradedMode to ViewCallback`() = runTest(testDispatcher) {
+        whenever(mockSpellCheckManager.isDegradedMode).thenReturn(true)
+
+        pipeline.requestSuggestions(buffer = "test", inputMethod = InputMethod.TYPED)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        assertEquals(true, capturedDegradedIndicator)
+
+        whenever(mockSpellCheckManager.isDegradedMode).thenReturn(false)
+
+        pipeline.requestSuggestions(buffer = "test", inputMethod = InputMethod.TYPED)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        assertEquals(false, capturedDegradedIndicator)
     }
 
     @Test
