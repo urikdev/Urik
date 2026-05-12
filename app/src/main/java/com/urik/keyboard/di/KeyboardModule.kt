@@ -33,12 +33,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 
-/**
- * Provides core keyboard services and infrastructure.
- *
- * All services are singletons - initialized once per app lifecycle.
- * Hilt manages dependency order and injection.
- */
 @Module
 @InstallIn(SingletonComponent::class)
 object KeyboardModule {

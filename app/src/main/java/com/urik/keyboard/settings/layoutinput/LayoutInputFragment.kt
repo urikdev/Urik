@@ -22,11 +22,6 @@ import com.urik.keyboard.settings.layoutmapper.LayoutMapperActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
-/**
- * Settings fragment for keyboard layout and input configuration.
- *
- * Manages number row visibility and space bar sizing preferences.
- */
 @AndroidEntryPoint
 class LayoutInputFragment : PreferenceFragmentCompat() {
     private lateinit var viewModel: LayoutInputViewModel

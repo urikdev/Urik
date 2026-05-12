@@ -9,9 +9,6 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import net.zetetic.database.sqlcipher.SupportOpenHelperFactory
 
-/**
- * Room database for keyboard learned words and clipboard history with SQLCipher encryption.
- */
 @Database(
     entities = [
         LearnedWord::class,
@@ -19,9 +16,10 @@ import net.zetetic.database.sqlcipher.SupportOpenHelperFactory
         ClipboardItem::class,
         CustomKeyMapping::class,
         UserWordFrequency::class,
-        UserWordBigram::class
+        UserWordBigram::class,
+        UserKanjiFrequency::class
     ],
-    version = 6,
+    version = 8,
     exportSchema = true,
     autoMigrations = [
         AutoMigration(from = 2, to = 3)
@@ -37,6 +35,8 @@ abstract class KeyboardDatabase : RoomDatabase() {
     abstract fun userWordFrequencyDao(): UserWordFrequencyDao
 
     abstract fun userWordBigramDao(): UserWordBigramDao
+
+    abstract fun userKanjiFrequencyDao(): UserKanjiFrequencyDao
 
     companion object {
         const val DATABASE_NAME = "keyboard_database"
@@ -160,12 +160,58 @@ abstract class KeyboardDatabase : RoomDatabase() {
             }
 
         /**
-         * Returns singleton database instance.
-         *
-         * @param context Application context
+         * Drops and recreates `clipboard_items` to change `content_hash` from INTEGER to TEXT
+         * (SHA-256 hex). Existing clipboard history is cleared — clipboard is ephemeral by design
+         * (TTL'd, max 100, never synced).
+         */
+        private val MIGRATION_6_7 =
+            object : Migration(6, 7) {
+                override fun migrate(db: SupportSQLiteDatabase) {
+                    db.execSQL("DROP INDEX IF EXISTS idx_clipboard_content_hash")
+                    db.execSQL("DROP INDEX IF EXISTS idx_clipboard_timestamp")
+                    db.execSQL("DROP INDEX IF EXISTS idx_clipboard_pinned")
+                    db.execSQL("DROP TABLE IF EXISTS clipboard_items")
+                    db.execSQL(
+                        """
+                        CREATE TABLE clipboard_items (
+                            id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                            content TEXT NOT NULL,
+                            content_hash TEXT NOT NULL,
+                            timestamp INTEGER NOT NULL,
+                            is_pinned INTEGER NOT NULL DEFAULT 0
+                        )
+                        """.trimIndent()
+                    )
+                    db.execSQL("CREATE UNIQUE INDEX idx_clipboard_content_hash ON clipboard_items(content_hash)")
+                    db.execSQL("CREATE INDEX idx_clipboard_timestamp ON clipboard_items(timestamp)")
+                    db.execSQL("CREATE INDEX idx_clipboard_pinned ON clipboard_items(is_pinned, timestamp)")
+                }
+            }
+
+        private val MIGRATION_7_8 =
+            object : Migration(7, 8) {
+                override fun migrate(db: SupportSQLiteDatabase) {
+                    db.execSQL(
+                        """
+                        CREATE TABLE IF NOT EXISTS user_kanji_frequency (
+                            id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                            reading TEXT NOT NULL,
+                            surface TEXT NOT NULL,
+                            frequency INTEGER NOT NULL,
+                            last_used INTEGER NOT NULL
+                        )
+                        """.trimIndent()
+                    )
+                    db.execSQL(
+                        "CREATE UNIQUE INDEX IF NOT EXISTS " +
+                            "idx_kanji_freq_lookup ON user_kanji_frequency(reading, surface)"
+                    )
+                }
+            }
+
+        /**
          * @param passphrase SQLCipher key from Android Keystore, or null for unencrypted
-         * @return Database instance
-         * @throws IllegalStateException if encryption settings change between calls
+         * @throws IllegalStateException if encryption mode changes between calls
          */
         fun getInstance(context: Context, passphrase: ByteArray? = null): KeyboardDatabase =
             instance ?: synchronized(this) {
@@ -185,7 +231,14 @@ abstract class KeyboardDatabase : RoomDatabase() {
                             context.applicationContext,
                             KeyboardDatabase::class.java,
                             DATABASE_NAME
-                        ).addMigrations(MIGRATION_1_2, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
+                        ).addMigrations(
+                            MIGRATION_1_2,
+                            MIGRATION_3_4,
+                            MIGRATION_4_5,
+                            MIGRATION_5_6,
+                            MIGRATION_6_7,
+                            MIGRATION_7_8
+                        )
                         .addCallback(
                             object : Callback() {
                                 override fun onOpen(db: SupportSQLiteDatabase) {

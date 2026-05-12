@@ -35,9 +35,6 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
-/**
- * Word learning configuration.
- */
 data class LearningConfig(
     val minWordLength: Int = 1,
     val maxWordLength: Int = 100,
@@ -46,9 +43,6 @@ data class LearningConfig(
     val errorCooldownMs: Long = 1500L
 )
 
-/**
- * Learning statistics for analytics.
- */
 data class LearningStats(
     val totalWordsLearned: Int,
     val wordsInCurrentLanguage: Int,
@@ -58,10 +52,6 @@ data class LearningStats(
     val currentLanguage: String
 )
 
-/**
- * Learns and retrieves user-typed words with frequency tracking.
- *
- */
 @Singleton
 class WordLearningEngine
 @Inject
@@ -136,10 +126,7 @@ constructor(
     }
 
     /**
-     * Initializes cache for specific language from database.
-     *
-     * Call when language switches to populate cache with learned words.
-     * Safe to call multiple times (overwrites existing cache).
+     * Call when language switches. Safe to call multiple times (overwrites existing cache).
      */
     suspend fun initializeLearnedWordsCache(languageTag: String): Result<Unit> = withContext(ioDispatcher) {
         try {
@@ -300,15 +287,7 @@ constructor(
         }
     }
 
-    /**
-     * Checks if word is learned.
-     *
-     * Lookup order:
-     * 1. Cache (O(1) if language cached)
-     * 2. Database (indexed query)
-     *
-     * @return true if word exists in current language's learned words
-     */
+    /** Lookup order: cache (O(1) if language cached) → database (indexed query). */
     suspend fun isWordLearned(word: String): Boolean = withContext(defaultDispatcher) {
         val currentLanguage = languageManager.currentLanguage.value
 
@@ -387,16 +366,10 @@ constructor(
     }
 
     /**
-     * Gets similar learned words for autocomplete/correction.
-     *
      * Search strategy (in order, up to maxResults):
      * 1. Exact match
      * 2. Prefix matches (FTS4 query)
      * 3. Edit distance ≤2 (fuzzy search on all words within ±MAX_LENGTH_DIFFERENCE_FUZZY characters of input length)
-     *
-     * Results sorted by frequency descending.
-     *
-     * @return List of (word, frequency) pairs
      */
     suspend fun getSimilarLearnedWordsWithFrequency(
         word: String,
@@ -597,13 +570,7 @@ constructor(
         }
     }
 
-    /**
-     * Removes learned word from database and cache.
-     *
-     * Thread safety: Uses same mutex as learnWord to prevent race conditions.
-     *
-     * @return true if word removed, false if not found or error
-     */
+    /** Uses same mutex as learnWord to prevent race conditions. */
     suspend fun removeWord(word: String): Result<Boolean> = withContext(ioDispatcher) {
         val currentLanguage = languageManager.currentLanguage.value
 
@@ -723,12 +690,8 @@ constructor(
     }
 
     /**
-     * Batch checks if multiple words are learned.
-     *
-     * More efficient than calling isWordLearned() repeatedly.
+     * More efficient than calling [isWordLearned] repeatedly.
      * Updates cache with results to improve future lookups.
-     *
-     * @return Map of original word → learned status
      */
     private suspend fun ensureCacheLoaded(languageTag: String) {
         synchronized(cacheLock) {
@@ -813,11 +776,7 @@ constructor(
         }
     }
 
-    /**
-     * Gets learning statistics for current language.
-     *
-     * Returns safe defaults if in error cooldown or destroyed.
-     */
+    /** Returns safe defaults if in error cooldown or destroyed. */
     suspend fun getLearningStats(): Result<LearningStats> = withContext(ioDispatcher) {
         return@withContext try {
             val currentLanguage = languageManager.currentLanguage.value
@@ -976,11 +935,7 @@ constructor(
         WordSource.SYSTEM_DEFAULT -> InputMethod.TYPED
     }
 
-    /**
-     * Clears learned words cache for current language.
-     *
-     * Call when entering secure fields to prevent cache leaks.
-     */
+    /** Call when entering secure fields to prevent cache leaks. */
     fun clearCurrentLanguageCache() {
         val currentLanguage = languageManager.currentLanguage.value
         learnedWordsCache.invalidate(currentLanguage)

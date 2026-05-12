@@ -13,6 +13,10 @@ class CandidateBarController(private val viewProvider: () -> SwipeKeyboardView?)
         viewProvider()?.clearSuggestions()
     }
 
+    fun showDegradedIndicator(degraded: Boolean) {
+        viewProvider()?.showDegradedIndicator(degraded)
+    }
+
     fun forceClearAllSuggestions() {
         viewProvider()?.forceClearAllSuggestions()
     }

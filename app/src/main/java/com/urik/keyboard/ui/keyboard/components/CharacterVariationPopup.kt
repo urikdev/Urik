@@ -195,15 +195,11 @@ class CharacterVariationPopup(private val context: Context, private val themeMan
     }
 
     /**
-     * Shows popup intelligently positioned relative to anchor key.
-     *
      * Positioning strategy:
      * 1. Prefers showing above anchor (standard long-press behavior)
      * 2. Falls back to below if insufficient space above
      * 3. Centers horizontally on anchor, respects screen edges
      * 4. Ensures popup fully visible within screen bounds
-     *
-     * @param anchorView Key view that triggered the popup
      */
     fun showAboveAnchor(anchorView: View) {
         if (!anchorView.isAttachedToWindow || anchorView.windowToken == null) {

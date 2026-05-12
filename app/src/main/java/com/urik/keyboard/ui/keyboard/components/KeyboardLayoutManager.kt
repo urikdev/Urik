@@ -472,6 +472,27 @@ class KeyboardLayoutManager(
         cacheValid = true
     }
 
+    /**
+     * Returns a cached dimension, re-running [ensureCacheValid] if the key is absent, then
+     * falling back to the equivalent resource default so consumers never receive null.
+     */
+    private fun requireDim(key: String): Int {
+        val cached = cachedDimensions[key]
+        if (cached != null) return cached
+        ensureCacheValid()
+        cachedDimensions[key]?.let { return it }
+        return when (key) {
+            "minTarget" -> context.resources.getDimensionPixelSize(R.dimen.minimum_touch_target)
+            "keyHeight" -> context.resources.getDimensionPixelSize(R.dimen.key_height)
+            "horizontalPadding" -> context.resources.getDimensionPixelSize(R.dimen.key_margin_horizontal)
+            "verticalPadding" -> (context.resources.getDimensionPixelSize(R.dimen.key_margin_horizontal) * 0.5f).toInt()
+            "horizontalMargin" -> context.resources.getDimensionPixelSize(R.dimen.key_margin_horizontal)
+            "rowVerticalMargin" -> context.resources.getDimensionPixelSize(R.dimen.key_margin_vertical)
+            "numberRowGutter" -> context.resources.getDimensionPixelSize(R.dimen.number_row_gutter)
+            else -> 0
+        }
+    }
+
     private fun getCachedTextSize(keyHeight: Int): Float = cachedTextSizes.getOrPut(keyHeight) {
         val dims = adaptiveDimensions
         val ratio = dims?.keyTextBaseRatio ?: 0.38f
@@ -567,11 +588,10 @@ class KeyboardLayoutManager(
                             LinearLayout.LayoutParams.WRAP_CONTENT
                         ).apply {
                             ensureCacheValid()
-                            val verticalMargin = cachedDimensions["rowVerticalMargin"]
-                                ?: context.resources.getDimensionPixelSize(R.dimen.key_margin_vertical)
+                            val verticalMargin = requireDim("rowVerticalMargin")
                             val gutterMargin =
                                 if (hasNumberRowGutter) {
-                                    cachedDimensions["numberRowGutter"]!!
+                                    requireDim("numberRowGutter")
                                 } else {
                                     0
                                 }
@@ -760,9 +780,9 @@ class KeyboardLayoutManager(
             setOnLongClickListener(null)
             setOnTouchListener(null)
 
-            val minTarget = cachedDimensions["minTarget"]!!
-            val keyHeight = cachedDimensions["keyHeight"]!!
-            val gutterReduction = if (isTopNumberRow(rowKeys)) cachedDimensions["numberRowGutter"]!! else 0
+            val minTarget = requireDim("minTarget")
+            val keyHeight = requireDim("keyHeight")
+            val gutterReduction = if (isTopNumberRow(rowKeys)) requireDim("numberRowGutter") else 0
             val adjustedKeyHeight = (keyHeight - gutterReduction).coerceAtLeast(keyHeight / 2)
             val adjustedMinTarget = (minTarget - gutterReduction).coerceAtLeast(minTarget / 2)
             val visualHeight = adjustedKeyHeight + 2
@@ -775,7 +795,7 @@ class KeyboardLayoutManager(
                         visualHeight,
                         getKeyWeight(key, rowKeys)
                     ).apply {
-                        val horizontalMargin = cachedDimensions["horizontalMargin"]!!
+                        val horizontalMargin = requireDim("horizontalMargin")
                         setMargins(horizontalMargin, verticalMargin, horizontalMargin, verticalMargin)
                     }
 
@@ -801,8 +821,8 @@ class KeyboardLayoutManager(
             minHeight = 0
             minimumHeight = 0
 
-            val horizontalPadding = cachedDimensions["horizontalPadding"]!!
-            val verticalPadding = cachedDimensions["verticalPadding"]!!
+            val horizontalPadding = requireDim("horizontalPadding")
+            val verticalPadding = requireDim("verticalPadding")
             setPadding(horizontalPadding, verticalPadding, horizontalPadding, verticalPadding)
 
             if (key is KeyboardKey.Action &&

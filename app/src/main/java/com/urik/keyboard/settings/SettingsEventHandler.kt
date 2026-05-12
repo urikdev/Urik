@@ -4,11 +4,7 @@ import android.content.Context
 import android.widget.Toast
 import com.urik.keyboard.R
 
-/**
- * Handles settings events by displaying localized user feedback.
- *
- * Should be instantiated per-Fragment to respect lifecycle.
- */
+/** Should be instantiated per-Fragment to respect lifecycle. */
 class SettingsEventHandler(private val context: Context) {
     fun handle(event: SettingsEvent) {
         val message =

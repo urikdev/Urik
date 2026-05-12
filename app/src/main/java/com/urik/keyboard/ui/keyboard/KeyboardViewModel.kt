@@ -21,10 +21,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
 
-/**
- * Keyboard UI state and layout management.
- *
- */
 @HiltViewModel
 class KeyboardViewModel
 @Inject
@@ -64,12 +60,6 @@ constructor(
         }
     }
 
-    /**
-     * Updates action key type (enter/search/done/go/etc).
-     *
-     * Cancels in-flight layout load, reloads current mode with new action.
-     * Called when input field type changes (text → URL → email).
-     */
     fun updateActionType(actionType: KeyboardKey.ActionType) {
         if (actionType != currentActionType) {
             currentActionType = actionType
@@ -77,20 +67,10 @@ constructor(
         }
     }
 
-    /**
-     * Reloads the current keyboard layout.
-     *
-     * Called when alternative layout setting changes.
-     */
     fun reloadLayout() {
         startLoadLayout(_state.value.currentMode)
     }
 
-    /**
-     * Resets keyboard mode to LETTERS.
-     *
-     * No-op if already in LETTERS mode.
-     */
     fun resetToLetters() {
         if (_state.value.currentMode != KeyboardMode.LETTERS) {
             startLoadLayout(KeyboardMode.LETTERS)
@@ -104,15 +84,6 @@ constructor(
         }
     }
 
-    /**
-     * Returns character to insert, applying shift/caps lock.
-     *
-     * Capitalization rules:
-     * - Letters: Uppercase if shift OR caps lock active
-     * - Others: No transformation
-     *
-     * Note: Shift cleared by caller after character inserted.
-     */
     fun getCharacterForInput(key: KeyboardKey.Character): String {
         val shouldCap = shouldCapitalize()
         return when {
@@ -139,9 +110,6 @@ constructor(
         updateState { it.copy(isShiftPressed = true, isAutoShift = true) }
     }
 
-    /**
-     * Checks if auto-capitalization should trigger.
-     */
     fun shouldAutoCapitalize(textBeforeCursor: String?): Boolean {
         if (textBeforeCursor.isNullOrBlank()) {
             return true
@@ -205,9 +173,7 @@ constructor(
 
     private fun handleKeyPress(key: KeyboardKey) {
         when (key) {
-            is KeyboardKey.Character -> {
-                // Shift clearing happens after getCharacterForInput() is called
-            }
+            is KeyboardKey.Character -> {}
 
             is KeyboardKey.Action -> {
                 viewModelScope.launch {
@@ -221,12 +187,6 @@ constructor(
         }
     }
 
-    /**
-     * Clears shift state after letter insertion.
-     *
-     * Only clears if shift (not caps lock) was active.
-     * Call after character inserted to editor.
-     */
     fun clearShiftAfterCharacter(key: KeyboardKey.Character) {
         if (key.type == KeyboardKey.KeyType.LETTER && _state.value.isShiftPressed && !_state.value.isCapsLockOn) {
             updateState { it.copy(isShiftPressed = false, isAutoShift = false) }
@@ -291,12 +251,6 @@ constructor(
         }
     }
 
-    /**
-     * Cancels in-flight layout load and starts new load.
-     *
-     * Prevents race conditions when mode/language/action changes rapidly.
-     * Only one layout load active at a time.
-     */
     private fun startLoadLayout(mode: KeyboardMode) {
         loadJob?.cancel()
         loadJob =

@@ -3,6 +3,7 @@
 package com.urik.keyboard.service
 
 import android.content.Context
+import androidx.annotation.VisibleForTesting
 import com.darkrockstudios.symspellkt.api.SpellChecker
 import com.darkrockstudios.symspellkt.common.SpellCheckSettings
 import com.darkrockstudios.symspellkt.common.Verbosity
@@ -29,6 +30,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -74,7 +76,7 @@ constructor(
 
     @Volatile private var cachedLocale: Locale = Locale.forLanguageTag("en")
 
-    private val wordFrequencies = ConcurrentHashMap<String, Long>()
+    private val wordFrequencies = ConcurrentHashMap<String, ConcurrentHashMap<String, Long>>()
 
     private val parsedDictionaryWords = ConcurrentHashMap<String, List<Pair<String, Int>>>()
     private val indexedDictionaryWords = ConcurrentHashMap<String, List<CachedWord>>()
@@ -133,6 +135,9 @@ constructor(
                         )
                         false
                     }
+                if (!success) {
+                    isDegradedMode = true
+                }
                 initializationComplete.complete(success)
             }
 
@@ -170,6 +175,9 @@ constructor(
         }
     }
 
+    @VisibleForTesting
+    internal fun wordFrequenciesForTest(): Map<String, Map<String, Long>> = wordFrequencies
+
     private suspend fun ensureInitialized(): Boolean = withTimeoutOrNull(INITIALIZATION_TIMEOUT_MS) {
         initializationComplete.await()
     } ?: run {
@@ -205,8 +213,6 @@ constructor(
             if (languageCode !in KeyboardSettings.SUPPORTED_LANGUAGES) {
                 return
             }
-
-            currentLanguage = languageCode
 
             if (spellCheckers[languageCode] == null) {
                 val spellChecker = createSpellChecker(context, languageCode)
@@ -292,29 +298,28 @@ constructor(
             val collectedWords = ArrayList<Pair<String, Int>>(INITIAL_WORD_LIST_CAPACITY)
 
             inputStream.bufferedReader().use { reader ->
-                val lines = reader.readLines()
-
-                lines.chunked(DICTIONARY_BATCH_SIZE).forEach { batch ->
-                    ensureActive()
-
-                    batch.forEach { line ->
-                        if (line.isNotBlank()) {
-                            val parts = line.trim().split(" ", limit = 2)
-                            if (parts.size >= 2) {
-                                val word = parts[0]
-                                val frequency = parts[1].toLongOrNull() ?: 1L
-                                wordFrequencies[word.lowercase()] = frequency
-                                symSpell.createDictionaryEntry(word, frequency.toInt())
-                                collectedWords.add(word.lowercase() to frequency.toInt())
-                            } else if (parts.size == 1) {
-                                wordFrequencies[parts[0].lowercase()] = 1L
-                                symSpell.createDictionaryEntry(parts[0], 1)
-                                collectedWords.add(parts[0].lowercase() to 1)
-                            }
+                var linesRead = 0
+                for (line in reader.lineSequence()) {
+                    currentCoroutineContext().ensureActive()
+                    if (line.isNotBlank()) {
+                        val parts = line.trim().split(" ", limit = 2)
+                        if (parts.size >= 2) {
+                            val word = parts[0]
+                            val frequency = parts[1].toLongOrNull() ?: 1L
+                            wordFrequencies.getOrPut(languageCode) { ConcurrentHashMap() }[word.lowercase()] =
+                                frequency
+                            val frequencyInt = frequency.coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
+                            symSpell.createDictionaryEntry(word, frequencyInt)
+                            collectedWords.add(word.lowercase() to frequencyInt)
+                        } else if (parts.size == 1) {
+                            wordFrequencies.getOrPut(languageCode) { ConcurrentHashMap() }[parts[0].lowercase()] =
+                                1L
+                            symSpell.createDictionaryEntry(parts[0], 1)
+                            collectedWords.add(parts[0].lowercase() to 1)
                         }
+                        linesRead++
+                        if (linesRead % DICTIONARY_BATCH_SIZE == 0) yield()
                     }
-
-                    yield()
                 }
 
                 val sorted = collectedWords.sortedByDescending { it.second }
@@ -378,6 +383,7 @@ constructor(
         spellCheckerAccessOrder.remove(evictionTarget)
         parsedDictionaryWords.remove(evictionTarget)
         indexedDictionaryWords.remove(evictionTarget)
+        wordFrequencies.remove(evictionTarget)
     }
 
     private suspend fun getSpellCheckerForLanguage(languageCode: String): SpellChecker? {
@@ -396,16 +402,8 @@ constructor(
     }
 
     /**
-     * Checks if word exists in dictionary or learned words.
-     *
-     * Lookup order:
-     * 1. Learned words (always checked first, dynamic data)
-     * 2. Cache (static dictionary results)
-     * 3. SymSpell dictionary (exact match, edit distance = 0)
-     *
+     * Lookup order: learned words → cache → SymSpell (edit distance = 0).
      * Word is normalized (lowercase, trimmed) before checking.
-     *
-     * @return true if word valid, false if typo/unknown
      */
     suspend fun isWordInDictionary(word: String): Boolean = withContext(Dispatchers.Default) {
         try {
@@ -466,14 +464,14 @@ constructor(
         val prefixValid =
             wordLearningEngine.isWordLearned(prefix) ||
                 checkSymSpellDictionary(prefix, languageCode) ||
-                wordFrequencies.containsKey(prefix)
+                wordFrequencies[languageCode]?.containsKey(prefix) ?: false
 
         if (!prefixValid) return false
 
         val suffixValid =
             wordLearningEngine.isWordLearned(suffix) ||
                 checkSymSpellDictionary(suffix, languageCode) ||
-                wordFrequencies.containsKey(suffix)
+                wordFrequencies[languageCode]?.containsKey(suffix) ?: false
 
         if (suffixValid) {
             val cacheKey = buildCacheKey(normalizedWord, languageCode)
@@ -483,15 +481,15 @@ constructor(
         return suffixValid
     }
 
-    fun getDominantContractionForm(normalizedWord: String): String? {
+    fun getDominantContractionForm(normalizedWord: String, languageCode: String = currentLanguage): String? {
         val canonical = wordNormalizer.canonicalizeApostrophes(normalizedWord)
         if (canonical.contains('\'')) return null
 
-        val wordFreq = wordFrequencies[canonical] ?: return null
+        val wordFreq = wordFrequencies[languageCode]?.get(canonical) ?: return null
 
         for (i in 1 until canonical.length) {
             val candidate = canonical.substring(0, i) + "'" + canonical.substring(i)
-            val contractionFreq = wordFrequencies[candidate] ?: continue
+            val contractionFreq = wordFrequencies[languageCode]?.get(candidate) ?: continue
             if (contractionFreq >= wordFreq * CONTRACTION_DOMINANCE_RATIO) {
                 return candidate
             }
@@ -499,15 +497,15 @@ constructor(
         return null
     }
 
-    suspend fun hasDominantContractionForm(normalizedWord: String): Boolean {
+    suspend fun hasDominantContractionForm(normalizedWord: String, languageCode: String? = null): Boolean {
+        val lang = languageCode ?: getCurrentLanguage()
         val canonical = wordNormalizer.canonicalizeApostrophes(normalizedWord)
         if (canonical.contains('\'')) return false
 
-        val dictFreq = wordFrequencies[canonical] ?: return false
+        val dictFreq = wordFrequencies[lang]?.get(canonical) ?: return false
 
-        val currentLang = getCurrentLanguage()
         val userFreq = try {
-            wordFrequencyRepository.getFrequency(canonical, currentLang)
+            wordFrequencyRepository.getFrequency(canonical, lang)
         } catch (e: Exception) {
             ErrorLogger.logException(
                 component = "SpellCheckManager",
@@ -522,7 +520,7 @@ constructor(
 
         for (i in 1 until canonical.length) {
             val candidate = canonical.substring(0, i) + "'" + canonical.substring(i)
-            val contractionFreq = wordFrequencies[candidate] ?: continue
+            val contractionFreq = wordFrequencies[lang]?.get(candidate) ?: continue
             if (contractionFreq >= effectiveBaseFreq * CONTRACTION_DOMINANCE_RATIO) {
                 return true
             }
@@ -530,13 +528,7 @@ constructor(
         return false
     }
 
-    /**
-     * Batch dictionary check for multiple words.
-     *
-     * Uses single batch query to WordLearningEngine for learned words.
-     *
-     * @return Map of original word → validity
-     */
+    /** Uses single batch query to WordLearningEngine for learned words. */
     suspend fun areWordsInDictionary(words: List<String>): Map<String, Boolean> = withContext(Dispatchers.Default) {
         if (words.isEmpty()) {
             return@withContext emptyMap()
@@ -627,14 +619,7 @@ constructor(
         return@withContext results
     }
 
-    /**
-     * Generates spelling suggestions for misspelled word.
-     *
-     * Simpler API wrapping getSpellingSuggestionsWithConfidence().
-     *
-     * @param maxSuggestions Number of suggestions to return (default 3)
-     * @return List of suggested corrections, confidence-sorted
-     */
+    /** Simpler API wrapping [getSpellingSuggestionsWithConfidence]. */
     suspend fun generateSuggestions(word: String, maxSuggestions: Int = 3): List<String> {
         return try {
             if (!ensureInitialized()) {
@@ -658,14 +643,9 @@ constructor(
     }
 
     /**
-     * Generates spelling suggestions with confidence scores.
-     *
      * Combines learned words + dictionary corrections + prefix completions, ranked by confidence.
      * Learned words boosted by frequency, corrections penalized by edit distance, completions by prefix match.
-     *
-     * Cached (500 entries, LRU) for performance.
-     *
-     * @return List of suggestions sorted by confidence (highest first)
+     * Cached (500 entries, LRU).
      */
     suspend fun getSpellingSuggestionsWithConfidence(word: String): List<SpellingSuggestion> =
         withContext(Dispatchers.Default) {
@@ -718,6 +698,7 @@ constructor(
         activeLanguages: List<String>
     ): List<SpellingSuggestion> = coroutineScope {
         try {
+            val effectiveLanguage = getCurrentLanguage()
             val allLanguageSuggestions =
                 activeLanguages
                     .map { lang ->
@@ -727,7 +708,7 @@ constructor(
                     }.awaitAll()
                     .flatten()
 
-            mergeAndRankSuggestions(allLanguageSuggestions, MAX_SUGGESTIONS)
+            mergeAndRankSuggestions(allLanguageSuggestions, MAX_SUGGESTIONS, effectiveLanguage)
         } catch (e: Exception) {
             ErrorLogger.logException(
                 component = "SpellCheckManager",
@@ -931,7 +912,7 @@ constructor(
                         val isContraction =
                             com.urik.keyboard.utils.TextMatchingUtils
                                 .isContractionSuggestion(normalizedWord, symResult.term)
-                        val frequency = wordFrequencies[symResult.term.lowercase()] ?: 1L
+                        val frequency = wordFrequencies[languageCode]?.get(symResult.term.lowercase()) ?: 1L
                         val userFrequency = userFrequencies[symResult.term] ?: 0
                         val confidence =
                             if (isContraction) {
@@ -1013,9 +994,10 @@ constructor(
 
     private fun mergeAndRankSuggestions(
         suggestions: List<SpellingSuggestion>,
-        maxResults: Int
+        maxResults: Int,
+        languageCode: String
     ): List<SpellingSuggestion> {
-        val promoted = promoteContractionForms(suggestions)
+        val promoted = promoteContractionForms(suggestions, languageCode)
 
         if (promoted.size <= maxResults) {
             val hasDuplicates = promoted.map { it.word }.toSet().size < promoted.size
@@ -1029,10 +1011,13 @@ constructor(
             .take(maxResults)
     }
 
-    private fun promoteContractionForms(suggestions: List<SpellingSuggestion>): List<SpellingSuggestion> {
+    private fun promoteContractionForms(
+        suggestions: List<SpellingSuggestion>,
+        languageCode: String
+    ): List<SpellingSuggestion> {
         var anyPromoted = false
         val result = suggestions.map { suggestion ->
-            val contraction = getDominantContractionForm(suggestion.word)
+            val contraction = getDominantContractionForm(suggestion.word, languageCode)
             if (contraction != null) {
                 anyPromoted = true
                 suggestion.copy(word = contraction)
@@ -1146,19 +1131,13 @@ constructor(
 
     private fun buildCacheKey(word: String, language: String): String = "${language}_$word"
 
-    /**
-     * Clears all cached suggestions and dictionary lookups.
-     *
-     * Call when language changed or after bulk word learning.
-     */
+    /** Call when language changed or after bulk word learning. */
     fun clearCaches() {
         suggestionCache.invalidateAll()
         dictionaryCache.invalidateAll()
     }
 
     /**
-     * Invalidates cache entries for specific word.
-     *
      * CRITICAL: Must be called after word removal from learned words.
      * Otherwise cache marks removed word as valid (stale data).
      *
@@ -1183,12 +1162,7 @@ constructor(
         }
     }
 
-    /**
-     * Removes suggestion completely (learned word + blacklist).
-     *
-     * Coordinates removal across WordLearningEngine and SpellCheckManager.
-     * Use for long-press suggestion removal.
-     */
+    /** Removes from WordLearningEngine and adds to blacklist in one operation. */
     suspend fun removeSuggestion(word: String): Result<Boolean> = withContext(ioDispatcher) {
         return@withContext try {
             val result = wordLearningEngine.removeWord(word)
@@ -1200,10 +1174,8 @@ constructor(
     }
 
     /**
-     * Permanently hides word from suggestions (global, all languages).
-     *
-     * Use for profanity, spam, or unwanted autocorrect.
-     * Clears entire suggestion cache since cached prefix lists may contain this word.
+     * Global across all languages. Clears entire suggestion cache since cached
+     * prefix lists may contain this word.
      */
     fun blacklistSuggestion(word: String) {
         try {
@@ -1225,10 +1197,7 @@ constructor(
         }
     }
 
-    /**
-     * Removes word from blacklist, allowing it in suggestions again.
-     * Clears entire suggestion cache since cached prefix lists excluded this word.
-     */
+    /** Clears entire suggestion cache since cached prefix lists excluded this word. */
     fun removeFromBlacklist(word: String) {
         try {
             val normalizedWord = word.lowercase(getLocaleForLanguage()).trim()
@@ -1301,13 +1270,7 @@ constructor(
         }
     }
 
-    /**
-     * Loads dictionary words sorted by frequency.
-     *
-     * Cached per language to avoid redundant file I/O.
-     * Used for swipe word candidate generation and prefix completions.
-     * @return List of (word, frequency) pairs
-     */
+    /** Cached per language to avoid redundant file I/O. */
     suspend fun getCommonWords(languageCode: String? = null): List<Pair<String, Int>> = withContext(ioDispatcher) {
         try {
             if (!ensureInitialized()) {
@@ -1581,7 +1544,7 @@ constructor(
         }
     }
 
-    private companion object {
+    internal companion object {
         const val SUGGESTION_CACHE_SIZE = 500
         const val DICTIONARY_CACHE_SIZE = 1000
 

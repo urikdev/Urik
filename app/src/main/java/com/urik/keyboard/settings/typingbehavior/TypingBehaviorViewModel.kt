@@ -18,9 +18,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-/**
- * Manages typing behavior settings state and updates.
- */
 @HiltViewModel
 class TypingBehaviorViewModel
 @Inject
@@ -144,9 +141,6 @@ constructor(private val settingsRepository: SettingsRepository) :
     }
 }
 
-/**
- * UI state for typing behavior settings.
- */
 data class TypingBehaviorUiState(
     val doubleSpacePeriod: Boolean = true,
     val autoCapitalizationEnabled: Boolean = true,

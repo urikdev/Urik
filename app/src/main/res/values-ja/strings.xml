@@ -175,6 +175,8 @@
     <!-- Privacy & Data Settings -->
     <string name="privacy_settings_storage_encryption_title">単語ストレージ：暗号化なし</string>
     <string name="privacy_settings_storage_encryption_summary">デバイスのロック画面が検出されませんでした。学習した単語は平文で保存されています。暗号化を有効にするには、Androidの設定でPIN、パターン、または生体認証ロックを設定してください。</string>
+    <string name="privacy_settings_keystore_api27_title">暗号化: ロック保護が制限されています</string>
+    <string name="privacy_settings_keystore_api27_summary">このデバイスは Android 7.1 以前で動作しています。この Android バージョンでは、データベースキーをデバイスのロック解除時のみアクセス可能に制限することができないため、学習した単語がデバイスのロック中でもアクセス可能な状態になる可能性があります。Android 9.0 以降にアップグレードすると、完全なロック画面保護が有効になります。</string>
     <string name="privacy_settings_clipboard_history">クリップボード履歴</string>
     <string name="privacy_settings_clipboard_history_on">クリップボード履歴有効</string>
     <string name="privacy_settings_clipboard_history_off">クリップボード履歴無効</string>

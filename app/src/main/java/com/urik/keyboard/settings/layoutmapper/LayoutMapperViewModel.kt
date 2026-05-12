@@ -30,9 +30,6 @@ sealed class LayoutMapperEvent {
     data object ClearFailed : LayoutMapperEvent()
 }
 
-/**
- * ViewModel for the Layout Mapper settings screen.
- */
 @HiltViewModel
 class LayoutMapperViewModel
 @Inject

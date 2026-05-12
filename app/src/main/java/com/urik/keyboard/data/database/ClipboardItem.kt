@@ -28,7 +28,7 @@ data class ClipboardItem(
     @ColumnInfo(name = "content")
     val content: String,
     @ColumnInfo(name = "content_hash")
-    val contentHash: Int = content.hashCode(),
+    val contentHash: String = com.urik.keyboard.utils.ContentHasher.sha256Hex(content),
     @ColumnInfo(name = "timestamp")
     val timestamp: Long,
     @ColumnInfo(name = "is_pinned")

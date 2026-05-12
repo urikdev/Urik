@@ -2,6 +2,7 @@ package com.urik.keyboard.settings.privacydata
 
 import android.app.Activity
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyPermanentlyInvalidatedException
@@ -35,12 +36,6 @@ import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import kotlinx.coroutines.launch
 
-/**
- * Settings fragment for privacy and data management.
- *
- * Provides options to configure clipboard history, clear learned words,
- * reset settings to defaults, and export error logs for debugging.
- */
 @AndroidEntryPoint
 class PrivacyDataFragment : PreferenceFragmentCompat() {
     private lateinit var viewModel: PrivacyDataViewModel
@@ -90,6 +85,17 @@ class PrivacyDataFragment : PreferenceFragmentCompat() {
                 isIconSpaceReserved = false
             }
             screen.addPreference(encryptionWarningPref)
+        }
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
+            val keystoreApi27Pref = Preference(context).apply {
+                key = "keystore_api27_warning"
+                title = resources.getString(R.string.privacy_settings_keystore_api27_title)
+                summary = resources.getString(R.string.privacy_settings_keystore_api27_summary)
+                isSelectable = false
+                isIconSpaceReserved = false
+            }
+            screen.addPreference(keystoreApi27Pref)
         }
 
         clipboardPref =
@@ -291,17 +297,30 @@ class PrivacyDataFragment : PreferenceFragmentCompat() {
     private fun showBiometricPrompt() {
         val activity = requireActivity() as FragmentActivity
         val executor = ContextCompat.getMainExecutor(requireContext())
+        val challenge = createChallenge()
 
         val callback = object : BiometricPrompt.AuthenticationCallback() {
             override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
                 result.cryptoObject?.cipher?.let { cipher ->
                     try {
-                        cipher.doFinal(BIOMETRIC_CHALLENGE)
-                    } catch (_: Exception) {
+                        cipher.doFinal(challenge)
+                    } catch (e: Exception) {
+                        ErrorLogger.logException(
+                            component = "PrivacyDataFragment",
+                            severity = ErrorLogger.Severity.HIGH,
+                            exception = e,
+                            context = mapOf("operation" to "biometric_cipher_verify")
+                        )
                         return
                     }
                 }
                 navigateToLearnedWords()
+            }
+
+            override fun onAuthenticationFailed() {
+            }
+
+            override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
             }
         }
 
@@ -379,16 +398,19 @@ class PrivacyDataFragment : PreferenceFragmentCompat() {
         keyGenerator.init(
             KeyGenParameterSpec.Builder(
                 BIOMETRIC_KEY_ALIAS,
-                KeyProperties.PURPOSE_ENCRYPT
+                KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
             )
                 .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
                 .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
+                .setKeySize(256)
                 .setUserAuthenticationRequired(true)
                 .setInvalidatedByBiometricEnrollment(true)
                 .build()
         )
         keyGenerator.generateKey()
     }
+
+    private fun createChallenge(): ByteArray = ByteArray(16).also { java.security.SecureRandom().nextBytes(it) }
 
     private fun navigateToLearnedWords() {
         parentFragmentManager
@@ -401,6 +423,5 @@ class PrivacyDataFragment : PreferenceFragmentCompat() {
     companion object {
         private const val BIOMETRIC_KEY_ALIAS = "urik_learned_words_biometric_key"
         private const val CIPHER_TRANSFORMATION = "AES/GCM/NoPadding"
-        private val BIOMETRIC_CHALLENGE = byteArrayOf(0)
     }
 }

@@ -5,6 +5,7 @@ import android.content.Context
 import com.urik.keyboard.data.ClipboardRepository
 import com.urik.keyboard.di.ApplicationScope
 import com.urik.keyboard.settings.SettingsRepository
+import com.urik.keyboard.utils.ContentHasher
 import com.urik.keyboard.utils.ErrorLogger
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.util.concurrent.atomic.AtomicBoolean
@@ -31,7 +32,7 @@ constructor(
 ) {
     private val clipboardManager = context.getSystemService(ClipboardManager::class.java)
 
-    private var lastClipContentHash: Int? = null
+    private var lastClipContentHash: String? = null
     private val isMonitoring = AtomicBoolean(false)
 
     private val listener =
@@ -71,7 +72,8 @@ constructor(
         }
     }
 
-    private fun onClipboardChanged() {
+    @androidx.annotation.VisibleForTesting
+    internal fun onClipboardChanged() {
         applicationScope.launch {
             try {
                 val settings = settingsRepository.settings.first()
@@ -87,7 +89,7 @@ constructor(
 
                 val truncatedText = text.take(100_000)
 
-                val textHash = truncatedText.hashCode()
+                val textHash = ContentHasher.sha256Hex(truncatedText)
                 if (textHash == lastClipContentHash) return@launch
 
                 clipboardRepository.addItem(truncatedText)
