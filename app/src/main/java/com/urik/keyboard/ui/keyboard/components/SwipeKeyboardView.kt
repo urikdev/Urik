@@ -1695,6 +1695,7 @@ constructor(
                     if (justActivated) {
                         parent?.requestDisallowInterceptTouchEvent(true)
                         keyboardLayoutManager?.cancelAllPendingCallbacks()
+                        keyboardLayoutManager?.stopAcceleratedBackspace()
                         keyboardLayoutManager?.dismissVariationPopup()
                         keyboardLayoutManager?.triggerHapticFeedback()
                         return true
@@ -1714,6 +1715,7 @@ constructor(
 
                 if (isSwipe && !isSwipeActive) {
                     isSwipeActive = true
+                    keyboardLayoutManager?.stopAcceleratedBackspace()
                     return true
                 }
 
