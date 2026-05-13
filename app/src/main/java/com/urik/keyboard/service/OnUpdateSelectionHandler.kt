@@ -37,7 +37,7 @@ class OnUpdateSelectionHandler(
                 invalidateComposingStateOnCursorJump()
             }
 
-            if (!inputState.isUrlOrEmailField) {
+            if (!inputState.isUrlOrEmailField && !inputState.isTerminalField) {
                 onCheckAutoCapitalization(textBefore)
             }
         }

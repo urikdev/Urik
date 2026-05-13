@@ -70,6 +70,29 @@ class OnUpdateSelectionHandlerTest {
     }
 
     @Test
+    fun handle_doesNotInvokeAutoCapLambda_whenTerminalField() {
+        realInputState.isTerminalField = true
+        `when`(mockOutputBridge.safeGetTextBeforeCursor(50)).thenReturn("")
+        `when`(mockOutputBridge.safeGetTextAfterCursor(50)).thenReturn("")
+
+        handler.handle(0, 0, -1, -1)
+
+        assertEquals(0, autoCapArgs.size)
+    }
+
+    @Test
+    fun handle_invokesAutoCapLambda_whenCursorAtZero_andNotTerminalField_andNotUrlField() {
+        realInputState.isTerminalField = false
+        realInputState.isUrlOrEmailField = false
+        `when`(mockOutputBridge.safeGetTextBeforeCursor(50)).thenReturn("")
+        `when`(mockOutputBridge.safeGetTextAfterCursor(50)).thenReturn("")
+
+        handler.handle(0, 0, -1, -1)
+
+        assertEquals(1, autoCapArgs.size)
+    }
+
+    @Test
     fun handle_clearsIsActivelyEditing_whenSet() {
         realInputState.isActivelyEditing = true
         handler.handle(5, 5, -1, -1)
