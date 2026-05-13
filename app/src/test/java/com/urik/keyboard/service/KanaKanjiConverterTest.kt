@@ -8,7 +8,8 @@ import com.urik.keyboard.data.database.UserKanjiFrequencyDao
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -25,6 +26,9 @@ import org.robolectric.Shadows.shadowOf
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
 class KanaKanjiConverterTest {
+    private val testScheduler = TestCoroutineScheduler()
+    private val testDispatcher = StandardTestDispatcher(testScheduler)
+
     private lateinit var context: Context
     private lateinit var database: KeyboardDatabase
     private lateinit var dao: UserKanjiFrequencyDao
@@ -39,7 +43,7 @@ class KanaKanjiConverterTest {
                 .allowMainThreadQueries()
                 .build()
         dao = database.userKanjiFrequencyDao()
-        converter = KanaKanjiConverter(context, dao, UnconfinedTestDispatcher())
+        converter = KanaKanjiConverter(context, dao, testDispatcher)
     }
 
     @After
@@ -92,7 +96,7 @@ class KanaKanjiConverterTest {
     }
 
     @Test
-    fun `recordSelection persists to Room`() = runTest {
+    fun `recordSelection persists to Room`() = runTest(testScheduler) {
         converter.recordSelection("わたし", "私")
         advanceUntilIdle()
         shadowOf(Looper.getMainLooper()).idle()
@@ -117,7 +121,7 @@ class KanaKanjiConverterTest {
     }
 
     @Test
-    fun `recordSelection boost survives simulated restart`() = runTest {
+    fun `recordSelection boost survives simulated restart`() = runTest(testScheduler) {
         converter.recordSelection("わたし", "私")
         advanceUntilIdle()
 

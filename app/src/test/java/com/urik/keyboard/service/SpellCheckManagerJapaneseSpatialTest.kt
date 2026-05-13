@@ -153,7 +153,7 @@ class SpellCheckManagerJapaneseSpatialTest {
     }
 
     @Test
-    fun `Japanese spatial bypass lets frequency win over spatial proximity`() = runTest {
+    fun `japanese spatial bypass lets frequency win over spatial proximity`() = runTest {
         keyPositionsFlow.emit(hiraganaPositions)
 
         val suggestions = spellCheckManager.getSpellingSuggestionsWithConfidence("あの")

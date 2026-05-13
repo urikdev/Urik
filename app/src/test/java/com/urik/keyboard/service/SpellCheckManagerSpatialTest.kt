@@ -170,4 +170,26 @@ class SpellCheckManagerSpatialTest {
             foxSuggestion.confidence > forSuggestion.confidence
         )
     }
+
+    @Test
+    fun `learned word with poor spatial score ranks below symspell ed1 with good spatial score`() = runTest {
+        keyPositionsFlow.emit(qwertyPositions)
+
+        whenever(
+            wordLearningEngine.getSimilarLearnedWordsWithFrequency(any(), any(), any())
+        ) doReturn listOf("pui" to 1)
+
+        val suggestions = spellCheckManager.getSpellingSuggestionsWithConfidence("foz")
+
+        val learnedSuggestion = suggestions.find { it.source == "learned" }
+        val symspellSuggestion = suggestions.find { it.source == "symspell" && it.word == "fox" }
+
+        assertNotNull("learned word should appear in suggestions", learnedSuggestion)
+        assertNotNull("symspell ed1 match 'fox' should appear in suggestions for input 'foz'", symspellSuggestion)
+        assertTrue(
+            "symspell ed1 (good spatial) should beat learned word (poor spatial, freq=1); " +
+                "symspell=${symspellSuggestion!!.confidence}, learned=${learnedSuggestion!!.confidence}",
+            symspellSuggestion.confidence > learnedSuggestion.confidence
+        )
+    }
 }

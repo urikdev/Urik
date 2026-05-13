@@ -63,7 +63,8 @@ constructor(
     private val wordFrequencyRepository: com.urik.keyboard.data.WordFrequencyRepository,
     private val wordNormalizer: WordNormalizer,
     cacheMemoryManager: CacheMemoryManager,
-    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
+    private val fatFingerExpander: FatFingerExpander = FatFingerExpander()
 ) : MemoryPressureSubscriber {
     private val initializationComplete = CompletableDeferred<Boolean>()
     private var initializationJob: Job? = null
@@ -115,6 +116,9 @@ constructor(
     @Volatile
     private var cachedAverageKeySpacing = 0.0
 
+    @Volatile
+    private var cachedAdjacentKeyMap = emptyMap<Char, Set<Char>>()
+
     init {
         cacheMemoryManager.registerPressureSubscriber(this)
 
@@ -165,11 +169,18 @@ constructor(
         initScope.launch {
             languageManager.keyPositions.collect { positions ->
                 cachedKeyPositions = positions
-                cachedAverageKeySpacing =
+                val avgSpacing =
                     if (positions.size >= 2) {
                         calculateAverageKeySpacing(positions)
                     } else {
                         0.0
+                    }
+                cachedAverageKeySpacing = avgSpacing
+                cachedAdjacentKeyMap =
+                    if (positions.isNotEmpty() && avgSpacing > 0.0) {
+                        fatFingerExpander.buildAdjacentKeyMap(positions, avgSpacing)
+                    } else {
+                        emptyMap()
                     }
             }
         }
@@ -768,7 +779,13 @@ constructor(
                             } else {
                                 calculateFullWordSpatialScore(normalizedWord, word.lowercase())
                             }
-                            val baseConfidence = LEARNED_WORD_BASE_CONFIDENCE - index * 0.02
+                            val hasSpatialData = languageCode != "ja" && cachedKeyPositions.isNotEmpty()
+                            val effectiveBase = if (hasSpatialData && spatialScore < SPATIAL_GATE_THRESHOLD) {
+                                LEARNED_WORD_BASE_CONFIDENCE * (spatialScore / SPATIAL_GATE_THRESHOLD)
+                            } else {
+                                LEARNED_WORD_BASE_CONFIDENCE
+                            }
+                            val baseConfidence = effectiveBase - index * 0.02
                             (baseConfidence + spatialScore * LEARNED_SPATIAL_WEIGHT + frequencyBoost).coerceIn(
                                 LEARNED_WORD_CONFIDENCE_MIN,
                                 LEARNED_WORD_CONFIDENCE_MAX
@@ -884,10 +901,22 @@ constructor(
         try {
             val result = mutableListOf<SpellingSuggestion>()
             val spellChecker = getSpellCheckerForLanguage(languageCode) ?: return emptyList()
-            val symSpellResults = spellChecker.lookup(normalizedWord, Verbosity.All, MAX_EDIT_DISTANCE)
+            val allResults = spellChecker.lookup(normalizedWord, Verbosity.All, MAX_EDIT_DISTANCE).toMutableList()
+            val adjacentKeyMap = cachedAdjacentKeyMap
+            if (adjacentKeyMap.isNotEmpty() && languageCode != "ja") {
+                val variants = fatFingerExpander.generateVariants(normalizedWord, adjacentKeyMap)
+                for (variant in variants) {
+                    if (variant == normalizedWord || seenWords.contains(variant)) continue
+                    val variantResults = spellChecker.lookup(variant, Verbosity.All, MAX_EDIT_DISTANCE)
+                    allResults.addAll(variantResults)
+                }
+            }
             val inputAccentStripped = wordNormalizer.stripDiacritics(normalizedWord)
+            val deduplicatedResults = allResults
+                .groupBy { it.term.lowercase() }
+                .map { (_, dupes) -> dupes.minBy { it.distance } }
             val filteredResults =
-                symSpellResults.filter { result ->
+                deduplicatedResults.filter { result ->
                     !seenWords.contains(result.term.lowercase()) && !isWordBlacklisted(result.term)
                 }
             val userFrequencies =
@@ -999,10 +1028,6 @@ constructor(
     ): List<SpellingSuggestion> {
         val promoted = promoteContractionForms(suggestions, languageCode)
 
-        if (promoted.size <= maxResults) {
-            val hasDuplicates = promoted.map { it.word }.toSet().size < promoted.size
-            if (!hasDuplicates) return promoted
-        }
         return promoted
             .groupBy { it.word }
             .mapValues { (_, dupes) -> dupes.maxBy { it.confidence } }
@@ -1567,6 +1592,9 @@ constructor(
 
         const val FREQUENCY_BOOST_MULTIPLIER = 0.02
         const val LEARNED_WORD_BASE_CONFIDENCE = 0.60
+
+        /** Spatial score below which learned word base confidence is multiplicatively reduced. */
+        const val SPATIAL_GATE_THRESHOLD = 0.4
         const val LEARNED_WORD_CONFIDENCE_MIN = 0.30
         const val LEARNED_SPATIAL_WEIGHT = 0.35
         const val LEARNED_WORD_CONFIDENCE_MAX = 0.99
