@@ -4,6 +4,7 @@ package com.urik.keyboard.service
 
 import android.content.Context
 import android.content.res.AssetManager
+import android.graphics.PointF
 import com.urik.keyboard.data.WordFrequencyRepository
 import com.urik.keyboard.utils.CacheMemoryManager
 import com.urik.keyboard.utils.ManagedCache
@@ -176,7 +177,7 @@ class SpellCheckManagerTest {
         effectiveDictionaryLanguagesFlow = MutableStateFlow(listOf("en"))
         whenever(languageManager.effectiveDictionaryLanguages).thenReturn(effectiveDictionaryLanguagesFlow)
 
-        val keyPositionsFlow = MutableStateFlow<Map<Char, android.graphics.PointF>>(emptyMap())
+        val keyPositionsFlow = MutableStateFlow<Map<Char, PointF>>(emptyMap())
         whenever(languageManager.keyPositions).thenReturn(keyPositionsFlow)
 
         whenever(context.assets).thenReturn(assetManager)
@@ -1557,5 +1558,104 @@ class SpellCheckManagerTest {
         val job = launch { spellCheckManager.isWordInDictionary("hello") }
         yield()
         job.cancelAndJoin()
+    }
+
+    @Test
+    fun `fat finger expansion returns gave for bave via b to g substitution`() = runTest {
+        val fatFingerExpander = FatFingerExpander()
+        val gaveDictionary = "gave 500\nhave 800"
+        val fatKeyPositionsFlow = MutableStateFlow<Map<Char, PointF>>(emptyMap())
+        whenever(languageManager.keyPositions).thenReturn(fatKeyPositionsFlow)
+        whenever(assetManager.open("dictionaries/en_symspell.txt"))
+            .thenAnswer { ByteArrayInputStream(gaveDictionary.toByteArray()) }
+        val fatFingerManager = SpellCheckManager(
+            context = context,
+            languageManager = languageManager,
+            wordLearningEngine = wordLearningEngine,
+            wordFrequencyRepository = wordFrequencyRepository,
+            cacheMemoryManager = cacheMemoryManager,
+            ioDispatcher = testDispatcher,
+            wordNormalizer = wordNormalizer,
+            fatFingerExpander = fatFingerExpander
+        )
+        val qwertyPositions = linkedMapOf(
+            'q' to PointF(50f, 40f), 'w' to PointF(150f, 40f), 'e' to PointF(250f, 40f),
+            'r' to PointF(350f, 40f), 't' to PointF(450f, 40f), 'y' to PointF(550f, 40f),
+            'u' to PointF(650f, 40f), 'i' to PointF(750f, 40f), 'o' to PointF(850f, 40f),
+            'p' to PointF(950f, 40f),
+            'a' to PointF(100f, 120f), 's' to PointF(200f, 120f), 'd' to PointF(300f, 120f),
+            'f' to PointF(400f, 120f), 'g' to PointF(500f, 120f), 'h' to PointF(600f, 120f),
+            'j' to PointF(700f, 120f), 'k' to PointF(800f, 120f), 'l' to PointF(900f, 120f),
+            'z' to PointF(150f, 200f), 'x' to PointF(250f, 200f), 'c' to PointF(350f, 200f),
+            'v' to PointF(450f, 200f), 'b' to PointF(550f, 200f), 'n' to PointF(650f, 200f),
+            'm' to PointF(750f, 200f)
+        )
+        fatKeyPositionsFlow.emit(qwertyPositions)
+
+        val suggestions = fatFingerManager.getSpellingSuggestionsWithConfidence("bave")
+        val words = suggestions.map { it.word }
+
+        assertTrue(
+            "gave should appear as a candidate for bave via b→g adjacent-key substitution",
+            words.contains("gave")
+        )
+    }
+
+    @Test
+    fun `fat finger expansion does not produce duplicate candidates`() = runTest {
+        val fatFingerExpander = FatFingerExpander()
+        val gaveDictionary = "gave 500\nhave 800"
+        val fatKeyPositionsFlow = MutableStateFlow<Map<Char, PointF>>(emptyMap())
+        whenever(languageManager.keyPositions).thenReturn(fatKeyPositionsFlow)
+        whenever(assetManager.open("dictionaries/en_symspell.txt"))
+            .thenAnswer { ByteArrayInputStream(gaveDictionary.toByteArray()) }
+        val fatFingerManager = SpellCheckManager(
+            context = context,
+            languageManager = languageManager,
+            wordLearningEngine = wordLearningEngine,
+            wordFrequencyRepository = wordFrequencyRepository,
+            cacheMemoryManager = cacheMemoryManager,
+            ioDispatcher = testDispatcher,
+            wordNormalizer = wordNormalizer,
+            fatFingerExpander = fatFingerExpander
+        )
+        val qwertyPositions = linkedMapOf(
+            'q' to PointF(50f, 40f), 'w' to PointF(150f, 40f), 'e' to PointF(250f, 40f),
+            'r' to PointF(350f, 40f), 't' to PointF(450f, 40f), 'y' to PointF(550f, 40f),
+            'u' to PointF(650f, 40f), 'i' to PointF(750f, 40f), 'o' to PointF(850f, 40f),
+            'p' to PointF(950f, 40f),
+            'a' to PointF(100f, 120f), 's' to PointF(200f, 120f), 'd' to PointF(300f, 120f),
+            'f' to PointF(400f, 120f), 'g' to PointF(500f, 120f), 'h' to PointF(600f, 120f),
+            'j' to PointF(700f, 120f), 'k' to PointF(800f, 120f), 'l' to PointF(900f, 120f),
+            'z' to PointF(150f, 200f), 'x' to PointF(250f, 200f), 'c' to PointF(350f, 200f),
+            'v' to PointF(450f, 200f), 'b' to PointF(550f, 200f), 'n' to PointF(650f, 200f),
+            'm' to PointF(750f, 200f)
+        )
+        fatKeyPositionsFlow.emit(qwertyPositions)
+
+        val suggestions = fatFingerManager.getSpellingSuggestionsWithConfidence("bave")
+        val words = suggestions.map { it.word.lowercase() }
+
+        assertEquals("Candidate list must not contain duplicates", words.size, words.toSet().size)
+    }
+
+    @Test
+    fun `fat finger expansion falls back gracefully when key positions are empty`() = runTest {
+        val fatFingerExpander = FatFingerExpander()
+        val fatFingerManager = SpellCheckManager(
+            context = context,
+            languageManager = languageManager,
+            wordLearningEngine = wordLearningEngine,
+            wordFrequencyRepository = wordFrequencyRepository,
+            cacheMemoryManager = cacheMemoryManager,
+            ioDispatcher = testDispatcher,
+            wordNormalizer = wordNormalizer,
+            fatFingerExpander = fatFingerExpander
+        )
+
+        val suggestions = fatFingerManager.getSpellingSuggestionsWithConfidence("helo")
+
+        assertNotNull("Should return non-null suggestions even with empty key positions", suggestions)
+        assertTrue("hello should still appear via direct SymSpell lookup", suggestions.any { it.word == "hello" })
     }
 }
