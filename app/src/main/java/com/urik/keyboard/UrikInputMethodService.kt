@@ -8,6 +8,7 @@ import android.os.Build
 import android.os.SystemClock
 import android.util.Size
 import android.view.Gravity
+import android.view.KeyCharacterMap
 import android.view.KeyEvent
 import android.view.View
 import android.view.ViewGroup
@@ -265,12 +266,25 @@ open class UrikInputMethodService :
 
     private fun sendCharacterAsKeyEvents(char: String) {
         val ic = currentInputConnection ?: return
-        val events = android.view.KeyCharacterMap.load(
-            android.view.KeyCharacterMap.VIRTUAL_KEYBOARD
+        val events = KeyCharacterMap.load(
+            KeyCharacterMap.VIRTUAL_KEYBOARD
         ).getEvents(char.toCharArray())
         if (events != null) {
+            val softKeyFlags = KeyEvent.FLAG_SOFT_KEYBOARD or KeyEvent.FLAG_KEEP_TOUCH_MODE
             for (event in events) {
-                ic.sendKeyEvent(event)
+                ic.sendKeyEvent(
+                    KeyEvent(
+                        event.downTime,
+                        event.eventTime,
+                        event.action,
+                        event.keyCode,
+                        event.repeatCount,
+                        event.metaState,
+                        event.deviceId,
+                        event.scanCode,
+                        event.flags or softKeyFlags
+                    )
+                )
             }
         } else {
             ic.commitText(char, 1)
@@ -348,8 +362,19 @@ open class UrikInputMethodService :
                         val ic = currentInputConnection
                         if (ic != null) {
                             val now = SystemClock.uptimeMillis()
-                            ic.sendKeyEvent(KeyEvent(now, now, KeyEvent.ACTION_DOWN, keyCode, 0))
-                            ic.sendKeyEvent(KeyEvent(now, now, KeyEvent.ACTION_UP, keyCode, 0))
+                            val flags = KeyEvent.FLAG_SOFT_KEYBOARD or KeyEvent.FLAG_KEEP_TOUCH_MODE
+                            ic.sendKeyEvent(
+                                KeyEvent(
+                                    now, now, KeyEvent.ACTION_DOWN, keyCode, 0, 0,
+                                    KeyCharacterMap.VIRTUAL_KEYBOARD, 0, flags
+                                )
+                            )
+                            ic.sendKeyEvent(
+                                KeyEvent(
+                                    now, now, KeyEvent.ACTION_UP, keyCode, 0, 0,
+                                    KeyCharacterMap.VIRTUAL_KEYBOARD, 0, flags
+                                )
+                            )
                         }
                     },
                     keyCharEventSender = { char -> sendCharacterAsKeyEvents(char) }

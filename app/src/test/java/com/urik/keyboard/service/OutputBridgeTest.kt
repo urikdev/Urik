@@ -305,12 +305,48 @@ class OutputBridgeTest {
     }
 
     @Test
-    fun `sendBackspace uses key events for terminal field`() {
+    fun `sendBackspace uses key events for raw key event field (JuiceSSH, Termius)`() {
+        whenever(mockState.isRawKeyEventField).thenReturn(true)
         whenever(mockState.isTerminalField).thenReturn(true)
 
         outputBridge.sendBackspace()
 
         assertEquals(listOf(KeyEvent.KEYCODE_DEL), keyEventSenderCalls)
+        verify(mockIc, never()).deleteSurroundingText(any(), any())
+    }
+
+    @Test
+    fun `sendBackspace uses key events when isRawKeyEventField true and isTerminalField false`() {
+        whenever(mockState.isRawKeyEventField).thenReturn(true)
+        whenever(mockState.isTerminalField).thenReturn(false)
+
+        outputBridge.sendBackspace()
+
+        assertEquals(listOf(KeyEvent.KEYCODE_DEL), keyEventSenderCalls)
+        verify(mockIc, never()).deleteSurroundingText(any(), any())
+    }
+
+    @Test
+    fun `sendBackspace uses deleteSurroundingText for non-raw terminal field (ConnectBot)`() {
+        whenever(mockState.isRawKeyEventField).thenReturn(false)
+        whenever(mockState.isTerminalField).thenReturn(true)
+        whenever(mockIc.getTextBeforeCursor(eq(1), eq(0))).thenReturn("a")
+
+        outputBridge.sendBackspace()
+
+        assertEquals(emptyList<Int>(), keyEventSenderCalls)
+        verify(mockIc).deleteSurroundingText(1, 0)
+    }
+
+    @Test
+    fun `sendBackspace no-ops for non-raw terminal field with empty text before cursor`() {
+        whenever(mockState.isRawKeyEventField).thenReturn(false)
+        whenever(mockState.isTerminalField).thenReturn(true)
+        whenever(mockIc.getTextBeforeCursor(eq(1), eq(0))).thenReturn("")
+
+        outputBridge.sendBackspace()
+
+        assertEquals(emptyList<Int>(), keyEventSenderCalls)
         verify(mockIc, never()).deleteSurroundingText(any(), any())
     }
 
@@ -449,17 +485,6 @@ class OutputBridgeTest {
 
         assertEquals(emptyList<String>(), keyCharEventSenderCalls)
         verify(mockIc).commitText("a", 1)
-    }
-
-    @Test
-    fun `sendBackspace uses key events for ConnectBot field (terminal but not raw key event)`() {
-        whenever(mockState.isTerminalField).thenReturn(true)
-        whenever(mockState.isRawKeyEventField).thenReturn(false)
-
-        outputBridge.sendBackspace()
-
-        assertEquals(listOf(KeyEvent.KEYCODE_DEL), keyEventSenderCalls)
-        verify(mockIc, never()).deleteSurroundingText(any(), any())
     }
 
     @Test

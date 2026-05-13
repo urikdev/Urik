@@ -295,7 +295,7 @@ class OutputBridge(
     }
 
     fun sendBackspace() {
-        if (state.isTerminalField) {
+        if (state.isRawKeyEventField) {
             keyEventSender(KeyEvent.KEYCODE_DEL)
         } else {
             val textBefore = safeGetTextBeforeCursor(1)
