@@ -8,7 +8,11 @@ import com.urik.keyboard.R
 import com.urik.keyboard.model.KeyboardKey
 import com.urik.keyboard.settings.LongPressDuration
 import com.urik.keyboard.settings.LongPressPunctuationMode
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -103,5 +107,64 @@ class KeyTouchDispatcherTest {
         val downEvent = motionEvent(MotionEvent.ACTION_DOWN)
         button.dispatchTouchEvent(downEvent)
         assertNotNull("Haptic should fire on period key touch", hapticFired.firstOrNull())
+    }
+
+    @Test
+    fun `backspace ACTION_CANCEL stops accelerated deletion`() {
+        val stopCalled = mutableListOf<Boolean>()
+        val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+        val controller = BackspaceController(
+            onBackspaceKey = {},
+            onAcceleratedDeletionChanged = { stopCalled.add(it) },
+            vibrateEffect = {},
+            cancelVibration = {},
+            getHapticEnabled = { false },
+            getHapticAmplitude = { 0 },
+            getSupportsAmplitudeControl = { false },
+            getBackgroundScope = { scope }
+        )
+        val context = RuntimeEnvironment.getApplication()
+        val dispatcherWithController = KeyTouchDispatcher(
+            onKeyClick = {},
+            performHaptic = {},
+            getLongPressDuration = { LongPressDuration.MEDIUM },
+            getLongPressPunctuationMode = { LongPressPunctuationMode.PERIOD },
+            getActiveLanguages = { listOf("en") },
+            getShowLanguageSwitchKey = { false },
+            getPopupSelectionMode = { false },
+            setPopupSelectionMode = {},
+            getVariationPopup = { null },
+            setVariationPopup = {},
+            getActivePunctuationPopup = { null },
+            setActivePunctuationPopup = {},
+            getLongPressConsumedButtons = { mutableSetOf() },
+            getHapticDownFiredButtons = { mutableSetOf() },
+            getCharacterLongPressFired = { mutableSetOf() },
+            getSymbolsLongPressFired = { mutableSetOf() },
+            getCustomMappingLongPressFired = { mutableSetOf() },
+            getButtonPendingCallbacks = { mutableMapOf() },
+            getButtonLongPressRunnables = { mutableMapOf() },
+            backspaceController = controller,
+            setSwipePopupActive = {},
+            getCurrentVariationKeyType = { null },
+            accessibilityManager = context.getSystemService(Context.ACCESSIBILITY_SERVICE) as AccessibilityManager
+        )
+
+        val key = KeyboardKey.Action(KeyboardKey.ActionType.BACKSPACE)
+        val button = buttonFor(key)
+        dispatcherWithController.attachListeners(button, key)
+
+        controller.start()
+
+        val cancelEvent = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_CANCEL, 100f, 100f, 0)
+        button.dispatchTouchEvent(cancelEvent)
+        cancelEvent.recycle()
+
+        assertTrue(
+            "ACTION_CANCEL on backspace must stop accelerated deletion",
+            stopCalled.contains(false)
+        )
+
+        controller.cleanup()
     }
 }
