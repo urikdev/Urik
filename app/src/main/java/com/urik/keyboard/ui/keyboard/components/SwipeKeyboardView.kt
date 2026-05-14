@@ -148,6 +148,8 @@ constructor(
     private var autofillIndicatorIcon: TextView? = null
     private var degradedIndicatorView: TextView? = null
     private var isShowingAutofillSuggestions = false
+    private var autofillScrollContainer: android.widget.HorizontalScrollView? = null
+    private var autofillScrollContent: LinearLayout? = null
 
     private var cachedLocationArray = IntArray(2)
     private var cachedParentLocationArray = IntArray(2)
@@ -1355,17 +1357,19 @@ constructor(
             (indicator.parent as? ViewGroup)?.removeView(indicator)
             bar.addView(indicator)
 
+            val scrollContent = getOrCreateAutofillScrollContent()
+            scrollContent.removeAllViews()
+
             for (i in views.indices) {
                 val view = views[i]
                 val layoutParams =
                     LinearLayout.LayoutParams(
-                        0,
-                        LinearLayout.LayoutParams.MATCH_PARENT,
-                        1f
+                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                        LinearLayout.LayoutParams.MATCH_PARENT
                     )
 
                 (view.parent as? ViewGroup)?.removeView(view)
-                bar.addView(view, layoutParams)
+                scrollContent.addView(view, layoutParams)
 
                 if (i < views.size - 1) {
                     val divider = getOrCreateDividerView()
@@ -1388,9 +1392,16 @@ constructor(
 
                     activeDividerViews.add(divider)
                     (divider.parent as? ViewGroup)?.removeView(divider)
-                    bar.addView(divider, dividerParams)
+                    scrollContent.addView(divider, dividerParams)
                 }
             }
+
+            val scrollContainer = getOrCreateAutofillScrollContainer()
+            (scrollContainer.parent as? ViewGroup)?.removeView(scrollContainer)
+            bar.addView(
+                scrollContainer,
+                LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1f)
+            )
 
             emojiButton?.let { btn ->
                 if (btn.parent != null) {
@@ -1405,6 +1416,29 @@ constructor(
                 .alpha(1f)
                 .setDuration(150)
                 .start()
+        }
+    }
+
+    private fun getOrCreateAutofillScrollContent(): LinearLayout {
+        autofillScrollContent?.let { return it }
+        return LinearLayout(context).apply {
+            orientation = LinearLayout.HORIZONTAL
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.MATCH_PARENT
+            )
+            autofillScrollContent = this
+        }
+    }
+
+    private fun getOrCreateAutofillScrollContainer(): android.widget.HorizontalScrollView {
+        autofillScrollContainer?.let { return it }
+        return android.widget.HorizontalScrollView(context).apply {
+            isHorizontalScrollBarEnabled = false
+            overScrollMode = OVER_SCROLL_NEVER
+            isFillViewport = false
+            addView(getOrCreateAutofillScrollContent())
+            autofillScrollContainer = this
         }
     }
 
@@ -1959,6 +1993,8 @@ constructor(
         cachedCursorDrawable = null
         degradedIndicatorView = null
         autofillIndicatorIcon = null
+        autofillScrollContainer = null
+        autofillScrollContent = null
 
         searchScopeJob?.cancel()
         searchScopeJob = null

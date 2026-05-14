@@ -14,6 +14,10 @@ object KeyboardConstants {
         const val CLIPBOARD_TTL_MS = 30L * 24 * 60 * 60 * 1000
     }
 
+    object AutofillConstants {
+        const val MAX_PASSWORD_INLINE_SUGGESTIONS = 6
+    }
+
     object GeometricScoringConstants {
         const val DEFAULT_SIGMA = 45f
         const val NORMAL_VELOCITY_THRESHOLD = 0.8f
