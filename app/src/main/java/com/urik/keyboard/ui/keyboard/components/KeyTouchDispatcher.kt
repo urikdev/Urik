@@ -54,7 +54,9 @@ internal class KeyTouchDispatcher(
     @VisibleForTesting
     internal val keyClickListener =
         View.OnClickListener { view ->
-            if (getLongPressConsumedButtons().remove(view as? Button)) return@OnClickListener
+            val btn = view as? Button
+            if (getLongPressConsumedButtons().remove(btn)) return@OnClickListener
+            if (getCustomMappingLongPressFired().remove(btn)) return@OnClickListener
 
             val key = view.getTag(R.id.key_data) as? KeyboardKey ?: return@OnClickListener
             val skipHaptic = getHapticDownFiredButtons().remove(view as? Button)
@@ -125,6 +127,7 @@ internal class KeyTouchDispatcher(
 
                     val longPressConsumed =
                         getCharacterLongPressFired().remove(button) ||
+                            getCustomMappingLongPressFired().contains(button) ||
                             getLongPressConsumedButtons().contains(button)
 
                     if (getPopupSelectionMode() && getVariationPopup()?.isShowing == true) {
@@ -159,6 +162,7 @@ internal class KeyTouchDispatcher(
 
                     val longPressConsumed =
                         getCharacterLongPressFired().remove(button) ||
+                            getCustomMappingLongPressFired().contains(button) ||
                             getLongPressConsumedButtons().contains(button)
 
                     if (getPopupSelectionMode() && getVariationPopup()?.isShowing == true) {

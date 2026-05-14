@@ -167,4 +167,54 @@ class KeyTouchDispatcherTest {
 
         controller.cleanup()
     }
+
+    @Test
+    fun `custom mapping long press on number key prevents click even when longPressConsumedButtons is empty`() {
+        val customMappingFired = mutableSetOf<Button>()
+        val longPressConsumed = mutableSetOf<Button>()
+        val characterLongPressFired = mutableSetOf<Button>()
+        val clickedFromThisTest = mutableListOf<KeyboardKey>()
+
+        val context = RuntimeEnvironment.getApplication()
+        val testDispatcher = KeyTouchDispatcher(
+            onKeyClick = { key -> clickedFromThisTest.add(key) },
+            performHaptic = {},
+            getLongPressDuration = { LongPressDuration.MEDIUM },
+            getLongPressPunctuationMode = { LongPressPunctuationMode.PERIOD },
+            getActiveLanguages = { listOf("en") },
+            getShowLanguageSwitchKey = { false },
+            getPopupSelectionMode = { false },
+            setPopupSelectionMode = {},
+            getVariationPopup = { null },
+            setVariationPopup = {},
+            getActivePunctuationPopup = { null },
+            setActivePunctuationPopup = {},
+            getLongPressConsumedButtons = { longPressConsumed },
+            getHapticDownFiredButtons = { mutableSetOf() },
+            getCharacterLongPressFired = { characterLongPressFired },
+            getSymbolsLongPressFired = { mutableSetOf() },
+            getCustomMappingLongPressFired = { customMappingFired },
+            getButtonPendingCallbacks = { mutableMapOf() },
+            getButtonLongPressRunnables = { mutableMapOf() },
+            backspaceController = null,
+            setSwipePopupActive = {},
+            getCurrentVariationKeyType = { null },
+            accessibilityManager = context.getSystemService(Context.ACCESSIBILITY_SERVICE) as AccessibilityManager
+        )
+
+        val key = KeyboardKey.Character("1", KeyboardKey.KeyType.NUMBER)
+        val button = buttonFor(key)
+        testDispatcher.attachListeners(button, key)
+
+        // Simulate custom mapping long press fired: only customMappingFired is populated,
+        // longPressConsumedButtons and characterLongPressFired are empty (Android 16 edge case)
+        customMappingFired.add(button)
+
+        val upEvent = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_UP, 100f, 100f, 0)
+        val consumed = testDispatcher.characterLongPressTouchListener.onTouch(button, upEvent)
+        upEvent.recycle()
+
+        assertTrue("ACTION_UP must be consumed when custom mapping long press fired", consumed)
+        assertTrue("keyClickListener must not fire when custom mapping long press fired", clickedFromThisTest.isEmpty())
+    }
 }
