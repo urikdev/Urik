@@ -5,6 +5,7 @@ import android.os.Looper
 import androidx.room.Room
 import com.urik.keyboard.data.database.KeyboardDatabase
 import com.urik.keyboard.data.database.UserKanjiFrequencyDao
+import java.util.concurrent.Executor
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.launch
@@ -37,10 +38,13 @@ class KanaKanjiConverterTest {
     @Before
     fun setup() {
         context = RuntimeEnvironment.getApplication()
+        val directExecutor = Executor { it.run() }
         database =
             Room
                 .inMemoryDatabaseBuilder(context, KeyboardDatabase::class.java)
                 .allowMainThreadQueries()
+                .setQueryExecutor(directExecutor)
+                .setTransactionExecutor(directExecutor)
                 .build()
         dao = database.userKanjiFrequencyDao()
         converter = KanaKanjiConverter(context, dao, testDispatcher)
