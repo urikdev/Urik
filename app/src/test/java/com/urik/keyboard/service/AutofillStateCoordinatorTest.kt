@@ -2,6 +2,7 @@ package com.urik.keyboard.service
 
 import android.view.inputmethod.InlineSuggestion
 import android.view.inputmethod.InlineSuggestionsResponse
+import com.urik.keyboard.KeyboardConstants.AutofillConstants.MAX_PASSWORD_INLINE_SUGGESTIONS
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -10,6 +11,7 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
 import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -29,7 +31,11 @@ class AutofillStateCoordinatorTest {
     private val candidateBarController: CandidateBarController = mock()
 
     private var displayCallCount = 0
-    private val displaySuggestions: (List<InlineSuggestion>) -> Unit = { displayCallCount++ }
+    private var lastDisplayedSuggestions: List<InlineSuggestion> = emptyList()
+    private val displaySuggestions: (List<InlineSuggestion>) -> Unit = { suggestions ->
+        displayCallCount++
+        lastDisplayedSuggestions = suggestions
+    }
 
     private lateinit var coordinator: AutofillStateCoordinator
 
@@ -37,6 +43,7 @@ class AutofillStateCoordinatorTest {
     fun setup() {
         Dispatchers.setMain(testDispatcher)
         displayCallCount = 0
+        lastDisplayedSuggestions = emptyList()
         coordinator = AutofillStateCoordinator(
             tracker = tracker,
             candidateBarController = candidateBarController,
@@ -169,5 +176,18 @@ class AutofillStateCoordinatorTest {
         coordinator.cleanup()
 
         verify(tracker).cleanup()
+    }
+
+    @Test
+    fun `onInlineSuggestionsResponse passes all suggestions beyond four when view is ready`() {
+        val suggestionCount = MAX_PASSWORD_INLINE_SUGGESTIONS
+        val response = mock<InlineSuggestionsResponse>()
+        val suggestions = (1..suggestionCount).map { mock<InlineSuggestion>() }
+        whenever(response.inlineSuggestions).thenReturn(suggestions)
+        whenever(tracker.isDismissed()).thenReturn(false)
+
+        coordinator.onInlineSuggestionsResponse(response, isViewReady = true)
+
+        assertEquals(suggestionCount, lastDisplayedSuggestions.size)
     }
 }

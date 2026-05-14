@@ -28,6 +28,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
+import com.urik.keyboard.KeyboardConstants.AutofillConstants.MAX_PASSWORD_INLINE_SUGGESTIONS
 import com.urik.keyboard.data.KeyboardRepository
 import com.urik.keyboard.model.KeyboardDisplayMode
 import com.urik.keyboard.model.KeyboardEvent
@@ -1828,7 +1829,7 @@ open class UrikInputMethodService :
         val stylesBundle = stylesBuilder.build()
 
         val specs = mutableListOf<InlinePresentationSpec>()
-        repeat(4) {
+        repeat(MAX_PASSWORD_INLINE_SUGGESTIONS) {
             val minSize = Size((80 * density).toInt(), (40 * density).toInt())
             val maxSize = Size((400 * density).toInt(), (40 * density).toInt())
 
@@ -1851,7 +1852,7 @@ open class UrikInputMethodService :
 
         return InlineSuggestionsRequest
             .Builder(specs)
-            .setMaxSuggestionCount(5)
+            .setMaxSuggestionCount(MAX_PASSWORD_INLINE_SUGGESTIONS + 1)
             .build()
     }
 
@@ -1868,7 +1869,7 @@ open class UrikInputMethodService :
 
         serviceScope.launch(Dispatchers.Main) {
             val views = mutableListOf<View>()
-            for (suggestion in suggestions.take(5)) {
+            for (suggestion in suggestions.take(MAX_PASSWORD_INLINE_SUGGESTIONS)) {
                 val view = inflateSuggestionView(suggestion, size)
                 if (view != null) views.add(view)
             }
