@@ -19,11 +19,13 @@ data class AdaptiveDimensions(
     val splitGapPx: Int,
     val keyTextBaseRatio: Float,
     val keyTextMinSp: Float,
-    val keyTextMaxSp: Float
+    val keyTextMaxSp: Float,
+    val suggestionBarHeightPx: Int
 ) {
     companion object {
         private const val BASE_KEY_HEIGHT_DP = 40f
         private const val BASE_MIN_TOUCH_TARGET_DP = 44f
+        private const val BASE_SUGGESTION_BAR_HEIGHT_DP = 44f
         private const val BASE_KEY_MARGIN_H_DP = 3f
         private const val BASE_KEY_MARGIN_V_DP = 3f
         private const val BASE_KEYBOARD_PADDING_H_DP = 8f
@@ -122,6 +124,8 @@ data class AdaptiveDimensions(
                 else -> 0
             }
 
+            val suggestionBarHeightPx = (BASE_SUGGESTION_BAR_HEIGHT_DP * density).toInt()
+
             return AdaptiveDimensions(
                 maxKeyboardWidthPx = screenWidthPx,
                 keyHeightPx = keyHeightPx,
@@ -138,7 +142,8 @@ data class AdaptiveDimensions(
                 splitGapPx = splitGapPx,
                 keyTextBaseRatio = KEY_TEXT_BASE_RATIO,
                 keyTextMinSp = textRange.first,
-                keyTextMaxSp = textRange.second
+                keyTextMaxSp = textRange.second,
+                suggestionBarHeightPx = suggestionBarHeightPx
             )
         }
     }

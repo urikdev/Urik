@@ -190,6 +190,18 @@ class AdaptiveDimensionsTest {
     }
 
     @Test
+    fun `suggestion bar height is identical across all key sizes`() {
+        val small = AdaptiveDimensions.compute(phonePortrait(), KeySize.SMALL, phoneDensity)
+        val medium = AdaptiveDimensions.compute(phonePortrait(), KeySize.MEDIUM, phoneDensity)
+        val large = AdaptiveDimensions.compute(phonePortrait(), KeySize.LARGE, phoneDensity)
+        val extraLarge = AdaptiveDimensions.compute(phonePortrait(), KeySize.EXTRA_LARGE, phoneDensity)
+
+        assertEquals(medium.suggestionBarHeightPx, small.suggestionBarHeightPx)
+        assertEquals(medium.suggestionBarHeightPx, large.suggestionBarHeightPx)
+        assertEquals(medium.suggestionBarHeightPx, extraLarge.suggestionBarHeightPx)
+    }
+
+    @Test
     fun `all dimensions are positive across all form factors and key sizes`() {
         val formFactors = listOf(
             phonePortrait() to phoneDensity,
