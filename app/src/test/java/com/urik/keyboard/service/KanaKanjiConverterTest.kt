@@ -3,9 +3,9 @@ package com.urik.keyboard.service
 import android.content.Context
 import android.os.Looper
 import androidx.room.Room
-import java.util.concurrent.Executor
 import com.urik.keyboard.data.database.KeyboardDatabase
 import com.urik.keyboard.data.database.UserKanjiFrequencyDao
+import java.util.concurrent.Executor
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.launch
