@@ -1,6 +1,7 @@
 package com.urik.keyboard.service
 
 import android.content.res.Configuration
+import androidx.window.layout.WindowLayoutInfo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -38,28 +39,67 @@ class PostureDetectorTest {
     }
 
     @Test
-    fun `attachToWindow does not override portrait service context with stale landscape window context`() {
+    fun `attachToWindow adopts orientation from window context`() {
         val detector = PostureDetector(portraitContext(), scope)
 
         detector.attachToWindow(landscapeContext())
 
         assertEquals(
-            "attachToWindow must not replace portrait posture with stale landscape window context",
+            Configuration.ORIENTATION_LANDSCAPE,
+            detector.postureInfo.value.orientation
+        )
+    }
+
+    @Test
+    fun `onConfigurationChanged uses service context`() {
+        val detector = PostureDetector(portraitContext(), scope)
+        detector.attachToWindow(landscapeContext())
+
+        detector.onConfigurationChanged()
+
+        assertEquals(
             Configuration.ORIENTATION_PORTRAIT,
             detector.postureInfo.value.orientation
         )
     }
 
     @Test
-    fun `onConfigurationChanged uses service context not stale window context`() {
+    fun `updatePostureFromLayoutInfo uses windowContext orientation not bare service context`() {
+        // This is the real squish scenario: service context may lag during rotation window.
+        // windowContext is the authoritative source for orientation when set.
         val detector = PostureDetector(portraitContext(), scope)
+        detector.attachToWindow(portraitContext())
 
-        detector.attachToWindow(landscapeContext())
-
-        detector.onConfigurationChanged()
+        detector.updatePostureFromLayoutInfo(WindowLayoutInfo(emptyList()))
 
         assertEquals(
-            "onConfigurationChanged must re-read service context orientation, not stale window context",
+            Configuration.ORIENTATION_PORTRAIT,
+            detector.postureInfo.value.orientation
+        )
+    }
+
+    @Test
+    fun `updatePostureFromLayoutInfo reflects landscape when windowContext is landscape`() {
+        val detector = PostureDetector(landscapeContext(), scope)
+        detector.attachToWindow(landscapeContext())
+
+        detector.updatePostureFromLayoutInfo(WindowLayoutInfo(emptyList()))
+
+        assertEquals(
+            Configuration.ORIENTATION_LANDSCAPE,
+            detector.postureInfo.value.orientation
+        )
+    }
+
+    @Test
+    fun `updatePostureFromLayoutInfo reflects portrait after onConfigurationChanged`() {
+        val detector = PostureDetector(portraitContext(), scope)
+        detector.attachToWindow(portraitContext())
+        detector.onConfigurationChanged()
+
+        detector.updatePostureFromLayoutInfo(WindowLayoutInfo(emptyList()))
+
+        assertEquals(
             Configuration.ORIENTATION_PORTRAIT,
             detector.postureInfo.value.orientation
         )
