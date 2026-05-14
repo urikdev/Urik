@@ -629,7 +629,7 @@ constructor(
         }
     }
 
-    private fun effectiveSuggestionBarHeight(): Int = adaptiveDimensions?.minimumTouchTargetPx
+    private fun effectiveSuggestionBarHeight(): Int = adaptiveDimensions?.suggestionBarHeightPx
         ?: context.resources.getDimensionPixelSize(R.dimen.minimum_touch_target)
 
     /**
