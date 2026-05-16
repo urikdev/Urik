@@ -282,6 +282,14 @@
     <string name="action_next_description">Към следващото поле</string>
     <string name="action_previous_description">Към предишното поле</string>
 
+    <string name="flick_key_description">%1$s. Плъзгане: нагоре %2$s, надясно %3$s, надолу %4$s, наляво %5$s</string>
+    <string name="flick_key_description_partial">%1$s. Плъзгане: %2$s</string>
+    <string name="action_dakuten">Превключи знак на озвучаване</string>
+    <string name="action_small_kana">Превключи малка кана</string>
+    <string name="action_handakuten">Превключи полузвучен знак</string>
+    <string name="action_next_candidate">Следващ кандидат</string>
+    <string name="action_commit_candidate">Потвърди кандидат</string>
+
     <string name="action_emoji">Емоджи</string>
     <string name="emoji_search_hint" tools:ignore="TypographyEllipsis">Търсене на емоджи...</string>
     <string name="autofill_indicator_description">Налични предложения от мениджър на пароли</string>
