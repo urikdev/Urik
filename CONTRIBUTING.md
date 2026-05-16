@@ -37,6 +37,7 @@
 ### Required
 - ktlint must pass (CI enforces this)
 - Existing tests must pass
+- All code must be compatible with API 26+ (Android 8.0). The app's `minSdk` is 26.
 
 ### Privacy-First Principles
 **CRITICAL:** This is a privacy-first keyboard. PRs violating these principles will be rejected:

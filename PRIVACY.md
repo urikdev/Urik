@@ -129,11 +129,11 @@ For privacy inquiries, contact us at the email above.
 **Encryption:** Same AES-256 encryption as learned words. The encryption key is stored in the Android Keystore and protected by your device lock screen.
 
 **Monitoring Behavior:**
-- **Enabled by default** on first install
+- **Enabled by default** on first install (opt-out model — you must disable it in settings if you do not want clipboard monitoring)
 - Monitors all clipboard activity system-wide (not limited to keyboard input)
 - Stores text copied from any app (web browser, messaging, password managers, etc.)
 - Starts monitoring immediately when keyboard is installed
-- Consent screen shown when you first access clipboard history (long-press symbols key)
+- Informational screen shown when you first access clipboard history (long-press symbols key)
 
 **Limitations:**
 - Text truncated to 100,000 characters (approximately 100KB)
@@ -249,7 +249,7 @@ For privacy inquiries, contact us at the email above.
 - Dictionary lookup cache (LRU cache, max 1000 entries)
 - User word frequency cache (LRU cache, max 2000 entries)
 - Bigram prediction cache (LRU cache, max 100 entries)
-- Learned word hot buffer (LRU cache, max 1000 entries)
+- Learned word hot buffer (LRU cache, max 100 entries)
 - Preloaded top bigrams (in-memory map, cleared on language switch)
 
 **Lifecycle:** Automatically cleared when:

@@ -83,7 +83,7 @@ cd Urik
 ./gradlew assembleDebug
 ```
 
-Requirements: Android Studio Ladybug+, JDK 17+, Android SDK 34+
+Requirements: Android Studio Ladybug+, JDK 17+, Android SDK 36+
 
 ## Contributing
 
