@@ -365,4 +365,7 @@
     <string name="flick_key_description_partial">%1$s. Deslizar: %2$s</string>
     <string name="action_dakuten">Alternar marca sonora</string>
     <string name="action_small_kana">Alternar kana pequeno</string>
+    <string name="action_handakuten">Alternar marca semivocal</string>
+    <string name="action_next_candidate">Próximo candidato</string>
+    <string name="action_commit_candidate">Confirmar candidato</string>
 </resources>

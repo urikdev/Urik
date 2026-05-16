@@ -365,4 +365,7 @@
     <string name="flick_key_description_partial">%1$s. Posun: %2$s</string>
     <string name="action_dakuten">Prepnúť znak znelosti</string>
     <string name="action_small_kana">Prepnúť malú kanu</string>
+    <string name="action_handakuten">Prepnúť polozvučný znak</string>
+    <string name="action_next_candidate">Ďalší kandidát</string>
+    <string name="action_commit_candidate">Potvrdiť kandidáta</string>
 </resources>

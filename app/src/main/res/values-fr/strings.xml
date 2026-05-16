@@ -368,4 +368,7 @@
     <string name="flick_key_description_partial">%1$s. Flick : %2$s</string>
     <string name="action_dakuten">Basculer le signe voisé</string>
     <string name="action_small_kana">Basculer le petit kana</string>
+    <string name="action_handakuten">Basculer le signe semi-voisé</string>
+    <string name="action_next_candidate">Candidat suivant</string>
+    <string name="action_commit_candidate">Confirmer le candidat</string>
 </resources>

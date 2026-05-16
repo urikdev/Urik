@@ -335,4 +335,7 @@
     <string name="flick_key_description_partial">%1$s. Σύρε: %2$s</string>
     <string name="action_dakuten">Εναλλαγή σημαδιού φωνής</string>
     <string name="action_small_kana">Εναλλαγή μικρού κάνα</string>
+    <string name="action_handakuten">Εναλλαγή ημίφωνου σημαδιού</string>
+    <string name="action_next_candidate">Επόμενος υποψήφιος</string>
+    <string name="action_commit_candidate">Επιβεβαίωση υποψηφίου</string>
 </resources>

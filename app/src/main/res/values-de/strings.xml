@@ -364,4 +364,7 @@
     <string name="flick_key_description_partial">%1$s. Wischen: %2$s</string>
     <string name="action_dakuten">Stimmzeichen umschalten</string>
     <string name="action_small_kana">Kleines Kana umschalten</string>
+    <string name="action_handakuten">Halbstimmzeichen umschalten</string>
+    <string name="action_next_candidate">Nächster Kandidat</string>
+    <string name="action_commit_candidate">Kandidat bestätigen</string>
 </resources>

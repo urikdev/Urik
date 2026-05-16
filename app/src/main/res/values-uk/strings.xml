@@ -369,4 +369,7 @@
     <string name="flick_key_description_partial">%1$s. Свайп: %2$s</string>
     <string name="action_dakuten">Перемкнути знак дзвінкості</string>
     <string name="action_small_kana">Перемкнути малу кану</string>
+    <string name="action_handakuten">Перемкнути напівдзвінкий знак</string>
+    <string name="action_next_candidate">Наступний кандидат</string>
+    <string name="action_commit_candidate">Підтвердити кандидата</string>
 </resources>

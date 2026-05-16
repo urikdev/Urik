@@ -352,4 +352,108 @@ class SuggestionPipelineTest {
 
         assertEquals(listOf("Hello"), result)
     }
+
+    private inner class FakeJapanesePipelineHost : SuggestionPipelineHost {
+        override fun showSuggestions(): Boolean = true
+        override fun effectiveSuggestionCount(): Int = 5
+        override fun getKeyboardState(): KeyboardState = KeyboardState()
+        override fun shouldAutoCapitalize(text: String): Boolean = false
+        override fun currentLanguage(): String = "ja"
+    }
+
+    @Test
+    fun `requestJapaneseSuggestions appends hiragana reading and katakana as last candidates`() =
+        runTest(testDispatcher) {
+            val japanesePipeline = SuggestionPipeline(
+                state = inputState,
+                outputBridge = outputBridge,
+                textInputProcessor = mockTextInputProcessor,
+                spellCheckManager = mockSpellCheckManager,
+                wordLearningEngine = mockWordLearningEngine,
+                wordFrequencyRepository = mockWordFrequencyRepository,
+                languageManager = mockLanguageManager,
+                caseTransformer = mockCaseTransformer,
+                scriptConverterRegistry = mockScriptConverterRegistry,
+                serviceScope = kotlinx.coroutines.CoroutineScope(testDispatcher),
+                host = FakeJapanesePipelineHost()
+            )
+            japanesePipeline.setJapaneseLayout(true)
+
+            val mockConverter = mock<ScriptConverter>()
+            whenever(mockScriptConverterRegistry.forLanguage("ja")).thenReturn(mockConverter)
+            whenever(mockConverter.getCandidates("か", "ja")).thenReturn(
+                listOf(ConversionCandidate(surface = "化", reading = "か", frequency = 19992, source = "dictionary"))
+            )
+            whenever(mockSpellCheckManager.getSpellingSuggestionsWithConfidence("か")).thenReturn(emptyList())
+
+            inputState.updateDisplayBuffer("か")
+            japanesePipeline.requestSuggestions("か", InputMethod.TYPED)
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            assertEquals(listOf("化", "か", "カ"), capturedSuggestions.take(3))
+        }
+
+    @Test
+    fun `requestJapaneseSuggestions katakana slot reflects full buffer`() = runTest(testDispatcher) {
+        val japanesePipeline = SuggestionPipeline(
+            state = inputState,
+            outputBridge = outputBridge,
+            textInputProcessor = mockTextInputProcessor,
+            spellCheckManager = mockSpellCheckManager,
+            wordLearningEngine = mockWordLearningEngine,
+            wordFrequencyRepository = mockWordFrequencyRepository,
+            languageManager = mockLanguageManager,
+            caseTransformer = mockCaseTransformer,
+            scriptConverterRegistry = mockScriptConverterRegistry,
+            serviceScope = kotlinx.coroutines.CoroutineScope(testDispatcher),
+            host = FakeJapanesePipelineHost()
+        )
+        japanesePipeline.setJapaneseLayout(true)
+
+        val mockConverter = mock<ScriptConverter>()
+        whenever(mockScriptConverterRegistry.forLanguage("ja")).thenReturn(mockConverter)
+        whenever(mockConverter.getCandidates("がっこう", "ja")).thenReturn(
+            listOf(ConversionCandidate(surface = "学校", reading = "がっこう", frequency = 50000, source = "dictionary"))
+        )
+        whenever(mockSpellCheckManager.getSpellingSuggestionsWithConfidence("がっこう")).thenReturn(emptyList())
+
+        inputState.updateDisplayBuffer("がっこう")
+        japanesePipeline.requestSuggestions("がっこう", InputMethod.TYPED)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        assertEquals(listOf("学校", "がっこう", "ガッコウ"), capturedSuggestions.take(3))
+    }
+
+    @Test
+    fun `requestJapaneseSuggestions deduplicates if hiragana matches a kanji candidate`() = runTest(testDispatcher) {
+        val japanesePipeline = SuggestionPipeline(
+            state = inputState,
+            outputBridge = outputBridge,
+            textInputProcessor = mockTextInputProcessor,
+            spellCheckManager = mockSpellCheckManager,
+            wordLearningEngine = mockWordLearningEngine,
+            wordFrequencyRepository = mockWordFrequencyRepository,
+            languageManager = mockLanguageManager,
+            caseTransformer = mockCaseTransformer,
+            scriptConverterRegistry = mockScriptConverterRegistry,
+            serviceScope = kotlinx.coroutines.CoroutineScope(testDispatcher),
+            host = FakeJapanesePipelineHost()
+        )
+        japanesePipeline.setJapaneseLayout(true)
+
+        val mockConverter = mock<ScriptConverter>()
+        whenever(mockScriptConverterRegistry.forLanguage("ja")).thenReturn(mockConverter)
+        whenever(mockConverter.getCandidates("か", "ja")).thenReturn(
+            listOf(ConversionCandidate(surface = "か", reading = "か", frequency = 1000, source = "dictionary"))
+        )
+        whenever(mockSpellCheckManager.getSpellingSuggestionsWithConfidence("か")).thenReturn(emptyList())
+
+        inputState.updateDisplayBuffer("か")
+        japanesePipeline.requestSuggestions("か", InputMethod.TYPED)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        val suggestions = capturedSuggestions
+        assertEquals(1, suggestions.count { it == "か" })
+        assert(suggestions.contains("カ")) { "katakana カ must be present" }
+    }
 }

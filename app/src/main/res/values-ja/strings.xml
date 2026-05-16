@@ -277,6 +277,9 @@
     <string name="flick_key_description_partial">%1$s。フリック：%2$s</string>
     <string name="action_dakuten">濁点・半濁点</string>
     <string name="action_small_kana">小文字切替</string>
+    <string name="action_handakuten">半濁点</string>
+    <string name="action_next_candidate">次候補</string>
+    <string name="action_commit_candidate">確定</string>
 
     <!-- Action button accessibility descriptions -->
     <string name="action_enter_description">Enterを押す</string>

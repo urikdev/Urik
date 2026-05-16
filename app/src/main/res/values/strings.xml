@@ -286,6 +286,9 @@
     <string name="flick_key_description_partial">%1$s. Flick: %2$s</string>
     <string name="action_dakuten">Voiced mark toggle</string>
     <string name="action_small_kana">Small kana toggle</string>
+    <string name="action_handakuten">Semi-voiced mark toggle</string>
+    <string name="action_next_candidate">Next candidate</string>
+    <string name="action_commit_candidate">Commit candidate</string>
 
     <!-- Action button accessibility descriptions -->
     <string name="action_enter_description">Press enter</string>

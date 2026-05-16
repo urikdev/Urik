@@ -278,6 +278,7 @@ constructor(
                         "commit_candidate" -> KeyboardKey.ActionType.COMMIT_CANDIDATE
                         "handakuten" -> KeyboardKey.ActionType.HANDAKUTEN
                         "emoji" -> KeyboardKey.ActionType.EMOJI
+                        "language_switch" -> KeyboardKey.ActionType.LANGUAGE_SWITCH
                         else -> KeyboardKey.ActionType.ENTER
                     }
                 KeyboardKey.Action(actionType)

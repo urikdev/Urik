@@ -957,6 +957,8 @@ class KeyboardLayoutManager(
 
                         KeyboardKey.ActionType.BACKSPACE -> R.drawable.backspace_48px
 
+                        KeyboardKey.ActionType.EMOJI -> R.drawable.ic_emoji
+
                         KeyboardKey.ActionType.ENTER -> R.drawable.keyboard_return_48px
 
                         KeyboardKey.ActionType.SEARCH -> R.drawable.search_48px
@@ -1174,7 +1176,7 @@ class KeyboardLayoutManager(
                 KeyboardKey.ActionType.NEXT_CANDIDATE -> "次候補"
                 KeyboardKey.ActionType.COMMIT_CANDIDATE -> "確定"
                 KeyboardKey.ActionType.HANDAKUTEN -> "゜"
-                KeyboardKey.ActionType.EMOJI -> "😊"
+                KeyboardKey.ActionType.EMOJI -> ""
 
                 else -> {
                     "?"
@@ -1289,11 +1291,11 @@ class KeyboardLayoutManager(
                     context.getString(R.string.action_small_kana)
                 }
 
-                KeyboardKey.ActionType.NEXT_CANDIDATE -> "次候補"
+                KeyboardKey.ActionType.NEXT_CANDIDATE -> context.getString(R.string.action_next_candidate)
 
-                KeyboardKey.ActionType.COMMIT_CANDIDATE -> "確定"
+                KeyboardKey.ActionType.COMMIT_CANDIDATE -> context.getString(R.string.action_commit_candidate)
 
-                KeyboardKey.ActionType.HANDAKUTEN -> "゜"
+                KeyboardKey.ActionType.HANDAKUTEN -> context.getString(R.string.action_handakuten)
 
                 KeyboardKey.ActionType.EMOJI -> context.getString(R.string.action_emoji)
             }
@@ -1533,7 +1535,14 @@ class KeyboardLayoutManager(
                             }
 
                             KeyboardKey.ActionType.BACKSPACE -> {
-                                if (characterKeyCount >= 10) STANDARD_KEY_WEIGHT else BACKSPACE_KEY_WEIGHT
+                                val hasFlickKeys = rowKeys.any { it is KeyboardKey.FlickKey }
+                                if (characterKeyCount >= 10 ||
+                                    hasFlickKeys
+                                ) {
+                                    STANDARD_KEY_WEIGHT
+                                } else {
+                                    BACKSPACE_KEY_WEIGHT
+                                }
                             }
 
                             else -> {

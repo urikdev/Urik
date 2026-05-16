@@ -3,6 +3,7 @@ package com.urik.keyboard.service
 import com.urik.keyboard.data.WordFrequencyRepository
 import com.urik.keyboard.utils.CaseTransformer
 import com.urik.keyboard.utils.ErrorLogger
+import com.urik.keyboard.utils.KanaTransformUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -398,7 +399,7 @@ class SuggestionPipeline(
 
     private fun requestJapaneseSuggestions(hiraganaBuffer: String) {
         suggestionDebounceJob?.cancel()
-        suggestionDebounceJob = serviceScope.launch(Dispatchers.Default) {
+        suggestionDebounceJob = serviceScope.launch {
             try {
                 delay(suggestionDebounceDelay)
 
@@ -422,7 +423,20 @@ class SuggestionPipeline(
                     emptyList()
                 }
 
-                val combined = (conversionCandidates + dictCompletions)
+                val hiraganaCandidate = SpellingSuggestion(
+                    word = hiraganaBuffer,
+                    confidence = -1.0,
+                    ranking = 0,
+                    source = "reading"
+                )
+                val katakanaCandidate = SpellingSuggestion(
+                    word = KanaTransformUtils.toKatakana(hiraganaBuffer),
+                    confidence = -2.0,
+                    ranking = 0,
+                    source = "katakana"
+                )
+
+                val combined = (conversionCandidates + dictCompletions + hiraganaCandidate + katakanaCandidate)
                     .distinctBy { it.word }
                     .take(host.effectiveSuggestionCount())
 

@@ -369,4 +369,7 @@
     <string name="flick_key_description_partial">%1$s. Veeg: %2$s</string>
     <string name="action_dakuten">Stemteken wisselen</string>
     <string name="action_small_kana">Klein kana wisselen</string>
+    <string name="action_handakuten">Halfgestemd teken wisselen</string>
+    <string name="action_next_candidate">Volgende kandidaat</string>
+    <string name="action_commit_candidate">Kandidaat bevestigen</string>
 </resources>

@@ -119,4 +119,33 @@ class KanaTransformUtilsTest {
     @Test
     fun `toggleSmallKanaOnLast empty string unchanged`() =
         assertEquals("", KanaTransformUtils.toggleSmallKanaOnLast(""))
+
+    // ── toKatakana ────────────────────────────────────────────────────────────
+
+    @Test
+    fun `toKatakana converts basic hiragana to katakana`() =
+        assertEquals("カキクケコ", KanaTransformUtils.toKatakana("かきくけこ"))
+
+    @Test
+    fun `toKatakana converts small kana`() = assertEquals("ァィゥェォャュョッ", KanaTransformUtils.toKatakana("ぁぃぅぇぉゃゅょっ"))
+
+    @Test
+    fun `toKatakana converts full hiragana set including ん`() = assertEquals("ン", KanaTransformUtils.toKatakana("ん"))
+
+    @Test
+    fun `toKatakana converts を and archaic kana`() {
+        assertEquals("ヲ", KanaTransformUtils.toKatakana("を"))
+        assertEquals("ヰ", KanaTransformUtils.toKatakana("ゐ"))
+        assertEquals("ヱ", KanaTransformUtils.toKatakana("ゑ"))
+    }
+
+    @Test
+    fun `toKatakana passes through non-hiragana characters unchanged`() =
+        assertEquals("アBC123", KanaTransformUtils.toKatakana("アBC123"))
+
+    @Test
+    fun `toKatakana handles mixed string`() = assertEquals("カタカナtest", KanaTransformUtils.toKatakana("かたかなtest"))
+
+    @Test
+    fun `toKatakana handles empty string`() = assertEquals("", KanaTransformUtils.toKatakana(""))
 }

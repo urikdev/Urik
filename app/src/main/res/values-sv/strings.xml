@@ -313,4 +313,7 @@
     <string name="flick_key_description_partial">%1$s. Svep: %2$s</string>
     <string name="action_dakuten">Växla röstmärke</string>
     <string name="action_small_kana">Växla liten kana</string>
+    <string name="action_handakuten">Växla halvstämt tecken</string>
+    <string name="action_next_candidate">Nästa kandidat</string>
+    <string name="action_commit_candidate">Bekräfta kandidat</string>
 </resources>
