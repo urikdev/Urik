@@ -173,6 +173,10 @@
     <string name="layout_mapper_clear_failed">マッピングの消去に失敗しました</string>
 
     <!-- Privacy & Data Settings -->
+    <string name="privacy_settings_storage_encryption_title">単語ストレージ：暗号化なし</string>
+    <string name="privacy_settings_storage_encryption_summary">デバイスのロック画面が検出されませんでした。学習した単語は平文で保存されています。暗号化を有効にするには、Androidの設定でPIN、パターン、または生体認証ロックを設定してください。</string>
+    <string name="privacy_settings_keystore_api27_title">暗号化: ロック保護が制限されています</string>
+    <string name="privacy_settings_keystore_api27_summary">このデバイスは Android 7.1 以前で動作しています。この Android バージョンでは、データベースキーをデバイスのロック解除時のみアクセス可能に制限することができないため、学習した単語がデバイスのロック中でもアクセス可能な状態になる可能性があります。Android 9.0 以降にアップグレードすると、完全なロック画面保護が有効になります。</string>
     <string name="privacy_settings_clipboard_history">クリップボード履歴</string>
     <string name="privacy_settings_clipboard_history_on">クリップボード履歴有効</string>
     <string name="privacy_settings_clipboard_history_off">クリップボード履歴無効</string>
@@ -267,6 +271,15 @@
     <string name="symbols_secondary_mode_description">拡張記号キーボードに切替</string>
     <string name="language_switch_description">キーボード言語を切替</string>
     <string name="ime_prediction_description">予測候補：%1$s</string>
+
+    <!-- Flick key accessibility descriptions -->
+    <string name="flick_key_description">%1$s。フリック：上 %2$s、右 %3$s、下 %4$s、左 %5$s</string>
+    <string name="flick_key_description_partial">%1$s。フリック：%2$s</string>
+    <string name="action_dakuten">濁点・半濁点</string>
+    <string name="action_small_kana">小文字切替</string>
+    <string name="action_handakuten">半濁点</string>
+    <string name="action_next_candidate">次候補</string>
+    <string name="action_commit_candidate">確定</string>
 
     <!-- Action button accessibility descriptions -->
     <string name="action_enter_description">Enterを押す</string>

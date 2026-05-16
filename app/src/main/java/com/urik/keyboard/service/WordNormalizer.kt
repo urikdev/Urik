@@ -1,8 +1,7 @@
 package com.urik.keyboard.service
 
-import com.ibm.icu.lang.UCharacter
-import com.ibm.icu.text.Normalizer2
-import com.ibm.icu.util.ULocale
+import java.text.Normalizer
+import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -10,31 +9,22 @@ import javax.inject.Singleton
 class WordNormalizer
 @Inject
 constructor() {
-    private val nfcNormalizer = Normalizer2.getNFCInstance()
-    private val nfdNormalizer = Normalizer2.getNFDInstance()
-
     @Volatile private var cachedLocaleTag: String = ""
 
-    @Volatile private var cachedULocale: ULocale = ULocale.ENGLISH
+    @Volatile private var cachedLocale: Locale = Locale.ENGLISH
 
-    private fun getULocale(languageTag: String): ULocale {
-        if (languageTag == cachedLocaleTag) return cachedULocale
-        val locale = try {
-            ULocale.forLanguageTag(languageTag)
-        } catch (_: Exception) {
-            ULocale.ENGLISH
-        }
+    private fun getLocale(languageTag: String): Locale {
+        if (languageTag == cachedLocaleTag) return cachedLocale
+        val locale = Locale.forLanguageTag(languageTag)
         cachedLocaleTag = languageTag
-        cachedULocale = locale
+        cachedLocale = locale
         return locale
     }
 
     fun normalize(word: String, languageTag: String): String {
-        val standardNormalized = nfcNormalizer.normalize(word.trim())
+        val standardNormalized = Normalizer.normalize(word.trim(), Normalizer.Form.NFC)
         val canonicalized = canonicalizeApostrophes(standardNormalized)
-        return UCharacter
-            .toLowerCase(getULocale(languageTag), canonicalized)
-            .trim()
+        return canonicalized.lowercase(getLocale(languageTag)).trim()
     }
 
     fun canonicalizeApostrophes(text: String): String {
@@ -61,7 +51,7 @@ constructor() {
     }
 
     fun stripDiacritics(word: String): String {
-        val decomposed = nfdNormalizer.normalize(word)
+        val decomposed = Normalizer.normalize(word, Normalizer.Form.NFD)
         return buildString(decomposed.length) {
             for (ch in decomposed) {
                 if (Character.getType(ch) != Character.NON_SPACING_MARK.toInt()) {

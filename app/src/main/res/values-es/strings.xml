@@ -160,6 +160,10 @@
     <string name="layout_mapper_clear_failed">Error al borrar los asignaciones</string>
 
     <!-- Privacy & Data Settings -->
+    <string name="privacy_settings_storage_encryption_title">Almacenamiento de palabras: Sin cifrar</string>
+    <string name="privacy_settings_storage_encryption_summary">No se detectó ninguna pantalla de bloqueo del dispositivo. Las palabras aprendidas se almacenan en texto plano. Establezca un PIN, patrón o bloqueo biométrico en la configuración de Android para habilitar el cifrado.</string>
+    <string name="privacy_settings_keystore_api27_title">Cifrado: protección de bloqueo reducida</string>
+    <string name="privacy_settings_keystore_api27_summary">Este dispositivo ejecuta Android 7.1 o una versión anterior. En esta versión de Android, la clave de la base de datos no se puede restringir para que solo sea accesible cuando el dispositivo está desbloqueado, por lo que las palabras aprendidas podrían ser accesibles mientras el dispositivo está bloqueado. Actualizar a Android 9.0 o posterior habilita la protección completa de la pantalla de bloqueo.</string>
     <string name="privacy_settings_clipboard_history">Historial del portapapeles</string>
     <string name="privacy_settings_clipboard_history_on">Historial del portapapeles activado</string>
     <string name="privacy_settings_clipboard_history_off">Historial del portapapeles desactivado</string>
@@ -356,5 +360,12 @@
 
     <!-- AlphabetSideBar accessibility -->
     <string name="alphabet_sidebar_description">Barra lateral de navegación alfabética</string>
-
+    <!-- Flick key accessibility -->
+    <string name="flick_key_description">%1$s. Deslizar: arriba %2$s, derecha %3$s, abajo %4$s, izquierda %5$s</string>
+    <string name="flick_key_description_partial">%1$s. Deslizar: %2$s</string>
+    <string name="action_dakuten">Alternar marca sonora</string>
+    <string name="action_small_kana">Alternar kana pequeño</string>
+    <string name="action_handakuten">Alternar marca semivocal</string>
+    <string name="action_next_candidate">Siguiente candidato</string>
+    <string name="action_commit_candidate">Confirmar candidato</string>
 </resources>

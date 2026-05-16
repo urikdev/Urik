@@ -2,6 +2,7 @@ package com.urik.keyboard.service
 
 import android.content.Context
 import com.urik.keyboard.settings.KeyboardSettings
+import com.urik.keyboard.utils.ErrorLogger
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import javax.inject.Inject
@@ -81,7 +82,13 @@ constructor(
         }
 
         EmojiAnnotations(language, emojisMap)
-    } catch (_: Exception) {
+    } catch (e: Exception) {
+        ErrorLogger.logException(
+            component = "EmojiSearchManager",
+            severity = ErrorLogger.Severity.LOW,
+            exception = e,
+            context = mapOf("operation" to "loadAnnotationsForLanguage")
+        )
         null
     }
 

@@ -273,6 +273,42 @@ class ClipboardDaoTest {
         assertEquals("Third", results[2].content)
     }
 
+    @Test
+    fun `deleteExpired removes unpinned items older than threshold`() = runTest {
+        val now = System.currentTimeMillis()
+        val ttlMs = 30L * 24 * 60 * 60 * 1000
+        val oldTimestamp = now - ttlMs - 1000
+        val recentTimestamp = now - 1000
+
+        dao.insert(createTestItem("old item", timestamp = oldTimestamp))
+        dao.insert(createTestItem("recent item", timestamp = recentTimestamp))
+        assertEquals(2, dao.getCount())
+
+        dao.deleteExpired(expiryTimestamp = now - ttlMs)
+
+        val remaining = dao.getRecentItems(limit = 100)
+        assertEquals(1, remaining.size)
+        assertEquals("recent item", remaining[0].content)
+    }
+
+    @Test
+    fun `deleteExpired does not remove pinned items even if expired`() = runTest {
+        val now = System.currentTimeMillis()
+        val ttlMs = 30L * 24 * 60 * 60 * 1000
+        val oldTimestamp = now - ttlMs - 1000
+
+        dao.insert(createTestItem("old pinned", timestamp = oldTimestamp, isPinned = true))
+        dao.insert(createTestItem("old unpinned", timestamp = oldTimestamp, isPinned = false))
+        assertEquals(2, dao.getCount())
+
+        dao.deleteExpired(expiryTimestamp = now - ttlMs)
+
+        assertEquals(1, dao.getCount())
+        val pinned = dao.getPinnedItems()
+        assertEquals(1, pinned.size)
+        assertEquals("old pinned", pinned[0].content)
+    }
+
     /**
      * Creates test clipboard item with defaults.
      */

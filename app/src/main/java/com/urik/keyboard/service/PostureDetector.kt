@@ -3,8 +3,10 @@ package com.urik.keyboard.service
 import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Rect
+import androidx.annotation.VisibleForTesting
 import androidx.window.layout.FoldingFeature
 import androidx.window.layout.WindowInfoTracker
+import com.urik.keyboard.utils.ErrorLogger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -49,13 +51,19 @@ class PostureDetector(private val context: Context, private val scope: Coroutine
 
     fun attachToWindow(windowCtx: Context) {
         windowContext = windowCtx
-        _postureInfo.value = getCurrentPostureInfo(context)
+        _postureInfo.value = getCurrentPostureInfo()
         try {
             windowInfoTracker = WindowInfoTracker.getOrCreate(windowCtx)
             fallbackJob?.cancel()
             fallbackJob = null
             startWindowInfoCollection()
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            ErrorLogger.logException(
+                component = "PostureDetector",
+                severity = ErrorLogger.Severity.LOW,
+                exception = e,
+                context = mapOf("operation" to "attachToWindow")
+            )
             ensureFallbackPolling()
         }
     }
@@ -88,7 +96,7 @@ class PostureDetector(private val context: Context, private val scope: Coroutine
         fallbackJob =
             scope.launch {
                 while (true) {
-                    _postureInfo.value = getCurrentPostureInfo(context)
+                    _postureInfo.value = getCurrentPostureInfo()
                     delay(FALLBACK_POLL_MS)
                 }
             }
@@ -109,7 +117,8 @@ class PostureDetector(private val context: Context, private val scope: Coroutine
         windowContext = null
     }
 
-    private fun updatePostureFromLayoutInfo(layoutInfo: androidx.window.layout.WindowLayoutInfo) {
+    @VisibleForTesting
+    internal fun updatePostureFromLayoutInfo(layoutInfo: androidx.window.layout.WindowLayoutInfo) {
         val effectiveContext = windowContext ?: context
         val displayMetrics = effectiveContext.resources.displayMetrics
         val widthPx = displayMetrics.widthPixels

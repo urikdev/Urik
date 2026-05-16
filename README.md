@@ -37,11 +37,11 @@ Privacy-focused Android keyboard with swipe typing, custom layouts, and password
 
 **Intelligence**
 - Local bigram model for next-word prediction
-- On-device spell checking using SymSpell algorithm
+- On-device spell checking using URIK (Ultra-compressed Ranked Input Korpus) — a custom binary dictionary format with Levenshtein automaton traversal
 - Autocorrect with configurable pause-on-misspell; skips URLs, emails, and punctuation
 - Word learning with encrypted SQLCipher database
 - User-specific word frequency tracking
-- 17 supported languages with dedicated language toggle button
+- 18 supported languages with dedicated language toggle button
 - Merged dictionaries mode for multilingual typing sessions
 - Emoji search with keyword support
 
@@ -83,7 +83,7 @@ cd Urik
 ./gradlew assembleDebug
 ```
 
-Requirements: Android Studio Ladybug+, JDK 17+, Android SDK 34+
+Requirements: Android Studio Panda+, JDK 17+, Android SDK 36+
 
 ## Contributing
 
@@ -98,7 +98,7 @@ Report vulnerabilities via [SECURITY.md](SECURITY.md).
 Spell checking uses word frequency lists from [FrequencyWords](https://github.com/hermitdave/FrequencyWords) by hermitdave, derived from the OpenSubtitles corpus.
 
 - License: CC-BY-SA-4.0
-- Modifications: Sorted by frequency, filtered for keyboard use
+- Modifications: Filtered top-N by frequency per language, compiled to URIK binary format at build time
 
 ## Emoji Annotations
 
@@ -106,6 +106,13 @@ Emoji search uses multilingual keyword annotations from [Unicode CLDR](https://g
 
 - License: Unicode License V3
 - Modifications: Extracted emoji annotations, converted to searchable JSON format
+
+## Japanese Conversion Data
+
+Kana-to-kanji conversion uses dictionary data from [Mozc](https://github.com/google/mozc) by Google LLC.
+
+- License: BSD 3-Clause
+- Modifications: Extracted reading/surface/frequency triples; converted cost values to frequency scores; filtered single-character hiragana entries (covered by the spell-check dictionary)
 
 ## License
 

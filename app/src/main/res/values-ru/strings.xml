@@ -162,6 +162,10 @@
     <string name="alternative_layout_default">По умолчанию (Языковая раскладка)</string>
 
     <!-- Privacy & Data Settings -->
+    <string name="privacy_settings_storage_encryption_title">Хранилище слов: Незашифровано</string>
+    <string name="privacy_settings_storage_encryption_summary">Экран блокировки устройства не обнаружен. Выученные слова хранятся в открытом тексте. Установите PIN-код, графический ключ или биометрическую блокировку в настройках Android, чтобы включить шифрование.</string>
+    <string name="privacy_settings_keystore_api27_title">Шифрование: ограниченная защита блокировки</string>
+    <string name="privacy_settings_keystore_api27_summary">Это устройство работает на Android 7.1 или более ранней версии. В этой версии Android ключ базы данных нельзя ограничить доступом только при разблокированном устройстве, поэтому выученные слова могут быть доступны, пока устройство заблокировано. Обновление до Android 9.0 или новее включает полную защиту экрана блокировки.</string>
     <string name="privacy_settings_clipboard_history">История Буфера Обмена</string>
     <string name="privacy_settings_clipboard_history_on">История буфера обмена включена</string>
     <string name="privacy_settings_clipboard_history_off">История буфера обмена отключена</string>
@@ -362,5 +366,12 @@
 
     <!-- AlphabetSideBar accessibility -->
     <string name="alphabet_sidebar_description">Боковая панель алфавитной навигации</string>
-
+    <!-- Flick key accessibility -->
+    <string name="flick_key_description">%1$s. Свайп: вверх %2$s, вправо %3$s, вниз %4$s, влево %5$s</string>
+    <string name="flick_key_description_partial">%1$s. Свайп: %2$s</string>
+    <string name="action_dakuten">Переключить знак озвончения</string>
+    <string name="action_small_kana">Переключить малую кану</string>
+    <string name="action_handakuten">Переключить полузвонкий знак</string>
+    <string name="action_next_candidate">Следующий кандидат</string>
+    <string name="action_commit_candidate">Подтвердить кандидата</string>
 </resources>

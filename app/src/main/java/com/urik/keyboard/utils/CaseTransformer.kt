@@ -1,8 +1,8 @@
 package com.urik.keyboard.utils
 
-import com.ibm.icu.text.BreakIterator
 import com.urik.keyboard.model.KeyboardState
 import com.urik.keyboard.service.SpellingSuggestion
+import java.text.BreakIterator
 import javax.inject.Inject
 import javax.inject.Singleton
 

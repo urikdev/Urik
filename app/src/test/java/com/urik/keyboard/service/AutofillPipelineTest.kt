@@ -2,6 +2,7 @@
 
 package com.urik.keyboard.service
 
+import com.urik.keyboard.KeyboardConstants.AutofillConstants.MAX_PASSWORD_INLINE_SUGGESTIONS
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -180,6 +181,11 @@ class AutofillPipelineTest {
 
         assertNull(tracker.drainPendingResponse())
         assertFalse(tracker.isDismissed())
+    }
+
+    @Test
+    fun `maxPasswordInlineSuggestions is greater than four`() {
+        assertTrue(MAX_PASSWORD_INLINE_SUGGESTIONS > 4)
     }
 
     @Test

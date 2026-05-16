@@ -1,8 +1,5 @@
 package com.urik.keyboard.model
 
-/**
- * Keyboard input modes determining available characters.
- */
 enum class KeyboardMode {
     LETTERS,
     NUMBERS,
@@ -36,31 +33,27 @@ data class KeyboardLayout(
     val script: String = "Latn"
 )
 
-/**
- * Key types in the keyboard.
- *
- * Character keys insert text, Action keys trigger operations.
- */
 sealed class KeyboardKey {
-    /**
-     * Text-inserting key.
-     *
-     * @property value Character(s) to insert (can be multi-char for ligatures/emoji)
-     * @property type Visual/semantic classification for styling
-     */
+    /** @property value Can be multi-char for ligatures/emoji */
     data class Character(val value: String, val type: KeyType) : KeyboardKey()
 
-    /**
-     * Operation key (backspace, enter, mode switch, etc).
-     *
-     * @property action Operation to perform
-     */
     data class Action(val action: ActionType) : KeyboardKey()
 
-    /**
-     * Empty spacer for layout alignment.
-     */
     data object Spacer : KeyboardKey()
+
+    /**
+     * Kana key with directional flick variants for 12-key Japanese input.
+     *
+     * [center] is committed on tap. Null directions indicate no character for that flick direction.
+     */
+    data class FlickKey(
+        val center: String,
+        val up: String?,
+        val right: String?,
+        val down: String?,
+        val left: String?,
+        val type: KeyType
+    ) : KeyboardKey()
 
     enum class KeyType {
         LETTER,
@@ -85,13 +78,16 @@ sealed class KeyboardKey {
         MODE_SWITCH_SYMBOLS,
         MODE_SWITCH_SYMBOLS_SECONDARY,
         CAPS_LOCK,
-        LANGUAGE_SWITCH
+        LANGUAGE_SWITCH,
+        DAKUTEN,
+        SMALL_KANA,
+        NEXT_CANDIDATE,
+        COMMIT_CANDIDATE,
+        HANDAKUTEN,
+        EMOJI
     }
 }
 
-/**
- * Keyboard state change events.
- */
 sealed class KeyboardEvent {
     data class KeyPressed(val key: KeyboardKey) : KeyboardEvent()
 

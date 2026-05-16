@@ -67,10 +67,11 @@ class InputProcessingIntegrationTest {
         context = RuntimeEnvironment.getApplication()
 
         val mockAssets = mock<AssetManager>()
+        val urikBytes = com.urik.keyboard.service.TestUrikBuilder.buildUrikFromText(testDictionary)
         whenever(mockAssets.open(any())).thenAnswer {
             when {
-                it.getArgument<String>(0).contains("_symspell.txt") -> {
-                    ByteArrayInputStream(testDictionary.toByteArray())
+                it.getArgument<String>(0).endsWith(".urik") -> {
+                    ByteArrayInputStream(urikBytes)
                 }
 
                 else -> {
@@ -218,22 +219,24 @@ class InputProcessingIntegrationTest {
     }
 
     @Test
-    fun `learned word with high frequency beats dictionary word in confidence`() = runTest(testDispatcher) {
-        wordLearningEngine.learnWord("helloworld", InputMethod.TYPED)
-        repeat(10) { wordLearningEngine.learnWord("helloworld", InputMethod.TYPED) }
+    fun `learned word with high frequency beats dictionary correction in confidence`() = runTest(testDispatcher) {
+        wordLearningEngine.learnWord("helo", InputMethod.TYPED)
+        repeat(10) { wordLearningEngine.learnWord("helo", InputMethod.TYPED) }
 
-        val suggestions = spellCheckManager.getSpellingSuggestionsWithConfidence("hello")
+        val suggestions = spellCheckManager.getSpellingSuggestionsWithConfidence("helo")
 
-        val learned = suggestions.find { it.word == "helloworld" && it.source == "learned" }
-        val dictionary = suggestions.find { it.word == "hello" && it.source == "symspell" }
+        val learned = suggestions.find { it.word == "helo" && it.source == "learned" }
+        val dictionaryCorrection = suggestions.find { it.word == "hello" && it.source == "dictionary" }
 
         assertNotNull(learned)
-        assertNotNull(dictionary)
+        assertNotNull(dictionaryCorrection)
 
-        if (learned != null && dictionary != null) {
+        if (learned != null && dictionaryCorrection != null) {
+            val learnedConf = learned.confidence
+            val dictConf = dictionaryCorrection.confidence
             assertTrue(
-                "Learned word confidence (${learned.confidence}) > dictionary (${dictionary.confidence})",
-                learned.confidence > dictionary.confidence
+                "Learned word confidence ($learnedConf) > dictionary correction ($dictConf)",
+                learnedConf > dictConf
             )
         }
     }

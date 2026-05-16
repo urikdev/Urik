@@ -26,20 +26,12 @@ constructor(
 ) {
     private val _mappings = MutableStateFlow<Map<String, String>>(emptyMap())
 
-    /**
-     * Current custom key mappings as a StateFlow.
-     *
-     * Map from base key (lowercase) to custom symbol.
-     */
+    /** Map from base key (lowercase) to custom symbol. */
     val mappings: StateFlow<Map<String, String>> = _mappings.asStateFlow()
 
     private val isInitialized = AtomicBoolean(false)
 
-    /**
-     * Initializes the service and starts observing repository changes.
-     *
-     * Safe to call multiple times; only initializes once.
-     */
+    /** Safe to call multiple times; only initializes once. */
     fun initialize() {
         if (!isInitialized.compareAndSet(false, true)) return
 
@@ -50,35 +42,14 @@ constructor(
         }
     }
 
-    /**
-     * Gets the custom symbol mapped to a key, if any.
-     *
-     * @param baseKey The key to look up (case-insensitive)
-     * @return The mapped symbol, or null if not mapped
-     */
     fun getMapping(baseKey: String): String? = _mappings.value[baseKey.lowercase()]
 
-    /**
-     * Checks if a key has a custom mapping.
-     *
-     * @param baseKey The key to check (case-insensitive)
-     * @return true if the key has a custom mapping
-     */
     fun hasMapping(baseKey: String): Boolean = baseKey.lowercase() in _mappings.value
 
-    /**
-     * Gets all current mappings as a snapshot.
-     */
     fun getAllMappings(): Map<String, String> = _mappings.value.toMap()
 
-    /**
-     * Gets the count of custom mappings.
-     */
     fun getMappingCount(): Int = _mappings.value.size
 
-    /**
-     * Forces a refresh of the mappings from the repository.
-     */
     suspend fun refresh() {
         _mappings.value = repository.getAllMappingsAsMap()
     }

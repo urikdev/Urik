@@ -24,11 +24,6 @@ import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import kotlinx.coroutines.launch
 
-/**
- * Settings fragment for appearance customization.
- *
- * Manages theme, key sizing, label sizing, and repeat key timing preferences.
- */
 @AndroidEntryPoint
 class AppearanceFragment : PreferenceFragmentCompat() {
     @Inject

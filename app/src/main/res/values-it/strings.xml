@@ -173,6 +173,10 @@
     <string name="alternative_layout_default">Predefinito (Layout lingua)</string>
 
     <!-- Privacy & Data Settings -->
+    <string name="privacy_settings_storage_encryption_title">Archiviazione parole: Non cifrata</string>
+    <string name="privacy_settings_storage_encryption_summary">Nessuna schermata di blocco rilevata. Le parole apprese sono archiviate in testo normale. Imposta un PIN, un pattern o un blocco biometrico nelle impostazioni Android per abilitare la crittografia.</string>
+    <string name="privacy_settings_keystore_api27_title">Crittografia: protezione di blocco ridotta</string>
+    <string name="privacy_settings_keystore_api27_summary">Questo dispositivo utilizza Android 7.1 o versioni precedenti. In questa versione di Android, la chiave del database non può essere limitata all\'accesso solo a dispositivo sbloccato, quindi le parole apprese potrebbero essere accessibili anche quando il dispositivo è bloccato. L\'aggiornamento ad Android 9.0 o successivo abilita la protezione completa della schermata di blocco.</string>
     <string name="privacy_settings_clipboard_history">Cronologia appunti</string>
     <string name="privacy_settings_clipboard_history_on">Cronologia appunti attivata</string>
     <string name="privacy_settings_clipboard_history_off">Cronologia appunti disattivata</string>
@@ -359,5 +363,12 @@
 
     <!-- AlphabetSideBar accessibility -->
     <string name="alphabet_sidebar_description">Barra laterale di navigazione alfabetica</string>
-
+    <!-- Flick key accessibility -->
+    <string name="flick_key_description">%1$s. Swipe: su %2$s, destra %3$s, giù %4$s, sinistra %5$s</string>
+    <string name="flick_key_description_partial">%1$s. Swipe: %2$s</string>
+    <string name="action_dakuten">Attiva/disattiva segno vocale</string>
+    <string name="action_small_kana">Attiva/disattiva kana piccolo</string>
+    <string name="action_handakuten">Attiva/disattiva segno semivocale</string>
+    <string name="action_next_candidate">Candidato successivo</string>
+    <string name="action_commit_candidate">Conferma candidato</string>
 </resources>

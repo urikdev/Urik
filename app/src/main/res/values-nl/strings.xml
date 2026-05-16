@@ -173,6 +173,10 @@
     <string name="alternative_layout_default">Standaard (Taalindeling)</string>
 
     <!-- Privacy & Data Settings -->
+    <string name="privacy_settings_storage_encryption_title">Woordopslag: Niet versleuteld</string>
+    <string name="privacy_settings_storage_encryption_summary">Geen apparaatvergrendeling gedetecteerd. Geleerde woorden worden opgeslagen als platte tekst. Stel een pincode, patroon of biometrische vergrendeling in via de Android-instellingen om versleuteling in te schakelen.</string>
+    <string name="privacy_settings_keystore_api27_title">Versleuteling: beperkte vergrendelingsbescherming</string>
+    <string name="privacy_settings_keystore_api27_summary">Dit apparaat gebruikt Android 7.1 of ouder. In deze Android-versie kan de databasesleutel niet worden beperkt tot toegang alleen wanneer het apparaat is ontgrendeld, waardoor geleerde woorden toegankelijk kunnen zijn terwijl het apparaat is vergrendeld. Upgraden naar Android 9.0 of later schakelt volledige vergrendelschermbescherming in.</string>
     <string name="privacy_settings_clipboard_history">Klembordgeschiedenis</string>
     <string name="privacy_settings_clipboard_history_on">Klembordgeschiedenis ingeschakeld</string>
     <string name="privacy_settings_clipboard_history_off">Klembordgeschiedenis uitgeschakeld</string>
@@ -360,5 +364,12 @@
 
     <!-- AlphabetSideBar accessibility -->
     <string name="alphabet_sidebar_description">Alfabetische navigatiebalk</string>
-
+    <!-- Flick key accessibility -->
+    <string name="flick_key_description">%1$s. Veeg: omhoog %2$s, rechts %3$s, omlaag %4$s, links %5$s</string>
+    <string name="flick_key_description_partial">%1$s. Veeg: %2$s</string>
+    <string name="action_dakuten">Stemteken wisselen</string>
+    <string name="action_small_kana">Klein kana wisselen</string>
+    <string name="action_handakuten">Halfgestemd teken wisselen</string>
+    <string name="action_next_candidate">Volgende kandidaat</string>
+    <string name="action_commit_candidate">Kandidaat bevestigen</string>
 </resources>

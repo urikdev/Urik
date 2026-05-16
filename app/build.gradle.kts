@@ -59,6 +59,11 @@ android {
         targetCompatibility = JavaVersion.VERSION_21
     }
 
+    lint {
+        abortOnError = true
+        warningsAsErrors = false
+    }
+
     buildFeatures {
         viewBinding = true
         resValues = false
@@ -177,10 +182,6 @@ dependencies {
     implementation(libs.hilt.android)
     implementation(libs.androidx.core.ktx)
     ksp(libs.hilt.android.compiler)
-
-    implementation(libs.icu4j)
-
-    implementation(libs.symspellkt)
 
     implementation(libs.androidx.preference.ktx)
 

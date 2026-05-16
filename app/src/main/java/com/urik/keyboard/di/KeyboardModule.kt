@@ -10,6 +10,7 @@ import com.urik.keyboard.data.database.UserWordFrequencyDao
 import com.urik.keyboard.service.CharacterVariationService
 import com.urik.keyboard.service.DictionaryBackupManager
 import com.urik.keyboard.service.EmojiSearchManager
+import com.urik.keyboard.service.FatFingerExpander
 import com.urik.keyboard.service.LanguageManager
 import com.urik.keyboard.service.SpellCheckManager
 import com.urik.keyboard.service.SwipeSpaceManager
@@ -33,12 +34,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 
-/**
- * Provides core keyboard services and infrastructure.
- *
- * All services are singletons - initialized once per app lifecycle.
- * Hilt manages dependency order and injection.
- */
 @Module
 @InstallIn(SingletonComponent::class)
 object KeyboardModule {
@@ -76,6 +71,10 @@ object KeyboardModule {
     @Provides
     @Singleton
     fun provideWordNormalizer(): WordNormalizer = WordNormalizer()
+
+    @Provides
+    @Singleton
+    fun provideFatFingerExpander(): FatFingerExpander = FatFingerExpander()
 
     @Provides
     @Singleton
@@ -143,14 +142,16 @@ object KeyboardModule {
         wordLearningEngine: WordLearningEngine,
         wordFrequencyRepository: WordFrequencyRepository,
         cacheMemoryManager: CacheMemoryManager,
-        wordNormalizer: WordNormalizer
+        wordNormalizer: WordNormalizer,
+        fatFingerExpander: FatFingerExpander
     ): SpellCheckManager = SpellCheckManager(
         context,
         languageManager,
         wordLearningEngine,
         wordFrequencyRepository,
         wordNormalizer,
-        cacheMemoryManager
+        cacheMemoryManager,
+        fatFingerExpander = fatFingerExpander
     )
 
     @Provides

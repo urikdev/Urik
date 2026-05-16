@@ -1,13 +1,10 @@
 package com.urik.keyboard.settings
 
-import com.ibm.icu.util.ULocale
+import android.icu.util.ULocale
 import com.urik.keyboard.R
 import com.urik.keyboard.model.KeyboardDisplayMode
 import com.urik.keyboard.settings.KeyboardSettings.Companion.DEFAULT_LANGUAGE
 
-/**
- * Key size scale factors.
- */
 enum class KeySize(val displayNameRes: Int, val scaleFactor: Float) {
     SMALL(R.string.key_size_small, 0.85f),
     MEDIUM(R.string.key_size_medium, 1.0f),
@@ -15,36 +12,24 @@ enum class KeySize(val displayNameRes: Int, val scaleFactor: Float) {
     EXTRA_LARGE(R.string.key_size_extra_large, 1.35f)
 }
 
-/**
- * Long press activation timing in milliseconds.
- */
 enum class LongPressDuration(val displayNameRes: Int, val durationMs: Long) {
     SHORT(R.string.long_press_duration_short, 300L),
     MEDIUM(R.string.long_press_duration_medium, 500L),
     LONG(R.string.long_press_duration_long, 800L)
 }
 
-/**
- * Space bar width as key-count multiplier.
- */
 enum class SpaceBarSize(val displayNameRes: Int, val widthMultiplier: Float) {
     COMPACT(R.string.space_bar_size_compact, 3.0f),
     STANDARD(R.string.space_bar_size_standard, 4.0f),
     WIDE(R.string.space_bar_size_wide, 5.0f)
 }
 
-/**
- * Key label size scale factors.
- */
 enum class KeyLabelSize(val displayNameRes: Int, val scaleFactor: Float) {
     SMALL(R.string.key_label_size_small, 0.85f),
     MEDIUM(R.string.key_label_size_medium, 1.0f),
     LARGE(R.string.key_label_size_large, 1.2f)
 }
 
-/**
- * Cursor movement speed for spacebar swipe gesture.
- */
 enum class CursorSpeed(val displayNameRes: Int, val sensitivityDp: Float) {
     SLOW(R.string.cursor_speed_slow, 40f),
     MEDIUM(R.string.cursor_speed_medium, 25f),
@@ -52,9 +37,6 @@ enum class CursorSpeed(val displayNameRes: Int, val sensitivityDp: Float) {
     VERY_FAST(R.string.cursor_speed_very_fast, 8f)
 }
 
-/**
- * Long press punctuation menu activation mode.
- */
 enum class LongPressPunctuationMode(val displayNameRes: Int) {
     OFF(R.string.long_press_punctuation_off),
     SPACEBAR(R.string.long_press_punctuation_spacebar),
@@ -136,23 +118,15 @@ data class KeyboardSettings(
     val isClipboardFullyActive: Boolean
         get() = clipboardEnabled && clipboardConsentShown
 
-    /**
-     * Effective suggestion count respecting suggestion toggle.
-     * Returns 0 if suggestions are disabled.
-     */
+    /** Returns 0 if suggestions are disabled. */
     val effectiveSuggestionCount: Int
         get() = if (showSuggestions) suggestionCount else 0
 
-    /**
-     * Effective vibration amplitude respecting haptic feedback toggle.
-     * Returns 0 if haptic feedback is disabled.
-     */
+    /** Returns 0 if haptic feedback is disabled. */
     val effectiveVibrationAmplitude: Int
         get() = if (hapticFeedback) vibrationStrength else 0
 
     /**
-     * Returns validated copy with constraints enforced.
-     *
      * Filters languages to supported set, limits to max 3, clamps suggestion count,
      * ensures primary language and layout language are active. Falls back to
      * [DEFAULT_LANGUAGE] if validation fails.
@@ -192,22 +166,18 @@ data class KeyboardSettings(
         const val MAX_SUGGESTION_COUNT = 3
         const val MAX_ACTIVE_LANGUAGES = 3
 
-        /**
-         * Default language used as fallback when user locale is unsupported.
-         */
         const val DEFAULT_LANGUAGE = "en"
 
         /**
          * Languages with full keyboard layout, dictionary, and localization support.
          */
         val SUPPORTED_LANGUAGES =
-            setOf("ar", "bg", "ca", "cs", "de", "el", "en", "es", "fa", "fr", "it", "nl", "pl", "pt", "ru", "sk", "sv", "uk")
+            setOf(
+                "ar", "ca", "cs", "de", "el", "en", "es", "fa", "fr", "it",
+                "ja", "nl", "pl", "pt", "ru", "sk", "sv", "uk"
+            )
 
-        /**
-         * Returns localized display names for all supported languages.
-         *
-         * Display names are in the system's current display locale and capitalized.
-         */
+        /** Display names are in the system's current display locale and capitalized. */
         fun getLanguageDisplayNames(): Map<String, String> {
             val displayLocale = ULocale.getDefault()
             return SUPPORTED_LANGUAGES.associateWith { languageCode ->
@@ -227,10 +197,7 @@ data class KeyboardSettings(
             }
         }
 
-        /**
-         * Creates settings with language defaulted to system locale if supported.
-         * Falls back to [DEFAULT_LANGUAGE] for unsupported locales.
-         */
+        /** Falls back to [DEFAULT_LANGUAGE] for unsupported locales. */
         fun defaultForLocale(languageCode: String): KeyboardSettings {
             val lang = if (languageCode in SUPPORTED_LANGUAGES) languageCode else DEFAULT_LANGUAGE
 

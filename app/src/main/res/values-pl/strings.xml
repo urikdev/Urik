@@ -161,6 +161,10 @@
     <string name="alternative_layout_default">Domyślny (Układ językowy)</string>
 
     <!-- Privacy & Data Settings -->
+    <string name="privacy_settings_storage_encryption_title">Przechowywanie słów: Niezaszyfrowane</string>
+    <string name="privacy_settings_storage_encryption_summary">Nie wykryto ekranu blokady urządzenia. Nauczone słowa są przechowywane jako tekst jawny. Ustaw PIN, wzór lub blokadę biometryczną w ustawieniach Androida, aby włączyć szyfrowanie.</string>
+    <string name="privacy_settings_keystore_api27_title">Szyfrowanie: ograniczona ochrona blokady</string>
+    <string name="privacy_settings_keystore_api27_summary">To urządzenie działa w systemie Android 7.1 lub starszym. W tej wersji Androida nie można ograniczyć klucza bazy danych tylko do dostępu przy odblokowanym urządzeniu, dlatego nauczone słowa mogą być dostępne także wtedy, gdy urządzenie jest zablokowane. Aktualizacja do Androida 9.0 lub nowszego włącza pełną ochronę ekranu blokady.</string>
     <string name="privacy_settings_clipboard_history">Historia Schowka</string>
     <string name="privacy_settings_clipboard_history_on">Historia schowka włączona</string>
     <string name="privacy_settings_clipboard_history_off">Historia schowka wyłączona</string>
@@ -359,5 +363,12 @@
 
     <!-- AlphabetSideBar accessibility -->
     <string name="alphabet_sidebar_description">Pasek nawigacji alfabetycznej</string>
-
+    <!-- Flick key accessibility -->
+    <string name="flick_key_description">%1$s. Przesuń: góra %2$s, prawo %3$s, dół %4$s, lewo %5$s</string>
+    <string name="flick_key_description_partial">%1$s. Przesuń: %2$s</string>
+    <string name="action_dakuten">Przełącz znak dźwięczny</string>
+    <string name="action_small_kana">Przełącz małą kanę</string>
+    <string name="action_handakuten">Przełącz znak półdźwięczny</string>
+    <string name="action_next_candidate">Następny kandydat</string>
+    <string name="action_commit_candidate">Zatwierdź kandydata</string>
 </resources>

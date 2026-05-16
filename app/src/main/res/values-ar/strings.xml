@@ -170,6 +170,10 @@
     <string name="layout_mapper_clear_failed">فشل حذف جميع التخصيصات</string>
 
     <!-- Privacy & Data Settings -->
+    <string name="privacy_settings_storage_encryption_title">تخزين الكلمات: غير مشفر</string>
+    <string name="privacy_settings_storage_encryption_summary">لم يتم اكتشاف شاشة قفل الجهاز. يتم تخزين الكلمات المتعلمة بنص عادي. قم بتعيين رمز PIN أو نمط أو قفل بيومتري في إعدادات Android لتمكين التشفير.</string>
+    <string name="privacy_settings_keystore_api27_title">التشفير: حماية قفل مخفّضة</string>
+    <string name="privacy_settings_keystore_api27_summary">يعمل هذا الجهاز بنظام Android 7.1 أو أقدم. لا يمكن تقييد مفتاح قاعدة البيانات بحيث يكون الوصول إليه عند إلغاء قفل الجهاز فقط في هذا الإصدار من Android، لذا قد تكون الكلمات المتعلّمة قابلة للوصول أثناء قفل الجهاز. تتيح الترقية إلى Android 9.0 أو أحدث الحماية الكاملة عبر شاشة القفل.</string>
     <string name="privacy_settings_clipboard_history">تاريخ الحافظة</string>
     <string name="privacy_settings_clipboard_history_on">تاريخ الحافظة مفعل</string>
     <string name="privacy_settings_clipboard_history_off">تفعيل الحافظة غير مفعل</string>
@@ -360,5 +364,12 @@
 
     <!-- AlphabetSideBar accessibility -->
     <string name="alphabet_sidebar_description">شريط التنقل الأبجدي</string>
-
+    <!-- Flick key accessibility -->
+    <string name="flick_key_description">%1$s. تمرير: لأعلى %2$s، لليمين %3$s، لأسفل %4$s، لليسار %5$s</string>
+    <string name="flick_key_description_partial">%1$s. تمرير: %2$s</string>
+    <string name="action_dakuten">تبديل علامة المنطوق</string>
+    <string name="action_small_kana">تبديل كانا الصغيرة</string>
+    <string name="action_handakuten">تبديل علامة شبه المنطوق</string>
+    <string name="action_next_candidate">المرشح التالي</string>
+    <string name="action_commit_candidate">تأكيد المرشح</string>
 </resources>

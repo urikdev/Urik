@@ -2,13 +2,13 @@
 
 package com.urik.keyboard.ui.keyboard
 
-import com.ibm.icu.util.ULocale
 import com.urik.keyboard.data.KeyboardRepository
 import com.urik.keyboard.model.KeyboardEvent
 import com.urik.keyboard.model.KeyboardKey
 import com.urik.keyboard.model.KeyboardLayout
 import com.urik.keyboard.model.KeyboardMode
 import com.urik.keyboard.service.LanguageManager
+import java.util.Locale
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -598,7 +598,7 @@ class KeyboardViewModelTest {
 
         verify(repository).getLayoutForMode(
             eq(KeyboardMode.LETTERS),
-            eq(ULocale.forLanguageTag("sv")),
+            eq(Locale.forLanguageTag("sv")),
             any()
         )
     }
@@ -611,7 +611,7 @@ class KeyboardViewModelTest {
 
         verify(repository, atLeastOnce()).getLayoutForMode(
             any(),
-            eq(ULocale.forLanguageTag("en")),
+            eq(Locale.forLanguageTag("en")),
             any()
         )
     }
@@ -624,7 +624,7 @@ class KeyboardViewModelTest {
 
         verify(repository, atLeastOnce()).getLayoutForMode(
             any(),
-            eq(ULocale.forLanguageTag("sv")),
+            eq(Locale.forLanguageTag("sv")),
             any()
         )
     }
@@ -637,7 +637,7 @@ class KeyboardViewModelTest {
 
         verify(repository, atLeastOnce()).getLayoutForMode(
             any(),
-            eq(ULocale.forLanguageTag("en")),
+            eq(Locale.forLanguageTag("en")),
             any()
         )
     }

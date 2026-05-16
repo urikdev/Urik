@@ -1,5 +1,3 @@
-@file:Suppress("ktlint:standard:no-wildcard-imports")
-
 package com.urik.keyboard.ui.keyboard.components
 
 import android.annotation.SuppressLint
@@ -11,13 +9,11 @@ import android.graphics.drawable.LayerDrawable
 import android.graphics.drawable.RippleDrawable
 import android.graphics.drawable.StateListDrawable
 import android.os.Handler
-import android.os.Looper
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityManager
 import android.widget.Button
 import android.widget.LinearLayout
@@ -44,6 +40,7 @@ import com.urik.keyboard.settings.LongPressPunctuationMode
 import com.urik.keyboard.settings.SpaceBarSize
 import com.urik.keyboard.theme.ThemeManager
 import com.urik.keyboard.utils.CacheMemoryManager
+import com.urik.keyboard.utils.ErrorLogger
 import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -51,7 +48,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-private data class PendingCallbacks(val handler: Handler, val runnable: Runnable)
+internal data class PendingCallbacks(val handler: Handler, val runnable: Runnable)
 
 class KeyboardLayoutManager(
     private val context: Context,
@@ -101,8 +98,6 @@ class KeyboardLayoutManager(
     @VisibleForTesting
     internal var onHapticFired: ((KeyboardKey?) -> Unit)? = null
 
-    private var shiftLongPressFired = false
-
     private val accessibilityManager = context.getSystemService(Context.ACCESSIBILITY_SERVICE) as AccessibilityManager
 
     private var currentLongPressDuration = LongPressDuration.MEDIUM
@@ -116,8 +111,38 @@ class KeyboardLayoutManager(
     private var activePunctuationPopup: CharacterVariationPopup? = null
     private var popupSelectionMode = false
     private var swipeKeyboardView: SwipeKeyboardView? = null
-    private var spaceGestureStartX = 0f
-    private var spaceGestureStartY = 0f
+    private val flickGestureDetector = FlickGestureDetector().also { detector ->
+        detector.updateDisplayMetrics(context.resources.displayMetrics.density)
+        detector.setFlickListener(object : FlickGestureDetector.FlickListener {
+            override fun onFlickStart(key: KeyboardKey.FlickKey, anchorX: Float, anchorY: Float) {}
+            override fun onFlickDirectionChanged(
+                key: KeyboardKey.FlickKey,
+                direction: FlickGestureDetector.FlickDirection
+            ) {
+                flickPopup?.updateHighlight(direction)
+            }
+            override fun onFlickCommit(key: KeyboardKey.FlickKey, direction: FlickGestureDetector.FlickDirection) {
+                flickPopup?.dismiss()
+                flickPopup = null
+                val char = when (direction) {
+                    FlickGestureDetector.FlickDirection.NONE -> key.center
+                    FlickGestureDetector.FlickDirection.UP -> key.up ?: key.center
+                    FlickGestureDetector.FlickDirection.RIGHT -> key.right ?: key.center
+                    FlickGestureDetector.FlickDirection.DOWN -> key.down ?: key.center
+                    FlickGestureDetector.FlickDirection.LEFT -> key.left ?: key.center
+                }
+                onKeyClick(KeyboardKey.Character(char, key.type))
+            }
+            override fun onFlickCancel() {
+                flickPopup?.dismiss()
+                flickPopup = null
+            }
+            override fun onActionTap(key: KeyboardKey.Action) {
+                onKeyClick(key)
+            }
+        })
+    }
+    private var flickPopup: FlickPopup? = null
 
     private var backgroundJob = SupervisorJob()
     private var backgroundScope = CoroutineScope(Dispatchers.IO + backgroundJob)
@@ -140,8 +165,6 @@ class KeyboardLayoutManager(
     private var cachedStrokeWidth = 0
     private var cachedStrokeWidthThick = 0
 
-    private val sharedHandler = Handler(Looper.getMainLooper())
-
     private val backspaceController = BackspaceController(
         onBackspaceKey = { onKeyClick(KeyboardKey.Action(KeyboardKey.ActionType.BACKSPACE)) },
         onAcceleratedDeletionChanged = onAcceleratedDeletionChanged,
@@ -151,6 +174,32 @@ class KeyboardLayoutManager(
         getHapticAmplitude = { hapticAmplitude },
         getSupportsAmplitudeControl = { supportsAmplitudeControl },
         getBackgroundScope = { backgroundScope }
+    )
+
+    private val touchDispatcher = KeyTouchDispatcher(
+        onKeyClick = onKeyClick,
+        performHaptic = ::performContextualHaptic,
+        getLongPressDuration = { currentLongPressDuration },
+        getLongPressPunctuationMode = { longPressPunctuationMode },
+        getActiveLanguages = { activeLanguages },
+        getShowLanguageSwitchKey = { showLanguageSwitchKey },
+        getPopupSelectionMode = { popupSelectionMode },
+        setPopupSelectionMode = { popupSelectionMode = it },
+        getVariationPopup = { variationPopup },
+        setVariationPopup = { variationPopup = it },
+        getActivePunctuationPopup = { activePunctuationPopup },
+        setActivePunctuationPopup = { activePunctuationPopup = it },
+        getLongPressConsumedButtons = { longPressConsumedButtons },
+        getHapticDownFiredButtons = { hapticDownFiredButtons },
+        getCharacterLongPressFired = { characterLongPressFired },
+        getSymbolsLongPressFired = { symbolsLongPressFired },
+        getCustomMappingLongPressFired = { customMappingLongPressFired },
+        getButtonPendingCallbacks = { buttonPendingCallbacks },
+        getButtonLongPressRunnables = { buttonLongPressRunnables },
+        backspaceController = backspaceController,
+        setSwipePopupActive = { active -> swipeKeyboardView?.setPopupActive(active) },
+        getCurrentVariationKeyType = { currentVariationKeyType },
+        accessibilityManager = accessibilityManager
     )
 
     private var variationPopup: CharacterVariationPopup? = null
@@ -178,446 +227,22 @@ class KeyboardLayoutManager(
         onKeyClick(punctuationKey)
     }
 
-    @VisibleForTesting
-    internal val keyClickListener =
-        View.OnClickListener { view ->
-            if (longPressConsumedButtons.remove(view as? Button)) return@OnClickListener
-
-            val key = view.getTag(R.id.key_data) as? KeyboardKey ?: return@OnClickListener
-            val skipHaptic = hapticDownFiredButtons.remove(view as? Button)
-            if (!skipHaptic) {
-                performContextualHaptic(key)
-            }
-
-            if (accessibilityManager.isEnabled) {
-                val event = AccessibilityEvent.obtain(AccessibilityEvent.TYPE_VIEW_CLICKED)
-                event.contentDescription = view.contentDescription
-                accessibilityManager.sendAccessibilityEvent(event)
-            }
-
-            onKeyClick(key)
-        }
-
-    private var longPressStartX = 0f
-    private var longPressStartY = 0f
-    private val longPressCancelThresholdPx = 20f
+    @VisibleForTesting internal val keyClickListener get() = touchDispatcher.keyClickListener
 
     @VisibleForTesting
-    @SuppressLint("ClickableViewAccessibility")
-    internal val characterLongPressTouchListener =
-        View.OnTouchListener { view, event ->
-            when (event.action) {
-                MotionEvent.ACTION_DOWN -> {
-                    val key = view.getTag(R.id.key_data) as? KeyboardKey.Character ?: return@OnTouchListener false
-                    val button = view as Button
-                    characterLongPressFired.remove(button)
-                    customMappingLongPressFired.remove(button)
-                    longPressConsumedButtons.remove(button)
-                    hapticDownFiredButtons.add(button)
-                    performContextualHaptic(key)
-                    longPressStartX = event.rawX
-                    longPressStartY = event.rawY
-                    val runnable = buttonLongPressRunnables[button] ?: return@OnTouchListener false
-                    buttonPendingCallbacks[button] = PendingCallbacks(sharedHandler, runnable)
-                    sharedHandler.postDelayed(runnable, currentLongPressDuration.durationMs)
-                    false
-                }
-
-                MotionEvent.ACTION_MOVE -> {
-                    val button = view as Button
-                    if (popupSelectionMode && variationPopup?.isShowing == true) {
-                        val previousChar = variationPopup?.getHighlightedCharacter()
-                        val char = variationPopup?.getCharacterAt(event.rawX, event.rawY)
-                        variationPopup?.setHighlighted(char)
-                        if (char != null && char != previousChar) {
-                            performContextualHaptic(null)
-                        }
-                        return@OnTouchListener true
-                    }
-                    if (characterLongPressFired.contains(button)) {
-                        return@OnTouchListener true
-                    }
-                    val dx = event.rawX - longPressStartX
-                    val dy = event.rawY - longPressStartY
-                    val distance = kotlin.math.sqrt(dx * dx + dy * dy)
-                    if (distance > longPressCancelThresholdPx) {
-                        buttonPendingCallbacks.remove(button)?.let { pending ->
-                            pending.handler.removeCallbacks(pending.runnable)
-                        }
-                    }
-                    false
-                }
-
-                MotionEvent.ACTION_UP -> {
-                    val button = view as Button
-                    buttonPendingCallbacks.remove(button)?.let { pending ->
-                        pending.handler.removeCallbacks(pending.runnable)
-                    }
-
-                    val longPressConsumed =
-                        characterLongPressFired.remove(button) ||
-                            longPressConsumedButtons.contains(button)
-
-                    if (popupSelectionMode && variationPopup?.isShowing == true) {
-                        val selectedChar = variationPopup?.getHighlightedCharacter()
-                        if (selectedChar != null) {
-                            variationPopup?.dismiss()
-                            variationPopup = null
-                            popupSelectionMode = false
-                            swipeKeyboardView?.setPopupActive(false)
-
-                            val keyType = currentVariationKeyType ?: KeyboardKey.KeyType.LETTER
-                            val selectedKey = KeyboardKey.Character(selectedChar, keyType)
-                            performContextualHaptic(selectedKey)
-                            onKeyClick(selectedKey)
-                        } else {
-                            popupSelectionMode = false
-                            swipeKeyboardView?.setPopupActive(false)
-                        }
-                        customMappingLongPressFired.remove(button)
-                        return@OnTouchListener true
-                    }
-
-                    customMappingLongPressFired.remove(button)
-                    longPressConsumed
-                }
-
-                MotionEvent.ACTION_CANCEL -> {
-                    val button = view as Button
-                    buttonPendingCallbacks.remove(button)?.let { pending ->
-                        pending.handler.removeCallbacks(pending.runnable)
-                    }
-
-                    val longPressConsumed =
-                        characterLongPressFired.remove(button) ||
-                            longPressConsumedButtons.contains(button)
-
-                    if (popupSelectionMode && variationPopup?.isShowing == true) {
-                        variationPopup?.dismiss()
-                        variationPopup = null
-                        popupSelectionMode = false
-                        swipeKeyboardView?.setPopupActive(false)
-                    }
-
-                    customMappingLongPressFired.remove(button)
-                    longPressConsumed
-                }
-
-                else -> {
-                    false
-                }
-            }
-        }
-
-    @SuppressLint("ClickableViewAccessibility")
-    private val spaceLongPressTouchListener =
-        View.OnTouchListener { view, event ->
-            when (event.action) {
-                MotionEvent.ACTION_DOWN -> {
-                    popupSelectionMode = false
-                    longPressConsumedButtons.remove(view as Button)
-                    spaceGestureStartX = event.x
-                    spaceGestureStartY = event.y
-                    val runnable = buttonLongPressRunnables[view as Button] ?: return@OnTouchListener false
-                    buttonPendingCallbacks[view] = PendingCallbacks(sharedHandler, runnable)
-                    sharedHandler.postDelayed(runnable, currentLongPressDuration.durationMs)
-                    false
-                }
-
-                MotionEvent.ACTION_MOVE -> {
-                    if (popupSelectionMode && activePunctuationPopup != null) {
-                        val char = activePunctuationPopup?.getCharacterAt(event.rawX, event.rawY)
-                        activePunctuationPopup?.setHighlighted(char)
-                        return@OnTouchListener true
-                    }
-
-                    if (!popupSelectionMode) {
-                        val dx = event.x - spaceGestureStartX
-                        val dy = event.y - spaceGestureStartY
-                        val distance = kotlin.math.sqrt(dx * dx + dy * dy)
-                        if (distance > 20f) {
-                            buttonPendingCallbacks.remove(view as Button)?.let { pending ->
-                                pending.handler.removeCallbacks(pending.runnable)
-                            }
-                        }
-                    }
-                    false
-                }
-
-                MotionEvent.ACTION_UP -> {
-                    if (popupSelectionMode && activePunctuationPopup != null) {
-                        val selectedChar = activePunctuationPopup?.getHighlightedCharacter()
-
-                        buttonPendingCallbacks.remove(view as Button)?.let { pending ->
-                            pending.handler.removeCallbacks(pending.runnable)
-                        }
-
-                        if (selectedChar != null) {
-                            activePunctuationPopup?.dismiss()
-                            activePunctuationPopup = null
-                            popupSelectionMode = false
-                            swipeKeyboardView?.setPopupActive(false)
-
-                            val punctuationKey = KeyboardKey.Character(selectedChar, KeyboardKey.KeyType.PUNCTUATION)
-                            performContextualHaptic(punctuationKey)
-                            onKeyClick(punctuationKey)
-                        } else {
-                            activePunctuationPopup?.setHighlighted(null)
-                        }
-
-                        return@OnTouchListener true
-                    }
-
-                    buttonPendingCallbacks.remove(view as Button)?.let { pending ->
-                        pending.handler.removeCallbacks(pending.runnable)
-                    }
-                    false
-                }
-
-                MotionEvent.ACTION_CANCEL -> {
-                    if (popupSelectionMode && activePunctuationPopup != null) {
-                        activePunctuationPopup?.dismiss()
-                        activePunctuationPopup = null
-                        popupSelectionMode = false
-                        swipeKeyboardView?.setPopupActive(false)
-                    }
-
-                    buttonPendingCallbacks.remove(view as Button)?.let { pending ->
-                        pending.handler.removeCallbacks(pending.runnable)
-                    }
-                    false
-                }
-
-                else -> {
-                    false
-                }
-            }
-        }
+    internal val characterLongPressTouchListener get() = touchDispatcher.characterLongPressTouchListener
 
     @VisibleForTesting
-    @SuppressLint("ClickableViewAccessibility")
-    internal val punctuationLongPressTouchListener =
-        View.OnTouchListener { view, event ->
-            when (event.action) {
-                MotionEvent.ACTION_DOWN -> {
-                    popupSelectionMode = false
-                    longPressConsumedButtons.remove(view as Button)
-                    val key = view.getTag(R.id.key_data) as? KeyboardKey.Character ?: return@OnTouchListener false
-                    hapticDownFiredButtons.add(view as Button)
-                    performContextualHaptic(key)
-                    val runnable = buttonLongPressRunnables[view as Button] ?: return@OnTouchListener false
-                    buttonPendingCallbacks[view] = PendingCallbacks(sharedHandler, runnable)
-                    sharedHandler.postDelayed(runnable, currentLongPressDuration.durationMs)
-                    false
-                }
+    internal val punctuationLongPressTouchListener get() = touchDispatcher.punctuationLongPressTouchListener
 
-                MotionEvent.ACTION_MOVE -> {
-                    if (popupSelectionMode && activePunctuationPopup != null) {
-                        val char = activePunctuationPopup?.getCharacterAt(event.rawX, event.rawY)
-                        activePunctuationPopup?.setHighlighted(char)
-                        return@OnTouchListener true
-                    }
-                    false
-                }
+    @VisibleForTesting internal val backspaceLongClickListener get() = touchDispatcher.backspaceLongClickListener
 
-                MotionEvent.ACTION_UP -> {
-                    if (popupSelectionMode && activePunctuationPopup != null) {
-                        val selectedChar = activePunctuationPopup?.getHighlightedCharacter()
+    @VisibleForTesting internal val backspaceTouchListener get() = touchDispatcher.backspaceTouchListener
 
-                        buttonPendingCallbacks.remove(view as Button)?.let { pending ->
-                            pending.handler.removeCallbacks(pending.runnable)
-                        }
-
-                        if (selectedChar != null) {
-                            activePunctuationPopup?.dismiss()
-                            activePunctuationPopup = null
-                            popupSelectionMode = false
-                            swipeKeyboardView?.setPopupActive(false)
-
-                            val punctuationKey = KeyboardKey.Character(selectedChar, KeyboardKey.KeyType.PUNCTUATION)
-                            performContextualHaptic(punctuationKey)
-                            onKeyClick(punctuationKey)
-                        } else {
-                            activePunctuationPopup?.setHighlighted(null)
-                        }
-
-                        return@OnTouchListener true
-                    }
-
-                    buttonPendingCallbacks.remove(view as Button)?.let { pending ->
-                        pending.handler.removeCallbacks(pending.runnable)
-                    }
-                    false
-                }
-
-                MotionEvent.ACTION_CANCEL -> {
-                    if (popupSelectionMode && activePunctuationPopup != null) {
-                        activePunctuationPopup?.dismiss()
-                        activePunctuationPopup = null
-                        popupSelectionMode = false
-                        swipeKeyboardView?.setPopupActive(false)
-                    }
-
-                    buttonPendingCallbacks.remove(view as Button)?.let { pending ->
-                        pending.handler.removeCallbacks(pending.runnable)
-                    }
-                    false
-                }
-
-                else -> {
-                    false
-                }
-            }
-        }
-
-    @SuppressLint("ClickableViewAccessibility")
-    private val shiftLongPressTouchListener =
-        View.OnTouchListener { view, event ->
-            when (event.action) {
-                MotionEvent.ACTION_DOWN -> {
-                    shiftLongPressFired = false
-                    longPressConsumedButtons.remove(view as Button)
-                    val runnable = buttonLongPressRunnables[view as Button] ?: return@OnTouchListener false
-                    buttonPendingCallbacks[view] = PendingCallbacks(sharedHandler, runnable)
-                    sharedHandler.postDelayed(runnable, currentLongPressDuration.durationMs)
-                    false
-                }
-
-                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                    buttonPendingCallbacks.remove(view as Button)?.let { pending ->
-                        pending.handler.removeCallbacks(pending.runnable)
-                    }
-                    val shouldConsume =
-                        shiftLongPressFired ||
-                            longPressConsumedButtons.contains(view)
-                    shiftLongPressFired = false
-                    shouldConsume
-                }
-
-                else -> {
-                    false
-                }
-            }
-        }
-
-    @SuppressLint("ClickableViewAccessibility")
-    private val symbolsLongPressTouchListener =
-        View.OnTouchListener { view, event ->
-            when (event.action) {
-                MotionEvent.ACTION_DOWN -> {
-                    val button = view as Button
-                    symbolsLongPressFired.remove(button)
-                    longPressConsumedButtons.remove(button)
-                    val runnable = buttonLongPressRunnables[button] ?: return@OnTouchListener false
-                    buttonPendingCallbacks[button] = PendingCallbacks(sharedHandler, runnable)
-                    sharedHandler.postDelayed(runnable, currentLongPressDuration.durationMs)
-                    false
-                }
-
-                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                    val button = view as Button
-                    buttonPendingCallbacks.remove(button)?.let { pending ->
-                        pending.handler.removeCallbacks(pending.runnable)
-                    }
-                    val longPressFired = symbolsLongPressFired.remove(button)
-                    longPressFired
-                }
-
-                else -> {
-                    false
-                }
-            }
-        }
+    @VisibleForTesting internal val commaLongPressTouchListener get() = touchDispatcher.commaLongPressTouchListener
 
     @VisibleForTesting
-    internal val backspaceLongClickListener =
-        View.OnLongClickListener { _ ->
-            performContextualHaptic(KeyboardKey.Action(KeyboardKey.ActionType.BACKSPACE))
-            backspaceController.start()
-            true
-        }
-
-    @VisibleForTesting
-    @SuppressLint("ClickableViewAccessibility")
-    internal val backspaceTouchListener =
-        View.OnTouchListener { view, event ->
-            when (event.action) {
-                MotionEvent.ACTION_DOWN -> {
-                    hapticDownFiredButtons.add(view as Button)
-                    performContextualHaptic(KeyboardKey.Action(KeyboardKey.ActionType.BACKSPACE))
-                    false
-                }
-
-                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                    backspaceController.stop()
-                    false
-                }
-
-                else -> {
-                    false
-                }
-            }
-        }
-
-    private var commaLongPressFired = false
-
-    @VisibleForTesting
-    @SuppressLint("ClickableViewAccessibility")
-    internal val commaLongPressTouchListener =
-        View.OnTouchListener { view, event ->
-            when (event.action) {
-                MotionEvent.ACTION_DOWN -> {
-                    commaLongPressFired = false
-                    longPressConsumedButtons.remove(view as Button)
-                    val commaKey = view.getTag(R.id.key_data) as? KeyboardKey.Character
-                    hapticDownFiredButtons.add(view as Button)
-                    if (commaKey != null) performContextualHaptic(commaKey)
-                    longPressStartX = event.rawX
-                    longPressStartY = event.rawY
-                    val runnable = buttonLongPressRunnables[view as Button] ?: return@OnTouchListener false
-                    buttonPendingCallbacks[view] = PendingCallbacks(sharedHandler, runnable)
-                    sharedHandler.postDelayed(runnable, currentLongPressDuration.durationMs)
-                    false
-                }
-
-                MotionEvent.ACTION_MOVE -> {
-                    val dx = event.rawX - longPressStartX
-                    val dy = event.rawY - longPressStartY
-                    val distance = kotlin.math.sqrt(dx * dx + dy * dy)
-                    if (distance > longPressCancelThresholdPx) {
-                        buttonPendingCallbacks.remove(view as Button)?.let { pending ->
-                            pending.handler.removeCallbacks(pending.runnable)
-                        }
-                    }
-                    false
-                }
-
-                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                    buttonPendingCallbacks.remove(view as Button)?.let { pending ->
-                        pending.handler.removeCallbacks(pending.runnable)
-                    }
-                    val shouldConsume = commaLongPressFired
-                    commaLongPressFired = false
-                    shouldConsume
-                }
-
-                else -> {
-                    false
-                }
-            }
-        }
-
-    @VisibleForTesting
-    @SuppressLint("ClickableViewAccessibility")
-    internal val punctuationTapHapticTouchListener =
-        View.OnTouchListener { view, event ->
-            if (event.action == MotionEvent.ACTION_DOWN) {
-                val key = view.getTag(R.id.key_data) as? KeyboardKey.Character
-                hapticDownFiredButtons.add(view as Button)
-                if (key != null) performContextualHaptic(key)
-            }
-            false
-        }
+    internal val punctuationTapHapticTouchListener get() = touchDispatcher.punctuationTapHapticTouchListener
 
     private val punctuationLoader = PunctuationLoader(context, cacheMemoryManager)
 
@@ -739,7 +364,13 @@ class KeyboardLayoutManager(
             } else {
                 v.vibrate(effect)
             }
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            ErrorLogger.logException(
+                component = "KeyboardLayoutManager",
+                severity = ErrorLogger.Severity.LOW,
+                exception = e,
+                context = mapOf("operation" to "vibrateEffect")
+            )
         }
     }
 
@@ -769,6 +400,8 @@ class KeyboardLayoutManager(
                         }
                     }
 
+                    is KeyboardKey.FlickKey -> HapticSignature.LetterClick
+
                     KeyboardKey.Spacer -> {
                         return
                     }
@@ -785,7 +418,13 @@ class KeyboardLayoutManager(
             }
             val effect = signature.createEffect(amplitude)
             vibrateEffect(effect)
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            ErrorLogger.logException(
+                component = "KeyboardLayoutManager",
+                severity = ErrorLogger.Severity.LOW,
+                exception = e,
+                context = mapOf("operation" to "performContextualHaptic")
+            )
         }
     }
 
@@ -831,6 +470,27 @@ class KeyboardLayoutManager(
         cachedStrokeWidth = (1 * density).toInt()
         cachedStrokeWidthThick = (2 * density).toInt()
         cacheValid = true
+    }
+
+    /**
+     * Returns a cached dimension, re-running [ensureCacheValid] if the key is absent, then
+     * falling back to the equivalent resource default so consumers never receive null.
+     */
+    private fun requireDim(key: String): Int {
+        val cached = cachedDimensions[key]
+        if (cached != null) return cached
+        ensureCacheValid()
+        cachedDimensions[key]?.let { return it }
+        return when (key) {
+            "minTarget" -> context.resources.getDimensionPixelSize(R.dimen.minimum_touch_target)
+            "keyHeight" -> context.resources.getDimensionPixelSize(R.dimen.key_height)
+            "horizontalPadding" -> context.resources.getDimensionPixelSize(R.dimen.key_margin_horizontal)
+            "verticalPadding" -> (context.resources.getDimensionPixelSize(R.dimen.key_margin_horizontal) * 0.5f).toInt()
+            "horizontalMargin" -> context.resources.getDimensionPixelSize(R.dimen.key_margin_horizontal)
+            "rowVerticalMargin" -> context.resources.getDimensionPixelSize(R.dimen.key_margin_vertical)
+            "numberRowGutter" -> context.resources.getDimensionPixelSize(R.dimen.number_row_gutter)
+            else -> 0
+        }
     }
 
     private fun getCachedTextSize(keyHeight: Int): Float = cachedTextSizes.getOrPut(keyHeight) {
@@ -928,11 +588,10 @@ class KeyboardLayoutManager(
                             LinearLayout.LayoutParams.WRAP_CONTENT
                         ).apply {
                             ensureCacheValid()
-                            val verticalMargin = cachedDimensions["rowVerticalMargin"]
-                                ?: context.resources.getDimensionPixelSize(R.dimen.key_margin_vertical)
+                            val verticalMargin = requireDim("rowVerticalMargin")
                             val gutterMargin =
                                 if (hasNumberRowGutter) {
-                                    cachedDimensions["numberRowGutter"]!!
+                                    requireDim("numberRowGutter")
                                 } else {
                                     0
                                 }
@@ -1073,7 +732,7 @@ class KeyboardLayoutManager(
 
             key is KeyboardKey.Character && key.value == "," ->
                 buttonLongPressRunnables[button] = Runnable {
-                    commaLongPressFired = true
+                    touchDispatcher.commaLongPressFired = true
                     longPressConsumedButtons.add(button)
                     button.isPressed = false
                     performContextualHaptic(KeyboardKey.Character(",", KeyboardKey.KeyType.PUNCTUATION))
@@ -1094,7 +753,7 @@ class KeyboardLayoutManager(
                 !showLanguageSwitchKey &&
                 activeLanguages.size > 1 ->
                 buttonLongPressRunnables[button] = Runnable {
-                    shiftLongPressFired = true
+                    touchDispatcher.shiftLongPressFired = true
                     longPressConsumedButtons.add(button)
                     performContextualHaptic(KeyboardKey.Action(KeyboardKey.ActionType.SHIFT))
                     handleShiftLongPress(button)
@@ -1112,6 +771,7 @@ class KeyboardLayoutManager(
     }
 
     @SuppressLint("ClickableViewAccessibility")
+    @Suppress("CyclomaticComplexMethod")
     private fun configureButton(button: Button, key: KeyboardKey, state: KeyboardState, rowKeys: List<KeyboardKey>) {
         ensureCacheValid()
 
@@ -1120,9 +780,9 @@ class KeyboardLayoutManager(
             setOnLongClickListener(null)
             setOnTouchListener(null)
 
-            val minTarget = cachedDimensions["minTarget"]!!
-            val keyHeight = cachedDimensions["keyHeight"]!!
-            val gutterReduction = if (isTopNumberRow(rowKeys)) cachedDimensions["numberRowGutter"]!! else 0
+            val minTarget = requireDim("minTarget")
+            val keyHeight = requireDim("keyHeight")
+            val gutterReduction = if (isTopNumberRow(rowKeys)) requireDim("numberRowGutter") else 0
             val adjustedKeyHeight = (keyHeight - gutterReduction).coerceAtLeast(keyHeight / 2)
             val adjustedMinTarget = (minTarget - gutterReduction).coerceAtLeast(minTarget / 2)
             val visualHeight = adjustedKeyHeight + 2
@@ -1135,7 +795,7 @@ class KeyboardLayoutManager(
                         visualHeight,
                         getKeyWeight(key, rowKeys)
                     ).apply {
-                        val horizontalMargin = cachedDimensions["horizontalMargin"]!!
+                        val horizontalMargin = requireDim("horizontalMargin")
                         setMargins(horizontalMargin, verticalMargin, horizontalMargin, verticalMargin)
                     }
 
@@ -1161,8 +821,8 @@ class KeyboardLayoutManager(
             minHeight = 0
             minimumHeight = 0
 
-            val horizontalPadding = cachedDimensions["horizontalPadding"]!!
-            val verticalPadding = cachedDimensions["verticalPadding"]!!
+            val horizontalPadding = requireDim("horizontalPadding")
+            val verticalPadding = requireDim("verticalPadding")
             setPadding(horizontalPadding, verticalPadding, horizontalPadding, verticalPadding)
 
             if (key is KeyboardKey.Action &&
@@ -1259,6 +919,10 @@ class KeyboardLayoutManager(
                                 }
                             }
 
+                            is KeyboardKey.FlickKey -> {
+                                info.roleDescription = context.getString(R.string.key_role)
+                            }
+
                             KeyboardKey.Spacer -> {}
                         }
                     }
@@ -1278,7 +942,6 @@ class KeyboardLayoutManager(
             )
 
             setTag(R.id.key_data, key)
-            setOnClickListener(keyClickListener)
             isHapticFeedbackEnabled = false
 
             if (key is KeyboardKey.Action) {
@@ -1293,6 +956,8 @@ class KeyboardLayoutManager(
                         KeyboardKey.ActionType.SPACE -> R.drawable.space_bar_48px
 
                         KeyboardKey.ActionType.BACKSPACE -> R.drawable.backspace_48px
+
+                        KeyboardKey.ActionType.EMOJI -> R.drawable.ic_emoji
 
                         KeyboardKey.ActionType.ENTER -> R.drawable.keyboard_return_48px
 
@@ -1350,45 +1015,7 @@ class KeyboardLayoutManager(
             }
 
             preallocateLongPressRunnable(button, key)
-
-            if (key is KeyboardKey.Character &&
-                (
-                    key.type == KeyboardKey.KeyType.LETTER ||
-                        key.type == KeyboardKey.KeyType.NUMBER ||
-                        key.type == KeyboardKey.KeyType.SYMBOL
-                    )
-            ) {
-                setOnTouchListener(characterLongPressTouchListener)
-            }
-
-            if (key is KeyboardKey.Character && key.type == KeyboardKey.KeyType.PUNCTUATION) {
-                if (longPressPunctuationMode == LongPressPunctuationMode.PERIOD && key.value == ".") {
-                    setOnTouchListener(punctuationLongPressTouchListener)
-                } else if (key.value == ",") {
-                    setOnTouchListener(commaLongPressTouchListener)
-                } else {
-                    setOnTouchListener(punctuationTapHapticTouchListener)
-                }
-            }
-
-            if (key is KeyboardKey.Action &&
-                key.action == KeyboardKey.ActionType.SPACE &&
-                longPressPunctuationMode == LongPressPunctuationMode.SPACEBAR
-            ) {
-                setOnTouchListener(spaceLongPressTouchListener)
-            }
-
-            if (key is KeyboardKey.Action &&
-                key.action == KeyboardKey.ActionType.SHIFT &&
-                !showLanguageSwitchKey &&
-                activeLanguages.size > 1
-            ) {
-                setOnTouchListener(shiftLongPressTouchListener)
-            }
-
-            if (key is KeyboardKey.Action && key.action == KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS) {
-                setOnTouchListener(symbolsLongPressTouchListener)
-            }
+            touchDispatcher.attachListeners(button, key)
 
             if (key is KeyboardKey.Action && key.action == KeyboardKey.ActionType.LANGUAGE_SWITCH) {
                 setOnClickListener {
@@ -1411,10 +1038,19 @@ class KeyboardLayoutManager(
                 }
             }
 
-            if (key is KeyboardKey.Action && key.action == KeyboardKey.ActionType.BACKSPACE) {
-                setOnLongClickListener(backspaceLongClickListener)
-                setOnTouchListener(backspaceTouchListener)
-                isHapticFeedbackEnabled = false
+            if (key is KeyboardKey.FlickKey) {
+                setOnClickListener(null)
+                setOnTouchListener { view, event ->
+                    if (event.action == MotionEvent.ACTION_DOWN) {
+                        val popup = FlickPopup(context, themeManager)
+                        flickPopup?.dismiss()
+                        flickPopup = popup
+                        popup.show(key, view)
+                    }
+                    flickGestureDetector.handleTouchEvent(event) { _, _ ->
+                        view.getTag(R.id.key_data) as? KeyboardKey
+                    }
+                }
             }
         }
     }
@@ -1533,11 +1169,22 @@ class KeyboardLayoutManager(
                         ).uppercase(java.util.Locale.ROOT)
                 }
 
+                KeyboardKey.ActionType.DAKUTEN -> "゛"
+
+                KeyboardKey.ActionType.SMALL_KANA -> "小"
+
+                KeyboardKey.ActionType.NEXT_CANDIDATE -> "次候補"
+                KeyboardKey.ActionType.COMMIT_CANDIDATE -> "確定"
+                KeyboardKey.ActionType.HANDAKUTEN -> "゜"
+                KeyboardKey.ActionType.EMOJI -> ""
+
                 else -> {
                     "?"
                 }
             }
         }
+
+        is KeyboardKey.FlickKey -> key.center
 
         KeyboardKey.Spacer -> {
             ""
@@ -1635,8 +1282,26 @@ class KeyboardLayoutManager(
                 KeyboardKey.ActionType.LANGUAGE_SWITCH -> {
                     context.getString(R.string.language_switch_description)
                 }
+
+                KeyboardKey.ActionType.DAKUTEN -> {
+                    context.getString(R.string.action_dakuten)
+                }
+
+                KeyboardKey.ActionType.SMALL_KANA -> {
+                    context.getString(R.string.action_small_kana)
+                }
+
+                KeyboardKey.ActionType.NEXT_CANDIDATE -> context.getString(R.string.action_next_candidate)
+
+                KeyboardKey.ActionType.COMMIT_CANDIDATE -> context.getString(R.string.action_commit_candidate)
+
+                KeyboardKey.ActionType.HANDAKUTEN -> context.getString(R.string.action_handakuten)
+
+                KeyboardKey.ActionType.EMOJI -> context.getString(R.string.action_emoji)
             }
         }
+
+        is KeyboardKey.FlickKey -> buildFlickContentDescription(key)
 
         KeyboardKey.Spacer -> {
             ""
@@ -1659,7 +1324,13 @@ class KeyboardLayoutManager(
                 withContext(Dispatchers.Main) {
                     showPunctuationPopup(view, punctuation)
                 }
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                ErrorLogger.logException(
+                    component = "KeyboardLayoutManager",
+                    severity = ErrorLogger.Severity.LOW,
+                    exception = e,
+                    context = mapOf("operation" to "handleSpaceLongPress_loadPunctuation")
+                )
                 withContext(Dispatchers.Main) {
                     showPunctuationPopup(view, PunctuationLoader.DEFAULT_PUNCTUATION)
                 }
@@ -1679,7 +1350,13 @@ class KeyboardLayoutManager(
                 withContext(Dispatchers.Main) {
                     showPunctuationPopup(view, punctuation)
                 }
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                ErrorLogger.logException(
+                    component = "KeyboardLayoutManager",
+                    severity = ErrorLogger.Severity.LOW,
+                    exception = e,
+                    context = mapOf("operation" to "handlePunctuationLongPress_loadPunctuation")
+                )
                 withContext(Dispatchers.Main) {
                     showPunctuationPopup(view, PunctuationLoader.DEFAULT_PUNCTUATION)
                 }
@@ -1786,7 +1463,13 @@ class KeyboardLayoutManager(
                         view.isPressed = false
                     }
                 }
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                ErrorLogger.logException(
+                    component = "KeyboardLayoutManager",
+                    severity = ErrorLogger.Severity.LOW,
+                    exception = e,
+                    context = mapOf("operation" to "handleCharacterVariationLongPress")
+                )
                 withContext(Dispatchers.Main) {
                     view.isPressed = false
                 }
@@ -1852,7 +1535,14 @@ class KeyboardLayoutManager(
                             }
 
                             KeyboardKey.ActionType.BACKSPACE -> {
-                                if (characterKeyCount >= 10) STANDARD_KEY_WEIGHT else BACKSPACE_KEY_WEIGHT
+                                val hasFlickKeys = rowKeys.any { it is KeyboardKey.FlickKey }
+                                if (characterKeyCount >= 10 ||
+                                    hasFlickKeys
+                                ) {
+                                    STANDARD_KEY_WEIGHT
+                                } else {
+                                    BACKSPACE_KEY_WEIGHT
+                                }
                             }
 
                             else -> {
@@ -1860,6 +1550,8 @@ class KeyboardLayoutManager(
                             }
                         }
                     }
+
+                    is KeyboardKey.FlickKey -> STANDARD_KEY_WEIGHT
 
                     KeyboardKey.Spacer -> {
                         STANDARD_KEY_WEIGHT
@@ -1881,6 +1573,8 @@ class KeyboardLayoutManager(
 
                 is KeyboardKey.Action -> key.action == KeyboardKey.ActionType.BACKSPACE
 
+                is KeyboardKey.FlickKey -> false
+
                 KeyboardKey.Spacer -> false
             }
         }
@@ -1889,6 +1583,20 @@ class KeyboardLayoutManager(
     private fun isTopNumberRow(rowKeys: List<KeyboardKey>): Boolean {
         val characterKeys = rowKeys.filterIsInstance<KeyboardKey.Character>()
         return characterKeys.size == 10 && characterKeys.all { it.type == KeyboardKey.KeyType.NUMBER }
+    }
+
+    private fun buildFlickContentDescription(key: KeyboardKey.FlickKey): String {
+        val parts = buildList {
+            key.up?.let { add("up $it") }
+            key.right?.let { add("right $it") }
+            key.down?.let { add("down $it") }
+            key.left?.let { add("left $it") }
+        }
+        return if (parts.isEmpty()) {
+            key.center
+        } else {
+            "${key.center}. Flick: ${parts.joinToString(", ")}"
+        }
     }
 
     private fun shouldCapitalize(state: KeyboardState): Boolean = state.isShiftPressed || state.isCapsLockOn
@@ -1932,6 +1640,8 @@ class KeyboardLayoutManager(
                         else -> theme.colors.keyBackgroundAction
                     }
                 }
+
+                is KeyboardKey.FlickKey -> theme.colors.keyBackgroundCharacter
 
                 KeyboardKey.Spacer -> {
                     android.graphics.Color.TRANSPARENT
@@ -1990,6 +1700,7 @@ class KeyboardLayoutManager(
         return when (key) {
             is KeyboardKey.Character -> colors.keyTextCharacter
             is KeyboardKey.Action -> colors.keyTextAction
+            is KeyboardKey.FlickKey -> colors.keyTextCharacter
             KeyboardKey.Spacer -> android.graphics.Color.TRANSPARENT
         }
     }

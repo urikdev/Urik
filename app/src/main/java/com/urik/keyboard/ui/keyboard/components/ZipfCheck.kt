@@ -1,5 +1,3 @@
-@file:Suppress("ktlint:standard:no-wildcard-imports")
-
 package com.urik.keyboard.ui.keyboard.components
 
 import android.graphics.PointF
@@ -34,7 +32,7 @@ constructor(private val spellCheckManager: SpellCheckManager) {
         geometricAnalysis: PathGeometryAnalyzer.GeometricAnalysis,
         keyPositions: Map<Char, PointF>,
         bigramPredictions: Set<String>,
-        wordFrequencyMap: Map<String, Int>,
+        wordFrequencyMap: Map<String, Long>,
         pathSize: Int
     ): ArbitrationResult {
         if (scoredCandidates.isEmpty()) {
@@ -276,7 +274,7 @@ constructor(private val spellCheckManager: SpellCheckManager) {
 
     private fun enrichWithPrefixCompletions(
         candidates: List<WordCandidate>,
-        wordFrequencyMap: Map<String, Int>,
+        wordFrequencyMap: Map<String, Long>,
         pathSize: Int
     ): List<WordCandidate> {
         if (candidates.isEmpty()) return candidates

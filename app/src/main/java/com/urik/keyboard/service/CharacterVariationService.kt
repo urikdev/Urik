@@ -2,6 +2,7 @@ package com.urik.keyboard.service
 
 import android.content.Context
 import com.urik.keyboard.utils.CacheMemoryManager
+import com.urik.keyboard.utils.ErrorLogger
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.FileNotFoundException
 import java.io.IOException
@@ -61,10 +62,6 @@ private class BoundedVariationErrorTracker(private val maxSize: Int) {
     }
 }
 
-/**
- * Loads character variations (long-press alternatives) from JSON assets.
- *
- */
 @Singleton
 class CharacterVariationService
 @Inject
@@ -111,16 +108,10 @@ constructor(
     }
 
     /**
-     * Gets character variations for long-press menu.
-     *
      * Fallback cascade on missing assets:
      * 1. Language-specific (languageCode) → 2. English (en) → 3. Hardcoded Latin
      *
      * Circuit breaker skips known-broken languages (3 failures, 60s cooldown).
-     *
-     * @param baseChar Character to get variations for (e.g., "a")
-     * @param languageCode Target language code (e.g., "sv", "en")
-     * @return List of variation characters, empty if none available
      */
     suspend fun getVariations(baseChar: String, languageCode: String): List<String> = withContext(Dispatchers.IO) {
         if (isDestroyed || baseChar.isEmpty()) return@withContext emptyList()
@@ -130,7 +121,13 @@ constructor(
 
             val variations = getVariationsForLanguage(languageCode)
             variations[baseChar.lowercase()] ?: emptyList()
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            ErrorLogger.logException(
+                component = "CharacterVariationService",
+                severity = ErrorLogger.Severity.LOW,
+                exception = e,
+                context = mapOf("operation" to "getVariations")
+            )
             emptyList()
         }
     }
@@ -176,7 +173,13 @@ constructor(
             handleAssetError(languageCode)
             clearNonEssentialCaches()
             emptyMap()
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            ErrorLogger.logException(
+                component = "CharacterVariationService",
+                severity = ErrorLogger.Severity.HIGH,
+                exception = e,
+                context = mapOf("operation" to "loadVariationsWithErrorHandling")
+            )
             handleAssetError(languageCode)
             getFallbackVariations(languageCode)
         }
@@ -239,7 +242,13 @@ constructor(
                 try {
                     val context = contextRef.get() ?: return getMinimalFallbackVariations()
                     loadVariationsFromAssets(context, "en")
-                } catch (_: Exception) {
+                } catch (e: Exception) {
+                    ErrorLogger.logException(
+                        component = "CharacterVariationService",
+                        severity = ErrorLogger.Severity.LOW,
+                        exception = e,
+                        context = mapOf("operation" to "getFallbackVariations")
+                    )
                     failedLanguages.add("en")
                     getMinimalFallbackVariations()
                 }
@@ -291,14 +300,10 @@ constructor(
             }
         }
 
-        cacheMemoryManager.onTrimMemory(android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL)
+        cacheMemoryManager.handleTrimMemory(android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL)
     }
 
-    /**
-     * Clears all caches and error state.
-     *
-     * Call when changing keyboard settings or on memory pressure.
-     */
+    /** Call when changing keyboard settings or on memory pressure. */
     fun cleanup() {
         if (isDestroyed) return
         isDestroyed = true

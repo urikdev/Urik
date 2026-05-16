@@ -87,7 +87,7 @@ class CaseTransformerTest {
                 word = "the",
                 confidence = 0.80,
                 ranking = 0,
-                source = "symspell",
+                source = "dictionary",
                 preserveCase = false
             )
         val state =
@@ -174,7 +174,7 @@ class CaseTransformerTest {
             listOf(
                 SpellingSuggestion("iPhone", 0.95, 0, "learned", preserveCase = true),
                 SpellingSuggestion("ipad", 0.90, 1, "learned", preserveCase = true),
-                SpellingSuggestion("the", 0.80, 2, "symspell", preserveCase = false)
+                SpellingSuggestion("the", 0.80, 2, "dictionary", preserveCase = false)
             )
         val state =
             KeyboardState(
@@ -195,7 +195,7 @@ class CaseTransformerTest {
                 word = "test",
                 confidence = 0.90,
                 ranking = 0,
-                source = "symspell",
+                source = "dictionary",
                 preserveCase = false
             )
         val state =
@@ -240,7 +240,7 @@ class CaseTransformerTest {
                 word = "hello",
                 confidence = 0.90,
                 ranking = 0,
-                source = "symspell",
+                source = "dictionary",
                 preserveCase = false
             )
         val state =
@@ -262,7 +262,7 @@ class CaseTransformerTest {
                 word = "über",
                 confidence = 0.90,
                 ranking = 0,
-                source = "symspell",
+                source = "dictionary",
                 preserveCase = false
             )
         val state =
@@ -372,7 +372,7 @@ class CaseTransformerTest {
                 word = "привет",
                 confidence = 0.90,
                 ranking = 0,
-                source = "symspell",
+                source = "dictionary",
                 preserveCase = false
             )
         val state =
@@ -394,7 +394,7 @@ class CaseTransformerTest {
                 word = "مرحبا",
                 confidence = 0.90,
                 ranking = 0,
-                source = "symspell",
+                source = "dictionary",
                 preserveCase = false
             )
         val state =
@@ -416,7 +416,7 @@ class CaseTransformerTest {
                 word = "hello",
                 confidence = 0.90,
                 ranking = 0,
-                source = "symspell",
+                source = "dictionary",
                 preserveCase = false
             )
         val state =
@@ -460,7 +460,7 @@ class CaseTransformerTest {
                 word = "hello",
                 confidence = 0.90,
                 ranking = 0,
-                source = "symspell",
+                source = "dictionary",
                 preserveCase = false
             )
         val state =
@@ -482,7 +482,7 @@ class CaseTransformerTest {
                 word = "über",
                 confidence = 0.90,
                 ranking = 0,
-                source = "symspell",
+                source = "dictionary",
                 preserveCase = false
             )
         val state =
@@ -504,7 +504,7 @@ class CaseTransformerTest {
                 word = "über",
                 confidence = 0.90,
                 ranking = 0,
-                source = "symspell",
+                source = "dictionary",
                 preserveCase = false
             )
         val state =
@@ -526,7 +526,7 @@ class CaseTransformerTest {
                 word = "hello",
                 confidence = 0.90,
                 ranking = 0,
-                source = "symspell",
+                source = "dictionary",
                 preserveCase = false
             )
         val state =
@@ -633,8 +633,8 @@ class CaseTransformerTest {
     fun `re-casing suggestions after shift toggle produces title case`() {
         val suggestions =
             listOf(
-                SpellingSuggestion("car", 0.9, 0, "symspell", preserveCase = false),
-                SpellingSuggestion("can", 0.8, 1, "symspell", preserveCase = false)
+                SpellingSuggestion("car", 0.9, 0, "dictionary", preserveCase = false),
+                SpellingSuggestion("can", 0.8, 1, "dictionary", preserveCase = false)
             )
         val noShift = KeyboardState(isShiftPressed = false)
         val manualShift = KeyboardState(isShiftPressed = true, isAutoShift = false)
@@ -650,8 +650,8 @@ class CaseTransformerTest {
     fun `re-casing suggestions after caps lock toggle produces all uppercase`() {
         val suggestions =
             listOf(
-                SpellingSuggestion("car", 0.9, 0, "symspell", preserveCase = false),
-                SpellingSuggestion("can", 0.8, 1, "symspell", preserveCase = false)
+                SpellingSuggestion("car", 0.9, 0, "dictionary", preserveCase = false),
+                SpellingSuggestion("can", 0.8, 1, "dictionary", preserveCase = false)
             )
         val noShift = KeyboardState(isShiftPressed = false)
         val capsLock = KeyboardState(isCapsLockOn = true)
@@ -668,7 +668,7 @@ class CaseTransformerTest {
         val suggestions =
             listOf(
                 SpellingSuggestion("iPhone", 0.95, 0, "learned", preserveCase = true),
-                SpellingSuggestion("idea", 0.8, 1, "symspell", preserveCase = false)
+                SpellingSuggestion("idea", 0.8, 1, "dictionary", preserveCase = false)
             )
         val autoShift = KeyboardState(isShiftPressed = true, isAutoShift = true)
         val capsLock = KeyboardState(isCapsLockOn = true)
@@ -684,8 +684,8 @@ class CaseTransformerTest {
     fun `toggling shift off reverts suggestions to lowercase`() {
         val suggestions =
             listOf(
-                SpellingSuggestion("hello", 0.9, 0, "symspell", preserveCase = false),
-                SpellingSuggestion("help", 0.8, 1, "symspell", preserveCase = false)
+                SpellingSuggestion("hello", 0.9, 0, "dictionary", preserveCase = false),
+                SpellingSuggestion("help", 0.8, 1, "dictionary", preserveCase = false)
             )
         val manualShift = KeyboardState(isShiftPressed = true, isAutoShift = false)
         val noShift = KeyboardState(isShiftPressed = false)

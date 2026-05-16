@@ -17,11 +17,6 @@ import com.urik.keyboard.settings.SettingsEventHandler
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
-/**
- * Settings fragment for auto-correction and suggestion configuration.
- *
- * Manages suggestion visibility, count, and word learning preferences.
- */
 @AndroidEntryPoint
 class AutoCorrectionFragment : PreferenceFragmentCompat() {
     private lateinit var viewModel: AutoCorrectionViewModel

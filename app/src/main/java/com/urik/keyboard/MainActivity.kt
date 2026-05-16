@@ -21,7 +21,6 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.card.MaterialCardView
-import com.ibm.icu.util.ULocale
 import com.urik.keyboard.data.KeyboardRepository
 import com.urik.keyboard.model.KeyboardKey
 import com.urik.keyboard.model.KeyboardMode
@@ -29,7 +28,9 @@ import com.urik.keyboard.settings.SettingsActivity
 import com.urik.keyboard.settings.theme.KeyboardPreviewRenderer
 import com.urik.keyboard.settings.theme.ThemePickerActivity
 import com.urik.keyboard.theme.ThemeManager
+import com.urik.keyboard.utils.ErrorLogger
 import dagger.hilt.android.AndroidEntryPoint
+import java.util.Locale
 import javax.inject.Inject
 import kotlinx.coroutines.launch
 
@@ -166,7 +167,7 @@ class MainActivity : AppCompatActivity() {
                 keyboardRepository
                     .getLayoutForMode(
                         KeyboardMode.LETTERS,
-                        ULocale.forLanguageTag("en"),
+                        Locale.forLanguageTag("en"),
                         KeyboardKey.ActionType.ENTER
                     ).getOrNull()
 
@@ -326,7 +327,13 @@ class MainActivity : AppCompatActivity() {
         try {
             val intent = Intent(Settings.ACTION_INPUT_METHOD_SETTINGS)
             startActivity(intent)
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            ErrorLogger.logException(
+                component = "MainActivity",
+                severity = ErrorLogger.Severity.LOW,
+                exception = e,
+                context = mapOf("operation" to "openKeyboardSettings")
+            )
             Toast
                 .makeText(
                     this,

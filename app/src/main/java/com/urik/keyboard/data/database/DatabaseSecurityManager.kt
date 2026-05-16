@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import android.util.Base64
+import androidx.annotation.VisibleForTesting
 import com.urik.keyboard.utils.ErrorLogger
 import java.security.KeyStore
 import javax.crypto.Cipher
@@ -13,45 +14,34 @@ import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
 
 /**
- * Manages hardware-backed database encryption using Android Keystore.
- *
  * Architecture:
  * - Master key (AES-256) stored in hardware security module
  * - Database passphrase (32 bytes) encrypted by master key
  * - Device lock screen required (enforces device-level security)
- *
  */
-class DatabaseSecurityManager(private val context: Context) {
+class DatabaseSecurityManager(
+    private val context: Context,
+    @get:VisibleForTesting internal val lockScreenCheck: () -> Boolean = { defaultLockScreenCheck(context) }
+) {
     private val keyAlias = "urik_database_master_key"
     private val prefsFile = "urik_db_prefs"
     private val passphraseKey = "encrypted_passphrase"
     private val ivKey = "encryption_iv"
 
-    private val prefs: SharedPreferences
-        get() = context.getSharedPreferences(prefsFile, Context.MODE_PRIVATE)
+    private val prefs: SharedPreferences = context.getSharedPreferences(prefsFile, Context.MODE_PRIVATE)
 
-    /**
-     * Checks if device has lock screen configured.
-     *
-     * Device lock screen required for Android Keystore security guarantees.
-     * Without it, Keystore keys vulnerable to offline attacks.
-     *
-     * @return true if lock screen configured, false otherwise
-     */
-    fun hasDeviceLockScreen(): Boolean {
-        val keyguardManager =
-            context.getSystemService(Context.KEYGUARD_SERVICE)
-                as? android.app.KeyguardManager
-        return keyguardManager?.isDeviceSecure ?: false
-    }
+    /** Without a lock screen, Keystore keys are vulnerable to offline attacks. */
+    fun hasDeviceLockScreen(): Boolean = lockScreenCheck()
 
-    /**
-     * Retrieves or generates database encryption passphrase.
-     *
-     * @return 32-byte passphrase for SQLCipher, or null if no device lock screen
-     */
+    /** @return 32-byte passphrase for SQLCipher, or null if no device lock screen */
     fun getDatabasePassphrase(): ByteArray? {
         if (!hasDeviceLockScreen()) {
+            ErrorLogger.logException(
+                component = "DatabaseSecurityManager",
+                severity = ErrorLogger.Severity.HIGH,
+                exception = IllegalStateException("Device has no lock screen; database encryption unavailable"),
+                context = mapOf("condition" to "no_lock_screen")
+            )
             return null
         }
 
@@ -127,6 +117,16 @@ class DatabaseSecurityManager(private val context: Context) {
         }
     }
 
+    /**
+     * Generates AES-256 master key in Android Keystore.
+     *
+     * setUserAuthenticationRequired(false): key does not require biometric/PIN to use.
+     * This is intentional — requiring auth would block the keyboard from decrypting the
+     * database passphrase in the background (no UI surface to prompt). The compensating
+     * control is setUnlockedDeviceRequired(true) on API 28+, which ensures the key is
+     * inaccessible when the device is locked (screen off / locked state), providing
+     * equivalent protection without requiring an interactive auth prompt.
+     */
     private fun generateMasterKey(): SecretKey {
         val keyGenerator =
             KeyGenerator.getInstance(
@@ -153,25 +153,20 @@ class DatabaseSecurityManager(private val context: Context) {
         return keyGenerator.generateKey()
     }
 
-    /**
-     * Checks if database needs migration from unencrypted to encrypted.
-     *
-     * @return true if migration needed, false otherwise
-     */
     fun shouldMigrateToEncrypted(context: Context): Boolean {
         val dbFile = context.getDatabasePath("keyboard_database")
         return dbFile.exists() && !prefs.contains(passphraseKey) && hasDeviceLockScreen()
     }
 
     /**
-     * Migrates existing unencrypted database to encrypted format.
-     *
      * One-way operation. On success, original unencrypted database permanently deleted.
      * On failure, temp deleted and original preserved.
-     *
-     * @return true if migration successful, false if failed
      */
     fun migrateToEncryptedDatabase(context: Context): Boolean {
+        if (prefs.contains(passphraseKey)) {
+            return false
+        }
+
         val tempDbPath = context.getDatabasePath("keyboard_database_temp")
 
         return try {
@@ -182,30 +177,39 @@ class DatabaseSecurityManager(private val context: Context) {
             }
 
             val passphrase = generateAndStorePassphrase()
-            val passphraseString = passphrase.joinToString("") { "%02x".format(it) }
+            try {
+                val passphraseString = passphrase.joinToString("") { "%02x".format(it) }
 
-            val unencryptedDb =
-                net.zetetic.database.sqlcipher.SQLiteDatabase.openDatabase(
-                    unencryptedDbPath.absolutePath,
-                    "",
-                    null,
-                    net.zetetic.database.sqlcipher.SQLiteDatabase.OPEN_READWRITE,
-                    null,
-                    null
-                )
+                val safePath = tempDbPath.absolutePath
+                check(!safePath.contains('\'')) {
+                    "Unexpected single-quote in database path: $safePath"
+                }
 
-            unencryptedDb.use { unencryptedDb ->
-                unencryptedDb.execSQL(
-                    "ATTACH DATABASE '${tempDbPath.absolutePath}' AS encrypted KEY \"x'$passphraseString'\""
-                )
-                unencryptedDb.rawQuery("SELECT sqlcipher_export('encrypted')", null)?.use { }
-                unencryptedDb.execSQL("DETACH DATABASE encrypted")
+                val unencryptedDb =
+                    net.zetetic.database.sqlcipher.SQLiteDatabase.openDatabase(
+                        unencryptedDbPath.absolutePath,
+                        "",
+                        null,
+                        net.zetetic.database.sqlcipher.SQLiteDatabase.OPEN_READWRITE,
+                        null,
+                        null
+                    )
+
+                unencryptedDb.use { unencryptedDb ->
+                    unencryptedDb.execSQL(
+                        "ATTACH DATABASE '$safePath' AS encrypted KEY \"x'$passphraseString'\""
+                    )
+                    unencryptedDb.rawQuery("SELECT sqlcipher_export('encrypted')", null)?.use { }
+                    unencryptedDb.execSQL("DETACH DATABASE encrypted")
+                }
+
+                unencryptedDbPath.delete()
+                tempDbPath.renameTo(unencryptedDbPath)
+
+                true
+            } finally {
+                passphrase.fill(0)
             }
-
-            unencryptedDbPath.delete()
-            tempDbPath.renameTo(unencryptedDbPath)
-
-            true
         } catch (e: Exception) {
             ErrorLogger.logException(
                 component = "DatabaseSecurityManager",
@@ -220,5 +224,12 @@ class DatabaseSecurityManager(private val context: Context) {
 
     companion object {
         private val secureRandom = java.security.SecureRandom()
+
+        private fun defaultLockScreenCheck(context: Context): Boolean {
+            val keyguardManager =
+                context.getSystemService(Context.KEYGUARD_SERVICE)
+                    as? android.app.KeyguardManager
+            return keyguardManager?.isDeviceSecure ?: false
+        }
     }
 }

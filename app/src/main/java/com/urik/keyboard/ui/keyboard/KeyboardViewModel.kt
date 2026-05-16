@@ -2,9 +2,6 @@ package com.urik.keyboard.ui.keyboard
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ibm.icu.lang.UCharacter
-import com.ibm.icu.lang.UProperty
-import com.ibm.icu.util.ULocale
 import com.urik.keyboard.data.KeyboardRepository
 import com.urik.keyboard.model.KeyboardEvent
 import com.urik.keyboard.model.KeyboardKey
@@ -14,6 +11,7 @@ import com.urik.keyboard.model.KeyboardState
 import com.urik.keyboard.service.LanguageManager
 import com.urik.keyboard.utils.ErrorLogger
 import dagger.hilt.android.lifecycle.HiltViewModel
+import java.util.Locale
 import javax.inject.Inject
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -23,10 +21,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
 
-/**
- * Keyboard UI state and layout management.
- *
- */
 @HiltViewModel
 class KeyboardViewModel
 @Inject
@@ -66,12 +60,6 @@ constructor(
         }
     }
 
-    /**
-     * Updates action key type (enter/search/done/go/etc).
-     *
-     * Cancels in-flight layout load, reloads current mode with new action.
-     * Called when input field type changes (text → URL → email).
-     */
     fun updateActionType(actionType: KeyboardKey.ActionType) {
         if (actionType != currentActionType) {
             currentActionType = actionType
@@ -79,20 +67,10 @@ constructor(
         }
     }
 
-    /**
-     * Reloads the current keyboard layout.
-     *
-     * Called when alternative layout setting changes.
-     */
     fun reloadLayout() {
         startLoadLayout(_state.value.currentMode)
     }
 
-    /**
-     * Resets keyboard mode to LETTERS.
-     *
-     * No-op if already in LETTERS mode.
-     */
     fun resetToLetters() {
         if (_state.value.currentMode != KeyboardMode.LETTERS) {
             startLoadLayout(KeyboardMode.LETTERS)
@@ -106,15 +84,6 @@ constructor(
         }
     }
 
-    /**
-     * Returns character to insert, applying shift/caps lock.
-     *
-     * Capitalization rules:
-     * - Letters: Uppercase if shift OR caps lock active
-     * - Others: No transformation
-     *
-     * Note: Shift cleared by caller after character inserted.
-     */
     fun getCharacterForInput(key: KeyboardKey.Character): String {
         val shouldCap = shouldCapitalize()
         return when {
@@ -122,7 +91,7 @@ constructor(
                 if (key.value == "ß") {
                     "ẞ"
                 } else {
-                    key.value.uppercase(getCurrentLocale().toLocale())
+                    key.value.uppercase(getCurrentLocale())
                 }
             }
 
@@ -141,9 +110,6 @@ constructor(
         updateState { it.copy(isShiftPressed = true, isAutoShift = true) }
     }
 
-    /**
-     * Checks if auto-capitalization should trigger.
-     */
     fun shouldAutoCapitalize(textBeforeCursor: String?): Boolean {
         if (textBeforeCursor.isNullOrBlank()) {
             return true
@@ -171,8 +137,7 @@ constructor(
         return false
     }
 
-    private fun isSentenceEndingPunctuation(char: Char): Boolean =
-        UCharacter.hasBinaryProperty(char.code, UProperty.S_TERM)
+    private fun isSentenceEndingPunctuation(char: Char): Boolean = char in SENTENCE_TERMINAL_CHARS
 
     fun checkAndApplyAutoCapitalization(textBeforeCursor: String?, autoCapEnabled: Boolean = true) {
         if (!autoCapEnabled) return
@@ -208,9 +173,7 @@ constructor(
 
     private fun handleKeyPress(key: KeyboardKey) {
         when (key) {
-            is KeyboardKey.Character -> {
-                // Shift clearing happens after getCharacterForInput() is called
-            }
+            is KeyboardKey.Character -> {}
 
             is KeyboardKey.Action -> {
                 viewModelScope.launch {
@@ -219,15 +182,11 @@ constructor(
             }
 
             KeyboardKey.Spacer -> {}
+
+            is KeyboardKey.FlickKey -> {}
         }
     }
 
-    /**
-     * Clears shift state after letter insertion.
-     *
-     * Only clears if shift (not caps lock) was active.
-     * Call after character inserted to editor.
-     */
     fun clearShiftAfterCharacter(key: KeyboardKey.Character) {
         if (key.type == KeyboardKey.KeyType.LETTER && _state.value.isShiftPressed && !_state.value.isCapsLockOn) {
             updateState { it.copy(isShiftPressed = false, isAutoShift = false) }
@@ -292,12 +251,6 @@ constructor(
         }
     }
 
-    /**
-     * Cancels in-flight layout load and starts new load.
-     *
-     * Prevents race conditions when mode/language/action changes rapidly.
-     * Only one layout load active at a time.
-     */
     private fun startLoadLayout(mode: KeyboardMode) {
         loadJob?.cancel()
         loadJob =
@@ -355,13 +308,23 @@ constructor(
         }
     }
 
-    private fun getCurrentLocale(): ULocale {
+    private fun getCurrentLocale(): Locale {
         val currentLayoutLang = languageManager.currentLayoutLanguage.value
         val languageOnly = currentLayoutLang.split("-").first()
-        return ULocale.forLanguageTag(languageOnly)
+        return Locale.forLanguageTag(languageOnly)
     }
 
     private fun updateState(update: (KeyboardState) -> KeyboardState) {
         _state.value = update(_state.value)
+    }
+
+    private companion object {
+        val SENTENCE_TERMINAL_CHARS = setOf(
+            '.', '!', '?', '\u2026',
+            '\u0589', '\u061F', '\u06D4', '\u0964', '\u0965',
+            '\u203C', '\u2047', '\u2048', '\u2049',
+            '\u3002', '\uFE15', '\uFE16', '\uFE52', '\uFE56', '\uFE57',
+            '\uFF01', '\uFF0E', '\uFF1F', '\uFF61'
+        )
     }
 }

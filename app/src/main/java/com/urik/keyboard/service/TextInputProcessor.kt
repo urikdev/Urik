@@ -1,11 +1,12 @@
 package com.urik.keyboard.service
 
-import com.ibm.icu.lang.UScript
-import com.ibm.icu.text.BreakIterator
-import com.ibm.icu.util.ULocale
+import android.icu.lang.UScript
+import android.icu.text.BreakIterator
+import android.icu.util.ULocale
 import com.urik.keyboard.KeyboardConstants.TextProcessingConstants
 import com.urik.keyboard.settings.KeyboardSettings
 import com.urik.keyboard.settings.SettingsRepository
+import com.urik.keyboard.utils.ErrorLogger
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
@@ -63,7 +64,10 @@ constructor(
             maxSize = PROCESSING_CACHE_MAX_SIZE
         )
 
-    private var currentScriptCode = UScript.LATIN
+    @Volatile private var isJapaneseLayout = false
+
+    private var _currentScriptCode = UScript.LATIN
+    val currentScriptCode: Int get() = _currentScriptCode
     private var currentLocale: ULocale = ULocale.ENGLISH
     private var currentSettings = KeyboardSettings()
 
@@ -91,10 +95,17 @@ constructor(
         }
     }
 
+    fun setJapaneseLayout(japanese: Boolean) {
+        if (isJapaneseLayout != japanese) {
+            isJapaneseLayout = japanese
+            clearCaches()
+        }
+    }
+
     fun updateScriptContext(locale: ULocale, scriptCode: Int) {
-        if (currentScriptCode != scriptCode || currentLocale != locale) {
+        if (_currentScriptCode != scriptCode || currentLocale != locale) {
             currentLocale = locale
-            currentScriptCode = scriptCode
+            _currentScriptCode = scriptCode
             clearCaches()
         }
     }
@@ -178,7 +189,7 @@ constructor(
                     isFromSwipe = inputMethod == InputMethod.SWIPED,
                     suggestions = if (suggestionsEnabled) suggestions else emptyList(),
                     graphemeCount = graphemeCount,
-                    scriptCode = currentScriptCode,
+                    scriptCode = _currentScriptCode,
                     isValid = isValid,
                     requiresSpellCheck = requiresSpellCheck
                 )
@@ -217,7 +228,13 @@ constructor(
                     .getSpellingSuggestionsWithConfidence(normalized)
                     .sortedByDescending { it.confidence }
                     .take(maxSuggestions)
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                ErrorLogger.logException(
+                    component = "TextInputProcessor",
+                    severity = ErrorLogger.Severity.HIGH,
+                    exception = e,
+                    context = mapOf("operation" to "getSuggestions")
+                )
                 emptyList()
             }
 
@@ -234,7 +251,13 @@ constructor(
 
         return@withContext try {
             spellCheckManager.isWordInDictionary(normalized)
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            ErrorLogger.logException(
+                component = "TextInputProcessor",
+                severity = ErrorLogger.Severity.HIGH,
+                exception = e,
+                context = mapOf("operation" to "validateWord")
+            )
             false
         }
     }
@@ -242,6 +265,16 @@ constructor(
     suspend fun hasDominantContractionForm(word: String): Boolean {
         val normalized = normalizeText(word)
         return spellCheckManager.hasDominantContractionForm(normalized)
+    }
+
+    fun getDictFrequency(word: String): Long {
+        val normalized = normalizeText(word)
+        return spellCheckManager.getDictFrequency(normalized)
+    }
+
+    suspend fun getUserFrequency(word: String): Int {
+        val normalized = normalizeText(word)
+        return spellCheckManager.getUserFrequency(normalized)
     }
 
     private fun normalizeText(text: String): String {

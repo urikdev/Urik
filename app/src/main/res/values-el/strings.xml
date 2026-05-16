@@ -160,6 +160,10 @@
     <string name="layout_mapper_remove_failed">Αποτυχία αφαίρεσης αντιστοίχισης</string>
     <string name="layout_mapper_clear_failed">Αποτυχία κατάργησης αντιστοιχίσεων</string>
     <!-- Privacy & Data Settings -->
+    <string name="privacy_settings_storage_encryption_title">Αποθήκευση λέξεων: Μη κρυπτογραφημένη</string>
+    <string name="privacy_settings_storage_encryption_summary">Δεν εντοπίστηκε κλείδωμα οθόνης συσκευής. Οι μαθημένες λέξεις αποθηκεύονται σε απλό κείμενο. Ορίστε PIN, μοτίβο ή βιομετρικό κλείδωμα στις ρυθμίσεις Android για να ενεργοποιήσετε την κρυπτογράφηση.</string>
+    <string name="privacy_settings_keystore_api27_title">Κρυπτογράφηση: Μειωμένη προστασία κλειδώματος</string>
+    <string name="privacy_settings_keystore_api27_summary">Αυτή η συσκευή εκτελεί Android 7.1 ή παλαιότερη έκδοση. Σε αυτή την έκδοση του Android, το κλειδί της βάσης δεδομένων δεν μπορεί να περιοριστεί ώστε να είναι προσβάσιμο μόνο όταν η συσκευή είναι ξεκλείδωτη, επομένως οι λέξεις που έχουν εκμαθηθεί μπορεί να είναι προσβάσιμες ενώ η συσκευή είναι κλειδωμένη. Η αναβάθμιση σε Android 9.0 ή νεότερη έκδοση ενεργοποιεί την πλήρη προστασία οθόνης κλειδώματος.</string>
     <string name="privacy_settings_clipboard_history">Ιστορικό προχείρου</string>
     <string name="privacy_settings_clipboard_history_on">Το ιστορικό προχείρου ενεργοποιήθηκε</string>
     <string name="privacy_settings_clipboard_history_off">Το ιστορικό προχείρου απενεργοποιήθηκε</string>
@@ -326,4 +330,12 @@
 
     <!-- AlphabetSideBar accessibility -->
     <string name="alphabet_sidebar_description">Πλαϊνή γραμμή αλφαβητικής πλοήγησης</string>
+    <!-- Flick key accessibility -->
+    <string name="flick_key_description">%1$s. Σύρε: πάνω %2$s, δεξιά %3$s, κάτω %4$s, αριστερά %5$s</string>
+    <string name="flick_key_description_partial">%1$s. Σύρε: %2$s</string>
+    <string name="action_dakuten">Εναλλαγή σημαδιού φωνής</string>
+    <string name="action_small_kana">Εναλλαγή μικρού κάνα</string>
+    <string name="action_handakuten">Εναλλαγή ημίφωνου σημαδιού</string>
+    <string name="action_next_candidate">Επόμενος υποψήφιος</string>
+    <string name="action_commit_candidate">Επιβεβαίωση υποψηφίου</string>
 </resources>

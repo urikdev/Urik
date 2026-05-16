@@ -26,11 +26,6 @@ import com.urik.keyboard.settings.SettingsEventHandler
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
-/**
- * Settings fragment for typing behavior configuration.
- *
- * Manages double-space period shortcut and long press duration preferences.
- */
 @AndroidEntryPoint
 class TypingBehaviorFragment : PreferenceFragmentCompat() {
     private lateinit var viewModel: TypingBehaviorViewModel

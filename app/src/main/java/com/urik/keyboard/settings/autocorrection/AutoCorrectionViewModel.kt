@@ -15,9 +15,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-/**
- * Manages auto-correction settings state and updates.
- */
 @HiltViewModel
 class AutoCorrectionViewModel
 @Inject
@@ -96,9 +93,6 @@ constructor(private val settingsRepository: SettingsRepository) :
     }
 }
 
-/**
- * UI state for auto-correction settings.
- */
 data class AutoCorrectionUiState(
     val spellCheckEnabled: Boolean = true,
     val showSuggestions: Boolean = true,

@@ -35,9 +35,6 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
-/**
- * Word learning configuration.
- */
 data class LearningConfig(
     val minWordLength: Int = 1,
     val maxWordLength: Int = 100,
@@ -46,9 +43,6 @@ data class LearningConfig(
     val errorCooldownMs: Long = 1500L
 )
 
-/**
- * Learning statistics for analytics.
- */
 data class LearningStats(
     val totalWordsLearned: Int,
     val wordsInCurrentLanguage: Int,
@@ -58,10 +52,6 @@ data class LearningStats(
     val currentLanguage: String
 )
 
-/**
- * Learns and retrieves user-typed words with frequency tracking.
- *
- */
 @Singleton
 class WordLearningEngine
 @Inject
@@ -136,10 +126,7 @@ constructor(
     }
 
     /**
-     * Initializes cache for specific language from database.
-     *
-     * Call when language switches to populate cache with learned words.
-     * Safe to call multiple times (overwrites existing cache).
+     * Call when language switches. Safe to call multiple times (overwrites existing cache).
      */
     suspend fun initializeLearnedWordsCache(languageTag: String): Result<Unit> = withContext(ioDispatcher) {
         try {
@@ -300,15 +287,7 @@ constructor(
         }
     }
 
-    /**
-     * Checks if word is learned.
-     *
-     * Lookup order:
-     * 1. Cache (O(1) if language cached)
-     * 2. Database (indexed query)
-     *
-     * @return true if word exists in current language's learned words
-     */
+    /** Lookup order: cache (O(1) if language cached) → database (indexed query). */
     suspend fun isWordLearned(word: String): Boolean = withContext(defaultDispatcher) {
         val currentLanguage = languageManager.currentLanguage.value
 
@@ -339,7 +318,13 @@ constructor(
         } catch (_: SQLiteException) {
             handleDatabaseError()
             false
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            ErrorLogger.logException(
+                component = "WordLearningEngine",
+                severity = ErrorLogger.Severity.HIGH,
+                exception = e,
+                context = mapOf("operation" to "isWordLearned")
+            )
             false
         }
     }
@@ -369,22 +354,22 @@ constructor(
         } catch (_: SQLiteException) {
             handleDatabaseError()
             null
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            ErrorLogger.logException(
+                component = "WordLearningEngine",
+                severity = ErrorLogger.Severity.HIGH,
+                exception = e,
+                context = mapOf("operation" to "getLearnedWordOriginalCase")
+            )
             null
         }
     }
 
     /**
-     * Gets similar learned words for autocomplete/correction.
-     *
      * Search strategy (in order, up to maxResults):
      * 1. Exact match
      * 2. Prefix matches (FTS4 query)
      * 3. Edit distance ≤2 (fuzzy search on all words within ±MAX_LENGTH_DIFFERENCE_FUZZY characters of input length)
-     *
-     * Results sorted by frequency descending.
-     *
-     * @return List of (word, frequency) pairs
      */
     suspend fun getSimilarLearnedWordsWithFrequency(
         word: String,
@@ -446,7 +431,13 @@ constructor(
                     if (exactMatch != null) {
                         results[exactMatch.word] = exactMatch.frequency
                     }
-                } catch (_: Exception) {
+                } catch (e: Exception) {
+                    ErrorLogger.logException(
+                        component = "WordLearningEngine",
+                        severity = ErrorLogger.Severity.HIGH,
+                        exception = e,
+                        context = mapOf("operation" to "getSimilarLearnedWords_exactMatch")
+                    )
                 }
             }
 
@@ -463,7 +454,13 @@ constructor(
                             results[learnedWord.word] = learnedWord.frequency
                         }
                     }
-                } catch (_: Exception) {
+                } catch (e: Exception) {
+                    ErrorLogger.logException(
+                        component = "WordLearningEngine",
+                        severity = ErrorLogger.Severity.HIGH,
+                        exception = e,
+                        context = mapOf("operation" to "getSimilarLearnedWords_prefixMatch")
+                    )
                 }
             }
 
@@ -495,7 +492,13 @@ constructor(
                         .forEach { candidate ->
                             results[candidate.word] = candidate.frequency
                         }
-                } catch (_: Exception) {
+                } catch (e: Exception) {
+                    ErrorLogger.logException(
+                        component = "WordLearningEngine",
+                        severity = ErrorLogger.Severity.HIGH,
+                        exception = e,
+                        context = mapOf("operation" to "getSimilarLearnedWords_strippedMatch")
+                    )
                 }
             }
 
@@ -537,7 +540,13 @@ constructor(
                         .forEach { (candidate, _) ->
                             results[candidate.word] = candidate.frequency
                         }
-                } catch (_: Exception) {
+                } catch (e: Exception) {
+                    ErrorLogger.logException(
+                        component = "WordLearningEngine",
+                        severity = ErrorLogger.Severity.HIGH,
+                        exception = e,
+                        context = mapOf("operation" to "getSimilarLearnedWords_fuzzyMatch")
+                    )
                 }
             }
 
@@ -550,18 +559,18 @@ constructor(
         } catch (_: SQLiteException) {
             handleDatabaseError()
             emptyList()
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            ErrorLogger.logException(
+                component = "WordLearningEngine",
+                severity = ErrorLogger.Severity.HIGH,
+                exception = e,
+                context = mapOf("operation" to "getSimilarLearnedWordsWithFrequency")
+            )
             emptyList()
         }
     }
 
-    /**
-     * Removes learned word from database and cache.
-     *
-     * Thread safety: Uses same mutex as learnWord to prevent race conditions.
-     *
-     * @return true if word removed, false if not found or error
-     */
+    /** Uses same mutex as learnWord to prevent race conditions. */
     suspend fun removeWord(word: String): Result<Boolean> = withContext(ioDispatcher) {
         val currentLanguage = languageManager.currentLanguage.value
 
@@ -681,12 +690,8 @@ constructor(
     }
 
     /**
-     * Batch checks if multiple words are learned.
-     *
-     * More efficient than calling isWordLearned() repeatedly.
+     * More efficient than calling [isWordLearned] repeatedly.
      * Updates cache with results to improve future lookups.
-     *
-     * @return Map of original word → learned status
      */
     private suspend fun ensureCacheLoaded(languageTag: String) {
         synchronized(cacheLock) {
@@ -760,16 +765,18 @@ constructor(
         } catch (_: SQLiteException) {
             handleDatabaseError()
             words.associateWith { false }
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            ErrorLogger.logException(
+                component = "WordLearningEngine",
+                severity = ErrorLogger.Severity.HIGH,
+                exception = e,
+                context = mapOf("operation" to "areWordsLearned")
+            )
             words.associateWith { false }
         }
     }
 
-    /**
-     * Gets learning statistics for current language.
-     *
-     * Returns safe defaults if in error cooldown or destroyed.
-     */
+    /** Returns safe defaults if in error cooldown or destroyed. */
     suspend fun getLearningStats(): Result<LearningStats> = withContext(ioDispatcher) {
         return@withContext try {
             val currentLanguage = languageManager.currentLanguage.value
@@ -790,14 +797,26 @@ constructor(
             val totalWords =
                 try {
                     learnedWordDao.getTotalWordCount()
-                } catch (_: Exception) {
+                } catch (e: Exception) {
+                    ErrorLogger.logException(
+                        component = "WordLearningEngine",
+                        severity = ErrorLogger.Severity.HIGH,
+                        exception = e,
+                        context = mapOf("operation" to "getLearningStats_totalWordCount")
+                    )
                     0
                 }
 
             val averageFrequency =
                 try {
                     learnedWordDao.getAverageFrequency()
-                } catch (_: Exception) {
+                } catch (e: Exception) {
+                    ErrorLogger.logException(
+                        component = "WordLearningEngine",
+                        severity = ErrorLogger.Severity.HIGH,
+                        exception = e,
+                        context = mapOf("operation" to "getLearningStats_averageFrequency")
+                    )
                     0.0
                 }
 
@@ -806,7 +825,13 @@ constructor(
             val sourceCounts =
                 try {
                     learnedWordDao.getWordCountsBySource()
-                } catch (_: Exception) {
+                } catch (e: Exception) {
+                    ErrorLogger.logException(
+                        component = "WordLearningEngine",
+                        severity = ErrorLogger.Severity.HIGH,
+                        exception = e,
+                        context = mapOf("operation" to "getLearningStats_sourceCounts")
+                    )
                     emptyList()
                 }
 
@@ -882,7 +907,13 @@ constructor(
         try {
             val cutoff = System.currentTimeMillis() - CLEANUP_CUTOFF_MS
             learnedWordDao.cleanupLowFrequencyWords(cutoff)
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            ErrorLogger.logException(
+                component = "WordLearningEngine",
+                severity = ErrorLogger.Severity.HIGH,
+                exception = e,
+                context = mapOf("operation" to "tryCleanupOldWords")
+            )
         }
     }
 
@@ -904,11 +935,7 @@ constructor(
         WordSource.SYSTEM_DEFAULT -> InputMethod.TYPED
     }
 
-    /**
-     * Clears learned words cache for current language.
-     *
-     * Call when entering secure fields to prevent cache leaks.
-     */
+    /** Call when entering secure fields to prevent cache leaks. */
     fun clearCurrentLanguageCache() {
         val currentLanguage = languageManager.currentLanguage.value
         learnedWordsCache.invalidate(currentLanguage)
@@ -939,7 +966,13 @@ constructor(
                             async {
                                 try {
                                     learnedWordDao.getAllLearnedWordsForLanguage(lang)
-                                } catch (_: Exception) {
+                                } catch (e: Exception) {
+                                    ErrorLogger.logException(
+                                        component = "WordLearningEngine",
+                                        severity = ErrorLogger.Severity.HIGH,
+                                        exception = e,
+                                        context = mapOf("operation" to "getLearnedWordsForSwipe_language")
+                                    )
                                     emptyList()
                                 }
                             }
@@ -964,7 +997,13 @@ constructor(
         } catch (_: SQLiteException) {
             handleDatabaseError()
             emptyMap()
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            ErrorLogger.logException(
+                component = "WordLearningEngine",
+                severity = ErrorLogger.Severity.HIGH,
+                exception = e,
+                context = mapOf("operation" to "getLearnedWordsForSwipeAllLanguages")
+            )
             emptyMap()
         }
     }

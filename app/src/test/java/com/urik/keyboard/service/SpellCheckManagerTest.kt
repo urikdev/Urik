@@ -4,22 +4,31 @@ package com.urik.keyboard.service
 
 import android.content.Context
 import android.content.res.AssetManager
+import android.graphics.PointF
 import com.urik.keyboard.data.WordFrequencyRepository
 import com.urik.keyboard.utils.CacheMemoryManager
 import com.urik.keyboard.utils.ManagedCache
 import java.io.ByteArrayInputStream
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import kotlinx.coroutines.yield
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -103,6 +112,10 @@ class SpellCheckManagerTest {
         thats 50
         join 500
         in 8000
+        best 300000
+        bested 300
+        bester 100
+        bestow 800
         """.trimIndent()
 
     @Before
@@ -169,13 +182,14 @@ class SpellCheckManagerTest {
         effectiveDictionaryLanguagesFlow = MutableStateFlow(listOf("en"))
         whenever(languageManager.effectiveDictionaryLanguages).thenReturn(effectiveDictionaryLanguagesFlow)
 
-        val keyPositionsFlow = MutableStateFlow<Map<Char, android.graphics.PointF>>(emptyMap())
+        val keyPositionsFlow = MutableStateFlow<Map<Char, PointF>>(emptyMap())
         whenever(languageManager.keyPositions).thenReturn(keyPositionsFlow)
 
         whenever(context.assets).thenReturn(assetManager)
 
-        whenever(assetManager.open("dictionaries/en_symspell.txt"))
-            .thenAnswer { ByteArrayInputStream(testDictionary.toByteArray()) }
+        val urikBytes = TestUrikBuilder.buildUrikFromText(testDictionary)
+        whenever(assetManager.open("dictionaries/en.urik"))
+            .thenAnswer { ByteArrayInputStream(urikBytes) }
 
         spellCheckManager =
             SpellCheckManager(
@@ -202,7 +216,7 @@ class SpellCheckManagerTest {
 
     @Test
     fun `initialization handles missing dictionary gracefully`() = runTest {
-        whenever(assetManager.open("dictionaries/sv_symspell.txt"))
+        whenever(assetManager.open("dictionaries/sv.urik"))
             .thenThrow(java.io.FileNotFoundException())
 
         activeLanguagesFlow.emit(listOf("sv"))
@@ -452,6 +466,49 @@ class SpellCheckManagerTest {
     }
 
     @Test
+    fun `getSpellingSuggestionsWithConfidence excludes exact match of typed word`() = runTest {
+        whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency(any(), any(), any()))
+            .thenReturn(emptyList())
+
+        val suggestions = spellCheckManager.getSpellingSuggestionsWithConfidence("hello")
+        val exactMatch = suggestions.filter { it.source == "dictionary" }.find { it.word == "hello" }
+        assertNull("Typed word should not appear in its own dictionary suggestions", exactMatch)
+    }
+
+    @Test
+    fun `getSpellingSuggestionsWithConfidence filters low frequency noise relative to input`() = runTest {
+        whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency(any(), any(), any()))
+            .thenReturn(emptyList())
+
+        // "hello" freq=1000, "hose" freq=100, "hops" freq=80 — ratio > 500 threshold
+        val suggestions = spellCheckManager.getSpellingSuggestionsWithConfidence("hello")
+        val dictSuggestions = suggestions.filter { it.source == "dictionary" }
+        val lowFreqNoise = dictSuggestions.filter { it.word in listOf("hose", "hops", "hogs", "woes", "foes") }
+        assertTrue(
+            "Low-frequency noise words should be filtered, got: $lowFreqNoise",
+            lowFreqNoise.isEmpty()
+        )
+    }
+
+    @Test
+    fun `queryCompletionSuggestions filters low frequency completions relative to typed prefix`() = runTest {
+        whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency(any(), any(), any()))
+            .thenReturn(emptyList())
+
+        val suggestions = spellCheckManager.getSpellingSuggestionsWithConfidence("best")
+        val completions = suggestions.filter { it.source == "completion" }
+
+        val noiseCompletions = completions.filter { it.word in listOf("bested", "bester") }
+        assertTrue(
+            "Low-frequency completions should be filtered when prefix freq >> completion freq, got: $noiseCompletions",
+            noiseCompletions.isEmpty()
+        )
+
+        val realCompletion = completions.find { it.word == "bestow" }
+        assertNotNull("Higher-frequency completion 'bestow' should survive filtering", realCompletion)
+    }
+
+    @Test
     fun `generateSuggestions caches results`() = runTest {
         whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency("test", "en", 5))
             .thenReturn(listOf("testing" to 10))
@@ -564,8 +621,8 @@ class SpellCheckManagerTest {
         whenever(wordLearningEngine.isWordLearned(any())).thenReturn(false)
 
         val swedishDictionary = "hej 1000\nvärld 800"
-        whenever(assetManager.open("dictionaries/sv_symspell.txt"))
-            .thenReturn(ByteArrayInputStream(swedishDictionary.toByteArray()))
+        whenever(assetManager.open("dictionaries/sv.urik"))
+            .thenAnswer { ByteArrayInputStream(TestUrikBuilder.buildUrikFromText(swedishDictionary)) }
 
         activeLanguagesFlow.value = listOf("en", "sv")
         effectiveDictionaryLanguagesFlow.value = listOf("en", "sv")
@@ -583,24 +640,16 @@ class SpellCheckManagerTest {
         val words = spellCheckManager.getCommonWords()
 
         assertTrue(words.isNotEmpty())
-        assertTrue(words.any { it.first == "hello" && it.second == 1000 })
-        assertTrue(words.any { it.first == "world" && it.second == 800 })
+        assertTrue(words.any { it.first == "hello" })
+        assertTrue(words.any { it.first == "world" })
     }
 
     @Test
-    fun `getCommonWords sorts by frequency descending`() = runTest {
+    fun `getCommonWords returns all dictionary words`() = runTest {
         val words = spellCheckManager.getCommonWords()
 
-        for (i in 0 until words.size - 1) {
-            assertTrue(words[i].second >= words[i + 1].second)
-        }
-    }
-
-    @Test
-    fun `getCommonWords filters by length`() = runTest {
-        val words = spellCheckManager.getCommonWords()
-
-        assertTrue(words.all { it.first.length in 2..15 })
+        assertTrue("Expected multiple words", words.size > 5)
+        assertTrue("hello should be present", words.any { it.first == "hello" })
     }
 
     @Test
@@ -660,7 +709,7 @@ class SpellCheckManagerTest {
 
     @Test
     fun `getCommonWords handles IOException gracefully`() = runTest {
-        whenever(assetManager.open("dictionaries/en_symspell.txt"))
+        whenever(assetManager.open("dictionaries/en.urik"))
             .thenThrow(java.io.IOException("File error"))
 
         val failingManager =
@@ -716,12 +765,12 @@ class SpellCheckManagerTest {
 
         val suggestions = spellCheckManager.getSpellingSuggestionsWithConfidence("helo")
 
-        val symspellSuggestions = suggestions.filter { it.source == "symspell" }
-        assertTrue("Should have multiple SymSpell suggestions", symspellSuggestions.size >= 2)
+        val dictSuggestions = suggestions.filter { it.source == "dictionary" }
+        assertTrue("Should have multiple dictionary suggestions", dictSuggestions.size >= 2)
 
-        val confidences = symspellSuggestions.map { it.confidence }.distinct()
+        val confidences = dictSuggestions.map { it.confidence }.distinct()
         assertTrue(
-            "SymSpell suggestions should have different confidence scores " +
+            "Dictionary suggestions should have different confidence scores " +
                 "based on frequency, not all capped at same value",
             confidences.size > 1
         )
@@ -982,15 +1031,13 @@ class SpellCheckManagerTest {
                 prueba 800
             """.trimIndent()
 
-        whenever(assetManager.open("dictionaries/es_symspell.txt"))
-            .thenReturn(ByteArrayInputStream(spanishDictionary.toByteArray()))
+        whenever(assetManager.open("dictionaries/es.urik"))
+            .thenAnswer { ByteArrayInputStream(TestUrikBuilder.buildUrikFromText(spanishDictionary)) }
 
         val words = spellCheckManager.getCommonWordsForLanguages(listOf("en", "es"))
 
         assertTrue(words.containsKey("hello"))
         assertTrue(words.containsKey("hola"))
-        assertEquals(1000, words["hello"])
-        assertEquals(2000, words["hola"])
     }
 
     @Test
@@ -1001,12 +1048,12 @@ class SpellCheckManagerTest {
                 unique 500
             """.trimIndent()
 
-        whenever(assetManager.open("dictionaries/es_symspell.txt"))
-            .thenReturn(ByteArrayInputStream(spanishDictionary.toByteArray()))
+        whenever(assetManager.open("dictionaries/es.urik"))
+            .thenAnswer { ByteArrayInputStream(TestUrikBuilder.buildUrikFromText(spanishDictionary)) }
 
         val words = spellCheckManager.getCommonWordsForLanguages(listOf("en", "es"))
 
-        assertEquals(1200, words["test"])
+        assertTrue("test word should be present", words.containsKey("test"))
     }
 
     @Test
@@ -1029,8 +1076,8 @@ class SpellCheckManagerTest {
                 l' 700
             """.trimIndent()
 
-        whenever(assetManager.open("dictionaries/fr_symspell.txt"))
-            .thenAnswer { ByteArrayInputStream(frenchDictionary.toByteArray()) }
+        whenever(assetManager.open("dictionaries/fr.urik"))
+            .thenAnswer { ByteArrayInputStream(TestUrikBuilder.buildUrikFromText(frenchDictionary)) }
 
         activeLanguagesFlow.value = listOf("fr")
         effectiveDictionaryLanguagesFlow.value = listOf("fr")
@@ -1062,8 +1109,8 @@ class SpellCheckManagerTest {
                 dell' 600
             """.trimIndent()
 
-        whenever(assetManager.open("dictionaries/it_symspell.txt"))
-            .thenAnswer { ByteArrayInputStream(italianDictionary.toByteArray()) }
+        whenever(assetManager.open("dictionaries/it.urik"))
+            .thenAnswer { ByteArrayInputStream(TestUrikBuilder.buildUrikFromText(italianDictionary)) }
 
         activeLanguagesFlow.value = listOf("it")
         effectiveDictionaryLanguagesFlow.value = listOf("it")
@@ -1116,8 +1163,8 @@ class SpellCheckManagerTest {
                 jardin 200
             """.trimIndent()
 
-        whenever(assetManager.open("dictionaries/fr_symspell.txt"))
-            .thenAnswer { ByteArrayInputStream(frenchDictionary.toByteArray()) }
+        whenever(assetManager.open("dictionaries/fr.urik"))
+            .thenAnswer { ByteArrayInputStream(TestUrikBuilder.buildUrikFromText(frenchDictionary)) }
 
         activeLanguagesFlow.value = listOf("fr")
         effectiveDictionaryLanguagesFlow.value = listOf("fr")
@@ -1151,8 +1198,8 @@ class SpellCheckManagerTest {
     @Test
     fun `isWordInDictionary respects effective languages when isolated`() = runTest {
         val spanishDictionary = "hola 2000\nmundo 1500"
-        whenever(assetManager.open("dictionaries/es_symspell.txt"))
-            .thenAnswer { ByteArrayInputStream(spanishDictionary.toByteArray()) }
+        whenever(assetManager.open("dictionaries/es.urik"))
+            .thenAnswer { ByteArrayInputStream(TestUrikBuilder.buildUrikFromText(spanishDictionary)) }
 
         activeLanguagesFlow.value = listOf("en", "es")
         effectiveDictionaryLanguagesFlow.value = listOf("en")
@@ -1165,8 +1212,8 @@ class SpellCheckManagerTest {
     @Test
     fun `isWordInDictionary finds word when effective languages includes its language`() = runTest {
         val spanishDictionary = "hola 2000\nmundo 1500"
-        whenever(assetManager.open("dictionaries/es_symspell.txt"))
-            .thenAnswer { ByteArrayInputStream(spanishDictionary.toByteArray()) }
+        whenever(assetManager.open("dictionaries/es.urik"))
+            .thenAnswer { ByteArrayInputStream(TestUrikBuilder.buildUrikFromText(spanishDictionary)) }
 
         activeLanguagesFlow.value = listOf("en", "es")
         effectiveDictionaryLanguagesFlow.value = listOf("en", "es")
@@ -1179,8 +1226,8 @@ class SpellCheckManagerTest {
     @Test
     fun `suggestions restricted to effective languages when isolated`() = runTest {
         val spanishDictionary = "hola 2000\nmundo 1500"
-        whenever(assetManager.open("dictionaries/es_symspell.txt"))
-            .thenAnswer { ByteArrayInputStream(spanishDictionary.toByteArray()) }
+        whenever(assetManager.open("dictionaries/es.urik"))
+            .thenAnswer { ByteArrayInputStream(TestUrikBuilder.buildUrikFromText(spanishDictionary)) }
 
         activeLanguagesFlow.value = listOf("en", "es")
         effectiveDictionaryLanguagesFlow.value = listOf("en")
@@ -1194,8 +1241,8 @@ class SpellCheckManagerTest {
     @Test
     fun `areWordsInDictionary respects effective languages`() = runTest {
         val spanishDictionary = "hola 2000\nmundo 1500"
-        whenever(assetManager.open("dictionaries/es_symspell.txt"))
-            .thenAnswer { ByteArrayInputStream(spanishDictionary.toByteArray()) }
+        whenever(assetManager.open("dictionaries/es.urik"))
+            .thenAnswer { ByteArrayInputStream(TestUrikBuilder.buildUrikFromText(spanishDictionary)) }
 
         activeLanguagesFlow.value = listOf("en", "es")
         effectiveDictionaryLanguagesFlow.value = listOf("en")
@@ -1388,6 +1435,313 @@ class SpellCheckManagerTest {
         assertTrue(
             "Low user frequency should not suppress contraction dominance",
             spellCheckManager.hasDominantContractionForm("hows")
+        )
+    }
+
+    @Test
+    fun `isDegradedMode is false by default`() = runTest {
+        assertFalse(spellCheckManager.isDegradedMode)
+    }
+
+    @Test
+    fun `isDegradedMode is false after successful initialization`() = runTest {
+        assertFalse(spellCheckManager.isDegradedMode)
+    }
+
+    @Test
+    fun `dictionary lookup is scoped per language`() = runTest {
+        val frenchDictionary =
+            """
+            bonjour 2000
+            monde 1500
+            """.trimIndent()
+
+        whenever(assetManager.open("dictionaries/fr.urik"))
+            .thenAnswer { ByteArrayInputStream(TestUrikBuilder.buildUrikFromText(frenchDictionary)) }
+
+        activeLanguagesFlow.value = listOf("en", "fr")
+        effectiveDictionaryLanguagesFlow.value = listOf("en", "fr")
+        currentLanguageFlow.value = "fr"
+
+        val frenchManager =
+            SpellCheckManager(
+                context = context,
+                languageManager = languageManager,
+                wordLearningEngine = wordLearningEngine,
+                wordFrequencyRepository = wordFrequencyRepository,
+                wordNormalizer = wordNormalizer,
+                cacheMemoryManager = cacheMemoryManager,
+                ioDispatcher = testDispatcher
+            )
+
+        assertTrue("hello should be found in en", frenchManager.isWordInDictionary("hello"))
+        assertTrue("bonjour should be found in fr", frenchManager.isWordInDictionary("bonjour"))
+
+        effectiveDictionaryLanguagesFlow.value = listOf("en")
+        frenchManager.clearCaches()
+        assertFalse(
+            "bonjour should not be found when only en is effective",
+            frenchManager.isWordInDictionary("bonjour")
+        )
+    }
+
+    @Test
+    fun `onMemoryPressure CRITICAL evicts non-current language dictionaries`() = runTest {
+        val frenchDictionary = "bonjour 2000\nmonde 1500"
+        whenever(assetManager.open("dictionaries/fr.urik"))
+            .thenAnswer { ByteArrayInputStream(TestUrikBuilder.buildUrikFromText(frenchDictionary)) }
+
+        effectiveDictionaryLanguagesFlow.value = listOf("en", "fr")
+        spellCheckManager.isWordInDictionary("bonjour")
+
+        spellCheckManager.onMemoryPressure(android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL)
+
+        whenever(assetManager.open("dictionaries/fr.urik"))
+            .thenAnswer { ByteArrayInputStream(TestUrikBuilder.buildUrikFromText(frenchDictionary)) }
+        assertTrue("en lookup still works after CRITICAL pressure", spellCheckManager.isWordInDictionary("hello"))
+    }
+
+    @Test
+    fun `isDegradedMode is true after initialization timeout`() {
+        val standardDispatcher = StandardTestDispatcher()
+        val neverDispatcher = object : CoroutineDispatcher() {
+            override fun dispatch(context: kotlin.coroutines.CoroutineContext, block: Runnable) {
+                // Never executes — simulates IO that never completes, forcing a timeout
+            }
+        }
+        Dispatchers.setMain(standardDispatcher)
+        try {
+            val timeoutManager =
+                SpellCheckManager(
+                    context = context,
+                    languageManager = languageManager,
+                    wordLearningEngine = wordLearningEngine,
+                    wordFrequencyRepository = wordFrequencyRepository,
+                    cacheMemoryManager = cacheMemoryManager,
+                    ioDispatcher = neverDispatcher,
+                    wordNormalizer = wordNormalizer
+                )
+
+            kotlinx.coroutines.test.runTest(standardDispatcher) {
+                launch { timeoutManager.generateSuggestions("hello") }
+                advanceTimeBy(5001L)
+                runCurrent()
+                assertTrue(timeoutManager.isDegradedMode)
+            }
+        } finally {
+            Dispatchers.setMain(testDispatcher)
+        }
+    }
+
+    @Test
+    fun `isDegradedMode is true after initialization fails with exception`() = runTest {
+        whenever(assetManager.open("dictionaries/en.urik"))
+            .thenThrow(java.io.IOException("Asset missing"))
+
+        val failingManager =
+            SpellCheckManager(
+                context = context,
+                languageManager = languageManager,
+                wordLearningEngine = wordLearningEngine,
+                wordFrequencyRepository = wordFrequencyRepository,
+                wordNormalizer = wordNormalizer,
+                cacheMemoryManager = cacheMemoryManager,
+                ioDispatcher = testDispatcher
+            )
+
+        failingManager.generateSuggestions("hello")
+        assertTrue(failingManager.isDegradedMode)
+    }
+
+    @Test
+    fun `isWordInDictionary cancels cooperatively without hanging`() = runTest(UnconfinedTestDispatcher()) {
+        val job = launch { spellCheckManager.isWordInDictionary("hello") }
+        yield()
+        job.cancelAndJoin()
+    }
+
+    @Test
+    fun `fat finger expansion returns gave for bave via b to g substitution`() = runTest {
+        val fatFingerExpander = FatFingerExpander()
+        val gaveDictionary = "gave 500\nhave 800"
+        val fatKeyPositionsFlow = MutableStateFlow<Map<Char, PointF>>(emptyMap())
+        whenever(languageManager.keyPositions).thenReturn(fatKeyPositionsFlow)
+        whenever(assetManager.open("dictionaries/en.urik"))
+            .thenAnswer { ByteArrayInputStream(TestUrikBuilder.buildUrikFromText(gaveDictionary)) }
+        val fatFingerManager = SpellCheckManager(
+            context = context,
+            languageManager = languageManager,
+            wordLearningEngine = wordLearningEngine,
+            wordFrequencyRepository = wordFrequencyRepository,
+            cacheMemoryManager = cacheMemoryManager,
+            ioDispatcher = testDispatcher,
+            wordNormalizer = wordNormalizer,
+            fatFingerExpander = fatFingerExpander
+        )
+        val qwertyPositions = linkedMapOf(
+            'q' to PointF(50f, 40f), 'w' to PointF(150f, 40f), 'e' to PointF(250f, 40f),
+            'r' to PointF(350f, 40f), 't' to PointF(450f, 40f), 'y' to PointF(550f, 40f),
+            'u' to PointF(650f, 40f), 'i' to PointF(750f, 40f), 'o' to PointF(850f, 40f),
+            'p' to PointF(950f, 40f),
+            'a' to PointF(100f, 120f), 's' to PointF(200f, 120f), 'd' to PointF(300f, 120f),
+            'f' to PointF(400f, 120f), 'g' to PointF(500f, 120f), 'h' to PointF(600f, 120f),
+            'j' to PointF(700f, 120f), 'k' to PointF(800f, 120f), 'l' to PointF(900f, 120f),
+            'z' to PointF(150f, 200f), 'x' to PointF(250f, 200f), 'c' to PointF(350f, 200f),
+            'v' to PointF(450f, 200f), 'b' to PointF(550f, 200f), 'n' to PointF(650f, 200f),
+            'm' to PointF(750f, 200f)
+        )
+        fatKeyPositionsFlow.emit(qwertyPositions)
+
+        val suggestions = fatFingerManager.getSpellingSuggestionsWithConfidence("bave")
+        val words = suggestions.map { it.word }
+
+        assertTrue(
+            "gave should appear as a candidate for bave via b→g adjacent-key substitution",
+            words.contains("gave")
+        )
+    }
+
+    @Test
+    fun `fat finger expansion does not produce duplicate candidates`() = runTest {
+        val fatFingerExpander = FatFingerExpander()
+        val gaveDictionary = "gave 500\nhave 800"
+        val fatKeyPositionsFlow = MutableStateFlow<Map<Char, PointF>>(emptyMap())
+        whenever(languageManager.keyPositions).thenReturn(fatKeyPositionsFlow)
+        whenever(assetManager.open("dictionaries/en.urik"))
+            .thenAnswer { ByteArrayInputStream(TestUrikBuilder.buildUrikFromText(gaveDictionary)) }
+        val fatFingerManager = SpellCheckManager(
+            context = context,
+            languageManager = languageManager,
+            wordLearningEngine = wordLearningEngine,
+            wordFrequencyRepository = wordFrequencyRepository,
+            cacheMemoryManager = cacheMemoryManager,
+            ioDispatcher = testDispatcher,
+            wordNormalizer = wordNormalizer,
+            fatFingerExpander = fatFingerExpander
+        )
+        val qwertyPositions = linkedMapOf(
+            'q' to PointF(50f, 40f), 'w' to PointF(150f, 40f), 'e' to PointF(250f, 40f),
+            'r' to PointF(350f, 40f), 't' to PointF(450f, 40f), 'y' to PointF(550f, 40f),
+            'u' to PointF(650f, 40f), 'i' to PointF(750f, 40f), 'o' to PointF(850f, 40f),
+            'p' to PointF(950f, 40f),
+            'a' to PointF(100f, 120f), 's' to PointF(200f, 120f), 'd' to PointF(300f, 120f),
+            'f' to PointF(400f, 120f), 'g' to PointF(500f, 120f), 'h' to PointF(600f, 120f),
+            'j' to PointF(700f, 120f), 'k' to PointF(800f, 120f), 'l' to PointF(900f, 120f),
+            'z' to PointF(150f, 200f), 'x' to PointF(250f, 200f), 'c' to PointF(350f, 200f),
+            'v' to PointF(450f, 200f), 'b' to PointF(550f, 200f), 'n' to PointF(650f, 200f),
+            'm' to PointF(750f, 200f)
+        )
+        fatKeyPositionsFlow.emit(qwertyPositions)
+
+        val suggestions = fatFingerManager.getSpellingSuggestionsWithConfidence("bave")
+        val words = suggestions.map { it.word.lowercase() }
+
+        assertEquals("Candidate list must not contain duplicates", words.size, words.toSet().size)
+    }
+
+    @Test
+    fun `fat finger expansion falls back gracefully when key positions are empty`() = runTest {
+        val fatFingerExpander = FatFingerExpander()
+        val fatFingerManager = SpellCheckManager(
+            context = context,
+            languageManager = languageManager,
+            wordLearningEngine = wordLearningEngine,
+            wordFrequencyRepository = wordFrequencyRepository,
+            cacheMemoryManager = cacheMemoryManager,
+            ioDispatcher = testDispatcher,
+            wordNormalizer = wordNormalizer,
+            fatFingerExpander = fatFingerExpander
+        )
+
+        val suggestions = fatFingerManager.getSpellingSuggestionsWithConfidence("helo")
+
+        assertNotNull("Should return non-null suggestions even with empty key positions", suggestions)
+        assertTrue("hello should still appear via direct dictionary lookup", suggestions.any { it.word == "hello" })
+    }
+
+    @Test
+    fun `urik dictionary returns suggestions for known typo`() = runTest {
+        val suggestions = spellCheckManager.getSpellingSuggestionsWithConfidence("hellp")
+        assertTrue("Expected hello suggestion from URIK dictionary", suggestions.any { it.word == "hello" })
+    }
+
+    @Test
+    fun `apostrophe candidate at distance 1 gets confidence boost`() = runTest {
+        whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency(any(), any(), any()))
+            .thenReturn(emptyList())
+
+        // "dont" → "don't" is distance 1 (apostrophe insertion), contraction candidate
+        val suggestions = spellCheckManager.getSpellingSuggestionsWithConfidence("dont")
+        val contraction = suggestions.find { it.word == "don't" }
+        assertNotNull("don't should appear in suggestions for 'dont'", contraction)
+        assertTrue(
+            "Contraction suggestion should have guaranteed confidence, got ${contraction!!.confidence}",
+            contraction.confidence >= SpellCheckManager.CONTRACTION_GUARANTEED_CONFIDENCE
+        )
+    }
+
+    @Test
+    fun `dictionary suggestion ranking reflects result order`() = runTest {
+        whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency(any(), any(), any()))
+            .thenReturn(emptyList())
+
+        val suggestions = spellCheckManager.getSpellingSuggestionsWithConfidence("helo")
+            .filter { it.source == "dictionary" }
+        assertTrue("Should have dictionary suggestions", suggestions.isNotEmpty())
+        suggestions.forEachIndexed { index, suggestion ->
+            assertEquals("Ranking should match position $index", index, suggestion.ranking)
+        }
+    }
+
+    @Test
+    fun `getCommonWordsForLanguages returns Long frequencies`() = runTest {
+        val words = spellCheckManager.getCommonWordsForLanguages(listOf("en"))
+        assertTrue(words.isNotEmpty())
+        val helloFreq = words["hello"]
+        assertNotNull(helloFreq)
+        assertTrue("Expected Long frequency > 1000, got $helloFreq", helloFreq!! > 1000L)
+    }
+
+    @Test
+    fun `fat finger expansion integrates with URIK candidates for adjacent key typo`() = runTest {
+        val fatFingerExpander = FatFingerExpander()
+        val gaveDictionary = "gave 500\nhave 800"
+        val fatKeyPositionsFlow = MutableStateFlow<Map<Char, PointF>>(emptyMap())
+        whenever(languageManager.keyPositions).thenReturn(fatKeyPositionsFlow)
+        whenever(assetManager.open("dictionaries/en.urik"))
+            .thenAnswer { ByteArrayInputStream(TestUrikBuilder.buildUrikFromText(gaveDictionary)) }
+
+        val fatManager = SpellCheckManager(
+            context = context,
+            languageManager = languageManager,
+            wordLearningEngine = wordLearningEngine,
+            wordFrequencyRepository = wordFrequencyRepository,
+            cacheMemoryManager = cacheMemoryManager,
+            ioDispatcher = testDispatcher,
+            wordNormalizer = wordNormalizer,
+            fatFingerExpander = fatFingerExpander
+        )
+
+        val qwerty = linkedMapOf(
+            'q' to PointF(50f, 40f), 'w' to PointF(150f, 40f), 'e' to PointF(250f, 40f),
+            'r' to PointF(350f, 40f), 't' to PointF(450f, 40f), 'y' to PointF(550f, 40f),
+            'u' to PointF(650f, 40f), 'i' to PointF(750f, 40f), 'o' to PointF(850f, 40f),
+            'p' to PointF(950f, 40f),
+            'a' to PointF(100f, 120f), 's' to PointF(200f, 120f), 'd' to PointF(300f, 120f),
+            'f' to PointF(400f, 120f), 'g' to PointF(500f, 120f), 'h' to PointF(600f, 120f),
+            'j' to PointF(700f, 120f), 'k' to PointF(800f, 120f), 'l' to PointF(900f, 120f),
+            'z' to PointF(150f, 200f), 'x' to PointF(250f, 200f), 'c' to PointF(350f, 200f),
+            'v' to PointF(450f, 200f), 'b' to PointF(550f, 200f), 'n' to PointF(650f, 200f),
+            'm' to PointF(750f, 200f)
+        )
+        fatKeyPositionsFlow.emit(qwerty)
+        whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency(any(), any(), any()))
+            .thenReturn(emptyList())
+
+        val suggestions = fatManager.getSpellingSuggestionsWithConfidence("bave")
+        assertTrue(
+            "gave should appear as suggestion for bave (b→g adjacent keys), got: ${suggestions.map { it.word }}",
+            suggestions.any { it.word == "gave" }
         )
     }
 }

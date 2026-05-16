@@ -160,6 +160,10 @@
     <string name="layout_mapper_clear_failed">Nepodarilo sa vymazať mapovania</string>
 
     <!-- Privacy & Data Settings -->
+    <string name="privacy_settings_storage_encryption_title">Úložisko slov: Nešifrované</string>
+    <string name="privacy_settings_storage_encryption_summary">Nebol zistený žiadny uzamknutý displej zariadenia. Naučené slová sú uložené ako obyčajný text. Nastavte PIN, vzor alebo biometrické odomknutie v nastaveniach Androidu, aby ste povolili šifrovanie.</string>
+    <string name="privacy_settings_keystore_api27_title">Šifrovanie: obmedzená ochrana zámkom</string>
+    <string name="privacy_settings_keystore_api27_summary">Toto zariadenie používa Android 7.1 alebo starší. V tejto verzii Androidu nie je možné obmedziť kľúč databázy len na prístup pri odomknutom zariadení, takže naučené slová môžu byť prístupné aj keď je zariadenie uzamknuté. Aktualizácia na Android 9.0 alebo novší umožní úplnú ochranu uzamknutej obrazovky.</string>
     <string name="privacy_settings_clipboard_history">História schránky</string>
     <string name="privacy_settings_clipboard_history_on">História schránky zapnutá</string>
     <string name="privacy_settings_clipboard_history_off">História schránky vypnutá</string>
@@ -356,5 +360,12 @@
 
     <!-- AlphabetSideBar accessibility -->
     <string name="alphabet_sidebar_description">Bočný panel abecedy</string>
-
+    <!-- Flick key accessibility -->
+    <string name="flick_key_description">%1$s. Posun: hore %2$s, vpravo %3$s, dole %4$s, vľavo %5$s</string>
+    <string name="flick_key_description_partial">%1$s. Posun: %2$s</string>
+    <string name="action_dakuten">Prepnúť znak znelosti</string>
+    <string name="action_small_kana">Prepnúť malú kanu</string>
+    <string name="action_handakuten">Prepnúť polozvučný znak</string>
+    <string name="action_next_candidate">Ďalší kandidát</string>
+    <string name="action_commit_candidate">Potvrdiť kandidáta</string>
 </resources>

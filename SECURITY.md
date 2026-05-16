@@ -2,11 +2,13 @@
 
 ## Supported Versions
 
-We support only the latest version available on Google Play. Please ensure automatic updates are enabled.
+We support only the latest release. Google Play users: enable automatic updates. F-Droid users: note that F-Droid releases may lag by days or weeks — for critical fixes, download directly from [GitHub Releases](https://github.com/urikdev/Urik/releases).
 
-| Version              | Supported          |
-|----------------------|--------------------|
-| Latest (Google Play) | :white_check_mark: |
+| Version                    | Supported          |
+|----------------------------|--------------------|
+| Latest (Google Play)       | :white_check_mark: |
+| Latest (GitHub Releases)   | :white_check_mark: |
+| Older versions             | :x:                |
 
 ## Reporting a Vulnerability
 
@@ -47,7 +49,7 @@ Urik is a privacy-first keyboard with:
 - Dependency vulnerabilities
 
 **Out of scope:**
-- Vulnerabilities requiring physical device access
+- Attacks requiring full filesystem access on a physically compromised device (e.g., rooted device with direct DB access)
 - Social engineering attacks
 - Issues in upstream dependencies (report to maintainers)
 - Theoretical attacks without practical exploit

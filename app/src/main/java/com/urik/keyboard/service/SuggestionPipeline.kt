@@ -1,8 +1,9 @@
 package com.urik.keyboard.service
 
 import com.urik.keyboard.data.WordFrequencyRepository
-import com.urik.keyboard.model.KeyboardState
 import com.urik.keyboard.utils.CaseTransformer
+import com.urik.keyboard.utils.ErrorLogger
+import com.urik.keyboard.utils.KanaTransformUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -11,6 +12,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class SuggestionPipeline(
+    private val host: SuggestionPipelineHost,
     private val state: InputStateManager,
     private val outputBridge: OutputBridge,
     private val textInputProcessor: TextInputProcessor,
@@ -19,18 +21,24 @@ class SuggestionPipeline(
     private val wordFrequencyRepository: WordFrequencyRepository,
     private val languageManager: LanguageManager,
     private val caseTransformer: CaseTransformer,
-    private val serviceScope: CoroutineScope,
-    private val showSuggestions: () -> Boolean,
-    private val effectiveSuggestionCount: () -> Int,
-    private val getKeyboardState: () -> KeyboardState,
-    private val shouldAutoCapitalize: (String) -> Boolean,
-    private val currentLanguageProvider: () -> String
+    private val scriptConverterRegistry: ScriptConverterRegistry,
+    private val serviceScope: CoroutineScope
 ) {
     private var suggestionDebounceJob: Job? = null
     private val suggestionDebounceDelay = SUGGESTION_DEBOUNCE_MS
+    var isJapaneseLayout: Boolean = false
+        private set
 
-    @Suppress("UnusedParameter")
-    fun requestSuggestions(buffer: String, inputMethod: InputMethod, isCharacterInput: Boolean, char: String? = null) {
+    fun setJapaneseLayout(japanese: Boolean) {
+        isJapaneseLayout = japanese
+    }
+
+    fun requestSuggestions(buffer: String, inputMethod: InputMethod) {
+        state.showDegradedIndicator(spellCheckManager.isDegradedMode)
+        if (isJapaneseLayout) {
+            requestJapaneseSuggestions(buffer)
+            return
+        }
         val (currentSequence, bufferSnapshot) = state.getSequenceAndBuffer()
 
         suggestionDebounceJob?.cancel()
@@ -39,19 +47,14 @@ class SuggestionPipeline(
                 try {
                     delay(suggestionDebounceDelay)
 
-                    val result =
-                        if (isCharacterInput && char != null) {
-                            textInputProcessor.processCharacterInput(char, bufferSnapshot, inputMethod)
-                        } else {
-                            textInputProcessor.processWordInput(bufferSnapshot, inputMethod)
-                        }
+                    val result = textInputProcessor.processWordInput(bufferSnapshot, inputMethod)
 
                     withContext(Dispatchers.Main) {
                         if (state.isSequenceCurrent(currentSequence, bufferSnapshot)) {
                             when (result) {
                                 is ProcessingResult.Success -> {
                                     state.wordState = result.wordState
-                                    if (result.wordState.suggestions.isNotEmpty() && showSuggestions()) {
+                                    if (result.wordState.suggestions.isNotEmpty() && host.showSuggestions()) {
                                         val displaySuggestions =
                                             storeAndCapitalizeSuggestions(
                                                 result.wordState.suggestions,
@@ -72,7 +75,13 @@ class SuggestionPipeline(
                             }
                         }
                     }
-                } catch (_: Exception) {
+                } catch (e: Exception) {
+                    ErrorLogger.logException(
+                        component = "SuggestionPipeline",
+                        severity = ErrorLogger.Severity.HIGH,
+                        exception = e,
+                        context = mapOf("operation" to "requestSuggestions")
+                    )
                 }
             }
     }
@@ -105,7 +114,11 @@ class SuggestionPipeline(
     }
 
     fun capitalizeSuggestions(suggestions: List<SpellingSuggestion>, isSentenceStart: Boolean = false): List<String> {
-        var keyboardState = getKeyboardState()
+        val lang = host.currentLanguage().split("-").first()
+        if (lang in CASELESS_LANGUAGES) {
+            return suggestions.map { it.word }
+        }
+        var keyboardState = host.getKeyboardState()
         if (state.isCurrentWordManualShifted && !keyboardState.isShiftPressed && !keyboardState.isCapsLockOn) {
             keyboardState = keyboardState.copy(isShiftPressed = true, isAutoShift = false)
         }
@@ -113,7 +126,7 @@ class SuggestionPipeline(
     }
 
     fun showBigramPredictions() {
-        if (state.requiresDirectCommit || !showSuggestions() || state.lastCommittedWord.isBlank()) {
+        if (state.requiresDirectCommit || !host.showSuggestions() || state.lastCommittedWord.isBlank()) {
             return
         }
 
@@ -124,7 +137,7 @@ class SuggestionPipeline(
                     wordFrequencyRepository.getBigramPredictions(
                         state.lastCommittedWord,
                         currentLanguage,
-                        effectiveSuggestionCount()
+                        host.effectiveSuggestionCount()
                     )
 
                 val predictions = allPredictions.filter { !spellCheckManager.isWordBlacklisted(it) }
@@ -141,7 +154,7 @@ class SuggestionPipeline(
                             )
                         }
                     val textBefore = outputBridge.safeGetTextBeforeCursor(50)
-                    val bigramSentenceStart = shouldAutoCapitalize(textBefore)
+                    val bigramSentenceStart = host.shouldAutoCapitalize(textBefore)
                     val displayPredictions = storeAndCapitalizeSuggestions(suggestionObjects, bigramSentenceStart)
                     withContext(Dispatchers.Main) {
                         if (state.displayBuffer.isEmpty()) {
@@ -151,7 +164,13 @@ class SuggestionPipeline(
                         }
                     }
                 }
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                ErrorLogger.logException(
+                    component = "SuggestionPipeline",
+                    severity = ErrorLogger.Severity.LOW,
+                    exception = e,
+                    context = mapOf("operation" to "showBigramPredictions")
+                )
             }
         }
     }
@@ -164,7 +183,7 @@ class SuggestionPipeline(
 
         recordWordUsage(word)
 
-        val isInDictionary = spellCheckManager.isWordInSymSpellDictionary(word)
+        val isInDictionary = spellCheckManager.isWordInDictionary(word)
         if (isInDictionary) {
             return true
         }
@@ -178,7 +197,13 @@ class SuggestionPipeline(
         } else {
             false
         }
-    } catch (_: Exception) {
+    } catch (e: Exception) {
+        ErrorLogger.logException(
+            component = "SuggestionPipeline",
+            severity = ErrorLogger.Severity.HIGH,
+            exception = e,
+            context = mapOf("operation" to "learnWordAndInvalidateCache")
+        )
         false
     }
 
@@ -191,7 +216,13 @@ class SuggestionPipeline(
                 wordFrequencyRepository.recordBigram(state.lastCommittedWord, word, currentLanguage)
             }
             state.lastCommittedWord = word
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            ErrorLogger.logException(
+                component = "SuggestionPipeline",
+                severity = ErrorLogger.Severity.LOW,
+                exception = e,
+                context = mapOf("operation" to "recordWordUsage")
+            )
         }
     }
 
@@ -207,7 +238,14 @@ class SuggestionPipeline(
 
             outputBridge.beginBatchEdit()
             try {
-                outputBridge.autoCapitalizePronounI(currentLanguageProvider)
+                val lang = host.currentLanguage().split("-").first()
+                if (lang == "en" && state.displayBuffer.isNotEmpty()) {
+                    val corrected = EnglishPronounCorrection.capitalize(state.displayBuffer.lowercase())
+                    if (corrected != null && corrected != state.displayBuffer) {
+                        state.onPronounCapitalized(corrected)
+                        outputBridge.setComposingText(corrected, 1)
+                    }
+                }
                 if (state.displayBuffer.isNotEmpty()) {
                     outputBridge.updateLastCommittedWord(state.displayBuffer)
                 }
@@ -215,7 +253,13 @@ class SuggestionPipeline(
                 outputBridge.commitText(" ")
                 state.clearInternalStateOnly()
                 showBigramPredictions()
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                ErrorLogger.logException(
+                    component = "SuggestionPipeline",
+                    severity = ErrorLogger.Severity.HIGH,
+                    exception = e,
+                    context = mapOf("operation" to "confirmAndLearnWord")
+                )
                 outputBridge.finishComposingText()
                 outputBridge.commitText(" ")
                 state.clearInternalStateOnly()
@@ -268,7 +312,13 @@ class SuggestionPipeline(
                 } finally {
                     outputBridge.endBatchEdit()
                 }
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                ErrorLogger.logException(
+                    component = "SuggestionPipeline",
+                    severity = ErrorLogger.Severity.HIGH,
+                    exception = e,
+                    context = mapOf("operation" to "coordinateSuggestionSelection")
+                )
                 outputBridge.coordinateStateClear()
             }
         }
@@ -317,7 +367,13 @@ class SuggestionPipeline(
                 } finally {
                     outputBridge.endBatchEdit()
                 }
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                ErrorLogger.logException(
+                    component = "SuggestionPipeline",
+                    severity = ErrorLogger.Severity.HIGH,
+                    exception = e,
+                    context = mapOf("operation" to "coordinatePostCommitReplacement")
+                )
                 state.postCommitReplacementState = null
                 state.clearSuggestionDisplay()
             }
@@ -329,8 +385,78 @@ class SuggestionPipeline(
             try {
                 state.isActivelyEditing = true
                 outputBridge.coordinateStateClear()
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                ErrorLogger.logException(
+                    component = "SuggestionPipeline",
+                    severity = ErrorLogger.Severity.HIGH,
+                    exception = e,
+                    context = mapOf("operation" to "coordinateWordCompletion")
+                )
                 outputBridge.coordinateStateClear()
+            }
+        }
+    }
+
+    private fun requestJapaneseSuggestions(hiraganaBuffer: String) {
+        suggestionDebounceJob?.cancel()
+        suggestionDebounceJob = serviceScope.launch {
+            try {
+                delay(suggestionDebounceDelay)
+
+                val rawCandidates = scriptConverterRegistry
+                    .forLanguage(host.currentLanguage())
+                    ?.getCandidates(hiraganaBuffer, host.currentLanguage())
+                    ?: emptyList()
+                val conversionCandidates = rawCandidates.map { candidate ->
+                    SpellingSuggestion(
+                        word = candidate.surface,
+                        confidence = candidate.frequency.toDouble(),
+                        ranking = 0,
+                        source = candidate.source
+                    )
+                }
+
+                val dictCompletions = if (host.showSuggestions()) {
+                    spellCheckManager.getSpellingSuggestionsWithConfidence(hiraganaBuffer)
+                        .filter { it.source == "completion" }
+                } else {
+                    emptyList()
+                }
+
+                val hiraganaCandidate = SpellingSuggestion(
+                    word = hiraganaBuffer,
+                    confidence = -1.0,
+                    ranking = 0,
+                    source = "reading"
+                )
+                val katakanaCandidate = SpellingSuggestion(
+                    word = KanaTransformUtils.toKatakana(hiraganaBuffer),
+                    confidence = -2.0,
+                    ranking = 0,
+                    source = "katakana"
+                )
+
+                val combined = (conversionCandidates + dictCompletions + hiraganaCandidate + katakanaCandidate)
+                    .distinctBy { it.word }
+                    .take(host.effectiveSuggestionCount())
+
+                withContext(Dispatchers.Main) {
+                    if (combined.isNotEmpty()) {
+                        state.pendingSuggestions = combined.map { it.word }
+                        state.currentRawSuggestions = combined
+                        state.updateSuggestionDisplay(combined.map { it.word })
+                    } else {
+                        state.pendingSuggestions = emptyList()
+                        state.clearSuggestionDisplay()
+                    }
+                }
+            } catch (e: Exception) {
+                ErrorLogger.logException(
+                    component = "SuggestionPipeline",
+                    severity = ErrorLogger.Severity.HIGH,
+                    exception = e,
+                    context = mapOf("operation" to "requestJapaneseSuggestions")
+                )
             }
         }
     }
@@ -341,5 +467,6 @@ class SuggestionPipeline(
 
     private companion object {
         const val SUGGESTION_DEBOUNCE_MS = 10L
+        val CASELESS_LANGUAGES = setOf("ar", "fa", "ja")
     }
 }

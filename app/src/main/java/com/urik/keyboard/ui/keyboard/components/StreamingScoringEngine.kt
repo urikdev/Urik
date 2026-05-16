@@ -1,5 +1,3 @@
-@file:Suppress("ktlint:standard:no-wildcard-imports")
-
 package com.urik.keyboard.ui.keyboard.components
 
 import android.graphics.PointF
@@ -8,6 +6,7 @@ import com.urik.keyboard.data.WordFrequencyRepository
 import com.urik.keyboard.service.SpellCheckManager
 import com.urik.keyboard.service.WordLearningEngine
 import com.urik.keyboard.service.WordNormalizer
+import com.urik.keyboard.utils.ErrorLogger
 import java.util.concurrent.Executors
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -60,9 +59,11 @@ constructor(
 
     @Volatile private var gestureStartTimeNanos = 0L
 
-    @Volatile private var cachedDictionary = emptyMap<String, Int>()
+    @Volatile private var cachedDictionary = emptyMap<String, Long>()
 
     @Volatile private var cachedLanguageCombination = emptyList<String>()
+
+    @Volatile private var cachedDictionaryIndex = emptyList<SwipeDetector.DictionaryEntry>()
 
     @Volatile private var cachedAdaptiveSigmas = emptyMap<Char, PathGeometryAnalyzer.AdaptiveSigma>()
 
@@ -70,17 +71,41 @@ constructor(
 
     @Volatile private var lastKeyPositionsHash = 0
 
+    @VisibleForTesting internal val anchorKeysBuffer = HashSet<Char>(32)
+
+    @VisibleForTesting internal val boundsBuffer = HashSet<Char>(32)
+
+    @VisibleForTesting internal val traversedBuffer = HashSet<Char>(32)
+
     @Volatile var lastCommittedWord: String = ""
 
     @Volatile var currentLanguageTag: String = "en"
 
     private var fullDictionary = ArrayList<SwipeDetector.DictionaryEntry>()
 
-    lateinit var ringBuffer: SwipePointRingBuffer
-        private set
+    @Volatile private var ringBuffer: SwipePointRingBuffer? = null
 
     fun bindRingBuffer(buffer: SwipePointRingBuffer) {
         ringBuffer = buffer
+    }
+
+    fun prewarm(activeLanguages: List<String>) {
+        if (cachedDictionaryIndex.isNotEmpty() && activeLanguages == cachedLanguageCombination) return
+        scoringScope.launch {
+            try {
+                val dictionary = loadOrCacheDictionary(activeLanguages)
+                if (dictionary.isNotEmpty() && cachedDictionaryIndex.isEmpty()) {
+                    cachedDictionaryIndex = buildDictionaryIndex(dictionary)
+                }
+            } catch (e: Exception) {
+                ErrorLogger.logException(
+                    component = "StreamingScoringEngine",
+                    severity = ErrorLogger.Severity.HIGH,
+                    exception = e,
+                    context = mapOf("operation" to "prewarm")
+                )
+            }
+        }
     }
 
     fun startGesture(currentKeyPositions: Map<Char, PointF>, activeLanguages: List<String>, languageTag: String) {
@@ -93,18 +118,39 @@ constructor(
         gestureStartTimeNanos = System.nanoTime()
         liveCandidates.clear()
 
+        val isCacheHit = cachedDictionaryIndex.isNotEmpty() && activeLanguages == cachedLanguageCombination
+        if (isCacheHit) {
+            fullDictionary = ArrayList(cachedDictionaryIndex)
+            liveCandidates = ArrayList(cachedDictionaryIndex)
+            updateAdaptiveSigmaCache(currentKeyPositions)
+            startTicker()
+        }
+
         scoringScope.launch {
             try {
                 val dictionary = loadOrCacheDictionary(activeLanguages)
                 if (dictionary.isEmpty()) return@launch
 
-                val indexed = buildDictionaryIndex(dictionary)
-                fullDictionary = ArrayList(indexed)
-                liveCandidates = ArrayList(indexed)
+                val indexed = if (cachedDictionaryIndex.isNotEmpty()) {
+                    cachedDictionaryIndex
+                } else {
+                    buildDictionaryIndex(dictionary).also { cachedDictionaryIndex = it }
+                }
 
-                updateAdaptiveSigmaCache(currentKeyPositions)
-                startTicker()
-            } catch (_: Exception) {
+                if (!isCacheHit) {
+                    fullDictionary = ArrayList(indexed)
+                    liveCandidates = ArrayList(indexed)
+                    updateAdaptiveSigmaCache(currentKeyPositions)
+                    if (!gestureActive) return@launch
+                    startTicker()
+                }
+            } catch (e: Exception) {
+                ErrorLogger.logException(
+                    component = "StreamingScoringEngine",
+                    severity = ErrorLogger.Severity.HIGH,
+                    exception = e,
+                    context = mapOf("operation" to "startGesture_initDictionary")
+                )
             }
         }
     }
@@ -129,9 +175,11 @@ constructor(
             }
     }
 
-    private fun onTick() {
-        if (!::ringBuffer.isInitialized) return
-        val path = ringBuffer.snapshot()
+    @VisibleForTesting internal fun onTick() {
+        val buffer = checkNotNull(ringBuffer) {
+            "SwipePointRingBuffer not bound; bindRingBuffer() must be called before startGesture()"
+        }
+        val path = buffer.snapshot()
         if (path.size < 3) return
 
         val currentKeyPositions = keyPositions
@@ -178,33 +226,25 @@ constructor(
             if (currentKeyPositions.isEmpty()) return@withContext emptyList()
 
             val maxLength = (rawPointCount / 5).coerceIn(5, 20)
-            val unfilteredCandidates =
-                liveCandidates.ifEmpty {
-                    fullDictionary
-                }
-            val candidates = unfilteredCandidates.filter { it.word.length <= maxLength }
+            val candidates = liveCandidates.ifEmpty { fullDictionary }
+                .filter { it.word.length <= maxLength }
 
             if (candidates.isEmpty()) return@withContext emptyList()
 
             val sigmaCache = cachedAdaptiveSigmas
             val neighborhoodCache = cachedKeyNeighborhoods
 
-            val signal =
-                SwipeSignal.extract(
-                    swipePath,
-                    currentKeyPositions,
-                    pathGeometryAnalyzer,
-                    sigmaCache,
-                    rawPointCount
-                )
+            val signal = SwipeSignal.extract(
+                swipePath,
+                currentKeyPositions,
+                pathGeometryAnalyzer,
+                sigmaCache,
+                rawPointCount
+            )
 
             val bigramPredictions: Set<String> =
                 if (lastCommittedWord.isNotBlank()) {
-                    wordFrequencyRepository
-                        .getBigramPredictions(
-                            lastCommittedWord,
-                            currentLanguageTag
-                        )
+                    wordFrequencyRepository.getBigramPredictions(lastCommittedWord, currentLanguageTag)
                 } else {
                     emptySet()
                 }
@@ -220,15 +260,14 @@ constructor(
                     maxFrequencySeen = entry.rawFrequency
                 }
 
-                val result =
-                    residualScorer.scoreCandidate(
-                        entry,
-                        signal,
-                        currentKeyPositions,
-                        sigmaCache,
-                        neighborhoodCache,
-                        maxFrequencySeen
-                    ) ?: continue
+                val result = residualScorer.scoreCandidate(
+                    entry,
+                    signal,
+                    currentKeyPositions,
+                    sigmaCache,
+                    neighborhoodCache,
+                    maxFrequencySeen
+                ) ?: continue
 
                 resultsBuffer.add(result)
 
@@ -241,19 +280,14 @@ constructor(
                 }
             }
 
-            val wordFrequencyMap = cachedDictionary
-
-            val arbitration =
-                zipfCheck.arbitrate(
-                    resultsBuffer,
-                    signal.geometricAnalysis,
-                    currentKeyPositions,
-                    bigramPredictions,
-                    wordFrequencyMap,
-                    rawPointCount
-                )
-
-            return@withContext arbitration.candidates
+            return@withContext zipfCheck.arbitrate(
+                resultsBuffer,
+                signal.geometricAnalysis,
+                currentKeyPositions,
+                bigramPredictions,
+                cachedDictionary,
+                rawPointCount
+            ).candidates
         }
 
     @VisibleForTesting
@@ -316,8 +350,12 @@ constructor(
         }
     }
 
-    private fun computeStartAnchorKeys(path: List<SwipeDetector.SwipePoint>, positions: Map<Char, PointF>): Set<Char> {
-        if (path.isEmpty()) return emptySet()
+    @VisibleForTesting internal fun computeStartAnchorKeysInternal(
+        path: List<SwipeDetector.SwipePoint>,
+        positions: Map<Char, PointF>
+    ): HashSet<Char> {
+        anchorKeysBuffer.clear()
+        if (path.isEmpty()) return anchorKeysBuffer
 
         val sampleCount = minOf(5, path.size)
         var cx = 0f
@@ -330,19 +368,25 @@ constructor(
         cy /= sampleCount
 
         val thresholdSq = START_ANCHOR_RADIUS * START_ANCHOR_RADIUS
-        val result = mutableSetOf<Char>()
         for ((char, pos) in positions) {
             val dx = pos.x - cx
             val dy = pos.y - cy
             if (dx * dx + dy * dy < thresholdSq) {
-                result.add(char)
+                anchorKeysBuffer.add(char)
             }
         }
-        return result
+        return anchorKeysBuffer
     }
 
-    private fun computeCharsInBounds(path: List<SwipeDetector.SwipePoint>, positions: Map<Char, PointF>): Set<Char> {
-        if (path.isEmpty()) return emptySet()
+    private fun computeStartAnchorKeys(path: List<SwipeDetector.SwipePoint>, positions: Map<Char, PointF>): Set<Char> =
+        computeStartAnchorKeysInternal(path, positions)
+
+    @VisibleForTesting internal fun computeCharsInBoundsInternal(
+        path: List<SwipeDetector.SwipePoint>,
+        positions: Map<Char, PointF>
+    ): HashSet<Char> {
+        boundsBuffer.clear()
+        if (path.isEmpty()) return boundsBuffer
 
         var minX = Float.MAX_VALUE
         var maxX = Float.MIN_VALUE
@@ -360,33 +404,35 @@ constructor(
         minY -= BOUNDS_MARGIN
         maxY += BOUNDS_MARGIN
 
-        val result = mutableSetOf<Char>()
         for ((char, pos) in positions) {
             if (pos.x in minX..maxX && pos.y in minY..maxY) {
-                result.add(char)
+                boundsBuffer.add(char)
             }
         }
-        return result
+        return boundsBuffer
     }
 
+    private fun computeCharsInBounds(path: List<SwipeDetector.SwipePoint>, positions: Map<Char, PointF>): Set<Char> =
+        computeCharsInBoundsInternal(path, positions)
+
     private fun computeTraversedKeys(path: List<SwipeDetector.SwipePoint>, positions: Map<Char, PointF>): Set<Char> {
-        val result = mutableSetOf<Char>()
+        traversedBuffer.clear()
         val traversalRadiusSq = TRAVERSAL_RADIUS * TRAVERSAL_RADIUS
 
         for (point in path) {
             for ((char, pos) in positions) {
-                if (char in result) continue
+                if (char in traversedBuffer) continue
                 val dx = point.x - pos.x
                 val dy = point.y - pos.y
                 if (dx * dx + dy * dy < traversalRadiusSq) {
-                    result.add(char)
+                    traversedBuffer.add(char)
                 }
             }
         }
-        return result
+        return traversedBuffer
     }
 
-    private suspend fun loadOrCacheDictionary(compatibleLanguages: List<String>): Map<String, Int> {
+    private suspend fun loadOrCacheDictionary(compatibleLanguages: List<String>): Map<String, Long> {
         if (compatibleLanguages == cachedLanguageCombination && cachedDictionary.isNotEmpty()) {
             return cachedDictionary
         }
@@ -399,21 +445,22 @@ constructor(
                 20
             )
 
-        val mergedMap = HashMap<String, Int>(dictionaryWordsMap.size + learnedWordsMap.size)
+        val mergedMap = HashMap<String, Long>(dictionaryWordsMap.size + learnedWordsMap.size)
         dictionaryWordsMap.forEach { (word, freq) -> mergedMap[word] = freq }
         learnedWordsMap.forEach { (word, freq) ->
-            mergedMap[word] = maxOf(mergedMap[word] ?: 0, freq)
+            mergedMap[word] = maxOf(mergedMap[word] ?: 0L, freq.toLong())
         }
 
         cachedDictionary = mergedMap
         cachedLanguageCombination = compatibleLanguages
+        cachedDictionaryIndex = emptyList()
         return mergedMap
     }
 
-    private fun buildDictionaryIndex(wordFrequencyMap: Map<String, Int>): List<SwipeDetector.DictionaryEntry> {
+    private fun buildDictionaryIndex(wordFrequencyMap: Map<String, Long>): List<SwipeDetector.DictionaryEntry> {
         val sorted =
             wordFrequencyMap.entries
-                .filter { (word, _) -> word.length in 2..20 }
+                .filter { (word, freq) -> word.length in 2..20 && freq >= SWIPE_MIN_FREQUENCY }
                 .sortedByDescending { it.value }
 
         return sorted.mapIndexed { rank, (word, frequency) ->
@@ -422,7 +469,7 @@ constructor(
             SwipeDetector.DictionaryEntry(
                 word = word,
                 frequencyScore = ln(frequency.toFloat() + 1f) / 20f,
-                rawFrequency = frequency.toLong(),
+                rawFrequency = frequency,
                 firstChar =
                 wordNormalizer
                     .stripDiacritics(
@@ -458,6 +505,7 @@ constructor(
     }
 
     companion object {
+        private const val SWIPE_MIN_FREQUENCY = 200L
         private const val TICK_INTERVAL_NANOS = 50_000_000L
         private const val ANCHOR_PRUNE_MS = 100L
         private const val BOUNDS_PRUNE_MS = 200L

@@ -9,6 +9,7 @@ import kotlinx.coroutines.launch
 /**
  * Manages autofill inline suggestion state across IME lifecycle transitions.
  */
+@Suppress("NewApi")
 class AutofillStateTracker {
     var pendingResponse: InlineSuggestionsResponse? = null
         private set

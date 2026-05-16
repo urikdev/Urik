@@ -1,14 +1,15 @@
 package com.urik.keyboard.data
 
 import android.content.Context
-import com.ibm.icu.util.ULocale
 import com.urik.keyboard.model.KeyboardKey
 import com.urik.keyboard.model.KeyboardLayout
 import com.urik.keyboard.model.KeyboardMode
 import com.urik.keyboard.utils.CacheMemoryManager
+import com.urik.keyboard.utils.ErrorLogger
 import com.urik.keyboard.utils.ManagedCache
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.FileNotFoundException
+import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.Dispatchers
@@ -64,10 +65,6 @@ private class BoundedLayoutErrorTracker(private val maxSize: Int) {
     }
 }
 
-/**
- * Loads keyboard layouts from JSON assets with caching and fallback.
- *
- */
 @Singleton
 class KeyboardRepository
 @Inject
@@ -111,21 +108,14 @@ constructor(
     }
 
     /**
-     * Loads keyboard layout for given mode and locale.
-     *
      * Fallback cascade on missing assets:
      * 1. Full locale (en-US) → 2. Language only (en) → 3. Hardcoded QWERTY
      *
      * Circuit breaker skips known-broken locales (3 failures, 60s cooldown).
-     *
-     * @param mode Letters/Numbers/Symbols
-     * @param locale Target locale for layout
-     * @param currentAction Enter key action type (e.g., ENTER, SEARCH, DONE, GO)
-     * @return Layout or failure with exception
      */
     suspend fun getLayoutForMode(
         mode: KeyboardMode,
-        locale: ULocale,
+        locale: Locale,
         currentAction: KeyboardKey.ActionType = KeyboardKey.ActionType.ENTER
     ): Result<KeyboardLayout> = withContext(Dispatchers.IO) {
         val settings = settingsRepository.settings.first()
@@ -163,7 +153,7 @@ constructor(
         mode: KeyboardMode,
         layoutIdentifier: String,
         currentAction: KeyboardKey.ActionType,
-        originalLocale: ULocale
+        originalLocale: Locale
     ): KeyboardLayout = withContext(Dispatchers.IO) {
         cleanupExpiredErrors()
 
@@ -184,7 +174,13 @@ constructor(
             } else {
                 tryLanguageFallback(context, originalLocale, mode, currentAction)
             }
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            ErrorLogger.logException(
+                component = "KeyboardRepository",
+                severity = ErrorLogger.Severity.HIGH,
+                exception = e,
+                context = mapOf("operation" to "loadLayout")
+            )
             handleAssetError(layoutIdentifier)
             getFallbackLayout(mode, currentAction)
         }
@@ -277,6 +273,13 @@ constructor(
                         "mode_switch_symbols_secondary" -> KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS_SECONDARY
                         "caps_lock" -> KeyboardKey.ActionType.CAPS_LOCK
                         "dynamic_action" -> currentAction
+                        "dakuten" -> KeyboardKey.ActionType.DAKUTEN
+                        "small_kana" -> KeyboardKey.ActionType.SMALL_KANA
+                        "next_candidate" -> KeyboardKey.ActionType.NEXT_CANDIDATE
+                        "commit_candidate" -> KeyboardKey.ActionType.COMMIT_CANDIDATE
+                        "handakuten" -> KeyboardKey.ActionType.HANDAKUTEN
+                        "emoji" -> KeyboardKey.ActionType.EMOJI
+                        "language_switch" -> KeyboardKey.ActionType.LANGUAGE_SWITCH
                         else -> KeyboardKey.ActionType.ENTER
                     }
                 KeyboardKey.Action(actionType)
@@ -284,12 +287,32 @@ constructor(
 
             "spacer" -> KeyboardKey.Spacer
 
+            "flick" -> {
+                val center = keyData.getString("char")
+                val keyType = when (keyData.optString("keyType", "letter")) {
+                    "letter" -> KeyboardKey.KeyType.LETTER
+                    "number" -> KeyboardKey.KeyType.NUMBER
+                    "symbol" -> KeyboardKey.KeyType.SYMBOL
+                    "punctuation" -> KeyboardKey.KeyType.PUNCTUATION
+                    else -> KeyboardKey.KeyType.LETTER
+                }
+                val flickObj = keyData.optJSONObject("flick")
+                KeyboardKey.FlickKey(
+                    center = center,
+                    up = flickObj?.optString("up")?.takeIf { it.isNotEmpty() },
+                    right = flickObj?.optString("right")?.takeIf { it.isNotEmpty() },
+                    down = flickObj?.optString("down")?.takeIf { it.isNotEmpty() },
+                    left = flickObj?.optString("left")?.takeIf { it.isNotEmpty() },
+                    type = keyType
+                )
+            }
+
             else -> throw IllegalArgumentException("Unknown key type: $type")
         }
 
     private suspend fun tryLanguageFallback(
         context: Context,
-        locale: ULocale,
+        locale: Locale,
         mode: KeyboardMode,
         currentAction: KeyboardKey.ActionType
     ): KeyboardLayout = withContext(Dispatchers.IO) {
@@ -299,7 +322,13 @@ constructor(
             return@withContext try {
                 val layoutData = loadLayoutDataFromAssets(context, languageOnly)
                 parseLayoutForMode(layoutData, mode, currentAction)
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                ErrorLogger.logException(
+                    component = "KeyboardRepository",
+                    severity = ErrorLogger.Severity.HIGH,
+                    exception = e,
+                    context = mapOf("operation" to "tryLanguageFallback")
+                )
                 handleAssetError(languageOnly)
                 getFallbackLayout(mode, currentAction)
             }
@@ -317,7 +346,13 @@ constructor(
         return@withContext try {
             val layoutData = loadLayoutDataFromAssets(context, fallbackIdentifier)
             parseLayoutForMode(layoutData, mode, currentAction)
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            ErrorLogger.logException(
+                component = "KeyboardRepository",
+                severity = ErrorLogger.Severity.HIGH,
+                exception = e,
+                context = mapOf("operation" to "tryLoadFallback")
+            )
             getFallbackLayout(mode, currentAction)
         }
     }
@@ -447,11 +482,7 @@ constructor(
         }
     }
 
-    /**
-     * Clears all caches and error state.
-     *
-     * Call when changing keyboard settings or on memory pressure.
-     */
+    /** Call when changing keyboard settings or on memory pressure. */
     fun cleanup() {
         layoutCache.invalidateAll()
         failedLocales.clear()

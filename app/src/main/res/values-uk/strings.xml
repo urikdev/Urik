@@ -161,6 +161,10 @@
     <string name="alternative_layout_default">За замовчуванням (Мовна розкладка)</string>
 
     <!-- Privacy & Data Settings -->
+    <string name="privacy_settings_storage_encryption_title">Зберігання слів: Незашифровано</string>
+    <string name="privacy_settings_storage_encryption_summary">Екран блокування пристрою не виявлено. Вивчені слова зберігаються у відкритому тексті. Встановіть PIN-код, графічний ключ або біометричне блокування в налаштуваннях Android, щоб увімкнути шифрування.</string>
+    <string name="privacy_settings_keystore_api27_title">Шифрування: обмежений захист блокування</string>
+    <string name="privacy_settings_keystore_api27_summary">Цей пристрій працює на Android 7.1 або старішій версії. У цій версії Android ключ бази даних не можна обмежити доступом лише за умови розблокованого пристрою, тому вивчені слова можуть бути доступні, поки пристрій заблоковано. Оновлення до Android 9.0 або новішої версії вмикає повний захист екрана блокування.</string>
     <string name="privacy_settings_clipboard_history">Історія Буфера Обміну</string>
     <string name="privacy_settings_clipboard_history_on">Історію буфера обміну увімкнено</string>
     <string name="privacy_settings_clipboard_history_off">Історію буфера обміну вимкнено</string>
@@ -360,5 +364,12 @@
 
     <!-- AlphabetSideBar accessibility -->
     <string name="alphabet_sidebar_description">Бічна панель алфавітної навігації</string>
-
+    <!-- Flick key accessibility -->
+    <string name="flick_key_description">%1$s. Свайп: вгору %2$s, вправо %3$s, вниз %4$s, вліво %5$s</string>
+    <string name="flick_key_description_partial">%1$s. Свайп: %2$s</string>
+    <string name="action_dakuten">Перемкнути знак дзвінкості</string>
+    <string name="action_small_kana">Перемкнути малу кану</string>
+    <string name="action_handakuten">Перемкнути напівдзвінкий знак</string>
+    <string name="action_next_candidate">Наступний кандидат</string>
+    <string name="action_commit_candidate">Підтвердити кандидата</string>
 </resources>

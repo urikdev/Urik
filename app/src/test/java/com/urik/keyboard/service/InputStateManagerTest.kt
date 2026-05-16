@@ -27,6 +27,9 @@ class InputStateManagerTest {
             override fun updateSuggestions(suggestions: List<String>) {
                 lastSuggestions = suggestions
             }
+
+            override fun showDegradedIndicator(degraded: Boolean) {
+            }
         }
 
         stateManager = InputStateManager(

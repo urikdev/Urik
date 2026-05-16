@@ -14,7 +14,6 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.appbar.MaterialToolbar
-import com.ibm.icu.util.ULocale
 import com.urik.keyboard.R
 import com.urik.keyboard.data.KeyboardRepository
 import com.urik.keyboard.model.KeyboardKey
@@ -23,6 +22,7 @@ import com.urik.keyboard.settings.SettingsRepository
 import com.urik.keyboard.theme.KeyboardTheme
 import com.urik.keyboard.theme.ThemeManager
 import dagger.hilt.android.AndroidEntryPoint
+import java.util.Locale
 import javax.inject.Inject
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -66,7 +66,7 @@ class ThemePickerActivity : AppCompatActivity() {
                 repository
                     .getLayoutForMode(
                         KeyboardMode.LETTERS,
-                        ULocale.forLanguageTag("en"),
+                        Locale.forLanguageTag("en"),
                         KeyboardKey.ActionType.ENTER
                     ).getOrNull()
 

@@ -1,7 +1,7 @@
 package com.urik.keyboard.utils
 
 import androidx.annotation.VisibleForTesting
-import com.ibm.icu.text.BreakIterator
+import java.text.BreakIterator
 
 object BackspaceUtils {
     private val threadLocalBreakIterator =

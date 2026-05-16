@@ -93,3 +93,7 @@ com.urik.keyboard.yml
 
 # Localization work folder
 _work/
+
+# Dictionary build tooling
+buildSrc/
+raw_dicts

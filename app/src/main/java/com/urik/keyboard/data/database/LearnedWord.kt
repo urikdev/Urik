@@ -5,7 +5,7 @@ import androidx.room.Entity
 import androidx.room.Fts4
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import com.ibm.icu.text.BreakIterator
+import java.text.BreakIterator
 import kotlinx.serialization.Serializable
 
 /**
@@ -54,19 +54,11 @@ data class LearnedWord(
     @ColumnInfo(name = "last_used")
     val lastUsed: Long = System.currentTimeMillis()
 ) {
-    /**
-     * Returns new instance with incremented frequency and updated timestamp.
-     */
     fun incrementFrequency(): LearnedWord = copy(
         frequency = frequency + 1,
         lastUsed = System.currentTimeMillis()
     )
 
-    /**
-     * Increments frequency and promotes casing when the new variant
-     * demonstrates higher intentionality than the stored form.
-     *
-     */
     fun updateCasingIfPreferred(newWord: String): LearnedWord {
         val updated = incrementFrequency()
         if (word == newWord) return updated
@@ -78,12 +70,7 @@ data class LearnedWord(
     }
 
     companion object {
-        /**
-         * Creates LearnedWord with calculated grapheme count.
-         *
-         * Calculates visible character count
-         * correctly for emoji and combining characters.
-         */
+        /** Uses BreakIterator for correct grapheme cluster count (emoji, combining chars). */
         fun create(
             word: String,
             wordNormalized: String,
@@ -130,9 +117,6 @@ data class LearnedWord(
     }
 }
 
-/**
- * Full-text search table for prefix matching on learned words.
- */
 @Entity(tableName = "learned_words_fts")
 @Fts4(contentEntity = LearnedWord::class)
 data class LearnedWordFts(
@@ -145,25 +129,11 @@ data class LearnedWordFts(
     val wordNormalized: String
 )
 
-/**
- * Source of learned word for analytics and prioritization.
- */
 enum class WordSource {
-    /** Manually typed by user */
     USER_TYPED,
-
-    /** Learned from swipe gesture */
     SWIPE_LEARNED,
-
-    /** User selected from suggestion bar */
     USER_SELECTED,
-
-    /** User accepted auto-correction */
     AUTO_CORRECTED,
-
-    /** Imported from external dictionary */
     IMPORTED,
-
-    /** Pre-loaded common word */
     SYSTEM_DEFAULT
 }

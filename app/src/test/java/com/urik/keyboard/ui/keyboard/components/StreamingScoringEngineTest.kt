@@ -9,11 +9,14 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito.mock
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 import org.robolectric.RobolectricTestRunner
 
@@ -327,6 +330,94 @@ class StreamingScoringEngineTest {
             2,
             pruned.size
         )
+    }
+
+    @Test
+    fun ringBuffer_notBound_onTick_throwsIllegalStateException() {
+        // engine created in @Before without bindRingBuffer()
+        assertThrows(IllegalStateException::class.java) {
+            engine.onTick()
+        }
+    }
+
+    @Test
+    fun ringBuffer_bound_onTick_proceedsToSnapshot() {
+        val mockRingBuffer = mock(SwipePointRingBuffer::class.java)
+        `when`(mockRingBuffer.snapshot()).thenReturn(emptyList())
+        engine.bindRingBuffer(mockRingBuffer)
+        // Should not throw
+        engine.onTick()
+    }
+
+    @Test
+    fun `computeStartAnchorKeys reuses pre-allocated buffer across calls`() {
+        val path = listOf(
+            SwipeDetector.SwipePoint(30f, 50f, 0L),
+            SwipeDetector.SwipePoint(35f, 52f, 10L),
+            SwipeDetector.SwipePoint(32f, 48f, 20L)
+        )
+        val positions = mapOf('q' to PointF(30f, 50f), 'w' to PointF(80f, 50f))
+
+        val buffer = engine.anchorKeysBuffer
+        val firstResult = engine.computeStartAnchorKeysInternal(path, positions)
+        val secondResult = engine.computeStartAnchorKeysInternal(path, positions)
+
+        assertTrue("Buffer should be reused (same reference)", firstResult === buffer)
+        assertTrue("Second call should return same buffer reference", secondResult === buffer)
+    }
+
+    @Test
+    fun `computeCharsInBounds reuses pre-allocated buffer across calls`() {
+        val path = listOf(
+            SwipeDetector.SwipePoint(30f, 50f, 0L),
+            SwipeDetector.SwipePoint(200f, 130f, 50L)
+        )
+        val positions = mapOf(
+            'q' to PointF(30f, 50f),
+            'a' to PointF(40f, 130f),
+            'z' to PointF(90f, 210f)
+        )
+
+        val buffer = engine.boundsBuffer
+        val firstResult = engine.computeCharsInBoundsInternal(path, positions)
+        val secondResult = engine.computeCharsInBoundsInternal(path, positions)
+
+        assertTrue("Buffer should be reused (same reference)", firstResult === buffer)
+        assertTrue("Second call should return same buffer reference", secondResult === buffer)
+    }
+
+    @Test
+    fun `prewarm loads dictionary without requiring key positions`() = runTest {
+        `when`(spellCheckManager.getCommonWordsForLanguages(listOf("en")))
+            .thenReturn(mapOf("hello" to 5_000_000L, "world" to 3_000_000L, "the" to 28_000_000L))
+        `when`(wordLearningEngine.getLearnedWordsForSwipeAllLanguages(listOf("en"), 2, 20))
+            .thenReturn(emptyMap())
+        `when`(wordNormalizer.stripDiacritics("h")).thenReturn("h")
+        `when`(wordNormalizer.stripDiacritics("w")).thenReturn("w")
+        `when`(wordNormalizer.stripDiacritics("t")).thenReturn("t")
+
+        // prewarm should complete without throwing even with no key positions set
+        engine.prewarm(listOf("en"))
+
+        // Calling prewarm again with same languages should be a no-op (cache hit, no second load)
+        engine.prewarm(listOf("en"))
+    }
+
+    @Test
+    fun `prewarm with new language combination triggers fresh load`() = runTest {
+        `when`(spellCheckManager.getCommonWordsForLanguages(listOf("en")))
+            .thenReturn(mapOf("hello" to 5_000_000L))
+        `when`(spellCheckManager.getCommonWordsForLanguages(listOf("de")))
+            .thenReturn(mapOf("hallo" to 4_000_000L))
+        `when`(wordLearningEngine.getLearnedWordsForSwipeAllLanguages(listOf("en"), 2, 20))
+            .thenReturn(emptyMap())
+        `when`(wordLearningEngine.getLearnedWordsForSwipeAllLanguages(listOf("de"), 2, 20))
+            .thenReturn(emptyMap())
+        `when`(wordNormalizer.stripDiacritics("h")).thenReturn("h")
+
+        engine.prewarm(listOf("en"))
+        // Different language should not throw
+        engine.prewarm(listOf("de"))
     }
 
     private fun makeDictionaryEntry(word: String, firstChar: Char, frequency: Long): SwipeDetector.DictionaryEntry {
