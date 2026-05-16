@@ -58,7 +58,8 @@ enum class AlternativeKeyboardLayout(val displayNameRes: Int) {
     DVORAK(R.string.alternative_layout_dvorak),
     COLEMAK(R.string.alternative_layout_colemak),
     WORKMAN(R.string.alternative_layout_workman),
-    HCESAR(R.string.alternative_layout_hcesar)
+    HCESAR(R.string.alternative_layout_hcesar),
+    BDS(R.string.alternative_layout_bds)
 }
 
 /**

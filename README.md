@@ -32,7 +32,7 @@ Privacy-focused Android keyboard with swipe typing, custom layouts, and password
 - Spacebar swipe for cursor control
 - Backspace swipe to delete previous word
 - Optional number row
-- QWERTZ, AZERTY, Dvorak, Colemak, Workman, and Hcesar layouts
+- QWERTZ, AZERTY, Dvorak, Colemak, Workman, Bds and Hcesar layouts
 - Hardware keyboard detection
 
 **Intelligence**

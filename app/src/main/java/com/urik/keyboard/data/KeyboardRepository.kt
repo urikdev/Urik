@@ -131,6 +131,7 @@ constructor(
                 com.urik.keyboard.settings.AlternativeKeyboardLayout.COLEMAK -> "colemak"
                 com.urik.keyboard.settings.AlternativeKeyboardLayout.WORKMAN -> "workman"
                 com.urik.keyboard.settings.AlternativeKeyboardLayout.HCESAR -> "hcesar"
+                com.urik.keyboard.settings.AlternativeKeyboardLayout.BDS -> "bds"
             }
 
         val cacheKey = "${layoutIdentifier}_${mode.name}_${currentAction.name}"
