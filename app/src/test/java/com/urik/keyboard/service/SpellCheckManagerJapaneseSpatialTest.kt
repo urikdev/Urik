@@ -133,8 +133,8 @@ class SpellCheckManagerJapaneseSpatialTest {
         whenever(languageManager.keyPositions).thenReturn(keyPositionsFlow)
 
         whenever(context.assets).thenReturn(assetManager)
-        whenever(assetManager.open("dictionaries/ja_symspell.txt"))
-            .thenAnswer { ByteArrayInputStream(testDictionary.toByteArray()) }
+        whenever(assetManager.open("dictionaries/ja.urik"))
+            .thenAnswer { ByteArrayInputStream(TestUrikBuilder.buildUrikFromText(testDictionary)) }
 
         spellCheckManager = SpellCheckManager(
             context = context,

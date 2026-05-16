@@ -33,9 +33,7 @@ constructor(private val pathGeometryAnalyzer: PathGeometryAnalyzer) {
         val lengthPenalty: Float,
         val traversalPenalty: Float,
         val orderPenalty: Float,
-        val vertexLengthPenalty: Float,
-        val passthroughPenalty: Float,
-        val positionAlignmentPenalty: Float
+        val vertexLengthPenalty: Float
     )
 
     private class ScoringBuffers {
@@ -146,14 +144,7 @@ constructor(private val pathGeometryAnalyzer: PathGeometryAnalyzer) {
             }
 
         val lengthExcess = maxOf(0, entry.word.length - signal.expectedWordLength)
-        val excessRate =
-            if (signal.rawPointCount <= 30) {
-                WORD_LENGTH_DEFICIT_PENALTY +
-                    WORD_LENGTH_EXCESS_PENALTY
-            } else {
-                WORD_LENGTH_EXCESS_PENALTY
-            }
-        val lengthExcessPenalty = 1.0f - lengthExcess * excessRate
+        val lengthExcessPenalty = 1.0f - lengthExcess * WORD_LENGTH_EXCESS_PENALTY
 
         val lengthDeficit = maxOf(0, signal.expectedWordLength - entry.word.length)
         val lengthDeficitPenalty = 1.0f - lengthDeficit * WORD_LENGTH_DEFICIT_PENALTY
@@ -244,13 +235,6 @@ constructor(private val pathGeometryAnalyzer: PathGeometryAnalyzer) {
                 isClusteredWord
             )
 
-        val passthroughPenalty = calculatePassthroughPenalty(entry.word, signal)
-        val positionAlignmentPenalty = calculatePositionAlignmentPenalty(
-            entry.word.length,
-            b.letterPathIndices,
-            signal.path.size
-        )
-
         @Suppress("ktlint:standard:max-line-length")
         val combinedScore =
             (adjustedSpatialScore * spatialWeight + boostedFrequencyScore * frequencyWeight) *
@@ -258,8 +242,7 @@ constructor(private val pathGeometryAnalyzer: PathGeometryAnalyzer) {
                 startKeyBonus * startDirectionPenalty * endKeyBonus *
                 traversalPenalty * orderPenalty * vertexLengthPenalty *
                 pathCoherenceMultiplier * boundsPenalty *
-                pathLengthMultiplier * pathResidualPenalty *
-                passthroughPenalty * shortPathDampener * positionAlignmentPenalty
+                pathLengthMultiplier * pathResidualPenalty * shortPathDampener
 
         val residual = 1.0f - combinedScore.coerceIn(0f, 1f)
 
@@ -286,9 +269,7 @@ constructor(private val pathGeometryAnalyzer: PathGeometryAnalyzer) {
             lengthPenalty = lengthPenalty,
             traversalPenalty = traversalPenalty,
             orderPenalty = orderPenalty,
-            vertexLengthPenalty = vertexLengthPenalty,
-            passthroughPenalty = passthroughPenalty,
-            positionAlignmentPenalty = positionAlignmentPenalty
+            vertexLengthPenalty = vertexLengthPenalty
         )
     }
 
@@ -481,7 +462,7 @@ constructor(private val pathGeometryAnalyzer: PathGeometryAnalyzer) {
             }
 
             if (pathGeometryAnalyzer.didPathTraverseKey(lowerChar, geometricAnalysis) &&
-                lowerChar !in signal.passthroughKeys
+                lowerChar !in signal.highVelocityKeys
             ) {
                 letterScore = maxOf(letterScore, TRAVERSAL_FLOOR_SCORE)
             }
@@ -747,9 +728,6 @@ constructor(private val pathGeometryAnalyzer: PathGeometryAnalyzer) {
     }
 
     private fun calculateLengthBonus(wordLength: Int, ratioQuality: Float): Float = when {
-        ratioQuality >= SHORT_WORD_FIDELITY_MIN_RATIO_QUALITY && wordLength == 2 -> SHORT_WORD_FIDELITY_BONUS_2
-        ratioQuality >= SHORT_WORD_FIDELITY_MIN_RATIO_QUALITY && wordLength == 3 -> SHORT_WORD_FIDELITY_BONUS_3
-        ratioQuality >= SHORT_WORD_FIDELITY_MIN_RATIO_QUALITY && wordLength == 4 -> SHORT_WORD_FIDELITY_BONUS_4
         ratioQuality < LENGTH_BONUS_MIN_RATIO_QUALITY -> 1.0f
         wordLength >= 8 -> 1.25f
         wordLength == 7 -> 1.18f
@@ -818,16 +796,6 @@ constructor(private val pathGeometryAnalyzer: PathGeometryAnalyzer) {
                 1.0f
             }
         when {
-            entry.word.length == 2 && adjustedSpatialScore > 0.75f -> {
-                b.weights[0] = 0.88f
-                b.weights[1] = 0.12f
-            }
-
-            entry.word.length in 3..4 && adjustedSpatialScore >= SHORT_WORD_SPATIAL_THRESHOLD -> {
-                b.weights[0] = SHORT_WORD_SPATIAL_WEIGHT
-                b.weights[1] = SHORT_WORD_FREQ_WEIGHT
-            }
-
             frequencyRatio >= 10.0f -> {
                 b.weights[0] = minOf(baselineSpatialWeight, 0.50f)
                 b.weights[1] = maxOf(baselineFreqWeight, 0.50f)
@@ -841,6 +809,16 @@ constructor(private val pathGeometryAnalyzer: PathGeometryAnalyzer) {
             frequencyRatio >= 3.0f -> {
                 b.weights[0] = minOf(baselineSpatialWeight, 0.58f)
                 b.weights[1] = maxOf(baselineFreqWeight, 0.42f)
+            }
+
+            entry.word.length == 2 && adjustedSpatialScore > 0.75f -> {
+                b.weights[0] = 0.88f
+                b.weights[1] = 0.12f
+            }
+
+            entry.word.length in 3..4 && adjustedSpatialScore >= SHORT_WORD_SPATIAL_THRESHOLD -> {
+                b.weights[0] = SHORT_WORD_SPATIAL_WEIGHT
+                b.weights[1] = SHORT_WORD_FREQ_WEIGHT
             }
 
             else -> {
@@ -914,57 +892,6 @@ constructor(private val pathGeometryAnalyzer: PathGeometryAnalyzer) {
         }
     }
 
-    /**
-     * Penalises candidates whose letters map to path positions that are displaced
-     * from their expected sequential positions.
-     */
-    private fun calculatePositionAlignmentPenalty(
-        wordLength: Int,
-        letterPathIndices: ArrayList<Int>,
-        pathSize: Int
-    ): Float {
-        if (wordLength < POSITION_ALIGNMENT_MIN_WORD_LENGTH ||
-            letterPathIndices.size < wordLength ||
-            pathSize < 2
-        ) {
-            return 1.0f
-        }
-        var totalDeviation = 0f
-        val lastLetterIdx = (wordLength - 1).toFloat()
-        val lastPathIdx = (pathSize - 1).toFloat()
-        for (i in 0 until wordLength) {
-            val expectedIdx = i / lastLetterIdx * lastPathIdx
-            totalDeviation += abs(letterPathIndices[i] - expectedIdx) / lastPathIdx
-        }
-        val avgDeviation = totalDeviation / wordLength
-        return when {
-            avgDeviation > POSITION_ALIGNMENT_SEVERE_THRESHOLD -> POSITION_ALIGNMENT_SEVERE_PENALTY
-            avgDeviation > POSITION_ALIGNMENT_MODERATE_THRESHOLD -> POSITION_ALIGNMENT_MODERATE_PENALTY
-            avgDeviation > POSITION_ALIGNMENT_MILD_THRESHOLD -> POSITION_ALIGNMENT_MILD_PENALTY
-            else -> 1.0f
-        }
-    }
-
-    private fun calculatePassthroughPenalty(word: String, signal: SwipeSignal): Float {
-        if (signal.passthroughKeys.isEmpty()) return 1.0f
-        val intentionalKeys = signal.traversedKeys - signal.passthroughKeys
-        var passthroughOnlyCount = 0
-        val seen = HashSet<Char>(word.length)
-        for (char in word) {
-            val lc = char.lowercaseChar()
-            if (!seen.add(lc)) continue
-            if (lc in signal.passthroughKeys && lc !in intentionalKeys) {
-                passthroughOnlyCount++
-            }
-        }
-        return when (passthroughOnlyCount) {
-            0 -> 1.0f
-            1 -> PASSTHROUGH_PENALTY_ONE
-            2 -> PASSTHROUGH_PENALTY_TWO
-            else -> PASSTHROUGH_PENALTY_THREE_PLUS
-        }
-    }
-
     private companion object {
         const val REPETITION_PENALTY_FACTOR = 0.08f
         const val PATH_EXHAUSTION_MIN_WORD_LENGTH = 5
@@ -997,7 +924,7 @@ constructor(private val pathGeometryAnalyzer: PathGeometryAnalyzer) {
         const val CLUSTERED_SEQUENCE_TOLERANCE_MULTIPLIER = 0.5f
         const val TRAVERSAL_FLOOR_SCORE = 0.65f
         const val WORD_LENGTH_EXCESS_PENALTY = 0.05f
-        const val WORD_LENGTH_DEFICIT_PENALTY = 0.10f
+        const val WORD_LENGTH_DEFICIT_PENALTY = 0.20f
         const val START_KEY_MATCH_BONUS = 1.10f
         const val START_KEY_DISTANCE_PENALTY_FACTOR = 0.30f
         const val END_KEY_MATCH_BONUS = 1.15f
@@ -1011,16 +938,9 @@ constructor(private val pathGeometryAnalyzer: PathGeometryAnalyzer) {
         const val PATH_COHERENCE_SENSITIVITY = 0.60f
         const val PATH_COHERENCE_MIN_MULTIPLIER = 0.70f
         const val PATH_COHERENCE_MAX_MULTIPLIER = 1.40f
-        const val PASSTHROUGH_PENALTY_ONE = 0.88f
-        const val PASSTHROUGH_PENALTY_TWO = 0.73f
-        const val PASSTHROUGH_PENALTY_THREE_PLUS = 0.55f
         const val FREQ_TIER_TOP100_BOOST = 1.60f
         const val FREQ_TIER_TOP1000_BOOST = 1.35f
         const val FREQ_TIER_TOP5000_BOOST = 1.15f
-        const val SHORT_WORD_FIDELITY_BONUS_4 = 1.08f
-        const val SHORT_WORD_FIDELITY_BONUS_3 = 1.12f
-        const val SHORT_WORD_FIDELITY_BONUS_2 = 1.15f
-        const val SHORT_WORD_FIDELITY_MIN_RATIO_QUALITY = 0.90f
         const val SHORT_WORD_SPATIAL_WEIGHT = 0.85f
         const val SHORT_WORD_FREQ_WEIGHT = 0.15f
         const val SHORT_WORD_SPATIAL_THRESHOLD = 0.60f
@@ -1035,13 +955,5 @@ constructor(private val pathGeometryAnalyzer: PathGeometryAnalyzer) {
 
         const val REPEATED_LETTER_NO_DWELL_ATTENUATION = 0.40f
         const val NON_CONSECUTIVE_REVISIT_MIN_SPAN = 3
-
-        const val POSITION_ALIGNMENT_MIN_WORD_LENGTH = 4
-        const val POSITION_ALIGNMENT_MILD_THRESHOLD = 0.05f
-        const val POSITION_ALIGNMENT_MODERATE_THRESHOLD = 0.08f
-        const val POSITION_ALIGNMENT_SEVERE_THRESHOLD = 0.14f
-        const val POSITION_ALIGNMENT_MILD_PENALTY = 0.88f
-        const val POSITION_ALIGNMENT_MODERATE_PENALTY = 0.72f
-        const val POSITION_ALIGNMENT_SEVERE_PENALTY = 0.50f
     }
 }

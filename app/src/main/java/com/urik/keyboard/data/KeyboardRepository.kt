@@ -274,6 +274,10 @@ constructor(
                         "dynamic_action" -> currentAction
                         "dakuten" -> KeyboardKey.ActionType.DAKUTEN
                         "small_kana" -> KeyboardKey.ActionType.SMALL_KANA
+                        "next_candidate" -> KeyboardKey.ActionType.NEXT_CANDIDATE
+                        "commit_candidate" -> KeyboardKey.ActionType.COMMIT_CANDIDATE
+                        "handakuten" -> KeyboardKey.ActionType.HANDAKUTEN
+                        "emoji" -> KeyboardKey.ActionType.EMOJI
                         else -> KeyboardKey.ActionType.ENTER
                     }
                 KeyboardKey.Action(actionType)

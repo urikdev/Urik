@@ -29,6 +29,10 @@ class CandidateBarController(private val viewProvider: () -> SwipeKeyboardView?)
         viewProvider()?.hideEmojiPicker()
     }
 
+    fun showEmojiPicker() {
+        viewProvider()?.showEmojiPicker()
+    }
+
     fun handleSearchInput(key: KeyboardKey): Boolean = viewProvider()?.handleSearchInput(key) ?: false
 
     fun clearAutofillIfShowing(): Boolean = viewProvider()?.clearAutofillIfShowing() ?: false

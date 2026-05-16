@@ -20,13 +20,19 @@ class SpaceInputHandler(
     private val languageManager: LanguageManager,
     private val serviceScope: CoroutineScope,
     private val onGetCurrentSettings: () -> KeyboardSettings,
-    private val onCheckAutoCapitalization: (textBefore: String) -> Unit
+    private val onCheckAutoCapitalization: (textBefore: String) -> Unit,
+    private val onJapaneseSpaceNextCandidate: () -> Unit = {}
 ) {
     fun handle() {
         serviceScope.launch {
             try {
                 if (inputState.requiresDirectCommit) {
                     outputBridge.sendSpace()
+                    return@launch
+                }
+
+                if (suggestionPipeline.isJapaneseLayout && inputState.displayBuffer.isNotEmpty()) {
+                    onJapaneseSpaceNextCandidate()
                     return@launch
                 }
 
@@ -157,7 +163,12 @@ class SpaceInputHandler(
 
                             is AutocorrectDecision.Correct -> {
                                 val originalWord = inputState.displayBuffer
-                                val correctedWord = decision.suggestion
+                                val rawCorrected = decision.suggestion
+                                val correctedWord = if (inputState.isCurrentWordAtSentenceStart) {
+                                    rawCorrected.replaceFirstChar { it.uppercaseChar() }
+                                } else {
+                                    rawCorrected
+                                }
                                 inputState.isActivelyEditing = true
                                 suggestionPipeline.recordWordUsage(correctedWord)
                                 outputBridge.beginBatchEdit()

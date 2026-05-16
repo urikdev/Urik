@@ -178,8 +178,6 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     ksp(libs.hilt.android.compiler)
 
-    implementation(libs.symspellkt)
-
     implementation(libs.androidx.preference.ktx)
 
     implementation(libs.androidx.room.runtime)

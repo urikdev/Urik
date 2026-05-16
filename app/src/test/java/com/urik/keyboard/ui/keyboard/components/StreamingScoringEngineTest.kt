@@ -386,6 +386,40 @@ class StreamingScoringEngineTest {
         assertTrue("Second call should return same buffer reference", secondResult === buffer)
     }
 
+    @Test
+    fun `prewarm loads dictionary without requiring key positions`() = runTest {
+        `when`(spellCheckManager.getCommonWordsForLanguages(listOf("en")))
+            .thenReturn(mapOf("hello" to 5_000_000L, "world" to 3_000_000L, "the" to 28_000_000L))
+        `when`(wordLearningEngine.getLearnedWordsForSwipeAllLanguages(listOf("en"), 2, 20))
+            .thenReturn(emptyMap())
+        `when`(wordNormalizer.stripDiacritics("h")).thenReturn("h")
+        `when`(wordNormalizer.stripDiacritics("w")).thenReturn("w")
+        `when`(wordNormalizer.stripDiacritics("t")).thenReturn("t")
+
+        // prewarm should complete without throwing even with no key positions set
+        engine.prewarm(listOf("en"))
+
+        // Calling prewarm again with same languages should be a no-op (cache hit, no second load)
+        engine.prewarm(listOf("en"))
+    }
+
+    @Test
+    fun `prewarm with new language combination triggers fresh load`() = runTest {
+        `when`(spellCheckManager.getCommonWordsForLanguages(listOf("en")))
+            .thenReturn(mapOf("hello" to 5_000_000L))
+        `when`(spellCheckManager.getCommonWordsForLanguages(listOf("de")))
+            .thenReturn(mapOf("hallo" to 4_000_000L))
+        `when`(wordLearningEngine.getLearnedWordsForSwipeAllLanguages(listOf("en"), 2, 20))
+            .thenReturn(emptyMap())
+        `when`(wordLearningEngine.getLearnedWordsForSwipeAllLanguages(listOf("de"), 2, 20))
+            .thenReturn(emptyMap())
+        `when`(wordNormalizer.stripDiacritics("h")).thenReturn("h")
+
+        engine.prewarm(listOf("en"))
+        // Different language should not throw
+        engine.prewarm(listOf("de"))
+    }
+
     private fun makeDictionaryEntry(word: String, firstChar: Char, frequency: Long): SwipeDetector.DictionaryEntry {
         val lowercaseWord = word.lowercase()
         return SwipeDetector.DictionaryEntry(

@@ -1171,6 +1171,11 @@ class KeyboardLayoutManager(
 
                 KeyboardKey.ActionType.SMALL_KANA -> "小"
 
+                KeyboardKey.ActionType.NEXT_CANDIDATE -> "次候補"
+                KeyboardKey.ActionType.COMMIT_CANDIDATE -> "確定"
+                KeyboardKey.ActionType.HANDAKUTEN -> "゜"
+                KeyboardKey.ActionType.EMOJI -> "😊"
+
                 else -> {
                     "?"
                 }
@@ -1283,6 +1288,14 @@ class KeyboardLayoutManager(
                 KeyboardKey.ActionType.SMALL_KANA -> {
                     context.getString(R.string.action_small_kana)
                 }
+
+                KeyboardKey.ActionType.NEXT_CANDIDATE -> "次候補"
+
+                KeyboardKey.ActionType.COMMIT_CANDIDATE -> "確定"
+
+                KeyboardKey.ActionType.HANDAKUTEN -> "゜"
+
+                KeyboardKey.ActionType.EMOJI -> context.getString(R.string.action_emoji)
             }
         }
 

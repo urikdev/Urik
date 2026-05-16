@@ -145,7 +145,7 @@ class SuggestionPipelineTest {
         whenever(mockTextInputProcessor.getCurrentSettings()).thenReturn(
             com.urik.keyboard.settings.KeyboardSettings()
         )
-        whenever(mockSpellCheckManager.isWordInSymSpellDictionary(any())).thenReturn(false)
+        whenever(mockSpellCheckManager.isWordInDictionary(any())).thenReturn(false)
 
         pipeline.coordinatePostCommitReplacement(
             selectedSuggestion = "teh",
@@ -184,7 +184,7 @@ class SuggestionPipelineTest {
         whenever(mockTextInputProcessor.getCurrentSettings()).thenReturn(
             com.urik.keyboard.settings.KeyboardSettings()
         )
-        whenever(mockSpellCheckManager.isWordInSymSpellDictionary(any())).thenReturn(false)
+        whenever(mockSpellCheckManager.isWordInDictionary(any())).thenReturn(false)
 
         pipeline.coordinatePostCommitReplacement(
             selectedSuggestion = "teh",
@@ -248,5 +248,108 @@ class SuggestionPipelineTest {
 
         verify(mockWordFrequencyRepository).incrementFrequency("hello", "en")
         assertEquals("hello", inputState.lastCommittedWord)
+    }
+
+    @Test
+    fun `capitalizeSuggestions skips capitalization for Arabic`() {
+        val arabicPipeline = SuggestionPipeline(
+            state = inputState,
+            outputBridge = outputBridge,
+            textInputProcessor = mockTextInputProcessor,
+            spellCheckManager = mockSpellCheckManager,
+            wordLearningEngine = mockWordLearningEngine,
+            wordFrequencyRepository = mockWordFrequencyRepository,
+            languageManager = mockLanguageManager,
+            caseTransformer = mockCaseTransformer,
+            scriptConverterRegistry = mockScriptConverterRegistry,
+            serviceScope = kotlinx.coroutines.CoroutineScope(testDispatcher),
+            host = object : SuggestionPipelineHost {
+                override fun showSuggestions() = true
+                override fun effectiveSuggestionCount() = 3
+                override fun getKeyboardState() = KeyboardState()
+                override fun shouldAutoCapitalize(text: String) = false
+                override fun currentLanguage() = "ar"
+            }
+        )
+        val suggestions = listOf(
+            SpellingSuggestion("مرحبا", 0.9, 0, "dictionary", preserveCase = false)
+        )
+
+        val result = arabicPipeline.capitalizeSuggestions(suggestions, isSentenceStart = true)
+
+        assertEquals(listOf("مرحبا"), result)
+    }
+
+    @Test
+    fun `capitalizeSuggestions skips capitalization for Persian`() {
+        val faPipeline = SuggestionPipeline(
+            state = inputState,
+            outputBridge = outputBridge,
+            textInputProcessor = mockTextInputProcessor,
+            spellCheckManager = mockSpellCheckManager,
+            wordLearningEngine = mockWordLearningEngine,
+            wordFrequencyRepository = mockWordFrequencyRepository,
+            languageManager = mockLanguageManager,
+            caseTransformer = mockCaseTransformer,
+            scriptConverterRegistry = mockScriptConverterRegistry,
+            serviceScope = kotlinx.coroutines.CoroutineScope(testDispatcher),
+            host = object : SuggestionPipelineHost {
+                override fun showSuggestions() = true
+                override fun effectiveSuggestionCount() = 3
+                override fun getKeyboardState() = KeyboardState()
+                override fun shouldAutoCapitalize(text: String) = false
+                override fun currentLanguage() = "fa"
+            }
+        )
+        val suggestions = listOf(
+            SpellingSuggestion("سلام", 0.9, 0, "dictionary", preserveCase = false)
+        )
+
+        val result = faPipeline.capitalizeSuggestions(suggestions, isSentenceStart = true)
+
+        assertEquals(listOf("سلام"), result)
+    }
+
+    @Test
+    fun `capitalizeSuggestions skips capitalization for Japanese`() {
+        val jaPipeline = SuggestionPipeline(
+            state = inputState,
+            outputBridge = outputBridge,
+            textInputProcessor = mockTextInputProcessor,
+            spellCheckManager = mockSpellCheckManager,
+            wordLearningEngine = mockWordLearningEngine,
+            wordFrequencyRepository = mockWordFrequencyRepository,
+            languageManager = mockLanguageManager,
+            caseTransformer = mockCaseTransformer,
+            scriptConverterRegistry = mockScriptConverterRegistry,
+            serviceScope = kotlinx.coroutines.CoroutineScope(testDispatcher),
+            host = object : SuggestionPipelineHost {
+                override fun showSuggestions() = true
+                override fun effectiveSuggestionCount() = 3
+                override fun getKeyboardState() = KeyboardState()
+                override fun shouldAutoCapitalize(text: String) = false
+                override fun currentLanguage() = "ja"
+            }
+        )
+        val suggestions = listOf(
+            SpellingSuggestion("こんにちは", 0.9, 0, "dictionary", preserveCase = false)
+        )
+
+        val result = jaPipeline.capitalizeSuggestions(suggestions, isSentenceStart = true)
+
+        assertEquals(listOf("こんにちは"), result)
+    }
+
+    @Test
+    fun `capitalizeSuggestions capitalizes for English at sentence start`() {
+        val suggestions = listOf(
+            SpellingSuggestion("hello", 0.9, 0, "dictionary", preserveCase = false)
+        )
+        whenever(mockCaseTransformer.applyCasingToSuggestions(any(), any(), any(), any()))
+            .thenReturn(listOf("Hello"))
+
+        val result = pipeline.capitalizeSuggestions(suggestions, isSentenceStart = true)
+
+        assertEquals(listOf("Hello"), result)
     }
 }

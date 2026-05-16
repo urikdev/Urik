@@ -8,7 +8,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 interface KeyEventHandler {
-    fun onLetterInput(char: String)
+    fun onLetterInput(char: String, wasAutoShifted: Boolean)
     fun onNonLetterInput(char: String)
     fun onBackspace()
     fun onSpace()
@@ -19,6 +19,10 @@ interface KeyEventHandler {
     fun onDakuten()
     fun onSmallKana()
     fun onLanguageSwitch()
+    fun onNextCandidate()
+    fun onCommitCandidate()
+    fun onHandakuten()
+    fun onEmoji()
 }
 
 @Singleton
@@ -45,9 +49,10 @@ constructor() {
         when (key) {
             is KeyboardKey.Character -> {
                 val char = viewModel?.getCharacterForInput(key) ?: key.value
+                val wasAutoShifted = viewModel?.state?.value?.isAutoShift ?: false
                 viewModel?.clearShiftAfterCharacter(key)
                 if (key.type == KeyboardKey.KeyType.LETTER) {
-                    handler?.onLetterInput(char)
+                    handler?.onLetterInput(char, wasAutoShifted)
                 } else {
                     handler?.onNonLetterInput(char)
                 }
@@ -90,6 +95,10 @@ constructor() {
             KeyboardKey.ActionType.LANGUAGE_SWITCH -> handler?.onLanguageSwitch()
             KeyboardKey.ActionType.DAKUTEN -> handler?.onDakuten()
             KeyboardKey.ActionType.SMALL_KANA -> handler?.onSmallKana()
+            KeyboardKey.ActionType.NEXT_CANDIDATE -> handler?.onNextCandidate()
+            KeyboardKey.ActionType.COMMIT_CANDIDATE -> handler?.onCommitCandidate()
+            KeyboardKey.ActionType.HANDAKUTEN -> handler?.onHandakuten()
+            KeyboardKey.ActionType.EMOJI -> handler?.onEmoji()
         }
     }
 }

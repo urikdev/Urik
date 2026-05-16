@@ -81,10 +81,11 @@ class SwipeInputIntegrationTest {
         context = RuntimeEnvironment.getApplication()
 
         val mockAssets = mock<AssetManager>()
+        val urikBytes = com.urik.keyboard.service.TestUrikBuilder.buildUrikFromText(testDictionary)
         whenever(mockAssets.open(any())).thenAnswer {
             when {
-                it.getArgument<String>(0).contains("_symspell.txt") -> {
-                    ByteArrayInputStream(testDictionary.toByteArray())
+                it.getArgument<String>(0).endsWith(".urik") -> {
+                    ByteArrayInputStream(urikBytes)
                 }
 
                 else -> {

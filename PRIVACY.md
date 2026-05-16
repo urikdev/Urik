@@ -245,16 +245,14 @@ For privacy inquiries, contact us at the email above.
 **What:** Recent words and processing data held briefly in RAM for performance.
 
 **Details:**
-- Spell check processing cache (LRU cache, max 200 entries, 5-minute expiry per entry)
-- Spell check results cache
-- Dictionary lookup cache
+- Spell check results cache (LRU cache, max 500 entries)
+- Dictionary lookup cache (LRU cache, max 1000 entries)
 - User word frequency cache (LRU cache, max 2000 entries)
 - Bigram prediction cache (LRU cache, max 100 entries)
 - Learned word hot buffer (LRU cache, max 1000 entries)
 - Preloaded top bigrams (in-memory map, cleared on language switch)
 
 **Lifecycle:** Automatically cleared when:
-- Data expires (5-minute time-to-live per cache entry)
 - Cache size limits exceeded (LRU eviction)
 - You switch languages (language-specific caches)
 - The keyboard service stops
@@ -353,7 +351,7 @@ Number-only fields (e.g., OTP codes, calculators) use a direct-commit mode that 
 - **Export Only:** Settings → Privacy & Data → Export Error Log
 
 ### Temporary Caches
-- **Retention:** Cache entries expire after 5 minutes of non-use. Caches are also subject to LRU eviction when size limits are reached and are fully cleared when the keyboard service stops.
+- **Retention:** Caches are subject to LRU eviction when size limits are reached and are fully cleared when the keyboard service stops.
 
 ### On Uninstall
 When you uninstall Urik, Android automatically deletes:

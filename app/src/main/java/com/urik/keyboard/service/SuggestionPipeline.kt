@@ -113,6 +113,10 @@ class SuggestionPipeline(
     }
 
     fun capitalizeSuggestions(suggestions: List<SpellingSuggestion>, isSentenceStart: Boolean = false): List<String> {
+        val lang = host.currentLanguage().split("-").first()
+        if (lang in CASELESS_LANGUAGES) {
+            return suggestions.map { it.word }
+        }
         var keyboardState = host.getKeyboardState()
         if (state.isCurrentWordManualShifted && !keyboardState.isShiftPressed && !keyboardState.isCapsLockOn) {
             keyboardState = keyboardState.copy(isShiftPressed = true, isAutoShift = false)
@@ -178,7 +182,7 @@ class SuggestionPipeline(
 
         recordWordUsage(word)
 
-        val isInDictionary = spellCheckManager.isWordInSymSpellDictionary(word)
+        val isInDictionary = spellCheckManager.isWordInDictionary(word)
         if (isInDictionary) {
             return true
         }
@@ -411,14 +415,14 @@ class SuggestionPipeline(
                     )
                 }
 
-                val symspellCompletions = if (host.showSuggestions()) {
+                val dictCompletions = if (host.showSuggestions()) {
                     spellCheckManager.getSpellingSuggestionsWithConfidence(hiraganaBuffer)
                         .filter { it.source == "completion" }
                 } else {
                     emptyList()
                 }
 
-                val combined = (conversionCandidates + symspellCompletions)
+                val combined = (conversionCandidates + dictCompletions)
                     .distinctBy { it.word }
                     .take(host.effectiveSuggestionCount())
 
@@ -449,5 +453,6 @@ class SuggestionPipeline(
 
     private companion object {
         const val SUGGESTION_DEBOUNCE_MS = 10L
+        val CASELESS_LANGUAGES = setOf("ar", "fa", "ja")
     }
 }

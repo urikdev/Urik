@@ -19,7 +19,6 @@ import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -188,16 +187,16 @@ class KeyboardRepositoryTest {
     }
 
     @Test
-    fun `Japanese や key has null for up and left`() = runTest {
+    fun `Japanese や key has small kana flick variants`() = runTest {
         val layout = loadLetters("ja").getOrNull()!!
         val yaKey = layout.rows.flatten()
             .filterIsInstance<KeyboardKey.FlickKey>()
             .find { it.center == "や" }
         assertNotNull("や key must exist", yaKey)
-        assertNull(yaKey!!.up)
-        assertNull(yaKey.left)
+        assertEquals("ゃ", yaKey!!.up)
         assertEquals("ゆ", yaKey.right)
-        assertEquals("よ", yaKey.down)
+        assertEquals("ょ", yaKey.down)
+        assertEquals("ゅ", yaKey.left)
     }
 
     @Test

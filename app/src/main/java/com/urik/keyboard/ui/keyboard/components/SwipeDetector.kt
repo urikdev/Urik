@@ -164,6 +164,7 @@ constructor(private val streamingScoringEngine: StreamingScoringEngine) {
 
     fun updateActiveLanguages(languages: List<String>) {
         activeLanguages = languages
+        streamingScoringEngine.prewarm(languages)
     }
 
     private fun getScriptCodeForLanguage(languageCode: String): Int = when (languageCode) {

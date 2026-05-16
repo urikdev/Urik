@@ -153,13 +153,6 @@ class OssLicensesActivity : AppCompatActivity() {
 
         addLicense(
             builder,
-            "SymSpellKt",
-            "https://github.com/darkrockstudios/symspellkt",
-            "MIT License"
-        )
-
-        addLicense(
-            builder,
             "SQLCipher for Android",
             "https://github.com/sqlcipher/android-database-sqlcipher",
             "BSD License"

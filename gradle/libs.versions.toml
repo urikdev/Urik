@@ -22,7 +22,6 @@ preferenceKtx = "1.2.1"
 robolectric = "4.16.1"
 roomRuntime = "2.8.4"
 sqliteKtx = "2.6.2"
-symspellkt = "3.4.0"
 window = "1.5.1"
 
 [libraries]
@@ -53,7 +52,6 @@ material = { module = "com.google.android.material:material", version.ref = "mat
 mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockitoCore" }
 mockito-kotlin = { module = "org.mockito.kotlin:mockito-kotlin", version.ref = "mockitoKotlin" }
 robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
-symspellkt = { module = "com.darkrockstudios:symspellkt", version.ref = "symspellkt" }
 
 [plugins]
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }

@@ -7,6 +7,8 @@ import com.urik.keyboard.ui.keyboard.components.KeyboardLayoutManager
 import com.urik.keyboard.utils.BackspaceUtils
 import com.urik.keyboard.utils.CursorEditingUtils
 import com.urik.keyboard.utils.ErrorLogger
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 class BackspaceHandler(
     private val inputState: InputStateManager,
@@ -14,6 +16,7 @@ class BackspaceHandler(
     private val suggestionPipeline: SuggestionPipeline,
     private val candidateBarController: CandidateBarController,
     private val layoutManager: KeyboardLayoutManager,
+    private val serviceScope: CoroutineScope,
     private val onCoordinateStateClear: () -> Unit,
     private val onInvalidateComposingState: () -> Unit,
     private val onDisableShiftAfterBackspace: () -> Unit,
@@ -345,6 +348,12 @@ class BackspaceHandler(
                                 inputState.displayBuffer = autocorrection.originalTypedWord
                                 inputState.pendingSuggestions = emptyList()
                                 candidateBarController.clearSuggestions()
+                                val originalWord = autocorrection.originalTypedWord
+                                serviceScope.launch {
+                                    suggestionPipeline.learnWordAndInvalidateCache(originalWord, InputMethod.TYPED)
+                                    suggestionPipeline.recordWordUsage(originalWord)
+                                    suggestionPipeline.recordWordUsage(originalWord)
+                                }
                             } else {
                                 inputState.lastAutocorrection = null
                                 suggestionPipeline.requestSuggestions(
