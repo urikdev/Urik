@@ -368,4 +368,7 @@
     <string name="flick_key_description_partial">%1$s. کشیدن: %2$s</string>
     <string name="action_dakuten">تغییر نشانه صوتی</string>
     <string name="action_small_kana">تغییر کانای کوچک</string>
+    <string name="action_handakuten">تغییر نشانه نیمه‌صوتی</string>
+    <string name="action_next_candidate">نامزد بعدی</string>
+    <string name="action_commit_candidate">تأیید نامزد</string>
 </resources>

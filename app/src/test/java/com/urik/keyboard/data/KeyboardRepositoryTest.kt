@@ -216,4 +216,72 @@ class KeyboardRepositoryTest {
             .find { it.action == KeyboardKey.ActionType.SMALL_KANA }
         assertNotNull("SMALL_KANA action key must exist in Japanese layout", smallKanaKey)
     }
+
+    @Test
+    fun `Japanese layout contains LANGUAGE_SWITCH action key`() = runTest {
+        val layout = loadLetters("ja").getOrNull()!!
+        val languageSwitchKey = layout.rows.flatten()
+            .filterIsInstance<KeyboardKey.Action>()
+            .find { it.action == KeyboardKey.ActionType.LANGUAGE_SWITCH }
+        assertNotNull("LANGUAGE_SWITCH action key must exist in Japanese layout", languageSwitchKey)
+    }
+
+    @Test
+    fun `Japanese layout contains NEXT_CANDIDATE action key`() = runTest {
+        val layout = loadLetters("ja").getOrNull()!!
+        val key = layout.rows.flatten()
+            .filterIsInstance<KeyboardKey.Action>()
+            .find { it.action == KeyboardKey.ActionType.NEXT_CANDIDATE }
+        assertNotNull("NEXT_CANDIDATE action key must exist in Japanese layout", key)
+    }
+
+    @Test
+    fun `Japanese layout contains COMMIT_CANDIDATE action key`() = runTest {
+        val layout = loadLetters("ja").getOrNull()!!
+        val key = layout.rows.flatten()
+            .filterIsInstance<KeyboardKey.Action>()
+            .find { it.action == KeyboardKey.ActionType.COMMIT_CANDIDATE }
+        assertNotNull("COMMIT_CANDIDATE action key must exist in Japanese layout", key)
+    }
+
+    @Test
+    fun `Japanese layout contains HANDAKUTEN action key`() = runTest {
+        val layout = loadLetters("ja").getOrNull()!!
+        val key = layout.rows.flatten()
+            .filterIsInstance<KeyboardKey.Action>()
+            .find { it.action == KeyboardKey.ActionType.HANDAKUTEN }
+        assertNotNull("HANDAKUTEN action key must exist in Japanese layout", key)
+    }
+
+    @Test
+    fun `Japanese layout contains EMOJI action key`() = runTest {
+        val layout = loadLetters("ja").getOrNull()!!
+        val key = layout.rows.flatten()
+            .filterIsInstance<KeyboardKey.Action>()
+            .find { it.action == KeyboardKey.ActionType.EMOJI }
+        assertNotNull("EMOJI action key must exist in Japanese layout", key)
+    }
+
+    @Test
+    fun `Japanese symbols mode first row contains JP punctuation`() = runTest {
+        val layout = loadSymbols("ja").getOrNull()!!
+        val chars = layout.rows[0].filterIsInstance<KeyboardKey.Character>().map { it.value }
+        assertTrue("JP symbols row 0 must contain 。", chars.contains("。"))
+        assertTrue("JP symbols row 0 must contain 「", chars.contains("「"))
+        assertTrue("JP symbols row 0 must contain ！", chars.contains("！"))
+    }
+
+    @Test
+    fun `Japanese symbols secondary mode first row contains ASCII symbols`() = runTest {
+        val layout = loadSymbolsSecondary("ja").getOrNull()!!
+        val chars = layout.rows[0].filterIsInstance<KeyboardKey.Character>().map { it.value }
+        assertTrue("JP symbols_secondary row 0 must contain !", chars.contains("!"))
+        assertTrue("JP symbols_secondary row 0 must contain @", chars.contains("@"))
+    }
+
+    private suspend fun loadSymbols(lang: String) =
+        repository.getLayoutForMode(KeyboardMode.SYMBOLS, Locale.forLanguageTag(lang))
+
+    private suspend fun loadSymbolsSecondary(lang: String) =
+        repository.getLayoutForMode(KeyboardMode.SYMBOLS_SECONDARY, Locale.forLanguageTag(lang))
 }

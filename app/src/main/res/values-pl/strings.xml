@@ -368,4 +368,7 @@
     <string name="flick_key_description_partial">%1$s. Przesuń: %2$s</string>
     <string name="action_dakuten">Przełącz znak dźwięczny</string>
     <string name="action_small_kana">Przełącz małą kanę</string>
+    <string name="action_handakuten">Przełącz znak półdźwięczny</string>
+    <string name="action_next_candidate">Następny kandydat</string>
+    <string name="action_commit_candidate">Zatwierdź kandydata</string>
 </resources>

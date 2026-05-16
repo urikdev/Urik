@@ -371,4 +371,7 @@
     <string name="flick_key_description_partial">%1$s. Свайп: %2$s</string>
     <string name="action_dakuten">Переключить знак озвончения</string>
     <string name="action_small_kana">Переключить малую кану</string>
+    <string name="action_handakuten">Переключить полузвонкий знак</string>
+    <string name="action_next_candidate">Следующий кандидат</string>
+    <string name="action_commit_candidate">Подтвердить кандидата</string>
 </resources>

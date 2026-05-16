@@ -335,4 +335,7 @@
     <string name="flick_key_description_partial">%1$s. Llisca: %2$s</string>
     <string name="action_dakuten">Alterna marca de veu</string>
     <string name="action_small_kana">Alterna kana petit</string>
+    <string name="action_handakuten">Alterna marca semivocal</string>
+    <string name="action_next_candidate">Candidat següent</string>
+    <string name="action_commit_candidate">Confirmar candidat</string>
 </resources>

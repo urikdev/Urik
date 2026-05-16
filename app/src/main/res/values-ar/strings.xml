@@ -369,4 +369,7 @@
     <string name="flick_key_description_partial">%1$s. تمرير: %2$s</string>
     <string name="action_dakuten">تبديل علامة المنطوق</string>
     <string name="action_small_kana">تبديل كانا الصغيرة</string>
+    <string name="action_handakuten">تبديل علامة شبه المنطوق</string>
+    <string name="action_next_candidate">المرشح التالي</string>
+    <string name="action_commit_candidate">تأكيد المرشح</string>
 </resources>

@@ -57,4 +57,6 @@ object KanaTransformUtils {
         val toggled = SMALL_KANA_MAP[last] ?: LARGE_KANA_MAP[last] ?: return text
         return text.dropLast(1) + toggled
     }
+
+    fun toKatakana(hiragana: String): String = hiragana.map { c -> if (c in 'ぁ'..'ゖ') c + 0x60 else c }.joinToString("")
 }

@@ -365,4 +365,7 @@
     <string name="flick_key_description_partial">%1$s. Přejetí: %2$s</string>
     <string name="action_dakuten">Přepnout znak znělosti</string>
     <string name="action_small_kana">Přepnout malou kanu</string>
+    <string name="action_handakuten">Přepnout polozvučný znak</string>
+    <string name="action_next_candidate">Další kandidát</string>
+    <string name="action_commit_candidate">Potvrdit kandidáta</string>
 </resources>

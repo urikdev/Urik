@@ -368,4 +368,7 @@
     <string name="flick_key_description_partial">%1$s. Swipe: %2$s</string>
     <string name="action_dakuten">Attiva/disattiva segno vocale</string>
     <string name="action_small_kana">Attiva/disattiva kana piccolo</string>
+    <string name="action_handakuten">Attiva/disattiva segno semivocale</string>
+    <string name="action_next_candidate">Candidato successivo</string>
+    <string name="action_commit_candidate">Conferma candidato</string>
 </resources>
