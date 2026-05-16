@@ -430,4 +430,13 @@ class TextInputProcessorTest {
         )
         assertEquals(UScript.LATIN, freshProcessor.currentScriptCode)
     }
+
+    @Test
+    fun `getUserFrequency delegates to spellCheckManager and normalizes word`() = runTest {
+        whenever(spellCheckManager.getUserFrequency("lmao")).thenReturn(3)
+
+        val result = processor.getUserFrequency("Lmao")
+
+        assertEquals(3, result)
+    }
 }

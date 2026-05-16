@@ -85,7 +85,8 @@ constructor(
         val normalized = normalizeWord(word, languageTag)
         val cacheKey = buildCacheKey(languageTag, normalized)
 
-        frequencyCache.invalidate(cacheKey)
+        val existing = frequencyCache.getIfPresent(cacheKey) ?: 0
+        frequencyCache.put(cacheKey, existing + 1)
 
         pendingFrequencyUpdates.merge(
             cacheKey,

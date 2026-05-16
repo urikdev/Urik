@@ -177,6 +177,10 @@ class InputStateManager(
         sequence == processingSequence && displayBuffer == bufferSnapshot
     }
 
+    fun updateDisplayBuffer(newBuffer: String) {
+        displayBuffer = newBuffer
+    }
+
     fun onComposingReasserted() {
         composingReassertionCount++
         isActivelyEditing = true

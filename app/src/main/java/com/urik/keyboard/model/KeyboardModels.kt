@@ -80,7 +80,11 @@ sealed class KeyboardKey {
         CAPS_LOCK,
         LANGUAGE_SWITCH,
         DAKUTEN,
-        SMALL_KANA
+        SMALL_KANA,
+        NEXT_CANDIDATE,
+        COMMIT_CANDIDATE,
+        HANDAKUTEN,
+        EMOJI
     }
 }
 

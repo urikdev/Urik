@@ -267,6 +267,16 @@ constructor(
         return spellCheckManager.hasDominantContractionForm(normalized)
     }
 
+    fun getDictFrequency(word: String): Long {
+        val normalized = normalizeText(word)
+        return spellCheckManager.getDictFrequency(normalized)
+    }
+
+    suspend fun getUserFrequency(word: String): Int {
+        val normalized = normalizeText(word)
+        return spellCheckManager.getUserFrequency(normalized)
+    }
+
     private fun normalizeText(text: String): String {
         if (text.isBlank()) return text
         return text.lowercase(currentLocale.toLocale()).trim()

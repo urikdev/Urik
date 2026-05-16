@@ -38,17 +38,42 @@ constructor(private val textInputProcessor: TextInputProcessor) {
         }
 
         val isValid = textInputProcessor.validateWord(buffer)
+
         val bypassForContraction = isValid &&
             autocorrectionEnabled &&
             lastAutocorrection == null &&
             textInputProcessor.hasDominantContractionForm(buffer)
 
-        if (isValid && !bypassForContraction) {
-            return AutocorrectDecision.None
-        }
-
         if (bypassForContraction) {
             return AutocorrectDecision.ContractionBypass
+        }
+
+        if (isValid) {
+            if (!autocorrectionEnabled || lastAutocorrection != null) {
+                return AutocorrectDecision.None
+            }
+            val typedFreq = textInputProcessor.getDictFrequency(buffer)
+            val userFreq = textInputProcessor.getUserFrequency(buffer)
+            val effectiveTypedFreq = typedFreq + userFreq * USER_FREQ_DICT_SCALE
+            if (effectiveTypedFreq >= FREQUENCY_NOISE_THRESHOLD) {
+                return AutocorrectDecision.None
+            }
+            val suggestions = textInputProcessor.getSuggestions(buffer)
+            if (suggestions.isEmpty()) {
+                return AutocorrectDecision.None
+            }
+            val topSuggestion = suggestions.first()
+            if (topSuggestion.word.equals(buffer, ignoreCase = true)) {
+                return AutocorrectDecision.None
+            }
+            val suggFreq = textInputProcessor.getDictFrequency(topSuggestion.word)
+            if (effectiveTypedFreq > 0 &&
+                suggFreq > effectiveTypedFreq * FREQUENCY_OVERRIDE_RATIO &&
+                isSafeForAutocorrect(topSuggestion)
+            ) {
+                return AutocorrectDecision.Correct(topSuggestion.word)
+            }
+            return AutocorrectDecision.None
         }
 
         val suggestions = textInputProcessor.getSuggestions(buffer)
@@ -65,5 +90,11 @@ constructor(private val textInputProcessor: TextInputProcessor) {
         }
 
         return AutocorrectDecision.Suggestions(suggestions)
+    }
+
+    private companion object {
+        const val FREQUENCY_OVERRIDE_RATIO = 100L
+        const val FREQUENCY_NOISE_THRESHOLD = 10_000L
+        const val USER_FREQ_DICT_SCALE = 10L
     }
 }

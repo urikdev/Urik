@@ -49,6 +49,7 @@ import com.urik.keyboard.service.EmojiSearchManager
 import com.urik.keyboard.service.ImeStateCoordinator
 import com.urik.keyboard.service.InputFieldClassifier
 import com.urik.keyboard.service.InputStateManager
+import com.urik.keyboard.service.JapaneseCandidateHandler
 import com.urik.keyboard.service.KeyEventHandler
 import com.urik.keyboard.service.KeyEventRouter
 import com.urik.keyboard.service.LanguageManager
@@ -215,6 +216,7 @@ open class UrikInputMethodService :
     private lateinit var candidateBarController: CandidateBarController
     private lateinit var imeStateCoordinator: ImeStateCoordinator
     private lateinit var onUpdateSelectionHandler: OnUpdateSelectionHandler
+    private lateinit var japaneseCandidateHandler: JapaneseCandidateHandler
     private lateinit var letterInputHandler: LetterInputHandler
     private lateinit var nonLetterInputHandler: NonLetterInputHandler
     private lateinit var backspaceHandler: BackspaceHandler
@@ -257,7 +259,10 @@ open class UrikInputMethodService :
         spellCheckManager.clearCaches()
     }
 
-    private fun coordinateStateClear() = imeStateCoordinator.coordinateStateClear()
+    private fun coordinateStateClear() {
+        if (::japaneseCandidateHandler.isInitialized) japaneseCandidateHandler.reset()
+        imeStateCoordinator.coordinateStateClear()
+    }
 
     private fun invalidateComposingStateOnCursorJump() = imeStateCoordinator.invalidateComposingStateOnCursorJump()
 
@@ -432,6 +437,11 @@ open class UrikInputMethodService :
                 )
             layoutManager.onDeleteWord = { handleBackspaceSwipeDelete() }
 
+            japaneseCandidateHandler = JapaneseCandidateHandler(
+                inputState = inputState,
+                outputBridge = outputBridge,
+                onCommit = { suggestion -> handleSuggestionSelected(suggestion) }
+            )
             letterInputHandler = LetterInputHandler(
                 inputState = inputState,
                 outputBridge = outputBridge,
@@ -461,6 +471,7 @@ open class UrikInputMethodService :
                 suggestionPipeline = suggestionPipeline,
                 candidateBarController = candidateBarController,
                 layoutManager = layoutManager,
+                serviceScope = serviceScope,
                 onCoordinateStateClear = ::coordinateStateClear,
                 onInvalidateComposingState = ::invalidateComposingStateOnCursorJump,
                 onDisableShiftAfterBackspace = { viewModel.onEvent(KeyboardEvent.ShiftStateChanged(false)) },
@@ -479,7 +490,8 @@ open class UrikInputMethodService :
                 languageManager = languageManager,
                 serviceScope = serviceScope,
                 onGetCurrentSettings = { currentSettings },
-                onCheckAutoCapitalization = ::checkAutoCapitalization
+                onCheckAutoCapitalization = ::checkAutoCapitalization,
+                onJapaneseSpaceNextCandidate = { japaneseCandidateHandler.onNextCandidate() }
             )
             swipeWordHandler = SwipeWordHandler(
                 inputState = inputState,
@@ -1260,11 +1272,11 @@ open class UrikInputMethodService :
         viewModel.updateActionType(inputState.currentInputAction)
     }
 
-    override fun onLetterInput(char: String) {
+    override fun onLetterInput(char: String, wasAutoShifted: Boolean) {
         autofillCoordinator.onKeyInput()
         if (inputState.displayBuffer.isEmpty()) {
             val state = viewModel.state.value
-            inputState.isCurrentWordAtSentenceStart = state.isAutoShift
+            inputState.isCurrentWordAtSentenceStart = wasAutoShifted
             inputState.isCurrentWordManualShifted =
                 state.isShiftPressed &&
                 !state.isAutoShift &&
@@ -1318,6 +1330,15 @@ open class UrikInputMethodService :
     }
 
     override fun onDakuten() {
+        val buffer = inputState.displayBuffer
+        if (buffer.isNotEmpty()) {
+            val cycled = KanaTransformUtils.cycleDakutenOnLast(buffer)
+            if (cycled != buffer) {
+                inputState.updateDisplayBuffer(cycled)
+                outputBridge.setComposingText(cycled, 1)
+            }
+            return
+        }
         val ic = currentInputConnection ?: return
         val before = ic.getTextBeforeCursor(1, 0)?.toString() ?: return
         val transformed = KanaTransformUtils.cycleDakutenOnLast(before)
@@ -1330,6 +1351,15 @@ open class UrikInputMethodService :
     }
 
     override fun onSmallKana() {
+        val buffer = inputState.displayBuffer
+        if (buffer.isNotEmpty()) {
+            val toggled = KanaTransformUtils.toggleSmallKanaOnLast(buffer)
+            if (toggled != buffer) {
+                inputState.updateDisplayBuffer(toggled)
+                outputBridge.setComposingText(toggled, 1)
+            }
+            return
+        }
         val ic = currentInputConnection ?: return
         val before = ic.getTextBeforeCursor(1, 0)?.toString() ?: return
         val transformed = KanaTransformUtils.toggleSmallKanaOnLast(before)
@@ -1341,9 +1371,44 @@ open class UrikInputMethodService :
         }
     }
 
+    override fun onNextCandidate() {
+        japaneseCandidateHandler.onNextCandidate()
+    }
+
+    override fun onCommitCandidate() {
+        japaneseCandidateHandler.onCommitCandidate()
+    }
+
+    override fun onHandakuten() {
+        val buffer = inputState.displayBuffer
+        if (buffer.isNotEmpty()) {
+            val transformed = KanaTransformUtils.toHandakuten(buffer.last())?.let {
+                buffer.dropLast(1) + it
+            } ?: return
+            inputState.updateDisplayBuffer(transformed)
+            outputBridge.setComposingText(transformed, 1)
+            return
+        }
+        val ic = currentInputConnection ?: return
+        val before = ic.getTextBeforeCursor(1, 0)?.toString() ?: return
+        val last = before.lastOrNull() ?: return
+        val handakuten = KanaTransformUtils.toHandakuten(last) ?: return
+        ic.beginBatchEdit()
+        ic.deleteSurroundingText(1, 0)
+        ic.commitText(handakuten.toString(), 1)
+        ic.endBatchEdit()
+    }
+
+    override fun onEmoji() {
+        candidateBarController.showEmojiPicker()
+    }
+
     override fun onLanguageSwitch() {}
 
-    private fun handleLetterInput(char: String) = letterInputHandler.handle(char)
+    private fun handleLetterInput(char: String) {
+        japaneseCandidateHandler.reset()
+        letterInputHandler.handle(char)
+    }
 
     private fun handleNonLetterInput(char: String) = nonLetterInputHandler.handle(char)
 

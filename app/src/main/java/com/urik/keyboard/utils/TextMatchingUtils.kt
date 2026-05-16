@@ -65,7 +65,11 @@ object TextMatchingUtils {
         val strippedInput = stripWordPunctuation(input)
         val strippedCandidate = stripWordPunctuation(candidate)
 
-        return strippedInput.equals(strippedCandidate, ignoreCase = true) &&
+        val apostropheIndex = candidate.indexOfFirst { isWordSeparatingPunctuation(it) }
+        val apostropheNotAtEnd = apostropheIndex > 0 && apostropheIndex < candidate.length - 1
+
+        return apostropheNotAtEnd &&
+            strippedInput.equals(strippedCandidate, ignoreCase = true) &&
             candidate != strippedCandidate &&
             input == strippedInput
     }

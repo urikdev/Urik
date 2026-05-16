@@ -2,9 +2,13 @@ package com.urik.keyboard.service
 
 import com.urik.keyboard.model.KeyboardKey
 import com.urik.keyboard.model.KeyboardMode
+import com.urik.keyboard.model.KeyboardState
 import com.urik.keyboard.ui.keyboard.KeyboardViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Before
 import org.junit.Test
+import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
@@ -19,6 +23,7 @@ class KeyEventRouterTest {
     fun setup() {
         mockViewModel = mock()
         mockHandler = mock()
+        whenever(mockViewModel.state).thenReturn(MutableStateFlow(KeyboardState()))
         router = KeyEventRouter()
         router.configure(handler = mockHandler, searchInputHandler = { false }, viewModel = mockViewModel)
     }
@@ -29,7 +34,7 @@ class KeyEventRouterTest {
             mockViewModel.getCharacterForInput(KeyboardKey.Character("a", KeyboardKey.KeyType.LETTER))
         ).thenReturn("a")
         router.route(KeyboardKey.Character("a", KeyboardKey.KeyType.LETTER))
-        verify(mockHandler).onLetterInput("a")
+        verify(mockHandler).onLetterInput(eq("a"), any())
         verify(mockHandler, never()).onNonLetterInput("a")
     }
 
@@ -40,7 +45,7 @@ class KeyEventRouterTest {
         ).thenReturn("!")
         router.route(KeyboardKey.Character("!", KeyboardKey.KeyType.SYMBOL))
         verify(mockHandler).onNonLetterInput("!")
-        verify(mockHandler, never()).onLetterInput("!")
+        verify(mockHandler, never()).onLetterInput(eq("!"), any())
     }
 
     @Test
@@ -104,7 +109,7 @@ class KeyEventRouterTest {
             mockViewModel.getCharacterForInput(KeyboardKey.Character("a", KeyboardKey.KeyType.LETTER))
         ).thenReturn("a")
         router.route(KeyboardKey.Character("a", KeyboardKey.KeyType.LETTER))
-        verify(mockHandler, never()).onLetterInput("a")
+        verify(mockHandler, never()).onLetterInput(eq("a"), any())
         verify(mockHandler, never()).onNonLetterInput("a")
     }
 
@@ -112,5 +117,26 @@ class KeyEventRouterTest {
     fun `route Action ENTER calls onEnterAction`() {
         router.route(KeyboardKey.Action(KeyboardKey.ActionType.ENTER))
         verify(mockHandler).onEnterAction(android.view.inputmethod.EditorInfo.IME_ACTION_NONE)
+    }
+
+    @Test
+    fun `route LETTER passes wasAutoShifted=true when isAutoShift was set before clearShift`() {
+        whenever(
+            mockViewModel.state
+        ).thenReturn(MutableStateFlow(KeyboardState(isAutoShift = true, isShiftPressed = true)))
+        whenever(
+            mockViewModel.getCharacterForInput(KeyboardKey.Character("l", KeyboardKey.KeyType.LETTER))
+        ).thenReturn("L")
+        router.route(KeyboardKey.Character("l", KeyboardKey.KeyType.LETTER))
+        verify(mockHandler).onLetterInput(eq("L"), eq(true))
+    }
+
+    @Test
+    fun `route LETTER passes wasAutoShifted=false when isAutoShift was not set`() {
+        whenever(
+            mockViewModel.getCharacterForInput(KeyboardKey.Character("a", KeyboardKey.KeyType.LETTER))
+        ).thenReturn("a")
+        router.route(KeyboardKey.Character("a", KeyboardKey.KeyType.LETTER))
+        verify(mockHandler).onLetterInput(eq("a"), eq(false))
     }
 }
