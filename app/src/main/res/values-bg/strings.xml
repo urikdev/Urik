@@ -190,6 +190,10 @@
     <string name="privacy_settings_export_dictionary_summary">Запазване на думи във файл</string>
     <string name="privacy_settings_import_dictionary">Импорт на речник</string>
     <string name="privacy_settings_import_dictionary_summary">Възстановяване на научени думи от файл</string>
+    <string name="privacy_settings_storage_encryption_title">Хранилище за думи: Некриптирано</string>
+    <string name="privacy_settings_storage_encryption_summary">Не е открит заключен екран. Научените думи се съхраняват в обикновен текст. Задайте PIN, графичен ключ или биометрична защита в настройките на Android, за да активирате криптирането.</string>
+    <string name="privacy_settings_keystore_api27_title">Криптиране: Ограничена защита при заключване</string>
+    <string name="privacy_settings_keystore_api27_summary">Устройството работи с Android 7.1 или по-стара версия. Ключът на базата данни не може да бъде ограничен само до отключено устройство на тази версия на Android, поради което научените думи може да са достъпни при заключено устройство. Надграждането до Android 9.0 или по-нова версия активира пълна защита на заключения екран.</string>
     <string name="learned_words_title">Научени думи</string>
     <string name="learned_words_manage">Управление на думи</string>
     <string name="learned_words_manage_summary">Преглед и изтриване на отделни научени думи</string>
@@ -312,6 +316,12 @@
 
     <string name="tip_5_title">Клипборд мениджър</string>
     <string name="tip_5_description">Задръжте клавиша за символи, за да отворите клипборда.</string>
+
+    <string name="tip_6_title">Управление на курсора</string>
+    <string name="tip_6_description">Плъзнете наляво или надясно по интервала, за да преместите курсора с един знак.</string>
+
+    <string name="tip_7_title">Бързо изтриване</string>
+    <string name="tip_7_description">Плъзнете наляво по клавиша за изтриване, за да изтриете цяла дума.</string>
 
     <!-- Clipboard Panel -->
     <string name="clipboard_panel_pinned">Закачени</string>
