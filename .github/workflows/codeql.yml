@@ -31,7 +31,7 @@ jobs:
         - language: actions
           build-mode: none
         - language: java-kotlin
-          build-mode: autobuild
+          build-mode: manual
 
     steps:
     - name: Checkout repository
@@ -39,11 +39,11 @@ jobs:
       with:
         persist-credentials: false
 
-    - name: Set up JDK 17
+    - name: Set up JDK 21
       if: matrix.language == 'java-kotlin'
       uses: actions/setup-java@v5
       with:
-        java-version: '17'
+        java-version: '21'
         distribution: 'temurin'
 
     - name: Initialize CodeQL
@@ -52,6 +52,10 @@ jobs:
         languages: ${{ matrix.language }}
         build-mode: ${{ matrix.build-mode }}
         queries: security-extended
+
+    - name: Build for CodeQL
+      if: matrix.build-mode == 'manual'
+      run: ./gradlew assembleDebug --stacktrace
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v4

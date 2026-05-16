@@ -59,6 +59,11 @@ android {
         targetCompatibility = JavaVersion.VERSION_21
     }
 
+    lint {
+        abortOnError = true
+        warningsAsErrors = false
+    }
+
     buildFeatures {
         viewBinding = true
         resValues = false
