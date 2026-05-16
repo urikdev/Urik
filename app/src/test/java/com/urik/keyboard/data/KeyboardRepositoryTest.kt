@@ -279,6 +279,62 @@ class KeyboardRepositoryTest {
         assertTrue("JP symbols_secondary row 0 must contain @", chars.contains("@"))
     }
 
+    // ── Bulgarian ─────────────────────────────────────────────────────────────
+
+    @Test
+    fun `Bulgarian layout resolves to Cyrl script`() = runTest {
+        val result = loadLetters("bg")
+        assertTrue("bg layout must load without error", result.isSuccess)
+        assertEquals("Cyrl", result.getOrNull()?.script)
+    }
+
+    @Test
+    fun `Bulgarian layout letter keys are all Cyrillic`() = runTest {
+        val keys = letterKeys(loadLetters("bg"))
+        assertTrue("Bulgarian layout must have letter keys", keys.isNotEmpty())
+        keys.forEach { key ->
+            assertTrue(
+                "Key '${key.value}' contains non-Cyrillic characters",
+                key.value.all { it in 'Ѐ'..'ӿ' }
+            )
+        }
+    }
+
+    // ── BDS layout ────────────────────────────────────────────────────────────
+
+    @Test
+    fun `BDS layout resolves to Cyrl script`() = runTest {
+        val settingsFlow = MutableStateFlow(
+            KeyboardSettings(alternativeKeyboardLayout = com.urik.keyboard.settings.AlternativeKeyboardLayout.BDS)
+        )
+        val settingsRepository = mock<SettingsRepository>()
+        whenever(settingsRepository.settings).thenReturn(settingsFlow)
+        val repo = KeyboardRepository(context, CacheMemoryManager(context), settingsRepository)
+
+        val result = repo.getLayoutForMode(KeyboardMode.LETTERS, Locale.forLanguageTag("bg"))
+        assertTrue("BDS layout must load without error", result.isSuccess)
+        assertEquals("Cyrl", result.getOrNull()?.script)
+    }
+
+    @Test
+    fun `BDS layout letter keys are all Cyrillic`() = runTest {
+        val settingsFlow = MutableStateFlow(
+            KeyboardSettings(alternativeKeyboardLayout = com.urik.keyboard.settings.AlternativeKeyboardLayout.BDS)
+        )
+        val settingsRepository = mock<SettingsRepository>()
+        whenever(settingsRepository.settings).thenReturn(settingsFlow)
+        val repo = KeyboardRepository(context, CacheMemoryManager(context), settingsRepository)
+
+        val keys = letterKeys(repo.getLayoutForMode(KeyboardMode.LETTERS, Locale.forLanguageTag("bg")))
+        assertTrue("BDS layout must have letter keys", keys.isNotEmpty())
+        keys.forEach { key ->
+            assertTrue(
+                "Key '${key.value}' contains non-Cyrillic characters",
+                key.value.all { it in 'Ѐ'..'ӿ' }
+            )
+        }
+    }
+
     private suspend fun loadSymbols(lang: String) =
         repository.getLayoutForMode(KeyboardMode.SYMBOLS, Locale.forLanguageTag(lang))
 

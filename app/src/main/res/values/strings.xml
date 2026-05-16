@@ -159,6 +159,7 @@
     <string name="alternative_layout_colemak" translatable="false">Colemak</string>
     <string name="alternative_layout_workman" translatable="false">Workman</string>
     <string name="alternative_layout_hcesar" translatable="false">HCESAR</string>
+    <string name="alternative_layout_bds" translatable="false">BDS</string>
     <string name="layout_settings_customize_keys">Customize Keys</string>
     <string name="layout_settings_customize_keys_summary">Assign custom character to long-press</string>
 

@@ -1,5 +1,4 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="app_name" translatable="false">Urik</string>
     <string name="ime_name">Urik клавиатура</string>
     <string name="ime_label">Urik клавиатура</string>
     <string name="ime_description">Плъзгащо писане, проверка на правописа и многоезична поддръжка без компромис с поверителността. Без телеметрия. Без събиране на данни. Всичко остава на устройството ви.</string>
@@ -153,14 +152,6 @@
     <string name="layout_settings_language_switch_key_off">Изключен</string>
     <string name="layout_settings_space_bar_size">Размер на интервала</string>
     <string name="alternative_layout_default">По подразбиране (езиково оформление)</string>
-    <string name="alternative_layout_qwerty" translatable="false">QWERTY</string>
-    <string name="alternative_layout_azerty" translatable="false">AZERTY</string>
-    <string name="alternative_layout_qwertz" translatable="false">QWERTZ</string>
-    <string name="alternative_layout_dvorak" translatable="false">Dvorak</string>
-    <string name="alternative_layout_colemak" translatable="false">Colemak</string>
-    <string name="alternative_layout_workman" translatable="false">Workman</string>
-    <string name="alternative_layout_hcesar" translatable="false">HCESAR</string>
-    <string name="alternative_layout_bds" translatable="false">BDS</string>
     <string name="layout_settings_customize_keys">Персонализиране на клавиши</string>
     <string name="layout_settings_customize_keys_summary">Задаване на символ при дълго натискане</string>
 
@@ -262,8 +253,6 @@
     <string name="letters_mode_label">AБВ</string>
     <string name="numbers_mode_label">123</string>
     <string name="symbols_mode_label">+=&lt;</string>
-    <string name="symbols_secondary_mode_label" translatable="false">SYM</string>
-
     <!-- Accessibility descriptions -->
     <string name="key_character_description">Въведи %1$s</string>
 

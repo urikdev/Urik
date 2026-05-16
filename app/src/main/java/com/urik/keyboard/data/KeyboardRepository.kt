@@ -169,7 +169,7 @@ constructor(
             }
         } catch (_: FileNotFoundException) {
             handleAssetError(layoutIdentifier)
-            if (layoutIdentifier in setOf("dvorak", "colemak", "workman")) {
+            if (layoutIdentifier in setOf("dvorak", "colemak", "workman", "hcesar", "bds")) {
                 tryLoadFallback(context, "en", mode, currentAction)
             } else {
                 tryLanguageFallback(context, originalLocale, mode, currentAction)

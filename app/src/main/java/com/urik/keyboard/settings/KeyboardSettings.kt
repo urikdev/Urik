@@ -174,7 +174,7 @@ data class KeyboardSettings(
         val SUPPORTED_LANGUAGES =
             setOf(
                 "ar", "ca", "cs", "de", "el", "en", "es", "fa", "fr", "it",
-                "ja", "nl", "pl", "pt", "ru", "sk", "sv", "uk"
+                "bg", "ja", "nl", "pl", "pt", "ru", "sk", "sv", "uk"
             )
 
         /** Display names are in the system's current display locale and capitalized. */

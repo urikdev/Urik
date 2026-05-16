@@ -41,7 +41,7 @@ Privacy-focused Android keyboard with swipe typing, custom layouts, and password
 - Autocorrect with configurable pause-on-misspell; skips URLs, emails, and punctuation
 - Word learning with encrypted SQLCipher database
 - User-specific word frequency tracking
-- 18 supported languages with dedicated language toggle button
+- 19 supported languages with dedicated language toggle button
 - Merged dictionaries mode for multilingual typing sessions
 - Emoji search with keyword support
 

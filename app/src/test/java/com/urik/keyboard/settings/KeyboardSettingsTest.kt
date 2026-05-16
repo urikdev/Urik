@@ -758,4 +758,17 @@ class KeyboardSettingsTest {
         assertEquals(listOf("ja", "en"), validated.activeLanguages)
         assertEquals("ja", validated.primaryLanguage)
     }
+
+    @Test
+    fun `validated preserves bulgarian as supported language`() {
+        val settings = KeyboardSettings(
+            activeLanguages = listOf("bg", "en", "zh"),
+            primaryLanguage = "bg"
+        )
+
+        val validated = settings.validated()
+
+        assertEquals(listOf("bg", "en"), validated.activeLanguages)
+        assertEquals("bg", validated.primaryLanguage)
+    }
 }
