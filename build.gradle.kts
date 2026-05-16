@@ -8,9 +8,3 @@ plugins {
     id("androidx.room") version "2.8.4" apply false
     id("org.jetbrains.kotlinx.kover") version "0.9.8" apply false
 }
-
-tasks.register<UrikCompiler>("generateUrikDictionaries") {
-    rawDictDir.set(layout.projectDirectory.dir("raw_dicts"))
-    outputDir.set(layout.projectDirectory.dir("app/src/main/assets/dictionaries"))
-    minFrequency.set(20)
-}
