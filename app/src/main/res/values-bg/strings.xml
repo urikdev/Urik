@@ -1,5 +1,4 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="app_name" translatable="false">Urik</string>
     <string name="ime_name">Urik клавиатура</string>
     <string name="ime_label">Urik клавиатура</string>
     <string name="ime_description">Плъзгащо писане, проверка на правописа и многоезична поддръжка без компромис с поверителността. Без телеметрия. Без събиране на данни. Всичко остава на устройството ви.</string>
@@ -153,14 +152,6 @@
     <string name="layout_settings_language_switch_key_off">Изключен</string>
     <string name="layout_settings_space_bar_size">Размер на интервала</string>
     <string name="alternative_layout_default">По подразбиране (езиково оформление)</string>
-    <string name="alternative_layout_qwerty" translatable="false">QWERTY</string>
-    <string name="alternative_layout_azerty" translatable="false">AZERTY</string>
-    <string name="alternative_layout_qwertz" translatable="false">QWERTZ</string>
-    <string name="alternative_layout_dvorak" translatable="false">Dvorak</string>
-    <string name="alternative_layout_colemak" translatable="false">Colemak</string>
-    <string name="alternative_layout_workman" translatable="false">Workman</string>
-    <string name="alternative_layout_hcesar" translatable="false">HCESAR</string>
-    <string name="alternative_layout_bds" translatable="false">BDS</string>
     <string name="layout_settings_customize_keys">Персонализиране на клавиши</string>
     <string name="layout_settings_customize_keys_summary">Задаване на символ при дълго натискане</string>
 
@@ -199,6 +190,10 @@
     <string name="privacy_settings_export_dictionary_summary">Запазване на думи във файл</string>
     <string name="privacy_settings_import_dictionary">Импорт на речник</string>
     <string name="privacy_settings_import_dictionary_summary">Възстановяване на научени думи от файл</string>
+    <string name="privacy_settings_storage_encryption_title">Хранилище за думи: Некриптирано</string>
+    <string name="privacy_settings_storage_encryption_summary">Не е открит заключен екран. Научените думи се съхраняват в обикновен текст. Задайте PIN, графичен ключ или биометрична защита в настройките на Android, за да активирате криптирането.</string>
+    <string name="privacy_settings_keystore_api27_title">Криптиране: Ограничена защита при заключване</string>
+    <string name="privacy_settings_keystore_api27_summary">Устройството работи с Android 7.1 или по-стара версия. Ключът на базата данни не може да бъде ограничен само до отключено устройство на тази версия на Android, поради което научените думи може да са достъпни при заключено устройство. Надграждането до Android 9.0 или по-нова версия активира пълна защита на заключения екран.</string>
     <string name="learned_words_title">Научени думи</string>
     <string name="learned_words_manage">Управление на думи</string>
     <string name="learned_words_manage_summary">Преглед и изтриване на отделни научени думи</string>
@@ -262,8 +257,6 @@
     <string name="letters_mode_label">AБВ</string>
     <string name="numbers_mode_label">123</string>
     <string name="symbols_mode_label">+=&lt;</string>
-    <string name="symbols_secondary_mode_label" translatable="false">SYM</string>
-
     <!-- Accessibility descriptions -->
     <string name="key_character_description">Въведи %1$s</string>
 
@@ -288,6 +281,14 @@
     <string name="action_go_description">Отиди към дестинацията</string>
     <string name="action_next_description">Към следващото поле</string>
     <string name="action_previous_description">Към предишното поле</string>
+
+    <string name="flick_key_description">%1$s. Плъзгане: нагоре %2$s, надясно %3$s, надолу %4$s, наляво %5$s</string>
+    <string name="flick_key_description_partial">%1$s. Плъзгане: %2$s</string>
+    <string name="action_dakuten">Превключи знак на озвучаване</string>
+    <string name="action_small_kana">Превключи малка кана</string>
+    <string name="action_handakuten">Превключи полузвучен знак</string>
+    <string name="action_next_candidate">Следващ кандидат</string>
+    <string name="action_commit_candidate">Потвърди кандидат</string>
 
     <string name="action_emoji">Емоджи</string>
     <string name="emoji_search_hint" tools:ignore="TypographyEllipsis">Търсене на емоджи...</string>
@@ -323,6 +324,12 @@
 
     <string name="tip_5_title">Клипборд мениджър</string>
     <string name="tip_5_description">Задръжте клавиша за символи, за да отворите клипборда.</string>
+
+    <string name="tip_6_title">Управление на курсора</string>
+    <string name="tip_6_description">Плъзнете наляво или надясно по интервала, за да преместите курсора с един знак.</string>
+
+    <string name="tip_7_title">Бързо изтриване</string>
+    <string name="tip_7_description">Плъзнете наляво по клавиша за изтриване, за да изтриете цяла дума.</string>
 
     <!-- Clipboard Panel -->
     <string name="clipboard_panel_pinned">Закачени</string>

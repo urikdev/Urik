@@ -1,5 +1,5 @@
 plugins {
-    id("com.android.application") version "9.1.1" apply false
+    id("com.android.application") version "9.2.1" apply false
     alias(libs.plugins.kotlin.serialization) apply false
     id("com.google.devtools.ksp") version "2.3.8" apply false
     id("org.jlleitschuh.gradle.ktlint") version "14.2.0" apply false

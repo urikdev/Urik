@@ -169,7 +169,7 @@ constructor(private val streamingScoringEngine: StreamingScoringEngine) {
 
     private fun getScriptCodeForLanguage(languageCode: String): Int = when (languageCode) {
         "en", "es", "pl", "pt", "de", "cs", "sk", "sv" -> UScript.LATIN
-        "ru", "uk" -> UScript.CYRILLIC
+        "bg", "ru", "uk" -> UScript.CYRILLIC
         "ar", "fa" -> UScript.ARABIC
         "ja" -> UScript.HIRAGANA
         else -> UScript.LATIN
