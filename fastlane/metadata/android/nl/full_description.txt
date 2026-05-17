@@ -1,0 +1,52 @@
+Privacygericht Android-toetsenbord met veegtypen, aangepaste indelingen en ondersteuning voor wachtwoordbeheerders. Geen tracking, 100% op het apparaat en volledig open source.
+
+## Functies
+
+**Invoer**
+- Veegtypen met geometrische padovereenkomst en hoekpuntdetectie
+- Eénhandig en gesplitst modus met coördinatentransformatie
+- Adaptieve indeling voor tablets en opvouwbare apparaten
+- Lang indrukken voor tekstvarianten en aangepaste toetsopmaak
+- Lang indrukken van de kommatoets om van toetsenbord te wisselen (IME-kiezer)
+- Spatiebalk vegen voor cursorbesturing
+- Backspace vegen om vorig woord te verwijderen
+- Optionele cijferrij
+- QWERTZ-, AZERTY-, Dvorak-, Colemak-, Workman-, Bds- en Hcesar-indelingen
+- Detectie van hardwaretoetsenbord
+
+**Intelligentie**
+- Lokaal bigrammodel voor voorspelling van het volgende woord
+- Spellingcontrole op het apparaat met URIK (Ultra-compressed Ranked Input Korpus) — aangepast binair woordenboekformaat met Levenshtein-automaat-doorloop
+- Automatische correctie met configureerbare pauze bij spelfouten; slaat URL's, e-mails en leestekens over
+- Woordleren met versleutelde SQLCipher-database
+- Gebruikersspecifieke woordfrequentietracking
+- 19 ondersteunde talen met speciale taalkeuzeknop
+- Samengevoegde woordenboekmodus voor meertalige typsessies
+- Emoji zoeken met trefwoordondersteuning
+
+**Integratie**
+- Inline automatisch invullen voor wachtwoordbeheerders (Android 11+)
+- Klembordgeschiedenis met versleutelde opslag
+
+**Aanpassing**
+- Meer dan 15 ingebouwde thema's met favorieten en Material You dynamische thema's (Android 12+)
+- Aangepaste lang-indrukken-symbolen en toetsopmaak
+- Schuifregelaar voor haptische feedbacksterkte
+- Schakelaar voor automatisch hoofdlettergebruik
+- Configureerbare toetsgrootte, toetslabelgrootte, spatiebalkgrootte en cursorsnelheid
+- Geleerde woorden beheren: bladeren, zoeken en vermeldingen verwijderen
+- WCAG AA-contrast en TalkBack-ondersteuning
+
+**Privacy**
+- Geen telemetrie, analyses of netwerkmachtigingen
+- Lokale verwerking op het apparaat
+- Versleutelde lokale opslag voor gebruikersgegevens (AES-256 + Android Keystore)
+- Biometrische authenticatie voor toegang tot geleerde woorden
+- Woordenboek exporteren en importeren voor back-up of migratie
+- Bigramvoorspellingen en woordfrequenties blijven alleen lokaal (niet geëxporteerd)
+
+## Privacy
+
+Alle verwerking vindt plaats op het apparaat. Er verlaat geen data uw telefoon. Het gebruikerswoordenboek en geleerde woorden worden opgeslagen in een versleutelde lokale database.
+
+We geven antwoord aan onze gebruikers, niet aan investeerders.

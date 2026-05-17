@@ -1,0 +1,52 @@
+Klávesnica pre Android zameraná na súkromie s písaním potiahnutím, vlastnými rozloženiami a podporou správcov hesiel. Bez sledovania, 100% na zariadení a plne open source.
+
+## Funkcie
+
+**Vstup**
+- Písanie potiahnutím s geometrickým porovnávaním ciest a detekciou vrcholov
+- Jednoručný a rozdelený režim s transformáciou súradníc
+- Adaptívne rozloženie pre tablety a skladacie zariadenia
+- Dlhé stlačenie pre varianty znakov a vlastné mapovanie klávesov
+- Dlhé stlačenie klávesu čiarky na prepínanie klávesníc (výber IME)
+- Potiahnutie medzerníka na ovládanie kurzora
+- Potiahnutie Backspace na vymazanie predchádzajúceho slova
+- Voliteľný rad čísel
+- Rozloženia QWERTZ, AZERTY, Dvorak, Colemak, Workman, Bds a Hcesar
+- Detekcia hardvérovej klávesnice
+
+**Inteligencia**
+- Lokálny bigramový model na predikciu ďalšieho slova
+- Kontrola pravopisu na zariadení pomocou URIK (Ultra-compressed Ranked Input Korpus) — vlastný binárny formát slovníka s prechodom Levenshteinovho automatu
+- Automatická oprava s konfigurovateľnou pauzou pri pravopisných chybách; preskakuje URL, e-maily a interpunkciu
+- Učenie slov so zašifrovanou databázou SQLCipher
+- Sledovanie frekvencie slov špecifické pre používateľa
+- 19 podporovaných jazykov s dedikovaným tlačidlom prepínania jazyka
+- Režim zlúčených slovníkov pre viacjazyčné relácie písania
+- Vyhľadávanie emoji s podporou kľúčových slov
+
+**Integrácia**
+- Podpora vkladania automatického vyplňovania pre správcov hesiel (Android 11+)
+- História schránky so šifrovaným úložiskom
+
+**Prispôsobenie**
+- Viac ako 15 vstavaných tém s obľúbenými a dynamickými témami Material You (Android 12+)
+- Vlastné symboly pri dlhom stlačení a priradenia klávesov
+- Posuvník intenzity haptickej odozvy
+- Prepínanie automatického veľkého písmena
+- Konfigurovateľná veľkosť klávesov, veľkosť štítkov, veľkosť medzerníka a rýchlosť kurzora
+- Správa naučených slov: prehliadanie, vyhľadávanie a odstraňovanie záznamov
+- Podpora kontrastu WCAG AA a TalkBack
+
+**Súkromie**
+- Žiadna telemetria, analytika ani sieťové oprávnenia
+- Lokálne spracovanie na zariadení
+- Šifrované lokálne úložisko pre údaje používateľa (AES-256 + Android Keystore)
+- Biometrická autentifikácia pre prístup k naučeným slovám
+- Export a import slovníka pre zálohovanie alebo migráciu
+- Bigramové predikcie a frekvencie slov zostávajú iba lokálne (neexportujú sa)
+
+## Súkromie
+
+Všetko spracovanie prebieha na zariadení. Žiadne údaje neopúšťajú váš telefón. Slovník používateľa a naučené slová sú uložené v šifrovanej lokálnej databáze.
+
+Zodpovedáme našim používateľom, nie investorom.

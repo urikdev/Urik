@@ -1,5 +1,7 @@
 Privacy-focused Android keyboard with swipe typing, custom layouts, and password manager support. No tracking, 100% on-device, and fully open source.
 
+## Features
+
 **Input**
 - Swipe typing with geometric path matching and vertex detection
 - One-handed and split modes with coordinate transformation
@@ -9,16 +11,16 @@ Privacy-focused Android keyboard with swipe typing, custom layouts, and password
 - Spacebar swipe for cursor control
 - Backspace swipe to delete previous word
 - Optional number row
-- QWERTZ, AZERTY, Dvorak, Colemak, Workman, and Hcesar layouts
+- QWERTZ, AZERTY, Dvorak, Colemak, Workman, Bds and Hcesar layouts
 - Hardware keyboard detection
 
 **Intelligence**
 - Local bigram model for next-word prediction
-- On-device spell checking using SymSpell algorithm
+- On-device spell checking using URIK (Ultra-compressed Ranked Input Korpus) — a custom binary dictionary format with Levenshtein automaton traversal
 - Autocorrect with configurable pause-on-misspell; skips URLs, emails, and punctuation
 - Word learning with encrypted SQLCipher database
 - User-specific word frequency tracking
-- 16 supported languages with dedicated language toggle button
+- 19 supported languages with dedicated language toggle button
 - Merged dictionaries mode for multilingual typing sessions
 - Emoji search with keyword support
 
@@ -36,9 +38,15 @@ Privacy-focused Android keyboard with swipe typing, custom layouts, and password
 - WCAG AA contrast and TalkBack support
 
 **Privacy**
-- No telemetry, analytics or network permissions
+- No telemetry, analytics, or network permissions
 - Local on-device processing
 - Encrypted local storage for user data (AES-256 + Android Keystore)
 - Biometric authentication for accessing learned words
 - Dictionary export and import for backup or migration
 - Bigram predictions and word frequencies remain local-only (not exported)
+
+## Privacy
+
+All processing happens on-device. No data leaves your phone. User dictionary and learned words are stored in an encrypted local database.
+
+We answer to our users, not investors. 

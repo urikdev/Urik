@@ -1,0 +1,52 @@
+Klávesnice Android zaměřená na soukromí s psaním přejetím, vlastními rozloženími a podporou správce hesel. Žádné sledování, 100 % na zařízení a plně otevřený zdroj.
+
+## Funkce
+
+**Vstup**
+- Psaní přejetím s porovnáváním geometrických cest a detekcí vrcholů
+- Jednoruční a rozdělené režimy s transformací souřadnic
+- Adaptivní rozložení pro tablety a skládací zařízení
+- Dlouhým stisknutím zobrazíte varianty znaků a vlastní mapování kláves
+- Dlouhým stisknutím klávesy s čárkou přepnete klávesnice (výběr IME)
+- Přejetím mezerníkem pro ovládání kurzoru
+- Přejetím Backspace odstraníte předchozí slovo
+- Volitelná řada čísel
+- rozložení QWERTZ, AZERTY, Dvorak, Colemak, Workman, Bds a Hcesar
+- Detekce hardwarové klávesnice
+
+**Inteligence**
+- Lokální model bigramu pro predikci dalšího slova
+- Kontrola pravopisu na zařízení pomocí URIK (Ultra-compressed Ranked Input Korpus) – formát vlastního binárního slovníku s procházením automatu Levenshtein
+- Automatické opravy s konfigurovatelnou pauzou při chybném pravopisu; přeskakuje adresy URL, e-maily a interpunkci
+- Učení slov pomocí šifrované databáze SQLCipher
+- Uživatelsky specifické sledování frekvence slov
+- 19 podporovaných jazyků s vyhrazeným tlačítkem pro přepínání jazyků
+- Režim sloučených slovníků pro vícejazyčné relace psaní
+- Vyhledávání emodži s podporou klíčových slov
+
+**Integrace**
+– Inline podpora automatického vyplňování pro správce hesel (Android 11+)
+- Historie schránky se šifrovaným úložištěm
+
+**Přizpůsobení**
+- 15+ integrovaných motivů s oblíbenými a dynamickými motivy Material You (Android 12+)
+- Vlastní přiřazení symbolů a kláves při dlouhém stisknutí
+- Posuvník síly haptické zpětné vazby
+- Přepínač automatického psaní velkých písmen
+- Konfigurovatelná velikost klíče, velikost štítku klíče, velikost mezerníku a rychlost kurzoru
+- Správa naučených slov: procházejte, hledejte a mažte záznamy
+- WCAG AA kontrast a podpora TalkBack
+
+**Soukromí**
+- Žádná telemetrická, analytická nebo síťová oprávnění
+- Místní zpracování na zařízení
+- Šifrované místní úložiště pro uživatelská data (AES-256 + úložiště klíčů Android)
+- Biometrické ověřování pro přístup k naučeným slovům
+- Export a import slovníku pro zálohování nebo migraci
+- Bigramové předpovědi a frekvence slov zůstávají pouze místní (neexportují se)
+
+## Soukromí
+
+Veškeré zpracování probíhá na zařízení. Z vašeho telefonu neodcházejí žádná data. Uživatelský slovník a naučená slova jsou uložena v šifrované lokální databázi.
+
+Odpovídáme našim uživatelům, ne investorům.
