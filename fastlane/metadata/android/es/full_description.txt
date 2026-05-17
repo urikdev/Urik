@@ -1,0 +1,52 @@
+Teclado Android centrado en la privacidad con escritura por deslizamiento, diseños personalizados y compatibilidad con gestores de contraseñas. Sin seguimiento, 100% en el dispositivo y completamente de código abierto.
+
+## Funciones
+
+**Entrada**
+- Escritura por deslizamiento con coincidencia de rutas geométricas y detección de vértices
+- Modos de una mano y dividido con transformación de coordenadas
+- Diseño adaptativo para tabletas y plegables
+- Mantener presionado para variaciones de caracteres y asignación de teclas personalizada
+- Mantener presionado la tecla de coma para cambiar de teclado (selector IME)
+- Deslizar barra espaciadora para control del cursor
+- Deslizar retroceso para eliminar la palabra anterior
+- Fila de números opcional
+- Diseños QWERTZ, AZERTY, Dvorak, Colemak, Workman, Bds y Hcesar
+- Detección de teclado físico
+
+**Inteligencia**
+- Modelo bigrámico local para predicción de la siguiente palabra
+- Corrección ortográfica en el dispositivo usando URIK (Ultra-compressed Ranked Input Korpus) — formato de diccionario binario personalizado con recorrido de autómata de Levenshtein
+- Autocorrección con pausa configurable en errores ortográficos; omite URLs, correos electrónicos y puntuación
+- Aprendizaje de palabras con base de datos SQLCipher cifrada
+- Seguimiento de frecuencia de palabras específico del usuario
+- 19 idiomas compatibles con botón de cambio de idioma dedicado
+- Modo de diccionarios fusionados para sesiones de escritura multilingüe
+- Búsqueda de emoji con soporte de palabras clave
+
+**Integración**
+- Compatibilidad con autocompletado en línea para gestores de contraseñas (Android 11+)
+- Historial del portapapeles con almacenamiento cifrado
+
+**Personalización**
+- Más de 15 temas integrados con favoritos y temas dinámicos Material You (Android 12+)
+- Asignaciones personalizadas de símbolos y teclas al mantener presionado
+- Control deslizante de intensidad de retroalimentación háptica
+- Alternar mayúsculas automáticas
+- Tamaño de teclas, tamaño de etiquetas, tamaño de barra espaciadora y velocidad del cursor configurables
+- Gestionar palabras aprendidas: explorar, buscar y eliminar entradas
+- Soporte de contraste WCAG AA y TalkBack
+
+**Privacidad**
+- Sin telemetría, análisis ni permisos de red
+- Procesamiento local en el dispositivo
+- Almacenamiento local cifrado para datos del usuario (AES-256 + Android Keystore)
+- Autenticación biométrica para acceder a palabras aprendidas
+- Exportación e importación de diccionario para copia de seguridad o migración
+- Las predicciones de bigramas y las frecuencias de palabras permanecen solo locales (no se exportan)
+
+## Privacidad
+
+Todo el procesamiento ocurre en el dispositivo. Ningún dato sale de tu teléfono. El diccionario del usuario y las palabras aprendidas se almacenan en una base de datos local cifrada.
+
+Respondemos a nuestros usuarios, no a los inversores.

@@ -1,0 +1,52 @@
+Tastiera Android incentrata sulla privacy con digitazione a scorrimento, layout personalizzati e supporto per gestori di password. Nessun tracciamento, 100% sul dispositivo e completamente open source.
+
+## Funzionalità
+
+**Input**
+- Digitazione a scorrimento con corrispondenza di percorsi geometrici e rilevamento dei vertici
+- Modalità a una mano e divisa con trasformazione delle coordinate
+- Layout adattivo per tablet e pieghevoli
+- Pressione prolungata per varianti di caratteri e mappatura personalizzata dei tasti
+- Pressione prolungata del tasto virgola per cambiare tastiera (selettore IME)
+- Scorrimento della barra spaziatrice per il controllo del cursore
+- Scorrimento del tasto backspace per eliminare la parola precedente
+- Riga numerica opzionale
+- Layout QWERTZ, AZERTY, Dvorak, Colemak, Workman, Bds e Hcesar
+- Rilevamento tastiera hardware
+
+**Intelligenza**
+- Modello bigramma locale per la previsione della parola successiva
+- Controllo ortografico sul dispositivo usando URIK (Ultra-compressed Ranked Input Korpus) — formato dizionario binario personalizzato con attraversamento automa di Levenshtein
+- Correzione automatica con pausa configurabile sugli errori ortografici; ignora URL, e-mail e punteggiatura
+- Apprendimento parole con database SQLCipher crittografato
+- Tracciamento della frequenza delle parole specifico dell'utente
+- 19 lingue supportate con pulsante di cambio lingua dedicato
+- Modalità dizionari uniti per sessioni di digitazione multilingue
+- Ricerca emoji con supporto per parole chiave
+
+**Integrazione**
+- Supporto compilazione automatica inline per gestori di password (Android 11+)
+- Cronologia degli appunti con archiviazione crittografata
+
+**Personalizzazione**
+- Oltre 15 temi integrati con preferiti e temi dinamici Material You (Android 12+)
+- Simboli personalizzati a pressione prolungata e assegnazioni dei tasti
+- Dispositivo di scorrimento dell'intensità del feedback aptico
+- Attivazione/disattivazione della maiuscola automatica
+- Dimensione dei tasti, dimensione delle etichette, dimensione della barra spaziatrice e velocità del cursore configurabili
+- Gestione delle parole apprese: sfogliare, cercare ed eliminare voci
+- Supporto contrasto WCAG AA e TalkBack
+
+**Privacy**
+- Nessuna telemetria, analisi o autorizzazione di rete
+- Elaborazione locale sul dispositivo
+- Archiviazione locale crittografata per i dati utente (AES-256 + Android Keystore)
+- Autenticazione biometrica per accedere alle parole apprese
+- Esportazione e importazione del dizionario per backup o migrazione
+- Le previsioni bigrammi e le frequenze delle parole rimangono solo locali (non esportate)
+
+## Privacy
+
+Tutta l'elaborazione avviene sul dispositivo. Nessun dato lascia il tuo telefono. Il dizionario utente e le parole apprese sono memorizzati in un database locale crittografato.
+
+Rispondiamo ai nostri utenti, non agli investitori.

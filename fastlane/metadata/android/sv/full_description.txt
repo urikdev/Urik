@@ -1,0 +1,52 @@
+Integritetsfokuserat Android-tangentbord med svepskrivning, anpassade layouter och stöd för lösenordshanterare. Ingen spårning, 100% på enheten och helt öppen källkod.
+
+## Funktioner
+
+**Inmatning**
+- Svepskrivning med geometrisk vägmatchning och hörndetektion
+- Etthandsläge och delat läge med koordinatomvandling
+- Adaptiv layout för surfplattor och vikbara enheter
+- Långtryckning för teckenvarianter och anpassad tangenttilldelning
+- Långtryckning på kommatangenten för att byta tangentbord (IME-väljare)
+- Svep på mellanslagstangenten för markörhantering
+- Svep på backsteg för att ta bort föregående ord
+- Valfri sifferrad
+- QWERTZ-, AZERTY-, Dvorak-, Colemak-, Workman-, Bds- och Hcesar-layouter
+- Identifiering av hårdvarutangentbord
+
+**Intelligens**
+- Lokal bigrammodell för nästa-ord-förutsägelse
+- Stavningskontroll på enheten med URIK (Ultra-compressed Ranked Input Korpus) — anpassat binärt ordlisteformat med Levenshtein-automattransversal
+- Autokorrigering med konfigurerbar paus vid stavfel; hoppar över URL:er, e-postadresser och skiljetecken
+- Ordinlärning med krypterad SQLCipher-databas
+- Användarspecifik ordfrekvensuppföljning
+- 19 språk med dedikerad språkväxlingsknapp
+- Sammanslaget ordlisteläge för flerspråkiga skrivningssessioner
+- Emojisökning med nyckelordsstöd
+
+**Integration**
+- Inbyggt stöd för automatisk ifyllning för lösenordshanterare (Android 11+)
+- Urklippshistorik med krypterad lagring
+
+**Anpassning**
+- Mer än 15 inbyggda teman med favoriter och Material You dynamiska teman (Android 12+)
+- Anpassade långtryckningssymboler och tangenttilldelningar
+- Skjutreglage för haptisk återkopplingsstyrka
+- Växlingsknapp för automatisk versalisering
+- Konfigurerbar tangentstorlek, tangentmärkningsstorlek, mellanslagsstorlek och markörhastighet
+- Hantera inlärda ord: bläddra, sök och ta bort poster
+- Stöd för WCAG AA-kontrast och TalkBack
+
+**Integritet**
+- Ingen telemetri, analys eller nätverksbehörigheter
+- Lokal bearbetning på enheten
+- Krypterad lokal lagring för användardata (AES-256 + Android Keystore)
+- Biometrisk autentisering för åtkomst till inlärda ord
+- Export och import av ordlista för säkerhetskopiering eller migrering
+- Bigramförutsägelser och ordfrekvenser förblir bara lokala (exporteras inte)
+
+## Integritet
+
+All bearbetning sker på enheten. Inga data lämnar din telefon. Användarordlistan och inlärda ord lagras i en krypterad lokal databas.
+
+Vi svarar inför våra användare, inte investerare.

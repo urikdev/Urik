@@ -1,0 +1,52 @@
+Teclat d'Android centrat en la privadesa amb lliscament, dissenys personalitzats i suport per al gestor de contrasenyes. Sense seguiment, 100% al dispositiu i codi completament obert.
+
+## Característiques
+
+**Entrada**
+- Escriptura amb llisca amb coincidència de camins geomètrics i detecció de vèrtexs
+- Modes d'una sola mà i dividit amb transformació de coordenades
+- Disseny adaptatiu per a tauletes i plegables
+- Premeu llargament per a variacions de caràcters i mapes de tecles personalitzats
+- Premeu llargament la tecla de coma per canviar de teclat (selector d'IME)
+- Llisca amb la barra espaiadora per controlar el cursor
+- Fes lliscar el dit enrere per eliminar la paraula anterior
+- Fila de números opcional
+- Dissenys QWERTZ, AZERTY, Dvorak, Colemak, Workman, Bds i Hcesar
+- Detecció de teclat de maquinari
+
+**Intel·ligència**
+- Model de bigram local per a la predicció de la paraula següent
+- Correcció ortogràfica al dispositiu mitjançant URIK (Ultra-compressed Ranked Input Korpus): un format de diccionari binari personalitzat amb recorregut d'autòmats Levenshtein
+- Correcció automàtica amb pausa configurable en error d'ortografia; omet URL, correus electrònics i signes de puntuació
+- Aprenentatge de paraules amb base de dades SQLCipher xifrada
+- Seguiment de freqüència de paraules específic de l'usuari
+- 19 idiomes compatibles amb un botó de commutació d'idioma dedicat
+- Mode de diccionaris combinats per a sessions de mecanografia multilingüe
+- Cerca d'emojis amb suport de paraules clau
+
+**Integració**
+- Compatibilitat d'emplenament automàtic en línia per als gestors de contrasenyes (Android 11+)
+- Historial del porta-retalls amb emmagatzematge xifrat
+
+**Personalització**
+- Més de 15 temes integrats amb temes preferits i dinàmics Material You (Android 12+)
+- Assignacions personalitzades de símbols i tecles de premsa llarga
+- Control lliscant de força de retroalimentació hàptica
+- Canvi de majúscules automàtica
+- Mida de la tecla configurable, mida de l'etiqueta de la tecla, mida de la barra espaiadora i velocitat del cursor
+- Gestioneu les paraules apreses: navegueu, cerqueu i suprimiu entrades
+- Contrast WCAG AA i suport TalkBack
+
+**Privadesa**
+- Sense permisos de telemetria, anàlisi o xarxa
+- Processament local al dispositiu
+- Emmagatzematge local xifrat per a les dades de l'usuari (AES-256 + Android Keystore)
+- Autenticació biomètrica per accedir a les paraules apreses
+- Exportació i importació de diccionaris per a còpia de seguretat o migració
+- Les prediccions de Bigram i les freqüències de paraules romanen només locals (no s'exporten)
+
+## Privadesa
+
+Tot el processament es fa al dispositiu. No surten dades del teu telèfon. El diccionari de l'usuari i les paraules apreses s'emmagatzemen en una base de dades local xifrada.
+
+Responem als nostres usuaris, no als inversors.

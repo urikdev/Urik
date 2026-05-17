@@ -1,0 +1,52 @@
+Clavier Android axé sur la confidentialité avec saisie par glissement, dispositions personnalisées et prise en charge des gestionnaires de mots de passe. Aucun suivi, 100% sur l'appareil et entièrement open source.
+
+## Fonctionnalités
+
+**Saisie**
+- Saisie par glissement avec correspondance de trajectoire géométrique et détection de sommets
+- Modes une main et fractionné avec transformation de coordonnées
+- Disposition adaptative pour tablettes et appareils pliables
+- Appui long pour les variantes de caractères et la cartographie personnalisée des touches
+- Appui long sur la touche virgule pour changer de clavier (sélecteur IME)
+- Glissement sur la barre d'espace pour le contrôle du curseur
+- Glissement sur la touche retour pour supprimer le mot précédent
+- Rangée de chiffres optionnelle
+- Dispositions QWERTZ, AZERTY, Dvorak, Colemak, Workman, Bds et Hcesar
+- Détection du clavier matériel
+
+**Intelligence**
+- Modèle bigramme local pour la prédiction du mot suivant
+- Vérification orthographique sur l'appareil avec URIK (Ultra-compressed Ranked Input Korpus) — format de dictionnaire binaire personnalisé avec traversée d'automate de Levenshtein
+- Correction automatique avec pause configurable sur faute d'orthographe ; ignore les URL, e-mails et la ponctuation
+- Apprentissage de mots avec base de données SQLCipher chiffrée
+- Suivi de la fréquence des mots spécifique à l'utilisateur
+- 19 langues prises en charge avec bouton de bascule de langue dédié
+- Mode dictionnaires fusionnés pour les sessions de saisie multilingues
+- Recherche d'emoji avec prise en charge des mots-clés
+
+**Intégration**
+- Prise en charge du remplissage automatique en ligne pour les gestionnaires de mots de passe (Android 11+)
+- Historique du presse-papiers avec stockage chiffré
+
+**Personnalisation**
+- Plus de 15 thèmes intégrés avec favoris et thèmes dynamiques Material You (Android 12+)
+- Symboles et affectations de touches personnalisés sur appui long
+- Curseur d'intensité du retour haptique
+- Bascule de mise en majuscules automatique
+- Taille des touches, taille des étiquettes, taille de la barre d'espace et vitesse du curseur configurables
+- Gérer les mots appris : parcourir, rechercher et supprimer des entrées
+- Prise en charge du contraste WCAG AA et de TalkBack
+
+**Confidentialité**
+- Aucune télémétrie, analyse ou autorisation réseau
+- Traitement local sur l'appareil
+- Stockage local chiffré pour les données utilisateur (AES-256 + Android Keystore)
+- Authentification biométrique pour accéder aux mots appris
+- Export et import de dictionnaire pour sauvegarde ou migration
+- Les prédictions bigrammes et les fréquences de mots restent uniquement locales (non exportées)
+
+## Confidentialité
+
+Tout le traitement se fait sur l'appareil. Aucune donnée ne quitte votre téléphone. Le dictionnaire utilisateur et les mots appris sont stockés dans une base de données locale chiffrée.
+
+Nous répondons à nos utilisateurs, pas aux investisseurs.

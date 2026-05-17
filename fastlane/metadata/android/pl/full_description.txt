@@ -1,0 +1,52 @@
+Klawiatura Android skupiona na prywatności z pisaniem przez przesuwanie, niestandardowymi układami i obsługą menedżerów haseł. Bez śledzenia, 100% na urządzeniu i w pełni open source.
+
+## Funkcje
+
+**Wprowadzanie**
+- Pisanie przez przesuwanie z geometrycznym dopasowaniem ścieżek i wykrywaniem wierzchołków
+- Tryby jednoręczny i podzielony z transformacją współrzędnych
+- Adaptacyjny układ dla tabletów i urządzeń składanych
+- Długie naciśnięcie dla wariantów znaków i niestandardowego mapowania klawiszy
+- Długie naciśnięcie klawisza przecinka do przełączania klawiatury (wybór IME)
+- Przesuwanie spacji do sterowania kursorem
+- Przesuwanie backspace do usunięcia poprzedniego słowa
+- Opcjonalny rząd cyfr
+- Układy QWERTZ, AZERTY, Dvorak, Colemak, Workman, Bds i Hcesar
+- Wykrywanie klawiatury sprzętowej
+
+**Inteligencja**
+- Lokalny model bigramowy do przewidywania następnego słowa
+- Sprawdzanie pisowni na urządzeniu z użyciem URIK (Ultra-compressed Ranked Input Korpus) — niestandardowy binarny format słownika z przejściem automatu Levenshteina
+- Autokorekta z konfigurowalną pauzą przy błędach pisowni; pomija URL, e-maile i interpunkcję
+- Uczenie słów z zaszyfrowaną bazą danych SQLCipher
+- Śledzenie częstotliwości słów specyficzne dla użytkownika
+- 19 obsługiwanych języków z dedykowanym przyciskiem przełączania języka
+- Tryb połączonych słowników do wielojęzycznych sesji pisania
+- Wyszukiwanie emoji z obsługą słów kluczowych
+
+**Integracja**
+- Wbudowana obsługa automatycznego uzupełniania dla menedżerów haseł (Android 11+)
+- Historia schowka z zaszyfrowanym przechowywaniem
+
+**Personalizacja**
+- Ponad 15 wbudowanych motywów z ulubionymi i dynamicznymi motywami Material You (Android 12+)
+- Niestandardowe symbole przy długim naciśnięciu i przypisania klawiszy
+- Suwak intensywności haptycznego sprzężenia zwrotnego
+- Przełącznik automatycznego kapitalizowania
+- Konfigurowalne rozmiary klawiszy, etykiet, spacji i szybkość kursora
+- Zarządzanie wyuczonymi słowami: przeglądanie, wyszukiwanie i usuwanie wpisów
+- Obsługa kontrastu WCAG AA i TalkBack
+
+**Prywatność**
+- Bez telemetrii, analityki ani uprawnień sieciowych
+- Lokalne przetwarzanie na urządzeniu
+- Zaszyfrowane lokalne przechowywanie danych użytkownika (AES-256 + Android Keystore)
+- Uwierzytelnianie biometryczne do dostępu do wyuczonych słów
+- Eksport i import słownika do tworzenia kopii zapasowych lub migracji
+- Przewidywania bigramów i częstotliwości słów pozostają tylko lokalne (nie eksportowane)
+
+## Prywatność
+
+Całe przetwarzanie odbywa się na urządzeniu. Żadne dane nie opuszczają Twojego telefonu. Słownik użytkownika i wyuczone słowa są przechowywane w zaszyfrowanej lokalnej bazie danych.
+
+Odpowiadamy naszym użytkownikom, a nie inwestorom.

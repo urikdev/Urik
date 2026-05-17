@@ -1,44 +1,52 @@
-Datenschutzorientierte Android-Tastatur mit Wischgesten-Eingabe, benutzerdefinierten Layouts und Passwortmanager-Unterstützung. Keine Nachverfolgung, 100 % Geräte-lokal und vollständig quelloffen.
+Datenschutzorientierte Android-Tastatur mit Wischeingabe, benutzerdefinierten Layouts und Unterstützung für den Passwort-Manager. Kein Tracking, 100 % auf dem Gerät und vollständig Open Source.
+
+## Funktionen
 
 **Eingabe**
-- Wischgesten-Eingabe mit geometrischem Pfadabgleich und Eckpunkterkennung
+- Wischeingabe mit geometrischer Pfadanpassung und Scheitelpunkterkennung
 - Einhand- und Split-Modus mit Koordinatentransformation
-- Adaptives Layout für Tablets und Faltgeräte
+- Adaptives Layout für Tablets und faltbare Geräte
 - Langes Drücken für Zeichenvariationen und benutzerdefinierte Tastenbelegung
-- Langes Drücken der Komma-Taste zum Wechseln der Tastatur (IME-Auswahl)
-- Wischen über die Leertaste zur Cursor-Positionierung
-- Wischen über die Rücktaste zum Löschen des vorherigen Wortes
+- Kommataste lange drücken, um die Tastatur zu wechseln (IME-Auswahl)
+- Wischen mit der Leertaste zur Cursorsteuerung
+- Wischen Sie mit der Rücktaste, um das vorherige Wort zu löschen
 - Optionale Zahlenreihe
-- QWERTZ-, AZERTY-, Dvorak-, Colemak-, Workman- und Hcesar-Layouts
-- Erkennung von Hardware-Tastaturen
+- QWERTZ-, AZERTY-, Dvorak-, Colemak-, Workman-, Bds- und Hcesar-Layouts
+- Hardware-Tastaturerkennung
 
 **Intelligenz**
-- Lokales Bigram-Modell zur Vorhersage des nächsten Wortes
-- Geräteinterne Rechtschreibprüfung mit SymSpell-Algorithmus
-- Autokorrektur mit konfigurierbarer Tipp-Pause; überspringt URLs, E-Mail-Adressen und Interpunktion
+- Lokales Bigramm-Modell für die Vorhersage des nächsten Wortes
+- Rechtschreibprüfung auf dem Gerät mit URIK (Ultra-compressed Ranked Input Korpus) – einem benutzerdefinierten binären Wörterbuchformat mit Levenshtein-Automaton-Traversal
+- Autokorrektur mit konfigurierbarer Pause bei Rechtschreibfehler; überspringt URLs, E-Mails und Satzzeichen
 - Wortlernen mit verschlüsselter SQLCipher-Datenbank
-- Benutzerspezifische Aufzeichnung der Wortfrequenz
-- 16 unterstützte Sprachen mit dediziertem Sprachumschalter
-- Zusammengeführte Wörterbücher für mehrsprachige Eingabesitzungen
-- Emoji-Suche anhand von Schlüsselwörtern
+- Benutzerspezifische Worthäufigkeitsverfolgung
+- 19 unterstützte Sprachen mit spezieller Sprachumschalttaste
+- Modus für zusammengeführte Wörterbücher für mehrsprachige Schreibsitzungen
+- Emoji-Suche mit Schlüsselwortunterstützung
 
 **Integration**
-- Unterstützt automatisches Ausfüllen durch Passwortmanager (Android 11+)
-- Zwischenablageverlauf mit verschlüsseltem Speicher
+- Inline-Autofill-Unterstützung für Passwort-Manager (Android 11+)
+- Zwischenablageverlauf mit verschlüsselter Speicherung
 
 **Anpassung**
-- Mehr als 15 integrierte Designs mit Favoriten und dynamischem Material You Thema (Android 12+)
-- Benutzerdefinierte Symbol- und Tastenbelegung durch langes Drücken
+- Über 15 integrierte Themes mit Favoriten und dynamischem Material You-Theme (Android 12+)
+- Benutzerdefinierte Symbol- und Tastenzuweisungen für langes Drücken
 - Schieberegler für die Stärke des haptischen Feedbacks
-- Umschalten der automatischen Großschreibung
+- Automatische Großschreibung umschalten
 - Konfigurierbare Tastengröße, Tastenbeschriftungsgröße, Leertastengröße und Cursorgeschwindigkeit
-- Gelernte Wörter verwalten: Einträge durchsuchen und löschen
+- Gelernte Wörter verwalten: Einträge durchsuchen, suchen und löschen
 - WCAG AA-Kontrast und TalkBack-Unterstützung
 
 **Datenschutz**
-- Keine Telemetrie, Analysen oder Netzwerkberechtigungen
+- Keine Telemetrie-, Analyse- oder Netzwerkberechtigungen
 - Lokale Verarbeitung auf dem Gerät
-- Verschlüsselte lokale Speicherung für Benutzerdaten (AES-256 + Android Keystore)
+- Verschlüsselter lokaler Speicher für Benutzerdaten (AES-256 + Android Keystore)
 - Biometrische Authentifizierung für den Zugriff auf gelernte Wörter
-- Export und Import von Wörterbüchern für Backups oder Migrationen
-- Bigram-Vorhersagen und Wortfrequenzen bleiben lokal (werden nicht exportiert)
+- Wörterbuchexport und -import zur Sicherung oder Migration
+- Bigram-Vorhersagen und Worthäufigkeiten bleiben nur lokal (nicht exportiert)
+
+## Datenschutz
+
+Die gesamte Verarbeitung erfolgt auf dem Gerät. Keine Daten verlassen Ihr Telefon. Benutzerwörterbuch und gelernte Wörter werden in einer verschlüsselten lokalen Datenbank gespeichert.
+
+Wir antworten unseren Nutzern, nicht den Investoren.
