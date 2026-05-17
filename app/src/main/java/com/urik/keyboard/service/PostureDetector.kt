@@ -103,7 +103,7 @@ class PostureDetector(private val context: Context, private val scope: Coroutine
     }
 
     fun onConfigurationChanged() {
-        _postureInfo.value = getCurrentPostureInfo(context)
+        _postureInfo.value = getCurrentPostureInfo()
     }
 
     fun stop() {

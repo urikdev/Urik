@@ -172,7 +172,7 @@ class SpellCheckManagerSpatialTest {
     }
 
     @Test
-    fun `learned word with poor spatial score ranks below symspell ed1 with good spatial score`() = runTest {
+    fun `learned word with poor spatial score ranks below dict ed1 with good spatial score`() = runTest {
         keyPositionsFlow.emit(qwertyPositions)
 
         whenever(
@@ -182,14 +182,14 @@ class SpellCheckManagerSpatialTest {
         val suggestions = spellCheckManager.getSpellingSuggestionsWithConfidence("foz")
 
         val learnedSuggestion = suggestions.find { it.source == "learned" }
-        val symspellSuggestion = suggestions.find { it.source == "dictionary" && it.word == "fox" }
+        val dictSuggestion = suggestions.find { it.source == "dictionary" && it.word == "fox" }
 
         assertNotNull("learned word should appear in suggestions", learnedSuggestion)
-        assertNotNull("symspell ed1 match 'fox' should appear in suggestions for input 'foz'", symspellSuggestion)
+        assertNotNull("dict ed1 match 'fox' should appear in suggestions for input 'foz'", dictSuggestion)
         assertTrue(
-            "symspell ed1 (good spatial) should beat learned word (poor spatial, freq=1); " +
-                "symspell=${symspellSuggestion!!.confidence}, learned=${learnedSuggestion!!.confidence}",
-            symspellSuggestion.confidence > learnedSuggestion.confidence
+            "dict ed1 (good spatial) should beat learned word (poor spatial, freq=1); " +
+                "dict=${dictSuggestion!!.confidence}, learned=${learnedSuggestion!!.confidence}",
+            dictSuggestion.confidence > learnedSuggestion.confidence
         )
     }
 

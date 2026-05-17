@@ -51,9 +51,35 @@ class PostureDetectorTest {
     }
 
     @Test
-    fun `onConfigurationChanged uses service context`() {
+    fun `onConfigurationChanged prefers window context over service context (GH-742)`() {
         val detector = PostureDetector(portraitContext(), scope)
         detector.attachToWindow(landscapeContext())
+
+        detector.onConfigurationChanged()
+
+        assertEquals(
+            Configuration.ORIENTATION_LANDSCAPE,
+            detector.postureInfo.value.orientation
+        )
+    }
+
+    @Test
+    fun `onConfigurationChanged falls back to service context when no window attached`() {
+        val detector = PostureDetector(portraitContext(), scope)
+
+        detector.onConfigurationChanged()
+
+        assertEquals(
+            Configuration.ORIENTATION_PORTRAIT,
+            detector.postureInfo.value.orientation
+        )
+    }
+
+    @Test
+    fun `onConfigurationChanged falls back to service context after stop clears window context`() {
+        val detector = PostureDetector(portraitContext(), scope)
+        detector.attachToWindow(landscapeContext())
+        detector.stop()
 
         detector.onConfigurationChanged()
 

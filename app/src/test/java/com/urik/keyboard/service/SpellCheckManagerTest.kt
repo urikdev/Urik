@@ -759,7 +759,7 @@ class SpellCheckManagerTest {
     }
 
     @Test
-    fun `corrections from symspell have varied confidence based on frequency`() = runTest {
+    fun `corrections from dict have varied confidence based on frequency`() = runTest {
         whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency(any(), any(), any()))
             .thenReturn(emptyList())
 
@@ -811,16 +811,16 @@ class SpellCheckManagerTest {
     }
 
     @Test
-    fun `symspell contraction gets guaranteed confidence`() = runTest {
+    fun `dict contraction gets guaranteed confidence`() = runTest {
         whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency(any(), any(), any()))
             .thenReturn(emptyList())
 
         val suggestions = spellCheckManager.getSpellingSuggestionsWithConfidence("havent")
 
         val contractionSuggestion = suggestions.find { it.word == "haven't" }
-        assertNotNull("Should find contraction haven't from SymSpell", contractionSuggestion)
+        assertNotNull("Should find contraction haven't from dict", contractionSuggestion)
         assertEquals(
-            "SymSpell contraction should have guaranteed confidence",
+            "dict contraction should have guaranteed confidence",
             0.995,
             contractionSuggestion!!.confidence,
             0.001
