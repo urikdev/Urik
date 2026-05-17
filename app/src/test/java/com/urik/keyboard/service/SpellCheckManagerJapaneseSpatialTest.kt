@@ -32,9 +32,7 @@ import org.robolectric.RobolectricTestRunner
 
 /**
  * Tests that the Japanese spatial-score bypass (`if (languageCode == "ja") 0.0`)
- * is load-bearing: without it, a low-frequency candidate adjacent to the input key
- * would outscore a high-frequency candidate due to SPATIAL_PROXIMITY_WEIGHT (0.35)
- * dwarfing SYMSPELL_FREQUENCY_WEIGHT (0.05).
+ * is load-bearing
  *
  * Setup:
  *   dictionary: あい=100, あう=10_000_000
