@@ -165,9 +165,9 @@
 
     <!-- Layout Mapper -->
     <string name="layout_mapper_title">Customize Keys</string>
-    <string name="layout_mapper_instructions">Tap a key to assign a custom character. Long-pressing that key on the keyboard will insert your character.</string>
+    <string name="layout_mapper_instructions">Tap a key to assign custom characters (space-separated). Long-pressing that key will show your characters alongside the built-in options.</string>
     <string name="layout_mapper_edit_key">Edit key: %1$s</string>
-    <string name="layout_mapper_symbol_hint">Custom character</string>
+    <string name="layout_mapper_symbol_hint">Custom characters (space-separated, e.g. ǔ ū)</string>
     <string name="layout_mapper_save">Save</string>
     <string name="layout_mapper_remove">Remove</string>
     <string name="layout_mapper_reset_all">Reset All</string>

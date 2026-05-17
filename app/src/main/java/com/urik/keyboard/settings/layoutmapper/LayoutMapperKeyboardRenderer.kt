@@ -48,7 +48,7 @@ class LayoutMapperKeyboardRenderer(private val context: Context) {
     fun createKeyboardView(
         layout: KeyboardLayout,
         theme: KeyboardTheme,
-        mappings: Map<String, String>,
+        mappings: Map<String, List<String>>,
         onKeyClick: (String) -> Unit
     ): View {
         keyButtons.clear()
@@ -77,10 +77,10 @@ class LayoutMapperKeyboardRenderer(private val context: Context) {
         return container
     }
 
-    fun updateMappings(mappings: Map<String, String>, theme: KeyboardTheme) {
+    fun updateMappings(mappings: Map<String, List<String>>, theme: KeyboardTheme) {
         keyButtons.forEach { (keyValue, button) ->
-            val customSymbol = mappings[keyValue]
-            updateButtonAppearance(button, keyValue, customSymbol, theme)
+            val customSymbols = mappings[keyValue]
+            updateButtonAppearance(button, keyValue, customSymbols, theme)
         }
     }
 
@@ -94,7 +94,7 @@ class LayoutMapperKeyboardRenderer(private val context: Context) {
     private fun createRowView(
         keys: List<KeyboardKey>,
         theme: KeyboardTheme,
-        mappings: Map<String, String>,
+        mappings: Map<String, List<String>>,
         textSize: Float,
         onKeyClick: (String) -> Unit
     ): LinearLayout {
@@ -150,7 +150,7 @@ class LayoutMapperKeyboardRenderer(private val context: Context) {
         key: KeyboardKey.Character,
         rowKeys: List<KeyboardKey>,
         theme: KeyboardTheme,
-        mappings: Map<String, String>,
+        mappings: Map<String, List<String>>,
         textSize: Float,
         onKeyClick: (String) -> Unit
     ): Button {
@@ -172,8 +172,8 @@ class LayoutMapperKeyboardRenderer(private val context: Context) {
             }
 
         val keyValue = key.value.lowercase()
-        val customSymbol = mappings[keyValue]
-        updateButtonAppearance(button, keyValue, customSymbol, theme)
+        val customSymbols = mappings[keyValue]
+        updateButtonAppearance(button, keyValue, customSymbols, theme)
 
         if (key.type == KeyboardKey.KeyType.LETTER || key.type == KeyboardKey.KeyType.NUMBER) {
             button.setOnClickListener { onKeyClick(key.value) }
@@ -215,9 +215,14 @@ class LayoutMapperKeyboardRenderer(private val context: Context) {
         isFocusable = false
     }
 
-    private fun updateButtonAppearance(button: Button, keyValue: String, customSymbol: String?, theme: KeyboardTheme) {
-        if (customSymbol != null) {
-            button.text = "${keyValue.uppercase()}\n$customSymbol"
+    private fun updateButtonAppearance(
+        button: Button,
+        keyValue: String,
+        customSymbols: List<String>?,
+        theme: KeyboardTheme
+    ) {
+        if (!customSymbols.isNullOrEmpty()) {
+            button.text = "${keyValue.uppercase()}\n${customSymbols.first()}"
             button.setTextSize(TypedValue.COMPLEX_UNIT_SP, 11f)
             button.background = createKeyBackground(theme.colors.keyBackgroundAction, theme)
             button.setTextColor(theme.colors.keyTextAction)

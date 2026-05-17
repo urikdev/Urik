@@ -156,9 +156,9 @@
 
     <!-- Layout Mapper -->
     <string name="layout_mapper_title">Personnaliser les touches</string>
-    <string name="layout_mapper_instructions">Appuyez sur une touche pour attribuer un caractère personnalisé. Appuyez longuement sur cette touche du clavier pour insérer votre caractère.</string>
+    <string name="layout_mapper_instructions">Appuyez sur une touche pour attribuer des caractères personnalisés (séparés par des espaces). Un appui long sur cette touche affichera vos caractères avec les options intégrées.</string>
     <string name="layout_mapper_edit_key">Clé d\'édition : %1$s</string>
-    <string name="layout_mapper_symbol_hint">Caractère personnalisé</string>
+    <string name="layout_mapper_symbol_hint">Caractères personnalisés (séparés par des espaces, ex. ǔ ū)</string>
     <string name="layout_mapper_save">Enregistrer</string>
     <string name="layout_mapper_remove">Supprimer</string>
     <string name="layout_mapper_reset_all">Tout réinitialiser</string>

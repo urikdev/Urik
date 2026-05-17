@@ -144,9 +144,9 @@
     <string name="layout_settings_customize_keys_summary">Ορισμός προσαρμοσμένου χαρακτήρα για παρατεταμένο πάτημα</string>
     <!-- Layout Mapper -->
     <string name="layout_mapper_title">Προσαρμογή πλήκτρων</string>
-    <string name="layout_mapper_instructions">Πατήστε ένα πλήκτρο για να ορίσετε προσαρμοσμένο χαρακτήρα. Με παρατεταμένο πάτημα αυτού του πλήκτρου στο πληκτρολόγιο θα γίνεται εισαγωγή του χαρακτήρα σας.</string>
+    <string name="layout_mapper_instructions">Πατήστε ένα πλήκτρο για να ορίσετε προσαρμοσμένους χαρακτήρες (χωρισμένους με κενά). Με παρατεταμένο πάτημα θα εμφανίζονται οι χαρακτήρες σας μαζί με τις ενσωματωμένες επιλογές.</string>
     <string name="layout_mapper_edit_key">Επεξεργασία πλήκτρου: %1$s</string>
-    <string name="layout_mapper_symbol_hint">Προσαρμοσμένος χαρακτήρας</string>
+    <string name="layout_mapper_symbol_hint">Προσαρμοσμένοι χαρακτήρες (χωρισμένοι με κενά, π.χ. ǔ ū)</string>
     <string name="layout_mapper_save">Αποθήκευση</string>
     <string name="layout_mapper_remove">Κατάργηση</string>
     <string name="layout_mapper_reset_all">Επαναφορά όλων</string>

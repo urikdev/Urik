@@ -183,4 +183,14 @@ class CustomKeyMappingDaoTest {
 
         assertEquals("😀", retrieved?.customSymbol)
     }
+
+    @Test
+    fun `unit separator delimited string stored and retrieved verbatim`() = runTest {
+        val raw = "ǔ${com.urik.keyboard.service.CustomKeyMappingService.LONG_PRESS_DELIMITER}ū"
+        dao.upsertMapping(CustomKeyMapping.create("u", raw))
+
+        val retrieved = dao.getMappingForKey("u")
+
+        assertEquals(raw, retrieved?.customSymbol)
+    }
 }

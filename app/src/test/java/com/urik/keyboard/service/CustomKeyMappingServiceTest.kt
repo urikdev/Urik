@@ -48,6 +48,80 @@ class CustomKeyMappingServiceTest {
         Dispatchers.resetMain()
     }
 
+    // parseSymbols
+
+    @Test
+    fun `parseSymbols single char returns single-element list`() {
+        assertEquals(listOf("ǔ"), CustomKeyMappingService.parseSymbols("ǔ"))
+    }
+
+    @Test
+    fun `parseSymbols delimiter-separated returns ordered list`() {
+        val raw = "ǔ${CustomKeyMappingService.LONG_PRESS_DELIMITER}ū"
+        assertEquals(listOf("ǔ", "ū"), CustomKeyMappingService.parseSymbols(raw))
+    }
+
+    @Test
+    fun `parseSymbols trims whitespace from each segment`() {
+        val raw = " ǔ ${CustomKeyMappingService.LONG_PRESS_DELIMITER} ū "
+        assertEquals(listOf("ǔ", "ū"), CustomKeyMappingService.parseSymbols(raw))
+    }
+
+    @Test
+    fun `parseSymbols discards blank segments`() {
+        val d = CustomKeyMappingService.LONG_PRESS_DELIMITER
+        val raw = "${d}ǔ${d}${d}ū$d"
+        assertEquals(listOf("ǔ", "ū"), CustomKeyMappingService.parseSymbols(raw))
+    }
+
+    @Test
+    fun `parseSymbols empty string returns empty list`() {
+        assertEquals(emptyList<String>(), CustomKeyMappingService.parseSymbols(""))
+    }
+
+    @Test
+    fun `parseSymbols blank-only string returns empty list`() {
+        assertEquals(emptyList<String>(), CustomKeyMappingService.parseSymbols("   "))
+    }
+
+    @Test
+    fun `parseSymbols delimiter-only returns empty list`() {
+        val raw = "${CustomKeyMappingService.LONG_PRESS_DELIMITER}${CustomKeyMappingService.LONG_PRESS_DELIMITER}"
+        assertEquals(emptyList<String>(), CustomKeyMappingService.parseSymbols(raw))
+    }
+
+    @Test
+    fun `parseSymbols caps at 5 symbols`() {
+        val d = CustomKeyMappingService.LONG_PRESS_DELIMITER
+        val raw = "a${d}b${d}c${d}d${d}e${d}f${d}g"
+        assertEquals(listOf("a", "b", "c", "d", "e"), CustomKeyMappingService.parseSymbols(raw))
+    }
+
+    @Test
+    fun `parseSymbols NFC deduplicates precomposed and decomposed equivalents`() {
+        // é precomposed (U+00E9) and é decomposed (e + U+0301) — same NFC result
+        val precomposed = "é"
+        val decomposed = "é"
+        val raw = "$precomposed${CustomKeyMappingService.LONG_PRESS_DELIMITER}$decomposed"
+        val result = CustomKeyMappingService.parseSymbols(raw)
+        assertEquals(1, result.size)
+        assertEquals(precomposed, result[0])
+    }
+
+    @Test
+    fun `parseSymbols preserves order of distinct symbols`() {
+        val d = CustomKeyMappingService.LONG_PRESS_DELIMITER
+        val raw = "ū${d}ǔ${d}û"
+        assertEquals(listOf("ū", "ǔ", "û"), CustomKeyMappingService.parseSymbols(raw))
+    }
+
+    @Test
+    fun `parseSymbols legacy single char without delimiter returns single-element list`() {
+        assertEquals(listOf("ū"), CustomKeyMappingService.parseSymbols("ū"))
+    }
+
+    // initialize / observe
+
     @Test
     fun `mappings is empty initially`() {
         assertTrue(service.mappings.value.isEmpty())
@@ -65,8 +139,19 @@ class CustomKeyMappingServiceTest {
         testDispatcher.scheduler.advanceUntilIdle()
 
         assertEquals(2, service.mappings.value.size)
-        assertEquals("@", service.mappings.value["a"])
-        assertEquals("#", service.mappings.value["b"])
+        assertEquals(listOf("@"), service.mappings.value["a"])
+        assertEquals(listOf("#"), service.mappings.value["b"])
+    }
+
+    @Test
+    fun `initialize parses multi-symbol stored value`() = runTest {
+        val raw = "ǔ${CustomKeyMappingService.LONG_PRESS_DELIMITER}ū"
+        mappingsFlow.value = listOf(CustomKeyMapping.create("u", raw))
+
+        service.initialize()
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        assertEquals(listOf("ǔ", "ū"), service.mappings.value["u"])
     }
 
     @Test
@@ -81,15 +166,15 @@ class CustomKeyMappingServiceTest {
         assertEquals(1, service.mappings.value.size)
     }
 
+    // getMapping
+
     @Test
-    fun `getMapping returns mapped symbol`() = runTest {
+    fun `getMapping returns list for mapped key`() = runTest {
         mappingsFlow.value = listOf(CustomKeyMapping.create("a", "@"))
         service.initialize()
         testDispatcher.scheduler.advanceUntilIdle()
 
-        val result = service.getMapping("a")
-
-        assertEquals("@", result)
+        assertEquals(listOf("@"), service.getMapping("a"))
     }
 
     @Test
@@ -98,9 +183,7 @@ class CustomKeyMappingServiceTest {
         service.initialize()
         testDispatcher.scheduler.advanceUntilIdle()
 
-        val result = service.getMapping("b")
-
-        assertNull(result)
+        assertNull(service.getMapping("b"))
     }
 
     @Test
@@ -109,12 +192,11 @@ class CustomKeyMappingServiceTest {
         service.initialize()
         testDispatcher.scheduler.advanceUntilIdle()
 
-        val lowercase = service.getMapping("a")
-        val uppercase = service.getMapping("A")
-
-        assertEquals("@", lowercase)
-        assertEquals("@", uppercase)
+        assertEquals(listOf("@"), service.getMapping("a"))
+        assertEquals(listOf("@"), service.getMapping("A"))
     }
+
+    // hasMapping
 
     @Test
     fun `hasMapping returns true for mapped key`() = runTest {
@@ -143,8 +225,10 @@ class CustomKeyMappingServiceTest {
         assertTrue(service.hasMapping("A"))
     }
 
+    // getAllMappings
+
     @Test
-    fun `getAllMappings returns snapshot`() = runTest {
+    fun `getAllMappings returns snapshot as list values`() = runTest {
         mappingsFlow.value =
             listOf(
                 CustomKeyMapping.create("a", "@"),
@@ -156,9 +240,11 @@ class CustomKeyMappingServiceTest {
         val snapshot = service.getAllMappings()
 
         assertEquals(2, snapshot.size)
-        assertEquals("@", snapshot["a"])
-        assertEquals("#", snapshot["b"])
+        assertEquals(listOf("@"), snapshot["a"])
+        assertEquals(listOf("#"), snapshot["b"])
     }
+
+    // getMappingCount
 
     @Test
     fun `getMappingCount returns correct count`() = runTest {
@@ -182,6 +268,8 @@ class CustomKeyMappingServiceTest {
         assertEquals(0, service.getMappingCount())
     }
 
+    // refresh
+
     @Test
     fun `refresh updates from repository`() = runTest {
         whenever(repository.getAllMappingsAsMap()).thenReturn(
@@ -191,9 +279,11 @@ class CustomKeyMappingServiceTest {
         service.refresh()
 
         assertEquals(2, service.mappings.value.size)
-        assertEquals("!", service.mappings.value["x"])
-        assertEquals("?", service.mappings.value["y"])
+        assertEquals(listOf("!"), service.mappings.value["x"])
+        assertEquals(listOf("?"), service.mappings.value["y"])
     }
+
+    // live updates
 
     @Test
     fun `mappings updates when repository emits new data`() = runTest {
@@ -205,6 +295,6 @@ class CustomKeyMappingServiceTest {
         testDispatcher.scheduler.advanceUntilIdle()
 
         assertEquals(1, service.mappings.value.size)
-        assertEquals("@", service.mappings.value["a"])
+        assertEquals(listOf("@"), service.mappings.value["a"])
     }
 }

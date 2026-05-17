@@ -4,6 +4,7 @@ package com.urik.keyboard.settings.layoutmapper
 
 import com.urik.keyboard.data.CustomKeyMappingRepository
 import com.urik.keyboard.data.database.CustomKeyMapping
+import com.urik.keyboard.service.CustomKeyMappingService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,6 +19,7 @@ import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
@@ -53,11 +55,11 @@ class LayoutMapperViewModelTest {
 
     @Test
     fun `mappings is empty initially`() {
-        assertEquals(emptyMap<String, String>(), viewModel.mappings.value)
+        assertEquals(emptyMap<String, List<String>>(), viewModel.mappings.value)
     }
 
     @Test
-    fun `mappings updates when repository emits`() = runTest {
+    fun `mappings updates when repository emits single symbol`() = runTest {
         mappingsFlow.value =
             listOf(
                 CustomKeyMapping.create("a", "@"),
@@ -67,8 +69,18 @@ class LayoutMapperViewModelTest {
         val result = viewModel.mappings.first()
 
         assertEquals(2, result.size)
-        assertEquals("@", result["a"])
-        assertEquals("#", result["b"])
+        assertEquals(listOf("@"), result["a"])
+        assertEquals(listOf("#"), result["b"])
+    }
+
+    @Test
+    fun `mappings updates when repository emits multi-symbol delimiter value`() = runTest {
+        val raw = "ǔ${CustomKeyMappingService.LONG_PRESS_DELIMITER}ū"
+        mappingsFlow.value = listOf(CustomKeyMapping.create("u", raw))
+
+        val result = viewModel.mappings.first()
+
+        assertEquals(listOf("ǔ", "ū"), result["u"])
     }
 
     @Test
@@ -92,13 +104,11 @@ class LayoutMapperViewModelTest {
     }
 
     @Test
-    fun `getMappingForKey returns mapping from state`() = runTest {
+    fun `getMappingForKey returns list for mapped key`() = runTest {
         mappingsFlow.value = listOf(CustomKeyMapping.create("a", "@"))
         viewModel.mappings.first()
 
-        val result = viewModel.getMappingForKey("a")
-
-        assertEquals("@", result)
+        assertEquals(listOf("@"), viewModel.getMappingForKey("a"))
     }
 
     @Test
@@ -106,9 +116,7 @@ class LayoutMapperViewModelTest {
         mappingsFlow.value = listOf(CustomKeyMapping.create("a", "@"))
         viewModel.mappings.first()
 
-        val result = viewModel.getMappingForKey("A")
-
-        assertEquals("@", result)
+        assertEquals(listOf("@"), viewModel.getMappingForKey("A"))
     }
 
     @Test
@@ -116,29 +124,59 @@ class LayoutMapperViewModelTest {
         mappingsFlow.value = listOf(CustomKeyMapping.create("a", "@"))
         viewModel.mappings.first()
 
-        val result = viewModel.getMappingForKey("b")
-
-        assertNull(result)
+        assertNull(viewModel.getMappingForKey("b"))
     }
 
     @Test
-    fun `saveMapping calls repository setMapping`() = runTest {
+    fun `saveMapping encodes single symbol to repository`() = runTest {
         whenever(repository.setMapping(any(), any())).thenReturn(Result.success(Unit))
 
-        viewModel.saveMapping("a", "@")
+        viewModel.saveMapping("u", "ǔ")
         testDispatcher.scheduler.advanceUntilIdle()
 
-        verify(repository).setMapping("a", "@")
+        verify(repository).setMapping("u", "ǔ")
     }
 
     @Test
-    fun `saveMapping trims whitespace`() = runTest {
+    fun `saveMapping encodes space-separated symbols as delimiter-joined string`() = runTest {
         whenever(repository.setMapping(any(), any())).thenReturn(Result.success(Unit))
+        val captor = argumentCaptor<String>()
 
-        viewModel.saveMapping("a", "  @  ")
+        viewModel.saveMapping("u", "ǔ ū")
         testDispatcher.scheduler.advanceUntilIdle()
 
-        verify(repository).setMapping("a", "@")
+        verify(repository).setMapping(any(), captor.capture())
+        val stored = captor.firstValue
+        val parts = stored.split(CustomKeyMappingService.LONG_PRESS_DELIMITER)
+        assertEquals(listOf("ǔ", "ū"), parts)
+    }
+
+    @Test
+    fun `saveMapping NFC-normalizes symbols before storage`() = runTest {
+        whenever(repository.setMapping(any(), any())).thenReturn(Result.success(Unit))
+        val captor = argumentCaptor<String>()
+        // decomposed é (e + combining acute)
+        val decomposed = "é"
+
+        viewModel.saveMapping("e", decomposed)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        verify(repository).setMapping(any(), captor.capture())
+        // stored value should be NFC precomposed é (U+00E9)
+        assertEquals("é", captor.firstValue)
+    }
+
+    @Test
+    fun `saveMapping trims whitespace around each symbol`() = runTest {
+        whenever(repository.setMapping(any(), any())).thenReturn(Result.success(Unit))
+        val captor = argumentCaptor<String>()
+
+        viewModel.saveMapping("u", "  ǔ  ū  ")
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        verify(repository).setMapping(any(), captor.capture())
+        val parts = captor.firstValue.split(CustomKeyMappingService.LONG_PRESS_DELIMITER)
+        assertEquals(listOf("ǔ", "ū"), parts)
     }
 
     @Test
@@ -184,6 +222,22 @@ class LayoutMapperViewModelTest {
 
         verify(repository).removeMapping("a")
         verify(repository, never()).setMapping(any(), any())
+    }
+
+    @Test
+    fun `saveMapping deduplicates NFC-equivalent inputs before applying cap`() = runTest {
+        whenever(repository.setMapping(any(), any())).thenReturn(Result.success(Unit))
+        val captor = argumentCaptor<String>()
+        // 4 distinct inputs + 1 NFC-duplicate of the first → should store 4 not 5
+        val precomposed = "é"
+        val decomposed = "é"
+        viewModel.saveMapping("e", "$precomposed ā ǎ à $decomposed")
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        verify(repository).setMapping(any(), captor.capture())
+        val parts = captor.firstValue.split(CustomKeyMappingService.LONG_PRESS_DELIMITER)
+        assertEquals(4, parts.size)
+        assertEquals(precomposed, parts[0])
     }
 
     @Test

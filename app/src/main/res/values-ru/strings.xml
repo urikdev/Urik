@@ -125,9 +125,9 @@
 
     <!-- Layout Mapper -->
     <string name="layout_mapper_title">Настройка Клавиш</string>
-    <string name="layout_mapper_instructions">Нажмите на клавишу, чтобы назначить пользовательский символ. Долгое нажатие этой клавиши на клавиатуре вставит ваш символ.</string>
+    <string name="layout_mapper_instructions">Нажмите на клавишу, чтобы назначить пользовательские символы (через пробел). Долгое нажатие этой клавиши покажет ваши символы рядом со встроенными вариантами.</string>
     <string name="layout_mapper_edit_key">Редактировать клавишу: %1$s</string>
-    <string name="layout_mapper_symbol_hint">Пользовательский символ</string>
+    <string name="layout_mapper_symbol_hint">Пользовательские символы (через пробел, напр. ǔ ū)</string>
     <string name="layout_mapper_save">Сохранить</string>
     <string name="layout_mapper_remove">Удалить</string>
     <string name="layout_mapper_reset_all">Сбросить Все</string>

@@ -143,9 +143,9 @@
 
     <!-- Layout Mapper -->
     <string name="layout_mapper_title">Personalizar teclas</string>
-    <string name="layout_mapper_instructions">Toca una tecla para asignar un carácter personalizado. Si presionas esa tecla en el teclado, se insertará tu carácter.</string>
+    <string name="layout_mapper_instructions">Toca una tecla para asignar caracteres personalizados (separados por espacios). Al mantener pulsada esa tecla se mostrarán tus caracteres junto con las opciones integradas.</string>
     <string name="layout_mapper_edit_key">Editar tecla: %1$s</string>
-    <string name="layout_mapper_symbol_hint">Carácter personalizado</string>
+    <string name="layout_mapper_symbol_hint">Caracteres personalizados (separados por espacios, p. ej. ǔ ū)</string>
     <string name="layout_mapper_save">Guardar</string>
     <string name="layout_mapper_remove">Eliminar</string>
     <string name="layout_mapper_reset_all">Restablecer todo</string>

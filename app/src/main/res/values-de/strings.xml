@@ -142,9 +142,9 @@
 
     <!-- Layout Mapper -->
     <string name="layout_mapper_title">Tasten anpassen</string>
-    <string name="layout_mapper_instructions">Tippe auf eine Taste, um ein benutzerdefiniertes Zeichen zuzuweisen. Durch Langdruck auf diese Taste auf der Tastatur wird dein Zeichen eingefügt.</string>
+    <string name="layout_mapper_instructions">Tippe auf eine Taste, um benutzerdefinierte Zeichen zuzuweisen (durch Leerzeichen getrennt). Durch Langdruck auf diese Taste werden deine Zeichen neben den integrierten Optionen angezeigt.</string>
     <string name="layout_mapper_edit_key">Taste bearbeiten: %1$s</string>
-    <string name="layout_mapper_symbol_hint">Benutzerdefiniertes Zeichen</string>
+    <string name="layout_mapper_symbol_hint">Benutzerdefinierte Zeichen (leerzeichengetrennt, z. B. ǔ ū)</string>
     <string name="layout_mapper_save">Speichern</string>
     <string name="layout_mapper_remove">Entfernen</string>
     <string name="layout_mapper_reset_all">Alle zurücksetzen</string>

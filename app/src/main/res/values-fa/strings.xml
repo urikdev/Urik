@@ -135,9 +135,9 @@
 
     <!-- Layout Mapper -->
     <string name="layout_mapper_title">سفارشی‌سازی کلیدها</string>
-    <string name="layout_mapper_instructions">روی یک کلید ضربه بزنید تا یک کاراکتر شخصی اختصاص دهید. فشار طولانی روی این کلید بر روی صفحه‌کلید کاراکتر شخصی شما را درج می‌کند.</string>
+    <string name="layout_mapper_instructions">روی یک کلید ضربه بزنید تا کاراکترهای شخصی اختصاص دهید (جدا شده با فاصله). فشار طولانی روی آن کلید، کاراکترهای شما را در کنار گزینه‌های داخلی نشان می‌دهد.</string>
     <string name="layout_mapper_edit_key">ویرایش کلید: %1$s</string>
-    <string name="layout_mapper_symbol_hint">کاراکتر شخصی</string>
+    <string name="layout_mapper_symbol_hint">کاراکترهای شخصی (جدا شده با فاصله، مثال: ǔ ū)</string>
     <string name="layout_mapper_save">ذخیره</string>
     <string name="layout_mapper_remove">حذف</string>
     <string name="layout_mapper_reset_all">بازنشانی همه</string>

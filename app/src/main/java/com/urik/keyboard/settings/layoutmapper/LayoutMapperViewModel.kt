@@ -3,7 +3,9 @@ package com.urik.keyboard.settings.layoutmapper
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.urik.keyboard.data.CustomKeyMappingRepository
+import com.urik.keyboard.service.CustomKeyMappingService
 import dagger.hilt.android.lifecycle.HiltViewModel
+import java.text.Normalizer
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -40,9 +42,13 @@ constructor(private val repository: CustomKeyMappingRepository) : ViewModel() {
     private val _selectedKey = MutableStateFlow<String?>(null)
     val selectedKey: StateFlow<String?> = _selectedKey.asStateFlow()
 
-    val mappings: StateFlow<Map<String, String>> =
+    val mappings: StateFlow<Map<String, List<String>>> =
         repository.mappings
-            .map { list -> list.associate { it.baseKey to it.customSymbol } }
+            .map { list ->
+                list
+                    .associate { it.baseKey to CustomKeyMappingService.parseSymbols(it.customSymbol) }
+                    .filter { it.value.isNotEmpty() }
+            }
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS),
@@ -57,15 +63,24 @@ constructor(private val repository: CustomKeyMappingRepository) : ViewModel() {
         _selectedKey.value = null
     }
 
-    fun saveMapping(baseKey: String, customSymbol: String) {
-        if (customSymbol.isBlank()) {
+    fun saveMapping(baseKey: String, rawInput: String) {
+        if (rawInput.isBlank()) {
             removeMapping(baseKey)
             return
         }
 
+        val encoded = rawInput
+            .trim()
+            .split("\\s+".toRegex())
+            .filter { it.isNotBlank() }
+            .map { Normalizer.normalize(it, Normalizer.Form.NFC) }
+            .distinct()
+            .take(CustomKeyMappingService.MAX_CUSTOM_SYMBOLS)
+            .joinToString(CustomKeyMappingService.LONG_PRESS_DELIMITER.toString())
+
         viewModelScope.launch {
             repository
-                .setMapping(baseKey, customSymbol.trim())
+                .setMapping(baseKey, encoded)
                 .onSuccess {
                     _events.emit(LayoutMapperEvent.MappingSaved)
                     clearSelection()
@@ -100,7 +115,7 @@ constructor(private val repository: CustomKeyMappingRepository) : ViewModel() {
         }
     }
 
-    fun getMappingForKey(baseKey: String): String? = mappings.value[baseKey.lowercase()]
+    fun getMappingForKey(baseKey: String): List<String>? = mappings.value[baseKey.lowercase()]
 
     private companion object {
         const val STOP_TIMEOUT_MILLIS = 5000L

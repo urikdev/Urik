@@ -124,9 +124,9 @@
 
     <!-- Layout Mapper -->
     <string name="layout_mapper_title">Dostosuj klawisze</string>
-    <string name="layout_mapper_instructions">Stuknij klawisz, aby przypisać niestandardowy znak. Długie naciśnięcie tego klawisza na klawiaturze spowoduje wstawienie Twojego znaku.</string>
+    <string name="layout_mapper_instructions">Stuknij klawisz, aby przypisać niestandardowe znaki (oddzielone spacją). Długie naciśnięcie tego klawisza wyświetli Twoje znaki obok wbudowanych opcji.</string>
     <string name="layout_mapper_edit_key">Edytuj klawisz: %1$s</string>
-    <string name="layout_mapper_symbol_hint">Niestandardowy znak</string>
+    <string name="layout_mapper_symbol_hint">Niestandardowe znaki (oddzielone spacją, np. ǔ ū)</string>
     <string name="layout_mapper_save">Zapisz</string>
     <string name="layout_mapper_remove">Usuń</string>
     <string name="layout_mapper_reset_all">Zresetuj wszystko</string>

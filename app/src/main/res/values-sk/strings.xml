@@ -143,9 +143,9 @@
 
     <!-- Layout Mapper -->
     <string name="layout_mapper_title">Prispôsobiť klávesy</string>
-    <string name="layout_mapper_instructions">Kliknite na kláves, aby ste priradili vlastný znak. Dlhé stlačenie tohto klávesu na klávesnici vloží váš znak.</string>
+    <string name="layout_mapper_instructions">Klepnite na kláves, aby ste priradili vlastné znaky (oddelené medzerou). Dlhé stlačenie tohto klávesu zobrazí vaše znaky spolu s vstavanými možnosťami.</string>
     <string name="layout_mapper_edit_key">Upraviť kláves: %1$s</string>
-    <string name="layout_mapper_symbol_hint">Vlastný znak</string>
+    <string name="layout_mapper_symbol_hint">Vlastné znaky (oddelené medzerou, napr. ǔ ū)</string>
     <string name="layout_mapper_save">Uložiť</string>
     <string name="layout_mapper_remove">Odstrániť</string>
     <string name="layout_mapper_reset_all">Obnoviť všetko</string>
