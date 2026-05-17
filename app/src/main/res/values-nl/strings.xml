@@ -136,9 +136,9 @@
 
     <!-- Layout Mapper -->
     <string name="layout_mapper_title">Toetsen aanpassen</string>
-    <string name="layout_mapper_instructions">Tik op een toets om een aangepast teken toe te wijzen. Als je lang op die toets op het toetsenbord drukt, wordt je teken ingevoegd.</string>
+    <string name="layout_mapper_instructions">Tik op een toets om aangepaste tekens toe te wijzen (spatie-gescheiden). Lang indrukken van die toets toont jouw tekens naast de ingebouwde opties.</string>
     <string name="layout_mapper_edit_key">Toets bewerken: %1$s</string>
-    <string name="layout_mapper_symbol_hint">Aangepast teken</string>
+    <string name="layout_mapper_symbol_hint">Aangepaste tekens (spatie-gescheiden, bijv. ǔ ū)</string>
     <string name="layout_mapper_save">Opslaan</string>
     <string name="layout_mapper_remove">Verwijderen</string>
     <string name="layout_mapper_reset_all">Alles opnieuw instellen</string>

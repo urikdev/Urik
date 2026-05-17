@@ -78,9 +78,9 @@
 
     <!-- Layout Mapper -->
     <string name="layout_mapper_title">Anpassa tangenter</string>
-    <string name="layout_mapper_instructions">Tryck på en tangent för att tilldela en anpassad karaktär. Om du trycker länge på denna tangent på tangentbordet infogas din karaktär.</string>
+    <string name="layout_mapper_instructions">Tryck på en tangent för att tilldela anpassade tecken (blankstegsavgränsade). Långtryckning på den tangenten visar dina tecken bredvid de inbyggda alternativen.</string>
     <string name="layout_mapper_edit_key">Redigera tangent: %1$s</string>
-    <string name="layout_mapper_symbol_hint">Anpassad karaktär</string>
+    <string name="layout_mapper_symbol_hint">Anpassade tecken (blankstegsavgränsade, t.ex. ǔ ū)</string>
     <string name="layout_mapper_save">Spara</string>
     <string name="layout_mapper_remove">Ta bort</string>
     <string name="layout_mapper_reset_all">Återställ alla</string>

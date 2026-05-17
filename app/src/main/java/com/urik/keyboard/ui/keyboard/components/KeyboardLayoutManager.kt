@@ -41,6 +41,7 @@ import com.urik.keyboard.settings.SpaceBarSize
 import com.urik.keyboard.theme.ThemeManager
 import com.urik.keyboard.utils.CacheMemoryManager
 import com.urik.keyboard.utils.ErrorLogger
+import java.text.Normalizer
 import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -73,7 +74,7 @@ class KeyboardLayoutManager(
         private set
 
     @Volatile
-    private var customKeyMappings: Map<String, String> = emptyMap()
+    private var customKeyMappings: Map<String, List<String>> = emptyMap()
     private val keyHintRenderer = KeyHintRenderer(context)
 
     private val vibrator =
@@ -350,7 +351,7 @@ class KeyboardLayoutManager(
         pressHighlightEnabled = enabled
     }
 
-    fun updateCustomKeyMappings(mappings: Map<String, String>) {
+    fun updateCustomKeyMappings(mappings: Map<String, List<String>>) {
         customKeyMappings = mappings
     }
 
@@ -859,8 +860,8 @@ class KeyboardLayoutManager(
                     val keyboardIcon = ContextCompat.getDrawable(context, R.drawable.ic_keyboard)
                     keyboardIcon?.setTint(getKeyTextColor(key))
                     addBadgeOverlay(keyBackground, keyboardIcon)
-                } else if (supportsCustomMapping && customKeyMappings[key.value.lowercase()] != null) {
-                    val customSymbol = customKeyMappings[key.value.lowercase()]!!
+                } else if (supportsCustomMapping && !customKeyMappings[key.value.lowercase()].isNullOrEmpty()) {
+                    val customSymbol = customKeyMappings[key.value.lowercase()]!!.first()
                     keyHintRenderer.createKeyWithHint(
                         keyBackground,
                         customSymbol,
@@ -1422,16 +1423,7 @@ class KeyboardLayoutManager(
     }
 
     private fun handleCharacterLongPress(key: KeyboardKey.Character, view: View, button: Button) {
-        val customSymbol = customKeyMappings[key.value.lowercase()]
-        if (customSymbol != null) {
-            customMappingLongPressFired.add(button)
-            view.isPressed = false
-            val customKey = KeyboardKey.Character(customSymbol, KeyboardKey.KeyType.SYMBOL)
-            performContextualHaptic(customKey)
-            onKeyClick(customKey)
-            return
-        }
-
+        val customSymbols = customKeyMappings[key.value.lowercase()].orEmpty()
         val currentLayoutLang = languageManager.currentLayoutLanguage.value
 
         backgroundScope.launch {
@@ -1447,15 +1439,23 @@ class KeyboardLayoutManager(
                     null
                 }
 
-                var variations = characterVariationService.getVariations(key.value, currentLayoutLang)
+                val builtInVariations = characterVariationService.getVariations(key.value, currentLayoutLang)
 
-                if (firstRowLetter != null) {
+                val numberPrefix = if (firstRowLetter != null) {
                     val number = (firstRowLetter.indexOf(key) + 1) % 10
-                    variations = listOf(number.toString()) + variations
+                    listOf(number.toString())
+                } else {
+                    emptyList()
                 }
-                if (variations.isNotEmpty()) {
-                    val casedVariations = applyCasingToVariations(variations)
+
+                val merged = mergeVariations(customSymbols, numberPrefix + builtInVariations)
+
+                if (merged.isNotEmpty()) {
+                    val casedVariations = applyCasingToVariations(merged)
                     withContext(Dispatchers.Main) {
+                        if (customSymbols.isNotEmpty()) {
+                            customMappingLongPressFired.add(button)
+                        }
                         showCharacterVariationPopup(key, view, casedVariations)
                     }
                 } else {
@@ -1475,6 +1475,17 @@ class KeyboardLayoutManager(
                 }
             }
         }
+    }
+
+    @VisibleForTesting internal fun mergeVariations(custom: List<String>, builtIn: List<String>): List<String> {
+        val seen = LinkedHashSet<String>()
+        for (s in custom) seen.add(Normalizer.normalize(s, Normalizer.Form.NFC))
+        val result = ArrayList<String>(seen)
+        for (s in builtIn) {
+            val nfc = Normalizer.normalize(s, Normalizer.Form.NFC)
+            if (seen.add(nfc)) result.add(nfc)
+        }
+        return result
     }
 
     private fun showCharacterVariationPopup(key: KeyboardKey.Character, anchorView: View, variations: List<String>) {

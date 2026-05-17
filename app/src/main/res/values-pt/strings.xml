@@ -123,9 +123,9 @@
 
     <!-- Layout Mapper -->
     <string name="layout_mapper_title">Personalizar Teclas</string>
-    <string name="layout_mapper_instructions">Toque uma tecla para atribuir um caractere personalizado. Tocar prolongadamente essa tecla no teclado inserirá seu caractere.</string>
+    <string name="layout_mapper_instructions">Toque uma tecla para atribuir caracteres personalizados (separados por espaços). Manter essa tecla pressionada mostrará seus caracteres junto com as opções integradas.</string>
     <string name="layout_mapper_edit_key">Editar tecla: %1$s</string>
-    <string name="layout_mapper_symbol_hint">Caractere personalizado</string>
+    <string name="layout_mapper_symbol_hint">Caracteres personalizados (separados por espaços, ex. ǔ ū)</string>
     <string name="layout_mapper_save">Guardar</string>
     <string name="layout_mapper_remove">Remover</string>
     <string name="layout_mapper_reset_all">Repor Tudo</string>

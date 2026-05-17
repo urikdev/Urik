@@ -156,9 +156,9 @@
 
     <!-- Layout Mapper -->
     <string name="layout_mapper_title">キーのカスタマイズ</string>
-    <string name="layout_mapper_instructions">キーをタップしてカスタム文字を割り当てます。キーボード上でそのキーを長押しすると文字が入力されます。</string>
+    <string name="layout_mapper_instructions">キーをタップしてカスタム文字を割り当てます（スペース区切り）。そのキーを長押しすると、カスタム文字が組み込みオプションとともに表示されます。</string>
     <string name="layout_mapper_edit_key">キーを編集：%1$s</string>
-    <string name="layout_mapper_symbol_hint">カスタム文字</string>
+    <string name="layout_mapper_symbol_hint">カスタム文字（スペース区切り、例: ǔ ū）</string>
     <string name="layout_mapper_save">保存</string>
     <string name="layout_mapper_remove">削除</string>
     <string name="layout_mapper_reset_all">すべてリセット</string>

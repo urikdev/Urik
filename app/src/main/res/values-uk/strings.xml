@@ -124,9 +124,9 @@
 
     <!-- Layout Mapper -->
     <string name="layout_mapper_title">Настройка Клавіш</string>
-    <string name="layout_mapper_instructions">Натисніть на клавішу, щоб призначити власний символ. Довге натискання цієї клавіші на клавіатурі вставить ваш символ.</string>
+    <string name="layout_mapper_instructions">Натисніть на клавішу, щоб призначити власні символи (через пробіл). Довге натискання цієї клавіші покаже ваші символи поряд із вбудованими варіантами.</string>
     <string name="layout_mapper_edit_key">Редагувати клавішу: %1$s</string>
-    <string name="layout_mapper_symbol_hint">Власний символ</string>
+    <string name="layout_mapper_symbol_hint">Власні символи (через пробіл, напр. ǔ ū)</string>
     <string name="layout_mapper_save">Зберегти</string>
     <string name="layout_mapper_remove">Видалити</string>
     <string name="layout_mapper_reset_all">Скинути Все</string>

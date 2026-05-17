@@ -158,9 +158,9 @@
 
     <!-- Layout Mapper -->
     <string name="layout_mapper_title">Персонализиране на клавиши</string>
-    <string name="layout_mapper_instructions">Докоснете клавиш, за да зададете символ. Дългото натискане ще го вмъкне.</string>
+    <string name="layout_mapper_instructions">Докоснете клавиш, за да зададете персонализирани символи (разделени с интервал). Дългото натискане ще покаже вашите символи заедно с вградените опции.</string>
     <string name="layout_mapper_edit_key">Редактиране на клавиш: %1$s</string>
-    <string name="layout_mapper_symbol_hint">Персонализиран символ</string>
+    <string name="layout_mapper_symbol_hint">Персонализирани символи (разделени с интервал, напр. ǔ ū)</string>
     <string name="layout_mapper_save">Запази</string>
     <string name="layout_mapper_remove">Премахни</string>
     <string name="layout_mapper_reset_all">Нулирай всички</string>

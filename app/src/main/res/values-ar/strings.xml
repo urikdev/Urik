@@ -153,9 +153,9 @@
 
     <!-- Layout Mapper -->
     <string name="layout_mapper_title">تخصيص المفاتيح</string>
-    <string name="layout_mapper_instructions">إضغط على مفتاح لتخصيصه، ثم إضغط على المفتاح ضغطًا مطولًا لإستخدام تخصيصك</string>
+    <string name="layout_mapper_instructions">اضغط على مفتاح لتعيين أحرف مخصصة (مفصولة بمسافات). سيعرض الضغط المطوّل على ذلك المفتاح أحرفك جانبًا مع الخيارات المضمّنة.</string>
     <string name="layout_mapper_edit_key">عدل المفتاح: %1$s</string>
-    <string name="layout_mapper_symbol_hint">حرف مخصص</string>
+    <string name="layout_mapper_symbol_hint">أحرف مخصصة (مفصولة بمسافات، مثال: ǔ ū)</string>
     <string name="layout_mapper_save">حفظ</string>
     <string name="layout_mapper_remove">حذف</string>
     <string name="layout_mapper_reset_all">إعادة ضبط الجميع</string>

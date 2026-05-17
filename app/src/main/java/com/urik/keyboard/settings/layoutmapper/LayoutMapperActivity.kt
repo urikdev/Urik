@@ -28,6 +28,7 @@ import com.urik.keyboard.data.KeyboardRepository
 import com.urik.keyboard.model.KeyboardKey
 import com.urik.keyboard.model.KeyboardLayout
 import com.urik.keyboard.model.KeyboardMode
+import com.urik.keyboard.service.CustomKeyMappingService
 import com.urik.keyboard.settings.SettingsRepository
 import com.urik.keyboard.theme.ThemeManager
 import dagger.hilt.android.AndroidEntryPoint
@@ -224,6 +225,7 @@ class LayoutMapperActivity : AppCompatActivity() {
         val density = resources.displayMetrics.density
         val theme = themeManager.currentTheme.value
         val currentMapping = viewModel.getMappingForKey(keyValue)
+        val prefillText = currentMapping?.joinToString(" ") ?: ""
 
         val contentLayout =
             LinearLayout(this).apply {
@@ -262,9 +264,9 @@ class LayoutMapperActivity : AppCompatActivity() {
 
                 val symbolInput =
                     TextInputEditText(context).apply {
-                        setText(currentMapping ?: "")
+                        setText(prefillText)
                         maxLines = 1
-                        filters = arrayOf(SingleGraphemeFilter())
+                        filters = arrayOf(MultiGraphemeFilter())
                     }
                 inputLayout.addView(symbolInput)
                 addView(inputLayout)
@@ -312,8 +314,8 @@ class LayoutMapperActivity : AppCompatActivity() {
                                             marginStart = (8 * density).toInt()
                                         }
                                 setOnClickListener {
-                                    val symbol = symbolInput.text?.toString() ?: ""
-                                    viewModel.saveMapping(keyValue, symbol)
+                                    val input = symbolInput.text?.toString() ?: ""
+                                    viewModel.saveMapping(keyValue, input)
                                     bottomSheet.dismiss()
                                 }
                             }
@@ -455,7 +457,11 @@ class LayoutMapperActivity : AppCompatActivity() {
         return typedValue.data
     }
 
-    private class SingleGraphemeFilter : android.text.InputFilter {
+    /**
+     * Allows up to [MAX_CUSTOM_SYMBOLS] non-space grapheme clusters, separated by spaces.
+     * Spaces are permitted as separators but not counted toward the limit.
+     */
+    private class MultiGraphemeFilter : android.text.InputFilter {
         override fun filter(
             source: CharSequence,
             start: Int,
@@ -465,17 +471,22 @@ class LayoutMapperActivity : AppCompatActivity() {
             dend: Int
         ): CharSequence? {
             val resultText = dest.substring(0, dstart) + source.subSequence(start, end) + dest.substring(dend)
-            val graphemeCount = countGraphemes(resultText)
-            return if (graphemeCount > 1) "" else null
+            val nonSpaceGraphemeCount = countNonSpaceGraphemes(resultText)
+            return if (nonSpaceGraphemeCount > CustomKeyMappingService.MAX_CUSTOM_SYMBOLS) "" else null
         }
 
-        private fun countGraphemes(text: String): Int {
+        private fun countNonSpaceGraphemes(text: String): Int {
             if (text.isEmpty()) return 0
             val iterator = java.text.BreakIterator.getCharacterInstance()
             iterator.setText(text)
             var count = 0
-            while (iterator.next() != java.text.BreakIterator.DONE) {
-                count++
+            var prev = iterator.first()
+            var next = iterator.next()
+            while (next != java.text.BreakIterator.DONE) {
+                val cluster = text.substring(prev, next)
+                if (cluster.isNotBlank()) count++
+                prev = next
+                next = iterator.next()
             }
             return count
         }

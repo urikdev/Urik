@@ -136,9 +136,9 @@
 
     <!-- Layout Mapper -->
     <string name="layout_mapper_title">Personalizza tasti</string>
-    <string name="layout_mapper_instructions">Tocca un tasto per assegnare un carattere personalizzato. La pressione prolungata su quel tasto sulla tastiera inserirà il tuo carattere.</string>
+    <string name="layout_mapper_instructions">Tocca un tasto per assegnare caratteri personalizzati (separati da spazi). La pressione prolungata su quel tasto mostrerà i tuoi caratteri insieme alle opzioni integrate.</string>
     <string name="layout_mapper_edit_key">Modifica tasto: %1$s</string>
-    <string name="layout_mapper_symbol_hint">Carattere personalizzato</string>
+    <string name="layout_mapper_symbol_hint">Caratteri personalizzati (separati da spazi, es. ǔ ū)</string>
     <string name="layout_mapper_save">Salva</string>
     <string name="layout_mapper_remove">Rimuovi</string>
     <string name="layout_mapper_reset_all">Ripristina tutto</string>

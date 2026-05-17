@@ -144,9 +144,9 @@
     <string name="layout_settings_customize_keys_summary">Assignar un caràcter personalitzat a la premsa llarga</string>
     <!-- Layout Mapper -->
     <string name="layout_mapper_title">Personalitzar tecles</string>
-    <string name="layout_mapper_instructions">Toca una tecla per assignar un caràcter personalitzat. Mantingues premuda aquesta tecla al teclat per inserir el teu caràcter.</string>
+    <string name="layout_mapper_instructions">Toca una tecla per assignar caràcters personalitzats (separats per espais). Mantenir premuda aquella tecla mostrarà els teus caràcters juntament amb les opcions integrades.</string>
     <string name="layout_mapper_edit_key">Editar tecla: %1$s</string>
-    <string name="layout_mapper_symbol_hint">Caràcter personalitzat</string>
+    <string name="layout_mapper_symbol_hint">Caràcters personalitzats (separats per espais, p. ex. ǔ ū)</string>
     <string name="layout_mapper_save">Desar</string>
     <string name="layout_mapper_remove">Eliminar</string>
     <string name="layout_mapper_reset_all">Reinicialitza-ho tot</string>
