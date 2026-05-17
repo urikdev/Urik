@@ -29,15 +29,47 @@ class SwipeWordHandler(
         try {
             inputState.clearBigramPredictions()
 
+            if (inputState.isRawKeyEventField) return
+
             if (inputState.requiresDirectCommit) {
-                if (!inputState.isSecureField && !inputState.isRawKeyEventField) {
-                    val textBefore = outputBridge.safeGetTextBeforeCursor(1)
-                    if (textBefore.isNotEmpty() && !swipeSpaceManager.isWhitespace(textBefore)) {
-                        outputBridge.commitText(" ", 1)
-                        swipeSpaceManager.markAutoSpaceInserted()
+                if (!inputState.isSecureField && !inputState.isTerminalField) {
+                    outputBridge.beginBatchEdit()
+                    try {
+                        val textBefore = outputBridge.safeGetTextBeforeCursor(1)
+                        if (textBefore.isNotEmpty() && !swipeSpaceManager.isWhitespace(textBefore)) {
+                            outputBridge.commitText(" ", 1)
+                            swipeSpaceManager.markAutoSpaceInserted()
+                        }
+                        val keyboardState = onGetKeyboardState()
+                        val isSentenceStart = keyboardState.isAutoShift
+                        val isManualShifted =
+                            keyboardState.isShiftPressed && !keyboardState.isAutoShift && !keyboardState.isCapsLockOn
+                        val effectiveState =
+                            if (isManualShifted) {
+                                keyboardState.copy(isShiftPressed = true, isAutoShift = false)
+                            } else {
+                                keyboardState
+                            }
+                        if (keyboardState.isShiftPressed && !keyboardState.isCapsLockOn) {
+                            onDisableShiftAfterSwipe()
+                        }
+                        val currentLanguage = languageManager.currentLanguage.value.split("-").first()
+                        val displayWord = computeSwipeDisplayWord(
+                            validatedWord = validatedWord,
+                            learnedOriginalCase = null,
+                            currentLanguage = currentLanguage,
+                            keyboardState = effectiveState,
+                            isSentenceStart = isSentenceStart
+                        )
+                        outputBridge.commitText(displayWord, 1)
+                        val textAfterCommit = outputBridge.safeGetTextBeforeCursor(50)
+                        onCheckAutoCapitalization(textAfterCommit)
+                    } finally {
+                        outputBridge.endBatchEdit()
                     }
+                } else {
+                    outputBridge.commitText(validatedWord, 1)
                 }
-                outputBridge.commitText(validatedWord, 1)
                 return
             }
 
@@ -115,13 +147,17 @@ class SwipeWordHandler(
                         is ProcessingResult.Success -> {
                             withContext(Dispatchers.Main) {
                                 inputState.isActivelyEditing = true
-                                outputBridge.commitPreviousSwipeAndInsertSpace()
-                                outputBridge.setComposingText(displayWord, 1)
-                                inputState.composingRegionStart =
-                                    outputBridge.safeGetCursorPosition() - displayWord.length
-                                inputState.displayBuffer = displayWord
-                                suggestionPipeline.coordinateStateTransition(result.wordState)
-
+                                outputBridge.beginBatchEdit()
+                                try {
+                                    outputBridge.commitPreviousSwipeAndInsertSpace()
+                                    outputBridge.setComposingText(displayWord, 1)
+                                    inputState.composingRegionStart =
+                                        outputBridge.safeGetCursorPosition() - displayWord.length
+                                    inputState.displayBuffer = displayWord
+                                    suggestionPipeline.coordinateStateTransition(result.wordState)
+                                } finally {
+                                    outputBridge.endBatchEdit()
+                                }
                                 if (result.shouldHighlight) {
                                     inputState.spellConfirmationState =
                                         SpellConfirmationState.AWAITING_CONFIRMATION
@@ -134,19 +170,24 @@ class SwipeWordHandler(
                         is ProcessingResult.Error -> {
                             withContext(Dispatchers.Main) {
                                 inputState.isActivelyEditing = true
-                                outputBridge.commitPreviousSwipeAndInsertSpace()
-                                outputBridge.setComposingText(displayWord, 1)
-                                inputState.composingRegionStart =
-                                    outputBridge.safeGetCursorPosition() - displayWord.length
-                                inputState.displayBuffer = displayWord
-                                inputState.wordState =
-                                    WordState(
-                                        buffer = displayWord,
-                                        normalizedBuffer = validatedWord.lowercase(),
-                                        isFromSwipe = true,
-                                        graphemeCount = displayWord.length,
-                                        scriptCode = swipeScriptCode
-                                    )
+                                outputBridge.beginBatchEdit()
+                                try {
+                                    outputBridge.commitPreviousSwipeAndInsertSpace()
+                                    outputBridge.setComposingText(displayWord, 1)
+                                    inputState.composingRegionStart =
+                                        outputBridge.safeGetCursorPosition() - displayWord.length
+                                    inputState.displayBuffer = displayWord
+                                    inputState.wordState =
+                                        WordState(
+                                            buffer = displayWord,
+                                            normalizedBuffer = validatedWord.lowercase(),
+                                            isFromSwipe = true,
+                                            graphemeCount = displayWord.length,
+                                            scriptCode = swipeScriptCode
+                                        )
+                                } finally {
+                                    outputBridge.endBatchEdit()
+                                }
                             }
                         }
                     }
@@ -172,18 +213,24 @@ class SwipeWordHandler(
                             isSentenceStart
                         )
                         inputState.isActivelyEditing = true
-                        outputBridge.commitPreviousSwipeAndInsertSpace()
-                        outputBridge.setComposingText(fallbackDisplay, 1)
-                        inputState.composingRegionStart = outputBridge.safeGetCursorPosition() - fallbackDisplay.length
-                        inputState.displayBuffer = fallbackDisplay
-                        inputState.wordState =
-                            WordState(
-                                buffer = fallbackDisplay,
-                                normalizedBuffer = validatedWord.lowercase(),
-                                isFromSwipe = true,
-                                graphemeCount = fallbackDisplay.length,
-                                scriptCode = swipeScriptCode
-                            )
+                        outputBridge.beginBatchEdit()
+                        try {
+                            outputBridge.commitPreviousSwipeAndInsertSpace()
+                            outputBridge.setComposingText(fallbackDisplay, 1)
+                            inputState.composingRegionStart =
+                                outputBridge.safeGetCursorPosition() - fallbackDisplay.length
+                            inputState.displayBuffer = fallbackDisplay
+                            inputState.wordState =
+                                WordState(
+                                    buffer = fallbackDisplay,
+                                    normalizedBuffer = validatedWord.lowercase(),
+                                    isFromSwipe = true,
+                                    graphemeCount = fallbackDisplay.length,
+                                    scriptCode = swipeScriptCode
+                                )
+                        } finally {
+                            outputBridge.endBatchEdit()
+                        }
                     }
                 }
             }
@@ -194,6 +241,7 @@ class SwipeWordHandler(
                 exception = e,
                 context = mapOf("operation" to "handleSwipeWord")
             )
+            onCoordinateStateClear()
             outputBridge.setComposingText(validatedWord, 1)
         }
     }
