@@ -255,4 +255,9 @@ class InputStateManagerTest {
 
         assertFalse(stateManager.isKnownCursorTrustworthy())
     }
+
+    @Test
+    fun `isSuggestionsDisabled initialises false`() {
+        assertFalse(stateManager.isSuggestionsDisabled)
+    }
 }

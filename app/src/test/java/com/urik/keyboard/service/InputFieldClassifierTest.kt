@@ -135,4 +135,96 @@ class InputFieldClassifierTest {
 
         assertTrue(result.isTerminalField)
     }
+
+    @Test
+    fun `classify null info isSuggestionsDisabled false`() {
+        assertFalse(InputFieldClassifier.classify(null).isSuggestionsDisabled)
+    }
+
+    @Test
+    fun `classify TYPE_TEXT_FLAG_NO_SUGGESTIONS isSuggestionsDisabled true`() {
+        val info = createEditorInfo(inputFlags = InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS)
+        assertTrue(InputFieldClassifier.classify(info).isSuggestionsDisabled)
+    }
+
+    @Test
+    fun `classify TYPE_TEXT_FLAG_AUTO_COMPLETE isSuggestionsDisabled true`() {
+        val info = createEditorInfo(inputFlags = InputType.TYPE_TEXT_FLAG_AUTO_COMPLETE)
+        assertTrue(InputFieldClassifier.classify(info).isSuggestionsDisabled)
+    }
+
+    @Test
+    fun `classify TYPE_TEXT_VARIATION_FILTER isSuggestionsDisabled true`() {
+        val info = createEditorInfo(inputVariation = InputType.TYPE_TEXT_VARIATION_FILTER)
+        assertTrue(InputFieldClassifier.classify(info).isSuggestionsDisabled)
+    }
+
+    @Test
+    fun `classify TYPE_CLASS_NUMBER non-password isSuggestionsDisabled true`() {
+        val info = createEditorInfo(
+            inputClass = InputType.TYPE_CLASS_NUMBER,
+            inputVariation = InputType.TYPE_NUMBER_VARIATION_NORMAL
+        )
+        assertTrue(InputFieldClassifier.classify(info).isSuggestionsDisabled)
+    }
+
+    @Test
+    fun `classify TYPE_CLASS_NUMBER password isSuggestionsDisabled false`() {
+        val info = createEditorInfo(
+            inputClass = InputType.TYPE_CLASS_NUMBER,
+            inputVariation = InputType.TYPE_NUMBER_VARIATION_PASSWORD
+        )
+        assertFalse(InputFieldClassifier.classify(info).isSuggestionsDisabled)
+    }
+
+    @Test
+    fun `classify TYPE_CLASS_PHONE isSuggestionsDisabled true`() {
+        val info = createEditorInfo(inputClass = InputType.TYPE_CLASS_PHONE, inputVariation = 0)
+        assertTrue(InputFieldClassifier.classify(info).isSuggestionsDisabled)
+    }
+
+    @Test
+    fun `classify normal text field isSuggestionsDisabled false`() {
+        val info = createEditorInfo(
+            inputClass = InputType.TYPE_CLASS_TEXT,
+            inputVariation = InputType.TYPE_TEXT_VARIATION_NORMAL
+        )
+        assertFalse(InputFieldClassifier.classify(info).isSuggestionsDisabled)
+    }
+
+    @Test
+    fun `classify password variation isSuggestionsDisabled false`() {
+        val info = createEditorInfo(
+            inputClass = InputType.TYPE_CLASS_TEXT,
+            inputVariation = InputType.TYPE_TEXT_VARIATION_PASSWORD
+        )
+        assertFalse(InputFieldClassifier.classify(info).isSuggestionsDisabled)
+    }
+
+    @Test
+    fun `classify web password variation isSuggestionsDisabled false`() {
+        val info = createEditorInfo(
+            inputClass = InputType.TYPE_CLASS_TEXT,
+            inputVariation = InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD
+        )
+        assertFalse(InputFieldClassifier.classify(info).isSuggestionsDisabled)
+    }
+
+    @Test
+    fun `classify email address variation isSuggestionsDisabled false`() {
+        val info = createEditorInfo(
+            inputClass = InputType.TYPE_CLASS_TEXT,
+            inputVariation = InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
+        )
+        assertFalse(InputFieldClassifier.classify(info).isSuggestionsDisabled)
+    }
+
+    @Test
+    fun `classify uri variation isSuggestionsDisabled false`() {
+        val info = createEditorInfo(
+            inputClass = InputType.TYPE_CLASS_TEXT,
+            inputVariation = InputType.TYPE_TEXT_VARIATION_URI
+        )
+        assertFalse(InputFieldClassifier.classify(info).isSuggestionsDisabled)
+    }
 }
