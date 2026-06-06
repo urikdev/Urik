@@ -20,7 +20,6 @@ import com.urik.keyboard.utils.MemoryPressureSubscriber
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
-import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -53,9 +52,7 @@ data class LearningStats(
 )
 
 @Singleton
-class WordLearningEngine
-@Inject
-constructor(
+class WordLearningEngine constructor(
     private val learnedWordDao: LearnedWordDao,
     private val userWordFrequencyDao: UserWordFrequencyDao,
     private val userWordBigramDao: UserWordBigramDao,
@@ -66,7 +63,11 @@ constructor(
     cacheMemoryManager: CacheMemoryManager,
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
     private val defaultDispatcher: CoroutineDispatcher = Dispatchers.Default,
-    mainDispatcher: CoroutineDispatcher = Dispatchers.Main
+    mainDispatcher: CoroutineDispatcher = Dispatchers.Main,
+    private val availableMemoryProvider: () -> Long = {
+        val rt = Runtime.getRuntime()
+        rt.maxMemory() - (rt.totalMemory() - rt.freeMemory())
+    }
 ) : MemoryPressureSubscriber {
     private val config = LearningConfig()
 
@@ -503,12 +504,10 @@ constructor(
             }
 
             if (results.size < maxResults && normalized.length >= MIN_FUZZY_SEARCH_LENGTH) {
-                val runtime = Runtime.getRuntime()
-                val availableMemory = runtime.maxMemory() - (runtime.totalMemory() - runtime.freeMemory())
                 val memoryThresholdBytes =
                     com.urik.keyboard.KeyboardConstants.MemoryConstants.LOW_MEMORY_THRESHOLD_MB * 1024 * 1024
 
-                if (availableMemory < memoryThresholdBytes) {
+                if (availableMemoryProvider() < memoryThresholdBytes) {
                     return@withContext results.toList().sortedByDescending { it.second }.take(maxResults)
                 }
 

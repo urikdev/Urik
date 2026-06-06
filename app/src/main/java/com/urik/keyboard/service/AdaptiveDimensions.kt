@@ -124,7 +124,7 @@ data class AdaptiveDimensions(
                 else -> 0
             }
 
-            val suggestionBarHeightPx = (BASE_SUGGESTION_BAR_HEIGHT_DP * density).toInt()
+            val suggestionBarHeightPx = (BASE_SUGGESTION_BAR_HEIGHT_DP * scaleFactor * density).toInt()
 
             return AdaptiveDimensions(
                 maxKeyboardWidthPx = screenWidthPx,

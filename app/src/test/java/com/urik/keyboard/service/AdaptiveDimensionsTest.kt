@@ -190,15 +190,22 @@ class AdaptiveDimensionsTest {
     }
 
     @Test
-    fun `suggestion bar height is identical across all key sizes`() {
+    fun `suggestion bar height scales with key size`() {
         val small = AdaptiveDimensions.compute(phonePortrait(), KeySize.SMALL, phoneDensity)
         val medium = AdaptiveDimensions.compute(phonePortrait(), KeySize.MEDIUM, phoneDensity)
         val large = AdaptiveDimensions.compute(phonePortrait(), KeySize.LARGE, phoneDensity)
         val extraLarge = AdaptiveDimensions.compute(phonePortrait(), KeySize.EXTRA_LARGE, phoneDensity)
 
-        assertEquals(medium.suggestionBarHeightPx, small.suggestionBarHeightPx)
-        assertEquals(medium.suggestionBarHeightPx, large.suggestionBarHeightPx)
-        assertEquals(medium.suggestionBarHeightPx, extraLarge.suggestionBarHeightPx)
+        assertTrue(small.suggestionBarHeightPx < medium.suggestionBarHeightPx)
+        assertTrue(medium.suggestionBarHeightPx < large.suggestionBarHeightPx)
+        assertTrue(large.suggestionBarHeightPx < extraLarge.suggestionBarHeightPx)
+    }
+
+    @Test
+    fun `suggestion bar height at MEDIUM matches baseline dp`() {
+        val medium = AdaptiveDimensions.compute(phonePortrait(), KeySize.MEDIUM, phoneDensity)
+        val expected = (44f * phoneDensity).toInt()
+        assertEquals(expected, medium.suggestionBarHeightPx)
     }
 
     @Test
@@ -227,6 +234,7 @@ class AdaptiveDimensionsTest {
                     "suggestionTextMaxSp must be > min for $posture/$keySize",
                     dims.suggestionTextMaxSp > dims.suggestionTextMinSp
                 )
+                assertTrue("suggestionBarHeightPx must be > 0 for $posture/$keySize", dims.suggestionBarHeightPx > 0)
             }
         }
     }
