@@ -108,7 +108,8 @@ class WordLearningEngineTest {
                 ioDispatcher = testDispatcher,
                 defaultDispatcher = testDispatcher,
                 cacheMemoryManager = cacheMemoryManager,
-                mainDispatcher = testDispatcher
+                mainDispatcher = testDispatcher,
+                availableMemoryProvider = { Long.MAX_VALUE }
             )
     }
 
