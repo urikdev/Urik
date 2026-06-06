@@ -16,6 +16,7 @@ import com.urik.keyboard.theme.Default
 import com.urik.keyboard.theme.KeyboardTheme
 import com.urik.keyboard.theme.ThemeManager
 import com.urik.keyboard.utils.CacheMemoryManager
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Assert.assertNotNull
 import org.junit.Before
@@ -25,6 +26,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
+import org.robolectric.annotation.Config
 
 /**
  * TDD safety tests for [KeyboardLayoutManager] cache null-safety contract.
@@ -34,6 +36,7 @@ import org.robolectric.RuntimeEnvironment
  * a cache key was manually removed after population.
  */
 @RunWith(RobolectricTestRunner::class)
+@Config(sdk = [33])
 class KeyboardLayoutManagerCacheSafetyTest {
     private lateinit var manager: KeyboardLayoutManager
 
@@ -48,6 +51,10 @@ class KeyboardLayoutManagerCacheSafetyTest {
         whenever(languageManager.currentLayoutLanguage).thenReturn(MutableStateFlow("en"))
         val themeManager = mock<ThemeManager>()
         whenever(themeManager.currentTheme).thenReturn(MutableStateFlow<KeyboardTheme>(Default))
+        val cacheMemoryManager = CacheMemoryManager(context)
+        val jobField = CacheMemoryManager::class.java.getDeclaredField("memoryMonitoringJob")
+        jobField.isAccessible = true
+        (jobField.get(cacheMemoryManager) as? Job)?.cancel()
         return KeyboardLayoutManager(
             context = context,
             onKeyClick = {},
@@ -56,7 +63,7 @@ class KeyboardLayoutManagerCacheSafetyTest {
             characterVariationService = mock<CharacterVariationService>(),
             languageManager = languageManager,
             themeManager = themeManager,
-            cacheMemoryManager = CacheMemoryManager(context)
+            cacheMemoryManager = cacheMemoryManager
         )
     }
 
