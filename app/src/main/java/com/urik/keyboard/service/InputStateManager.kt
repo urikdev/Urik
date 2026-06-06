@@ -113,6 +113,10 @@ class InputStateManager(
         internal set
 
     @Volatile
+    var isSuggestionsDisabled: Boolean = false
+        internal set
+
+    @Volatile
     var currentInputAction: com.urik.keyboard.model.KeyboardKey.ActionType =
         com.urik.keyboard.model.KeyboardKey.ActionType.ENTER
         internal set

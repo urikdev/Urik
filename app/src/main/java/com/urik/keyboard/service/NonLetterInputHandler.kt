@@ -30,6 +30,11 @@ class NonLetterInputHandler(
             outputBridge.sendCharacter(char)
             return
         }
+
+        if (inputState.isSuggestionsDisabled) {
+            outputBridge.sendCharacter(char)
+            return
+        }
         serviceScope.launch {
             try {
                 inputState.lastSpaceTime = 0

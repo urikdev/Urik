@@ -31,6 +31,11 @@ class SpaceInputHandler(
                     return@launch
                 }
 
+                if (inputState.isSuggestionsDisabled) {
+                    outputBridge.sendSpace()
+                    return@launch
+                }
+
                 if (suggestionPipeline.isJapaneseLayout && inputState.displayBuffer.isNotEmpty()) {
                     onJapaneseSpaceNextCandidate()
                     return@launch

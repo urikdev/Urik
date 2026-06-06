@@ -34,6 +34,7 @@ class SuggestionPipeline(
     }
 
     fun requestSuggestions(buffer: String, inputMethod: InputMethod) {
+        if (state.isSuggestionsDisabled) return
         state.showDegradedIndicator(spellCheckManager.isDegradedMode)
         if (isJapaneseLayout) {
             requestJapaneseSuggestions(buffer)
@@ -87,6 +88,7 @@ class SuggestionPipeline(
     }
 
     fun coordinateStateTransition(newWordState: WordState) {
+        if (state.isSuggestionsDisabled) return
         state.wordState = newWordState
 
         if (newWordState.suggestions.isNotEmpty()) {
@@ -126,7 +128,11 @@ class SuggestionPipeline(
     }
 
     fun showBigramPredictions() {
-        if (state.requiresDirectCommit || !host.showSuggestions() || state.lastCommittedWord.isBlank()) {
+        if (state.requiresDirectCommit ||
+            state.isSuggestionsDisabled ||
+            !host.showSuggestions() ||
+            state.lastCommittedWord.isBlank()
+        ) {
             return
         }
 

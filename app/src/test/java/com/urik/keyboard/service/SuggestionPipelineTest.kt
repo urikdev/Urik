@@ -456,4 +456,40 @@ class SuggestionPipelineTest {
         assertEquals(1, suggestions.count { it == "か" })
         assert(suggestions.contains("カ")) { "katakana カ must be present" }
     }
+
+    @Test
+    fun `requestSuggestions isSuggestionsDisabled emits no suggestions`() = runTest(testDispatcher) {
+        inputState.isSuggestionsDisabled = true
+        pipeline.requestSuggestions("hello", InputMethod.TYPED)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        verify(mockTextInputProcessor, never()).processWordInput(any(), any())
+        assertEquals(emptyList<String>(), capturedSuggestions)
+    }
+
+    @Test
+    fun `coordinateStateTransition isSuggestionsDisabled does not update suggestions`() {
+        inputState.isSuggestionsDisabled = true
+        val wordState = WordState(
+            buffer = "hello",
+            suggestions = listOf(SpellingSuggestion("hello", 0.9, 0, "dict", preserveCase = false))
+        )
+
+        pipeline.coordinateStateTransition(wordState)
+
+        assertEquals(emptyList<String>(), capturedSuggestions)
+    }
+
+    @Test
+    fun `showBigramPredictions isSuggestionsDisabled emits no predictions`() = runTest(testDispatcher) {
+        inputState.isSuggestionsDisabled = true
+        inputState.lastCommittedWord = "hello"
+        whenever(mockWordFrequencyRepository.getBigramPredictions(any(), any(), any()))
+            .thenReturn(setOf("world"))
+
+        pipeline.showBigramPredictions()
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        assertEquals(emptyList<String>(), capturedSuggestions)
+    }
 }

@@ -91,4 +91,23 @@ class SpaceInputHandlerTest {
         testDispatcher.scheduler.advanceUntilIdle()
         org.mockito.Mockito.verify(mockOutputBridge).commitText(" ", 1)
     }
+
+    @Test
+    fun `handle isSuggestionsDisabled sends space directly`() {
+        realInputState.isSuggestionsDisabled = true
+        handler.handle()
+        testDispatcher.scheduler.advanceUntilIdle()
+        org.mockito.Mockito.verify(mockOutputBridge).sendSpace()
+    }
+
+    @Test
+    fun `handle isSuggestionsDisabled double space does not produce period`() {
+        realInputState.isSuggestionsDisabled = true
+        handler.handle()
+        testDispatcher.scheduler.advanceUntilIdle()
+        handler.handle()
+        testDispatcher.scheduler.advanceUntilIdle()
+        org.mockito.Mockito.verify(mockOutputBridge, org.mockito.Mockito.times(2)).sendSpace()
+        org.mockito.Mockito.verify(mockOutputBridge, org.mockito.Mockito.never()).commitText(". ", 1)
+    }
 }

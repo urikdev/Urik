@@ -1717,6 +1717,7 @@ open class UrikInputMethodService :
         if (inputState.isTerminalField) viewModel.disableAutoCapForTerminalField()
         inputState.currentInputAction = c.currentInputAction
         inputState.isUrlOrEmailField = c.isUrlOrEmailField
+        inputState.isSuggestionsDisabled = c.isSuggestionsDisabled
     }
 
     override fun onFinishInput() {

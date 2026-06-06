@@ -63,4 +63,12 @@ class LetterInputHandlerTest {
         handler.handle("a")
         assertEquals("a", realInputState.displayBuffer)
     }
+
+    @Test
+    fun `handle isSuggestionsDisabled sends character directly without composing`() {
+        realInputState.isSuggestionsDisabled = true
+        handler.handle("a")
+        verify(mockOutputBridge).sendCharacter("a")
+        assertEquals("", realInputState.displayBuffer)
+    }
 }

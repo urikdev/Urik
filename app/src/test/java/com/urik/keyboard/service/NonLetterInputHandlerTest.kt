@@ -95,4 +95,12 @@ class NonLetterInputHandlerTest {
         testDispatcher.scheduler.advanceUntilIdle()
         assert(getCurrentSettingsCalls.size >= 1)
     }
+
+    @Test
+    fun `handle isSuggestionsDisabled sends character directly without suggestions`() {
+        realInputState.isSuggestionsDisabled = true
+        handler.handle(".")
+        verify(mockOutputBridge).sendCharacter(".")
+        verify(mockSuggestionPipeline, org.mockito.Mockito.never()).showBigramPredictions()
+    }
 }

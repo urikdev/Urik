@@ -20,6 +20,11 @@ class LetterInputHandler(
                 return
             }
 
+            if (inputState.isSuggestionsDisabled) {
+                outputBridge.sendCharacter(char)
+                return
+            }
+
             if (inputState.displayBuffer.isNotEmpty() && inputState.wordState.isFromSwipe) {
                 outputBridge.beginBatchEdit()
                 try {
