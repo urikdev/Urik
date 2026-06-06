@@ -1119,33 +1119,8 @@ open class UrikInputMethodService :
         observeSettings()
     }
 
-    private fun computeFilteredLayout(layout: KeyboardLayout): KeyboardLayout = when {
-        !currentSettings.showNumberRow &&
-            layout.mode == KeyboardMode.LETTERS &&
-            layout.rows.isNotEmpty() -> {
-            layout.copy(rows = layout.rows.drop(1))
-        }
-
-        layout.mode in listOf(KeyboardMode.SYMBOLS, KeyboardMode.SYMBOLS_SECONDARY) &&
-            layout.rows.isNotEmpty() -> {
-            val numberRow =
-                listOf(
-                    KeyboardKey.Character("1", KeyboardKey.KeyType.NUMBER),
-                    KeyboardKey.Character("2", KeyboardKey.KeyType.NUMBER),
-                    KeyboardKey.Character("3", KeyboardKey.KeyType.NUMBER),
-                    KeyboardKey.Character("4", KeyboardKey.KeyType.NUMBER),
-                    KeyboardKey.Character("5", KeyboardKey.KeyType.NUMBER),
-                    KeyboardKey.Character("6", KeyboardKey.KeyType.NUMBER),
-                    KeyboardKey.Character("7", KeyboardKey.KeyType.NUMBER),
-                    KeyboardKey.Character("8", KeyboardKey.KeyType.NUMBER),
-                    KeyboardKey.Character("9", KeyboardKey.KeyType.NUMBER),
-                    KeyboardKey.Character("0", KeyboardKey.KeyType.NUMBER)
-                )
-            layout.copy(rows = listOf(numberRow) + layout.rows)
-        }
-
-        else -> layout
-    }
+    private fun computeFilteredLayout(layout: KeyboardLayout): KeyboardLayout =
+        computeFilteredLayout(layout, currentSettings.showNumberRow)
 
     private fun updateSwipeKeyboard() {
         try {
@@ -1998,4 +1973,38 @@ open class UrikInputMethodService :
         const val NON_SEQUENTIAL_JUMP_THRESHOLD = 5
         const val WORD_BOUNDARY_CONTEXT_LENGTH = 64
     }
+}
+
+internal fun computeFilteredLayout(layout: KeyboardLayout, showNumberRow: Boolean): KeyboardLayout = when {
+    !showNumberRow &&
+        layout.mode == KeyboardMode.LETTERS &&
+        layout.rows.isNotEmpty() &&
+        isTopRowANumberRow(layout.rows[0]) -> {
+        layout.copy(rows = layout.rows.drop(1))
+    }
+
+    layout.mode in listOf(KeyboardMode.SYMBOLS, KeyboardMode.SYMBOLS_SECONDARY) &&
+        layout.rows.isNotEmpty() -> {
+        val numberRow =
+            listOf(
+                KeyboardKey.Character("1", KeyboardKey.KeyType.NUMBER),
+                KeyboardKey.Character("2", KeyboardKey.KeyType.NUMBER),
+                KeyboardKey.Character("3", KeyboardKey.KeyType.NUMBER),
+                KeyboardKey.Character("4", KeyboardKey.KeyType.NUMBER),
+                KeyboardKey.Character("5", KeyboardKey.KeyType.NUMBER),
+                KeyboardKey.Character("6", KeyboardKey.KeyType.NUMBER),
+                KeyboardKey.Character("7", KeyboardKey.KeyType.NUMBER),
+                KeyboardKey.Character("8", KeyboardKey.KeyType.NUMBER),
+                KeyboardKey.Character("9", KeyboardKey.KeyType.NUMBER),
+                KeyboardKey.Character("0", KeyboardKey.KeyType.NUMBER)
+            )
+        layout.copy(rows = listOf(numberRow) + layout.rows)
+    }
+
+    else -> layout
+}
+
+internal fun isTopRowANumberRow(row: List<KeyboardKey>): Boolean {
+    val charKeys = row.filterIsInstance<KeyboardKey.Character>()
+    return charKeys.size == 10 && charKeys.all { it.type == KeyboardKey.KeyType.NUMBER }
 }
