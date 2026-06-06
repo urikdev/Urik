@@ -252,8 +252,6 @@ class TypingBehaviorFragment : PreferenceFragmentCompat() {
             true
         }
 
-        vibrationPref.isEnabled = vibrator?.hasAmplitudeControl() == true
-
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
