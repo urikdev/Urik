@@ -73,6 +73,10 @@ sealed interface SettingsEvent {
         data object DeleteWordFailed : Error
 
         data object DeleteAllWordsFailed : Error
+
+        data object SettingsExportFailed : Error
+
+        data object SettingsImportFailed : Error
     }
 
     /**
@@ -90,5 +94,9 @@ sealed interface SettingsEvent {
         data object WordDeleted : Success
 
         data object AllWordsDeleted : Success
+
+        data class SettingsExported(val mappingCount: Int) : Success
+
+        data class SettingsImported(val mappingCount: Int) : Success
     }
 }

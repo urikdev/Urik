@@ -65,6 +65,28 @@ class PrivacyDataFragment : PreferenceFragmentCompat() {
             }
         }
 
+    private val exportSettingsLauncher =
+        registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                result.data?.data?.let { uri ->
+                    viewModel.exportSettings(uri)
+                }
+            }
+        }
+
+    private val importSettingsLauncher =
+        registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                result.data?.data?.let { uri ->
+                    viewModel.importSettings(uri)
+                }
+            }
+        }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewModel = ViewModelProvider(this)[PrivacyDataViewModel::class.java]
@@ -160,6 +182,30 @@ class PrivacyDataFragment : PreferenceFragmentCompat() {
                 }
             }
         screen.addPreference(importDictionaryPref)
+
+        val exportSettingsPref =
+            Preference(context).apply {
+                key = "export_settings"
+                title = resources.getString(R.string.privacy_settings_export_settings)
+                summary = resources.getString(R.string.privacy_settings_export_settings_summary)
+                setOnPreferenceClickListener {
+                    launchExportSettingsPicker()
+                    true
+                }
+            }
+        screen.addPreference(exportSettingsPref)
+
+        val importSettingsPref =
+            Preference(context).apply {
+                key = "import_settings"
+                title = resources.getString(R.string.privacy_settings_import_settings)
+                summary = resources.getString(R.string.privacy_settings_import_settings_summary)
+                setOnPreferenceClickListener {
+                    launchImportSettingsPicker()
+                    true
+                }
+            }
+        screen.addPreference(importSettingsPref)
 
         val resetPref =
             Preference(context).apply {
@@ -279,6 +325,28 @@ class PrivacyDataFragment : PreferenceFragmentCompat() {
                 type = "application/json"
             }
         importLauncher.launch(intent)
+    }
+
+    private fun launchExportSettingsPicker() {
+        val dateStr = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)
+        val fileName = "urik_settings_$dateStr.json"
+
+        val intent =
+            Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+                addCategory(Intent.CATEGORY_OPENABLE)
+                type = "application/json"
+                putExtra(Intent.EXTRA_TITLE, fileName)
+            }
+        exportSettingsLauncher.launch(intent)
+    }
+
+    private fun launchImportSettingsPicker() {
+        val intent =
+            Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                addCategory(Intent.CATEGORY_OPENABLE)
+                type = "application/json"
+            }
+        importSettingsLauncher.launch(intent)
     }
 
     private fun handleManageLearnedWordsTap() {

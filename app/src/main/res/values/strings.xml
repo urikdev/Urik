@@ -201,6 +201,10 @@
     <string name="privacy_settings_export_dictionary_summary">Save learned words to a file</string>
     <string name="privacy_settings_import_dictionary">Import Dictionary</string>
     <string name="privacy_settings_import_dictionary_summary">Restore learned words from a file</string>
+    <string name="privacy_settings_export_settings">Export Settings</string>
+    <string name="privacy_settings_export_settings_summary">Save keyboard settings and custom key mappings to a file</string>
+    <string name="privacy_settings_import_settings">Import Settings</string>
+    <string name="privacy_settings_import_settings_summary">Restore settings and custom key mappings from a file</string>
     <string name="learned_words_title">Learned Words</string>
     <string name="learned_words_manage">Manage Learned Words</string>
     <string name="learned_words_manage_summary">View and delete individual learned words</string>
@@ -248,6 +252,8 @@
     <string name="layout_settings_number_hints_off">Off</string>
     <string name="error_delete_word">Failed to delete word</string>
     <string name="error_delete_all_words">Failed to delete learned words</string>
+    <string name="error_settings_export">Failed to export settings</string>
+    <string name="error_settings_import">Failed to import settings</string>
 
     <!-- Success Messages -->
     <string name="success_learned_words_cleared">Learned words cleared</string>
@@ -256,6 +262,8 @@
     <string name="success_dictionary_imported">Added %1$d new, updated %2$d words</string>
     <string name="success_word_deleted">Word removed</string>
     <string name="success_all_words_deleted">All learned words cleared</string>
+    <string name="success_settings_exported">Settings exported (%1$d key mappings)</string>
+    <string name="success_settings_imported">Settings imported (%1$d key mappings)</string>
 
     <!-- Keyboard descriptions -->
     <string name="keyboard_description">Virtual keyboard</string>
