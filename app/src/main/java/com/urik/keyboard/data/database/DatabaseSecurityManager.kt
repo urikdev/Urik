@@ -24,11 +24,10 @@ class DatabaseSecurityManager(
     @get:VisibleForTesting internal val lockScreenCheck: () -> Boolean = { defaultLockScreenCheck(context) }
 ) {
     private val keyAlias = "urik_database_master_key"
-    private val prefsFile = "urik_db_prefs"
     private val passphraseKey = "encrypted_passphrase"
     private val ivKey = "encryption_iv"
 
-    private val prefs: SharedPreferences = context.getSharedPreferences(prefsFile, Context.MODE_PRIVATE)
+    private val prefs: SharedPreferences = deviceProtectedPrefs(context)
 
     /** Without a lock screen, Keystore keys are vulnerable to offline attacks. */
     fun hasDeviceLockScreen(): Boolean = lockScreenCheck()
@@ -92,7 +91,10 @@ class DatabaseSecurityManager(
             val ivString = prefs.getString(ivKey, null)
 
             if (encryptedPassphraseString == null || ivString == null) {
-                return generateAndStorePassphrase()
+                // Prefs entries missing despite alias existing — DE prefs may be corrupted/partially
+                // written. Do NOT regenerate: generateAndStorePassphrase() would overwrite the
+                // Keystore key, making any existing encrypted DB permanently unreadable.
+                return null
             }
 
             val encryptedPassphrase = Base64.decode(encryptedPassphraseString, Base64.NO_WRAP)
@@ -154,7 +156,7 @@ class DatabaseSecurityManager(
     }
 
     fun shouldMigrateToEncrypted(context: Context): Boolean {
-        val dbFile = context.getDatabasePath("keyboard_database")
+        val dbFile = context.getDatabasePath(KeyboardDatabase.DATABASE_NAME)
         return dbFile.exists() && !prefs.contains(passphraseKey) && hasDeviceLockScreen()
     }
 
@@ -167,10 +169,10 @@ class DatabaseSecurityManager(
             return false
         }
 
-        val tempDbPath = context.getDatabasePath("keyboard_database_temp")
+        val tempDbPath = context.getDatabasePath("${KeyboardDatabase.DATABASE_NAME}_temp")
 
         return try {
-            val unencryptedDbPath = context.getDatabasePath("keyboard_database")
+            val unencryptedDbPath = context.getDatabasePath(KeyboardDatabase.DATABASE_NAME)
 
             if (!unencryptedDbPath.exists()) {
                 return false
@@ -218,12 +220,44 @@ class DatabaseSecurityManager(
                 context = mapOf("operation" to "migrateToEncryptedDatabase")
             )
             tempDbPath.delete()
+            // Clear prefs so next launch re-attempts migration rather than misclassifying
+            // the still-present unencrypted DB as a corrupt encrypted one.
+            prefs.edit().remove(passphraseKey).remove(ivKey).commit()
             false
         }
     }
 
     companion object {
         private val secureRandom = java.security.SecureRandom()
+
+        private fun deviceProtectedPrefs(context: Context): SharedPreferences {
+            val deContext = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+                context.createDeviceProtectedStorageContext()
+            } else {
+                context
+            }
+            val dePrefs = deContext.getSharedPreferences("urik_db_prefs", Context.MODE_PRIVATE)
+
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N &&
+                !dePrefs.contains("encrypted_passphrase")
+            ) {
+                val cePrefs = context.getSharedPreferences("urik_db_prefs", Context.MODE_PRIVATE)
+                val encPassphrase = cePrefs.getString("encrypted_passphrase", null)
+                val iv = cePrefs.getString("encryption_iv", null)
+                if (encPassphrase != null && iv != null) {
+                    dePrefs.edit()
+                        .putString("encrypted_passphrase", encPassphrase)
+                        .putString("encryption_iv", iv)
+                        .commit()
+                    cePrefs.edit()
+                        .remove("encrypted_passphrase")
+                        .remove("encryption_iv")
+                        .commit()
+                }
+            }
+
+            return dePrefs
+        }
 
         private fun defaultLockScreenCheck(context: Context): Boolean {
             val keyguardManager =
