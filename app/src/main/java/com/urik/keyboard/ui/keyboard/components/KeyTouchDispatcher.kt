@@ -3,6 +3,7 @@ package com.urik.keyboard.ui.keyboard.components
 import android.annotation.SuppressLint
 import android.os.Handler
 import android.os.Looper
+import android.os.SystemClock
 import android.view.MotionEvent
 import android.view.View
 import android.view.accessibility.AccessibilityEvent
@@ -35,6 +36,7 @@ internal class KeyTouchDispatcher(
     private val getCustomMappingLongPressFired: () -> MutableSet<Button>,
     private val getButtonPendingCallbacks: () -> MutableMap<Button, PendingCallbacks>,
     private val getButtonLongPressRunnables: () -> MutableMap<Button, Runnable>,
+    private val getPressStartTimes: () -> MutableMap<Button, Long>,
     private val backspaceController: BackspaceController?,
     private val setSwipePopupActive: (Boolean) -> Unit,
     private val getCurrentVariationKeyType: () -> KeyboardKey.KeyType?,
@@ -86,6 +88,7 @@ internal class KeyTouchDispatcher(
                     getLongPressConsumedButtons().remove(button)
                     getHapticDownFiredButtons().add(button)
                     performHaptic(key)
+                    getPressStartTimes()[button] = SystemClock.uptimeMillis()
                     longPressStartX = event.rawX
                     longPressStartY = event.rawY
                     val runnable = getButtonLongPressRunnables()[button] ?: return@OnTouchListener false
@@ -125,10 +128,12 @@ internal class KeyTouchDispatcher(
                         pending.handler.removeCallbacks(pending.runnable)
                     }
 
+                    val elapsed = SystemClock.uptimeMillis() - (getPressStartTimes().remove(button) ?: Long.MAX_VALUE)
                     val longPressConsumed =
                         getCharacterLongPressFired().remove(button) ||
                             getCustomMappingLongPressFired().contains(button) ||
-                            getLongPressConsumedButtons().contains(button)
+                            getLongPressConsumedButtons().contains(button) ||
+                            elapsed >= getLongPressDuration().durationMs
 
                     if (getPopupSelectionMode() && getVariationPopup()?.isShowing == true) {
                         val selectedChar = getVariationPopup()?.getHighlightedCharacter()
@@ -160,6 +165,7 @@ internal class KeyTouchDispatcher(
                         pending.handler.removeCallbacks(pending.runnable)
                     }
 
+                    getPressStartTimes().remove(button)
                     val longPressConsumed =
                         getCharacterLongPressFired().remove(button) ||
                             getCustomMappingLongPressFired().contains(button) ||

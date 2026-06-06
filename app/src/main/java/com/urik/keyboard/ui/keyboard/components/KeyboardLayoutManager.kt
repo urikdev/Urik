@@ -158,6 +158,9 @@ class KeyboardLayoutManager(
     private val longPressConsumedButtons = ConcurrentHashMap.newKeySet<Button>()
     private val hapticDownFiredButtons = ConcurrentHashMap.newKeySet<Button>()
 
+    @VisibleForTesting
+    internal val pressStartTimes = ConcurrentHashMap<Button, Long>()
+
     private val cachedTextSizes = mutableMapOf<Int, Float>()
     private val cachedDimensions = mutableMapOf<String, Int>()
     private var cacheValid = false
@@ -197,6 +200,7 @@ class KeyboardLayoutManager(
         getCustomMappingLongPressFired = { customMappingLongPressFired },
         getButtonPendingCallbacks = { buttonPendingCallbacks },
         getButtonLongPressRunnables = { buttonLongPressRunnables },
+        getPressStartTimes = { pressStartTimes },
         backspaceController = backspaceController,
         setSwipePopupActive = { active -> swipeKeyboardView?.setPopupActive(active) },
         getCurrentVariationKeyType = { currentVariationKeyType },
@@ -1067,6 +1071,7 @@ class KeyboardLayoutManager(
         customMappingLongPressFired.remove(button)
         characterLongPressFired.remove(button)
         hapticDownFiredButtons.remove(button)
+        pressStartTimes.remove(button)
 
         button.isHapticFeedbackEnabled = true
         button.isPressed = false
