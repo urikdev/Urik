@@ -59,14 +59,29 @@ class OnUpdateSelectionHandler(
                 newSelEnd >= candidatesStart &&
                 newSelEnd <= candidatesEnd
 
+        val trackedComposingEnd =
+            if (inputState.composingRegionStart != -1 && inputState.displayBuffer.isNotEmpty()) {
+                inputState.composingRegionStart + inputState.displayBuffer.length
+            } else {
+                -1
+            }
+        val cursorInTrackedComposingRegion =
+            trackedComposingEnd != -1 &&
+                newSelStart >= inputState.composingRegionStart &&
+                newSelStart <= trackedComposingEnd &&
+                newSelEnd >= inputState.composingRegionStart &&
+                newSelEnd <= trackedComposingEnd
+
         if (handleActivelyEditing(newSelStart)) return
 
         if (selectionResult.requiresStateInvalidation()) {
-            if (inputState.displayBuffer.isNotEmpty() && outputBridge.reassertComposingRegion(newSelStart)) {
+            if (cursorInComposingRegion || cursorInTrackedComposingRegion) {
                 inputState.lastKnownCursorPosition = newSelStart
                 return
             }
-            invalidateComposingStateOnCursorJump()
+            if (inputState.displayBuffer.isEmpty() || !outputBridge.reassertComposingRegion(newSelStart)) {
+                invalidateComposingStateOnCursorJump()
+            }
             inputState.lastKnownCursorPosition = newSelStart
             return
         }
@@ -78,11 +93,9 @@ class OnUpdateSelectionHandler(
         }
 
         if (!hasComposingText && (inputState.wordState.hasContent || inputState.displayBuffer.isNotEmpty())) {
-            if (inputState.displayBuffer.isNotEmpty() && outputBridge.reassertComposingRegion(newSelStart)) {
-                inputState.lastKnownCursorPosition = newSelStart
-                return
+            if (inputState.displayBuffer.isEmpty() || !outputBridge.reassertComposingRegion(newSelStart)) {
+                invalidateComposingStateOnCursorJump()
             }
-            invalidateComposingStateOnCursorJump()
             inputState.lastKnownCursorPosition = newSelStart
             return
         }
