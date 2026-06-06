@@ -20,7 +20,7 @@
         android:background="@drawable/test_field_background"
         android:hint="@string/test_field_hint"
         android:importantForAutofill="no"
-        android:inputType="textMultiLine|textCapSentences"
+        android:inputType="textMultiLine|textCapSentences|textNoSuggestions"
         android:padding="12dp" />
 
 </LinearLayout>
