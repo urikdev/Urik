@@ -192,6 +192,10 @@
     <string name="privacy_settings_export_dictionary_summary">学習済み単語をファイルに保存</string>
     <string name="privacy_settings_import_dictionary">辞書をインポート</string>
     <string name="privacy_settings_import_dictionary_summary">ファイルから学習済み単語を復元</string>
+    <string name="privacy_settings_export_settings">設定をエクスポート</string>
+    <string name="privacy_settings_export_settings_summary">キーボード設定とカスタムキー割り当てをファイルに保存します</string>
+    <string name="privacy_settings_import_settings">設定をインポート</string>
+    <string name="privacy_settings_import_settings_summary">ファイルから設定とカスタムキー割り当てを復元します</string>
     <string name="learned_words_title">学習済み単語</string>
     <string name="learned_words_manage">学習済み単語を管理</string>
     <string name="learned_words_manage_summary">学習済み単語を確認・削除</string>
@@ -228,6 +232,8 @@
     <string name="error_reset_to_defaults">設定のリセットに失敗しました</string>
     <string name="error_dictionary_export">辞書のエクスポートに失敗しました</string>
     <string name="error_dictionary_import">辞書のインポートに失敗しました</string>
+    <string name="error_settings_export">設定のエクスポートに失敗しました</string>
+    <string name="error_settings_import">設定のインポートに失敗しました</string>
     <string name="error_update_merged_dictionaries">辞書モードの更新に失敗しました</string>
     <string name="error_update_pause_on_misspelled">一時停止設定の更新に失敗しました</string>
     <string name="error_update_autocorrection">自動修正設定の更新に失敗しました</string>
@@ -245,6 +251,8 @@
     <string name="success_settings_reset">設定をデフォルトにリセットしました</string>
     <string name="success_dictionary_exported">%1$d 件の単語をエクスポートしました</string>
     <string name="success_dictionary_imported">%1$d 件追加、%2$d 件更新しました</string>
+    <string name="success_settings_exported">設定をエクスポートしました（%1$d 件のキー割り当て）</string>
+    <string name="success_settings_imported">設定をインポートしました（%1$d 件のキー割り当て）</string>
     <string name="success_word_deleted">単語を削除しました</string>
     <string name="success_all_words_deleted">学習済み単語をすべて削除しました</string>
 

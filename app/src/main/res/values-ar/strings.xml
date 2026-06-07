@@ -189,6 +189,10 @@
     <string name="privacy_settings_export_dictionary_summary">حفظ الكلمات المتعلمة إلى ملف</string>
     <string name="privacy_settings_import_dictionary">استيراد معجم</string>
     <string name="privacy_settings_import_dictionary_summary">إسترجاع كلمات متعلمة من ملف</string>
+    <string name="privacy_settings_export_settings">تصدير الإعدادات</string>
+    <string name="privacy_settings_export_settings_summary">حفظ إعدادات لوحة المفاتيح وتعيينات المفاتيح المخصصة في ملف</string>
+    <string name="privacy_settings_import_settings">استيراد الإعدادات</string>
+    <string name="privacy_settings_import_settings_summary">استعادة الإعدادات وتعيينات المفاتيح المخصصة من ملف</string>
     <string name="learned_words_title">الكلمات المحفوظة</string>
     <string name="learned_words_manage">إدارة الكلمات المحفوظة</string>
     <string name="learned_words_manage_summary">عرض وحذف الكلمات المحفوظة</string>
@@ -225,6 +229,8 @@
     <string name="error_reset_to_defaults">فشل إعادة ضبط الإعدادات</string>
     <string name="error_dictionary_export">فشل تصدير المعجم</string>
     <string name="error_dictionary_import">فشل إستيراد المعجم</string>
+    <string name="error_settings_export">فشل تصدير الإعدادات</string>
+    <string name="error_settings_import">فشل استيراد الإعدادات</string>
 
     <!-- Success Messages -->
     <string name="error_update_merged_dictionaries">فشل تحديث وضع القاموس</string>
@@ -236,6 +242,8 @@
     <string name="success_settings_reset">تم إعادة ضبط الإعدادات</string>
     <string name="success_dictionary_exported">تم تصدير %1$d كلمة</string>
     <string name="success_dictionary_imported">تم إضافة %1$d كلمة جديدة, وتحديث %2$d كلمات</string>
+    <string name="success_settings_exported">تم تصدير الإعدادات (%1$d تعيين مفاتيح)</string>
+    <string name="success_settings_imported">تم استيراد الإعدادات (%1$d تعيين مفاتيح)</string>
     <string name="success_word_deleted">تم حذف الكلمة</string>
     <string name="success_all_words_deleted">تم حذف جميع الكلمات المحفوظة</string>
 

@@ -179,6 +179,10 @@
     <string name="privacy_settings_export_dictionary_summary">Guardar palabras aprendidas en un archivo</string>
     <string name="privacy_settings_import_dictionary">Importar diccionario</string>
     <string name="privacy_settings_import_dictionary_summary">Restaurar palabras aprendidas desde un archivo</string>
+    <string name="privacy_settings_export_settings">Exportar configuración</string>
+    <string name="privacy_settings_export_settings_summary">Guardar la configuración del teclado y las asignaciones de teclas personalizadas en un archivo</string>
+    <string name="privacy_settings_import_settings">Importar configuración</string>
+    <string name="privacy_settings_import_settings_summary">Restaurar la configuración y las asignaciones de teclas personalizadas desde un archivo</string>
     <string name="learned_words_title">Palabras aprendidas</string>
     <string name="learned_words_manage">Gestionar palabras aprendidas</string>
     <string name="learned_words_manage_summary">Ver y eliminar palabras aprendidas</string>
@@ -211,6 +215,8 @@
     <string name="error_reset_to_defaults">No se pudo restablecer la configuración</string>
     <string name="error_dictionary_export">No se pudo exportar el diccionario</string>
     <string name="error_dictionary_import">No se pudo importar el diccionario</string>
+    <string name="error_settings_export">Error al exportar la configuración</string>
+    <string name="error_settings_import">Error al importar la configuración</string>
     <string name="error_update_merged_dictionaries">Error al actualizar el modo de diccionario</string>
     <string name="error_update_pause_on_misspelled">Error al actualizar la configuración de pausa</string>
     <string name="error_update_autocorrection">Error al actualizar la configuración de autocorrección</string>
@@ -222,6 +228,8 @@
     <string name="success_settings_reset">La configuración se ha restablecido a los valores predeterminados.</string>
     <string name="success_dictionary_exported">%1$d palabras exportadas</string>
     <string name="success_dictionary_imported">%1$d nuevas añadidas, %2$d palabras actualizadas</string>
+    <string name="success_settings_exported">Configuración exportada (%1$d asignaciones de teclas)</string>
+    <string name="success_settings_imported">Configuración importada (%1$d asignaciones de teclas)</string>
     <string name="success_word_deleted">Palabra eliminada</string>
     <string name="success_all_words_deleted">Todas las palabras aprendidas eliminadas</string>
 

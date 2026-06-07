@@ -146,6 +146,8 @@
     <string name="error_reset_to_defaults">Misslyckades med att återställa inställningarna</string>
     <string name="error_dictionary_export">Misslyckades med att exportera ordboken</string>
     <string name="error_dictionary_import">Misslyckades med att importera ordboken</string>
+    <string name="error_settings_export">Det gick inte att exportera inställningarna</string>
+    <string name="error_settings_import">Det gick inte att importera inställningarna</string>
     <string name="error_update_merged_dictionaries">Kunde inte uppdatera ordboksläge</string>
     <string name="error_update_pause_on_misspelled">Kunde inte uppdatera pausinställning</string>
     <string name="error_update_autocorrection">Kunde inte uppdatera autokorrigeringsinställning</string>
@@ -155,6 +157,8 @@
     <string name="success_settings_reset">Inställningarna återställda till standardinställningarna</string>
     <string name="success_dictionary_exported">%1$d ord exporterade</string>
     <string name="success_dictionary_imported">%1$d nya ord, %2$d uppdaterade</string>
+    <string name="success_settings_exported">Inställningar exporterade (%1$d tangentmappningar)</string>
+    <string name="success_settings_imported">Inställningar importerade (%1$d tangentmappningar)</string>
     <string name="success_word_deleted">Ordet borttaget</string>
     <string name="success_all_words_deleted">Alla inlärda ord borttagna</string>
     <string name="keyboard_description">Virtuellt tangentbord</string>
@@ -218,6 +222,10 @@
     <string name="privacy_settings_export_dictionary_summary">Spara dina inlärda ord till en fil</string>
     <string name="privacy_settings_import_dictionary">Importera ordbok</string>
     <string name="privacy_settings_import_dictionary_summary">Läs in inlärda ord från en säkerhetskopia</string>
+    <string name="privacy_settings_export_settings">Exportera inställningar</string>
+    <string name="privacy_settings_export_settings_summary">Spara tangentbordsinställningar och anpassade tangentmappningar till en fil</string>
+    <string name="privacy_settings_import_settings">Importera inställningar</string>
+    <string name="privacy_settings_import_settings_summary">Återställ inställningar och anpassade tangentmappningar från en fil</string>
     <string name="learned_words_title">Inlärda ord</string>
     <string name="learned_words_manage">Hantera inlärda ord</string>
     <string name="learned_words_manage_summary">Visa och ta bort inlärda ord</string>

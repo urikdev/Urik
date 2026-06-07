@@ -179,6 +179,10 @@
     <string name="privacy_settings_export_dictionary_summary">Uložit naučená slova do souboru</string>
     <string name="privacy_settings_import_dictionary">Importovat slovník</string>
     <string name="privacy_settings_import_dictionary_summary">Obnovit naučená slova ze souboru</string>
+    <string name="privacy_settings_export_settings">Exportovat nastavení</string>
+    <string name="privacy_settings_export_settings_summary">Uložit nastavení klávesnice a vlastní mapování kláves do souboru</string>
+    <string name="privacy_settings_import_settings">Importovat nastavení</string>
+    <string name="privacy_settings_import_settings_summary">Obnovit nastavení a vlastní mapování kláves ze souboru</string>
     <string name="learned_words_title">Naučená slova</string>
     <string name="learned_words_manage">Spravovat naučená slova</string>
     <string name="learned_words_manage_summary">Zobrazit a smazat jednotlivá naučená slova</string>
@@ -211,6 +215,8 @@
     <string name="error_reset_to_defaults">Nepodařilo se obnovit nastavení</string>
     <string name="error_dictionary_export">Nepodařilo se exportovat slovník</string>
     <string name="error_dictionary_import">Nepodařilo se importovat slovník</string>
+    <string name="error_settings_export">Export nastavení se nezdařil</string>
+    <string name="error_settings_import">Import nastavení se nezdařil</string>
     <string name="error_update_merged_dictionaries">Nepodařilo se aktualizovat režim slovníku</string>
     <string name="error_update_pause_on_misspelled">Nepodařilo se aktualizovat nastavení pauzy</string>
     <string name="error_update_autocorrection">Nepodařilo se aktualizovat nastavení automatické opravy</string>
@@ -222,6 +228,8 @@
     <string name="success_settings_reset">Obnoveno výchozí nastavení</string>
     <string name="success_dictionary_exported">Exportováno %1$d slov</string>
     <string name="success_dictionary_imported">Přidáno %1$d nových, aktualizováno %2$d slov</string>
+    <string name="success_settings_exported">Nastavení exportována (%1$d mapování kláves)</string>
+    <string name="success_settings_imported">Nastavení importována (%1$d mapování kláves)</string>
     <string name="success_word_deleted">Slovo odstraněno</string>
     <string name="success_all_words_deleted">Všechna naučená slova smazána</string>
 

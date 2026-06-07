@@ -181,6 +181,10 @@
     <string name="privacy_settings_export_dictionary_summary">Сохранить изученные слова в файл</string>
     <string name="privacy_settings_import_dictionary">Импорт словаря</string>
     <string name="privacy_settings_import_dictionary_summary">Восстановить изученные слова из файла</string>
+    <string name="privacy_settings_export_settings">Экспорт настроек</string>
+    <string name="privacy_settings_export_settings_summary">Сохранить настройки клавиатуры и пользовательские сопоставления клавиш в файл</string>
+    <string name="privacy_settings_import_settings">Импорт настроек</string>
+    <string name="privacy_settings_import_settings_summary">Восстановить настройки и пользовательские сопоставления клавиш из файла</string>
     <string name="learned_words_title">Выученные слова</string>
     <string name="learned_words_manage">Управление выученными словами</string>
     <string name="learned_words_manage_summary">Просмотр и удаление выученных слов</string>
@@ -214,6 +218,8 @@
     <string name="error_reset_to_defaults">Не удалось сбросить настройки</string>
     <string name="error_dictionary_export">Не удалось экспортировать словарь</string>
     <string name="error_dictionary_import">Не удалось импортировать словарь</string>
+    <string name="error_settings_export">Не удалось экспортировать настройки</string>
+    <string name="error_settings_import">Не удалось импортировать настройки</string>
     <string name="error_update_merged_dictionaries">Не удалось обновить режим словаря</string>
     <string name="error_update_pause_on_misspelled">Не удалось обновить настройку паузы</string>
     <string name="error_update_autocorrection">Не удалось обновить настройку автокоррекции</string>
@@ -225,6 +231,8 @@
     <string name="success_settings_reset">Настройки сброшены до значений по умолчанию</string>
     <string name="success_dictionary_exported">Экспортировано %1$d слов</string>
     <string name="success_dictionary_imported">Добавлено %1$d новых, обновлено %2$d слов</string>
+    <string name="success_settings_exported">Настройки экспортированы (%1$d сопоставлений клавиш)</string>
+    <string name="success_settings_imported">Настройки импортированы (%1$d сопоставлений клавиш)</string>
     <string name="success_word_deleted">Слово удалено</string>
     <string name="success_all_words_deleted">Все выученные слова удалены</string>
 
