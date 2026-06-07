@@ -104,6 +104,10 @@ class CharacterVariationPopup(private val context: Context, private val themeMan
             addCharacterView(variation, isBase = false, index = actualIndex, totalCount = totalCount)
         }
 
+        if (variations.isNotEmpty()) {
+            setHighlighted(variations[0])
+        }
+
         val itemSize = (40 * density).toInt()
         val idealWidth = totalCount * itemSize + (16 * density).toInt()
         val popupHeight = itemSize + (8 * density).toInt()
