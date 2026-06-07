@@ -180,6 +180,10 @@
     <string name="privacy_settings_export_dictionary_summary">Зберегти вивчені слова у файл</string>
     <string name="privacy_settings_import_dictionary">Імпорт словника</string>
     <string name="privacy_settings_import_dictionary_summary">Відновити вивчені слова з файлу</string>
+    <string name="privacy_settings_export_settings">Експорт налаштувань</string>
+    <string name="privacy_settings_export_settings_summary">Зберегти налаштування клавіатури та користувацькі прив\'язки клавіш у файл</string>
+    <string name="privacy_settings_import_settings">Імпорт налаштувань</string>
+    <string name="privacy_settings_import_settings_summary">Відновити налаштування та користувацькі прив\'язки клавіш із файлу</string>
     <string name="learned_words_title">Вивчені слова</string>
     <string name="learned_words_manage">Керування вивченими словами</string>
     <string name="learned_words_manage_summary">Перегляд і видалення вивчених слів</string>
@@ -212,6 +216,8 @@
     <string name="error_reset_to_defaults">Не вдалося скинути налаштування</string>
     <string name="error_dictionary_export">Не вдалося експортувати словник</string>
     <string name="error_dictionary_import">Не вдалося імпортувати словник</string>
+    <string name="error_settings_export">Не вдалося експортувати налаштування</string>
+    <string name="error_settings_import">Не вдалося імпортувати налаштування</string>
     <string name="error_update_merged_dictionaries">Не вдалося оновити режим словника</string>
     <string name="error_update_pause_on_misspelled">Не вдалося оновити налаштування паузи</string>
     <string name="error_update_autocorrection">Не вдалося оновити налаштування автокорекції</string>
@@ -223,6 +229,8 @@
     <string name="success_settings_reset">Налаштування скинуто до стандартних</string>
     <string name="success_dictionary_exported">Експортовано %1$d слів</string>
     <string name="success_dictionary_imported">Додано %1$d нових, оновлено %2$d слів</string>
+    <string name="success_settings_exported">Налаштування експортовано (%1$d прив\'язок клавіш)</string>
+    <string name="success_settings_imported">Налаштування імпортовано (%1$d прив\'язок клавіш)</string>
     <string name="success_word_deleted">Слово видалено</string>
     <string name="success_all_words_deleted">Усі вивчені слова видалено</string>
 

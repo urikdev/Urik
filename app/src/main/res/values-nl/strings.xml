@@ -192,6 +192,10 @@
     <string name="privacy_settings_export_dictionary_summary">Geleerde woorden opslaan naar bestand</string>
     <string name="privacy_settings_import_dictionary">Woordenboek importeren</string>
     <string name="privacy_settings_import_dictionary_summary">Geleerde woorden herstellen uit bestand</string>
+    <string name="privacy_settings_export_settings">Instellingen exporteren</string>
+    <string name="privacy_settings_export_settings_summary">Toetsenbordinstellingen en aangepaste toetskoppelingen opslaan in een bestand</string>
+    <string name="privacy_settings_import_settings">Instellingen importeren</string>
+    <string name="privacy_settings_import_settings_summary">Instellingen en aangepaste toetskoppelingen herstellen vanuit een bestand</string>
     <string name="learned_words_title">Geleerde woorden</string>
     <string name="learned_words_manage">Geleerde woorden beheren</string>
     <string name="learned_words_manage_summary">Bekijk en verwijder geleerde woorden</string>
@@ -228,6 +232,8 @@
     <string name="error_reset_to_defaults">Terugzetten naar standaardwaarden mislukt</string>
     <string name="error_dictionary_export">Woordenboek exporteren mislukt</string>
     <string name="error_dictionary_import">Woordenboek importeren mislukt</string>
+    <string name="error_settings_export">Exporteren van instellingen mislukt</string>
+    <string name="error_settings_import">Importeren van instellingen mislukt</string>
     <string name="error_update_merged_dictionaries">Woordenboekmodus bijwerken mislukt</string>
     <string name="error_update_pause_on_misspelled">Kan pauze-instelling niet bijwerken</string>
     <string name="error_update_autocorrection">Kan autocorrectie-instelling niet bijwerken</string>
@@ -239,6 +245,8 @@
     <string name="success_settings_reset">Instellingen teruggezet naar standaardwaarden</string>
     <string name="success_dictionary_exported">%1$d woorden geëxporteerd</string>
     <string name="success_dictionary_imported">%1$d nieuwe toegevoegd, %2$d woorden bijgewerkt</string>
+    <string name="success_settings_exported">Instellingen geëxporteerd (%1$d toetskoppelingen)</string>
+    <string name="success_settings_imported">Instellingen geïmporteerd (%1$d toetskoppelingen)</string>
     <string name="success_word_deleted">Woord verwijderd</string>
     <string name="success_all_words_deleted">Alle geleerde woorden gewist</string>
 

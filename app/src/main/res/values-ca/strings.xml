@@ -179,6 +179,10 @@
     <string name="privacy_settings_export_dictionary_summary">Desar les paraules apreses en un arxiu</string>
     <string name="privacy_settings_import_dictionary">Importar diccionari</string>
     <string name="privacy_settings_import_dictionary_summary">Restaurar les paraules apreses des d\'un arxiu</string>
+    <string name="privacy_settings_export_settings">Exporta la configuració</string>
+    <string name="privacy_settings_export_settings_summary">Desa la configuració del teclat i les assignacions de tecles personalitzades en un fitxer</string>
+    <string name="privacy_settings_import_settings">Importa la configuració</string>
+    <string name="privacy_settings_import_settings_summary">Restaura la configuració i les assignacions de tecles personalitzades des d\'un fitxer</string>
     <string name="learned_words_title">Paraules apreses</string>
     <string name="learned_words_manage">Gestionar paraules apreses</string>
     <string name="learned_words_manage_summary">Veure i eliminar paraules apreses</string>
@@ -219,11 +223,15 @@
     <string name="error_reset_to_defaults">Ha fallat el restabliment de la configuració</string>
     <string name="error_dictionary_export">No s\'ha pogut exportar el diccionari</string>
     <string name="error_dictionary_import">No s\'ha pogut importar el diccionari</string>
+    <string name="error_settings_export">Error en exportar la configuració</string>
+    <string name="error_settings_import">Error en importar la configuració</string>
     <!-- Success Messages -->
     <string name="success_learned_words_cleared">Paraules apreses esborrades</string>
     <string name="success_settings_reset">Configuració reiniciada als valors per defecte</string>
     <string name="success_dictionary_exported">%1$d paraules exportades</string>
     <string name="success_dictionary_imported">%1$d noves afegides, %2$d paraules actualitzades</string>
+    <string name="success_settings_exported">Configuració exportada (%1$d assignacions de tecles)</string>
+    <string name="success_settings_imported">Configuració importada (%1$d assignacions de tecles)</string>
     <string name="success_word_deleted">Paraula eliminada</string>
     <string name="success_all_words_deleted">Totes les paraules apreses eliminades</string>
     <!-- Keyboard descriptions -->

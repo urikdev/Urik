@@ -20,6 +20,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
 private val Context.settingsDataStore: DataStore<Preferences> by preferencesDataStore(
@@ -585,8 +586,126 @@ constructor(
         Result.failure(e)
     }
 
+    /**
+     * Exports all exportable preferences as a string map. Excludes [PreferenceKeys.CLIPBOARD_CONSENT_SHOWN].
+     * Set<String> values are joined with [EXPORT_SET_DELIMITER].
+     */
+    suspend fun exportPreferences(): Result<Map<String, String>> = try {
+        val prefs = dataStore.data.first()
+        val map = mutableMapOf<String, String>()
+
+        booleanExportKeys.forEach { key -> prefs[key]?.let { map[key.name] = it.toString() } }
+        intExportKeys.forEach { key -> prefs[key]?.let { map[key.name] = it.toString() } }
+        stringExportKeys.forEach { key -> prefs[key]?.let { map[key.name] = it } }
+        setExportKeys.forEach { key -> prefs[key]?.let { map[key.name] = it.joinToString(EXPORT_SET_DELIMITER) } }
+
+        Result.success(map)
+    } catch (e: Exception) {
+        ErrorLogger.logException(
+            component = "SettingsRepository",
+            severity = ErrorLogger.Severity.HIGH,
+            exception = e,
+            context = mapOf("operation" to "exportPreferences")
+        )
+        Result.failure(e)
+    }
+
+    /**
+     * Imports preferences from string map. Unknown keys are skipped. Only updates keys present
+     * in the map — does not clear absent keys. [PreferenceKeys.CLIPBOARD_CONSENT_SHOWN] is ignored.
+     */
+    suspend fun importPreferences(prefs: Map<String, String>): Result<Unit> = try {
+        val boolLookup = booleanExportKeys.associateBy { it.name }
+        val intLookup = intExportKeys.associateBy { it.name }
+        val stringLookup = stringExportKeys.associateBy { it.name }
+        val setLookup = setExportKeys.associateBy { it.name }
+
+        dataStore.edit { mutablePrefs ->
+            prefs.forEach { (keyName, value) ->
+                when {
+                    keyName in boolLookup -> boolLookup[keyName]?.let {
+                        mutablePrefs[it] = value.toBoolean()
+                    }
+                    keyName in intLookup -> intLookup[keyName]?.let {
+                        value.toIntOrNull()?.let { v -> mutablePrefs[it] = v }
+                    }
+                    keyName in setLookup -> setLookup[keyName]?.let {
+                        mutablePrefs[it] = if (value.isEmpty()) {
+                            emptySet()
+                        } else {
+                            value.split(EXPORT_SET_DELIMITER).toSet()
+                        }
+                    }
+                    keyName in stringLookup -> stringLookup[keyName]?.let {
+                        mutablePrefs[it] = value
+                    }
+                }
+            }
+        }
+        Result.success(Unit)
+    } catch (e: Exception) {
+        ErrorLogger.logException(
+            component = "SettingsRepository",
+            severity = ErrorLogger.Severity.HIGH,
+            exception = e,
+            context = mapOf("operation" to "importPreferences")
+        )
+        Result.failure(e)
+    }
+
     private fun getDefaultSettings(): KeyboardSettings {
         val systemLanguage = Locale.getDefault().language
         return KeyboardSettings.defaultForLocale(systemLanguage)
+    }
+
+    companion object {
+        const val EXPORT_SET_DELIMITER = ","
+
+        internal val booleanExportKeys: List<Preferences.Key<Boolean>> = listOf(
+            PreferenceKeys.SHOW_SUGGESTIONS,
+            PreferenceKeys.SPELL_CHECK_ENABLED,
+            PreferenceKeys.LEARN_NEW_WORDS,
+            PreferenceKeys.CLIPBOARD_ENABLED,
+            PreferenceKeys.HAPTIC_FEEDBACK,
+            PreferenceKeys.DOUBLE_SPACE_PERIOD,
+            PreferenceKeys.AUTO_CAPITALIZATION_ENABLED,
+            PreferenceKeys.SWIPE_ENABLED,
+            PreferenceKeys.SPACEBAR_CURSOR_CONTROL,
+            PreferenceKeys.BACKSPACE_SWIPE_DELETE,
+            PreferenceKeys.SHOW_NUMBER_ROW,
+            PreferenceKeys.ADAPTIVE_KEYBOARD_MODES_ENABLED,
+            PreferenceKeys.ONE_HANDED_MODE_ENABLED,
+            PreferenceKeys.SHOW_LANGUAGE_SWITCH_KEY,
+            PreferenceKeys.MERGED_DICTIONARIES,
+            PreferenceKeys.PAUSE_ON_MISSPELLED_WORD,
+            PreferenceKeys.AUTOCORRECTION_ENABLED,
+            PreferenceKeys.SHOW_NUMBER_HINTS,
+            PreferenceKeys.RESET_TO_LETTERS_ON_DISMISS,
+            PreferenceKeys.PRESS_HIGHLIGHT_ENABLED
+        )
+
+        internal val intExportKeys: List<Preferences.Key<Int>> = listOf(
+            PreferenceKeys.SUGGESTION_COUNT,
+            PreferenceKeys.VIBRATION_STRENGTH
+        )
+
+        internal val stringExportKeys: List<Preferences.Key<String>> = listOf(
+            PreferenceKeys.ACTIVE_LANGUAGES_LIST,
+            PreferenceKeys.PRIMARY_LANGUAGE,
+            PreferenceKeys.PRIMARY_LAYOUT_LANGUAGE,
+            PreferenceKeys.LONG_PRESS_PUNCTUATION_MODE,
+            PreferenceKeys.LONG_PRESS_DURATION,
+            PreferenceKeys.SPACE_BAR_SIZE,
+            PreferenceKeys.KEYBOARD_THEME,
+            PreferenceKeys.KEY_SIZE,
+            PreferenceKeys.KEY_LABEL_SIZE,
+            PreferenceKeys.CURSOR_SPEED,
+            PreferenceKeys.ALTERNATIVE_KEYBOARD_LAYOUT,
+            PreferenceKeys.KEYBOARD_DISPLAY_MODE
+        )
+
+        internal val setExportKeys: List<Preferences.Key<Set<String>>> = listOf(
+            PreferenceKeys.FAVORITE_THEMES
+        )
     }
 }

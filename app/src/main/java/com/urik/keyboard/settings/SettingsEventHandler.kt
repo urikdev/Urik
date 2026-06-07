@@ -143,6 +143,14 @@ class SettingsEventHandler(private val context: Context) {
                     context.getString(R.string.error_delete_all_words)
                 }
 
+                is SettingsEvent.Error.SettingsExportFailed -> {
+                    context.getString(R.string.error_settings_export)
+                }
+
+                is SettingsEvent.Error.SettingsImportFailed -> {
+                    context.getString(R.string.error_settings_import)
+                }
+
                 is SettingsEvent.Success.LearnedWordsCleared -> {
                     context.getString(R.string.success_learned_words_cleared)
                 }
@@ -169,6 +177,14 @@ class SettingsEventHandler(private val context: Context) {
 
                 is SettingsEvent.Success.AllWordsDeleted -> {
                     context.getString(R.string.success_all_words_deleted)
+                }
+
+                is SettingsEvent.Success.SettingsExported -> {
+                    context.getString(R.string.success_settings_exported, event.mappingCount)
+                }
+
+                is SettingsEvent.Success.SettingsImported -> {
+                    context.getString(R.string.success_settings_imported, event.mappingCount)
                 }
             }
 

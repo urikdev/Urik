@@ -190,6 +190,10 @@
     <string name="privacy_settings_export_dictionary_summary">Запазване на думи във файл</string>
     <string name="privacy_settings_import_dictionary">Импорт на речник</string>
     <string name="privacy_settings_import_dictionary_summary">Възстановяване на научени думи от файл</string>
+    <string name="privacy_settings_export_settings">Експортиране на настройки</string>
+    <string name="privacy_settings_export_settings_summary">Запазване на настройките на клавиатурата и персонализираните клавишни съответствия във файл</string>
+    <string name="privacy_settings_import_settings">Импортиране на настройки</string>
+    <string name="privacy_settings_import_settings_summary">Възстановяване на настройките и персонализираните клавишни съответствия от файл</string>
     <string name="privacy_settings_storage_encryption_title">Хранилище за думи: Некриптирано</string>
     <string name="privacy_settings_storage_encryption_summary">Не е открит заключен екран. Научените думи се съхраняват в обикновен текст. Задайте PIN, графичен ключ или биометрична защита в настройките на Android, за да активирате криптирането.</string>
     <string name="privacy_settings_keystore_api27_title">Криптиране: Ограничена защита при заключване</string>
@@ -230,6 +234,8 @@
     <string name="error_reset_to_defaults">Неуспешно нулиране на настройките</string>
     <string name="error_dictionary_export">Неуспешен експорт на речника</string>
     <string name="error_dictionary_import">Неуспешен импорт на речника</string>
+    <string name="error_settings_export">Неуспешен експорт на настройките</string>
+    <string name="error_settings_import">Неуспешен импорт на настройките</string>
     <string name="error_update_merged_dictionaries">Неуспешна промяна на речникa</string>
     <string name="error_update_pause_on_misspelled">Неуспешна промяна на настройките за пауза</string>
     <string name="error_update_autocorrection">Неуспешна промяна на настройките за автоматична поправка</string>
@@ -247,6 +253,8 @@
     <string name="success_settings_reset">Настройките са нулирани</string>
     <string name="success_dictionary_exported">Експортирани %1$d думи</string>
     <string name="success_dictionary_imported">Добавени %1$d нови, обновени %2$d думи</string>
+    <string name="success_settings_exported">Настройките са експортирани (%1$d клавишни съответствия)</string>
+    <string name="success_settings_imported">Настройките са импортирани (%1$d клавишни съответствия)</string>
     <string name="success_word_deleted">Думата е премахната</string>
     <string name="success_all_words_deleted">Всички научени думи са изчистени</string>
 

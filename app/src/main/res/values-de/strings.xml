@@ -178,6 +178,10 @@
     <string name="privacy_settings_export_dictionary_summary">Erlernte Wörter in eine Datei speichern</string>
     <string name="privacy_settings_import_dictionary">Wörterbuch importieren</string>
     <string name="privacy_settings_import_dictionary_summary">Erlernte Wörter aus einer Datei wiederherstellen</string>
+    <string name="privacy_settings_export_settings">Einstellungen exportieren</string>
+    <string name="privacy_settings_export_settings_summary">Tastatureinstellungen und benutzerdefinierte Tastenbelegungen in einer Datei speichern</string>
+    <string name="privacy_settings_import_settings">Einstellungen importieren</string>
+    <string name="privacy_settings_import_settings_summary">Einstellungen und benutzerdefinierte Tastenbelegungen aus einer Datei wiederherstellen</string>
     <string name="learned_words_title">Erlernte Wörter</string>
     <string name="learned_words_manage">Erlernte Wörter verwalten</string>
     <string name="learned_words_manage_summary">Einzelne erlernte Wörter anzeigen und löschen</string>
@@ -210,6 +214,8 @@
     <string name="error_reset_to_defaults">Einstellungen konnten nicht zurückgesetzt werden</string>
     <string name="error_dictionary_export">Wörterbuch konnte nicht exportiert werden</string>
     <string name="error_dictionary_import">Wörterbuch konnte nicht importiert werden</string>
+    <string name="error_settings_export">Export der Einstellungen fehlgeschlagen</string>
+    <string name="error_settings_import">Import der Einstellungen fehlgeschlagen</string>
     <string name="error_update_merged_dictionaries">Wörterbuchmodus konnte nicht aktualisiert werden</string>
     <string name="error_update_pause_on_misspelled">Pause-Einstellung konnte nicht aktualisiert werden</string>
     <string name="error_update_autocorrection">Autokorrektur-Einstellung konnte nicht aktualisiert werden</string>
@@ -221,6 +227,8 @@
     <string name="success_settings_reset">Einstellungen wurden zurückgesetzt</string>
     <string name="success_dictionary_exported">%1$d Wörter exportiert</string>
     <string name="success_dictionary_imported">%1$d neue hinzugefügt, %2$d Wörter aktualisiert</string>
+    <string name="success_settings_exported">Einstellungen exportiert (%1$d Tastenbelegungen)</string>
+    <string name="success_settings_imported">Einstellungen importiert (%1$d Tastenbelegungen)</string>
     <string name="success_word_deleted">Wort entfernt</string>
     <string name="success_all_words_deleted">Alle erlernten Wörter gelöscht</string>
 

@@ -180,6 +180,10 @@
     <string name="privacy_settings_export_dictionary_summary">Zapisz nauczone słowa do pliku</string>
     <string name="privacy_settings_import_dictionary">Importuj słownik</string>
     <string name="privacy_settings_import_dictionary_summary">Przywróć nauczone słowa z pliku</string>
+    <string name="privacy_settings_export_settings">Eksportuj ustawienia</string>
+    <string name="privacy_settings_export_settings_summary">Zapisz ustawienia klawiatury i niestandardowe mapowania klawiszy do pliku</string>
+    <string name="privacy_settings_import_settings">Importuj ustawienia</string>
+    <string name="privacy_settings_import_settings_summary">Przywróć ustawienia i niestandardowe mapowania klawiszy z pliku</string>
     <string name="learned_words_title">Nauczone słowa</string>
     <string name="learned_words_manage">Zarządzaj nauczonymi słowami</string>
     <string name="learned_words_manage_summary">Przeglądaj i usuwaj nauczone słowa</string>
@@ -212,6 +216,8 @@
     <string name="error_reset_to_defaults">Nie udało się przywrócić ustawień do domyślnych</string>
     <string name="error_dictionary_export">Nie udało się wyeksportować słownika</string>
     <string name="error_dictionary_import">Nie udało się zaimportować słownika</string>
+    <string name="error_settings_export">Eksport ustawień nie powiódł się</string>
+    <string name="error_settings_import">Import ustawień nie powiódł się</string>
     <string name="error_update_merged_dictionaries">Nie udało się zaktualizować trybu słownika</string>
     <string name="error_update_pause_on_misspelled">Nie udało się zaktualizować ustawienia pauzy</string>
     <string name="error_update_autocorrection">Nie udało się zaktualizować ustawienia autokorekty</string>
@@ -223,6 +229,8 @@
     <string name="success_settings_reset">Ustawienia przywrócone do domyślnych</string>
     <string name="success_dictionary_exported">Wyeksportowano %1$d słów</string>
     <string name="success_dictionary_imported">Dodano %1$d nowych, zaktualizowano %2$d słów</string>
+    <string name="success_settings_exported">Ustawienia wyeksportowane (%1$d mapowania klawiszy)</string>
+    <string name="success_settings_imported">Ustawienia zaimportowane (%1$d mapowania klawiszy)</string>
     <string name="success_word_deleted">Słowo usunięte</string>
     <string name="success_all_words_deleted">Wszystkie nauczone słowa usunięte</string>
 

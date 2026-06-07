@@ -4,6 +4,7 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.urik.keyboard.service.DictionaryBackupManager
+import com.urik.keyboard.service.SettingsBackupManager
 import com.urik.keyboard.settings.SettingsEvent
 import com.urik.keyboard.settings.SettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -22,7 +23,8 @@ class PrivacyDataViewModel
 @Inject
 constructor(
     private val settingsRepository: SettingsRepository,
-    private val dictionaryBackupManager: DictionaryBackupManager
+    private val dictionaryBackupManager: DictionaryBackupManager,
+    private val settingsBackupManager: SettingsBackupManager
 ) : ViewModel() {
     private val _events = MutableSharedFlow<SettingsEvent>()
     val events: SharedFlow<SettingsEvent> = _events.asSharedFlow()
@@ -89,6 +91,26 @@ constructor(
                         )
                     )
                 }.onFailure { _events.emit(SettingsEvent.Error.DictionaryImportFailed) }
+        }
+    }
+
+    fun exportSettings(uri: Uri) {
+        viewModelScope.launch {
+            settingsBackupManager
+                .exportToUri(uri)
+                .onSuccess { result ->
+                    _events.emit(SettingsEvent.Success.SettingsExported(result.mappingCount))
+                }.onFailure { _events.emit(SettingsEvent.Error.SettingsExportFailed) }
+        }
+    }
+
+    fun importSettings(uri: Uri) {
+        viewModelScope.launch {
+            settingsBackupManager
+                .importFromUri(uri)
+                .onSuccess { result ->
+                    _events.emit(SettingsEvent.Success.SettingsImported(result.mappingCount))
+                }.onFailure { _events.emit(SettingsEvent.Error.SettingsImportFailed) }
         }
     }
 }
