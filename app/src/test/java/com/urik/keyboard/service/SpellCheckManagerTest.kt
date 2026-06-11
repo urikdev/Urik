@@ -55,6 +55,7 @@ class SpellCheckManagerTest {
     private lateinit var wordLearningEngine: WordLearningEngine
     private lateinit var wordFrequencyRepository: WordFrequencyRepository
     private lateinit var cacheMemoryManager: CacheMemoryManager
+    private lateinit var blacklistRepository: BlacklistRepository
     private lateinit var wordNormalizer: WordNormalizer
     private lateinit var suggestionCache: ManagedCache<String, List<SpellingSuggestion>>
     private lateinit var dictionaryCache: ManagedCache<String, Boolean>
@@ -110,6 +111,13 @@ class SpellCheckManagerTest {
         this 5000
         that's 3000
         thats 50
+        yall 75
+        y'all 15000
+        maam 10
+        ma'am 48000
+        cmon 15
+        c'mon 6000
+        ill 5000
         join 500
         in 8000
         best 300000
@@ -141,6 +149,11 @@ class SpellCheckManagerTest {
             mock {
                 onBlocking { getFrequency(any(), any()) } doReturn 0
                 onBlocking { getFrequencies(any(), any()) } doReturn emptyMap()
+            }
+
+        blacklistRepository =
+            mock {
+                onBlocking { getAll() } doReturn emptySet()
             }
 
         suggestionCache =
@@ -198,6 +211,7 @@ class SpellCheckManagerTest {
                 wordLearningEngine = wordLearningEngine,
                 wordFrequencyRepository = wordFrequencyRepository,
                 cacheMemoryManager = cacheMemoryManager,
+                blacklistRepository = blacklistRepository,
                 ioDispatcher = testDispatcher,
                 wordNormalizer = wordNormalizer
             )
@@ -491,6 +505,23 @@ class SpellCheckManagerTest {
     }
 
     @Test
+    fun `getSpellingSuggestionsWithConfidence penalizes short single-deletion candidates`() = runTest {
+        whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency(any(), any(), any()))
+            .thenReturn(emptyList())
+
+        // "win" -> "in" is a single-character-deletion dictionary entry
+        // (ratio 2/3 ~= 0.667). It must be penalized below 0.2 confidence.
+        val suggestions = spellCheckManager.getSpellingSuggestionsWithConfidence("win")
+        val shortDeletion = suggestions.find { it.word == "in" }
+
+        assertNotNull("'in' should appear as a candidate for 'win'", shortDeletion)
+        assertTrue(
+            "Short single-deletion candidate 'in' should be penalized, got confidence ${shortDeletion!!.confidence}",
+            shortDeletion.confidence < 0.2
+        )
+    }
+
+    @Test
     fun `queryCompletionSuggestions filters low frequency completions relative to typed prefix`() = runTest {
         whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency(any(), any(), any()))
             .thenReturn(emptyList())
@@ -601,6 +632,41 @@ class SpellCheckManagerTest {
         spellCheckManager.removeFromBlacklist("word")
 
         assertEquals(null, dictionaryCache.getIfPresent("en_word"))
+    }
+
+    @Test
+    fun `blacklistSuggestion persists word via blacklistRepository`() = runTest {
+        spellCheckManager.blacklistSuggestion("badword")
+
+        verify(blacklistRepository).add("badword")
+    }
+
+    @Test
+    fun `initialization loads persisted blacklist so word is blacklisted before any new call`() = runTest {
+        whenever(blacklistRepository.getAll()).thenReturn(setOf("oldbad"))
+
+        val restartedManager =
+            SpellCheckManager(
+                context = context,
+                languageManager = languageManager,
+                wordLearningEngine = wordLearningEngine,
+                wordFrequencyRepository = wordFrequencyRepository,
+                cacheMemoryManager = cacheMemoryManager,
+                blacklistRepository = blacklistRepository,
+                ioDispatcher = testDispatcher,
+                wordNormalizer = wordNormalizer
+            )
+
+        assertTrue(restartedManager.isWordBlacklisted("oldbad"))
+    }
+
+    @Test
+    fun `removeFromBlacklist deletes the persisted entry`() = runTest {
+        spellCheckManager.blacklistSuggestion("word")
+
+        spellCheckManager.removeFromBlacklist("word")
+
+        verify(blacklistRepository).remove("word")
     }
 
     @Test
@@ -720,6 +786,7 @@ class SpellCheckManagerTest {
                 wordFrequencyRepository,
                 wordNormalizer,
                 cacheMemoryManager,
+                blacklistRepository,
                 testDispatcher
             )
         val words = failingManager.getCommonWords()
@@ -1092,6 +1159,7 @@ class SpellCheckManagerTest {
                 wordFrequencyRepository = wordFrequencyRepository,
                 wordNormalizer = wordNormalizer,
                 cacheMemoryManager = cacheMemoryManager,
+                blacklistRepository = blacklistRepository,
                 ioDispatcher = testDispatcher
             )
 
@@ -1125,6 +1193,7 @@ class SpellCheckManagerTest {
                 wordFrequencyRepository = wordFrequencyRepository,
                 wordNormalizer = wordNormalizer,
                 cacheMemoryManager = cacheMemoryManager,
+                blacklistRepository = blacklistRepository,
                 ioDispatcher = testDispatcher
             )
 
@@ -1181,6 +1250,7 @@ class SpellCheckManagerTest {
                 wordFrequencyRepository = wordFrequencyRepository,
                 wordNormalizer = wordNormalizer,
                 cacheMemoryManager = cacheMemoryManager,
+                blacklistRepository = blacklistRepository,
                 ioDispatcher = testDispatcher
             )
 
@@ -1269,19 +1339,28 @@ class SpellCheckManagerTest {
     @Test
     fun `hasDominantContractionForm returns true when contraction is 20x more frequent`() = runTest {
         spellCheckManager.isWordInDictionary("hello")
-        assertTrue(spellCheckManager.hasDominantContractionForm("hows"))
+        assertTrue(spellCheckManager.hasDominantContractionForm("yall"))
     }
 
     @Test
-    fun `hasDominantContractionForm returns true for cant vs can't`() = runTest {
+    fun `hasDominantContractionForm returns true at very high dominance ratio`() = runTest {
         spellCheckManager.isWordInDictionary("hello")
-        assertTrue(spellCheckManager.hasDominantContractionForm("cant"))
+        assertTrue(spellCheckManager.hasDominantContractionForm("maam"))
     }
 
     @Test
-    fun `hasDominantContractionForm returns true for wont vs won't`() = runTest {
+    fun `hasDominantContractionForm returns true at moderate dominance ratio`() = runTest {
         spellCheckManager.isWordInDictionary("hello")
-        assertTrue(spellCheckManager.hasDominantContractionForm("wont"))
+        assertTrue(spellCheckManager.hasDominantContractionForm("cmon"))
+    }
+
+    @Test
+    fun `removelisted bare form is filtered from dictionary`() = runTest {
+        assertFalse(spellCheckManager.isWordInDictionary("cant"))
+        assertFalse(spellCheckManager.isWordInDictionary("hows"))
+        assertFalse(spellCheckManager.isWordInDictionary("thats"))
+        assertTrue(spellCheckManager.isWordInDictionary("can't"))
+        assertTrue(spellCheckManager.isWordInDictionary("how's"))
     }
 
     @Test
@@ -1318,9 +1397,9 @@ class SpellCheckManagerTest {
     @Test
     fun `getDominantContractionForm returns contraction when dominant`() = runTest {
         spellCheckManager.isWordInDictionary("hello")
-        assertEquals("how's", spellCheckManager.getDominantContractionForm("hows"))
-        assertEquals("can't", spellCheckManager.getDominantContractionForm("cant"))
-        assertEquals("won't", spellCheckManager.getDominantContractionForm("wont"))
+        assertEquals("y'all", spellCheckManager.getDominantContractionForm("yall"))
+        assertEquals("ma'am", spellCheckManager.getDominantContractionForm("maam"))
+        assertEquals("c'mon", spellCheckManager.getDominantContractionForm("cmon"))
     }
 
     @Test
@@ -1348,18 +1427,18 @@ class SpellCheckManagerTest {
     @Test
     fun `contraction distance reduction gives distance-2 contraction competitive confidence`() = runTest {
         spellCheckManager.isWordInDictionary("hello")
-        val suggestions = spellCheckManager.getSpellingSuggestionsWithConfidence("thts")
+        val suggestions = spellCheckManager.getSpellingSuggestionsWithConfidence("yll")
 
-        val thatsConfidence = suggestions.find { it.word == "that's" }?.confidence
-        val thisConfidence = suggestions.find { it.word == "this" }?.confidence
+        val yallConfidence = suggestions.find { it.word == "y'all" }?.confidence
+        val illConfidence = suggestions.find { it.word == "ill" }?.confidence
 
-        assertNotNull("that's should appear in suggestions for thts", thatsConfidence)
-        assertNotNull("this should appear in suggestions for thts", thisConfidence)
+        assertNotNull("y'all should appear in suggestions for yll", yallConfidence)
+        assertNotNull("ill should appear in suggestions for yll", illConfidence)
 
-        if (thatsConfidence != null && thisConfidence != null) {
-            val gap = thisConfidence - thatsConfidence
+        if (yallConfidence != null && illConfidence != null) {
+            val gap = illConfidence - yallConfidence
             assertTrue(
-                "that's should be within 0.05 of this (gap=$gap), proving distance reduction worked",
+                "y'all should be within 0.05 of ill (gap=$gap), proving distance reduction worked",
                 gap < 0.05
             )
         }
@@ -1414,15 +1493,15 @@ class SpellCheckManagerTest {
         spellCheckManager.isWordInDictionary("hello")
 
         assertTrue(
-            "With no user frequency, hows should have dominant contraction",
-            spellCheckManager.hasDominantContractionForm("hows")
+            "With no user frequency, yall should have dominant contraction",
+            spellCheckManager.hasDominantContractionForm("yall")
         )
 
-        whenever(wordFrequencyRepository.getFrequency(eq("hows"), any())).thenReturn(15)
+        whenever(wordFrequencyRepository.getFrequency(eq("yall"), any())).thenReturn(15)
 
         assertFalse(
-            "With user frequency boosting hows, contraction dominance should be suppressed",
-            spellCheckManager.hasDominantContractionForm("hows")
+            "With user frequency boosting yall, contraction dominance should be suppressed",
+            spellCheckManager.hasDominantContractionForm("yall")
         )
     }
 
@@ -1430,11 +1509,11 @@ class SpellCheckManagerTest {
     fun `low user frequency does not suppress contraction dominance`() = runTest {
         spellCheckManager.isWordInDictionary("hello")
 
-        whenever(wordFrequencyRepository.getFrequency(eq("hows"), any())).thenReturn(1)
+        whenever(wordFrequencyRepository.getFrequency(eq("yall"), any())).thenReturn(1)
 
         assertTrue(
             "Low user frequency should not suppress contraction dominance",
-            spellCheckManager.hasDominantContractionForm("hows")
+            spellCheckManager.hasDominantContractionForm("yall")
         )
     }
 
@@ -1471,6 +1550,7 @@ class SpellCheckManagerTest {
                 wordFrequencyRepository = wordFrequencyRepository,
                 wordNormalizer = wordNormalizer,
                 cacheMemoryManager = cacheMemoryManager,
+                blacklistRepository = blacklistRepository,
                 ioDispatcher = testDispatcher
             )
 
@@ -1518,11 +1598,12 @@ class SpellCheckManagerTest {
                     wordLearningEngine = wordLearningEngine,
                     wordFrequencyRepository = wordFrequencyRepository,
                     cacheMemoryManager = cacheMemoryManager,
+                    blacklistRepository = blacklistRepository,
                     ioDispatcher = neverDispatcher,
                     wordNormalizer = wordNormalizer
                 )
 
-            kotlinx.coroutines.test.runTest(standardDispatcher) {
+            runTest(standardDispatcher) {
                 launch { timeoutManager.generateSuggestions("hello") }
                 advanceTimeBy(5001L)
                 runCurrent()
@@ -1546,6 +1627,7 @@ class SpellCheckManagerTest {
                 wordFrequencyRepository = wordFrequencyRepository,
                 wordNormalizer = wordNormalizer,
                 cacheMemoryManager = cacheMemoryManager,
+                blacklistRepository = blacklistRepository,
                 ioDispatcher = testDispatcher
             )
 
@@ -1574,6 +1656,7 @@ class SpellCheckManagerTest {
             wordLearningEngine = wordLearningEngine,
             wordFrequencyRepository = wordFrequencyRepository,
             cacheMemoryManager = cacheMemoryManager,
+            blacklistRepository = blacklistRepository,
             ioDispatcher = testDispatcher,
             wordNormalizer = wordNormalizer,
             fatFingerExpander = fatFingerExpander
@@ -1615,6 +1698,7 @@ class SpellCheckManagerTest {
             wordLearningEngine = wordLearningEngine,
             wordFrequencyRepository = wordFrequencyRepository,
             cacheMemoryManager = cacheMemoryManager,
+            blacklistRepository = blacklistRepository,
             ioDispatcher = testDispatcher,
             wordNormalizer = wordNormalizer,
             fatFingerExpander = fatFingerExpander
@@ -1648,6 +1732,7 @@ class SpellCheckManagerTest {
             wordLearningEngine = wordLearningEngine,
             wordFrequencyRepository = wordFrequencyRepository,
             cacheMemoryManager = cacheMemoryManager,
+            blacklistRepository = blacklistRepository,
             ioDispatcher = testDispatcher,
             wordNormalizer = wordNormalizer,
             fatFingerExpander = fatFingerExpander
@@ -1717,6 +1802,7 @@ class SpellCheckManagerTest {
             wordLearningEngine = wordLearningEngine,
             wordFrequencyRepository = wordFrequencyRepository,
             cacheMemoryManager = cacheMemoryManager,
+            blacklistRepository = blacklistRepository,
             ioDispatcher = testDispatcher,
             wordNormalizer = wordNormalizer,
             fatFingerExpander = fatFingerExpander

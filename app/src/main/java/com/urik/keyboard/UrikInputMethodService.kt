@@ -75,7 +75,6 @@ import com.urik.keyboard.ui.keyboard.components.SwipeDetector
 import com.urik.keyboard.ui.keyboard.components.SwipeKeyboardView
 import com.urik.keyboard.utils.BackspaceUtils
 import com.urik.keyboard.utils.CacheMemoryManager
-import com.urik.keyboard.utils.CursorEditingUtils
 import com.urik.keyboard.utils.ErrorLogger
 import com.urik.keyboard.utils.KanaTransformUtils
 import com.urik.keyboard.utils.KeyboardModeUtils
@@ -237,8 +236,6 @@ open class UrikInputMethodService :
     }
 
     private fun clearSecureFieldState() = imeStateCoordinator.clearSecureFieldState()
-
-    private fun isValidTextInput(text: String): Boolean = CursorEditingUtils.isValidTextInput(text)
 
     private fun updateScriptContext(locale: ULocale) {
         val currentLayout = viewModel.layout.value
@@ -483,7 +480,6 @@ open class UrikInputMethodService :
                 outputBridge = outputBridge,
                 suggestionPipeline = suggestionPipeline,
                 autoCorrectionEngine = autoCorrectionEngine,
-                textInputProcessor = textInputProcessor,
                 swipeSpaceManager = swipeSpaceManager,
                 swipeDetector = swipeDetector,
                 candidateBarController = candidateBarController,
@@ -1425,8 +1421,7 @@ open class UrikInputMethodService :
                 textInputProcessor.removeSuggestion(suggestion)
 
                 withContext(Dispatchers.Main) {
-                    val currentSuggestions = inputState.pendingSuggestions.filter { it != suggestion }
-                    inputState.pendingSuggestions = currentSuggestions
+                    val currentSuggestions = inputState.removeSuggestionFromState(suggestion)
                     if (currentSuggestions.isNotEmpty()) {
                         candidateBarController.updateSuggestions(currentSuggestions)
                     } else {
@@ -1969,10 +1964,7 @@ open class UrikInputMethodService :
     }
 
     private companion object {
-        const val DOUBLE_TAP_SPACE_THRESHOLD_MS = 250L
         const val DOUBLE_SHIFT_THRESHOLD_MS = 400L
-        const val NON_SEQUENTIAL_JUMP_THRESHOLD = 5
-        const val WORD_BOUNDARY_CONTEXT_LENGTH = 64
     }
 }
 

@@ -98,7 +98,7 @@ class ClipboardMonitorServiceTest {
     fun `repository delegation passes truncated text content`() = runTest {
         val captured = mutableListOf<String>()
         whenever(repo.addItem(any())).thenAnswer { invocation ->
-            captured.add(invocation.getArgument<String>(0))
+            captured.add(invocation.getArgument(0))
             Result.success(Unit)
         }
 

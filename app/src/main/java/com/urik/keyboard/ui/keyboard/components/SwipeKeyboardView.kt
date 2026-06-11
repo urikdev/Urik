@@ -1182,8 +1182,25 @@ constructor(
         }
     }
 
+    private fun flushInFlightGestureState() {
+        gestureHandler.cancel()
+        isSwipeActive = false
+        hasTouchStart = false
+        swipeOverlay.endSwipe()
+
+        val now = System.currentTimeMillis()
+        val cancelEvent = MotionEvent.obtain(now, now, MotionEvent.ACTION_CANCEL, 0f, 0f, 0)
+        try {
+            swipeDetector?.handleTouchEvent(cancelEvent) { x, y -> layoutEngine.findKeyAt(x, y) }
+        } finally {
+            cancelEvent.recycle()
+        }
+    }
+
     private fun showRemovalConfirmation(suggestion: String) {
         if (isDestroyed || confirmationOverlay != null) return
+
+        flushInFlightGestureState()
 
         pendingRemovalSuggestion = suggestion
 
@@ -1501,7 +1518,8 @@ constructor(
     private fun findKeyboardView(): ViewGroup? {
         if (isDestroyed) return null
 
-        val overlayViews = setOf(swipeOverlay, suggestionBar, emojiPickerContainer, emojiSearchContainer)
+        val overlayViews =
+            setOf(swipeOverlay, suggestionBar, emojiPickerContainer, emojiSearchContainer, confirmationOverlay)
         for (i in 0 until childCount) {
             val child = getChildAt(i)
             if (child !in overlayViews && child is ViewGroup) {
@@ -1534,6 +1552,10 @@ constructor(
 
     private fun createKeyboardLayout(layout: KeyboardLayout, state: KeyboardState) {
         if (isDestroyed) return
+
+        if (confirmationOverlay != null) {
+            hideRemovalConfirmation()
+        }
 
         if (isShowingEmojiPicker) {
             hideEmojiPicker()
@@ -1678,7 +1700,7 @@ constructor(
     private fun mapKeyPositions() {
         if (isDestroyed || layoutEngine.keyViews.isEmpty()) return
 
-        val rawPositions = mutableMapOf<android.widget.Button, Rect>()
+        val rawPositions = mutableMapOf<Button, Rect>()
         layoutEngine.keyViews.forEach { button ->
             if (isDestroyed) return@forEach
             button.getLocationInWindow(cachedLocationArray)
@@ -1691,7 +1713,7 @@ constructor(
     }
 
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
-        if (!isDestroyed && (gestureHandler.isActive || isSwipeActive)) {
+        if (!isDestroyed && confirmationOverlay == null && (gestureHandler.isActive || isSwipeActive)) {
             return onTouchEvent(ev)
         }
         return super.dispatchTouchEvent(ev)
@@ -1699,6 +1721,10 @@ constructor(
 
     override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
         if (isDestroyed) return false
+
+        if (confirmationOverlay != null) {
+            return false
+        }
 
         if (isTouchInEmojiPicker(ev.x, ev.y)) {
             return false
@@ -1778,6 +1804,10 @@ constructor(
     override fun onTouchEvent(event: MotionEvent): Boolean {
         requireInitialized()
         if (isDestroyed) return false
+
+        if (confirmationOverlay != null) {
+            return false
+        }
 
         if (isTouchInEmojiPicker(event.x, event.y)) {
             return false

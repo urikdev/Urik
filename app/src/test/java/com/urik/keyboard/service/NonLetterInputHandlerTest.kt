@@ -93,7 +93,7 @@ class NonLetterInputHandlerTest {
         realInputState.displayBuffer = "hello"
         handler.handle(".")
         testDispatcher.scheduler.advanceUntilIdle()
-        assert(getCurrentSettingsCalls.size >= 1)
+        assert(getCurrentSettingsCalls.isNotEmpty())
     }
 
     @Test

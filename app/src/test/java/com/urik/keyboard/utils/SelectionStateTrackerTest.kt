@@ -259,7 +259,7 @@ class SelectionStateTrackerTest {
     fun `requiresStateInvalidation returns true for destructive results`() {
         assertTrue(SelectionChangeResult.NonSequentialJump(0, 100, 100).requiresStateInvalidation())
         assertTrue(SelectionChangeResult.ComposingRegionLost.requiresStateInvalidation())
-        assertTrue(SelectionChangeResult.CursorLeftComposingRegion(0, 10).requiresStateInvalidation())
+        assertTrue(SelectionChangeResult.CursorLeftComposingRegion.requiresStateInvalidation())
     }
 
     @Test

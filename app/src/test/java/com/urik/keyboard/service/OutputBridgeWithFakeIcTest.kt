@@ -75,4 +75,32 @@ class OutputBridgeWithFakeIcTest {
         assertEquals("hell", fakeIc.textBuffer.toString())
         assertEquals(4, fakeIc.selectionStart)
     }
+
+    @Test
+    fun `attemptRecompositionAtCursor does nothing when suggestions disabled`() {
+        val realState = InputStateManager(
+            viewCallback = mock<ViewCallback>(),
+            onShiftStateChanged = {},
+            isCapsLockOn = { false },
+            cancelDebounceJob = {}
+        )
+        realState.isSuggestionsDisabled = true
+
+        val bridge = OutputBridge(
+            state = realState,
+            swipeDetector = mockSwipeDetector,
+            swipeSpaceManager = mockSwipeSpaceManager,
+            icProvider = { fakeIc }
+        )
+
+        fakeIc.textBuffer.append("Th")
+        fakeIc.selectionStart = 2
+
+        bridge.attemptRecompositionAtCursor(2)
+
+        assertEquals(-1, fakeIc.composingStart)
+        assertEquals(-1, fakeIc.composingEnd)
+        assertEquals("", realState.displayBuffer)
+        assertEquals(-1, realState.composingRegionStart)
+    }
 }

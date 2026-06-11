@@ -4,9 +4,11 @@ package com.urik.keyboard.integration
 
 import android.content.Context
 import android.content.res.AssetManager
+import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.room.Room
 import com.urik.keyboard.data.WordFrequencyRepository
 import com.urik.keyboard.data.database.KeyboardDatabase
+import com.urik.keyboard.service.BlacklistRepository
 import com.urik.keyboard.service.InputMethod
 import com.urik.keyboard.service.LanguageManager
 import com.urik.keyboard.service.ProcessingResult
@@ -23,8 +25,11 @@ import com.urik.keyboard.ui.keyboard.components.SwipeDetector
 import com.urik.keyboard.ui.keyboard.components.ZipfCheck
 import com.urik.keyboard.utils.CacheMemoryManager
 import java.io.ByteArrayInputStream
+import java.io.File
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -139,6 +144,14 @@ class SwipeInputIntegrationTest {
                 testDispatcher
             )
 
+        val blacklistRepository =
+            BlacklistRepository(
+                PreferenceDataStoreFactory.create(
+                    scope = CoroutineScope(testDispatcher + SupervisorJob()),
+                    produceFile = { File(context.cacheDir, "blacklist_test.preferences_pb") }
+                )
+            )
+
         spellCheckManager =
             SpellCheckManager(
                 mockContext,
@@ -147,6 +160,7 @@ class SwipeInputIntegrationTest {
                 wordFrequencyRepository,
                 wordNormalizer,
                 cacheMemoryManager,
+                blacklistRepository,
                 testDispatcher
             )
 

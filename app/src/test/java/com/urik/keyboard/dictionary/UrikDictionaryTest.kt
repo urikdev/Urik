@@ -125,6 +125,63 @@ class UrikDictionaryTest {
         assertTrue(dict.lookup("кот"))
     }
 
+    private fun buildRemovelistDict(removedWords: Set<String>): UrikDictionary {
+        val words = listOf(
+            "cant" to 3936L,
+            "can't" to 1510L,
+            "canto" to 100L,
+            "hello" to 1_000_000L
+        )
+        return UrikDictionary(buildTestUrik(words).inputStream(), removedWords)
+    }
+
+    @Test
+    fun `removed word lookup returns false`() {
+        val filtered = buildRemovelistDict(setOf("cant"))
+        assertFalse(filtered.lookup("cant"))
+        assertTrue(filtered.lookup("can't"))
+        assertTrue(filtered.lookup("hello"))
+    }
+
+    @Test
+    fun `removed word getFrequency returns 0`() {
+        val filtered = buildRemovelistDict(setOf("cant"))
+        assertEquals(0L, filtered.getFrequency("cant"))
+        assertTrue(filtered.getFrequency("can't") > 0L)
+    }
+
+    @Test
+    fun `removed word excluded from candidates`() {
+        val filtered = buildRemovelistDict(setOf("cant"))
+        val candidates = filtered.getCandidates("cant", maxEditDistance = 2).map { it.first }
+        assertFalse("cant" in candidates)
+        assertTrue("can't" in candidates)
+    }
+
+    @Test
+    fun `removed word excluded from prefix completions`() {
+        val filtered = buildRemovelistDict(setOf("cant"))
+        val words = filtered.getWordsWithPrefix("can", maxResults = 10).map { it.first }
+        assertFalse("cant" in words)
+        assertTrue("can't" in words)
+        assertTrue("canto" in words)
+    }
+
+    @Test
+    fun `removal matches case insensitively`() {
+        val cased = UrikDictionary(
+            buildTestUrik(listOf("Cant" to 100L)).inputStream(),
+            setOf("cant")
+        )
+        assertFalse(cased.lookup("Cant"))
+    }
+
+    @Test
+    fun `empty removelist leaves dictionary untouched`() {
+        val unfiltered = buildRemovelistDict(emptySet())
+        assertTrue(unfiltered.lookup("cant"))
+    }
+
     @Test
     fun `getCandidates unicode substitution`() {
         val candidates = dict.getCandidates("кат", maxEditDistance = 1)

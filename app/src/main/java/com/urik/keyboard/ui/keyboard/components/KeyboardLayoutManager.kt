@@ -712,21 +712,20 @@ class KeyboardLayoutManager(
     }
 
     private fun preallocateLongPressRunnable(button: Button, key: KeyboardKey) {
-        when {
-            key is KeyboardKey.Character &&
-                (
-                    key.type == KeyboardKey.KeyType.LETTER ||
-                        key.type == KeyboardKey.KeyType.NUMBER ||
-                        key.type == KeyboardKey.KeyType.SYMBOL
-                    ) -> buttonLongPressRunnables[button] = Runnable {
+        when (key) {
+            is KeyboardKey.Character if
+            key.type == KeyboardKey.KeyType.LETTER ||
+                key.type == KeyboardKey.KeyType.NUMBER ||
+                key.type == KeyboardKey.KeyType.SYMBOL
+            -> buttonLongPressRunnables[button] = Runnable {
                 characterLongPressFired.add(button)
                 longPressConsumedButtons.add(button)
                 performContextualHaptic(key)
                 handleCharacterLongPress(key, button, button)
             }
 
-            key is KeyboardKey.Character &&
-                key.type == KeyboardKey.KeyType.PUNCTUATION &&
+            is KeyboardKey.Character if
+            key.type == KeyboardKey.KeyType.PUNCTUATION &&
                 longPressPunctuationMode == LongPressPunctuationMode.PERIOD &&
                 key.value == "." ->
                 buttonLongPressRunnables[button] = Runnable {
@@ -735,7 +734,7 @@ class KeyboardLayoutManager(
                     handlePunctuationLongPress(key, button)
                 }
 
-            key is KeyboardKey.Character && key.value == "," ->
+            is KeyboardKey.Character if key.value == "," ->
                 buttonLongPressRunnables[button] = Runnable {
                     touchDispatcher.commaLongPressFired = true
                     longPressConsumedButtons.add(button)
@@ -744,8 +743,8 @@ class KeyboardLayoutManager(
                     onShowInputMethodPicker()
                 }
 
-            key is KeyboardKey.Action &&
-                key.action == KeyboardKey.ActionType.SPACE &&
+            is KeyboardKey.Action if
+            key.action == KeyboardKey.ActionType.SPACE &&
                 longPressPunctuationMode == LongPressPunctuationMode.SPACEBAR ->
                 buttonLongPressRunnables[button] = Runnable {
                     longPressConsumedButtons.add(button)
@@ -753,8 +752,8 @@ class KeyboardLayoutManager(
                     handleSpaceLongPress(button)
                 }
 
-            key is KeyboardKey.Action &&
-                key.action == KeyboardKey.ActionType.SHIFT &&
+            is KeyboardKey.Action if
+            key.action == KeyboardKey.ActionType.SHIFT &&
                 !showLanguageSwitchKey &&
                 activeLanguages.size > 1 ->
                 buttonLongPressRunnables[button] = Runnable {
@@ -764,7 +763,7 @@ class KeyboardLayoutManager(
                     handleShiftLongPress(button)
                 }
 
-            key is KeyboardKey.Action && key.action == KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS ->
+            is KeyboardKey.Action if key.action == KeyboardKey.ActionType.MODE_SWITCH_SYMBOLS ->
                 buttonLongPressRunnables[button] = Runnable {
                     symbolsLongPressFired.add(button)
                     longPressConsumedButtons.add(button)
@@ -772,6 +771,8 @@ class KeyboardLayoutManager(
                     performContextualHaptic(null)
                     onSymbolsLongPress()
                 }
+
+            else -> {}
         }
     }
 
@@ -1180,8 +1181,11 @@ class KeyboardLayoutManager(
                 KeyboardKey.ActionType.SMALL_KANA -> "小"
 
                 KeyboardKey.ActionType.NEXT_CANDIDATE -> "次候補"
+
                 KeyboardKey.ActionType.COMMIT_CANDIDATE -> "確定"
+
                 KeyboardKey.ActionType.HANDAKUTEN -> "゜"
+
                 KeyboardKey.ActionType.EMOJI -> ""
 
                 else -> {

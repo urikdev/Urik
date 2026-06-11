@@ -1,6 +1,7 @@
 package com.urik.keyboard.service
 
 import android.graphics.PointF
+import com.urik.keyboard.service.FatFingerExpander.Companion.ADJACENT_KEY_THRESHOLD_MULTIPLIER
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.math.sqrt

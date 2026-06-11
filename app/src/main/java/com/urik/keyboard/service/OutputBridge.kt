@@ -119,7 +119,7 @@ class OutputBridge(
     }
 
     fun attemptRecompositionAtCursor(cursorPosition: Int) {
-        if (state.requiresDirectCommit || state.isUrlOrEmailField) return
+        if (state.requiresDirectCommit || state.isUrlOrEmailField || state.isSuggestionsDisabled) return
         if (state.displayBuffer.isNotEmpty()) return
 
         val textBefore = safeGetTextBeforeCursor(WORD_BOUNDARY_CONTEXT_LENGTH)

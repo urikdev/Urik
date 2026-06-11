@@ -413,14 +413,16 @@ class SuggestionPipeline(
                     .forLanguage(host.currentLanguage())
                     ?.getCandidates(hiraganaBuffer, host.currentLanguage())
                     ?: emptyList()
-                val conversionCandidates = rawCandidates.map { candidate ->
-                    SpellingSuggestion(
-                        word = candidate.surface,
-                        confidence = candidate.frequency.toDouble(),
-                        ranking = 0,
-                        source = candidate.source
-                    )
-                }
+                val conversionCandidates = rawCandidates
+                    .map { candidate ->
+                        SpellingSuggestion(
+                            word = candidate.surface,
+                            confidence = candidate.frequency.toDouble(),
+                            ranking = 0,
+                            source = candidate.source
+                        )
+                    }
+                    .filter { !spellCheckManager.isWordBlacklisted(it.word) }
 
                 val dictCompletions = if (host.showSuggestions()) {
                     spellCheckManager.getSpellingSuggestionsWithConfidence(hiraganaBuffer)

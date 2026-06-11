@@ -7,6 +7,8 @@ import org.junit.Before
 import org.junit.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.times
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
 class AutoCorrectionEngineTest {
@@ -130,8 +132,10 @@ class AutoCorrectionEngineTest {
 
     @Test
     fun `decide returns ContractionBypass when valid word has dominant contraction form`() = runTest {
+        val suggestion = SpellingSuggestion("don't", 1.0, 0)
         whenever(mockTextInputProcessor.validateWord(any())).thenReturn(true)
         whenever(mockTextInputProcessor.hasDominantContractionForm(any())).thenReturn(true)
+        whenever(mockTextInputProcessor.getSuggestions(any())).thenReturn(listOf(suggestion))
 
         val result = engine.decide(
             buffer = "dont",
@@ -143,12 +147,15 @@ class AutoCorrectionEngineTest {
             nextChar = " "
         )
         assert(result is AutocorrectDecision.ContractionBypass)
+        assertEquals(listOf(suggestion), (result as AutocorrectDecision.ContractionBypass).suggestions)
+        verify(mockTextInputProcessor, times(1)).getSuggestions(any())
     }
 
     @Test
     fun `decide returns Pause when invalid word and pauseOnMisspelledWord is true`() = runTest {
+        val suggestion = SpellingSuggestion("the", 1.0, 0)
         whenever(mockTextInputProcessor.validateWord(any())).thenReturn(false)
-        whenever(mockTextInputProcessor.getSuggestions(any())).thenReturn(emptyList())
+        whenever(mockTextInputProcessor.getSuggestions(any())).thenReturn(listOf(suggestion))
 
         val result = engine.decide(
             buffer = "teh",
@@ -160,6 +167,7 @@ class AutoCorrectionEngineTest {
             nextChar = " "
         )
         assert(result is AutocorrectDecision.Pause)
+        assertEquals(listOf(suggestion), (result as AutocorrectDecision.Pause).suggestions)
     }
 
     @Test

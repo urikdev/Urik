@@ -122,7 +122,7 @@ class SuggestionPipelineTest {
         )
     }
 
-    private inner class FakeSuggestionPipelineHost : SuggestionPipelineHost {
+    private class FakeSuggestionPipelineHost : SuggestionPipelineHost {
         override fun showSuggestions(): Boolean = true
         override fun effectiveSuggestionCount(): Int = 3
         override fun getKeyboardState(): KeyboardState = KeyboardState()
@@ -353,7 +353,7 @@ class SuggestionPipelineTest {
         assertEquals(listOf("Hello"), result)
     }
 
-    private inner class FakeJapanesePipelineHost : SuggestionPipelineHost {
+    private class FakeJapanesePipelineHost : SuggestionPipelineHost {
         override fun showSuggestions(): Boolean = true
         override fun effectiveSuggestionCount(): Int = 5
         override fun getKeyboardState(): KeyboardState = KeyboardState()
@@ -456,6 +456,40 @@ class SuggestionPipelineTest {
         assertEquals(1, suggestions.count { it == "か" })
         assert(suggestions.contains("カ")) { "katakana カ must be present" }
     }
+
+    @Test
+    fun `requestJapaneseSuggestions excludes blacklisted conversion candidate but keeps hiragana and katakana`() =
+        runTest(testDispatcher) {
+            val japanesePipeline = SuggestionPipeline(
+                state = inputState,
+                outputBridge = outputBridge,
+                textInputProcessor = mockTextInputProcessor,
+                spellCheckManager = mockSpellCheckManager,
+                wordLearningEngine = mockWordLearningEngine,
+                wordFrequencyRepository = mockWordFrequencyRepository,
+                languageManager = mockLanguageManager,
+                caseTransformer = mockCaseTransformer,
+                scriptConverterRegistry = mockScriptConverterRegistry,
+                serviceScope = kotlinx.coroutines.CoroutineScope(testDispatcher),
+                host = FakeJapanesePipelineHost()
+            )
+            japanesePipeline.setJapaneseLayout(true)
+
+            val mockConverter = mock<ScriptConverter>()
+            whenever(mockScriptConverterRegistry.forLanguage("ja")).thenReturn(mockConverter)
+            whenever(mockConverter.getCandidates("か", "ja")).thenReturn(
+                listOf(ConversionCandidate(surface = "化", reading = "か", frequency = 19992, source = "dictionary"))
+            )
+            whenever(mockSpellCheckManager.getSpellingSuggestionsWithConfidence("か")).thenReturn(emptyList())
+            whenever(mockSpellCheckManager.isWordBlacklisted("化")).thenReturn(true)
+
+            inputState.updateDisplayBuffer("か")
+            japanesePipeline.requestSuggestions("か", InputMethod.TYPED)
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            assertEquals(false, capturedSuggestions.contains("化"))
+            assertEquals(listOf("か", "カ"), capturedSuggestions.take(2))
+        }
 
     @Test
     fun `requestSuggestions isSuggestionsDisabled emits no suggestions`() = runTest(testDispatcher) {

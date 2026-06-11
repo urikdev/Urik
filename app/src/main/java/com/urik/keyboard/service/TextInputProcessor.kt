@@ -34,7 +34,7 @@ data class WordState(
 sealed class ProcessingResult {
     data class Success(val wordState: WordState, val shouldHighlight: Boolean = false) : ProcessingResult()
 
-    data class Error(val exception: Throwable, val fallbackState: WordState = WordState()) : ProcessingResult()
+    data class Error(val exception: Throwable) : ProcessingResult()
 }
 
 private data class ProcessingCache(val normalized: String, val graphemeCount: Int, val timestamp: Long)
@@ -127,8 +127,7 @@ constructor(
         withContext(Dispatchers.Default) {
             if (!isValidWordInput(word)) {
                 return@withContext ProcessingResult.Error(
-                    IllegalArgumentException("Invalid word input: $word"),
-                    WordState()
+                    IllegalArgumentException("Invalid word input: $word")
                 )
             }
 
@@ -201,10 +200,13 @@ constructor(
                 shouldHighlight = shouldHighlight
             )
         } catch (e: Exception) {
-            return ProcessingResult.Error(
-                e,
-                WordState(buffer = word, normalizedBuffer = word.lowercase())
+            ErrorLogger.logException(
+                component = "TextInputProcessor",
+                severity = ErrorLogger.Severity.HIGH,
+                exception = e,
+                context = mapOf("operation" to "processWordInternal")
             )
+            return ProcessingResult.Error(e)
         }
     }
 
@@ -354,7 +356,7 @@ constructor(
     suspend fun removeSuggestion(word: String): Result<Boolean> = withContext(Dispatchers.Default) {
         return@withContext try {
             val result = spellCheckManager.removeSuggestion(word)
-            invalidateWord(word)
+            suggestionCache.invalidateAll()
             result
         } catch (e: Exception) {
             Result.failure(e)

@@ -7,6 +7,7 @@ import com.urik.keyboard.data.database.KeyboardDatabase
 import com.urik.keyboard.data.database.LearnedWordDao
 import com.urik.keyboard.data.database.UserWordBigramDao
 import com.urik.keyboard.data.database.UserWordFrequencyDao
+import com.urik.keyboard.service.BlacklistRepository
 import com.urik.keyboard.service.CharacterVariationService
 import com.urik.keyboard.service.DictionaryBackupManager
 import com.urik.keyboard.service.EmojiSearchManager
@@ -142,6 +143,7 @@ object KeyboardModule {
         wordLearningEngine: WordLearningEngine,
         wordFrequencyRepository: WordFrequencyRepository,
         cacheMemoryManager: CacheMemoryManager,
+        blacklistRepository: BlacklistRepository,
         wordNormalizer: WordNormalizer,
         fatFingerExpander: FatFingerExpander
     ): SpellCheckManager = SpellCheckManager(
@@ -151,6 +153,7 @@ object KeyboardModule {
         wordFrequencyRepository,
         wordNormalizer,
         cacheMemoryManager,
+        blacklistRepository,
         fatFingerExpander = fatFingerExpander
     )
 

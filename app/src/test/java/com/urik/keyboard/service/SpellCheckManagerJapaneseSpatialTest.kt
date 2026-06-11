@@ -53,6 +53,7 @@ class SpellCheckManagerJapaneseSpatialTest {
     private lateinit var wordLearningEngine: WordLearningEngine
     private lateinit var wordFrequencyRepository: WordFrequencyRepository
     private lateinit var cacheMemoryManager: CacheMemoryManager
+    private lateinit var blacklistRepository: BlacklistRepository
     private lateinit var wordNormalizer: WordNormalizer
     private lateinit var keyPositionsFlow: MutableStateFlow<Map<Char, PointF>>
 
@@ -95,6 +96,10 @@ class SpellCheckManagerJapaneseSpatialTest {
         wordFrequencyRepository = mock {
             onBlocking { getFrequency(any(), any()) } doReturn 0
             onBlocking { getFrequencies(any(), any()) } doReturn emptyMap()
+        }
+
+        blacklistRepository = mock {
+            onBlocking { getAll() } doReturn emptySet()
         }
 
         val suggestionCache = ManagedCache<String, List<SpellingSuggestion>>(
@@ -140,6 +145,7 @@ class SpellCheckManagerJapaneseSpatialTest {
             wordLearningEngine = wordLearningEngine,
             wordFrequencyRepository = wordFrequencyRepository,
             cacheMemoryManager = cacheMemoryManager,
+            blacklistRepository = blacklistRepository,
             ioDispatcher = testDispatcher,
             wordNormalizer = wordNormalizer
         )

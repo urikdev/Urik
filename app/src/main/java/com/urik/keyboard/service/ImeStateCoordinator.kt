@@ -24,7 +24,6 @@ class ImeStateCoordinator(
         outputBridge.finishComposingText()
 
         spellCheckManager.clearCaches()
-        spellCheckManager.clearBlacklist()
         textInputProcessor.clearCaches()
         wordLearningEngine.clearCurrentLanguageCache()
 
