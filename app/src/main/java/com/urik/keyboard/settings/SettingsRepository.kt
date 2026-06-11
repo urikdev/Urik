@@ -12,6 +12,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import androidx.room.withTransaction
 import com.urik.keyboard.data.database.KeyboardDatabase
 import com.urik.keyboard.model.KeyboardDisplayMode
+import com.urik.keyboard.settings.SettingsRepository.Companion.EXPORT_SET_DELIMITER
 import com.urik.keyboard.utils.CacheMemoryManager
 import com.urik.keyboard.utils.ErrorLogger
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -622,21 +623,24 @@ constructor(
 
         dataStore.edit { mutablePrefs ->
             prefs.forEach { (keyName, value) ->
-                when {
-                    keyName in boolLookup -> boolLookup[keyName]?.let {
+                when (keyName) {
+                    in boolLookup -> boolLookup[keyName]?.let {
                         mutablePrefs[it] = value.toBoolean()
                     }
-                    keyName in intLookup -> intLookup[keyName]?.let {
+
+                    in intLookup -> intLookup[keyName]?.let {
                         value.toIntOrNull()?.let { v -> mutablePrefs[it] = v }
                     }
-                    keyName in setLookup -> setLookup[keyName]?.let {
+
+                    in setLookup -> setLookup[keyName]?.let {
                         mutablePrefs[it] = if (value.isEmpty()) {
                             emptySet()
                         } else {
                             value.split(EXPORT_SET_DELIMITER).toSet()
                         }
                     }
-                    keyName in stringLookup -> stringLookup[keyName]?.let {
+
+                    in stringLookup -> stringLookup[keyName]?.let {
                         mutablePrefs[it] = value
                     }
                 }

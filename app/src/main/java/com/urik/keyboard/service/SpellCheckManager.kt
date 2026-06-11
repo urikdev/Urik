@@ -3,6 +3,7 @@
 package com.urik.keyboard.service
 
 import android.content.Context
+import com.urik.keyboard.dictionary.BareFormRemovelist
 import com.urik.keyboard.dictionary.LevenshteinAutomaton
 import com.urik.keyboard.dictionary.UrikDictionary
 import com.urik.keyboard.settings.KeyboardSettings
@@ -55,6 +56,7 @@ constructor(
     private val wordFrequencyRepository: com.urik.keyboard.data.WordFrequencyRepository,
     private val wordNormalizer: WordNormalizer,
     cacheMemoryManager: CacheMemoryManager,
+    private val blacklistRepository: BlacklistRepository,
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
     private val fatFingerExpander: FatFingerExpander = FatFingerExpander()
 ) : MemoryPressureSubscriber {
@@ -106,6 +108,7 @@ constructor(
                 val success =
                     try {
                         withContext(ioDispatcher) {
+                            loadBlacklist()
                             initializeUrik()
                         }
                         true
@@ -178,6 +181,10 @@ constructor(
         false
     }
 
+    private suspend fun loadBlacklist() {
+        blacklistedWords.addAll(blacklistRepository.getAll())
+    }
+
     private fun initializeUrik() {
         currentLanguage = getCurrentLanguage()
         val dict = loadUrikDictionary(currentLanguage)
@@ -198,7 +205,7 @@ constructor(
 
     private fun loadUrikDictionary(languageCode: String): UrikDictionary? = try {
         val stream = context.assets.open("dictionaries/$languageCode.urik")
-        UrikDictionary(stream)
+        UrikDictionary(stream, BareFormRemovelist.forLanguage(languageCode))
     } catch (_: Exception) {
         null
     }
@@ -977,6 +984,19 @@ constructor(
             val cacheKey = buildCacheKey(normalizedWord, currentLang)
             dictionaryCache.invalidate(cacheKey)
             suggestionCache.invalidateAll()
+
+            initScope.launch(ioDispatcher) {
+                try {
+                    blacklistRepository.add(normalizedWord)
+                } catch (e: Exception) {
+                    ErrorLogger.logException(
+                        component = "SpellCheckManager",
+                        severity = ErrorLogger.Severity.LOW,
+                        exception = e,
+                        context = mapOf("operation" to "blacklistSuggestion.persist")
+                    )
+                }
+            }
         } catch (e: Exception) {
             ErrorLogger.logException(
                 component = "SpellCheckManager",
@@ -999,6 +1019,19 @@ constructor(
                 val cacheKey = buildCacheKey(normalizedWord, currentLang)
                 dictionaryCache.invalidate(cacheKey)
                 suggestionCache.invalidateAll()
+
+                initScope.launch(ioDispatcher) {
+                    try {
+                        blacklistRepository.remove(normalizedWord)
+                    } catch (e: Exception) {
+                        ErrorLogger.logException(
+                            component = "SpellCheckManager",
+                            severity = ErrorLogger.Severity.LOW,
+                            exception = e,
+                            context = mapOf("operation" to "removeFromBlacklist.persist")
+                        )
+                    }
+                }
             }
         } catch (e: Exception) {
             ErrorLogger.logException(
@@ -1021,10 +1054,6 @@ constructor(
             context = mapOf("operation" to "isWordBlacklisted")
         )
         false
-    }
-
-    fun clearBlacklist() {
-        blacklistedWords.clear()
     }
 
     override fun onMemoryPressure(level: Int) {
@@ -1216,7 +1245,7 @@ constructor(
         var bestScore = 0.0
 
         if (skipBudget == 1) {
-            for (skipPos in 0 until longer.length) {
+            for (skipPos in longer.indices) {
                 val score = scoreWithSkips(shorter, longer, keyPositions, twoSigmaSquared, skipPos, -1)
                 if (score > bestScore) bestScore = score
             }
@@ -1355,7 +1384,7 @@ constructor(
 
         const val SPATIAL_PROXIMITY_WEIGHT = 0.35
         const val PROXIMITY_SIGMA_MULTIPLIER = 2.0
-        const val MINIMUM_LENGTH_RATIO = 0.6
+        const val MINIMUM_LENGTH_RATIO = 0.75
 
         const val LOOKAHEAD_BASE_WEIGHT = 0.5
         const val LOOKAHEAD_DECAY = 0.7

@@ -260,4 +260,28 @@ class InputStateManagerTest {
     fun `isSuggestionsDisabled initialises false`() {
         assertFalse(stateManager.isSuggestionsDisabled)
     }
+
+    @Test
+    fun `removeSuggestionFromState removes word from pending, raw, and word state suggestions`() {
+        stateManager.pendingSuggestions = listOf("Hello", "World")
+        stateManager.currentRawSuggestions = listOf(
+            SpellingSuggestion(word = "hello", confidence = 0.9, ranking = 0),
+            SpellingSuggestion(word = "world", confidence = 0.8, ranking = 1)
+        )
+        stateManager.wordState = stateManager.wordState.copy(
+            suggestions = listOf(
+                SpellingSuggestion(word = "hello", confidence = 0.9, ranking = 0),
+                SpellingSuggestion(word = "world", confidence = 0.8, ranking = 1)
+            )
+        )
+
+        val remaining = stateManager.removeSuggestionFromState("Hello")
+
+        assertEquals(listOf("World"), remaining)
+        assertEquals(listOf("World"), stateManager.pendingSuggestions)
+        assertFalse(stateManager.currentRawSuggestions.any { it.word.equals("hello", ignoreCase = true) })
+        assertFalse(stateManager.wordState.suggestions.any { it.word.equals("hello", ignoreCase = true) })
+        assertTrue(stateManager.currentRawSuggestions.any { it.word.equals("world", ignoreCase = true) })
+        assertTrue(stateManager.wordState.suggestions.any { it.word.equals("world", ignoreCase = true) })
+    }
 }

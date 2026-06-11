@@ -106,10 +106,7 @@ class SelectionStateTracker {
                 return SelectionChangeResult.Sequential
             }
             lastKnownValidPosition = newCursor
-            return SelectionChangeResult.CursorLeftComposingRegion(
-                composingStart = previousState.composingStart,
-                composingEnd = previousState.composingEnd
-            )
+            return SelectionChangeResult.CursorLeftComposingRegion
         }
 
         lastKnownValidPosition = newCursor
@@ -250,7 +247,7 @@ sealed class SelectionChangeResult {
 
     data object ComposingRegionLost : SelectionChangeResult()
 
-    data class CursorLeftComposingRegion(val composingStart: Int, val composingEnd: Int) : SelectionChangeResult()
+    data object CursorLeftComposingRegion : SelectionChangeResult()
 
     data class NonSequentialJump(val previousPosition: Int, val newPosition: Int, val distance: Int) :
         SelectionChangeResult()

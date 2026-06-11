@@ -2,8 +2,10 @@ package com.urik.keyboard.service
 
 import org.junit.Before
 import org.junit.Test
+import org.mockito.kotlin.any
 import org.mockito.kotlin.inOrder
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 
 class ImeStateCoordinatorTest {
@@ -62,10 +64,11 @@ class ImeStateCoordinatorTest {
     }
 
     @Test
-    fun `clearSecureFieldState clears spellCheckManager caches`() {
+    fun `clearSecureFieldState clears spellCheckManager caches without touching blacklist`() {
         coordinator.clearSecureFieldState()
         verify(mockSpellCheckManager).clearCaches()
-        verify(mockSpellCheckManager).clearBlacklist()
+        verify(mockSpellCheckManager, never()).blacklistSuggestion(any())
+        verify(mockSpellCheckManager, never()).removeFromBlacklist(any())
     }
 
     @Test

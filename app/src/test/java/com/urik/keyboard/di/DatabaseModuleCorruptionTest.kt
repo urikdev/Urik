@@ -7,6 +7,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
+@Suppress("KotlinConstantConditions")
 class DatabaseModuleCorruptionTest {
     @Test
     fun `SQLiteNotADatabaseException is-a SQLiteException`() {
@@ -23,7 +24,7 @@ class DatabaseModuleCorruptionTest {
     @Test
     fun `multi-catch guard covers SQLiteNotADatabaseException`() {
         val ex = SQLiteNotADatabaseException("file is not a database")
-        var caught = false
+        var caught: Boolean
 
         try {
             throw ex
@@ -41,7 +42,7 @@ class DatabaseModuleCorruptionTest {
     @Test
     fun `multi-catch guard covers SQLiteDatabaseCorruptException`() {
         val ex = SQLiteDatabaseCorruptException("database disk image is malformed")
-        var caught = false
+        var caught: Boolean
 
         try {
             throw ex

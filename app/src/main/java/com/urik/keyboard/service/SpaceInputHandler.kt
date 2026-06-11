@@ -13,7 +13,6 @@ class SpaceInputHandler(
     private val outputBridge: OutputBridge,
     private val suggestionPipeline: SuggestionPipeline,
     private val autoCorrectionEngine: AutoCorrectionEngine,
-    private val textInputProcessor: TextInputProcessor,
     private val swipeSpaceManager: SwipeSpaceManager,
     private val swipeDetector: SwipeDetector,
     private val candidateBarController: CandidateBarController,
@@ -110,10 +109,9 @@ class SpaceInputHandler(
                             }
 
                             is AutocorrectDecision.ContractionBypass -> {
-                                val suggestions = textInputProcessor.getSuggestions(inputState.displayBuffer)
                                 val displaySuggestions =
                                     suggestionPipeline.storeAndCapitalizeSuggestions(
-                                        suggestions,
+                                        decision.suggestions,
                                         inputState.isCurrentWordAtSentenceStart
                                     )
                                 val originalWord = inputState.displayBuffer
@@ -148,10 +146,9 @@ class SpaceInputHandler(
                             }
 
                             is AutocorrectDecision.Pause -> {
-                                val suggestions = textInputProcessor.getSuggestions(inputState.displayBuffer)
                                 val displaySuggestions =
                                     suggestionPipeline.storeAndCapitalizeSuggestions(
-                                        suggestions,
+                                        decision.suggestions,
                                         inputState.isCurrentWordAtSentenceStart
                                     )
                                 inputState.spellConfirmationState = SpellConfirmationState.AWAITING_CONFIRMATION
@@ -169,10 +166,16 @@ class SpaceInputHandler(
                             is AutocorrectDecision.Correct -> {
                                 val originalWord = inputState.displayBuffer
                                 val rawCorrected = decision.suggestion
-                                val correctedWord = if (inputState.isCurrentWordAtSentenceStart) {
-                                    rawCorrected.replaceFirstChar { it.uppercaseChar() }
+                                val pronounLang = languageManager.currentLanguage.value.split("-").first()
+                                val pronounCorrected = if (pronounLang == "en") {
+                                    EnglishPronounCorrection.capitalize(rawCorrected.lowercase()) ?: rawCorrected
                                 } else {
                                     rawCorrected
+                                }
+                                val correctedWord = if (inputState.isCurrentWordAtSentenceStart) {
+                                    pronounCorrected.replaceFirstChar { it.uppercaseChar() }
+                                } else {
+                                    pronounCorrected
                                 }
                                 inputState.isActivelyEditing = true
                                 suggestionPipeline.recordWordUsage(correctedWord)
@@ -204,10 +207,9 @@ class SpaceInputHandler(
                             }
 
                             is AutocorrectDecision.Suggestions -> {
-                                val suggestions = textInputProcessor.getSuggestions(inputState.displayBuffer)
                                 val displaySuggestions =
                                     suggestionPipeline.storeAndCapitalizeSuggestions(
-                                        suggestions,
+                                        decision.list,
                                         inputState.isCurrentWordAtSentenceStart
                                     )
                                 val originalWord = inputState.displayBuffer

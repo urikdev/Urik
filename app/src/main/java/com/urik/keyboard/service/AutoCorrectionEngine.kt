@@ -8,8 +8,8 @@ import javax.inject.Singleton
 sealed class AutocorrectDecision {
     data object None : AutocorrectDecision()
     data class Correct(val suggestion: String) : AutocorrectDecision()
-    data object Pause : AutocorrectDecision()
-    data object ContractionBypass : AutocorrectDecision()
+    data class Pause(val suggestions: List<SpellingSuggestion>) : AutocorrectDecision()
+    data class ContractionBypass(val suggestions: List<SpellingSuggestion>) : AutocorrectDecision()
     data class Suggestions(val list: List<SpellingSuggestion>) : AutocorrectDecision()
 }
 
@@ -45,7 +45,7 @@ constructor(private val textInputProcessor: TextInputProcessor) {
             textInputProcessor.hasDominantContractionForm(buffer)
 
         if (bypassForContraction) {
-            return AutocorrectDecision.ContractionBypass
+            return AutocorrectDecision.ContractionBypass(textInputProcessor.getSuggestions(buffer))
         }
 
         if (isValid) {
@@ -79,7 +79,7 @@ constructor(private val textInputProcessor: TextInputProcessor) {
         val suggestions = textInputProcessor.getSuggestions(buffer)
 
         if (pauseOnMisspelledWord) {
-            return AutocorrectDecision.Pause
+            return AutocorrectDecision.Pause(suggestions)
         }
 
         if (autocorrectionEnabled && suggestions.isNotEmpty() && lastAutocorrection == null) {

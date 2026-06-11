@@ -6,6 +6,7 @@ import android.icu.lang.UScript
 import android.icu.util.ULocale
 import com.urik.keyboard.settings.KeyboardSettings
 import com.urik.keyboard.settings.SettingsRepository
+import com.urik.keyboard.utils.ErrorLogger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -360,6 +361,24 @@ class TextInputProcessorTest {
     }
 
     @Test
+    fun `removeSuggestion drops the entire suggestion cache so removed word is not served stale`() = runTest {
+        whenever(spellCheckManager.getSpellingSuggestionsWithConfidence("helo"))
+            .thenReturn(createSuggestions("hello", "help"))
+        whenever(spellCheckManager.removeSuggestion("hello")).thenReturn(Result.success(true))
+
+        val before = processor.getSuggestions("helo")
+        assertTrue("hello" in before.map { it.word })
+
+        whenever(spellCheckManager.getSpellingSuggestionsWithConfidence("helo"))
+            .thenReturn(createSuggestions("help"))
+
+        processor.removeSuggestion("hello")
+
+        val after = processor.getSuggestions("helo")
+        assertFalse("hello" in after.map { it.word })
+    }
+
+    @Test
     fun `validateWord returns true for dictionary word`() = runTest {
         whenever(spellCheckManager.isWordInDictionary("hello")).thenReturn(true)
 
@@ -396,6 +415,19 @@ class TextInputProcessorTest {
         val result = processor.processCharacterInput("o", "hello", InputMethod.TYPED)
 
         assertTrue(result is ProcessingResult.Error)
+    }
+
+    @Test
+    fun `processing exception is logged to ErrorLogger`() = runTest {
+        val thrown = RuntimeException("Dictionary error")
+        whenever(spellCheckManager.isWordInDictionary(any())).thenThrow(thrown)
+        val countBefore = ErrorLogger.getErrorCount()
+
+        val result = processor.processCharacterInput("o", "hello", InputMethod.TYPED)
+
+        assertTrue(result is ProcessingResult.Error)
+        assertEquals(thrown, (result as ProcessingResult.Error).exception)
+        assertEquals(countBefore + 1, ErrorLogger.getErrorCount())
     }
 
     @Test

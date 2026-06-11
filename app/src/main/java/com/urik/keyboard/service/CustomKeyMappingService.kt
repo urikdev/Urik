@@ -74,12 +74,13 @@ constructor(
             if (raw.isBlank()) return emptyList()
 
             return raw
-                .split(LONG_PRESS_DELIMITER)
+                .splitToSequence(LONG_PRESS_DELIMITER)
                 .map { it.trim() }
                 .filter { it.isNotBlank() }
                 .map { Normalizer.normalize(it, Normalizer.Form.NFC) }
                 .distinct()
                 .take(MAX_CUSTOM_SYMBOLS)
+                .toList()
         }
     }
 }

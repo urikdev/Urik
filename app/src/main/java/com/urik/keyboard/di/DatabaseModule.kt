@@ -68,7 +68,6 @@ object DatabaseModule {
         @ApplicationContext context: Context,
         securityManager: DatabaseSecurityManager
     ): KeyboardDatabase {
-        var passphrase: ByteArray? = null
         var alreadyLogged = false
         try {
             if (securityManager.shouldMigrateToEncrypted(context)) {
@@ -86,7 +85,7 @@ object DatabaseModule {
                 }
             }
 
-            passphrase =
+            val passphrase =
                 try {
                     securityManager.getDatabasePassphrase()
                 } catch (e: Exception) {
@@ -102,7 +101,6 @@ object DatabaseModule {
 
             val passphraseWasAvailable = passphrase != null
             val initialPassphrase = passphrase
-            passphrase = null
             return try {
                 opener.open(context, initialPassphrase)
             } catch (e: Exception) {
@@ -184,8 +182,6 @@ object DatabaseModule {
                 initialPassphrase?.fill(0)
             }
         } catch (e: Exception) {
-            passphrase?.fill(0)
-
             if (!alreadyLogged) {
                 ErrorLogger.logException(
                     component = "DatabaseModule",
@@ -198,7 +194,7 @@ object DatabaseModule {
         }
     }
 
-    private fun deleteDatabaseFiles(context: Context) {
+    internal fun deleteDatabaseFiles(context: Context) {
         val dbPath = context.applicationContext.getDatabasePath(KeyboardDatabase.DATABASE_NAME)
         dbPath.delete()
         if (dbPath.exists()) {

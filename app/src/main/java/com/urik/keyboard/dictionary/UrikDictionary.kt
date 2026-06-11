@@ -4,7 +4,7 @@ package com.urik.keyboard.dictionary
 
 import java.io.InputStream
 
-class UrikDictionary(inputStream: InputStream) {
+class UrikDictionary(inputStream: InputStream, private val removedWords: Set<String> = emptySet()) {
     private val data: ByteArray = inputStream.readBytes()
 
     val wordCount: Int
@@ -33,7 +33,10 @@ class UrikDictionary(inputStream: InputStream) {
         return UrikFormat.dequantizeFreq(b)
     }
 
+    private fun isRemoved(word: String): Boolean = removedWords.isNotEmpty() && word.lowercase() in removedWords
+
     private fun getFreqByte(word: String): Int? {
+        if (isRemoved(word)) return null
         var stateOffset = stateTableOffset
         for ((idx, ch) in word.withIndex()) {
             val arc = findArc(stateOffset, ch) ?: return null
@@ -67,7 +70,10 @@ class UrikDictionary(inputStream: InputStream) {
         val isFinalDawg = (stateHeader and 0x80) != 0
 
         if (isFinalDawg && auto.isAccepting(autoState)) {
-            results.add(path.toString() to autoState.row.last())
+            val word = path.toString()
+            if (!isRemoved(word)) {
+                results.add(word to autoState.row.last())
+            }
         }
 
         var arcOffset = stateAbsOffset + 1
@@ -113,7 +119,12 @@ class UrikDictionary(inputStream: InputStream) {
         val arcCount = stateHeader and 0x7F
         val isFinal = (stateHeader and 0x80) != 0
 
-        if (isFinal) results.add(path.toString() to UrikFormat.dequantizeFreq(incomingFreqByte))
+        if (isFinal) {
+            val word = path.toString()
+            if (!isRemoved(word)) {
+                results.add(word to UrikFormat.dequantizeFreq(incomingFreqByte))
+            }
+        }
         if (results.size >= maxResults) return
 
         var arcOffset = stateAbsOffset + 1

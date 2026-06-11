@@ -52,7 +52,7 @@ data class LearningStats(
 )
 
 @Singleton
-class WordLearningEngine constructor(
+class WordLearningEngine(
     private val learnedWordDao: LearnedWordDao,
     private val userWordFrequencyDao: UserWordFrequencyDao,
     private val userWordBigramDao: UserWordBigramDao,

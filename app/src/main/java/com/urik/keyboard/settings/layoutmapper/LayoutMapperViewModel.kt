@@ -71,7 +71,7 @@ constructor(private val repository: CustomKeyMappingRepository) : ViewModel() {
 
         val encoded = rawInput
             .trim()
-            .split("\\s+".toRegex())
+            .splitToSequence("\\s+".toRegex())
             .filter { it.isNotBlank() }
             .map { Normalizer.normalize(it, Normalizer.Form.NFC) }
             .distinct()

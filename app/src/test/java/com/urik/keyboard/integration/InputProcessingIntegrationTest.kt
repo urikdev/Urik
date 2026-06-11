@@ -4,9 +4,11 @@ package com.urik.keyboard.integration
 
 import android.content.Context
 import android.content.res.AssetManager
+import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.room.Room
 import com.urik.keyboard.data.WordFrequencyRepository
 import com.urik.keyboard.data.database.KeyboardDatabase
+import com.urik.keyboard.service.BlacklistRepository
 import com.urik.keyboard.service.InputMethod
 import com.urik.keyboard.service.LanguageManager
 import com.urik.keyboard.service.ProcessingResult
@@ -18,13 +20,19 @@ import com.urik.keyboard.settings.KeyboardSettings
 import com.urik.keyboard.settings.SettingsRepository
 import com.urik.keyboard.utils.CacheMemoryManager
 import java.io.ByteArrayInputStream
+import java.io.File
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -44,6 +52,7 @@ import org.robolectric.RuntimeEnvironment
 @RunWith(RobolectricTestRunner::class)
 class InputProcessingIntegrationTest {
     private lateinit var context: Context
+    private lateinit var mockContext: Context
     private lateinit var database: KeyboardDatabase
     private lateinit var cacheMemoryManager: CacheMemoryManager
     private lateinit var settingsRepository: SettingsRepository
@@ -51,6 +60,7 @@ class InputProcessingIntegrationTest {
     private lateinit var wordLearningEngine: WordLearningEngine
     private lateinit var spellCheckManager: SpellCheckManager
     private lateinit var textInputProcessor: TextInputProcessor
+    private lateinit var blacklistRepository: BlacklistRepository
     private val testDispatcher = UnconfinedTestDispatcher()
 
     private val testDictionary =
@@ -79,7 +89,7 @@ class InputProcessingIntegrationTest {
                 }
             }
         }
-        val mockContext = spy(context)
+        mockContext = spy(context)
         whenever(mockContext.assets).thenReturn(mockAssets)
 
         database =
@@ -126,6 +136,14 @@ class InputProcessingIntegrationTest {
                 testDispatcher
             )
 
+        blacklistRepository =
+            BlacklistRepository(
+                PreferenceDataStoreFactory.create(
+                    scope = CoroutineScope(testDispatcher + SupervisorJob()),
+                    produceFile = { File(context.cacheDir, "blacklist_test.preferences_pb") }
+                )
+            )
+
         spellCheckManager =
             SpellCheckManager(
                 mockContext,
@@ -134,6 +152,7 @@ class InputProcessingIntegrationTest {
                 wordFrequencyRepository,
                 wordNormalizer,
                 cacheMemoryManager,
+                blacklistRepository,
                 testDispatcher
             )
 
@@ -336,6 +355,75 @@ class InputProcessingIntegrationTest {
         assertNotNull(word)
         assertTrue("Frequency should increment through DAO transaction", word!!.frequency > 1)
     }
+
+    @Test
+    fun `removed suggestion stays absent after retyping and after SpellCheckManager restart`() =
+        runTest(testDispatcher) {
+            val before = textInputProcessor.getSuggestions("helo")
+            assertTrue("'hello' should be suggested before removal", before.any { it.word == "hello" })
+
+            val removeResult = textInputProcessor.removeSuggestion("hello")
+            assertTrue(removeResult.isSuccess)
+
+            withContext(Dispatchers.Default) {
+                withTimeout(5_000) {
+                    while (!blacklistRepository.getAll().contains("hello")) {
+                        delay(10)
+                    }
+                }
+            }
+
+            val afterRemoval = textInputProcessor.getSuggestions("helo")
+            assertFalse(
+                "'hello' must not be suggested again after removal",
+                afterRemoval.any { it.word == "hello" }
+            )
+
+            val wordNormalizer = WordNormalizer()
+            val wordFrequencyRepository =
+                WordFrequencyRepository(
+                    database,
+                    database.userWordFrequencyDao(),
+                    database.userWordBigramDao(),
+                    wordNormalizer,
+                    cacheMemoryManager,
+                    testDispatcher,
+                    testDispatcher
+                )
+            val restartedSpellCheckManager =
+                SpellCheckManager(
+                    mockContext,
+                    languageManager,
+                    wordLearningEngine,
+                    wordFrequencyRepository,
+                    wordNormalizer,
+                    cacheMemoryManager,
+                    blacklistRepository,
+                    testDispatcher
+                )
+            val restartedTextInputProcessor =
+                TextInputProcessor(
+                    restartedSpellCheckManager,
+                    settingsRepository,
+                    cacheMemoryManager
+                )
+
+            assertTrue(
+                "Restarted manager should finish initialization and know dictionary words",
+                restartedSpellCheckManager.isWordInDictionary("test")
+            )
+
+            assertTrue(
+                "Blacklist must persist across SpellCheckManager restarts",
+                restartedSpellCheckManager.isWordBlacklisted("hello")
+            )
+
+            val afterRestart = restartedTextInputProcessor.getSuggestions("helo")
+            assertFalse(
+                "'hello' must remain absent after restart",
+                afterRestart.any { it.word == "hello" }
+            )
+        }
 
     @Test
     fun `database errors propagate gracefully through all layers`() = runTest(testDispatcher) {

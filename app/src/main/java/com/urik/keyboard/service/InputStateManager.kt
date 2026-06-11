@@ -245,6 +245,21 @@ class InputStateManager(
         }
     }
 
+    /** Removes [suggestion] from pending, raw, and word-state suggestion lists. Returns the updated pending list. */
+    fun removeSuggestionFromState(suggestion: String): List<String> {
+        val updatedPending = pendingSuggestions.filter { it != suggestion }
+        pendingSuggestions = updatedPending
+        currentRawSuggestions = currentRawSuggestions.filter {
+            !it.word.equals(suggestion, ignoreCase = true)
+        }
+        wordState = wordState.copy(
+            suggestions = wordState.suggestions.filter {
+                !it.word.equals(suggestion, ignoreCase = true)
+            }
+        )
+        return updatedPending
+    }
+
     fun clearBigramPredictions() {
         if (isShowingBigramPredictions) {
             isShowingBigramPredictions = false
