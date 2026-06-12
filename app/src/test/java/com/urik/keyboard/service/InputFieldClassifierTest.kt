@@ -148,6 +148,25 @@ class InputFieldClassifierTest {
     }
 
     @Test
+    fun `classify NO_SUGGESTIONS with AUTO_CORRECT isSuggestionsDisabled false`() {
+        val info = createEditorInfo(
+            inputFlags = InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS or InputType.TYPE_TEXT_FLAG_AUTO_CORRECT
+        )
+        assertFalse(InputFieldClassifier.classify(info).isSuggestionsDisabled)
+    }
+
+    @Test
+    fun `classify instagram message field flags isSuggestionsDisabled false`() {
+        val info = createEditorInfo(
+            inputFlags = InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS or
+                InputType.TYPE_TEXT_FLAG_AUTO_CORRECT or
+                InputType.TYPE_TEXT_FLAG_MULTI_LINE or
+                InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
+        )
+        assertFalse(InputFieldClassifier.classify(info).isSuggestionsDisabled)
+    }
+
+    @Test
     fun `classify TYPE_TEXT_FLAG_AUTO_COMPLETE isSuggestionsDisabled true`() {
         val info = createEditorInfo(inputFlags = InputType.TYPE_TEXT_FLAG_AUTO_COMPLETE)
         assertTrue(InputFieldClassifier.classify(info).isSuggestionsDisabled)

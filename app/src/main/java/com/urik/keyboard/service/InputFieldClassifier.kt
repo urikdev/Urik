@@ -46,7 +46,11 @@ object InputFieldClassifier {
         if (inputClass == InputType.TYPE_CLASS_TEXT) {
             val flags = inputType and InputType.TYPE_MASK_FLAGS
             val variation = inputType and InputType.TYPE_MASK_VARIATION
-            if (flags and InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS != 0) return true
+            if (flags and InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS != 0 &&
+                flags and InputType.TYPE_TEXT_FLAG_AUTO_CORRECT == 0
+            ) {
+                return true
+            }
             if (flags and InputType.TYPE_TEXT_FLAG_AUTO_COMPLETE != 0) return true
             if (variation == InputType.TYPE_TEXT_VARIATION_FILTER) return true
         }

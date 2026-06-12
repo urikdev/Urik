@@ -31,7 +31,7 @@ class SwipeWordHandler(
 
             if (inputState.isRawKeyEventField) return
 
-            if (inputState.requiresDirectCommit) {
+            if (inputState.requiresDirectCommit || inputState.isSuggestionsDisabled) {
                 if (!inputState.isSecureField && !inputState.isTerminalField) {
                     outputBridge.beginBatchEdit()
                     try {

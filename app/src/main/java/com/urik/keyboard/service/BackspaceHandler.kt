@@ -306,7 +306,10 @@ class BackspaceHandler(
                         }
                     }
 
-                    if (!inputState.isAcceleratedDeletion && !inputState.isUrlOrEmailField) {
+                    if (!inputState.isAcceleratedDeletion &&
+                        !inputState.isUrlOrEmailField &&
+                        !inputState.isSuggestionsDisabled
+                    ) {
                         val remainingText = textBeforeCursor.dropLast(graphemeLength)
 
                         if (remainingText.isNotEmpty() && remainingText.last() == '\n') {
