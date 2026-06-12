@@ -8,10 +8,10 @@
 Privacy-focused Android keyboard with swipe typing, custom layouts, and password manager support. No tracking, 100% on-device, and fully open source.
 
 <p float="left" align="middle">
-  <img src="https://urik.io/screenshots/notracking.png" width="200">
-  <img src="https://urik.io/screenshots/multilingual.png" width="200">
-  <img src="https://urik.io/screenshots/swipe.png" width="200">
-  <img src="https://urik.io/screenshots/customize.png" width="200">
+  <img src="https://urik.io/screenshots/notracking.webp" width="200">
+  <img src="https://urik.io/screenshots/multilingual.webp" width="200">
+  <img src="https://urik.io/screenshots/swipe.webp" width="200">
+  <img src="https://urik.io/screenshots/customize.webp" width="200">
 </p>
 
 ## Status
