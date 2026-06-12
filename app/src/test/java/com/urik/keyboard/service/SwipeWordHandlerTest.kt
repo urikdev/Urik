@@ -7,12 +7,15 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
@@ -97,6 +100,26 @@ class SwipeWordHandlerTest {
         whenever(mockOutputBridge.safeGetTextBeforeCursor(50)).thenReturn("")
         handler.handle("hello")
         verify(mockOutputBridge).commitText("hello", 1)
+    }
+
+    @Test
+    fun `swipe in suggestions-disabled field commits directly without composing region`() = runTest(testDispatcher) {
+        realInputState.isSuggestionsDisabled = true
+        whenever(mockOutputBridge.safeGetTextBeforeCursor(1)).thenReturn("")
+        whenever(mockOutputBridge.safeGetTextBeforeCursor(50)).thenReturn("")
+        whenever(mockCaseTransformer.applyCasing(any(), any(), any(), any())).thenAnswer { invocation ->
+            (invocation.arguments[0] as SpellingSuggestion).word
+        }
+
+        handler.handle("hello")
+        advanceUntilIdle()
+
+        verify(mockOutputBridge).commitText("hello", 1)
+        verify(mockOutputBridge, never()).setComposingText(any(), any())
+        assertEquals("", realInputState.displayBuffer)
+        assertEquals(-1, realInputState.composingRegionStart)
+        verify(mockTextInputProcessor, never()).processWordInput(any(), any())
+        verify(mockSuggestionPipeline, never()).coordinateStateTransition(any())
     }
 
     @Test

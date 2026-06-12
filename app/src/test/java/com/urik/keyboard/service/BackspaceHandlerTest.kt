@@ -134,4 +134,24 @@ class BackspaceHandlerTest {
         verify(mockSuggestionPipeline, never()).learnWordAndInvalidateCache(any(), any())
         verify(mockSuggestionPipeline, never()).recordWordUsage(any())
     }
+
+    @Test
+    fun `backspace in suggestions-disabled field deletes without recomposition`() = runTest(testDispatcher) {
+        realInputState.isSuggestionsDisabled = true
+        realInputState.displayBuffer = ""
+        realInputState.composingRegionStart = -1
+        whenever(mockOutputBridge.safeGetCursorPosition()).thenReturn(4)
+        whenever(mockOutputBridge.safeGetTextBeforeCursor(any(), any())).thenReturn("word")
+        whenever(mockOutputBridge.calculateParagraphBoundedComposingRegion("wor", 3))
+            .thenReturn(Triple(0, 3, "wor"))
+
+        handler.handle()
+        advanceUntilIdle()
+
+        verify(mockOutputBridge, never()).setComposingRegion(any(), any())
+        assertEquals("", realInputState.displayBuffer)
+        assertEquals(-1, realInputState.composingRegionStart)
+        verify(mockSuggestionPipeline, never()).requestSuggestions(any(), any())
+        verify(mockOutputBridge).deleteSurroundingText(1, 0)
+    }
 }
