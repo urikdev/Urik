@@ -2,12 +2,12 @@
 
 ## Supported Versions
 
-We support only the latest release. Google Play users: enable automatic updates. F-Droid users: note that F-Droid releases may lag by days or weeks — for critical fixes, download directly from [GitHub Releases](https://github.com/urikdev/Urik/releases).
+We support only the latest release. F-Droid users: note that F-Droid releases may lag by days or weeks — for critical fixes, download directly from [GitHub Releases](https://github.com/urikdev/Urik/releases).
 
 | Version                    | Supported          |
 |----------------------------|--------------------|
-| Latest (Google Play)       | :white_check_mark: |
 | Latest (GitHub Releases)   | :white_check_mark: |
+| Latest (F-Droid)           | :white_check_mark: |
 | Older versions             | :x:                |
 
 ## Reporting a Vulnerability
@@ -31,7 +31,7 @@ Contact: **hello@urik.io**
 **What happens after you report:**
 1. We'll confirm receipt and assess severity
 2. We'll develop and test a fix
-3. We'll deploy the patch via Google Play update
+3. We'll publish a patched release via GitHub Releases and F-Droid
 
 ## Security Scope
 
