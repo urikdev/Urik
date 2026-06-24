@@ -1163,6 +1163,8 @@ open class UrikInputMethodService :
     }
 
     override fun onStartInputView(info: EditorInfo?, restarting: Boolean) {
+        postureDetector?.refresh()
+
         layoutManager.updateLongPressDuration(currentSettings.longPressDuration)
         layoutManager.updateLongPressPunctuationMode(currentSettings.longPressPunctuationMode)
         layoutManager.updateKeySize(currentSettings.keySize)

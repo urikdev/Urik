@@ -102,8 +102,22 @@ class PostureDetector(private val context: Context, private val scope: Coroutine
             }
     }
 
+    /**
+     * Re-reads metrics-derived fields from current resources, correcting any stale cached value.
+     * Tracker-derived fields (posture, hingeBounds) are preserved; only WindowInfoTracker
+     * emissions update them.
+     */
+    fun refresh() {
+        val current = _postureInfo.value
+        _postureInfo.value =
+            getCurrentPostureInfo().copy(
+                posture = current.posture,
+                hingeBounds = current.hingeBounds
+            )
+    }
+
     fun onConfigurationChanged() {
-        _postureInfo.value = getCurrentPostureInfo()
+        refresh()
     }
 
     fun stop() {
@@ -163,7 +177,7 @@ class PostureDetector(private val context: Context, private val scope: Coroutine
                 screenWidthPx = widthPx,
                 screenHeightPx = heightPx,
                 isTablet = isTablet,
-                orientation = effectiveContext.resources.configuration.orientation
+                orientation = orientationFromMetrics(widthPx, heightPx)
             )
     }
 
@@ -193,9 +207,12 @@ class PostureDetector(private val context: Context, private val scope: Coroutine
             screenWidthPx = widthPx,
             screenHeightPx = heightPx,
             isTablet = isTablet,
-            orientation = ctx.resources.configuration.orientation
+            orientation = orientationFromMetrics(widthPx, heightPx)
         )
     }
+
+    private fun orientationFromMetrics(widthPx: Int, heightPx: Int): Int =
+        if (heightPx >= widthPx) Configuration.ORIENTATION_PORTRAIT else Configuration.ORIENTATION_LANDSCAPE
 
     private companion object {
         const val DEBOUNCE_MS = 150L
