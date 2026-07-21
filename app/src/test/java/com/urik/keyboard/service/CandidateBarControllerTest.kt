@@ -75,7 +75,7 @@ class CandidateBarControllerTest {
 
     @Test
     fun `updateInlineAutofillSuggestions delegates to view`() {
-        val views = listOf<android.view.View>()
+        val views = listOf<Pair<android.view.View, android.util.Size>>()
         controller.updateInlineAutofillSuggestions(views, animate = true)
         verify(mockView).updateInlineAutofillSuggestions(views, true)
     }
