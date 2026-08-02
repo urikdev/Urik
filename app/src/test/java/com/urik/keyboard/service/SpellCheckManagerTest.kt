@@ -1643,8 +1643,7 @@ class SpellCheckManagerTest {
     }
 
     @Test
-    fun `fat finger expansion returns gave for bave via b to g substitution`() = runTest {
-        val fatFingerExpander = FatFingerExpander()
+    fun `adjacent key substitution typo returns gave for bave via edit-distance search`() = runTest {
         val gaveDictionary = "gave 500\nhave 800"
         val fatKeyPositionsFlow = MutableStateFlow<Map<Char, PointF>>(emptyMap())
         whenever(languageManager.keyPositions).thenReturn(fatKeyPositionsFlow)
@@ -1658,8 +1657,7 @@ class SpellCheckManagerTest {
             cacheMemoryManager = cacheMemoryManager,
             blacklistRepository = blacklistRepository,
             ioDispatcher = testDispatcher,
-            wordNormalizer = wordNormalizer,
-            fatFingerExpander = fatFingerExpander
+            wordNormalizer = wordNormalizer
         )
         val qwertyPositions = linkedMapOf(
             'q' to PointF(50f, 40f), 'w' to PointF(150f, 40f), 'e' to PointF(250f, 40f),
@@ -1685,8 +1683,7 @@ class SpellCheckManagerTest {
     }
 
     @Test
-    fun `fat finger expansion does not produce duplicate candidates`() = runTest {
-        val fatFingerExpander = FatFingerExpander()
+    fun `dictionary suggestions do not contain duplicate candidates`() = runTest {
         val gaveDictionary = "gave 500\nhave 800"
         val fatKeyPositionsFlow = MutableStateFlow<Map<Char, PointF>>(emptyMap())
         whenever(languageManager.keyPositions).thenReturn(fatKeyPositionsFlow)
@@ -1700,8 +1697,7 @@ class SpellCheckManagerTest {
             cacheMemoryManager = cacheMemoryManager,
             blacklistRepository = blacklistRepository,
             ioDispatcher = testDispatcher,
-            wordNormalizer = wordNormalizer,
-            fatFingerExpander = fatFingerExpander
+            wordNormalizer = wordNormalizer
         )
         val qwertyPositions = linkedMapOf(
             'q' to PointF(50f, 40f), 'w' to PointF(150f, 40f), 'e' to PointF(250f, 40f),
@@ -1724,8 +1720,7 @@ class SpellCheckManagerTest {
     }
 
     @Test
-    fun `fat finger expansion falls back gracefully when key positions are empty`() = runTest {
-        val fatFingerExpander = FatFingerExpander()
+    fun `suggestions still work when key positions are empty`() = runTest {
         val fatFingerManager = SpellCheckManager(
             context = context,
             languageManager = languageManager,
@@ -1734,8 +1729,7 @@ class SpellCheckManagerTest {
             cacheMemoryManager = cacheMemoryManager,
             blacklistRepository = blacklistRepository,
             ioDispatcher = testDispatcher,
-            wordNormalizer = wordNormalizer,
-            fatFingerExpander = fatFingerExpander
+            wordNormalizer = wordNormalizer
         )
 
         val suggestions = fatFingerManager.getSpellingSuggestionsWithConfidence("helo")
@@ -1785,49 +1779,5 @@ class SpellCheckManagerTest {
         val helloFreq = words["hello"]
         assertNotNull(helloFreq)
         assertTrue("Expected Long frequency > 1000, got $helloFreq", helloFreq!! > 1000L)
-    }
-
-    @Test
-    fun `fat finger expansion integrates with URIK candidates for adjacent key typo`() = runTest {
-        val fatFingerExpander = FatFingerExpander()
-        val gaveDictionary = "gave 500\nhave 800"
-        val fatKeyPositionsFlow = MutableStateFlow<Map<Char, PointF>>(emptyMap())
-        whenever(languageManager.keyPositions).thenReturn(fatKeyPositionsFlow)
-        whenever(assetManager.open("dictionaries/en.urik"))
-            .thenAnswer { ByteArrayInputStream(TestUrikBuilder.buildUrikFromText(gaveDictionary)) }
-
-        val fatManager = SpellCheckManager(
-            context = context,
-            languageManager = languageManager,
-            wordLearningEngine = wordLearningEngine,
-            wordFrequencyRepository = wordFrequencyRepository,
-            cacheMemoryManager = cacheMemoryManager,
-            blacklistRepository = blacklistRepository,
-            ioDispatcher = testDispatcher,
-            wordNormalizer = wordNormalizer,
-            fatFingerExpander = fatFingerExpander
-        )
-
-        val qwerty = linkedMapOf(
-            'q' to PointF(50f, 40f), 'w' to PointF(150f, 40f), 'e' to PointF(250f, 40f),
-            'r' to PointF(350f, 40f), 't' to PointF(450f, 40f), 'y' to PointF(550f, 40f),
-            'u' to PointF(650f, 40f), 'i' to PointF(750f, 40f), 'o' to PointF(850f, 40f),
-            'p' to PointF(950f, 40f),
-            'a' to PointF(100f, 120f), 's' to PointF(200f, 120f), 'd' to PointF(300f, 120f),
-            'f' to PointF(400f, 120f), 'g' to PointF(500f, 120f), 'h' to PointF(600f, 120f),
-            'j' to PointF(700f, 120f), 'k' to PointF(800f, 120f), 'l' to PointF(900f, 120f),
-            'z' to PointF(150f, 200f), 'x' to PointF(250f, 200f), 'c' to PointF(350f, 200f),
-            'v' to PointF(450f, 200f), 'b' to PointF(550f, 200f), 'n' to PointF(650f, 200f),
-            'm' to PointF(750f, 200f)
-        )
-        fatKeyPositionsFlow.emit(qwerty)
-        whenever(wordLearningEngine.getSimilarLearnedWordsWithFrequency(any(), any(), any()))
-            .thenReturn(emptyList())
-
-        val suggestions = fatManager.getSpellingSuggestionsWithConfidence("bave")
-        assertTrue(
-            "gave should appear as suggestion for bave (b→g adjacent keys), got: ${suggestions.map { it.word }}",
-            suggestions.any { it.word == "gave" }
-        )
     }
 }

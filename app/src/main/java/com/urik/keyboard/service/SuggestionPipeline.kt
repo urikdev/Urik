@@ -474,7 +474,7 @@ class SuggestionPipeline(
     }
 
     private companion object {
-        const val SUGGESTION_DEBOUNCE_MS = 10L
+        const val SUGGESTION_DEBOUNCE_MS = 150L
         val CASELESS_LANGUAGES = setOf("ar", "fa", "ja")
     }
 }
