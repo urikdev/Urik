@@ -16,6 +16,7 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeoutException
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.coroutines.coroutineContext
 import kotlin.math.ln
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineDispatcher
@@ -57,8 +58,7 @@ constructor(
     private val wordNormalizer: WordNormalizer,
     cacheMemoryManager: CacheMemoryManager,
     private val blacklistRepository: BlacklistRepository,
-    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
-    private val fatFingerExpander: FatFingerExpander = FatFingerExpander()
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : MemoryPressureSubscriber {
     private val initializationComplete = CompletableDeferred<Boolean>()
     private var initializationJob: Job? = null
@@ -96,9 +96,6 @@ constructor(
 
     @Volatile
     private var cachedAverageKeySpacing = 0.0
-
-    @Volatile
-    private var cachedAdjacentKeyMap = emptyMap<Char, Set<Char>>()
 
     init {
         cacheMemoryManager.registerPressureSubscriber(this)
@@ -158,12 +155,6 @@ constructor(
                         0.0
                     }
                 cachedAverageKeySpacing = avgSpacing
-                cachedAdjacentKeyMap =
-                    if (positions.isNotEmpty() && avgSpacing > 0.0) {
-                        fatFingerExpander.buildAdjacentKeyMap(positions, avgSpacing)
-                    } else {
-                        emptyMap()
-                    }
             }
         }
     }
@@ -733,20 +724,12 @@ constructor(
         seenWords: MutableSet<String>
     ): List<SpellingSuggestion> {
         val dict = getUrikDictionary(languageCode) ?: return emptyList()
-        val adjacentKeyMap = cachedAdjacentKeyMap
         val inputAccentStripped = wordNormalizer.stripDiacritics(normalizedWord)
+        val job = coroutineContext[Job]
 
-        val rawCandidates = dict.getCandidates(normalizedWord, MAX_EDIT_DISTANCE).toMutableList()
-
-        if (adjacentKeyMap.isNotEmpty() &&
-            languageCode != "ja" &&
-            normalizedWord.length >= FAT_FINGER_MIN_WORD_LENGTH
-        ) {
-            val variants = fatFingerExpander.generateVariants(normalizedWord, adjacentKeyMap)
-            for (variant in variants) {
-                rawCandidates.addAll(dict.getCandidates(variant, MAX_EDIT_DISTANCE - 1))
-            }
-        }
+        // getCandidates is an exhaustive edit-distance search, so it already finds every
+        // adjacent-key substitution typo as a special case of the general edit-distance-2 search.
+        val rawCandidates = dict.getCandidates(normalizedWord, MAX_EDIT_DISTANCE, job).toMutableList()
 
         val auto = LevenshteinAutomaton(normalizedWord, MAX_EDIT_DISTANCE)
         val deduped = rawCandidates
@@ -1352,7 +1335,6 @@ constructor(
         const val MAX_EDIT_DISTANCE = 2
         const val MAX_SUGGESTIONS = 5
         const val MIN_COMPLETION_LENGTH = 4
-        const val FAT_FINGER_MIN_WORD_LENGTH = 4
         const val APOSTROPHE_BOOST = 0.30
         const val DIACRITIC_PROMOTION_BOOST = 0.08
         const val EXACT_MATCH_CONFIDENCE = 0.999
