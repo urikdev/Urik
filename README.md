@@ -1,5 +1,14 @@
 # Urik
 
+> ## ⚠️ Indefinite Hiatus
+>
+>Development is paused. Google's Android Developer Verification mandate runs directly against why this project existed, and maintaining it isn't something we're willing to do.
+
+Learn more and push back at [keepandroidopen.org](https://keepandroidopen.org/)
+
+Existing releases remain available for as long as they keep working.
+
+
 [![CI](https://github.com/urikdev/Urik/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/urikdev/Urik/actions/workflows/ci.yml)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Release](https://img.shields.io/github/v/release/urikdev/Urik?include_prereleases)](https://github.com/urikdev/Urik/releases)
@@ -16,7 +25,6 @@ Privacy-focused Android keyboard with swipe typing, custom layouts, and password
 
 ## Status
 
-**Beta Software** - In open beta testing.
 <p><a href="https://f-droid.org/packages/com.urik.keyboard/" target="_blank"><img src="https://f-droid.org/badge/get-it-on.png" alt="Get it on F-Droid" style="width: 280px"></a></p>
 <p>Or download the APK directly from <a href="https://github.com/urikdev/Urik/releases" target="_blank">GitHub Releases</a>.</p>
 
