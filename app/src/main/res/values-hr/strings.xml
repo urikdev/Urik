@@ -1,0 +1,298 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="app_name" translatable="false">Urik</string>
+    <string name="ime_name">Urik Keyboard</string>
+    <string name="ime_label">Urik Keyboard</string>
+    <string name="ime_description">Pisanje klizanjem, provjera pravopisa i višejezična podrška bez ugrožavanja privatnosti. Nema telemetrije. Nema prikupljanja podataka. Sve ostaje na Vašem uređaju.</string>
+
+    <!-- Settings -->
+    <string name="enable_keyboard_title">Omogući</string>
+    <string name="open_settings">Otvori postavke</string>
+    <string name="error_opening_settings">Nije moguće otvoriti postavke</string>
+
+    <!-- Settings Activity -->
+    <string name="settings_title">Postavke tipkovnice</string>
+    <string name="about_title">O aplikaciji</string>
+    <string name="about_button">O aplikaciji</string>
+    <string name="about_version">Inačica</string>
+    <string name="about_copyright">Copyright © 2025 Urik Development</string>
+    <string name="about_license">Licenca: GNU GPL v3.0</string>
+    <string name="about_source_code">Izvorni kôd</string>
+    <string name="about_release_notes">Napomene o inačici</string>
+    <string name="about_report_bug">Prijavite grešku</string>
+    <string name="about_privacy_policy">Politika privatnosti</string>
+    <string name="about_support">Podržite daljni razvoj aplikacije</string>
+    <string name="autocorrect_settings_title">Postavke autom. ispravljanja</string>
+    <string name="autocorrect_settings_description">Pravopis i prijedlozi</string>
+    <string name="language_settings_title">Jezične postavke</string>
+    <string name="language_settings_description">Odaberite jezike za svoju tipkovnicu</string>
+    <string name="select_active_language">Odaberi trenutni jezik</string>
+    <string name="typing_settings_title">Postavke za radnje unosa</string>
+    <string name="typing_settings_description">Interpunkcija, taktilne povratne informacije, itd.</string>
+    <string name="layout_settings_title">Raspored &amp; Unos</string>
+    <string name="layout_settings_description">Numerički niz, veličina razmaknice</string>
+    <string name="appearance_settings_title">Izgled</string>
+    <string name="appearance_settings_description">Tema, size</string>
+    <string name="privacy_settings_title">Privatnost &amp; Podaci</string>
+    <string name="privacy_settings_description">Izbriši podatke, vrati na zadane postavke</string>
+    <string name="licenses_title">Licence otvorenog kôda</string>
+    <string name="licenses_description">Vidi licence biblioteka treće strane</string>
+    <string name="dictionary_attribution_title">Podaci rječnika</string>
+    <string name="theme_picker_title">Izgled tipkovnice</string>
+    <string name="dictionary_attribution_summary">FrequencyWords licenca i doprinos</string>
+    <string name="test_field_hint">Testirajte promjene</string>
+
+    <!-- Settings Enums -->
+    <!-- Key Size -->
+    <string name="key_size_small">Mala</string>
+    <string name="key_size_medium">Srednja</string>
+    <string name="key_size_large">Velika</string>
+    <string name="key_size_extra_large">Iznimno velika</string>
+
+    <!-- Long Press Duration -->
+    <string name="long_press_duration_short">Kratka</string>
+    <string name="long_press_duration_medium">Srednja</string>
+    <string name="long_press_duration_long">Duga</string>
+    <string name="cursor_speed_slow">Spora</string>
+    <string name="cursor_speed_medium">Srednja</string>
+    <string name="cursor_speed_fast">Brza</string>
+
+    <!-- Space Bar Size -->
+    <string name="space_bar_size_compact">Kompaktna</string>
+    <string name="space_bar_size_standard">Standardna</string>
+    <string name="space_bar_size_wide">Široka</string>
+
+    <!-- Key Label Size -->
+    <string name="key_label_size_small">Mala</string>
+    <string name="key_label_size_medium">Srednja</string>
+    <string name="key_label_size_large">Velika</string>
+
+    <!-- Appearance Settings -->
+    <string name="appearance_settings_theme">Tema</string>
+    <string name="appearance_settings_key_size">Veličina tipki</string>
+    <string name="appearance_settings_key_label_size">Veličina znakova na tipkovnici</string>
+
+    <!-- Auto-Correct Settings -->
+    <string name="autocorrect_settings_spell_check">Provjera pravopisa</string>
+    <string name="autocorrect_settings_spell_check_on">Provjera pravopisa uključena</string>
+    <string name="autocorrect_settings_spell_check_off">Provjera pravopisa isključena</string>
+    <string name="autocorrect_settings_show_suggestions">Prikaži prijedloge</string>
+    <string name="autocorrect_settings_suggestions_on">Prijedlozi vidljivi</string>
+    <string name="autocorrect_settings_suggestions_off">Prijedlozi sakriveni</string>
+    <string name="autocorrect_settings_suggestion_count">Broj Prijedloga</string>
+    <string name="autocorrect_settings_learn_new_words">Uči Nove Riječi</string>
+    <string name="autocorrect_settings_learn_new_words_on">Učenje omogućeno</string>
+    <string name="autocorrect_settings_learn_new_words_off">Učenje onemogućeno</string>
+
+    <!-- Language Settings -->
+    <string name="max_languages_reached">Najviše 3 jezika dozvoljena</string>
+    <string name="primary_layout_language">Trenutni raspored</string>
+
+    <!-- Sound & Feedback Settings -->
+    <string name="feedback_settings_haptic_feedback">Vibracija prilikom unosa</string>
+    <string name="feedback_settings_haptic_on">Vibracija omogućena</string>
+    <string name="feedback_settings_haptic_off">Vibracija onemogućena</string>
+    <string name="feedback_settings_vibration_strength">Intenzitet Vibracije</string>
+
+    <!-- Typing Behavior Settings -->
+    <string name="typing_settings_double_space_period">Točka nakon dvostrukog pritiska na razmaknicu</string>
+    <string name="typing_settings_double_space_on">Dvostrukti pritisak na razmaknicu umeće točku</string>
+    <string name="typing_settings_double_space_off">Dvostrukti pritisak na razmaknicu umeće bjelinu</string>
+    <string name="typing_settings_auto_capitalization">Autom. veliko početno slovo</string>
+    <string name="typing_settings_auto_capitalization_on">Pisanje velikog početnog slova na početku rečenice</string>
+    <string name="typing_settings_auto_capitalization_off">automatic Autom. pisanje velikog slova isključeno</string>
+    <string name="typing_settings_swipe_enabled">Unos klizanjem</string>
+    <string name="typing_settings_swipe_on">Unos klizanjem omogućen</string>
+    <string name="typing_settings_swipe_off">Unos klizanjem onemogućen</string>
+    <string name="typing_settings_spacebar_cursor">Upravljanje razmaknicom kao pokazivačem</string>
+    <string name="typing_settings_spacebar_cursor_on">Kliznite po razmaknici kako biste pomicali pokazivač</string>
+    <string name="typing_settings_spacebar_cursor_off">Upravljanje pokazivačem pomoću razmaknice onemogućeno</string>
+    <string name="typing_settings_cursor_speed">Brzina pomicanja pokazivača</string>
+    <string name="typing_settings_backspace_swipe">Izbriši unos klizanjem povratne tipke</string>
+    <string name="typing_settings_backspace_swipe_on">Kliznite prema lijevo kako biste izbrisali riječ</string>
+    <string name="typing_settings_backspace_swipe_off">Brisanje unosa klizanjem povratne tipke onemogućen</string>
+    <string name="typing_settings_long_press_punctuation">Dugi pritisak interpunkcije</string>
+    <string name="long_press_punctuation_off">Isključeno</string>
+    <string name="long_press_punctuation_spacebar">Razmaknica</string>
+    <string name="long_press_punctuation_period">Tipka interpunkcije</string>
+    <string name="typing_settings_long_press_duration">Duljina dugog pritiska tipke</string>
+
+    <!-- Layout & Input Settings -->
+    <string name="layout_settings_alternative_layout">Raspored tipkovnice</string>
+    <string name="layout_settings_adaptive_modes_enabled">Prilagodljivi način rada tipkovnice</string>
+    <string name="layout_settings_adaptive_modes_on">Automatski se prilagođava vrsti i položaju uređaja (tableti, preklopni mobiteli)</string>
+    <string name="layout_settings_adaptive_modes_off">Uvijek koristi standardni raspored pune širine</string>
+    <string name="layout_settings_one_handed_mode_enabled">Način rada jednom rukom</string>
+    <string name="layout_settings_one_handed_mode_on">Omogućeno</string>
+    <string name="layout_settings_one_handed_mode_off">Standardna tipkovnica pune širine</string>
+    <string name="one_handed_mode_left">Pomakni tipkovnicu na lijevu stranu</string>
+    <string name="one_handed_mode_right">Pomakni tipkovnicu na desnu stranu<</string>
+    <string name="one_handed_mode_full">Povratak na tipkovnicu pune širine</string>
+    <string name="layout_settings_show_number_row">Prikaz numeričkog reda</string>
+    <string name="layout_settings_number_row_on">Prikaži numerički red</string>
+    <string name="layout_settings_number_row_off">Sakrij numerički red</string>
+    <string name="layout_settings_show_language_switch_key">Prikaz tipke za promjenu jezika</string>
+    <string name="layout_settings_language_switch_key_on">Omogućeno</string>
+    <string name="layout_settings_language_switch_key_off">Onemogućeno</string>
+    <string name="layout_settings_space_bar_size">Veličina razmaknice</string>
+    <string name="alternative_layout_default">Zadano (Raspored jezika)</string>
+    <string name="alternative_layout_qwerty" translatable="false">QWERTY</string>
+    <string name="alternative_layout_azerty" translatable="false">AZERTY</string>
+    <string name="alternative_layout_qwertz" translatable="false">QWERTZ</string>
+    <string name="alternative_layout_dvorak">Dvorak</string>
+    <string name="alternative_layout_colemak">Colemak</string>
+    <string name="alternative_layout_workman">Workman</string>
+    <string name="layout_settings_customize_keys">Prilagodba tipki</string>
+    <string name="layout_settings_customize_keys_summary">Dodijeli prilagođeni znak dugom pritisku tipke</string>
+
+    <!-- Layout Mapper -->
+    <string name="layout_mapper_title">Prilagodba tipki</string>
+    <string name="layout_mapper_instructions">Kliknite na tipku kako biste joj mapirali prilagođeni znak. Dug pritisak te tipke na tipkovnici unijet će Vaš znak.</string>
+    <string name="layout_mapper_edit_key">Uredi tipku: %1$s</string>
+    <string name="layout_mapper_symbol_hint">Prilagođen znak</string>
+    <string name="layout_mapper_save">Spremi</string>
+    <string name="layout_mapper_remove">Ukloni</string>
+    <string name="layout_mapper_reset_all">Sve resetiraj</string>
+    <string name="layout_mapper_reset_title">Resetirati sve mapirane znakove?</string>
+    <string name="layout_mapper_reset_message">Ova radnja će ukloniti sva mapiranja tipki. Nije ju moguće poništiti.</string>
+    <string name="layout_mapper_reset_confirm">Resetiraj</string>
+    <string name="layout_mapper_saved">Mapirane tipke spremljene</string>
+    <string name="layout_mapper_removed">Mapirane tipke uklonjene</string>
+    <string name="layout_mapper_cleared">Sva mapiranja tipki su poništena</string>
+    <string name="layout_mapper_save_failed">Neuspješno spremanje mapiranih tipki</string>
+    <string name="layout_mapper_remove_failed">Neuspješno uklanjanje mapiranih tipki</string>
+    <string name="layout_mapper_clear_failed">Nuspješno poništavanje mapiranih tipki</string>
+
+    <!-- Privacy & Data Settings -->
+    <string name="privacy_settings_clipboard_history">Povijest međuspremnika</string>
+    <string name="privacy_settings_clipboard_history_on">Povijest međuspremnika uključena</string>
+    <string name="privacy_settings_clipboard_history_off">Povijest međuspremnika isključena</string>
+    <string name="privacy_settings_clear_learned_words">Ukloni naučene riječi</string>
+    <string name="privacy_settings_clear_learned_words_summary">Izbriši sav naučen vokabular</string>
+    <string name="privacy_settings_clear_learned_words_confirm">Ukloniti sve naučene riječi? Ova radnja se ne može poništiti.</string>
+    <string name="privacy_settings_reset_to_defaults">Povratak na zadano</string>
+    <string name="privacy_settings_reset_to_defaults_confirm">Vratiti sve postavke na zadane vrijednosti?</string>
+    <string name="privacy_settings_export_error_log">Izvoz zapisa grešaka</string>
+    <string name="privacy_settings_export_error_log_summary">Podijeli dijagnostičke zapise za pomoć pri otkrivanju grešaka</string>
+    <string name="privacy_settings_export_error_log_failed">Neuspješan izvoz zapisa grešaka</string>
+    <string name="privacy_settings_export_dictionary">Izvezi rječnik</string>
+    <string name="privacy_settings_export_dictionary_summary">Spremi naučene riječi u datoteku</string>
+    <string name="privacy_settings_import_dictionary">Uvezi rječnik</string>
+    <string name="privacy_settings_import_dictionary_summary">Povrati naučene riječi iz datoteke</string>
+
+    <!-- Error Messages -->
+    <string name="error_title">Greška</string>
+    <string name="error_update_theme">Neuspješno ažuriranje teme</string>
+    <string name="error_update_key_size">Neuspješno ažuriranje veličine tipke</string>
+    <string name="error_update_key_label_size">Neuspješno ažuriranje veličine oznake</string>
+    <string name="error_update_spell_check">Neuspješno ažuriranje provjere pravopisa</string>
+    <string name="error_update_suggestions">Neuspješno ažuriranje postavki prijedloga</string>
+    <string name="error_update_suggestion_count">Neuspješno ažuriranje broja prijedloga</string>
+    <string name="error_update_word_learning">Neuspješno ažuriranje naučenih riječi</string>
+    <string name="error_update_clipboard">Neuspješno ažuriranje postavki međuspremnika</string>
+    <string name="error_update_language">Neuspješno ažuriranje postavki jezika</string>
+    <string name="error_update_haptic_feedback">Neuspješno ažuriranje taktilnih povratnih informacija</string>
+    <string name="error_update_vibration_strength">Neuspješno ažuriranje intenziteta vibracije</string>
+    <string name="error_update_double_space_period">Neuspješno ažuriranje unosa točke putem dvostrukog pritiska razmaknice</string>
+    <string name="error_update_auto_capitalization">Neuspješno ažuriranje autom. velikog slova</string>
+    <string name="error_update_swipe">Neuspješno ažuriranje unosa klizanjem</string>
+    <string name="error_update_spacebar_cursor">Neuspješno ažuriranje upravljanja pokazivačem pomoću razmaknice</string>
+    <string name="error_update_cursor_speed">Neuspješno ažuriranje brzine pokazivača</string>
+    <string name="error_update_backspace_swipe">Neuspješno ažuriranje brisanja pomoću unosa klizanjem povratne tipke</string>
+    <string name="error_update_long_press_punctuation">Neuspješno ažuriranje unosa interpunkcije dugim pritiskom tipke</string>
+    <string name="error_update_long_press_duration">Neuspješno ažuriranje duljine dugog pritiska tipke</string>
+    <string name="error_update_number_row">Neuspješno ažuriranje numeričkog reda</string>
+    <string name="error_update_space_bar_size">Neuspješno ažuriranje veličine razmaknice</string>
+    <string name="error_update_alternative_layout">Neuspješno ažuriranje rasporeda tipkovnice</string>
+    <string name="error_clear_learned_words">Neuspješno uklanjanje naučenih riječi</string>
+    <string name="error_reset_to_defaults">Neuspješno resetiranje postavki</string>
+    <string name="error_dictionary_export">Neuspješan izvoz rječnika</string>
+    <string name="error_dictionary_import">Neuspješan uvoz rječnika</string>
+
+    <!-- Success Messages -->
+    <string name="success_learned_words_cleared">Naučene riječi uklonjenje</string>
+    <string name="success_settings_reset">Postavke vraćene na zadane vrijednosti</string>
+    <string name="success_dictionary_exported">Izvezeno %1$d riječi</string>
+    <string name="success_dictionary_imported">Dodano %1$d novih, ažurirano %2$d riječi</string>
+
+    <!-- Keyboard descriptions -->
+    <string name="keyboard_description">Virtualna tipkovnica</string>
+
+    <!-- Default key labels -->
+    <string name="letters_mode_label">ABC</string>
+    <string name="numbers_mode_label">123</string>
+    <string name="symbols_mode_label">+=&lt;</string>
+
+    <!-- Accessibility descriptions -->
+    <string name="key_character_description">Unesi %1$s</string>
+
+    <string name="shift_key_description">Shift key, kliknite kako bi naredno slovo napisali kao veliko početno</string>
+    <string name="shift_active_description">Shift tipka je uključena, kliknite je kako biste ju isključili</string>
+    <string name="caps_lock_description">Caps lock</string>
+    <string name="caps_lock_on_description">Caps lock tipka je uključena, kliknite je kako biste ju isključili</string>
+    <string name="backspace_key_description">Izbriši prethodni znak</string>
+    <string name="space_key_description">Razmaknica</string>
+    <string name="letters_mode_description">Prebaci se na alfanumerički dio tipkovnice</string>
+    <string name="numbers_mode_description">Prebaci se na numerički dio tipkovnice</string>
+    <string name="symbols_mode_description">Prebaci se na dio tipkovnice sa simbolima</string>
+    <string name="language_switch_description">Promijeni jezik tipkovnice</string>
+    <string name="ime_prediction_description">Prijedlog: %1$s</string>
+
+    <!-- Action button accessibility descriptions -->
+    <string name="action_enter_description">Klikni enter</string>
+    <string name="action_send_description">Pošalji poruku</string>
+    <string name="action_search_description">Traži</string>
+    <string name="action_done_description">Uređivanje dovršeno</string>
+    <string name="action_go_description">Otiđi do traženoga unosa</string>
+    <string name="action_next_description">Pomak u sljedeće polje</string>
+    <string name="action_previous_description">Pomak u prethodno polje</string>
+
+    <string name="action_emoji">Emoji</string>
+    <string name="emoji_search_hint" tools:ignore="TypographyEllipsis">Pretraži emojije...</string>
+    <string name="autofill_indicator_description">Dostupni prijedlozi upravitelja lozinki</string>
+
+    <!-- Theme Picker Accessibility -->
+    <string name="theme_description">%1$s tema</string>
+    <string name="theme_description_selected">%1$s tema, trenutačno odabrana</string>
+    <string name="theme_add_favorite">Dodaj %1$s u omiljene</string>
+    <string name="theme_remove_favorite">Ukloni %1$s iz omiljenih</string>
+
+    <!-- Character Variation Accessibility -->
+    <string name="character_variation_position">Inačica znaka %1$d od %2$d: %3$s</string>
+
+    <!-- Blacklisting Words -->
+    <string name="remove_suggestion">Ukloniti %1$s iz prijedloga?</string>
+    <string name="remove_cancel">Odustani</string>
+    <string name="remove_confirm">Ukloni</string>
+
+    <!-- Tips -->
+    <string name="tip_1_title">Učenje riječi</string>
+    <string name="tip_1_description">Kliknite razmaknicu nakon označenog tipfelera kako biste ga dodali u svoj rječnik.</string>
+
+    <string name="tip_2_title">Brzi izbornik interpunkcije</string>
+    <string name="tip_2_description">Dugim klikom na razmaknicu otvorite brzi izbornik interpunkcije.</string>
+
+    <string name="tip_3_title">Inačice znakova</string>
+    <string name="tip_3_description">Dugim pritiskom na znak odaberite inačicu tog znaka.</string>
+
+    <string name="tip_4_title">Ukloni riječi</string>
+    <string name="tip_4_description">Dugo pritisnite na prijedlog kako biste ga uklonili iz rječnika.</string>
+
+    <string name="tip_5_title">Upravitelj međuspremnika</string>
+    <string name="tip_5_description">Dugim pritiskom na tipku simbola otvorite upravitelj međuspremnika.</string>
+
+    <!-- Clipboard Panel -->
+    <string name="clipboard_panel_title">Međuspremnik</string>
+    <string name="clipboard_panel_pinned">Prikvačeno</string>
+    <string name="clipboard_panel_recent">Nedavno</string>
+    <string name="clipboard_panel_empty">Nema povijesti međuspremnika</string>
+    <string name="clipboard_panel_delete_all">Izbriši sve</string>
+    <string name="clipboard_panel_delete_all_confirm">Izbrisati sve neprikvačene stavke iz međuspremnika?</string>
+    <string name="clipboard_consent_message">Urik može u nedogled čitati i pohranjivati stavke iz međuspremnika. Ako to ne želite, otiđite u postavke i isključite povijest međuspremnika.</string>
+
+    <!-- Clipboard Accessibility -->
+    <string name="clipboard_item_description">Stavka međuspremnika: %1$s</string>
+    <string name="clipboard_item_pin">Prikvači stavke međuspremnika</string>
+    <string name="clipboard_item_unpin">Otkvači stavke međuspremnika</string>
+    <string name="clipboard_item_delete">Izbriši stavke međuspremnika</string>
+
+</resources>
