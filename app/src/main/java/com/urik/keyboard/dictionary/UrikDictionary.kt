@@ -3,6 +3,8 @@
 package com.urik.keyboard.dictionary
 
 import java.io.InputStream
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.ensureActive
 
 class UrikDictionary(inputStream: InputStream, private val removedWords: Set<String> = emptySet()) {
     private val data: ByteArray = inputStream.readBytes()
@@ -49,10 +51,10 @@ class UrikDictionary(inputStream: InputStream, private val removedWords: Set<Str
         return null
     }
 
-    fun getCandidates(word: String, maxEditDistance: Int = 2): List<Pair<String, Int>> {
+    fun getCandidates(word: String, maxEditDistance: Int = 2, job: Job? = null): List<Pair<String, Int>> {
         val results = mutableListOf<Pair<String, Int>>()
         val auto = LevenshteinAutomaton(word, maxEditDistance)
-        dfs(stateTableOffset, auto, auto.start(), StringBuilder(), results)
+        dfs(stateTableOffset, auto, auto.start(), StringBuilder(), results, job, IntArray(1))
         return results.sortedBy { it.second }
     }
 
@@ -61,8 +63,14 @@ class UrikDictionary(inputStream: InputStream, private val removedWords: Set<Str
         auto: LevenshteinAutomaton,
         autoState: LevenshteinAutomaton.State,
         path: StringBuilder,
-        results: MutableList<Pair<String, Int>>
+        results: MutableList<Pair<String, Int>>,
+        job: Job?,
+        nodesVisited: IntArray
     ) {
+        if (job != null && ++nodesVisited[0] % CANCELLATION_CHECK_INTERVAL == 0) {
+            job.ensureActive()
+        }
+
         if (!auto.canReachFinal(autoState)) return
 
         val stateHeader = data[stateAbsOffset].toInt() and 0xFF
@@ -89,7 +97,7 @@ class UrikDictionary(inputStream: InputStream, private val removedWords: Set<Str
 
             val nextAutoState = auto.step(autoState, label)
             path.append(label)
-            dfs(stateTableOffset + targetRelOffset, auto, nextAutoState, path, results)
+            dfs(stateTableOffset + targetRelOffset, auto, nextAutoState, path, results, job, nodesVisited)
             path.deleteCharAt(path.length - 1)
         }
     }
@@ -165,5 +173,9 @@ class UrikDictionary(inputStream: InputStream, private val removedWords: Set<Str
             arcOffset += 6
         }
         return null
+    }
+
+    private companion object {
+        const val CANCELLATION_CHECK_INTERVAL = 512
     }
 }

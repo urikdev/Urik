@@ -144,8 +144,7 @@ object KeyboardModule {
         wordFrequencyRepository: WordFrequencyRepository,
         cacheMemoryManager: CacheMemoryManager,
         blacklistRepository: BlacklistRepository,
-        wordNormalizer: WordNormalizer,
-        fatFingerExpander: FatFingerExpander
+        wordNormalizer: WordNormalizer
     ): SpellCheckManager = SpellCheckManager(
         context,
         languageManager,
@@ -153,8 +152,7 @@ object KeyboardModule {
         wordFrequencyRepository,
         wordNormalizer,
         cacheMemoryManager,
-        blacklistRepository,
-        fatFingerExpander = fatFingerExpander
+        blacklistRepository
     )
 
     @Provides
