@@ -1,5 +1,6 @@
 package com.urik.keyboard.service
 
+import android.util.Size
 import android.view.View
 import com.urik.keyboard.model.KeyboardKey
 import com.urik.keyboard.ui.keyboard.components.SwipeKeyboardView
@@ -21,7 +22,7 @@ class CandidateBarController(private val viewProvider: () -> SwipeKeyboardView?)
         viewProvider()?.forceClearAllSuggestions()
     }
 
-    fun updateInlineAutofillSuggestions(views: List<View>, animate: Boolean) {
+    fun updateInlineAutofillSuggestions(views: List<Pair<View, Size>>, animate: Boolean) {
         viewProvider()?.updateInlineAutofillSuggestions(views, animate)
     }
 

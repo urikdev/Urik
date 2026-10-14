@@ -6,6 +6,7 @@ import android.graphics.Rect
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.AttributeSet
+import android.util.Size
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.MotionEvent
@@ -1350,7 +1351,7 @@ constructor(
         safeMappingPost()
     }
 
-    fun updateInlineAutofillSuggestions(views: List<View>, showIndicator: Boolean) {
+    fun updateInlineAutofillSuggestions(views: List<Pair<View, Size>>, showIndicator: Boolean) {
         if (isDestroyed) return
 
         suggestionBar?.let { bar ->
@@ -1378,12 +1379,11 @@ constructor(
             scrollContent.removeAllViews()
 
             for (i in views.indices) {
-                val view = views[i]
-                val layoutParams =
-                    LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.WRAP_CONTENT,
-                        LinearLayout.LayoutParams.MATCH_PARENT
-                    )
+                val (view, size) = views[i]
+                // InlineContentView hosts cross-process rendered content and does not
+                // reliably self-report a measured size - WRAP_CONTENT can collapse it to
+                // zero on screen, so it must be given the exact size it was inflated with.
+                val layoutParams = LinearLayout.LayoutParams(size.width, size.height)
 
                 (view.parent as? ViewGroup)?.removeView(view)
                 scrollContent.addView(view, layoutParams)

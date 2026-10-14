@@ -1903,12 +1903,13 @@ open class UrikInputMethodService :
     @Suppress("NewApi")
     private fun inflateAndDisplaySuggestions(suggestions: List<InlineSuggestion>) {
         val density = resources.displayMetrics.density
-        val size = Size((150 * density).toInt(), (40 * density).toInt())
+        val preferredWidth = (150 * density).toInt()
+        val preferredHeight = (40 * density).toInt()
 
         serviceScope.launch(Dispatchers.Main) {
-            val views = mutableListOf<View>()
+            val views = mutableListOf<Pair<View, Size>>()
             for (suggestion in suggestions.take(MAX_PASSWORD_INLINE_SUGGESTIONS)) {
-                val view = inflateSuggestionView(suggestion, size)
+                val view = inflateSuggestionView(suggestion, preferredWidth, preferredHeight)
                 if (view != null) views.add(view)
             }
             if (views.isNotEmpty()) {
@@ -1917,15 +1918,38 @@ open class UrikInputMethodService :
         }
     }
 
+    /**
+     * The inflate size must fall within the [InlinePresentationSpec] bounds the suggestion
+     * was actually built against, which vary per-suggestion (e.g. the icon-only fallback
+     * spec is capped at 48dp wide) - requesting a fixed size outside those bounds makes
+     * the system silently fail to inflate it.
+     *
+     * The returned [InlineContentView] hosts cross-process rendered content and does not
+     * reliably self-report a measured size, so the exact size used for inflate() must be
+     * carried along and applied as explicit layout params by the caller - WRAP_CONTENT can
+     * collapse it to zero on screen even though the content itself rendered correctly.
+     */
     @Suppress("NewApi")
-    private suspend fun inflateSuggestionView(suggestion: InlineSuggestion, size: Size): View? = try {
-        suspendCancellableCoroutine { continuation ->
-            suggestion.inflate(this@UrikInputMethodService, size, mainExecutor) { view ->
-                if (continuation.isActive) {
-                    continuation.resume(view)
+    private suspend fun inflateSuggestionView(
+        suggestion: InlineSuggestion,
+        preferredWidth: Int,
+        preferredHeight: Int
+    ): Pair<View, Size>? = try {
+        val spec = suggestion.info.inlinePresentationSpec
+        val size =
+            Size(
+                preferredWidth.coerceIn(spec.minSize.width, spec.maxSize.width),
+                preferredHeight.coerceIn(spec.minSize.height, spec.maxSize.height)
+            )
+        val view =
+            suspendCancellableCoroutine { continuation ->
+                suggestion.inflate(this@UrikInputMethodService, size, mainExecutor) { view ->
+                    if (continuation.isActive) {
+                        continuation.resume(view)
+                    }
                 }
             }
-        }
+        view?.let { it to size }
     } catch (e: Exception) {
         ErrorLogger.logException(
             component = "UrikInputMethodService",
